@@ -84,7 +84,7 @@ export default function LoginPage() {
     const { error } =
       await supabase.auth.resetPasswordForEmail(email, {
         redirectTo:
-          "http://localhost:3000/reset-password"
+          "https://league.lwrpickleballclub.com/reset-password"
       });
 
     if (error) {
