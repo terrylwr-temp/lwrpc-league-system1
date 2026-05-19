@@ -101,6 +101,14 @@ export default function LoginPage() {
     setLoading(false);
   }
 
+  const messageText = message.toLowerCase();
+  const isSuccessMessage = messageText.includes("sent");
+  const isPendingMessage =
+    messageText.includes("signing") ||
+    messageText.includes("sending");
+  const isErrorMessage =
+    Boolean(message) && !isSuccessMessage && !isPendingMessage;
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
 
@@ -225,20 +233,36 @@ export default function LoginPage() {
               Forgot Password?
             </button>
 
-{message && (
-  <div
-    className={`mt-4 rounded-xl border px-4 py-3 text-sm font-medium ${
-      message.toLowerCase().includes("sent")
-        ? "border-green-300 bg-green-50 text-green-800"
-        : message.toLowerCase().includes("error") ||
-          message.toLowerCase().includes("invalid")
-        ? "border-red-300 bg-red-50 text-red-800"
-        : "border-blue-300 bg-blue-50 text-blue-800"
-    }`}
-  >
-    {message}
-  </div>
-)}
+            {message && (
+              <div
+                role={isErrorMessage ? "alert" : "status"}
+                aria-live={isErrorMessage ? "assertive" : "polite"}
+                className={`mt-5 rounded-xl border px-4 py-3 text-sm ${
+                  isSuccessMessage
+                    ? "border-green-300 bg-green-50 font-medium text-green-800"
+                    : isErrorMessage
+                    ? "border-2 border-red-500 bg-red-100 font-bold text-red-950 shadow-lg shadow-red-200/70"
+                    : "border-blue-300 bg-blue-50 font-medium text-blue-800"
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  {isErrorMessage && (
+                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-700 text-sm font-black text-white">
+                      !
+                    </span>
+                  )}
+
+                  <div>
+                    {isErrorMessage && (
+                      <p className="mb-1 text-xs font-black uppercase tracking-wide text-red-800">
+                        Sign in problem
+                      </p>
+                    )}
+                    <p>{message}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
 
           </form>
