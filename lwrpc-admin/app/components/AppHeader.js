@@ -1,0 +1,404 @@
+﻿"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { supabase } from "../lib/auth";
+import { hasRole, roleLabel } from "../lib/permissions";
+
+export default function AppHeader({
+  title = "LWR PC League Management System",
+  subtitle = "League Operations Dashboard"
+}) {
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const [role, setRole] = useState("player");
+  const [memberName, setMemberName] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarReady, setSidebarReady] = useState(false);
+  const [openGroups, setOpenGroups] = useState({});
+
+  const primaryLinks = [
+    { label: "Dashboard", path: "/player-dashboard", role: "player", icon: "\u{1F3E0}" },
+    { label: "Admin Dashboard", path: "/", role: "league_manager", icon: "\u{2699}\u{FE0F}" },
+    {
+      label: "Captain Dashboard",
+      path: "/captain-dashboard",
+      role: "captain",
+      icon: "\u{1F9E2}"
+    }
+  ];
+
+  const groups = [
+    {
+      key: "operations",
+      label: "League Operations",
+      links: [
+        { label: "Members", path: "/members", role: "league_manager", icon: "\u{1F465}" },
+        { label: "Ratings", path: "/ratings", role: "league_manager", icon: "\u{2B50}" },
+        { label: "Teams", path: "/teams", role: "captain", icon: "\u{1F3D3}" },
+        { label: "Matches", path: "/matches", role: "captain", icon: "\u{1F4CB}" },
+        { label: "Standings", path: "/standings", role: "player", icon: "\u{1F3C6}" }
+      ]
+    },
+    {
+      key: "scheduling",
+      label: "Scheduling",
+      links: [
+        { label: "Scheduling", path: "/scheduling", role: "league_manager", icon: "\u{1F4C5}" },
+        { label: "Schedule Editor", path: "/schedule-editor", role: "league_manager", icon: "\u{1F6E0}\u{FE0F}" }
+      ]
+    },
+    {
+      key: "setup",
+      label: "Setup",
+      links: [
+        { label: "Leagues", path: "/leagues", role: "league_manager", icon: "\u{1F3DF}\u{FE0F}" },
+        { label: "Divisions", path: "/divisions", role: "league_manager", icon: "\u{1F4CA}" },
+        { label: "Locations", path: "/locations", role: "league_manager", icon: "\u{1F4CD}" },
+      ]
+    }
+  ];
+
+  async function loadUser() {
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+
+    if (!user?.email) return;
+
+    const { data: member } = await supabase
+      .from("members")
+      .select("id, first_name, last_name, email")
+      .eq("email", user.email)
+      .maybeSingle();
+
+    if (member) {
+      setMemberName(
+        `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+          member.email
+      );
+
+      const { data: userRole } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("member_id", member.id)
+        .maybeSingle();
+
+      setRole(userRole?.role || "player");
+    } else {
+      setMemberName(user.email);
+      setRole("player");
+    }
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
+
+  function isActive(path) {
+    return pathname === path || (path !== "/" && pathname.startsWith(path));
+  }
+
+  useEffect(() => {
+    loadUser();
+
+    const savedCollapsed = window.localStorage.getItem("lwrpc-sidebar-collapsed");
+    if (savedCollapsed !== null) {
+      setCollapsed(savedCollapsed === "true");
+    }
+    setSidebarReady(true);
+  }, []);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty(
+      "--sidebar-width",
+      collapsed ? "5rem" : "18rem"
+    );
+    if (sidebarReady) {
+      window.localStorage.setItem("lwrpc-sidebar-collapsed", String(collapsed));
+    }
+  }, [collapsed, sidebarReady]);
+
+  useEffect(() => {
+    const activeGroup = groups.find(group =>
+      group.links.some(link => isActive(link.path))
+    );
+
+    if (activeGroup) {
+      setOpenGroups({ [activeGroup.key]: true });
+    }
+  }, [pathname]);
+
+  const visiblePrimaryLinks = useMemo(() => {
+    return primaryLinks.filter(link => hasRole(role, link.role));
+  }, [role]);
+
+  const visibleGroups = useMemo(() => {
+    return groups
+      .map(group => ({
+        ...group,
+        links: group.links.filter(link => hasRole(role, link.role))
+      }))
+      .filter(group => group.links.length > 0);
+  }, [role]);
+
+  function toggleGroup(key) {
+    setOpenGroups(prev => (prev[key] ? {} : { [key]: true }));
+  }
+
+  function LinkButton({ link, mobile = false }) {
+    const active = isActive(link.path);
+
+    return (
+      <button
+        key={link.path}
+        title={collapsed && !mobile ? link.label : ""}
+        onClick={() => {
+          router.push(link.path);
+          setMenuOpen(false);
+        }}
+        className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-semibold transition ${
+          active
+            ? "bg-blue-700 text-white shadow"
+            : "text-slate-200 hover:bg-blue-900 hover:text-white"
+        } ${collapsed && !mobile ? "justify-center px-2" : ""}`}
+      >
+        <span className="text-lg">{link.icon}</span>
+
+        {(!collapsed || mobile) && (
+          <span>{link.label}</span>
+        )}
+      </button>
+    );
+  }
+
+  function NavGroups({ mobile = false }) {
+    return (
+      <nav className="mt-6 space-y-3">
+        <div className="space-y-1">
+          {visiblePrimaryLinks.map(link => (
+            <LinkButton
+              key={link.path}
+              link={link}
+              mobile={mobile}
+            />
+          ))}
+        </div>
+
+        {visibleGroups.map(group => (
+          <div key={group.key}>
+            {!collapsed || mobile ? (
+              <button
+                onClick={() => toggleGroup(group.key)}
+                className="flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-400 hover:bg-white/5"
+              >
+                <span>{group.label}</span>
+                <span>{openGroups[group.key] ? "\u{2212}" : "+"}</span>
+              </button>
+            ) : (
+              <div className="my-2 border-t border-white/10" />
+            )}
+
+            {(openGroups[group.key] || collapsed || mobile) && (
+              <div className="mt-1 space-y-1">
+                {group.links.map(link => (
+                  <LinkButton
+                    key={link.path}
+                    link={link}
+                    mobile={mobile}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </nav>
+    );
+  }
+
+  return (
+    <>
+      <aside
+        className={`fixed left-0 top-0 z-40 hidden h-screen bg-slate-950 text-white shadow-2xl transition-all duration-200 lg:block ${
+          collapsed ? "w-20" : "w-72"
+        }`}
+      >
+        <div className="flex h-full flex-col overflow-y-auto p-4">
+          <div className="flex items-center gap-4 border-b border-white/10 pb-5">
+            <img
+              src="https://lwrpickleballclub.com/lwrpc-logo.png"
+              alt="Lakewood Ranch Pickleball Club"
+              className="h-14 w-14 rounded-full bg-white object-contain p-1"
+            />
+
+            {!collapsed && (
+              <div>
+                <div className="text-sm font-black leading-tight">
+                  LAKEWOOD RANCH
+                </div>
+
+                <div className="text-sm font-black leading-tight">
+                  PICKLEBALL CLUB
+                </div>
+
+                <div className="mt-1 text-xs font-bold uppercase tracking-wide text-yellow-300">
+                  League Management
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={() => setCollapsed((value) => !value)}
+            className="mt-4 rounded-xl bg-white/10 px-3 py-2 text-sm font-bold text-white hover:bg-white/20"
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? "\u{2192}" : "\u{2190} Collapse"}
+          </button>
+
+          <NavGroups />
+
+          <div className="mt-auto border-t border-white/10 pt-5">
+            {!collapsed ? (
+              <>
+                <div className="text-xs uppercase tracking-wide text-slate-400">
+                  Signed in as
+                </div>
+
+                <div className="mt-1 text-sm font-bold text-white">
+                  {memberName || "User"}
+                </div>
+
+                <div className="mt-1 text-xs text-slate-300">
+                  {roleLabel(role)}
+                </div>
+
+                <button
+                  onClick={logout}
+                  className="mt-4 w-full rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
+                >
+                  Logout
+                </button>
+
+                <div className="mt-5 text-center text-[11px] leading-relaxed text-slate-400">
+                  {"\u{00A9}"} {new Date().getFullYear()} Lakewood Ranch Pickleball Club.
+                  <br />
+                  All rights reserved.
+                </div>
+              </>
+            ) : (
+              <button
+                onClick={logout}
+                className="w-full rounded-xl bg-white/10 px-2 py-3 text-sm font-semibold text-white hover:bg-white/20"
+                title="Logout"
+              >
+                {"\u{23FB}"}
+              </button>
+            )}
+          </div>
+        </div>
+      </aside>
+
+      <div className="mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-white shadow">
+        <div className="h-1.5 bg-gradient-to-r from-blue-700 via-sky-500 to-emerald-500" />
+        <div className="flex items-center justify-between gap-4 bg-gradient-to-r from-slate-950 to-blue-950 px-5 py-5 text-white">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setMenuOpen(true)}
+              className="rounded-xl bg-white/10 px-3 py-2 text-white hover:bg-white/20 lg:hidden"
+            >
+              {"\u{2630}"}
+            </button>
+
+            <img
+              src="https://lwrpickleballclub.com/lwrpc-logo.png"
+              alt="Lakewood Ranch Pickleball Club"
+              className="h-14 w-14 rounded-full object-contain lg:hidden"
+            />
+
+            <div>
+              <div className="text-xs font-bold uppercase tracking-wide text-sky-200">
+                LWR PC League Management
+              </div>
+
+              <h1 className="mt-1 text-2xl font-black text-white md:text-3xl">
+                {title}
+              </h1>
+
+              <p className="mt-1 text-sm font-medium text-slate-200">
+                {subtitle}
+              </p>
+            </div>
+          </div>
+
+          <div className="hidden rounded-xl bg-white/10 px-4 py-3 text-right md:block">
+            <div className="text-xs uppercase tracking-wide text-sky-200">
+              Welcome
+            </div>
+
+            <div className="font-bold text-white">
+              {memberName || "User"}
+            </div>
+
+            <div className="text-xs text-slate-200">
+              {roleLabel(role)}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setMenuOpen(false)}
+          />
+
+          <div className="relative h-full w-80 max-w-[85vw] overflow-y-auto bg-slate-950 p-5 text-white shadow-2xl">
+            <div className="flex items-center justify-between">
+              <img
+                src="https://lwrpickleballclub.com/lwrpc-logo.png"
+                alt="Lakewood Ranch Pickleball Club"
+                className="h-16 w-16 rounded-full bg-white object-contain p-1"
+              />
+
+              <button
+                onClick={() => setMenuOpen(false)}
+                className="rounded-xl bg-white/10 px-3 py-2 font-bold"
+              >
+                {"\u{2715}"}
+              </button>
+            </div>
+
+            <div className="mt-4 text-lg font-black">
+              Lakewood Ranch Pickleball Club
+            </div>
+
+            <div className="text-sm font-bold uppercase tracking-wide text-yellow-300">
+              League Management
+            </div>
+
+            <NavGroups mobile />
+
+            <button
+              onClick={logout}
+              className="mt-6 w-full rounded-xl bg-white/10 px-4 py-3 font-semibold text-white"
+            >
+              Logout
+            </button>
+
+            <div className="mt-6 text-center text-[11px] leading-relaxed text-slate-400">
+              {"\u{00A9}"} {new Date().getFullYear()} Lakewood Ranch Pickleball Club.
+              <br />
+              All rights reserved.
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
