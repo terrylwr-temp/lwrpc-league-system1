@@ -9,6 +9,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -154,13 +155,56 @@ export default function LoginPage() {
                 Password
               </label>
 
-              <input
-                type="password"
-                className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                required
-              />
+              <div className="relative mt-1">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  className="w-full rounded-xl border border-slate-300 py-3 pl-4 pr-12 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(current => !current)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  title={showPassword ? "Hide password" : "Show password"}
+                  className="absolute inset-y-0 right-3 flex items-center text-slate-500 transition hover:text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                >
+                  {showPassword ? (
+                    <svg
+                      aria-hidden="true"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 3l18 18M10.7 10.7a2 2 0 002.6 2.6M9.9 4.2A9.8 9.8 0 0112 4c5 0 8.5 4.5 9.7 6.3.4.6.4 1.4 0 2a18.6 18.6 0 01-2.3 2.8M6.5 6.5a18.6 18.6 0 00-4.2 3.8c-.4.6-.4 1.4 0 2C3.5 14 7 18.5 12 18.5c1.3 0 2.6-.3 3.8-.8"
+                      />
+                    </svg>
+                  ) : (
+                    <svg
+                      aria-hidden="true"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M2.3 10.3C3.5 8.5 7 4 12 4s8.5 4.5 9.7 6.3c.4.6.4 1.4 0 2C20.5 14 17 18.5 12 18.5S3.5 14 2.3 12.3c-.4-.6-.4-1.4 0-2z"
+                      />
+                      <circle cx="12" cy="11.3" r="2.8" />
+                    </svg>
+                  )}
+                </button>
+              </div>
 
             </div>
 
