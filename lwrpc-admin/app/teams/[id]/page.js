@@ -4,6 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
+import {
+  filterHistoryRows,
+  formatDate,
+  historyFilterOptions,
+  playerLineDetails,
+  sortHistoryRows,
+} from "../../lib/playHistory";
 
 export default function TeamRosterPage() {
   const { id } = useParams();
@@ -14,6 +21,9 @@ export default function TeamRosterPage() {
   const [members, setMembers] = useState([]);
   const [locations, setLocations] = useState([]);
   const [seasonRatings, setSeasonRatings] = useState([]);
+  const [playHistory, setPlayHistory] = useState([]);
+  const [expandedHistoryMemberId, setExpandedHistoryMemberId] = useState("");
+  const [historyFilters, setHistoryFilters] = useState({});
 
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState("");
@@ -144,11 +154,81 @@ export default function TeamRosterPage() {
       ratingData = data || [];
     }
 
+    const rosterMemberIds = (rosterData || [])
+      .map((row) => row.member_id)
+      .filter(Boolean);
+    let historyData = [];
+
+    if (rosterMemberIds.length > 0) {
+      const playerFilter = [
+        `home_player_1_id.in.(${rosterMemberIds.join(",")})`,
+        `home_player_2_id.in.(${rosterMemberIds.join(",")})`,
+        `away_player_1_id.in.(${rosterMemberIds.join(",")})`,
+        `away_player_2_id.in.(${rosterMemberIds.join(",")})`,
+      ].join(",");
+
+      const { data, error } = await supabase
+        .from("match_lines")
+        .select(`
+          id,
+          line_number,
+          home_player_1_id,
+          home_player_2_id,
+          away_player_1_id,
+          away_player_2_id,
+          home_team_games_won,
+          away_team_games_won,
+          winning_team_id,
+          division_lines (
+            id,
+            line_name,
+            line_type
+          ),
+          matches (
+            id,
+            scheduled_date,
+            scheduled_time,
+            status,
+            home_team_id,
+            away_team_id,
+            home_team:teams!matches_home_team_id_fkey (
+              id,
+              name
+            ),
+            away_team:teams!matches_away_team_id_fkey (
+              id,
+              name
+            ),
+            divisions (
+              id,
+              name
+            ),
+            leagues (
+              id,
+              name,
+              seasons (
+                id,
+                name
+              )
+            )
+          )
+        `)
+        .or(playerFilter);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      historyData = data || [];
+    }
+
     setTeam(teamData);
     setRoster(rosterData || []);
     setMembers(memberData || []);
     setLocations(locationData || []);
     setSeasonRatings(ratingData);
+    setPlayHistory(historyData);
 
     if (!selectedLocationId && teamData.home_location_id) {
       setSelectedLocationId(teamData.home_location_id);
@@ -301,6 +381,19 @@ function getAverageTeamRating() {
     }
 
     return 3;
+  }
+
+  function historyRowsForMember(memberId) {
+    return sortHistoryRows(
+      playHistory.filter((row) =>
+        [
+          row.home_player_1_id,
+          row.home_player_2_id,
+          row.away_player_1_id,
+          row.away_player_2_id,
+        ].includes(memberId)
+      )
+    );
   }
 
   const sortedRoster = useMemo(() => {
@@ -757,14 +850,42 @@ function getAverageTeamRating() {
 
                       </div>
 
-                      <button
-                        onClick={() => removePlayer(player.id)}
-                        className="rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-800 hover:bg-red-200"
-                      >
-                        Remove
-                      </button>
+                      <div className="flex shrink-0 flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedHistoryMemberId((current) =>
+                              current === member?.id ? "" : member?.id
+                            )
+                          }
+                          className="rounded-lg bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-200"
+                        >
+                          Play History
+                        </button>
+
+                        <button
+                          onClick={() => removePlayer(player.id)}
+                          className="rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-800 hover:bg-red-200"
+                        >
+                          Remove
+                        </button>
+                      </div>
 
                     </div>
+
+                    {expandedHistoryMemberId === member?.id && (
+                      <PlayerHistoryPanel
+                        memberId={member.id}
+                        historyRows={historyRowsForMember(member.id)}
+                        selectedFilter={historyFilters[member.id] || ""}
+                        onFilterChange={(value) =>
+                          setHistoryFilters((current) => ({
+                            ...current,
+                            [member.id]: value,
+                          }))
+                        }
+                      />
+                    )}
 
                   </div>
                 );
@@ -784,6 +905,87 @@ function getAverageTeamRating() {
 
       </div>
     </main>
+  );
+}
+
+function PlayerHistoryPanel({
+  memberId,
+  historyRows,
+  selectedFilter,
+  onFilterChange,
+}) {
+  const options = historyFilterOptions(historyRows);
+  const filteredRows = filterHistoryRows(historyRows, selectedFilter);
+
+  return (
+    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div className="font-bold text-slate-900">
+          Game Play History
+        </div>
+
+        <select
+          value={selectedFilter}
+          onChange={(e) => onFilterChange(e.target.value)}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800"
+          aria-label="Filter player history by league and season"
+        >
+          <option value="">All Leagues / Seasons</option>
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-2">
+        {filteredRows.map((row) => {
+          const match = row.matches;
+          const details = playerLineDetails(row, memberId);
+
+          return (
+            <div
+              key={row.id}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span
+                  className={`rounded-full px-2 py-0.5 text-xs font-black ${
+                    details.result === "W"
+                      ? "bg-green-100 text-green-800"
+                      : details.result === "L"
+                      ? "bg-red-100 text-red-800"
+                      : "bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  {details.result}
+                </span>
+                <span className="font-bold text-slate-900">
+                  {formatDate(match?.scheduled_date)}
+                </span>
+                <span className="text-slate-600">
+                  vs {details.opponentName}
+                </span>
+                <span className="font-semibold text-slate-800">
+                  {details.score}
+                </span>
+              </div>
+
+              <div className="mt-1 text-xs text-slate-600">
+                {match?.leagues?.seasons?.name || "No Season"} / {match?.leagues?.name || "No League"} · {match?.divisions?.name || "No Division"} · {row.division_lines?.line_name || row.division_lines?.line_type || `Line ${row.line_number || "—"}`} · {details.sideLabel}
+              </div>
+            </div>
+          );
+        })}
+
+        {filteredRows.length === 0 && (
+          <div className="rounded-lg bg-white p-4 text-center text-sm text-slate-500">
+            No game play history found for this player.
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 

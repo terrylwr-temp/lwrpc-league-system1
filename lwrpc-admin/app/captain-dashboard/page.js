@@ -14,6 +14,7 @@ export default function CaptainDashboardPage() {
   const [matches, setMatches] = useState([]);
   const [byeWeeks, setByeWeeks] = useState([]);
   const [teamStats, setTeamStats] = useState({});
+  const [upcomingTeamFilter, setUpcomingTeamFilter] = useState("");
   const [loading, setLoading] = useState(true);
 
   async function checkAuth() {
@@ -229,15 +230,33 @@ export default function CaptainDashboardPage() {
     );
   }, [matches]);
 
+  const filteredUpcomingMatches = useMemo(() => {
+    if (!upcomingTeamFilter) return upcomingMatches;
+
+    return upcomingMatches.filter(
+      (match) =>
+        String(match.home_team_id) === String(upcomingTeamFilter) ||
+        String(match.away_team_id) === String(upcomingTeamFilter)
+    );
+  }, [upcomingMatches, upcomingTeamFilter]);
+
+  const filteredByeWeeks = useMemo(() => {
+    if (!upcomingTeamFilter) return byeWeeks;
+
+    return byeWeeks.filter(
+      (bye) => String(bye.team_id) === String(upcomingTeamFilter)
+    );
+  }, [byeWeeks, upcomingTeamFilter]);
+
   const upcomingItems = useMemo(() => {
     return [
-      ...upcomingMatches.map((match) => ({
+      ...filteredUpcomingMatches.map((match) => ({
         type: "match",
         date: match.scheduled_date,
         time: match.scheduled_time || "00:00",
         data: match,
       })),
-      ...byeWeeks.map((bye) => ({
+      ...filteredByeWeeks.map((bye) => ({
         type: "bye",
         date: bye.bye_date,
         time: "00:00",
@@ -248,7 +267,7 @@ export default function CaptainDashboardPage() {
       const bDate = new Date(`${b.date || "9999-12-31"}T${b.time || "00:00"}`);
       return aDate - bDate;
     });
-  }, [upcomingMatches, byeWeeks]);
+  }, [filteredUpcomingMatches, filteredByeWeeks]);
 
   const pendingVerification = useMemo(() => {
     return matches.filter((match) => match.score_status === "pending_verification");
@@ -431,7 +450,27 @@ export default function CaptainDashboardPage() {
           {pendingVerification.length === 0 && <Empty message="No scores currently need verification." />}
         </Section>
 
-        <Section title="Upcoming Matches / Byes" count={upcomingItems.length}>
+        <Section
+          title="Upcoming Matches / Byes"
+          count={upcomingItems.length}
+          actions={
+            teams.length > 1 ? (
+              <select
+                value={upcomingTeamFilter}
+                onChange={(e) => setUpcomingTeamFilter(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 md:w-64"
+                aria-label="Filter upcoming matches by team"
+              >
+                <option value="">All My Teams</option>
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+            ) : null
+          }
+        >
           {upcomingItems.map((item) =>
             item.type === "match" ? matchCard(item.data) : byeCard(item.data)
           )}
@@ -509,14 +548,18 @@ function SummaryCard({ label, value }) {
   );
 }
 
-function Section({ title, count, children }) {
+function Section({ title, count, actions, children }) {
   return (
     <div className="mt-6 rounded-2xl bg-white p-6 shadow">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <h2 className="text-xl font-bold text-slate-900">{title}</h2>
 
-        <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
-          {count}
+        <div className="flex flex-col gap-2 md:flex-row md:items-center">
+          {actions}
+
+          <div className="rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-bold text-white">
+            {count}
+          </div>
         </div>
       </div>
 
