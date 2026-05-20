@@ -562,6 +562,297 @@ export default function ScheduleEditorPage() {
     loadData();
   }
 
+  async function resetMatch(match) {
+    const response = window.prompt(
+      [
+        `Reset ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}?`,
+        "This clears saved match setup teams, selected score-entry players, all game scores, winners, score verification/dispute state, and DUPR export status.",
+        "The scheduled match, date, time, location, teams, week, and published status will remain.",
+        'Type "RESET" to continue.',
+      ].join("\n\n")
+    );
+
+    if (response !== "RESET") return;
+
+    const { data: linesToReset, error: findLineError } = await supabase
+      .from("match_lines")
+      .select("id")
+      .eq("match_id", match.id);
+
+    if (findLineError) {
+      alert(findLineError.message);
+      return;
+    }
+
+    const lineIds = (linesToReset || []).map((line) => line.id);
+
+    if (lineIds.length > 0) {
+      const { error: gameError } = await supabase
+        .from("line_games")
+        .update({
+          home_score: null,
+          away_score: null,
+          game_status: "scheduled",
+          updated_at: new Date().toISOString(),
+        })
+        .in("match_line_id", lineIds);
+
+      if (gameError) {
+        alert(gameError.message);
+        return;
+      }
+
+      const { error: lineError } = await supabase
+        .from("match_lines")
+        .update({
+          home_player_1_id: null,
+          home_player_2_id: null,
+          away_player_1_id: null,
+          away_player_2_id: null,
+          winning_team_id: null,
+          home_team_games_won: 0,
+          away_team_games_won: 0,
+          home_team_points: 0,
+          away_team_points: 0,
+          line_status: "scheduled",
+          updated_at: new Date().toISOString(),
+        })
+        .eq("match_id", match.id);
+
+      if (lineError) {
+        alert(lineError.message);
+        return;
+      }
+    }
+
+    const { error: lineupError } = await supabase
+      .from("match_lineups")
+      .delete()
+      .eq("match_id", match.id);
+
+    if (lineupError) {
+      alert(lineupError.message);
+      return;
+    }
+
+    const { error: matchError } = await supabase
+      .from("matches")
+      .update({
+        status: "scheduled",
+        score_status: "not_entered",
+        home_score: null,
+        away_score: null,
+        winning_team_id: null,
+        score_entered_by_member_id: null,
+        score_entered_at: null,
+        score_verified_by_member_id: null,
+        score_verified_at: null,
+        finalized_at: null,
+        score_disputed: false,
+        score_dispute_notes: null,
+        score_exported_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", match.id);
+
+    if (matchError) {
+      alert(matchError.message);
+      return;
+    }
+
+    await rebuildDivisionStandings(match.division_id);
+    alert("Match reset. Captains can enter match setup and scores again.");
+    loadData();
+  }
+
+  async function rebuildDivisionStandings(divisionId) {
+    if (!divisionId) return;
+
+    const { data: division, error: divisionError } = await supabase
+      .from("divisions")
+      .select("*")
+      .eq("id", divisionId)
+      .single();
+
+    if (divisionError) {
+      alert(divisionError.message);
+      return;
+    }
+
+    const { data: completedMatches, error } = await supabase
+      .from("matches")
+      .select(`
+        *,
+        match_lines (
+          *,
+          winning_team_id,
+          home_team_games_won,
+          away_team_games_won,
+          home_team_points,
+          away_team_points,
+          division_lines (
+            team_win_points
+          )
+        )
+      `)
+      .eq("division_id", divisionId)
+      .eq("status", "completed")
+      .order("scheduled_date", { ascending: true });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    const standingsMap = {};
+
+    function ensureTeam(teamId) {
+      if (!standingsMap[teamId]) {
+        standingsMap[teamId] = {
+          league_id: division.league_id,
+          division_id: division.id,
+          team_id: teamId,
+          matches_played: 0,
+          match_wins: 0,
+          match_losses: 0,
+          match_ties: 0,
+          line_wins: 0,
+          line_losses: 0,
+          line_ties: 0,
+          game_wins: 0,
+          game_losses: 0,
+          points_for: 0,
+          points_against: 0,
+          point_differential: 0,
+          standings_points: 0,
+          home_wins: 0,
+          home_losses: 0,
+          away_wins: 0,
+          away_losses: 0,
+          recentResults: [],
+        };
+      }
+
+      return standingsMap[teamId];
+    }
+
+    (completedMatches || []).forEach((matchRow) => {
+      const home = ensureTeam(matchRow.home_team_id);
+      const away = ensureTeam(matchRow.away_team_id);
+
+      home.matches_played += 1;
+      away.matches_played += 1;
+
+      let homeLinesWon = 0;
+      let awayLinesWon = 0;
+
+      (matchRow.match_lines || []).forEach((line) => {
+        const hg = Number(line.home_team_games_won || 0);
+        const ag = Number(line.away_team_games_won || 0);
+        const hp = Number(line.home_team_points || 0);
+        const ap = Number(line.away_team_points || 0);
+        const teamWinPoints = Number(line.division_lines?.team_win_points ?? 1);
+
+        home.game_wins += hg;
+        home.game_losses += ag;
+        away.game_wins += ag;
+        away.game_losses += hg;
+        home.points_for += hp;
+        home.points_against += ap;
+        away.points_for += ap;
+        away.points_against += hp;
+        home.standings_points += hg * teamWinPoints;
+        away.standings_points += ag * teamWinPoints;
+
+        if (line.winning_team_id === matchRow.home_team_id) {
+          home.line_wins += 1;
+          away.line_losses += 1;
+          homeLinesWon += 1;
+        } else if (line.winning_team_id === matchRow.away_team_id) {
+          away.line_wins += 1;
+          home.line_losses += 1;
+          awayLinesWon += 1;
+        } else {
+          home.line_ties += 1;
+          away.line_ties += 1;
+        }
+      });
+
+      if (homeLinesWon > awayLinesWon) {
+        home.match_wins += 1;
+        away.match_losses += 1;
+        home.home_wins += 1;
+        away.away_losses += 1;
+        home.recentResults.push("W");
+        away.recentResults.push("L");
+      } else if (awayLinesWon > homeLinesWon) {
+        away.match_wins += 1;
+        home.match_losses += 1;
+        away.away_wins += 1;
+        home.home_losses += 1;
+        away.recentResults.push("W");
+        home.recentResults.push("L");
+      } else {
+        home.match_ties += 1;
+        away.match_ties += 1;
+        home.recentResults.push("T");
+        away.recentResults.push("T");
+      }
+    });
+
+    const ordered = Object.values(standingsMap).map((team) => {
+      team.point_differential = team.points_for - team.points_against;
+      const recent = team.recentResults.slice(-5);
+      team.recent_form = recent.join("");
+
+      if (recent.length > 0) {
+        const last = recent[recent.length - 1];
+        let streak = 0;
+
+        for (let i = recent.length - 1; i >= 0; i--) {
+          if (recent[i] === last) streak += 1;
+          else break;
+        }
+
+        team.current_streak = last + streak;
+      } else {
+        team.current_streak = "-";
+      }
+
+      delete team.recentResults;
+      return team;
+    });
+
+    ordered.sort((a, b) => {
+      const rules = [
+        division.standings_tiebreak_1,
+        division.standings_tiebreak_2,
+        division.standings_tiebreak_3,
+      ];
+
+      for (const rule of rules) {
+        if ((b[rule] || 0) !== (a[rule] || 0)) {
+          return (b[rule] || 0) - (a[rule] || 0);
+        }
+      }
+
+      return 0;
+    });
+
+    ordered.forEach((team, index) => {
+      team.rank = index + 1;
+      team.updated_at = new Date().toISOString();
+    });
+
+    await supabase.from("team_standings").delete().eq("division_id", divisionId);
+
+    if (ordered.length > 0) {
+      const { error: insertError } = await supabase.from("team_standings").insert(ordered);
+
+      if (insertError) alert(insertError.message);
+    }
+  }
+
   useEffect(() => {
     async function run() {
       const ok = await checkAuth();
@@ -865,6 +1156,12 @@ export default function ScheduleEditorPage() {
               className="rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
             >
               Open
+            </button>
+            <button
+              onClick={() => resetMatch(match)}
+              className="rounded-lg bg-orange-100 px-2.5 py-1.5 text-xs font-semibold text-orange-900 hover:bg-orange-200"
+            >
+              Reset
             </button>
             <button
               onClick={() => deleteMatch(match.id)}
@@ -1179,7 +1476,7 @@ export default function ScheduleEditorPage() {
           <div className="space-y-3">
 
             {groupedFilteredMatches.map((group) => {
-              const isCollapsed = Boolean(collapsedMatchGroups[group.key]);
+              const isCollapsed = collapsedMatchGroups[group.key] !== false;
 
               return (
                 <section key={group.key} className="overflow-hidden rounded-xl border border-slate-200">

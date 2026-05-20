@@ -55,6 +55,7 @@ export function playerLineDetails(row, memberId) {
   const isHomePlayer =
     row.home_player_1_id === memberId || row.home_player_2_id === memberId;
   const playerTeamId = isHomePlayer ? match?.home_team_id : match?.away_team_id;
+  const playerTeam = isHomePlayer ? match?.home_team : match?.away_team;
   const opponentTeam = isHomePlayer ? match?.away_team : match?.home_team;
   const playerGamesWon = isHomePlayer
     ? Number(row.home_team_games_won || 0)
@@ -68,6 +69,7 @@ export function playerLineDetails(row, memberId) {
   if (row.winning_team_id && row.winning_team_id !== playerTeamId) result = "L";
 
   return {
+    playerTeamName: playerTeam?.name || "Your Team",
     opponentName: opponentTeam?.name || "Opponent",
     result,
     score: `${playerGamesWon}-${opponentGamesWon}`,

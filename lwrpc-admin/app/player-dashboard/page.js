@@ -194,6 +194,30 @@ export default function PlayerDashboardPage() {
           away_score,
           game_status
         ),
+        home_player_1:members!match_lines_home_player_1_id_fkey (
+          id,
+          first_name,
+          last_name,
+          email
+        ),
+        home_player_2:members!match_lines_home_player_2_id_fkey (
+          id,
+          first_name,
+          last_name,
+          email
+        ),
+        away_player_1:members!match_lines_away_player_1_id_fkey (
+          id,
+          first_name,
+          last_name,
+          email
+        ),
+        away_player_2:members!match_lines_away_player_2_id_fkey (
+          id,
+          first_name,
+          last_name,
+          email
+        ),
         division_lines (
           id,
           line_name,
@@ -346,8 +370,22 @@ export default function PlayerDashboardPage() {
           subtitle="Your league teams, standings, and match access."
         />
 
-        <section className="rounded-2xl bg-white p-5 shadow">
-          <div className="mb-4 grid grid-cols-1 gap-3 lg:grid-cols-2">
+        <section className="overflow-hidden rounded-2xl bg-white shadow">
+          <div className="bg-slate-950 px-4 py-5 text-white md:px-6">
+            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+              <div>
+                <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+                  Player Workspace
+                </div>
+                <h2 className="mt-1 text-2xl font-black">My Teams</h2>
+              </div>
+              <div className="text-sm font-semibold text-slate-300">
+                {teams.length} team{teams.length === 1 ? "" : "s"}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 p-4 lg:grid-cols-2 md:p-5">
             {teams.map((team) => (
               <TeamCard key={team.id} team={team} />
             ))}
@@ -359,23 +397,26 @@ export default function PlayerDashboardPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 border-t border-slate-100 p-4 md:grid-cols-3 md:p-5">
             <DashboardOption
               active={activePanel === "history"}
               label="My Play History"
               value={filteredPlayHistory.length}
+              tone="blue"
               onClick={() => selectPanel("history")}
             />
             <DashboardOption
               active={activePanel === "standings"}
               label="Division Standings"
               value={selectedDivisionStandings.length || standings.length}
+              tone="emerald"
               onClick={() => selectPanel("standings")}
             />
             <DashboardOption
               active={activePanel === "upcoming"}
               label="Upcoming Matches"
               value={upcomingMatchesBySelectedTeam.length || matches.filter((match) => match.status !== "completed" && match.status !== "cancelled").length}
+              tone="amber"
               onClick={() => selectPanel("upcoming")}
             />
           </div>
@@ -533,25 +574,35 @@ export default function PlayerDashboardPage() {
   );
 }
 
-function DashboardOption({ active, label, value, onClick }) {
+function DashboardOption({ active, label, value, tone = "blue", onClick }) {
+  const tones = {
+    blue: active
+      ? "border-blue-700 bg-blue-700 text-white"
+      : "border-blue-200 bg-blue-50 text-blue-950 hover:border-blue-500",
+    emerald: active
+      ? "border-emerald-700 bg-emerald-700 text-white"
+      : "border-emerald-200 bg-emerald-50 text-emerald-950 hover:border-emerald-500",
+    amber: active
+      ? "border-amber-500 bg-amber-400 text-slate-950"
+      : "border-amber-200 bg-amber-50 text-amber-950 hover:border-amber-500",
+  };
+  const badgeClass = active ? "bg-white/20" : "bg-white";
+  const helperClass = active ? "text-white/80" : "text-slate-600";
+
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`group rounded-xl border-2 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-        active
-          ? "border-blue-700 bg-blue-50 ring-1 ring-blue-700"
-          : "border-slate-300 bg-white hover:border-blue-400 hover:bg-blue-50"
-      }`}
+      className={`group rounded-2xl border-2 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.blue}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <div className="text-sm font-black text-slate-950">{label}</div>
-          <div className={`mt-1 text-xs font-bold ${active ? "text-blue-700" : "text-slate-500 group-hover:text-blue-700"}`}>
+          <div className="text-sm font-black">{label}</div>
+          <div className={`mt-1 text-xs font-bold ${helperClass}`}>
             Click to view
           </div>
         </div>
-        <div className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-bold text-white">
+        <div className={`rounded-xl px-3 py-1 text-sm font-black shadow-sm ${badgeClass}`}>
           {value}
         </div>
       </div>
@@ -572,14 +623,19 @@ function HistoryStat({ label, value }) {
 
 function TeamCard({ team }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm">
-      <div className="font-bold text-slate-900">{team.name}</div>
-      <div className="mt-1 text-slate-600">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 text-sm shadow-sm">
+      <div className="border-b border-slate-200 bg-white px-4 py-3">
+        <div className="font-black text-slate-950">{team.name}</div>
+        <div className="mt-1 text-xs font-bold uppercase tracking-wide text-slate-500">
+          {team.locations?.name || "No Home Location"}
+        </div>
+      </div>
+      <div className="px-4 py-3 font-semibold text-slate-600">
         {team.divisions?.leagues?.name || ""} / {team.divisions?.name || ""}
       </div>
-      <div className="mt-2 grid grid-cols-1 gap-1 text-xs text-slate-600 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3">
         {teamCaptainContacts(team).map((contact) => (
-          <div key={contact.label} className="rounded-lg bg-white px-3 py-2">
+          <div key={contact.label} className="rounded-xl bg-white px-3 py-2 shadow-sm">
             <div className="font-bold text-slate-900">{contact.label}</div>
             <div>{contact.name || "Not assigned"}</div>
             {contact.phone && <div>{contact.phone}</div>}
@@ -684,8 +740,9 @@ function PlayerHistoryRow({ row, memberId }) {
         <span className="font-bold text-slate-900">
           {formatDate(match?.scheduled_date)}
         </span>
-        <span className="text-slate-600">vs {details.opponentName}</span>
-        <span className="font-semibold text-slate-800">{details.score}</span>
+        <span className="font-semibold text-slate-900">
+          {details.playerTeamName} vs {details.opponentName}
+        </span>
       </div>
 
       <div className="mt-1 text-sm text-slate-600">
@@ -717,19 +774,20 @@ function PlayerHistoryRowWithScores({ row, memberId }) {
         <span className="font-bold text-slate-900">
           {formatDate(match?.scheduled_date)}
         </span>
-        <span className="text-slate-600">vs {details.opponentName}</span>
-        <span className="font-semibold text-slate-800">{details.score}</span>
+        <span className="font-semibold text-slate-900">
+          {details.playerTeamName} vs {details.opponentName}
+        </span>
       </div>
 
       <div className="mt-1 text-sm text-slate-600">
-        {match?.leagues?.seasons?.name || "No Season"} / {match?.leagues?.name || "No League"} / {match?.divisions?.name || "No Division"} / {row.division_lines?.line_name || row.division_lines?.line_type || `Line ${row.line_number || "Line"}`} / {details.sideLabel}
+        {match?.leagues?.seasons?.name || "No Season"} / {match?.leagues?.name || "No League"} / {match?.divisions?.name || "No Division"}
       </div>
 
       {gameScores.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-700">
           {gameScores.map((game) => (
             <span key={game.key} className="rounded-lg bg-slate-100 px-2 py-1">
-              {game.label}: {game.score}
+              {game.label} - {game.playerTeamName}: {game.players} vs {game.opponentTeamName}: {game.opponentPlayers}: {game.score}
             </span>
           ))}
         </div>
@@ -739,6 +797,13 @@ function PlayerHistoryRowWithScores({ row, memberId }) {
 }
 
 function formatGameScores(row, sideLabel) {
+  const players = linePlayerNames(row, sideLabel);
+  const opponentSideLabel = sideLabel === "Home" ? "Away" : "Home";
+  const opponentPlayers = linePlayerNames(row, opponentSideLabel);
+  const match = row.matches;
+  const playerTeamName = sideLabel === "Home" ? match?.home_team?.name || "Home" : match?.away_team?.name || "Away";
+  const opponentTeamName = sideLabel === "Home" ? match?.away_team?.name || "Away" : match?.home_team?.name || "Home";
+
   return [...(row.line_games || [])]
     .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
     .filter((game) => game.home_score !== null && game.away_score !== null)
@@ -750,7 +815,24 @@ function formatGameScores(row, sideLabel) {
       return {
         key: game.id || game.game_number,
         label: `Game ${game.game_number || ""}`.trim(),
+        playerTeamName,
+        players,
+        opponentTeamName,
+        opponentPlayers,
         score: `${playerScore}-${opponentScore}`,
       };
     });
+}
+
+function linePlayerNames(row, sideLabel) {
+  const members =
+    sideLabel === "Home"
+      ? [row.home_player_1, row.home_player_2]
+      : [row.away_player_1, row.away_player_2];
+
+  return members
+    .filter(Boolean)
+    .map(formatMemberName)
+    .filter(Boolean)
+    .join(" / ") || "Players TBD";
 }

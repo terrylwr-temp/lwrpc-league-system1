@@ -437,7 +437,7 @@ export default function CaptainDashboardPage() {
             )}
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:w-auto lg:min-w-44 lg:grid-cols-1">
             {setupTeams.map((team) => {
               const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
 
@@ -446,7 +446,7 @@ export default function CaptainDashboardPage() {
                   <button
                     type="button"
                     onClick={() => openMatchSetup(match, team)}
-                    className="rounded-lg bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-200"
+                    className="rounded-lg bg-blue-100 px-3 py-2.5 text-sm font-bold text-blue-900 hover:bg-blue-200"
                   >
                     Match Setup
                   </button>
@@ -463,7 +463,7 @@ export default function CaptainDashboardPage() {
               onClick={() => {
                 if (canEnterScores) router.push(`/matches/${match.id}`);
               }}
-              className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="rounded-lg bg-slate-900 px-3 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               title={canEnterScores ? scoreButtonTitle : "Scores unlock on the scheduled match date"}
             >
               {scoreButtonLabel}
@@ -961,7 +961,7 @@ export default function CaptainDashboardPage() {
 
   if (!currentMember) {
     return (
-      <main className="min-h-screen bg-slate-100 p-6">
+      <main className="min-h-screen bg-slate-100 p-4 md:p-6">
         <div className="mx-auto max-w-7xl">
           <AppHeader
             title="Captain Dashboard"
@@ -977,18 +977,18 @@ export default function CaptainDashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main className="min-h-screen bg-slate-100 p-4 md:p-6">
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="Captain Dashboard"
           subtitle="Captain tools, upcoming matches, score entry, and score verification."
         />
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-          <SummaryCard label="My Teams" value={teams.length} />
-          <SummaryCard label="Upcoming Items" value={upcomingItems.length} />
-          <SummaryCard label="Pending Verification" value={pendingVerification.length} />
-          <SummaryCard label="Completed Matches" value={completedMatches.length} />
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+          <SummaryCard label="My Teams" value={teams.length} tone="slate" />
+          <SummaryCard label="Upcoming Items" value={upcomingItems.length} tone="blue" />
+          <SummaryCard label="Pending Verification" value={pendingVerification.length} tone="amber" />
+          <SummaryCard label="Completed Matches" value={completedMatches.length} tone="emerald" />
         </div>
 
         {setupMatch && setupTeam && (
@@ -1113,59 +1113,73 @@ export default function CaptainDashboardPage() {
           </div>
         )}
 
-        <div className="mt-6 rounded-2xl bg-white p-6 shadow">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-slate-900">My Teams</h2>
+        <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          <div className="border-b border-slate-200 bg-slate-950 px-4 py-5 text-white md:px-6">
+            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+              <div>
+                <div className="text-xs font-black uppercase tracking-wide text-blue-200">
+                  Captain Workspace
+                </div>
+                <h2 className="mt-1 text-2xl font-black">My Teams</h2>
+              </div>
+              <div className="text-sm font-semibold text-slate-300">
+                {teams.length} team{teams.length === 1 ? "" : "s"}
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 md:p-6">
             {teams.map((team) => {
               const stats = teamStats[team.id] || {};
               const standing = stats.standing;
 
               return (
-              <div key={team.id} className="rounded-xl border border-slate-200 p-4">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div className="text-lg font-bold text-slate-900">{team.name}</div>
+              <div key={team.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div className="bg-slate-50 p-4">
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <div className="text-lg font-black text-slate-950">{team.name}</div>
+                    <div className="mt-1 text-sm font-semibold text-slate-600">
+                      {team.divisions?.leagues?.name || "League"} / {team.divisions?.name || "Division"}
+                    </div>
+                  </div>
 
                   <button
                     type="button"
                     onClick={() => router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`)}
-                    className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-blue-900 hover:bg-blue-200"
+                    className="rounded-full bg-blue-700 px-3 py-1 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-800"
                   >
                     Rank {standing?.rank ? `#${standing.rank}` : "N/A"}
                   </button>
                 </div>
 
-                <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5">
-                    Players: {stats.playerCount ?? 0}
+                <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-bold text-slate-700">
+                  <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-500">Players</span>
+                    {stats.playerCount ?? 0}
                   </span>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5">
-                    Points: {standing?.standings_points ?? 0}
+                  <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-500">Points</span>
+                    {standing?.standings_points ?? 0}
                   </span>
-                  <span className="rounded-full bg-slate-100 px-2 py-0.5">
-                    W-L-T: {standing?.match_wins ?? 0}-{standing?.match_losses ?? 0}-{standing?.match_ties ?? 0}
+                  <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-500">W-L-T</span>
+                    {standing?.match_wins ?? 0}-{standing?.match_losses ?? 0}-{standing?.match_ties ?? 0}
                   </span>
                 </div>
-
-                <div className="mt-1 text-sm text-slate-600">
-                  League: {team.divisions?.leagues?.name || "—"}
                 </div>
 
-                <div className="mt-1 text-sm text-slate-600">
-                  Division: {team.divisions?.name || "—"}
+                <div className="space-y-1 px-4 py-3 text-sm text-slate-600">
+                  <div>
+                    <span className="font-bold text-slate-900">Home Location:</span> {team.locations?.name || "—"}
+                  </div>
                 </div>
 
-                <div className="mt-1 text-sm text-slate-600">
-                  Home Location: {team.locations?.name || "—"}
-                </div>
-
-                <div className="mt-4 flex flex-wrap gap-2">
+                <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-3">
                   <button
                     type="button"
                     onClick={() => router.push(`/teams/${team.id}`)}
-                    className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                    className="rounded-xl bg-slate-900 px-3 py-3 text-sm font-bold text-white shadow-sm hover:bg-slate-800"
                   >
                     Manage Roster
                   </button>
@@ -1173,17 +1187,17 @@ export default function CaptainDashboardPage() {
                   <button
                     type="button"
                     onClick={() => openDivisionSchedule(team)}
-                    className="rounded-xl bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-200"
+                    className="rounded-xl bg-indigo-100 px-3 py-3 text-sm font-bold text-indigo-900 shadow-sm hover:bg-indigo-200"
                   >
-                    Division Team Schedules
+                    Division Schedules
                   </button>
 
                   <button
                     type="button"
                     onClick={() => displayPrintDivisionCaptains(team)}
-                    className="rounded-xl bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-200"
+                    className="rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
                   >
-                    Display/Print Division Captains
+                    Print Captains
                   </button>
                 </div>
               </div>
@@ -1442,21 +1456,29 @@ function byeCard(bye) {
   );
 }
 
-function SummaryCard({ label, value }) {
+function SummaryCard({ label, value, tone = "slate" }) {
+  const tones = {
+    slate: "border-slate-200 bg-slate-950 text-white",
+    blue: "border-blue-200 bg-blue-700 text-white",
+    amber: "border-amber-200 bg-amber-400 text-slate-950",
+    emerald: "border-emerald-200 bg-emerald-600 text-white",
+  };
+  const labelTone = tone === "amber" ? "text-slate-800" : "text-white/75";
+
   return (
-    <div className="rounded-2xl bg-white p-5 shadow">
-      <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div className={`rounded-2xl border p-4 shadow-sm md:p-5 ${tones[tone] || tones.slate}`}>
+      <div className={`text-[11px] font-black uppercase tracking-wide ${labelTone}`}>
         {label}
       </div>
 
-      <div className="mt-2 text-3xl font-bold text-slate-900">{value}</div>
+      <div className="mt-2 text-3xl font-black">{value}</div>
     </div>
   );
 }
 
 function Section({ title, count, actions, children }) {
   return (
-    <div className="mt-6 rounded-2xl bg-white p-6 shadow">
+    <div className="mt-6 rounded-2xl bg-white p-4 shadow md:p-6">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <h2 className="text-xl font-bold text-slate-900">{title}</h2>
 
