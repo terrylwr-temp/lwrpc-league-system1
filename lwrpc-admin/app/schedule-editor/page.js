@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function ScheduleEditorPage() {
   const router = useRouter();
@@ -24,6 +25,7 @@ export default function ScheduleEditorPage() {
   const [publishedFilter, setPublishedFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [showMatchNotes, setShowMatchNotes] = useState(false);
+  const [showHomeAwayCounts, setShowHomeAwayCounts] = useState(false);
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
@@ -125,6 +127,18 @@ export default function ScheduleEditorPage() {
       return { used: 0, total: Number(match.locations?.number_of_courts || 0) };
     }
 
+    const location = locations.find((loc) => String(loc.id) === String(match.location_id));
+    const total = Number(location?.number_of_courts ?? match.locations?.number_of_courts ?? 0);
+    const unavailable = availability
+      .filter((row) =>
+        isAvailabilityMatch(
+          row,
+          match.location_id,
+          match.scheduled_date,
+          match.scheduled_time
+        )
+      )
+      .reduce((sum, row) => sum + Number(row.courts_unavailable ?? row.courts_available ?? 0), 0);
     const used = matches
       .filter(
         (row) =>
@@ -137,7 +151,10 @@ export default function ScheduleEditorPage() {
 
     return {
       used,
-      total: Number(match.locations?.number_of_courts || 0),
+      total,
+      unavailable,
+      available: total ? Math.max(total - unavailable, 0) : 0,
+      hasIssue: Boolean(total && used > Math.max(total - unavailable, 0)),
     };
   }
 
@@ -147,7 +164,7 @@ export default function ScheduleEditorPage() {
 
   function courtUsageTextForMatch(match) {
     const usage = courtUsageForMatch(match);
-    return `${usage.used}/${usage.total || "?"} courts used`;
+    return `${usage.used}/${usage.available || usage.total || "?"} courts used`;
   }
 
   function isAvailabilityMatch(row, locationId, matchDate, matchTime) {
@@ -170,6 +187,10 @@ export default function ScheduleEditorPage() {
       const sameDivision = !blackout.division_id || blackout.division_id === match.division_id;
       return sameLeague && sameDivision && blackout.blackout_date === match.scheduled_date;
     });
+  }
+
+  function matchHasScheduleIssue(match) {
+    return courtUsageForMatch(match).hasIssue || isLeagueBlackoutDate(match);
   }
 
   function wouldHaveEnoughCourts(proposedMatches, matchToCheck) {
@@ -472,7 +493,10 @@ export default function ScheduleEditorPage() {
   }
 
   async function deleteMatch(matchId) {
-    const ok = confirm("Delete this match and its generated teams/games?");
+    const ok = confirmDeleteAction({
+      title: "Delete this match and its generated game rows?",
+      details: "This deletes the match, match lines, and individual game score rows. Any entered players, scores, verification state, DUPR export readiness, and standings impact for this match will be lost.",
+    });
 
     if (!ok) return;
 
@@ -605,6 +629,39 @@ export default function ScheduleEditorPage() {
       (a, b) => Number(a) - Number(b)
     );
   }, [matches]);
+
+  const homeAwayCounts = (() => {
+    const counts = new Map();
+
+    filteredMatches.forEach((match) => {
+      [
+        { team: match.home_team, teamId: match.home_team_id, side: "home" },
+        { team: match.away_team, teamId: match.away_team_id, side: "away" },
+      ].forEach(({ team, teamId, side }) => {
+        if (!teamId) return;
+
+        const divisionName = match.divisions?.name || "No Division";
+        const key = `${match.division_id || "none"}:${teamId}`;
+        const current = counts.get(key) || {
+          key,
+          divisionName,
+          teamName: team?.name || "Unknown Team",
+          home: 0,
+          away: 0,
+          total: 0,
+        };
+
+        current[side] += 1;
+        current.total += 1;
+        counts.set(key, current);
+      });
+    });
+
+    return [...counts.values()].sort((a, b) =>
+      a.divisionName.localeCompare(b.divisionName) ||
+      a.teamName.localeCompare(b.teamName)
+    );
+  })();
 
   function clearFilters() {
     setLeagueFilter("");
@@ -828,6 +885,14 @@ export default function ScheduleEditorPage() {
 
               <button
                 type="button"
+                onClick={() => setShowHomeAwayCounts(true)}
+                className="rounded-lg bg-indigo-100 px-3 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-200"
+              >
+                Home/Away Counts
+              </button>
+
+              <button
+                type="button"
                 disabled={isBulkUpdating || selectedMatchIds.length === 0}
                 onClick={() => publishSelectedMatches(true)}
                 className="rounded-lg bg-green-700 px-3 py-2 text-sm font-semibold text-white hover:bg-green-800 disabled:opacity-50"
@@ -864,7 +929,9 @@ export default function ScheduleEditorPage() {
               <div
                 key={match.id}
                 className={`rounded-lg border px-3 py-2 transition-all ${
-                  match.is_published
+                  matchHasScheduleIssue(match)
+                    ? "border-red-300 bg-red-50 ring-1 ring-red-200"
+                    : match.is_published
                     ? "border-green-200 bg-green-50"
                     : "border-amber-200 bg-amber-50"
                 }`}
@@ -891,8 +958,11 @@ export default function ScheduleEditorPage() {
                     <div className="truncate text-xs text-slate-600">
                       {match.leagues?.name || "No League"} · {match.divisions?.name || "No Division"}
                     </div>
-                    <div className="text-xs font-semibold text-blue-800">
-                      Courts: {courtUsage.used}/{courtUsage.total || "?"} used
+                    <div className={`text-xs font-semibold ${courtUsage.hasIssue ? "text-red-800" : "text-blue-800"}`}>
+                      Courts: {courtUsage.used}/{courtUsage.available || courtUsage.total || "?"} used
+                      {courtUsage.unavailable ? ` (${courtUsage.unavailable} unavailable)` : ""}
+                      {courtUsage.hasIssue ? " - Overbooked" : ""}
+                      {isLeagueBlackoutDate(match) ? " - Blackout date" : ""}
                     </div>
                   </div>
 
@@ -1004,6 +1074,61 @@ export default function ScheduleEditorPage() {
           </div>
 
         </div>
+
+        {showHomeAwayCounts && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+            <div className="max-h-[85vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">Home / Away Counts</h2>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Counts are based on the matches currently shown by the filters.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHomeAwayCounts(false)}
+                  className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-300"
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="max-h-[65vh] overflow-auto p-6">
+                <table className="w-full border-collapse text-sm">
+                  <thead className="sticky top-0 bg-slate-900 text-left text-white">
+                    <tr>
+                      <th className="px-3 py-2">Division</th>
+                      <th className="px-3 py-2">Team</th>
+                      <th className="px-3 py-2 text-right">Home</th>
+                      <th className="px-3 py-2 text-right">Away</th>
+                      <th className="px-3 py-2 text-right">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {homeAwayCounts.map((row) => (
+                      <tr key={row.key} className="border-b border-slate-100">
+                        <td className="px-3 py-2 font-semibold text-slate-800">{row.divisionName}</td>
+                        <td className="px-3 py-2 text-slate-700">{row.teamName}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-900">{row.home}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-900">{row.away}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-900">{row.total}</td>
+                      </tr>
+                    ))}
+
+                    {homeAwayCounts.length === 0 && (
+                      <tr>
+                        <td colSpan="5" className="px-3 py-8 text-center text-slate-500">
+                          No matches are visible with the current filters.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </main>

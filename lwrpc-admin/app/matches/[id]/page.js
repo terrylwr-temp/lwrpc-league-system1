@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
+import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 
 export default function MatchDetailPage() {
   const { id } = useParams();
@@ -849,21 +850,24 @@ export default function MatchDetailPage() {
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_1:members!teams_co_captain_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_2:members!teams_co_captain_2_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           )
         `)
         .eq("id", opposingTeamId)
@@ -874,17 +878,11 @@ export default function MatchDetailPage() {
         return;
       }
 
-      const emails = [
-        opposingTeam?.captain?.email,
-        opposingTeam?.co_captain_1?.email,
-        opposingTeam?.co_captain_2?.email,
-      ].filter(Boolean);
-
-      const phones = [
-        opposingTeam?.captain?.phone,
-        opposingTeam?.co_captain_1?.phone,
-        opposingTeam?.co_captain_2?.phone,
-      ].filter(Boolean);
+      const { emails, phones } = splitNotificationRecipients([
+        opposingTeam?.captain,
+        opposingTeam?.co_captain_1,
+        opposingTeam?.co_captain_2,
+      ]);
 
       if (emails.length === 0 && phones.length === 0) {
         console.log("No opposing captain emails or phone numbers found.");
@@ -937,7 +935,10 @@ export default function MatchDetailPage() {
           home_team_games_won,
           away_team_games_won,
           home_team_points,
-          away_team_points
+          away_team_points,
+          division_lines (
+            team_win_points
+          )
         )
       `)
       .eq("division_id", match.division_id)
@@ -1018,6 +1019,10 @@ export default function MatchDetailPage() {
           home.line_ties += 1;
           away.line_ties += 1;
         }
+
+        const teamWinPoints = Number(line.division_lines?.team_win_points ?? 1);
+        home.standings_points += hg * teamWinPoints;
+        away.standings_points += ag * teamWinPoints;
       });
 
       if (homeLinesWon > awayLinesWon) {
@@ -1025,8 +1030,6 @@ export default function MatchDetailPage() {
         away.match_losses += 1;
         home.home_wins += 1;
         away.away_losses += 1;
-        home.standings_points += Number(division.standings_win_points || 2);
-        away.standings_points += Number(division.standings_loss_points || 0);
         home.recentResults.push("W");
         away.recentResults.push("L");
       } else if (awayLinesWon > homeLinesWon) {
@@ -1034,15 +1037,11 @@ export default function MatchDetailPage() {
         home.match_losses += 1;
         away.away_wins += 1;
         home.home_losses += 1;
-        away.standings_points += Number(division.standings_win_points || 2);
-        home.standings_points += Number(division.standings_loss_points || 0);
         away.recentResults.push("W");
         home.recentResults.push("L");
       } else {
         home.match_ties += 1;
         away.match_ties += 1;
-        home.standings_points += Number(division.standings_tie_points || 1);
-        away.standings_points += Number(division.standings_tie_points || 1);
         home.recentResults.push("T");
         away.recentResults.push("T");
       }

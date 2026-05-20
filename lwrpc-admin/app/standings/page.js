@@ -104,7 +104,10 @@ export default function StandingsPage() {
           home_team_games_won,
           away_team_games_won,
           home_team_points,
-          away_team_points
+          away_team_points,
+          division_lines (
+            team_win_points
+          )
         )
       `)
       .eq("division_id", selectedDivision)
@@ -221,6 +224,11 @@ export default function StandingsPage() {
           home.line_ties += 1;
           away.line_ties += 1;
         }
+
+        const teamWinPoints = Number(line.division_lines?.team_win_points ?? 1);
+
+        home.standings_points += hg * teamWinPoints;
+        away.standings_points += ag * teamWinPoints;
       });
 
       if (homeLinesWon > awayLinesWon) {
@@ -229,16 +237,6 @@ export default function StandingsPage() {
 
         home.home_wins += 1;
         away.away_losses += 1;
-
-        home.standings_points +=
-          Number(
-            division.standings_win_points || 2
-          );
-
-        away.standings_points +=
-          Number(
-            division.standings_loss_points || 0
-          );
 
         home.recentResults.push("W");
         away.recentResults.push("L");
@@ -252,32 +250,12 @@ export default function StandingsPage() {
         away.away_wins += 1;
         home.home_losses += 1;
 
-        away.standings_points +=
-          Number(
-            division.standings_win_points || 2
-          );
-
-        home.standings_points +=
-          Number(
-            division.standings_loss_points || 0
-          );
-
         away.recentResults.push("W");
         home.recentResults.push("L");
 
       } else {
         home.match_ties += 1;
         away.match_ties += 1;
-
-        home.standings_points +=
-          Number(
-            division.standings_tie_points || 1
-          );
-
-        away.standings_points +=
-          Number(
-            division.standings_tie_points || 1
-          );
 
         home.recentResults.push("T");
         away.recentResults.push("T");

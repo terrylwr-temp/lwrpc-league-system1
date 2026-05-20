@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
+import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
@@ -109,9 +110,11 @@ export default function ResetPasswordPage() {
         </div>
 
         <div className="mt-6 text-center text-xs leading-relaxed text-slate-500">
-          © {new Date().getFullYear()} Lakewood Ranch Pickleball Club.
+          © {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club.
           <br />
           All rights reserved.
+          <br />
+          Version {APP_VERSION}
         </div>
       </div>
     </main>

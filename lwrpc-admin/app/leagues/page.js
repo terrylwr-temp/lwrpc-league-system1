@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function LeaguesPage() {
   const router = useRouter();
@@ -132,9 +133,10 @@ export default function LeaguesPage() {
   }
 
   async function deleteSeason(id) {
-    const ok = confirm(
-      "Delete this season and all related leagues/divisions/teams?"
-    );
+    const ok = confirmDeleteAction({
+      title: "Delete this season?",
+      details: "This may delete or orphan related leagues, divisions, teams, schedules, matches, scores, standings, and roster records depending on database relationships.",
+    });
 
     if (!ok) return;
 
@@ -152,9 +154,10 @@ export default function LeaguesPage() {
   }
 
   async function deleteLeague(id) {
-    const ok = confirm(
-      "Delete this league and all related divisions/teams?"
-    );
+    const ok = confirmDeleteAction({
+      title: "Delete this league?",
+      details: "This may delete or orphan related divisions, teams, schedules, matches, scores, standings, and roster records depending on database relationships.",
+    });
 
     if (!ok) return;
 

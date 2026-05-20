@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function MatchesPage() {
   const router = useRouter();
@@ -193,7 +194,10 @@ export default function MatchesPage() {
   }
 
   async function deleteMatch(matchId) {
-    const ok = confirm("Delete this match?");
+    const ok = confirmDeleteAction({
+      title: "Delete this match?",
+      details: "This will delete the match plus generated match lines and individual game score rows. Any entered scores, DUPR export readiness, and standings impact for this match will be lost.",
+    });
 
     if (!ok) return;
 

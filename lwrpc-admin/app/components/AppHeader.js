@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
+import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function AppHeader({
   title = "LWR PC League Management System",
@@ -288,9 +289,11 @@ export default function AppHeader({
                 </button>
 
                 <div className="mt-5 text-center text-[11px] leading-relaxed text-slate-400">
-                  {"\u{00A9}"} {new Date().getFullYear()} Lakewood Ranch Pickleball Club.
+                  {"\u{00A9}"} {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club.
                   <br />
                   All rights reserved.
+                  <br />
+                  Version {APP_VERSION}
                 </div>
               </>
             ) : (
@@ -399,9 +402,11 @@ export default function AppHeader({
             </button>
 
             <div className="mt-6 text-center text-[11px] leading-relaxed text-slate-400">
-              {"\u{00A9}"} {new Date().getFullYear()} Lakewood Ranch Pickleball Club.
+              {"\u{00A9}"} {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club.
               <br />
               All rights reserved.
+              <br />
+              Version {APP_VERSION}
             </div>
           </div>
         </div>

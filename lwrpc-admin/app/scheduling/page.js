@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function SchedulingPage() {
   const router = useRouter();
@@ -31,6 +32,7 @@ export default function SchedulingPage() {
   const [defaultMatchDay, setDefaultMatchDay] = useState("");
   const [defaultMatchTime, setDefaultMatchTime] = useState("");
   const [courtsNeededPerMatch, setCourtsNeededPerMatch] = useState("4");
+  const [actualScheduleWeeks, setActualScheduleWeeks] = useState("");
   const [everyOtherWeek, setEveryOtherWeek] = useState(false);
   const [allowByes, setAllowByes] = useState(true);
   const [notes, setNotes] = useState("");
@@ -172,6 +174,7 @@ export default function SchedulingPage() {
       default_match_day: defaultMatchDay || null,
       default_match_time: defaultMatchTime || null,
       courts_needed_per_match: Number(courtsNeededPerMatch || 1),
+      actual_schedule_weeks: Number(actualScheduleWeeks || getSeasonWeeks(seasonStart, seasonEnd) || 0) || null,
       every_other_week: everyOtherWeek,
       allow_byes: allowByes,
       schedule_status: "draft",
@@ -255,6 +258,7 @@ export default function SchedulingPage() {
     setDefaultMatchDay(setting.default_match_day || "");
     setDefaultMatchTime(setting.default_match_time || "");
     setCourtsNeededPerMatch(String(setting.courts_needed_per_match || 4));
+    setActualScheduleWeeks(String(setting.actual_schedule_weeks || getSeasonWeeks(setting.season_start_date, setting.season_end_date) || ""));
     setEveryOtherWeek(setting.every_other_week === true);
     setAllowByes(setting.allow_byes !== false);
     setNotes(setting.notes || "");
@@ -262,7 +266,10 @@ export default function SchedulingPage() {
   }
 
   async function deleteSetting(settingId) {
-    if (!confirm("Delete this schedule setting?")) return;
+    if (!confirmDeleteAction({
+      title: "Delete this schedule setting?",
+      details: "This deletes the saved schedule generation settings only. Existing generated matches are not deleted, but you will lose this reusable scheduling setup.",
+    })) return;
 
     const { error } = await supabase
       .from("league_schedule_settings")
@@ -288,7 +295,10 @@ export default function SchedulingPage() {
   }
 
   async function deleteAvailability(rowId) {
-    if (!confirm("Delete this court unavailability / blackout record?")) return;
+    if (!confirmDeleteAction({
+      title: "Delete this court unavailability / blackout record?",
+      details: "This removes the court availability restriction. Future generated schedules may use this location/date/time again.",
+    })) return;
 
     const { error } = await supabase
       .from("location_court_availability")
@@ -311,7 +321,10 @@ export default function SchedulingPage() {
   }
 
   async function deleteLeagueBlackout(id) {
-    if (!confirm("Delete this league blackout date?")) return;
+    if (!confirmDeleteAction({
+      title: "Delete this league blackout date?",
+      details: "This removes the blackout restriction. Future generated schedules may place matches on this date again.",
+    })) return;
 
     const { error } = await supabase
       .from("league_blackout_dates")
@@ -333,6 +346,7 @@ export default function SchedulingPage() {
     setDefaultMatchDay("");
     setDefaultMatchTime("");
     setCourtsNeededPerMatch("4");
+    setActualScheduleWeeks("");
     setEveryOtherWeek(false);
     setAllowByes(true);
     setNotes("");
@@ -597,12 +611,14 @@ export default function SchedulingPage() {
       if (!ok) return;
     }
 
-    if (!confirm(`Generate season schedule for ${divisionTeams.length} teams?\n\nCourts needed per match: ${courtsNeeded}`)) return;
+    const scheduleWeekCount = Number(setting.actual_schedule_weeks || getSeasonWeeks(setting.season_start_date, setting.season_end_date) || 0);
+
+    if (!confirm(`Generate season schedule for ${divisionTeams.length} teams?\n\nActual weeks to schedule: ${scheduleWeekCount || "Full round robin"}\nCourts needed per match: ${courtsNeeded}`)) return;
 
     setIsGeneratingSchedule(true);
 
     try {
-      const rounds = generateRoundRobin(divisionTeams);
+      const rounds = generateRoundRobin(divisionTeams).slice(0, scheduleWeekCount || undefined);
       const rowsToInsert = [];
       const warnings = [];
       const byeRows = [];
@@ -673,7 +689,7 @@ export default function SchedulingPage() {
 
           const homeCourtCheck = getRemainingCourts(homeLocationId, matchDate, setting.default_match_time, courtsNeeded, rowsToInsert);
 
-          if (homeCourtCheck.remainingCourts < courtsNeeded) {
+          if (homeCourtCheck.remainingCourts < courtsNeeded && homeCourtCheck.isBlackout) {
             if (!awayLocationId) {
               warnings.push(`${awayTeam?.name || "Away Team"} has no home location for possible swap.`);
               return;
@@ -689,6 +705,8 @@ export default function SchedulingPage() {
               warnings.push(`${homeTeam?.name || "Home team"} and ${awayTeam?.name || "away team"} do not have enough courts on ${matchDate}.`);
               return;
             }
+          } else if (homeCourtCheck.remainingCourts < courtsNeeded) {
+            warnings.push(`${homeTeam?.name || "Home team"} vs ${awayTeam?.name || "away team"} overbooks ${homeTeam?.locations?.name || "the home location"} on ${matchDate}. Review this in Schedule Editor.`);
           }
 
           rowsToInsert.push({
@@ -762,7 +780,10 @@ export default function SchedulingPage() {
       return;
     }
 
-    if (!confirm(`Delete all scheduled matches for this league/division/season?\n\n${setting.name || "Unnamed Schedule"}\n\nThis will also delete related match lines.`)) return;
+    if (!confirmDeleteAction({
+      title: `Delete all scheduled matches for ${setting.name || "Unnamed Schedule"}?`,
+      details: "This will find matches for this league/division/season window and then ask for final confirmation after counting them. It will delete matches, match lines, game score rows, and related bye rows.",
+    })) return;
 
     let query = supabase
       .from("matches")
@@ -779,8 +800,10 @@ export default function SchedulingPage() {
     const matchIds = (matchesToDelete || []).map((match) => match.id);
     if (matchIds.length === 0) return alert("No matches found for this league/division/season.");
 
-    const confirmText = prompt(`This will delete ${matchIds.length} match(es).\n\nType DELETE to confirm.`);
-    if (confirmText !== "DELETE") return;
+    if (!confirmDeleteAction({
+      title: `Delete ${matchIds.length} generated match(es)?`,
+      details: "This will delete the selected generated matches, match lines, game score rows, and related bye rows. Entered players, scores, verification status, and standings impact for those matches will be lost.",
+    })) return;
 
     const { data: linesToDelete, error: findLineError } = await supabase
       .from("match_lines")
@@ -900,17 +923,48 @@ export default function SchedulingPage() {
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div>
                     <FieldLabel label="Season Start" />
-                    <input type="date" value={seasonStart} onChange={(e) => setSeasonStart(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" />
+                    <input
+                      type="date"
+                      value={seasonStart}
+                      onChange={(e) => {
+                        setSeasonStart(e.target.value);
+                        setActualScheduleWeeks("");
+                      }}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    />
                   </div>
                   <div>
                     <FieldLabel label="Season End" />
-                    <input type="date" value={seasonEnd} onChange={(e) => setSeasonEnd(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" />
+                    <input
+                      type="date"
+                      value={seasonEnd}
+                      onChange={(e) => {
+                        setSeasonEnd(e.target.value);
+                        setActualScheduleWeeks("");
+                      }}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    />
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 p-4">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Season Length</div>
-                  <div className="mt-1 text-2xl font-bold text-slate-900">{seasonWeeksLabel(seasonStart, seasonEnd)}</div>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div className="rounded-xl bg-slate-50 p-4">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Season Length</div>
+                    <div className="mt-1 text-2xl font-bold text-slate-900">{seasonWeeksLabel(seasonStart, seasonEnd)}</div>
+                  </div>
+                  <div>
+                    <FieldLabel label="Actual Weeks To Schedule" />
+                    <input
+                      type="number"
+                      min="1"
+                      value={actualScheduleWeeks || Number(getSeasonWeeks(seasonStart, seasonEnd) || "") || ""}
+                      onChange={(e) => setActualScheduleWeeks(e.target.value)}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    />
+                    <p className="mt-2 text-xs text-slate-500">
+                      Defaults to Season Length. Override this when blackout weeks should not count as playable weeks.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -969,6 +1023,7 @@ export default function SchedulingPage() {
                     <Detail label="Division" value={setting.divisions?.name || ""} />
                     <Detail label="Season" value={`${setting.season_start_date || ""} - ${setting.season_end_date || ""}`} />
                     <Detail label="Season Length" value={seasonWeeksLabel(setting.season_start_date, setting.season_end_date)} />
+                    <Detail label="Actual Weeks" value={setting.actual_schedule_weeks || getSeasonWeeks(setting.season_start_date, setting.season_end_date) || ""} />
                     <Detail label="Match Day" value={dayName(setting.default_match_day)} />
                     <Detail label="Match Time" value={setting.default_match_time || ""} />
                     <Detail label="Frequency" value={setting.every_other_week ? "Every Other Week" : "Weekly"} />

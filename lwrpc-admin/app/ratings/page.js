@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 const PAGE_SIZE = 100;
 
@@ -220,17 +221,12 @@ export default function RatingsPage() {
       (rating) => rating.season_id === selectedSeason
     ).length;
 
-    const ok = confirm(
-      `Delete all ${seasonRatingCount} rating record(s) for ${seasonName}? This cannot be undone.`
-    );
+    const ok = confirmDeleteAction({
+      title: `Delete all ${seasonRatingCount} rating record(s) for ${seasonName}?`,
+      details: "This removes the imported season rating records used for roster checks, match setup rating totals, and division eligibility. You would need to re-import ratings to restore them.",
+    });
 
     if (!ok) return;
-
-    const typed = prompt(
-      `Type DELETE to permanently remove all ratings for ${seasonName}.`
-    );
-
-    if (typed !== "DELETE") return;
 
     setIsDeletingSeasonRatings(true);
 

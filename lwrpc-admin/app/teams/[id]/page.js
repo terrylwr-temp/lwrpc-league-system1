@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
 import { hasRole } from "../../lib/permissions";
+import { confirmDeleteAction } from "../../lib/confirmDelete";
 import {
   filterHistoryRows,
   formatDate,
@@ -523,9 +524,10 @@ function getAverageTeamRating() {
       return;
     }
 
-    const ok = confirm(
-      "Remove player from roster?"
-    );
+    const ok = confirmDeleteAction({
+      title: "Remove this player from the roster?",
+      details: "This deletes the roster membership record. It does not delete the member, but it may affect captain match setup, roster eligibility, and future lineup selections.",
+    });
 
     if (!ok) return;
 

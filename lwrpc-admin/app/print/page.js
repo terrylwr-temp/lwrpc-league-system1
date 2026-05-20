@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 const PRINT_PAYLOAD_KEY = "lwrpc-print-payload";
 
@@ -41,7 +42,7 @@ export default function PrintPage() {
         @page {
           margin: 0.65in 0.55in 0.85in;
           @bottom-left {
-            content: "© ${new Date().getFullYear()} Lakewood Ranch Pickleball Club. All rights reserved.";
+            content: "© ${COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club. All rights reserved. Version ${APP_VERSION}.";
             font-family: Arial, sans-serif;
             font-size: 9px;
             color: #475569;
@@ -98,7 +99,7 @@ export default function PrintPage() {
       <div dangerouslySetInnerHTML={{ __html: payload.body || "" }} />
 
       <footer className="print-footer">
-        <span>© {new Date().getFullYear()} Lakewood Ranch Pickleball Club. All rights reserved.</span>
+        <span>© {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club. All rights reserved. Version {APP_VERSION}.</span>
         <span>Page <span className="page-number" /></span>
       </footer>
     </main>

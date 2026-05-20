@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function LocationsPage() {
   const router = useRouter();
@@ -79,9 +80,10 @@ export default function LocationsPage() {
   }
 
   async function deleteLocation(id) {
-    const ok = confirm(
-      "Delete this location? Be careful if teams, matches, members, or court availability records are connected to it."
-    );
+    const ok = confirmDeleteAction({
+      title: "Delete this location?",
+      details: "This can affect teams, matches, members, court availability, blackout records, and schedules connected to this location. If references still exist, the database may reject the delete.",
+    });
 
     if (!ok) return;
 
@@ -118,6 +120,15 @@ export default function LocationsPage() {
     );
 
     if (!ok) return;
+
+    if (deleteOldLocation) {
+      const deleteOk = confirmDeleteAction({
+        title: `Delete old location "${fromLocation?.name || "selected location"}" after merge?`,
+        details: `Connected records will be moved to "${toLocation?.name || "the target location"}" first, then the old location record will be deleted. If any references remain, the database may reject the delete.`,
+      });
+
+      if (!deleteOk) return;
+    }
 
     setIsMerging(true);
 

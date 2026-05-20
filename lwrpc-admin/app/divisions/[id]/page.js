@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { supabase } from "../../lib/auth";
+import { confirmDeleteAction } from "../../lib/confirmDelete";
 
 const GLOBAL_DEFAULT_LINES_KEY = "lwrpc-default-lines-config";
 
@@ -76,7 +77,7 @@ export default function DivisionDetailPage() {
     if (localDefaults.length > 0) {
       return {
         lines: localDefaults,
-        label: "shared default line set",
+        label: "shared default game line set",
       };
     }
 
@@ -114,7 +115,7 @@ export default function DivisionDetailPage() {
 
     return {
       lines: linesConfig,
-      label: `shared default line set from ${divisionWithDefaults.name}`,
+        label: `shared default game line set from ${divisionWithDefaults.name}`,
     };
   }
 
@@ -405,7 +406,10 @@ export default function DivisionDetailPage() {
   }
 
   async function deleteTeam(lineId) {
-    const ok = confirm("Delete this configured line?");
+    const ok = confirmDeleteAction({
+      title: "Delete this configured game line?",
+      details: "This removes the configured game line from the division and default game line set. Existing generated matches may still reference older lines, and future schedules may be generated differently.",
+    });
     if (!ok) return;
 
     if (isDatabaseId(lineId)) {
@@ -429,7 +433,7 @@ export default function DivisionDetailPage() {
   async function saveConfiguredLinesAsDefault() {
     if (lines.length === 0) {
       const okToClear = confirm(
-        "There are no configured lines. Clear the saved default line set for this division?"
+        "There are no configured game lines. Clear the saved default game line set for this division?"
       );
 
       if (!okToClear) return;
@@ -440,7 +444,7 @@ export default function DivisionDetailPage() {
     }
 
     const ok = confirm(
-      `Save all ${lines.length} configured lines as the default line set for this division?`
+      `Save all ${lines.length} configured game lines as the default game line set for this division?`
     );
 
     if (!ok) return;
@@ -471,9 +475,9 @@ export default function DivisionDetailPage() {
     const count = sourceDefaults.length || division.number_of_lines || 3;
     const sourceLabel =
       sourceDefaults === configuredDefaults
-        ? "currently configured lines"
+        ? "currently configured game lines"
         : savedDefaults.length > 0
-          ? "saved default line set"
+          ? "saved default game line set"
           : sharedDefaults.lines.length > 0
             ? sharedDefaults.label
           : "division settings";
@@ -482,8 +486,8 @@ export default function DivisionDetailPage() {
       .filter((lineId) => isDatabaseId(lineId));
     const actionLabel =
       lines.length > 0
-        ? `Replace the ${lines.length} currently configured lines with ${count} lines from the ${sourceLabel}?`
-        : `Generate ${count} default lines from the ${sourceLabel}?`;
+        ? `Replace the ${lines.length} currently configured game lines with ${count} game lines from the ${sourceLabel}?`
+        : `Generate ${count} default game lines from the ${sourceLabel}?`;
 
     const ok = confirm(
       `${actionLabel}${
@@ -517,6 +521,14 @@ export default function DivisionDetailPage() {
           }));
 
     if (existingLineIds.length > 0) {
+      const deleteOk = confirmDeleteAction({
+        title: "Replace this division's configured game lines?",
+        details:
+          "This will delete the existing configured game-line rows for this division and recreate them from the selected defaults. Existing generated matches are checked first and will block the replacement if they already use these game lines.",
+      });
+
+      if (!deleteOk) return;
+
       const { data: usedLines, error: usedLinesError } = await supabase
         .from("match_lines")
         .select("id")
@@ -530,7 +542,7 @@ export default function DivisionDetailPage() {
 
       if ((usedLines || []).length > 0) {
         alert(
-          "These configured lines are already used by generated matches. Delete or regenerate the schedule before replacing this division's lines."
+          "These configured game lines are already used by generated matches. Delete or regenerate the schedule before replacing this division's game lines."
         );
         return;
       }
@@ -608,8 +620,8 @@ export default function DivisionDetailPage() {
       <main className="min-h-screen bg-slate-100 p-6">
         <div className="mx-auto max-w-6xl">
           <AppHeader
-            title="Configure Lines"
-            subtitle="Manage division line setup, scoring, and default line sets."
+            title="Configure Game Lines"
+            subtitle="Manage division game line setup, scoring, and default game line sets."
           />
 
           <div className="rounded-2xl bg-white p-6 shadow">
@@ -624,8 +636,8 @@ export default function DivisionDetailPage() {
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-6xl">
         <AppHeader
-          title="Configure Lines"
-          subtitle={`${division.name} line setup, scoring, and default line sets.`}
+          title="Configure Game Lines"
+          subtitle={`${division.name} game line setup, scoring, and default game line sets.`}
         />
 
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -642,7 +654,7 @@ export default function DivisionDetailPage() {
             onClick={generateDefaultTeams}
             className="rounded-xl bg-blue-700 px-4 py-2 font-semibold text-white hover:bg-blue-800"
           >
-            Generate Default Lines
+            Generate Default Game Lines
           </button>
 
           <button
@@ -650,7 +662,7 @@ export default function DivisionDetailPage() {
             onClick={saveConfiguredLinesAsDefault}
             className="rounded-xl bg-green-700 px-4 py-2 font-semibold text-white hover:bg-green-800"
           >
-            Save Configured Lines as Default
+            Save Configured Game Lines as Default
           </button>
         </div>
 
@@ -729,7 +741,7 @@ export default function DivisionDetailPage() {
                 <span>
                   <span className="block font-medium text-slate-700">Post this line to DUPR</span>
                   <span className="mt-1 block text-xs text-slate-500">
-                    Enable this if scores from this configured line should be included in DUPR exports.
+                    Enable this if scores from this configured game line should be included in DUPR exports.
                   </span>
                 </span>
               </label>
@@ -827,7 +839,7 @@ export default function DivisionDetailPage() {
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
-            <h2 className="text-xl font-bold text-slate-900">Configured Lines</h2>
+            <h2 className="text-xl font-bold text-slate-900">Configured Game Lines</h2>
 
             <div className="mt-4 space-y-3">
               {lines.map((line) => (
@@ -878,7 +890,7 @@ export default function DivisionDetailPage() {
 
               {lines.length === 0 && (
                 <div className="text-slate-500">
-                  No lines configured yet. Use Generate Default Lines or add game lines manually.
+                  No game lines configured yet. Use Generate Default Game Lines or add game lines manually.
                 </div>
               )}
             </div>

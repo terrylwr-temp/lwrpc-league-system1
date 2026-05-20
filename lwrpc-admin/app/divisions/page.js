@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function DivisionsPage() {
   const router = useRouter();
@@ -140,7 +141,10 @@ export default function DivisionsPage() {
   }
 
   async function deleteDivision(id) {
-    const ok = confirm("Delete this division? Teams may also be removed.");
+    const ok = confirmDeleteAction({
+      title: "Delete this division?",
+      details: "This may delete or orphan teams, schedules, matches, scores, standings, configured game lines, and roster records tied to this division.",
+    });
 
     if (!ok) return;
 
@@ -656,7 +660,7 @@ export default function DivisionsPage() {
                               onClick={() => router.push(`/divisions/${division.id}`)}
                               className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
                             >
-                              Configure Lines
+                              Configure Game Lines
                             </button>
 
                             <button

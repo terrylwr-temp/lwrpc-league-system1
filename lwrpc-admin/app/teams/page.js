@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function TeamsPage() {
   const router = useRouter();
@@ -345,9 +346,10 @@ export default function TeamsPage() {
   }
 
   async function deleteTeam(team) {
-    const ok = confirm(
-      `Delete team "${team.name}"? This may also remove related roster and match references depending on your database rules.`
-    );
+    const ok = confirmDeleteAction({
+      title: `Delete team "${team.name}"?`,
+      details: "This may delete or orphan roster records, schedule entries, matches, scores, standings, and captain assignments depending on database relationships. If the team is used by matches, the database may reject the delete.",
+    });
 
     if (!ok) return;
 

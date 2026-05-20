@@ -7,6 +7,7 @@ import { requireRole, supabase } from "../../lib/auth";
 import LoadingScreen from "../../components/LoadingScreen";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
+import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../../lib/notificationPreferences";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
@@ -117,6 +118,7 @@ setUserRole(roleData?.role || "player");
       last_name: memberData.last_name || "",
       email: memberData.email || "",
       phone: formatPhoneNumberForStorage(memberData.phone),
+      notification_preference: memberData.notification_preference || NOTIFICATION_EMAIL,
       club_location: memberData.club_location || "",
       dupr_id: memberData.dupr_id || "",
       renewal_date: memberData.renewal_date || "",
@@ -184,6 +186,7 @@ setUserRole(roleData?.role || "player");
         last_name: form.last_name || null,
         email: normalizedEmail || null,
         phone: formatPhoneNumberForStorage(form.phone) || null,
+        notification_preference: form.notification_preference || NOTIFICATION_EMAIL,
         club_location: form.club_location || null,
         dupr_id: form.dupr_id || null,
         renewal_date: form.renewal_date || null,
@@ -205,6 +208,7 @@ setUserRole(roleData?.role || "player");
       last_name: data.last_name || "",
       email: data.email || "",
       phone: formatPhoneNumberForStorage(data.phone),
+      notification_preference: data.notification_preference || NOTIFICATION_EMAIL,
       club_location: data.club_location || "",
       dupr_id: data.dupr_id || "",
       renewal_date: data.renewal_date || "",
@@ -218,6 +222,7 @@ setUserRole(roleData?.role || "player");
       last_name: member.last_name || "",
       email: member.email || "",
       phone: formatPhoneNumberForStorage(member.phone),
+      notification_preference: member.notification_preference || NOTIFICATION_EMAIL,
       club_location: member.club_location || "",
       dupr_id: member.dupr_id || "",
       renewal_date: member.renewal_date || "",
@@ -377,6 +382,13 @@ async function updateUserRole(newRole) {
 
                     <div>
                       <span className="font-semibold text-slate-800">
+                        League Notifications:
+                      </span>{" "}
+                      {notificationPreferenceLabel(member.notification_preference)}
+                    </div>
+
+                    <div>
+                      <span className="font-semibold text-slate-800">
                         Club / Home Community:
                       </span>{" "}
                       {member.club_location || "—"}
@@ -469,6 +481,23 @@ async function updateUserRole(newRole) {
                         placeholder="(999) 999-9999"
                         className="w-full rounded-xl border border-slate-300 px-4 py-3"
                       />
+                    </div>
+
+                    <div>
+                      <label className="mb-1 block text-sm font-semibold text-slate-700">
+                        League Notifications
+                      </label>
+                      <select
+                        value={form.notification_preference || NOTIFICATION_EMAIL}
+                        onChange={(e) => updateForm("notification_preference", e.target.value)}
+                        className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                      >
+                        <option value={NOTIFICATION_EMAIL}>Email</option>
+                        <option value={NOTIFICATION_TEXT}>Text</option>
+                      </select>
+                      <p className="mt-1 text-xs text-slate-500">
+                        System reminders and match notices will use this method when available.
+                      </p>
                     </div>
 
 <div>

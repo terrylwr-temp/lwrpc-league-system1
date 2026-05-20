@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { splitNotificationRecipients } from "../lib/notificationPreferences";
 
 const TEMPLATE_KEY = "score_reminder";
 const DUPR_EXPORT_HEADERS = [
@@ -117,21 +118,24 @@ export default function ScoringPage() {
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_1:members!teams_co_captain_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_2:members!teams_co_captain_2_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           )
         ),
         away_team:teams!matches_away_team_id_fkey (
@@ -142,21 +146,24 @@ export default function ScoringPage() {
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_1:members!teams_co_captain_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_2:members!teams_co_captain_2_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           )
         )
       `)
@@ -256,17 +263,16 @@ export default function ScoringPage() {
       return;
     }
 
-    const recipients = selectedMatches.flatMap((match) => captainContacts(match))
-      .map((contact) => contact.email)
-      .filter(Boolean);
-    const emails = [...new Set(recipients)];
+    const { emails, phones } = splitNotificationRecipients(
+      selectedMatches.flatMap((match) => captainContacts(match))
+    );
 
-    if (emails.length === 0) {
-      alert("No captain email addresses were found for the selected matches.");
+    if (emails.length === 0 && phones.length === 0) {
+      alert("No captain email addresses or text phone numbers were found for the selected matches based on member notification preferences.");
       return;
     }
 
-    const ok = confirm(`Send score reminder email to ${emails.length} captain/co-captain email address${emails.length === 1 ? "" : "es"}?`);
+    const ok = confirm(`Send score reminder to ${emails.length} email recipient${emails.length === 1 ? "" : "s"} and ${phones.length} text recipient${phones.length === 1 ? "" : "s"}?`);
     if (!ok) return;
 
     setSending(true);
@@ -281,9 +287,11 @@ export default function ScoringPage() {
       },
       body: JSON.stringify({
         emails,
+        phones,
         subject: emailSubject,
         text,
         html,
+        smsBody: text,
       }),
     });
 
@@ -295,7 +303,7 @@ export default function ScoringPage() {
       return;
     }
 
-    setLastSendResult(`Reminder sent to ${emails.length} email address${emails.length === 1 ? "" : "es"}.`);
+    setLastSendResult(`Reminder sent to ${emails.length} email recipient${emails.length === 1 ? "" : "s"} and ${phones.length} text recipient${phones.length === 1 ? "" : "s"}.`);
   }
 
   async function exportForDupr() {
@@ -692,6 +700,7 @@ function captainContacts(match) {
       name: formatMemberName(member),
       email: member.email || "",
       phone: member.phone || "",
+      notification_preference: member.notification_preference || "email",
     }))
     .filter((contact, index, all) =>
       contact.id && all.findIndex((item) => item.id === contact.id) === index

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { formatPhoneNumberForStorage } from "../lib/phone";
+import { splitNotificationRecipients } from "../lib/notificationPreferences";
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
@@ -203,21 +204,24 @@ export default function CaptainDashboardPage() {
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_1:members!teams_co_captain_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_2:members!teams_co_captain_2_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           )
         ),
         away_team:teams!matches_away_team_id_fkey (
@@ -228,21 +232,24 @@ export default function CaptainDashboardPage() {
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_1:members!teams_co_captain_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           ),
           co_captain_2:members!teams_co_captain_2_member_id_fkey (
             id,
             first_name,
             last_name,
             email,
-            phone
+            phone,
+            notification_preference
           )
         ),
         winning_team:teams!matches_winning_team_id_fkey (
@@ -697,11 +704,9 @@ export default function CaptainDashboardPage() {
         ? setupMatch.away_team
         : setupMatch.home_team;
 
-    const recipientEmails = captainContacts(opponentTeam)
-      .map((member) => member.email)
-      .filter(Boolean);
+    const { emails, phones } = splitNotificationRecipients(captainContacts(opponentTeam));
 
-    if (recipientEmails.length === 0) {
+    if (emails.length === 0 && phones.length === 0) {
       return;
     }
 
@@ -764,10 +769,12 @@ export default function CaptainDashboardPage() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        emails: recipientEmails,
+        emails,
+        phones,
         subject,
         text,
         html,
+        smsBody: text,
       }),
     });
 
@@ -792,21 +799,24 @@ export default function CaptainDashboardPage() {
           first_name,
           last_name,
           email,
-          phone
+          phone,
+          notification_preference
         ),
         co_captain_1:members!teams_co_captain_member_id_fkey (
           id,
           first_name,
           last_name,
           email,
-          phone
+          phone,
+          notification_preference
         ),
         co_captain_2:members!teams_co_captain_2_member_id_fkey (
           id,
           first_name,
           last_name,
           email,
-          phone
+          phone,
+          notification_preference
         )
       `)
       .eq("division_id", team.division_id)

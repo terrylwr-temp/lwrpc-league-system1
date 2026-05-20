@@ -25,6 +25,19 @@ alter table public.match_lines
 alter table public.leagues
   add column if not exists rosters_locked boolean not null default false;
 
+alter table public.members
+  add column if not exists notification_preference text not null default 'email';
+
+alter table public.league_schedule_settings
+  add column if not exists actual_schedule_weeks integer;
+
+alter table public.members
+  drop constraint if exists members_notification_preference_check;
+
+alter table public.members
+  add constraint members_notification_preference_check
+  check (notification_preference in ('email', 'text'));
+
 create table if not exists public.notification_templates (
   id uuid primary key default gen_random_uuid(),
   template_key text not null unique,

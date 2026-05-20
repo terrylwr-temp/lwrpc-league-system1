@@ -88,6 +88,8 @@ Score entry is restricted to captains assigned to the match. Match score rows us
 
 Teams & Rosters supports assigning captains/co-captains from outside the team's home community through an explicit all-communities toggle. Team lists are grouped by league/division and start collapsed as accordions.
 
+Standings points are calculated from configured game line `team_win_points` multiplied by games won on each line, rather than only from match-level win/loss/tie points. The visible app version is centralized in `lwrpc-admin/app/lib/version.js` and displayed near the copyright footer.
+
 Player Dashboard uses inline panels for play history, division standings, and upcoming matches. Team summaries appear above the dashboard action buttons and include captain/co-captain contact details. Play history includes top-level games/wins/losses totals plus individual game scores when entered.
 
 Phone numbers entered or imported through member workflows are normalized to `(999) 999-9999` formatting when enough digits are present, with extensions preserved as `x123`.
@@ -182,3 +184,6 @@ As of 2026-05-20:
 - Use existing app patterns before introducing new abstractions.
 - Avoid service-role credentials in client components.
 - Keep changes scoped and document system-level decisions here.
+- User-facing delete actions now use the shared `app/lib/confirmDelete.js` helper, which requires typing `DELETE` and explains the affected records or risks before destructive actions proceed.
+- Members now have a `notification_preference` (`email` or `text`) used by captain match setup notices, score-entry notifications, and scoring reminders. Schedule settings also support `actual_schedule_weeks`, and Schedule Editor highlights court overbooking / blackout issues in red with a home-away counts popup.
+- Footer copyright rendering uses the centralized `COPYRIGHT_YEAR` from `app/lib/version.js` so client-rendered pages do not call `new Date().getFullYear()` during hydration.
