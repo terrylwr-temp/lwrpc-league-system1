@@ -17,6 +17,7 @@ export default function LeaguesPage() {
 
   const [leagueName, setLeagueName] = useState("");
   const [selectedSeason, setSelectedSeason] = useState("");
+  const [rostersLocked, setRostersLocked] = useState(false);
 
   const [editingSeasonId, setEditingSeasonId] = useState(null);
   const [editingLeagueId, setEditingLeagueId] = useState(null);
@@ -102,6 +103,7 @@ export default function LeaguesPage() {
         .update({
           name: leagueName,
           season_id: selectedSeason,
+          rosters_locked: rostersLocked,
           updated_at: new Date().toISOString()
         })
         .eq("id", editingLeagueId);
@@ -115,7 +117,8 @@ export default function LeaguesPage() {
         .from("leagues")
         .insert({
           name: leagueName,
-          season_id: selectedSeason
+          season_id: selectedSeason,
+          rosters_locked: rostersLocked
         });
 
       if (error) {
@@ -181,6 +184,7 @@ export default function LeaguesPage() {
 
     setLeagueName(league.name || "");
     setSelectedSeason(league.season_id || "");
+    setRostersLocked(league.rosters_locked === true);
   }
 
   function clearSeasonForm() {
@@ -196,6 +200,7 @@ export default function LeaguesPage() {
 
     setLeagueName("");
     setSelectedSeason("");
+    setRostersLocked(false);
   }
 
   useEffect(() => {
@@ -387,6 +392,24 @@ export default function LeaguesPage() {
 
               </select>
 
+              <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={rostersLocked}
+                  onChange={e =>
+                    setRostersLocked(e.target.checked)
+                  }
+                  className="mt-1"
+                />
+
+                <span>
+                  Lock team rosters
+                  <span className="mt-1 block text-xs font-normal text-slate-500">
+                    Captains cannot add or remove roster players while locked. League Managers and Commissioners can still modify rosters.
+                  </span>
+                </span>
+              </label>
+
               <div className="flex gap-3">
 
                 <button
@@ -525,6 +548,16 @@ export default function LeaguesPage() {
                         Season:
                         {" "}
                         {league.seasons?.name || "—"}
+                      </div>
+
+                      <div className="mt-2">
+                        <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                          league.rosters_locked
+                            ? "bg-red-100 text-red-800"
+                            : "bg-green-100 text-green-800"
+                        }`}>
+                          Rosters {league.rosters_locked ? "Locked" : "Open"}
+                        </span>
                       </div>
 
                     </div>

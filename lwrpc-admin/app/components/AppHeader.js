@@ -21,14 +21,14 @@ export default function AppHeader({
   const [openGroups, setOpenGroups] = useState({});
 
   const primaryLinks = useMemo(() => [
-    { label: "Dashboard", path: "/player-dashboard", role: "player", icon: "\u{1F3E0}" },
-    { label: "Admin Dashboard", path: "/", role: "league_manager", icon: "\u{2699}\u{FE0F}" },
+    { label: "Player Dashboard", path: "/player-dashboard", role: "player", icon: "\u{1F3E0}" },
     {
       label: "Captain Dashboard",
       path: "/captain-dashboard",
       role: "captain",
       icon: "\u{1F9E2}"
-    }
+    },
+    { label: "Admin Dashboard", path: "/", role: "league_manager", icon: "\u{2699}\u{FE0F}" }
   ], []);
 
   const groups = useMemo(() => [
@@ -40,6 +40,7 @@ export default function AppHeader({
         { label: "Ratings", path: "/ratings", role: "league_manager", icon: "\u{2B50}" },
         { label: "Teams", path: "/teams", role: "captain", icon: "\u{1F3D3}" },
         { label: "Matches", path: "/matches", role: "captain", icon: "\u{1F4CB}" },
+        { label: "Scoring", path: "/scoring", role: "league_manager", icon: "\u{2705}" },
         { label: "Standings", path: "/standings", role: "player", icon: "\u{1F3C6}" }
       ]
     },

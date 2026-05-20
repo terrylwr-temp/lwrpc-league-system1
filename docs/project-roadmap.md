@@ -45,6 +45,7 @@ The app currently includes pages for:
 - Standings
 - Captain dashboard
 - Player dashboard
+- Scoring operations for league managers to review due matches, filter unverified scores, edit reminder email copy, and send score-entry reminders to captains
 
 ## Data Source
 
@@ -67,8 +68,27 @@ The app appears to use role-based navigation and access checks around:
 - `player`
 - `captain`
 - `league_manager`
+- `commissioner`
 
 Role logic lives in `lwrpc-admin/app/lib/permissions.js` and auth/session logic lives in `lwrpc-admin/app/lib/auth.js`.
+
+League setup now supports a `leagues.rosters_locked` flag. When enabled, captains can view rosters but only `league_manager` and `commissioner` roles can add or remove roster players.
+
+Scoring reminders use the existing notification route and SendGrid/Twilio helper stack. The scoring reminder email template can be stored in `notification_templates` when the schema update has been applied, with browser local storage as a fallback.
+
+Print workflows should use the generic `/print` page so print previews open on an app URL and include the LWRPC copyright/page footer inside the document. Browser print dialogs may still show their own headers/footers unless disabled by the user.
+
+Divisions now support `team_dupr_max`, a combined doubles-team rating cap based on the division rating type. This is not a full roster cap; captains are blocked from saving match setup lineups over the cap, duplicate players are blocked within a match setup, and saved lineups are checked when used in score entry.
+
+Scoring operations can export verified scores that have not yet been marked exported. Export tracking uses `matches.score_exported_at`.
+
+Captain Dashboard has a match setup workflow for upcoming matches. Captains can save doubles pairings per match line in `match_lineups`; completed setups show a status badge on match cards, opposing captains receive an email with the submitted lineup, and the match score-entry screen can then populate game players from those saved lineups.
+
+Player Dashboard uses inline panels for play history, division standings, and upcoming matches. Team summaries appear above the dashboard action buttons and include captain/co-captain contact details. Play history includes top-level games/wins/losses totals plus individual game scores when entered.
+
+Phone numbers entered or imported through member workflows are normalized to `(999) 999-9999` formatting when enough digits are present, with extensions preserved as `x123`.
+
+Member email addresses are normalized to lowercase and validated for basic email shape before manual save or import.
 
 ## Verified Status
 

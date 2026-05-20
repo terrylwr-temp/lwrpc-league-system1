@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
+import { hasRole } from "../../lib/permissions";
 import {
   filterHistoryRows,
   formatDate,
@@ -17,6 +18,7 @@ export default function TeamRosterPage() {
   const router = useRouter();
 
   const [team, setTeam] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
   const [roster, setRoster] = useState([]);
   const [members, setMembers] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -30,6 +32,7 @@ export default function TeamRosterPage() {
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
+    setCurrentUser(user);
     return !!user;
   }, [router]);
 
@@ -47,7 +50,8 @@ export default function TeamRosterPage() {
           leagues (
             id,
             name,
-            season_id
+            season_id,
+            rosters_locked
           )
         ),
         locations (
@@ -420,7 +424,15 @@ function getAverageTeamRating() {
     });
   }, [getRosterRank, roster]);
 
+  const rostersLocked = team?.divisions?.leagues?.rosters_locked === true;
+  const canModifyRoster = !rostersLocked || hasRole(currentUser?.role, "league_manager");
+
   async function addPlayer() {
+    if (!canModifyRoster) {
+      alert("Rosters are locked for this league. Only League Managers and Commissioners can modify team rosters.");
+      return;
+    }
+
     if (!selectedMemberId) {
       alert("Select a player");
       return;
@@ -506,6 +518,11 @@ function getAverageTeamRating() {
   }
 
   async function removePlayer(teamMemberId) {
+    if (!canModifyRoster) {
+      alert("Rosters are locked for this league. Only League Managers and Commissioners can modify team rosters.");
+      return;
+    }
+
     const ok = confirm(
       "Remove player from roster?"
     );
@@ -657,6 +674,11 @@ function getAverageTeamRating() {
               value={team.locations?.name || "—"}
             />
 
+            <Info
+              label="Roster Status"
+              value={rostersLocked ? "Locked" : "Open"}
+            />
+
           </div>
 
         </div>
@@ -678,6 +700,12 @@ function getAverageTeamRating() {
             </div>
 
             <div className="space-y-4">
+
+              {!canModifyRoster && (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+                  Rosters are locked for this league. Contact a League Manager or Commissioner for roster changes.
+                </div>
+              )}
 
               <div>
 
@@ -750,7 +778,8 @@ function getAverageTeamRating() {
 
               <button
                 onClick={addPlayer}
-                className="w-full rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800"
+                disabled={!canModifyRoster}
+                className="w-full rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 Add Player To Team
               </button>
@@ -865,7 +894,8 @@ function getAverageTeamRating() {
 
                         <button
                           onClick={() => removePlayer(player.id)}
-                          className="rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-800 hover:bg-red-200"
+                          disabled={!canModifyRoster}
+                          className="rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                         >
                           Remove
                         </button>

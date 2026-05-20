@@ -24,12 +24,6 @@ export default function MatchesPage() {
   const [weekNumber, setWeekNumber] = useState("1");
   const [notes, setNotes] = useState("");
 
-  const [generateStartDate, setGenerateStartDate] = useState("");
-  const [generateTime, setGenerateTime] = useState("");
-  const [generateLocationId, setGenerateLocationId] = useState("");
-  const [generateStartWeek, setGenerateStartWeek] = useState("1");
-  const [isGenerating, setIsGenerating] = useState(false);
-
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
@@ -198,141 +192,6 @@ export default function MatchesPage() {
     }
   }
 
-  function generateRoundRobin(teamList) {
-    const list = [...teamList];
-
-    if (list.length % 2 === 1) {
-      list.push({
-        id: "BYE",
-        name: "BYE"
-      });
-    }
-
-    const rounds = [];
-    const teamCount = list.length;
-    const roundsNeeded = teamCount - 1;
-    const gamesPerRound = teamCount / 2;
-
-    for (let round = 0; round < roundsNeeded; round++) {
-      const games = [];
-
-      for (let i = 0; i < gamesPerRound; i++) {
-        const teamA = list[i];
-        const teamB = list[teamCount - 1 - i];
-
-        if (teamA.id !== "BYE" && teamB.id !== "BYE") {
-          const flipHomeAway = round % 2 === 1;
-
-          games.push({
-            round_number: round + 1,
-            home_team_id: flipHomeAway ? teamB.id : teamA.id,
-            away_team_id: flipHomeAway ? teamA.id : teamB.id
-          });
-        }
-      }
-
-      rounds.push(games);
-
-      const fixed = list[0];
-      const rotating = list.slice(1);
-      rotating.unshift(rotating.pop());
-      list.splice(0, list.length, fixed, ...rotating);
-    }
-
-    return rounds;
-  }
-
-  function addWeeksToDate(dateValue, weeksToAdd) {
-    const date = new Date(`${dateValue}T12:00:00`);
-    date.setDate(date.getDate() + weeksToAdd * 7);
-    return date.toISOString().slice(0, 10);
-  }
-
-  async function generateInitialSchedule() {
-    if (!selectedLeague || !selectedDivision) {
-      alert("Select a league and division first");
-      return;
-    }
-
-    if (!generateStartDate) {
-      alert("Enter a schedule start date");
-      return;
-    }
-
-    const divisionTeams = teams.filter(
-      team => team.division_id === selectedDivision
-    );
-
-    if (divisionTeams.length < 2) {
-      alert("This division needs at least 2 teams to generate a schedule");
-      return;
-    }
-
-    const existingMatches = matches.filter(
-      match => match.division_id === selectedDivision
-    );
-
-    if (existingMatches.length > 0) {
-      const ok = confirm(
-        `This division already has ${existingMatches.length} scheduled match(es).\n\nGenerate more matches anyway?`
-      );
-
-      if (!ok) return;
-    }
-
-    const ok = confirm(
-      `Generate an initial round-robin schedule for ${divisionTeams.length} teams?`
-    );
-
-    if (!ok) return;
-
-    setIsGenerating(true);
-
-    const rounds = generateRoundRobin(divisionTeams);
-    const rows = [];
-
-    rounds.forEach((roundGames, roundIndex) => {
-      const matchDate = addWeeksToDate(generateStartDate, roundIndex);
-      const week = Number(generateStartWeek || 1) + roundIndex;
-
-      roundGames.forEach(game => {
-        rows.push({
-          league_id: selectedLeague,
-          division_id: selectedDivision,
-          home_team_id: game.home_team_id,
-          away_team_id: game.away_team_id,
-          location_id: generateLocationId || null,
-          scheduled_date: matchDate,
-          scheduled_time: generateTime || null,
-          week_number: week,
-          notes: `Generated Round ${roundIndex + 1}`,
-          status: "scheduled",
-          updated_at: new Date().toISOString()
-        });
-      });
-    });
-
-    const { data: createdMatches, error } = await supabase
-      .from("matches")
-      .insert(rows)
-      .select();
-
-    if (error) {
-      alert(error.message);
-      setIsGenerating(false);
-      return;
-    }
-
-    for (const match of createdMatches || []) {
-      await generateMatchLines(match.id, selectedDivision);
-    }
-
-    setIsGenerating(false);
-    await loadData();
-
-    alert(`Generated ${createdMatches?.length || 0} matches.`);
-  }
-
   async function deleteMatch(matchId) {
     const ok = confirm("Delete this match?");
 
@@ -424,14 +283,6 @@ export default function MatchesPage() {
       team => team.division_id === selectedDivision
     );
   }, [teams, selectedDivision]);
-
-  const selectedDivisionMatchCount = useMemo(() => {
-    if (!selectedDivision) return 0;
-
-    return matches.filter(
-      match => match.division_id === selectedDivision
-    ).length;
-  }, [matches, selectedDivision]);
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -605,92 +456,6 @@ export default function MatchesPage() {
               </form>
             </div>
 
-            <div className="rounded-2xl bg-white p-6 shadow">
-              <div className="mb-4">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Generate Initial Schedule
-                </h2>
-
-                <p className="mt-1 text-sm text-slate-500">
-                  Creates one round-robin schedule for the selected league and division.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-700">
-                  <div>
-                    Teams in selected division:{" "}
-                    <span className="font-bold">{filteredTeams.length}</span>
-                  </div>
-
-                  <div>
-                    Existing matches in selected division:{" "}
-                    <span className="font-bold">{selectedDivisionMatchCount}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <FieldLabel label="First Match Date" />
-
-                  <input
-                    type="date"
-                    value={generateStartDate}
-                    onChange={e => setGenerateStartDate(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel label="Match Time" />
-
-                  <input
-                    type="time"
-                    value={generateTime}
-                    onChange={e => setGenerateTime(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                  />
-                </div>
-
-                <div>
-                  <FieldLabel label="Default Location" />
-
-                  <select
-                    value={generateLocationId}
-                    onChange={e => setGenerateLocationId(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                  >
-                    <option value="">No Default Location</option>
-
-                    {locations.map(location => (
-                      <option key={location.id} value={location.id}>
-                        {location.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <FieldLabel label="Starting Week Number" />
-
-                  <input
-                    type="number"
-                    min="1"
-                    value={generateStartWeek}
-                    onChange={e => setGenerateStartWeek(e.target.value)}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                  />
-                </div>
-
-                <button
-                  type="button"
-                  disabled={isGenerating}
-                  onClick={generateInitialSchedule}
-                  className="w-full rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800 disabled:opacity-50"
-                >
-                  {isGenerating ? "Generating..." : "Generate Initial Schedule"}
-                </button>
-              </div>
-            </div>
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">

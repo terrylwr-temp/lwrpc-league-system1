@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { formatPhoneNumberForStorage } from "../lib/phone";
 
 const PAGE_SIZE = 100;
 const CLEAN_MEMBERS_BATCH_SIZE = 25;
@@ -56,36 +57,12 @@ export default function MembersPage() {
     alert("Your members table currently does not have an active/status field yet.");
   }
 
-  function cleanPhoneNumber(value) {
-    const raw = String(value || "").trim();
-
-    if (!raw) return "";
-
-    const extensionMatch = raw.match(/(?:ext\.?|x)\s*(\d+)$/i);
-    const extension = extensionMatch?.[1] || "";
-    const withoutExtension = extensionMatch
-      ? raw.slice(0, extensionMatch.index).trim()
-      : raw;
-    let digits = withoutExtension.replace(/\D/g, "");
-
-    if (digits.length === 11 && digits.startsWith("1")) {
-      digits = digits.slice(1);
-    }
-
-    if (digits.length !== 10) {
-      return raw;
-    }
-
-    const formatted = `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
-    return extension ? `${formatted} x${extension}` : formatted;
-  }
-
   async function cleanMembers() {
     if (cleaningMembers) return;
 
     const updates = members
       .map((member) => {
-        const cleanedPhone = cleanPhoneNumber(member.phone);
+        const cleanedPhone = formatPhoneNumberForStorage(member.phone);
         const currentPhone = String(member.phone || "").trim();
 
         if (!currentPhone || cleanedPhone === currentPhone) {
@@ -385,7 +362,7 @@ export default function MembersPage() {
                   </td>
 
                   <td className="px-4 py-4 text-sm text-slate-700">
-                    {member.phone || "—"}
+                    {formatPhoneNumberForStorage(member.phone) || "—"}
                   </td>
 
                   <td className="px-4 py-4 text-sm text-slate-700">

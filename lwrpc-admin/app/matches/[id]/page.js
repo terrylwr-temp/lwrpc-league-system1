@@ -18,6 +18,7 @@ export default function MatchDetailPage() {
   const [awayRoster, setAwayRoster] = useState([]);
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [currentUserMember, setCurrentUserMember] = useState(null);
+  const [matchLineups, setMatchLineups] = useState([]);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -46,7 +47,7 @@ export default function MatchDetailPage() {
       .select(`
         *,
         leagues(id, name, season_id),
-        divisions(name, number_of_lines, games_per_line, rating_type),
+        divisions(name, number_of_lines, games_per_line, rating_type, team_dupr_max),
         locations(name),
         home_team:teams!matches_home_team_id_fkey(
           id,
@@ -193,6 +194,22 @@ export default function MatchDetailPage() {
       gameData = data || [];
     }
 
+    const { data: lineupData, error: lineupError } = await supabase
+      .from("match_lineups")
+      .select(`
+        *,
+        player_1:members!match_lineups_player_1_member_id_fkey(id, first_name, last_name),
+        player_2:members!match_lineups_player_2_member_id_fkey(id, first_name, last_name)
+      `)
+      .eq("match_id", id)
+      .order("line_number", { ascending: true });
+
+    if (lineupError) {
+      alert("Saved match teams require the match_lineups schema update. Run the updated Supabase SQL, then try again.");
+      setLoading(false);
+      return;
+    }
+
     let ratingData = [];
     const seasonId = matchData.leagues?.season_id;
 
@@ -216,6 +233,7 @@ export default function MatchDetailPage() {
     setHomeRoster(homeRosterData || []);
     setAwayRoster(awayRosterData || []);
     setSeasonRatings(ratingData);
+    setMatchLineups(lineupData || []);
     setGames(gameData);
     setLoading(false);
   }, [id]);
@@ -256,13 +274,21 @@ export default function MatchDetailPage() {
   }
 
   function teamDuprRating(player1, player2) {
+    const value = teamDuprRatingValue(player1, player2);
+
+    if (value === null) return "NR";
+
+    return value.toFixed(2);
+  }
+
+  function teamDuprRatingValue(player1, player2) {
     const ratings = [memberRating(player1), memberRating(player2)]
       .map((rating) => Number(rating))
       .filter((rating) => !Number.isNaN(rating));
 
-    if (ratings.length === 0) return "NR";
+    if (ratings.length === 0) return null;
 
-    return ratings.reduce((sum, rating) => sum + rating, 0).toFixed(2);
+    return ratings.reduce((sum, rating) => sum + rating, 0);
   }
   function teamSlotNumber(line) {
     return Number(line.division_lines?.line_number || line.line_number || 0);
@@ -401,6 +427,7 @@ export default function MatchDetailPage() {
 
   function lineWarnings(line) {
     const warnings = [];
+    const doublesMax = match?.divisions?.team_dupr_max;
 
     if (sameGameDuplicateLineIds.includes(line.id)) {
       warnings.push("A player is selected twice in this game.");
@@ -420,6 +447,19 @@ export default function MatchDetailPage() {
       warnings.push(
         `${[...new Set(overLimitNames)].join(", ")} selected more than the division allows.`
       );
+    }
+
+    if (doublesMax !== null && doublesMax !== undefined && doublesMax !== "") {
+      const homeRating = teamDuprRatingValue(line.home_player_1, line.home_player_2);
+      const awayRating = teamDuprRatingValue(line.away_player_1, line.away_player_2);
+
+      if (homeRating !== null && homeRating > Number(doublesMax)) {
+        warnings.push(`${match?.home_team?.name || "Home"} doubles team is over the ${ratingLabel()} maximum of ${Number(doublesMax).toFixed(2)}.`);
+      }
+
+      if (awayRating !== null && awayRating > Number(doublesMax)) {
+        warnings.push(`${match?.away_team?.name || "Away"} doubles team is over the ${ratingLabel()} maximum of ${Number(doublesMax).toFixed(2)}.`);
+      }
     }
 
     return warnings;
@@ -493,14 +533,60 @@ export default function MatchDetailPage() {
       return;
     }
 
+    const roster = field.startsWith("home_") ? homeRoster : awayRoster;
+    const selectedMember = roster.find((row) => String(row.members?.id) === String(value))?.members || null;
+    const playerObjectField = field.replace(/_id$/, "");
+
     setLines((currentLines) =>
       currentLines.map((line) =>
         lineIdsToUpdate.includes(line.id)
           ? {
               ...line,
               [field]: value || null,
+              [playerObjectField]: selectedMember,
             }
           : line
+      )
+    );
+  }
+
+  async function applySavedLineup(line, side, lineupId) {
+    if (!lineupId) return;
+
+    const lineup = matchLineups.find((item) => item.id === lineupId);
+    if (!lineup) return;
+
+    const player1Field = side === "home" ? "home_player_1_id" : "away_player_1_id";
+    const player2Field = side === "home" ? "home_player_2_id" : "away_player_2_id";
+    const roster = side === "home" ? homeRoster : awayRoster;
+    const player1 = roster.find((row) => String(row.members?.id) === String(lineup.player_1_member_id))?.members || lineup.player_1 || null;
+    const player2 = roster.find((row) => String(row.members?.id) === String(lineup.player_2_member_id))?.members || lineup.player_2 || null;
+
+    const { error } = await supabase
+      .from("match_lines")
+      .update({
+        [player1Field]: lineup.player_1_member_id || null,
+        [player2Field]: lineup.player_2_member_id || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", line.id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setLines((currentLines) =>
+      currentLines.map((row) =>
+        row.id === line.id
+          ? {
+              ...row,
+              [player1Field]: lineup.player_1_member_id || null,
+              [player2Field]: lineup.player_2_member_id || null,
+              [player1Field.replace(/_id$/, "")]: player1,
+              [player2Field.replace(/_id$/, "")]: player2,
+            }
+          : row
       )
     );
   }
@@ -576,7 +662,11 @@ export default function MatchDetailPage() {
   }
 
   async function saveCalculatedWinners(showAlert = true) {
-    if (sameGameDuplicateLineIds.length > 0 || overLineLimitPlayerIds.length > 0) {
+    if (
+      sameGameDuplicateLineIds.length > 0 ||
+      overLineLimitPlayerIds.length > 0 ||
+      displayedLines.some((line) => lineWarnings(line).length > 0)
+    ) {
       const ok = confirm(
         "Player assignment warnings are currently active for this match. Save winners anyway?"
       );
@@ -1182,11 +1272,13 @@ export default function MatchDetailPage() {
                     title={match.home_team?.name || "Home Team"}
                     teamRating={teamDuprRating(line.home_player_1, line.home_player_2)}
                     ratingLabel={ratingLabel()}
+                    savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.home_team_id))}
                     roster={homeRoster}
                     line={line}
                     player1Field="home_player_1_id"
                     player2Field="home_player_2_id"
                     updateLinePlayer={updateLinePlayer}
+                    applySavedLineup={(lineupId) => applySavedLineup(line, "home", lineupId)}
                     rosterOptionName={rosterOptionLabel}
                   />
 
@@ -1194,11 +1286,13 @@ export default function MatchDetailPage() {
                     title={match.away_team?.name || "Away Team"}
                     teamRating={teamDuprRating(line.away_player_1, line.away_player_2)}
                     ratingLabel={ratingLabel()}
+                    savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.away_team_id))}
                     roster={awayRoster}
                     line={line}
                     player1Field="away_player_1_id"
                     player2Field="away_player_2_id"
                     updateLinePlayer={updateLinePlayer}
+                    applySavedLineup={(lineupId) => applySavedLineup(line, "away", lineupId)}
                     rosterOptionName={rosterOptionLabel}
                   />
                 </div>
@@ -1291,11 +1385,13 @@ function TeamPlayers({
   title,
   teamRating,
   ratingLabel,
+  savedLineups,
   roster,
   line,
   player1Field,
   player2Field,
   updateLinePlayer,
+  applySavedLineup,
   rosterOptionName,
 }) {
   function selectedPlayerFor(field) {
@@ -1330,6 +1426,23 @@ function TeamPlayers({
           Team {ratingLabel}: {teamRating}
         </span>
       </h3>
+
+      {savedLineups.length > 0 && (
+        <div className="mt-2">
+          <select
+            value=""
+            onChange={(e) => applySavedLineup(e.target.value)}
+            className="w-full rounded-lg border border-blue-200 bg-blue-50 px-2 py-1.5 text-sm font-semibold text-blue-950"
+          >
+            <option value="">Use saved match setup team</option>
+            {savedLineups.map((lineup) => (
+              <option key={lineup.id} value={lineup.id}>
+                Team {lineup.line_number}: {formatSavedLineupName(lineup)}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
         <select
@@ -1369,6 +1482,17 @@ function TeamPlayers({
 
     </div>
   );
+}
+
+function formatSavedLineupName(lineup) {
+  const first = formatSmallMemberName(lineup.player_1);
+  const second = formatSmallMemberName(lineup.player_2);
+  return [first, second].filter(Boolean).join(" / ") || "Incomplete";
+}
+
+function formatSmallMemberName(member) {
+  if (!member) return "";
+  return `${member.first_name || ""} ${member.last_name || ""}`.trim();
 }
 
 function capitalizeFirst(value) {

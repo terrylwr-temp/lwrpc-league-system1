@@ -20,6 +20,7 @@ export default function DivisionsPage() {
   const [ratingType, setRatingType] = useState("dupr");
   const [minDupr, setMinDupr] = useState("");
   const [maxDupr, setMaxDupr] = useState("");
+  const [teamDuprMax, setTeamDuprMax] = useState("");
   const [sortOrder, setSortOrder] = useState("");
 
   const [numberOfTeams, setNumberOfTeams] = useState("3");
@@ -98,8 +99,9 @@ export default function DivisionsPage() {
       league_id: selectedLeague,
       name,
       rating_type: ratingType || "dupr",
-      min_dupr: minDupr ? Number(minDupr) : null,
-      max_dupr: maxDupr ? Number(maxDupr) : null,
+      min_dupr: ratingNumber(minDupr),
+      max_dupr: ratingNumber(maxDupr),
+      team_dupr_max: ratingNumber(teamDuprMax),
       sort_order: sortOrder ? Number(sortOrder) : 0,
 
       number_of_lines: Number(numberOfTeams || 3),
@@ -161,6 +163,7 @@ export default function DivisionsPage() {
 
     setMinDupr(division.min_dupr == null ? "" : String(division.min_dupr));
     setMaxDupr(division.max_dupr == null ? "" : String(division.max_dupr));
+    setTeamDuprMax(division.team_dupr_max == null ? "" : String(division.team_dupr_max));
     setSortOrder(division.sort_order == null ? "" : String(division.sort_order));
 
     setNumberOfTeams(
@@ -234,6 +237,7 @@ export default function DivisionsPage() {
 
     setMinDupr("");
     setMaxDupr("");
+    setTeamDuprMax("");
     setSortOrder("");
 
     setNumberOfTeams("3");
@@ -400,6 +404,20 @@ export default function DivisionsPage() {
                     placeholder="Max"
                   />
                 </div>
+              </Field>
+
+              <Field label="Doubles Team DUPR Maximum">
+                <input
+                  type="number"
+                  step="0.01"
+                  value={teamDuprMax}
+                  onChange={(e) => setTeamDuprMax(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  placeholder="Combined doubles-team maximum"
+                />
+                <p className="mt-2 text-xs text-slate-500">
+                  Maximum combined rating for one doubles pair using this division&apos;s selected rating type.
+                </p>
               </Field>
 
               <Field label="Number of Teams">
@@ -593,6 +611,10 @@ export default function DivisionsPage() {
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
+                              Doubles Team DUPR Maximum: {division.team_dupr_max ?? "—"}
+                            </div>
+
+                            <div className="mt-1 text-sm text-slate-600">
                               Number of Teams: {division.number_of_lines ?? 3}
                             </div>
 
@@ -687,4 +709,14 @@ function Field({ label, children }) {
       {children}
     </div>
   );
+}
+
+function ratingNumber(value) {
+  if (value === "" || value === null || value === undefined) return null;
+
+  const number = Number(value);
+
+  if (Number.isNaN(number)) return null;
+
+  return Math.round((number + Number.EPSILON) * 100) / 100;
 }

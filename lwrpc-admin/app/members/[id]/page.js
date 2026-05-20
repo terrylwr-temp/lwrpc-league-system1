@@ -5,6 +5,8 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
 import LoadingScreen from "../../components/LoadingScreen";
+import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../lib/phone";
+import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
@@ -114,7 +116,7 @@ setUserRole(roleData?.role || "player");
       first_name: memberData.first_name || "",
       last_name: memberData.last_name || "",
       email: memberData.email || "",
-      phone: memberData.phone || "",
+      phone: formatPhoneNumberForStorage(memberData.phone),
       club_location: memberData.club_location || "",
       dupr_id: memberData.dupr_id || "",
       renewal_date: memberData.renewal_date || "",
@@ -166,6 +168,13 @@ setUserRole(roleData?.role || "player");
   }
 
   async function saveMember() {
+    const normalizedEmail = normalizeEmailAddress(form.email);
+
+    if (normalizedEmail && !isValidEmailAddress(normalizedEmail)) {
+      alert("Please enter a valid email address, such as name@example.com.");
+      return;
+    }
+
     setSaving(true);
 
     const { data, error } = await supabase
@@ -173,8 +182,8 @@ setUserRole(roleData?.role || "player");
       .update({
         first_name: form.first_name || null,
         last_name: form.last_name || null,
-        email: form.email || null,
-        phone: form.phone || null,
+        email: normalizedEmail || null,
+        phone: formatPhoneNumberForStorage(form.phone) || null,
         club_location: form.club_location || null,
         dupr_id: form.dupr_id || null,
         renewal_date: form.renewal_date || null,
@@ -195,7 +204,7 @@ setUserRole(roleData?.role || "player");
       first_name: data.first_name || "",
       last_name: data.last_name || "",
       email: data.email || "",
-      phone: data.phone || "",
+      phone: formatPhoneNumberForStorage(data.phone),
       club_location: data.club_location || "",
       dupr_id: data.dupr_id || "",
       renewal_date: data.renewal_date || "",
@@ -208,7 +217,7 @@ setUserRole(roleData?.role || "player");
       first_name: member.first_name || "",
       last_name: member.last_name || "",
       email: member.email || "",
-      phone: member.phone || "",
+      phone: formatPhoneNumberForStorage(member.phone),
       club_location: member.club_location || "",
       dupr_id: member.dupr_id || "",
       renewal_date: member.renewal_date || "",
@@ -363,7 +372,7 @@ async function updateUserRole(newRole) {
                       <span className="font-semibold text-slate-800">
                         Phone:
                       </span>{" "}
-                      {member.phone || "—"}
+                      {formatPhoneNumberForStorage(member.phone) || "—"}
                     </div>
 
                     <div>
@@ -439,8 +448,11 @@ async function updateUserRole(newRole) {
                         Email
                       </label>
                       <input
+                        type="email"
                         value={form.email}
                         onChange={(e) => updateForm("email", e.target.value)}
+                        onBlur={(e) => updateForm("email", normalizeEmailAddress(e.target.value))}
+                        placeholder="name@example.com"
                         className="w-full rounded-xl border border-slate-300 px-4 py-3"
                       />
                     </div>
@@ -451,7 +463,10 @@ async function updateUserRole(newRole) {
                       </label>
                       <input
                         value={form.phone}
-                        onChange={(e) => updateForm("phone", e.target.value)}
+                        onChange={(e) => updateForm("phone", formatPhoneNumberInput(e.target.value))}
+                        onBlur={(e) => updateForm("phone", formatPhoneNumberForStorage(e.target.value))}
+                        inputMode="tel"
+                        placeholder="(999) 999-9999"
                         className="w-full rounded-xl border border-slate-300 px-4 py-3"
                       />
                     </div>

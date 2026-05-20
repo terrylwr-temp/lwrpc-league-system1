@@ -1,50 +1,5 @@
--- Required scoring/scheduling columns for the league match flow.
--- Run in Supabase SQL editor if these columns do not already exist.
-
-alter table public.divisions
-  add column if not exists picklebreaker_win_points integer default 1,
-  add column if not exists picklebreaker_loss_points integer default 0,
-  add column if not exists team_dupr_max numeric,
-  add column if not exists default_lines_config jsonb;
-
-alter table public.matches
-  add column if not exists score_exported_at timestamptz;
-
-alter table public.division_lines
-  add column if not exists team_win_points integer default 1,
-  add column if not exists picklebreaker_win_points integer default 1,
-  add column if not exists picklebreaker_loss_points integer default 0;
-
-alter table public.match_lines
-  add column if not exists home_team_games_won integer default 0,
-  add column if not exists away_team_games_won integer default 0,
-  add column if not exists home_team_points integer default 0,
-  add column if not exists away_team_points integer default 0,
-  add column if not exists winning_team_id uuid references public.teams(id);
-
-alter table public.leagues
-  add column if not exists rosters_locked boolean not null default false;
-
-create table if not exists public.notification_templates (
-  id uuid primary key default gen_random_uuid(),
-  template_key text not null unique,
-  subject text not null,
-  body text not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
-
-create table if not exists public.match_lineups (
-  id uuid primary key default gen_random_uuid(),
-  match_id uuid not null references public.matches(id) on delete cascade,
-  team_id uuid not null references public.teams(id) on delete cascade,
-  line_number integer not null,
-  player_1_member_id uuid references public.members(id),
-  player_2_member_id uuid references public.members(id),
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
-  unique (match_id, team_id, line_number)
-);
+-- RLS fix for Captain Dashboard Match Setup lineups.
+-- Run this whole file in the Supabase SQL Editor.
 
 alter table public.match_lineups enable row level security;
 
@@ -54,14 +9,14 @@ language sql
 stable
 security definer
 set search_path = public
-as $$
+as $function$
   select exists (
     select 1
     from public.user_roles ur
     where ur.user_id = auth.uid()
       and ur.role in ('league_manager', 'commissioner')
   )
-$$;
+$function$;
 
 create or replace function public.current_user_can_manage_match_lineup(lineup_team_id uuid)
 returns boolean
@@ -69,7 +24,7 @@ language sql
 stable
 security definer
 set search_path = public
-as $$
+as $function$
   select public.current_user_is_lwrpc_admin()
     or exists (
       select 1
@@ -83,7 +38,7 @@ as $$
           t.co_captain_2_member_id
         )
     )
-$$;
+$function$;
 
 grant execute on function public.current_user_is_lwrpc_admin() to authenticated;
 grant execute on function public.current_user_can_manage_match_lineup(uuid) to authenticated;

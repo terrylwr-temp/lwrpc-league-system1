@@ -661,8 +661,9 @@ export default function DivisionDetailPage() {
             {division.leagues?.name || "No League"} · {division.leagues?.seasons?.name || "No Season"}
           </p>
 
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
             <Info label="DUPR Range" value={`${division.min_dupr ?? "—"} to ${division.max_dupr ?? "—"}`} />
+            <Info label="Doubles Team DUPR Maximum" value={division.team_dupr_max ?? "—"} />
             <Info label="Number of Teams" value={division.number_of_lines ?? 3} />
           </div>
         </div>

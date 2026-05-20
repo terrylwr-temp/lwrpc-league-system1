@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { formatPhoneNumberForStorage } from "../lib/phone";
+import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { useRouter } from "next/navigation";
 
 export default function MemberImportPage() {
@@ -35,7 +37,7 @@ export default function MemberImportPage() {
   }
 
   function normalizeEmail(value) {
-    return String(value || "").trim().toLowerCase();
+    return normalizeEmailAddress(value);
   }
 
   function normalizeText(value) {
@@ -184,7 +186,7 @@ const clubLocation = normalizeText(
     "membership group"
   ])
 );
-      const phone = normalizeText(
+      const phone = formatPhoneNumberForStorage(normalizeText(
         findValue(row, [
           "phone",
           "phone number",
@@ -198,7 +200,7 @@ const clubLocation = normalizeText(
           "telephone",
           "contact phone"
         ])
-      );
+      ));
 
       const duprId = normalizeText(
         findValue(row, [
@@ -248,6 +250,9 @@ const clubLocation = normalizeText(
       if (!email) {
         action = "skip";
         message = "Missing email address.";
+      } else if (!isValidEmailAddress(email)) {
+        action = "skip";
+        message = "Invalid email address format.";
       } else if (matchedMember) {
         action = "update";
         message = `Matched existing member by ${matchType}.`;
