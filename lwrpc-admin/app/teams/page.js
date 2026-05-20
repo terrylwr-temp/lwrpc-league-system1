@@ -16,6 +16,7 @@ export default function TeamsPage() {
   const [members, setMembers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [teamSearch, setTeamSearch] = useState("");
+  const [expandedGroupKeys, setExpandedGroupKeys] = useState([]);
 
   const [editingTeamId, setEditingTeamId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -28,6 +29,7 @@ export default function TeamsPage() {
   const [captainId, setCaptainId] = useState("");
   const [coCaptain1Id, setCoCaptain1Id] = useState("");
   const [coCaptain2Id, setCoCaptain2Id] = useState("");
+  const [showAllCaptainCommunities, setShowAllCaptainCommunities] = useState(false);
   const [notes, setNotes] = useState("");
 
   const filteredDivisions = useMemo(() => {
@@ -35,13 +37,21 @@ export default function TeamsPage() {
     return divisions.filter(d => d.league_id === selectedLeague);
   }, [divisions, selectedLeague]);
 
-  const filteredMembers = useMemo(() => {
-    if (!selectedLocation) return [];
+  const captainMemberChoices = useMemo(() => {
+    const selectedCaptainIds = [captainId, coCaptain1Id, coCaptain2Id]
+      .filter(Boolean)
+      .map(String);
 
     return members
-      .filter(member => String(member.location_id) === String(selectedLocation))
-      .sort((a, b) => memberName(a).localeCompare(memberName(b)));
-  }, [members, selectedLocation]);
+      .filter((member) => {
+        if (showAllCaptainCommunities) return true;
+        if (selectedCaptainIds.includes(String(member.id))) return true;
+        if (!selectedLocation) return false;
+
+        return String(member.location_id) === String(selectedLocation);
+      })
+      .sort((a, b) => memberBaseName(a).localeCompare(memberBaseName(b)));
+  }, [captainId, coCaptain1Id, coCaptain2Id, members, selectedLocation, showAllCaptainCommunities]);
 
   const filteredTeams = useMemo(() => {
     const q = teamSearch.trim().toLowerCase();
@@ -135,7 +145,11 @@ export default function TeamsPage() {
         email,
         self_rating,
         dupr_id,
-        location_id
+        location_id,
+        locations (
+          id,
+          name
+        )
       `)
       .order("last_name", { ascending: true })
       .range(0, 2500);
@@ -296,6 +310,7 @@ export default function TeamsPage() {
     setCaptainId("");
     setCoCaptain1Id("");
     setCoCaptain2Id("");
+    setShowAllCaptainCommunities(false);
     setNotes("");
   }
 
@@ -316,6 +331,11 @@ export default function TeamsPage() {
     setCaptainId(team.captain_member_id || "");
     setCoCaptain1Id(team.co_captain_member_id || "");
     setCoCaptain2Id(team.co_captain_2_member_id || "");
+    setShowAllCaptainCommunities(
+      captainIsOutsideHomeLocation(team.captain_member_id, team.home_location_id) ||
+      captainIsOutsideHomeLocation(team.co_captain_member_id, team.home_location_id) ||
+      captainIsOutsideHomeLocation(team.co_captain_2_member_id, team.home_location_id)
+    );
     setNotes(team.notes || "");
 
     window.scrollTo({
@@ -361,12 +381,12 @@ export default function TeamsPage() {
   }, [checkAuth, loadData]);
 
   function memberName(member) {
-    return (
-      member.full_name ||
-      `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
-      member.email ||
-      "Unnamed Member"
-    );
+    const name = memberBaseName(member);
+    const locationName = member.locations?.name;
+
+    return showAllCaptainCommunities && locationName
+      ? `${name} - ${locationName}`
+      : name;
   }
 
   function displayMemberName(member) {
@@ -380,6 +400,16 @@ export default function TeamsPage() {
     );
   }
 
+  function captainIsOutsideHomeLocation(memberId, homeLocationId) {
+    if (!memberId || !homeLocationId) return false;
+
+    const member = members.find((item) => String(item.id) === String(memberId));
+
+    if (!member?.location_id) return false;
+
+    return String(member.location_id) !== String(homeLocationId);
+  }
+
   function captainSummary(team) {
     const names = [
       displayMemberName(team.captain),
@@ -388,6 +418,22 @@ export default function TeamsPage() {
     ].filter(Boolean);
 
     return names.join(", ");
+  }
+
+  function toggleGroup(groupKey) {
+    setExpandedGroupKeys((current) =>
+      current.includes(groupKey)
+        ? current.filter((key) => key !== groupKey)
+        : [...current, groupKey]
+    );
+  }
+
+  function expandAllGroups() {
+    setExpandedGroupKeys(groupedTeams.map((group) => group.key));
+  }
+
+  function collapseAllGroups() {
+    setExpandedGroupKeys([]);
   }
 
 if (loading) {
@@ -498,9 +544,6 @@ if (loading) {
                   value={selectedLocation}
                   onChange={e => {
                     setSelectedLocation(e.target.value);
-                    setCaptainId("");
-                    setCoCaptain1Id("");
-                    setCoCaptain2Id("");
                   }}
                 >
                   <option value="">Select Home Location</option>
@@ -513,21 +556,36 @@ if (loading) {
                 </select>
               </Field>
 
+              <label className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={showAllCaptainCommunities}
+                  onChange={(e) => setShowAllCaptainCommunities(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-semibold text-slate-900">Allow captain selection from any community</span>
+                  <span className="block text-xs text-slate-500">
+                    Use this when a captain or co-captain belongs to a different community than the home location.
+                  </span>
+                </span>
+              </label>
+
               <Field
                 label="Captain"
-                hint="Captain choices are filtered to members assigned to the selected home location."
+                hint={showAllCaptainCommunities ? "Showing members from all communities." : "Captain choices are filtered to members assigned to the selected home location."}
               >
                 <select
                   className="w-full rounded-xl border border-slate-300 px-4 py-3"
                   value={captainId}
                   onChange={e => setCaptainId(e.target.value)}
-                  disabled={!selectedLocation}
+                  disabled={!selectedLocation && !showAllCaptainCommunities}
                 >
                   <option value="">
-                    {selectedLocation ? "Select Captain" : "Select Location First"}
+                    {selectedLocation || showAllCaptainCommunities ? "Select Captain" : "Select Location First"}
                   </option>
 
-                  {filteredMembers.map(member => (
+                  {captainMemberChoices.map(member => (
                     <option key={member.id} value={member.id}>
                       {memberName(member)}
                     </option>
@@ -540,13 +598,13 @@ if (loading) {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3"
                   value={coCaptain1Id}
                   onChange={e => setCoCaptain1Id(e.target.value)}
-                  disabled={!selectedLocation}
+                  disabled={!selectedLocation && !showAllCaptainCommunities}
                 >
                   <option value="">
-                    {selectedLocation ? "Select Co-Captain 1" : "Select Location First"}
+                    {selectedLocation || showAllCaptainCommunities ? "Select Co-Captain 1" : "Select Location First"}
                   </option>
 
-                  {filteredMembers.map(member => (
+                  {captainMemberChoices.map(member => (
                     <option key={member.id} value={member.id}>
                       {memberName(member)}
                     </option>
@@ -559,13 +617,13 @@ if (loading) {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3"
                   value={coCaptain2Id}
                   onChange={e => setCoCaptain2Id(e.target.value)}
-                  disabled={!selectedLocation}
+                  disabled={!selectedLocation && !showAllCaptainCommunities}
                 >
                   <option value="">
-                    {selectedLocation ? "Select Co-Captain 2" : "Select Location First"}
+                    {selectedLocation || showAllCaptainCommunities ? "Select Co-Captain 2" : "Select Location First"}
                   </option>
 
-                  {filteredMembers.map(member => (
+                  {captainMemberChoices.map(member => (
                     <option key={member.id} value={member.id}>
                       {memberName(member)}
                     </option>
@@ -635,6 +693,22 @@ if (loading) {
                   </button>
                 )}
 
+                <button
+                  type="button"
+                  onClick={expandAllGroups}
+                  className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
+                >
+                  Expand All
+                </button>
+
+                <button
+                  type="button"
+                  onClick={collapseAllGroups}
+                  className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
+                >
+                  Collapse All
+                </button>
+
                 <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
                   <div className="text-xs uppercase tracking-wide text-slate-300">
                     Teams
@@ -649,9 +723,17 @@ if (loading) {
 
             <div className="space-y-3">
 
-              {groupedTeams.map(group => (
+              {groupedTeams.map(group => {
+                const expanded = expandedGroupKeys.includes(group.key);
+
+                return (
                 <div key={group.key} className="overflow-hidden rounded-xl border border-slate-200">
-                  <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-900 px-4 py-2 text-white">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.key)}
+                    className="flex w-full flex-wrap items-center justify-between gap-2 bg-slate-900 px-4 py-3 text-left text-white hover:bg-slate-800"
+                    aria-expanded={expanded}
+                  >
                     <div className="min-w-0">
                       <div className="truncate text-xs font-semibold uppercase tracking-wide text-blue-200">
                         {group.leagueName}
@@ -661,11 +743,17 @@ if (loading) {
                       </div>
                     </div>
 
-                    <div className="rounded-lg bg-white/10 px-3 py-1 text-sm font-bold">
-                      {group.teams.length} team{group.teams.length === 1 ? "" : "s"}
+                    <div className="flex items-center gap-2">
+                      <div className="rounded-lg bg-white/10 px-3 py-1 text-sm font-bold">
+                        {group.teams.length} team{group.teams.length === 1 ? "" : "s"}
+                      </div>
+                      <div className="rounded-lg bg-white/10 px-3 py-1 text-sm font-black">
+                        {expanded ? "Hide" : "Show"}
+                      </div>
                     </div>
-                  </div>
+                  </button>
 
+                  {expanded && (
                   <div className="divide-y divide-slate-100">
                     {group.teams.map(team => (
                       <div
@@ -722,8 +810,10 @@ if (loading) {
                       </div>
                     ))}
                   </div>
+                  )}
                 </div>
-              ))}
+                );
+              })}
 
               {filteredTeams.length === 0 && (
                 <div className="text-slate-500">
@@ -753,6 +843,15 @@ function Field({ label, hint, children }) {
         </p>
       )}
     </div>
+  );
+}
+
+function memberBaseName(member) {
+  return (
+    member.full_name ||
+    `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+    member.email ||
+    "Unnamed Member"
   );
 }
 

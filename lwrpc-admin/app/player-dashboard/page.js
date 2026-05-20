@@ -632,10 +632,17 @@ function MatchSummaryCard({ match, router }) {
           <div className="font-bold text-slate-900">
             {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
           </div>
+          <div className="mt-1 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
+            <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-900">
+              Home: {match.home_team?.name || "Home"}
+            </span>
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">
+              Played at: {match.locations?.name || "No Location"}
+            </span>
+          </div>
           <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
             <span>{formatDate(match.scheduled_date)} at {match.scheduled_time || "—"}</span>
             <span>{match.divisions?.name || "No Division"}</span>
-            <span>{match.locations?.name || "No Location"}</span>
             <span>Week {match.week_number || "—"}</span>
           </div>
         </div>

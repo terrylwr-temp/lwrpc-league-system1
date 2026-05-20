@@ -6,6 +6,31 @@ import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 
 const TEMPLATE_KEY = "score_reminder";
+const DUPR_EXPORT_HEADERS = [
+  "matchType",
+  "scoreType",
+  "event",
+  "date",
+  "playerA1",
+  "playerA1DuprId",
+  "playerA2",
+  "playerA2DuprId",
+  "playerB1",
+  "playerB1DuprId",
+  "playerB2",
+  "playerB2DuprId",
+  "teamAGame1",
+  "teamBGame1",
+  "teamAGame2",
+  "teamBGame2",
+  "teamAGame3",
+  "teamBGame3",
+  "teamAGame4",
+  "teamBGame4",
+  "teamAGame5",
+  "teamBGame5",
+];
+const DUPR_EXPORT_EVENT = "LWR Pickleball Club DUPR League";
 
 const DEFAULT_SUBJECT = "Score entry reminder";
 
@@ -33,6 +58,7 @@ export default function ScoringPage() {
   const [today, setToday] = useState("");
   const [templateOpen, setTemplateOpen] = useState(false);
   const [exportingScores, setExportingScores] = useState(false);
+  const [includeAlreadyExported, setIncludeAlreadyExported] = useState(false);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -143,7 +169,13 @@ export default function ScoringPage() {
       return;
     }
 
-    setMatches(data || []);
+    const sortedMatches = [...(data || [])].sort(compareScoringMatches);
+    setMatches(sortedMatches);
+    setSelectedMatchIds(
+      sortedMatches
+        .filter((match) => match.score_status === "verified" && !match.score_exported_at)
+        .map((match) => match.id)
+    );
   }, []);
 
   useEffect(() => {
@@ -266,7 +298,18 @@ export default function ScoringPage() {
     setLastSendResult(`Reminder sent to ${emails.length} email address${emails.length === 1 ? "" : "es"}.`);
   }
 
-  async function exportUnexportedScores() {
+  async function exportForDupr() {
+    const exportMatches = selectedMatches.filter(
+      (match) =>
+        match.score_status === "verified" &&
+        (includeAlreadyExported || !match.score_exported_at)
+    );
+
+    if (exportMatches.length === 0) {
+      alert("Select one or more verified matches to export.");
+      return;
+    }
+
     setExportingScores(true);
 
     const { data, error } = await supabase
@@ -274,32 +317,24 @@ export default function ScoringPage() {
       .select(`
         id,
         scheduled_date,
-        scheduled_time,
-        week_number,
         score_status,
-        home_score,
-        away_score,
         score_exported_at,
-        divisions (
-          name
-        ),
-        leagues (
-          name
-        ),
-        home_team:teams!matches_home_team_id_fkey (
-          name
-        ),
-        away_team:teams!matches_away_team_id_fkey (
-          name
-        ),
-        winning_team:teams!matches_winning_team_id_fkey (
-          name
+        match_lines (
+          id,
+          line_number,
+          home_player_1:members!match_lines_home_player_1_id_fkey(first_name, last_name, full_name, dupr_id),
+          home_player_2:members!match_lines_home_player_2_id_fkey(first_name, last_name, full_name, dupr_id),
+          away_player_1:members!match_lines_away_player_1_id_fkey(first_name, last_name, full_name, dupr_id),
+          away_player_2:members!match_lines_away_player_2_id_fkey(first_name, last_name, full_name, dupr_id),
+          line_games (
+            game_number,
+            home_score,
+            away_score
+          )
         )
       `)
       .eq("score_status", "verified")
-      .is("score_exported_at", null)
-      .order("scheduled_date", { ascending: true })
-      .order("scheduled_time", { ascending: true });
+      .in("id", exportMatches.map((match) => match.id));
 
     if (error) {
       setExportingScores(false);
@@ -307,67 +342,49 @@ export default function ScoringPage() {
       return;
     }
 
-    const rows = data || [];
+    const rows = (data || [])
+      .map((match) => {
+        const sourceMatch = exportMatches.find((item) => item.id === match.id) || match;
+        return {
+          ...sourceMatch,
+          match_lines: match.match_lines || [],
+        };
+      })
+      .sort(compareScoringMatches);
 
     if (rows.length === 0) {
       setExportingScores(false);
-      alert("No verified, unexported scores were found.");
+      alert("No verified scores were found for the selected matches.");
       return;
     }
 
-    const csv = toCsv([
-      [
-        "Match ID",
-        "League",
-        "Division",
-        "Week",
-        "Date",
-        "Time",
-        "Home Team",
-        "Away Team",
-        "Home Score",
-        "Away Score",
-        "Winner",
-        "Score Status",
-      ],
-      ...rows.map((match) => [
-        match.id,
-        match.leagues?.name || "",
-        match.divisions?.name || "",
-        match.week_number || "",
-        match.scheduled_date || "",
-        match.scheduled_time || "",
-        match.home_team?.name || "",
-        match.away_team?.name || "",
-        match.home_score ?? "",
-        match.away_score ?? "",
-        match.winning_team?.name || "",
-        match.score_status || "",
-      ]),
-    ]);
+    const csvRows = rows.flatMap((match) => duprRowsForMatch(match));
 
-    downloadCsv(csv, `lwrpc-unexported-scores-${localDateString()}.csv`);
-
-    const ok = confirm(`Downloaded ${rows.length} score record${rows.length === 1 ? "" : "s"}. Mark them as exported?`);
-
-    if (ok) {
-      const { error: updateError } = await supabase
-        .from("matches")
-        .update({
-          score_exported_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .in("id", rows.map((match) => match.id));
-
-      if (updateError) {
-        alert(updateError.message);
-        setExportingScores(false);
-        return;
-      }
-
-      await loadMatches();
+    if (csvRows.length === 0) {
+      setExportingScores(false);
+      alert("No completed line scores were found for the selected matches.");
+      return;
     }
 
+    const csv = toCsv([DUPR_EXPORT_HEADERS, ...csvRows]);
+
+    downloadCsv(csv, `lwrpc-dupr-export-${localDateString()}.csv`);
+
+    const { error: updateError } = await supabase
+      .from("matches")
+      .update({
+        score_exported_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", rows.map((match) => match.id));
+
+    if (updateError) {
+      alert(updateError.message);
+      setExportingScores(false);
+      return;
+    }
+
+    await loadMatches();
     setExportingScores(false);
   }
 
@@ -495,14 +512,23 @@ export default function ScoringPage() {
 
               <button
                 type="button"
-                onClick={exportUnexportedScores}
+                onClick={exportForDupr}
                 disabled={exportingScores}
                 className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
-                {exportingScores ? "Exporting..." : "Export Unexported Scores"}
+                {exportingScores ? "Exporting..." : "Export For DUPR"}
               </button>
             </div>
           </div>
+
+          <label className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <input
+              type="checkbox"
+              checked={includeAlreadyExported}
+              onChange={(e) => setIncludeAlreadyExported(e.target.checked)}
+            />
+            Include already exported verified matches for re-export override
+          </label>
 
           {lastSendResult && (
             <div className="mb-4 rounded-xl bg-green-50 p-4 text-sm font-semibold text-green-900">
@@ -555,6 +581,11 @@ function MatchRow({ match, selected, onToggle, onOpen }) {
               </div>
 
               <ScoreStatusBadge value={match.score_status} />
+              {match.score_exported_at && (
+                <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-slate-700">
+                  Exported
+                </span>
+              )}
             </div>
 
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
@@ -581,6 +612,55 @@ function MatchRow({ match, selected, onToggle, onOpen }) {
         </button>
       </div>
     </div>
+  );
+}
+
+function compareScoringMatches(a, b) {
+  const divisionCompare = (a.divisions?.name || "").localeCompare(b.divisions?.name || "");
+  if (divisionCompare !== 0) return divisionCompare;
+
+  const dateCompare = String(a.scheduled_date || "").localeCompare(String(b.scheduled_date || ""));
+  if (dateCompare !== 0) return dateCompare;
+
+  return (a.home_team?.name || "").localeCompare(b.home_team?.name || "");
+}
+
+function duprRowsForMatch(match) {
+  return [...(match.match_lines || [])]
+    .sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0))
+    .map((line) => {
+      const games = [...(line.line_games || [])]
+        .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
+        .slice(0, 5);
+      const gameScores = Array.from({ length: 5 }, (_, index) => {
+        const game = games[index] || {};
+        return [game.home_score ?? "", game.away_score ?? ""];
+      }).flat();
+
+      return [
+        "D",
+        "SIDEOUT",
+        DUPR_EXPORT_EVENT,
+        match.scheduled_date || "",
+        duprPlayerName(line.home_player_1),
+        line.home_player_1?.dupr_id || "",
+        duprPlayerName(line.home_player_2),
+        line.home_player_2?.dupr_id || "",
+        duprPlayerName(line.away_player_1),
+        line.away_player_1?.dupr_id || "",
+        duprPlayerName(line.away_player_2),
+        line.away_player_2?.dupr_id || "",
+        ...gameScores,
+      ];
+    });
+}
+
+function duprPlayerName(member) {
+  if (!member) return "";
+
+  return (
+    member.full_name ||
+    `${member.first_name || ""} ${member.last_name || ""}`.trim()
   );
 }
 

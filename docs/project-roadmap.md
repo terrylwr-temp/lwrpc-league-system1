@@ -80,9 +80,13 @@ Print workflows should use the generic `/print` page so print previews open on a
 
 Divisions now support `team_dupr_max`, a combined doubles-team rating cap based on the division rating type. This is not a full roster cap; captains are blocked from saving match setup lineups over the cap, duplicate players are blocked within a match setup, and saved lineups are checked when used in score entry.
 
-Scoring operations can export verified scores that have not yet been marked exported. Export tracking uses `matches.score_exported_at`.
+Scoring operations can export verified scores for DUPR using the club DUPR CSV format. Verified, not-yet-exported matches are selected by default; already exported verified matches can be manually reselected for override re-export. Export tracking uses `matches.score_exported_at`.
 
 Captain Dashboard has a match setup workflow for upcoming matches. Captains can save doubles pairings per match line in `match_lineups`; completed setups show a status badge on match cards, opposing captains receive an email with the submitted lineup, and the match score-entry screen can then populate game players from those saved lineups.
+
+Score entry is restricted to captains assigned to the match. Match score rows use Team 1/Team 2 style labels for line slots, and saved match setup choices are scoped to the matching team slot.
+
+Teams & Rosters supports assigning captains/co-captains from outside the team's home community through an explicit all-communities toggle. Team lists are grouped by league/division and start collapsed as accordions.
 
 Player Dashboard uses inline panels for play history, division standings, and upcoming matches. Team summaries appear above the dashboard action buttons and include captain/co-captain contact details. Play history includes top-level games/wins/losses totals plus individual game scores when entered.
 

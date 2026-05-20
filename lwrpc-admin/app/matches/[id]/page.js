@@ -661,7 +661,16 @@ export default function MatchDetailPage() {
     ].some((captainId) => String(captainId) === String(memberId));
   }
 
+  function canManageScores() {
+    return isCaptainView();
+  }
+
   async function saveCalculatedWinners(showAlert = true) {
+    if (!canManageScores()) {
+      alert("Only captains for this match can enter or verify scores.");
+      return false;
+    }
+
     if (
       sameGameDuplicateLineIds.length > 0 ||
       overLineLimitPlayerIds.length > 0 ||
@@ -721,6 +730,11 @@ export default function MatchDetailPage() {
   }
 
   async function completeMatch() {
+    if (!canManageScores()) {
+      alert("Only captains for this match can enter scores.");
+      return;
+    }
+
     const saved = await saveCalculatedWinners(false);
 
     if (!saved) return;
@@ -755,6 +769,11 @@ export default function MatchDetailPage() {
   }
 
   async function verifyScores() {
+    if (!canManageScores()) {
+      alert("Only captains for this match can verify scores.");
+      return;
+    }
+
     if (!currentUserMember?.id) {
       alert("Unable to identify current member.");
       return;
@@ -782,6 +801,11 @@ export default function MatchDetailPage() {
   }
 
   async function disputeScores() {
+    if (!canManageScores()) {
+      alert("Only captains for this match can dispute scores.");
+      return;
+    }
+
     const notes = prompt("Enter dispute notes");
 
     if (notes === null) return;
@@ -1098,6 +1122,8 @@ export default function MatchDetailPage() {
     return <LoadingScreen subtitle="Loading Match Operations..." />;
   }
 
+  const scoreActionsAllowed = canManageScores();
+
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
       <div className="mx-auto max-w-7xl">
@@ -1118,7 +1144,8 @@ export default function MatchDetailPage() {
           <button
             type="button"
             onClick={completeMatch}
-            className="rounded-xl bg-green-700 px-4 py-2 font-semibold text-white hover:bg-green-800"
+            disabled={!scoreActionsAllowed}
+            className="rounded-xl bg-green-700 px-4 py-2 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             Submit Scores
           </button>
@@ -1128,7 +1155,8 @@ export default function MatchDetailPage() {
               <button
                 type="button"
                 onClick={verifyScores}
-                className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white hover:bg-emerald-800"
+                disabled={!scoreActionsAllowed}
+                className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 Verify Scores
               </button>
@@ -1136,7 +1164,8 @@ export default function MatchDetailPage() {
               <button
                 type="button"
                 onClick={disputeScores}
-                className="rounded-xl bg-red-700 px-4 py-2 font-semibold text-white hover:bg-red-800"
+                disabled={!scoreActionsAllowed}
+                className="rounded-xl bg-red-700 px-4 py-2 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 Dispute Scores
               </button>
@@ -1280,6 +1309,7 @@ export default function MatchDetailPage() {
                     updateLinePlayer={updateLinePlayer}
                     applySavedLineup={(lineupId) => applySavedLineup(line, "home", lineupId)}
                     rosterOptionName={rosterOptionLabel}
+                    disabled={!scoreActionsAllowed}
                   />
 
                   <TeamPlayers
@@ -1294,6 +1324,7 @@ export default function MatchDetailPage() {
                     updateLinePlayer={updateLinePlayer}
                     applySavedLineup={(lineupId) => applySavedLineup(line, "away", lineupId)}
                     rosterOptionName={rosterOptionLabel}
+                    disabled={!scoreActionsAllowed}
                   />
                 </div>
 
@@ -1324,6 +1355,7 @@ export default function MatchDetailPage() {
                                 type="number"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
+                                disabled={!scoreActionsAllowed}
                                 className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-center font-bold"
                               />
                             </td>
@@ -1333,6 +1365,7 @@ export default function MatchDetailPage() {
                                 type="number"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
+                                disabled={!scoreActionsAllowed}
                                 className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-center font-bold"
                               />
                             </td>
@@ -1341,6 +1374,7 @@ export default function MatchDetailPage() {
                               <select
                                 value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                                 onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
+                                disabled={!scoreActionsAllowed}
                                 className="w-full min-w-40 rounded-lg border border-slate-300 px-2 py-1.5 text-xs"
                               >
                                 {gameStatusOptions().map((option) => (
@@ -1393,6 +1427,7 @@ function TeamPlayers({
   updateLinePlayer,
   applySavedLineup,
   rosterOptionName,
+  disabled = false,
 }) {
   function selectedPlayerFor(field) {
     const playerKey = field.replace(/_id$/, "");
@@ -1429,12 +1464,16 @@ function TeamPlayers({
 
       {savedLineups.length > 0 && (
         <div className="mt-2">
+          <div className="mb-1 text-xs font-bold uppercase tracking-wide text-blue-900">
+            Saved Match Setup Team
+          </div>
           <select
             value=""
             onChange={(e) => applySavedLineup(e.target.value)}
+            disabled={disabled}
             className="w-full rounded-lg border border-blue-200 bg-blue-50 px-2 py-1.5 text-sm font-semibold text-blue-950"
           >
-            <option value="">Use saved match setup team</option>
+            <option value="">Use this saved team</option>
             {savedLineups.map((lineup) => (
               <option key={lineup.id} value={lineup.id}>
                 Team {lineup.line_number}: {formatSavedLineupName(lineup)}
@@ -1448,6 +1487,7 @@ function TeamPlayers({
         <select
           value={line[player1Field] || ""}
           onChange={(e) => updateLinePlayer(line.id, player1Field, e.target.value)}
+          disabled={disabled}
           className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
         >
           <option value="">Select Player 1</option>
@@ -1465,6 +1505,7 @@ function TeamPlayers({
         <select
           value={line[player2Field] || ""}
           onChange={(e) => updateLinePlayer(line.id, player2Field, e.target.value)}
+          disabled={disabled}
           className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
         >
           <option value="">Select Player 2</option>
