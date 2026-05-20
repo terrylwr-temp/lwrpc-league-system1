@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import LoadingScreen from "../../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -297,7 +297,7 @@ export default function MatchDetailPage() {
 
   function teamSlotLabel(line) {
     const slot = teamSlotNumber(line);
-    return `Game ${slot || "—"}`;
+    return `Game ${slot || "-"}`;
   }
 
   function formatLineInfo(line, lineGames) {
@@ -308,7 +308,7 @@ export default function MatchDetailPage() {
       `${lineGames.length || divisionLine?.games_per_line || 1} game(s)`,
     ].filter(Boolean);
 
-    return pieces.join(" · ");
+    return pieces.join(" - ");
   }
 
   const getDisplayedLines = useCallback(function getDisplayedLines(allLines) {
@@ -361,7 +361,7 @@ export default function MatchDetailPage() {
     });
 
     let winningTeamId = null;
-    let winnerName = "—";
+    let winnerName = "-";
 
     if (homeGameWins > awayGameWins) {
       winningTeamId = match?.home_team_id;
@@ -478,7 +478,7 @@ export default function MatchDetailPage() {
     });
 
     let winningTeamId = null;
-    let winnerName = "—";
+    let winnerName = "-";
 
     if (homeWins > awayWins) {
       winningTeamId = match?.home_team_id;
@@ -645,7 +645,7 @@ export default function MatchDetailPage() {
       if (game.away_score > game.home_score) return match?.away_team?.name || "Away";
     }
 
-    return "—";
+    return "-";
   }
 
   function isCaptainView() {
@@ -733,6 +733,11 @@ export default function MatchDetailPage() {
   async function completeMatch() {
     if (!canManageScores()) {
       alert("Only captains for this match can enter scores.");
+      return;
+    }
+
+    if (match.score_status === "pending_verification") {
+      alert("Scores are locked for verification. Use Validate Scores or Dispute Scores.");
       return;
     }
 
@@ -1122,6 +1127,7 @@ export default function MatchDetailPage() {
   }
 
   const scoreActionsAllowed = canManageScores();
+  const scoreEntryEditable = scoreActionsAllowed && match.score_status !== "pending_verification";
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
@@ -1137,13 +1143,13 @@ export default function MatchDetailPage() {
             onClick={() => router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor")}
             className="rounded-xl bg-slate-200 px-4 py-2 font-semibold hover:bg-slate-300"
           >
-            ← {isCaptainView() ? "Captain Dashboard" : "Schedule Editor"}
+            Back to {isCaptainView() ? "Captain Dashboard" : "Schedule Editor"}
           </button>
 
           <button
             type="button"
             onClick={completeMatch}
-            disabled={!scoreActionsAllowed}
+            disabled={!scoreEntryEditable}
             className="rounded-xl bg-green-700 px-4 py-2 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
           >
             Submit Scores
@@ -1157,7 +1163,7 @@ export default function MatchDetailPage() {
                 disabled={!scoreActionsAllowed}
                 className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
-                Verify Scores
+                Validate Scores
               </button>
 
               <button
@@ -1171,6 +1177,15 @@ export default function MatchDetailPage() {
             </>
           )}
         </div>
+
+        {match.score_status === "pending_verification" && (
+          <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
+            <div className="font-black">Score Verification Mode</div>
+            <div className="mt-1 text-sm">
+              Scores are locked for review. Use Validate Scores or Dispute Scores at the top of this screen.
+            </div>
+          </div>
+        )}
 
         {(sameGameDuplicateLineIds.length > 0 || overLineLimitPlayerIds.length > 0) && (
           <div className="mb-4 rounded-2xl border-2 border-red-600 bg-red-100 p-4 text-red-950 shadow">
@@ -1202,11 +1217,11 @@ export default function MatchDetailPage() {
               </h1>
 
               <div className="mt-2 text-sm text-slate-600 md:text-base">
-                {match.leagues?.name || "No League"} · {match.divisions?.name || "No Division"}
+                {match.leagues?.name || "No League"} - {match.divisions?.name || "No Division"}
               </div>
 
               <div className="mt-1 text-sm text-slate-600 md:text-base">
-                {match.scheduled_date || "No Date"} · {match.scheduled_time || "No Time"} · {match.locations?.name || "No Location"}
+                {match.scheduled_date || "No Date"} - {match.scheduled_time || "No Time"} - {match.locations?.name || "No Location"}
               </div>
 
               <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">
@@ -1308,7 +1323,7 @@ export default function MatchDetailPage() {
                     updateLinePlayer={updateLinePlayer}
                     applySavedLineup={(lineupId) => applySavedLineup(line, "home", lineupId)}
                     rosterOptionName={rosterOptionLabel}
-                    disabled={!scoreActionsAllowed}
+                    disabled={!scoreEntryEditable}
                   />
 
                   <TeamPlayers
@@ -1323,7 +1338,7 @@ export default function MatchDetailPage() {
                     updateLinePlayer={updateLinePlayer}
                     applySavedLineup={(lineupId) => applySavedLineup(line, "away", lineupId)}
                     rosterOptionName={rosterOptionLabel}
-                    disabled={!scoreActionsAllowed}
+                    disabled={!scoreEntryEditable}
                   />
                 </div>
 
@@ -1354,7 +1369,7 @@ export default function MatchDetailPage() {
                                 type="number"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
-                                disabled={!scoreActionsAllowed}
+                                disabled={!scoreEntryEditable}
                                 className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-center font-bold"
                               />
                             </td>
@@ -1364,7 +1379,7 @@ export default function MatchDetailPage() {
                                 type="number"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
-                                disabled={!scoreActionsAllowed}
+                                disabled={!scoreEntryEditable}
                                 className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-center font-bold"
                               />
                             </td>
@@ -1373,7 +1388,7 @@ export default function MatchDetailPage() {
                               <select
                                 value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                                 onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
-                                disabled={!scoreActionsAllowed}
+                                disabled={!scoreEntryEditable}
                                 className="w-full min-w-40 rounded-lg border border-slate-300 px-2 py-1.5 text-xs"
                               >
                                 {gameStatusOptions().map((option) => (
@@ -1546,4 +1561,4 @@ function capitalizeFirst(value) {
 
 
 
-
+

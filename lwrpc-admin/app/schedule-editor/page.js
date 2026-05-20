@@ -30,6 +30,7 @@ export default function ScheduleEditorPage() {
   const [showHomeAwayCounts, setShowHomeAwayCounts] = useState(false);
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [collapsedMatchGroups, setCollapsedMatchGroups] = useState({});
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -167,6 +168,16 @@ export default function ScheduleEditorPage() {
   function courtUsageTextForMatch(match, sourceMatches = matches) {
     const usage = courtUsageForMatch(match, sourceMatches);
     return `${usage.used}/${usage.available || usage.total || "?"} courts used`;
+  }
+
+  function formatDate(value) {
+    if (!value || value === "No Date") return "No Date";
+
+    try {
+      return new Date(`${value}T12:00:00`).toLocaleDateString();
+    } catch {
+      return value;
+    }
   }
 
   function isAvailabilityMatch(row, locationId, matchDate, matchTime) {
@@ -679,6 +690,204 @@ export default function ScheduleEditorPage() {
     );
   })();
 
+  const problemMatchCount = filteredMatches.filter((match) => matchHasScheduleIssue(match)).length;
+
+  function scheduleGroupForMatch(match) {
+    if (sortBy === "location") {
+      const name = match.locations?.name || "No Location";
+      return { key: `location:${name}`, label: name };
+    }
+
+    if (sortBy === "week") {
+      const week = match.week_number || "No Week";
+      return { key: `week:${week}`, label: `Week ${week}` };
+    }
+
+    if (sortBy === "league") {
+      const name = match.leagues?.name || "No League";
+      return { key: `league:${name}`, label: name };
+    }
+
+    if (sortBy === "division") {
+      const name = match.divisions?.name || "No Division";
+      return { key: `division:${name}`, label: name };
+    }
+
+    if (sortBy === "team") {
+      const name = match.home_team?.name || "No Home Team";
+      return { key: `team:${name}`, label: name };
+    }
+
+    const date = match.scheduled_date || "No Date";
+    return { key: `date:${date}`, label: formatDate(date) };
+  }
+
+  const groupedFilteredMatches = (() => {
+    const groups = new Map();
+
+    filteredMatches.forEach((match) => {
+      const group = scheduleGroupForMatch(match);
+      const current = groups.get(group.key) || {
+        key: group.key,
+        label: group.label,
+        matches: [],
+        issueCount: 0,
+      };
+
+      current.matches.push(match);
+      if (matchHasScheduleIssue(match)) current.issueCount += 1;
+      groups.set(group.key, current);
+    });
+
+    return [...groups.values()];
+  })();
+
+  function toggleMatchGroup(groupKey) {
+    setCollapsedMatchGroups((current) => ({
+      ...current,
+      [groupKey]: !current[groupKey],
+    }));
+  }
+
+  function renderScheduledMatch(match) {
+    const courtUsage = courtUsageForMatch(match);
+
+    return (
+      <div
+        key={match.id}
+        className={`rounded-lg border px-3 py-2 transition-all ${
+          matchHasScheduleIssue(match)
+            ? "border-red-300 bg-red-50 ring-1 ring-red-200"
+            : match.is_published
+            ? "border-green-200 bg-green-50"
+            : "border-amber-200 bg-amber-50"
+        }`}
+      >
+        <div className="grid grid-cols-1 gap-2 xl:grid-cols-[32px_minmax(260px,1.35fr)_130px_120px_minmax(180px,1fr)_130px_85px_minmax(190px,auto)] xl:items-center">
+          <label className="flex items-center xl:justify-center">
+            <input
+              type="checkbox"
+              checked={selectedMatchIds.includes(match.id)}
+              onChange={() => toggleMatchSelection(match.id)}
+              aria-label={`Select ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`}
+              className="h-4 w-4"
+            />
+          </label>
+
+          <div className="min-w-0">
+            <div className="truncate text-sm font-bold text-slate-900">
+              {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+            </div>
+            <div className="truncate text-xs text-slate-600">
+              {match.leagues?.name || "No League"} · {match.divisions?.name || "No Division"}
+            </div>
+            <div className={`text-xs font-semibold ${courtUsage.hasIssue ? "text-red-800" : "text-blue-800"}`}>
+              Courts: {courtUsage.used}/{courtUsage.available || courtUsage.total || "?"} used
+              {courtUsage.unavailable ? ` (${courtUsage.unavailable} unavailable)` : ""}
+              {courtUsage.hasIssue ? " - Overbooked" : ""}
+              {isLeagueBlackoutDate(match) ? " - Blackout date" : ""}
+            </div>
+          </div>
+
+          <input
+            type="date"
+            value={match.scheduled_date || ""}
+            onChange={e => updateMatch(match.id, "scheduled_date", e.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            aria-label="Match date"
+          />
+
+          <input
+            type="time"
+            value={match.scheduled_time || ""}
+            onChange={e => updateMatch(match.id, "scheduled_time", e.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            aria-label="Match time"
+          />
+
+          <select
+            value={match.location_id || ""}
+            onChange={e => updateMatch(match.id, "location_id", e.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            aria-label="Match location"
+          >
+            <option value="">No Location</option>
+            {locations.map(location => (
+              <option key={location.id} value={location.id}>
+                {location.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={match.status || "draft"}
+            onChange={e => updateMatch(match.id, "status", e.target.value)}
+            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            aria-label="Match status"
+          >
+            <option value="draft">Draft</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="rainout">Rainout</option>
+          </select>
+
+          <label className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm">
+            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              Week
+            </span>
+            <input
+              type="number"
+              value={match.week_number || ""}
+              onChange={e => updateMatch(match.id, "week_number", e.target.value)}
+              className="min-w-0 flex-1 border-0 p-0 text-sm outline-none"
+              aria-label="Match week"
+            />
+          </label>
+
+          <div className="flex w-full flex-wrap gap-1.5 xl:justify-end">
+            <span className={`rounded-full px-2 py-1 text-xs font-bold ${
+              match.is_published
+                ? "bg-green-100 text-green-800"
+                : "bg-amber-100 text-amber-800"
+            }`}>
+              {match.is_published ? "Published" : "Draft"}
+            </span>
+            <button
+              onClick={() => swapHomeAway(match)}
+              className="rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-semibold text-blue-800 hover:bg-blue-200"
+            >
+              Swap
+            </button>
+            <button
+              onClick={() => router.push(`/matches/${match.id}`)}
+              className="rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+            >
+              Open
+            </button>
+            <button
+              onClick={() => deleteMatch(match.id)}
+              className="rounded-lg bg-red-100 px-2.5 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+
+        {showMatchNotes && (
+          <textarea
+            value={match.notes || ""}
+            onChange={e => updateMatch(match.id, "notes", e.target.value)}
+            className="mt-2 h-9 w-full resize-y rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            placeholder="Notes"
+            aria-label="Match notes"
+          />
+        )}
+      </div>
+    );
+  }
+
   function clearFilters() {
     setLeagueFilter("");
     setDivisionFilters([]);
@@ -689,6 +898,7 @@ export default function ScheduleEditorPage() {
     setPublishedFilter("all");
     setSortBy("date");
     setSelectedMatchIds([]);
+    setCollapsedMatchGroups({});
   }
 
   function toggleDivisionFilter(divisionId) {
@@ -878,14 +1088,23 @@ export default function ScheduleEditorPage() {
 
         <div className="mt-6 rounded-2xl bg-white p-6 shadow">
 
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
 
             <h2 className="text-xl font-bold text-slate-900">
               Scheduled Matches
             </h2>
 
-            <div className="text-sm text-slate-500">
-              Draft matches appear in amber · Published matches appear in green
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-slate-500">
+                Draft matches appear in amber · Published matches appear in green
+              </span>
+              <span className={`rounded-full px-3 py-1 text-xs font-black ${
+                problemMatchCount > 0
+                  ? "bg-red-100 text-red-800"
+                  : "bg-emerald-100 text-emerald-800"
+              }`}>
+                {problemMatchCount} problem match{problemMatchCount === 1 ? "" : "es"}
+              </span>
             </div>
 
           </div>
@@ -957,148 +1176,42 @@ export default function ScheduleEditorPage() {
             </button>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
 
-            {filteredMatches.map(match => (
-              <div
-                key={match.id}
-                className={`rounded-lg border px-3 py-2 transition-all ${
-                  matchHasScheduleIssue(match)
-                    ? "border-red-300 bg-red-50 ring-1 ring-red-200"
-                    : match.is_published
-                    ? "border-green-200 bg-green-50"
-                    : "border-amber-200 bg-amber-50"
-                }`}
-              >
-                {(() => {
-                  const courtUsage = courtUsageForMatch(match);
+            {groupedFilteredMatches.map((group) => {
+              const isCollapsed = Boolean(collapsedMatchGroups[group.key]);
 
-                  return (
-                <div className="grid grid-cols-1 gap-2 xl:grid-cols-[32px_minmax(260px,1.35fr)_130px_120px_minmax(180px,1fr)_130px_85px_minmax(190px,auto)] xl:items-center">
-                  <label className="flex items-center xl:justify-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedMatchIds.includes(match.id)}
-                      onChange={() => toggleMatchSelection(match.id)}
-                      aria-label={`Select ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`}
-                      className="h-4 w-4"
-                    />
-                  </label>
-
-                  <div className="min-w-0">
-                    <div className="truncate text-sm font-bold text-slate-900">
-                      {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
-                    </div>
-                    <div className="truncate text-xs text-slate-600">
-                      {match.leagues?.name || "No League"} · {match.divisions?.name || "No Division"}
-                    </div>
-                    <div className={`text-xs font-semibold ${courtUsage.hasIssue ? "text-red-800" : "text-blue-800"}`}>
-                      Courts: {courtUsage.used}/{courtUsage.available || courtUsage.total || "?"} used
-                      {courtUsage.unavailable ? ` (${courtUsage.unavailable} unavailable)` : ""}
-                      {courtUsage.hasIssue ? " - Overbooked" : ""}
-                      {isLeagueBlackoutDate(match) ? " - Blackout date" : ""}
-                    </div>
-                  </div>
-
-                  <input
-                    type="date"
-                    value={match.scheduled_date || ""}
-                    onChange={e => updateMatch(match.id, "scheduled_date", e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
-                    aria-label="Match date"
-                  />
-
-                  <input
-                    type="time"
-                    value={match.scheduled_time || ""}
-                    onChange={e => updateMatch(match.id, "scheduled_time", e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
-                    aria-label="Match time"
-                  />
-
-                  <select
-                    value={match.location_id || ""}
-                    onChange={e => updateMatch(match.id, "location_id", e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
-                    aria-label="Match location"
+              return (
+                <section key={group.key} className="overflow-hidden rounded-xl border border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => toggleMatchGroup(group.key)}
+                    className="flex w-full flex-wrap items-center justify-between gap-3 bg-slate-900 px-4 py-3 text-left text-white hover:bg-slate-800"
                   >
-                    <option value="">No Location</option>
-                    {locations.map(location => (
-                      <option key={location.id} value={location.id}>
-                        {location.name}
-                      </option>
-                    ))}
-                  </select>
-
-                  <select
-                    value={match.status || "draft"}
-                    onChange={e => updateMatch(match.id, "status", e.target.value)}
-                    className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
-                    aria-label="Match status"
-                  >
-                    <option value="draft">Draft</option>
-                    <option value="scheduled">Scheduled</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="completed">Completed</option>
-                    <option value="cancelled">Cancelled</option>
-                    <option value="rainout">Rainout</option>
-                  </select>
-
-                  <label className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm">
-                    <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      Week
+                    <span className="min-w-0 break-words text-sm font-black">
+                      {group.label}
                     </span>
-                    <input
-                      type="number"
-                      value={match.week_number || ""}
-                      onChange={e => updateMatch(match.id, "week_number", e.target.value)}
-                      className="min-w-0 flex-1 border-0 p-0 text-sm outline-none"
-                      aria-label="Match week"
-                    />
-                  </label>
-
-                  <div className="flex w-full flex-wrap gap-1.5 xl:justify-end">
-                    <span className={`rounded-full px-2 py-1 text-xs font-bold ${
-                      match.is_published
-                        ? "bg-green-100 text-green-800"
-                        : "bg-amber-100 text-amber-800"
-                    }`}>
-                      {match.is_published ? "Published" : "Draft"}
+                    <span className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                      <span className="rounded-full bg-white/15 px-2.5 py-1">
+                        {group.matches.length} match{group.matches.length === 1 ? "" : "es"}
+                      </span>
+                      {group.issueCount > 0 && (
+                        <span className="rounded-full bg-red-100 px-2.5 py-1 text-red-800">
+                          {group.issueCount} problem{group.issueCount === 1 ? "" : "s"}
+                        </span>
+                      )}
+                      <span>{isCollapsed ? "Open" : "Close"}</span>
                     </span>
-                    <button
-                      onClick={() => swapHomeAway(match)}
-                      className="rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-semibold text-blue-800 hover:bg-blue-200"
-                    >
-                      Swap
-                    </button>
-                    <button
-                      onClick={() => router.push(`/matches/${match.id}`)}
-                      className="rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
-                    >
-                      Open
-                    </button>
-                    <button
-                      onClick={() => deleteMatch(match.id)}
-                      className="rounded-lg bg-red-100 px-2.5 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-                  );
-                })()}
+                  </button>
 
-                {showMatchNotes && (
-                  <textarea
-                    value={match.notes || ""}
-                    onChange={e => updateMatch(match.id, "notes", e.target.value)}
-                    className="mt-2 h-9 w-full resize-y rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
-                    placeholder="Notes"
-                    aria-label="Match notes"
-                  />
-                )}
-              </div>
-            ))}
+                  {!isCollapsed && (
+                    <div className="space-y-2 bg-white p-2">
+                      {group.matches.map((match) => renderScheduledMatch(match))}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
             {filteredMatches.length === 0 && (
               <div className="rounded-2xl border border-slate-200 p-10 text-center text-slate-500">
                 No matches match the current filters.

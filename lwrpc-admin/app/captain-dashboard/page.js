@@ -380,12 +380,17 @@ export default function CaptainDashboardPage() {
     return matches.filter((match) => match.status === "completed");
   }, [matches]);
 
-  function matchCard(match) {
+  function matchCard(match, options = {}) {
+    const {
+      showSetup = true,
+      scoreButtonLabel = "Enter Match Scores",
+      scoreButtonTitle = "Enter match scores",
+    } = options;
     const canEnterScores =
       match.scheduled_date &&
       match.scheduled_date <= localDateString();
 
-    const setupTeams = getCaptainTeamsForMatch(match);
+    const setupTeams = showSetup ? getCaptainTeamsForMatch(match) : [];
 
     return (
       <div
@@ -459,9 +464,9 @@ export default function CaptainDashboardPage() {
                 if (canEnterScores) router.push(`/matches/${match.id}`);
               }}
               className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-              title={canEnterScores ? "Enter match scores" : "Scores unlock on the scheduled match date"}
+              title={canEnterScores ? scoreButtonTitle : "Scores unlock on the scheduled match date"}
             >
-              Enter Match Scores
+              {scoreButtonLabel}
             </button>
           </div>
         </div>
@@ -1194,7 +1199,13 @@ export default function CaptainDashboardPage() {
         </div>
 
         <Section title="Pending Score Verification" count={pendingVerification.length}>
-          {pendingVerification.map(matchCard)}
+          {pendingVerification.map((match) =>
+            matchCard(match, {
+              showSetup: false,
+              scoreButtonLabel: "Review / Validate Scores",
+              scoreButtonTitle: "Open score review, then validate or dispute",
+            })
+          )}
           {pendingVerification.length === 0 && <Empty message="No scores currently need verification." />}
         </Section>
 
