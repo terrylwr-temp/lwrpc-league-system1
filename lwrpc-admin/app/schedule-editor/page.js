@@ -21,6 +21,8 @@ export default function ScheduleEditorPage() {
   const [leagueFilter, setLeagueFilter] = useState("");
   const [divisionFilters, setDivisionFilters] = useState([]);
   const [locationFilter, setLocationFilter] = useState("");
+  const [teamNameFilter, setTeamNameFilter] = useState("");
+  const [dateFilter, setDateFilter] = useState("");
   const [weekFilter, setWeekFilter] = useState("");
   const [publishedFilter, setPublishedFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
@@ -122,7 +124,7 @@ export default function ScheduleEditorPage() {
     return Number(setting?.courts_needed_per_match || 1);
   }
 
-  function courtUsageForMatch(match) {
+  function courtUsageForMatch(match, sourceMatches = matches) {
     if (!match.location_id || !match.scheduled_date) {
       return { used: 0, total: Number(match.locations?.number_of_courts || 0) };
     }
@@ -139,7 +141,7 @@ export default function ScheduleEditorPage() {
         )
       )
       .reduce((sum, row) => sum + Number(row.courts_unavailable ?? row.courts_available ?? 0), 0);
-    const used = matches
+    const used = sourceMatches
       .filter(
         (row) =>
           row.id !== match.id &&
@@ -162,8 +164,8 @@ export default function ScheduleEditorPage() {
     return locations.find((location) => String(location.id) === String(locationId))?.name || "No Location";
   }
 
-  function courtUsageTextForMatch(match) {
-    const usage = courtUsageForMatch(match);
+  function courtUsageTextForMatch(match, sourceMatches = matches) {
+    const usage = courtUsageForMatch(match, sourceMatches);
     return `${usage.used}/${usage.available || usage.total || "?"} courts used`;
   }
 
@@ -431,13 +433,15 @@ export default function ScheduleEditorPage() {
       locations: locations.find((location) => String(location.id) === String(newLocationId)) || null,
     };
 
-    if (!wouldHaveEnoughCourts(matches.map((row) => (row.id === match.id ? proposedMatch : row)), proposedMatch)) {
+    const proposedMatches = matches.map((row) => (row.id === match.id ? proposedMatch : row));
+
+    if (!wouldHaveEnoughCourts(proposedMatches, proposedMatch)) {
       const ok = confirm(
         [
           `Swap ${match.home_team?.name || "Home"} and ${match.away_team?.name || "Away"} anyway?`,
           "",
           `${locationName(newLocationId)} may not have enough available courts at this date/time.`,
-          `Current: ${courtUsageTextForMatch(match)}`,
+          `Proposed: ${courtUsageTextForMatch(proposedMatch, proposedMatches)}`,
         ].join("\n")
       );
 
@@ -585,6 +589,18 @@ export default function ScheduleEditorPage() {
       ) return false;
 
       if (
+        teamNameFilter &&
+        !`${match.home_team?.name || ""} ${match.away_team?.name || ""}`
+          .toLowerCase()
+          .includes(teamNameFilter.trim().toLowerCase())
+      ) return false;
+
+      if (
+        dateFilter &&
+        match.scheduled_date !== dateFilter
+      ) return false;
+
+      if (
         weekFilter &&
         String(match.week_number || "") !== weekFilter
       ) return false;
@@ -667,6 +683,8 @@ export default function ScheduleEditorPage() {
     setLeagueFilter("");
     setDivisionFilters([]);
     setLocationFilter("");
+    setTeamNameFilter("");
+    setDateFilter("");
     setWeekFilter("");
     setPublishedFilter("all");
     setSortBy("date");
@@ -714,7 +732,7 @@ export default function ScheduleEditorPage() {
 
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-7">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-9">
 
             <select
               value={leagueFilter}
@@ -817,6 +835,22 @@ export default function ScheduleEditorPage() {
                 Published Only
               </option>
             </select>
+
+            <input
+              type="search"
+              value={teamNameFilter}
+              onChange={e => setTeamNameFilter(e.target.value)}
+              placeholder="Team name"
+              className="rounded-xl border border-slate-300 px-4 py-3"
+            />
+
+            <input
+              type="date"
+              value={dateFilter}
+              onChange={e => setDateFilter(e.target.value)}
+              className="rounded-xl border border-slate-300 px-4 py-3"
+              aria-label="Specific match date"
+            />
 
             <select
               value={sortBy}

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
+import TeamScheduleModal from "../components/TeamScheduleModal";
 
 export default function TeamsPage() {
   const router = useRouter();
@@ -18,6 +19,9 @@ export default function TeamsPage() {
   const [teams, setTeams] = useState([]);
   const [teamSearch, setTeamSearch] = useState("");
   const [expandedGroupKeys, setExpandedGroupKeys] = useState([]);
+  const [scheduleTeam, setScheduleTeam] = useState(null);
+  const [scheduleMatches, setScheduleMatches] = useState([]);
+  const [scheduleLoading, setScheduleLoading] = useState(false);
 
   const [editingTeamId, setEditingTeamId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -368,6 +372,70 @@ export default function TeamsPage() {
     }
 
     loadData();
+  }
+
+  async function openTeamSchedule(team) {
+    setScheduleTeam(team);
+    setScheduleMatches([]);
+    setScheduleLoading(true);
+
+    const { data, error } = await supabase
+      .from("matches")
+      .select(`
+        id,
+        league_id,
+        division_id,
+        home_team_id,
+        away_team_id,
+        location_id,
+        scheduled_date,
+        scheduled_time,
+        week_number,
+        status,
+        score_status,
+        home_score,
+        away_score,
+        is_published,
+        locations (
+          id,
+          name
+        ),
+        home_team:teams!matches_home_team_id_fkey (
+          id,
+          name
+        ),
+        away_team:teams!matches_away_team_id_fkey (
+          id,
+          name
+        ),
+        match_lines (
+          id,
+          line_number,
+          home_team_games_won,
+          away_team_games_won,
+          division_lines (
+            line_name
+          ),
+          line_games (
+            id,
+            game_number,
+            home_score,
+            away_score
+          )
+        )
+      `)
+      .or(`home_team_id.eq.${team.id},away_team_id.eq.${team.id}`)
+      .order("scheduled_date", { ascending: true })
+      .order("scheduled_time", { ascending: true });
+
+    setScheduleLoading(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setScheduleMatches(data || []);
   }
 
   useEffect(() => {
@@ -789,6 +857,13 @@ if (loading) {
 
                         <div className="flex flex-wrap gap-2 md:justify-end">
                           <button
+                            onClick={() => openTeamSchedule(team)}
+                            className="rounded-lg bg-indigo-100 px-3 py-1.5 text-xs font-semibold text-indigo-900 hover:bg-indigo-200"
+                          >
+                            Schedule
+                          </button>
+
+                          <button
                             onClick={() => editTeam(team)}
                             className="rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800"
                           >
@@ -827,6 +902,21 @@ if (loading) {
           </div>
 
         </div>
+        {scheduleTeam && (
+          <TeamScheduleModal
+            title="Team Schedule"
+            subtitle={`${scheduleTeam.divisions?.leagues?.name || "League"} · ${scheduleTeam.divisions?.name || "Division"}`}
+            teams={filteredTeams}
+            selectedTeamId={scheduleTeam.id}
+            onSelectTeam={openTeamSchedule}
+            matches={scheduleMatches}
+            loading={scheduleLoading}
+            onClose={() => {
+              setScheduleTeam(null);
+              setScheduleMatches([]);
+            }}
+          />
+        )}
       </div>
     </main>
   );

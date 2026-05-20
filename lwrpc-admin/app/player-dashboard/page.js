@@ -143,6 +143,7 @@ export default function PlayerDashboardPage() {
           .or(
             `home_team_id.in.(${teamIds.join(",")}),away_team_id.in.(${teamIds.join(",")})`
           )
+          .eq("is_published", true)
           .order("scheduled_date", { ascending: true })
           .order("scheduled_time", { ascending: true }),
         supabase

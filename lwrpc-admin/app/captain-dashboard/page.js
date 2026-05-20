@@ -7,6 +7,7 @@ import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
+import TeamScheduleModal from "../components/TeamScheduleModal";
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
@@ -25,6 +26,10 @@ export default function CaptainDashboardPage() {
   const [setupLineups, setSetupLineups] = useState([]);
   const [setupRatings, setSetupRatings] = useState([]);
   const [savingSetup, setSavingSetup] = useState(false);
+  const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
+  const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
+  const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
+  const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -260,6 +265,7 @@ export default function CaptainDashboardPage() {
       .or(
         `home_team_id.in.(${teamIds.join(",")}),away_team_id.in.(${teamIds.join(",")})`
       )
+      .eq("is_published", true)
       .order("scheduled_date", { ascending: true })
       .order("scheduled_time", { ascending: true });
 
@@ -295,7 +301,17 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    setByeWeeks(byeData || []);
+    const publishedScheduleKeys = new Set(
+      (matchData || []).map((match) =>
+        scheduleWeekKey(match.division_id, match.week_number, match.scheduled_date)
+      )
+    );
+
+    setByeWeeks(
+      (byeData || []).filter((bye) =>
+        publishedScheduleKeys.has(scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date))
+      )
+    );
     finishLoading(startedAt, setLoading);
   }, [loadMatchSetupStatus]);
 
@@ -849,6 +865,91 @@ export default function CaptainDashboardPage() {
     }
   }
 
+  async function openDivisionSchedule(team) {
+    if (!team?.division_id) {
+      alert("This team is not assigned to a division.");
+      return;
+    }
+
+    setDivisionScheduleTeam(team);
+    setDivisionScheduleTeams([]);
+    setDivisionScheduleMatches([]);
+    setDivisionScheduleLoading(true);
+
+    const [{ data: divisionTeams, error: teamsError }, { data: divisionMatches, error: matchesError }] =
+      await Promise.all([
+        supabase
+          .from("teams")
+          .select("id, name, division_id")
+          .eq("division_id", team.division_id)
+          .order("name", { ascending: true }),
+        supabase
+          .from("matches")
+          .select(`
+            id,
+            league_id,
+            division_id,
+            home_team_id,
+            away_team_id,
+            location_id,
+            scheduled_date,
+            scheduled_time,
+            week_number,
+            status,
+            score_status,
+            home_score,
+            away_score,
+            is_published,
+            locations (
+              id,
+              name
+            ),
+            home_team:teams!matches_home_team_id_fkey (
+              id,
+              name
+            ),
+            away_team:teams!matches_away_team_id_fkey (
+              id,
+              name
+            ),
+            match_lines (
+              id,
+              line_number,
+              home_team_games_won,
+              away_team_games_won,
+              division_lines (
+                line_name
+              ),
+              line_games (
+                id,
+                game_number,
+                home_score,
+                away_score
+              )
+            )
+          `)
+          .eq("division_id", team.division_id)
+          .eq("is_published", true)
+          .order("scheduled_date", { ascending: true })
+          .order("scheduled_time", { ascending: true }),
+      ]);
+
+    setDivisionScheduleLoading(false);
+
+    if (teamsError) {
+      alert(teamsError.message);
+      return;
+    }
+
+    if (matchesError) {
+      alert(matchesError.message);
+      return;
+    }
+
+    setDivisionScheduleTeams(divisionTeams || []);
+    setDivisionScheduleMatches(divisionMatches || []);
+  }
+
   if (loading) {
     return <LoadingScreen subtitle="Loading Captain Dashboard..." />;
   }
@@ -1055,21 +1156,31 @@ export default function CaptainDashboardPage() {
                   Home Location: {team.locations?.name || "—"}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => router.push(`/teams/${team.id}`)}
-                  className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-                >
-                  Manage Roster
-                </button>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/teams/${team.id}`)}
+                    className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
+                  >
+                    Manage Roster
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => displayPrintDivisionCaptains(team)}
-                  className="mt-2 rounded-xl bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-200"
-                >
-                  Display/Print Division Captains
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => openDivisionSchedule(team)}
+                    className="rounded-xl bg-indigo-100 px-4 py-2 text-sm font-semibold text-indigo-900 hover:bg-indigo-200"
+                  >
+                    Division Team Schedules
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => displayPrintDivisionCaptains(team)}
+                    className="rounded-xl bg-blue-100 px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-200"
+                  >
+                    Display/Print Division Captains
+                  </button>
+                </div>
               </div>
               );
             })}
@@ -1119,6 +1230,29 @@ export default function CaptainDashboardPage() {
           {completedMatches.map(matchCard)}
           {completedMatches.length === 0 && <Empty message="No completed matches found." />}
         </Section>
+
+        {divisionScheduleTeam && (
+          <TeamScheduleModal
+            title="Division Team Schedules"
+            subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} · ${divisionScheduleTeam.divisions?.name || "Division"}`}
+            teams={divisionScheduleTeams}
+            selectedTeamId={divisionScheduleTeam.id}
+            onSelectTeam={(team) =>
+              setDivisionScheduleTeam({
+                ...divisionScheduleTeam,
+                ...team,
+              })
+            }
+            matches={divisionScheduleMatches}
+            loading={divisionScheduleLoading}
+            compact
+            onClose={() => {
+              setDivisionScheduleTeam(null);
+              setDivisionScheduleTeams([]);
+              setDivisionScheduleMatches([]);
+            }}
+          />
+        )}
       </div>
     </main>
   );
@@ -1168,6 +1302,10 @@ function buildMatchSetupStatus(matches, lineups) {
   });
 
   return status;
+}
+
+function scheduleWeekKey(divisionId, weekNumber, date) {
+  return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
 }
 
 function buildSingleMatchSetupStatus(match, teamId, lineups) {

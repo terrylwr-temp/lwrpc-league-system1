@@ -187,3 +187,8 @@ As of 2026-05-20:
 - User-facing delete actions now use the shared `app/lib/confirmDelete.js` helper, which requires typing `DELETE` and explains the affected records or risks before destructive actions proceed.
 - Members now have a `notification_preference` (`email` or `text`) used by captain match setup notices, score-entry notifications, and scoring reminders. Schedule settings also support `actual_schedule_weeks`, and Schedule Editor highlights court overbooking / blackout issues in red with a home-away counts popup.
 - Footer copyright rendering uses the centralized `COPYRIGHT_YEAR` from `app/lib/version.js` so client-rendered pages do not call `new Date().getFullYear()` during hydration.
+- Schedule Editor supports team-name and exact-date filters. Swap court warning text reports proposed swapped-location usage instead of the original match location.
+- Captain Dashboard and Player Dashboard only load `matches.is_published = true` for upcoming/visible match lists; draft schedules remain reviewable in Schedule Editor.
+- Captain Dashboard bye weeks are only shown when a published match exists for the same division/week/date, so byes do not appear automatically from an unpublished draft schedule.
+- Teams & Rosters has a team schedule popup with match status, match scores, configured game lines, and game scores. Captain Dashboard has a Division Team Schedules popup next to Manage Roster that lists every team in the division and shows published schedules/results.
+- Captain Dashboard's Division Team Schedules popup uses compact schedule cards that hide configured game-line details and show only date/time, teams, week/location, status, and total score.
