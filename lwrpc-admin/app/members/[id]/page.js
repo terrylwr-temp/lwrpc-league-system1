@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
@@ -22,12 +22,12 @@ export default function MemberDetailPage() {
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: memberData, error: memberError } = await supabase
       .from("members")
       .select("*")
@@ -121,7 +121,7 @@ setUserRole(roleData?.role || "player");
     });
     setSeasonRatings(ratingData || []);
     setTeamMemberships(teamData || []);
-  }
+  }, [id]);
 
   useEffect(() => {
     async function run() {
@@ -133,7 +133,7 @@ setUserRole(roleData?.role || "player");
     }
 
     run();
-  }, [id]);
+  }, [checkAuth, id, loadData]);
 
   useEffect(() => {
     if (searchParams.get("edit") === "1") {

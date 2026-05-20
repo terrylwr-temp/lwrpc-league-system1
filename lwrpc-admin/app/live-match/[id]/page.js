@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "../../lib/auth";
 
@@ -13,7 +13,7 @@ export default function LiveMatchPage() {
   const [games, setGames] = useState([]);
   const [lastUpdated, setLastUpdated] = useState(null);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: matchData, error: matchError } = await supabase
       .from("matches")
       .select(`
@@ -79,7 +79,7 @@ export default function LiveMatchPage() {
     setLines(lineData || []);
     setGames(gameData);
     setLastUpdated(new Date());
-  }
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -91,61 +91,9 @@ export default function LiveMatchPage() {
     }, 15000);
 
     return () => clearInterval(interval);
-  }, [id]);
+  }, [id, loadData]);
 
-  const matchSummary = useMemo(() => {
-    let homeTeams = 0;
-    let awayTeams = 0;
-
-    lines.forEach(line => {
-      const summary = getLineSummary(line);
-
-      if (summary.homeGameWins > summary.awayGameWins) homeTeams++;
-      if (summary.awayGameWins > summary.homeGameWins) awayTeams++;
-    });
-
-    let winner = "—";
-
-    if (homeTeams > awayTeams) {
-      winner = match?.home_team?.name || "Home";
-    }
-
-    if (awayTeams > homeTeams) {
-      winner = match?.away_team?.name || "Away";
-    }
-
-    return {
-      homeTeams,
-      awayTeams,
-      winner
-    };
-  }, [lines, games, match]);
-
-  function playerName(player) {
-    if (!player) return "—";
-
-    return `${player.first_name || ""} ${player.last_name || ""}`.trim();
-  }
-
-  function teamPlayers(line, side) {
-    if (side === "home") {
-      return [
-        playerName(line.home_player_1),
-        playerName(line.home_player_2)
-      ]
-        .filter(name => name !== "—")
-        .join(" / ") || "Lineup not posted";
-    }
-
-    return [
-      playerName(line.away_player_1),
-      playerName(line.away_player_2)
-    ]
-      .filter(name => name !== "—")
-      .join(" / ") || "Lineup not posted";
-  }
-
-  function getLineSummary(line) {
+  const getLineSummary = useCallback(function getLineSummary(line) {
     const lineGames = games.filter(
       game => game.match_line_id === line.id
     );
@@ -196,6 +144,58 @@ export default function LiveMatchPage() {
       completedGames,
       winner
     };
+  }, [games, match]);
+
+  const matchSummary = useMemo(() => {
+    let homeTeams = 0;
+    let awayTeams = 0;
+
+    lines.forEach(line => {
+      const summary = getLineSummary(line);
+
+      if (summary.homeGameWins > summary.awayGameWins) homeTeams++;
+      if (summary.awayGameWins > summary.homeGameWins) awayTeams++;
+    });
+
+    let winner = "—";
+
+    if (homeTeams > awayTeams) {
+      winner = match?.home_team?.name || "Home";
+    }
+
+    if (awayTeams > homeTeams) {
+      winner = match?.away_team?.name || "Away";
+    }
+
+    return {
+      homeTeams,
+      awayTeams,
+      winner
+    };
+  }, [getLineSummary, lines, match]);
+
+  function playerName(player) {
+    if (!player) return "—";
+
+    return `${player.first_name || ""} ${player.last_name || ""}`.trim();
+  }
+
+  function teamPlayers(line, side) {
+    if (side === "home") {
+      return [
+        playerName(line.home_player_1),
+        playerName(line.home_player_2)
+      ]
+        .filter(name => name !== "—")
+        .join(" / ") || "Lineup not posted";
+    }
+
+    return [
+      playerName(line.away_player_1),
+      playerName(line.away_player_2)
+    ]
+      .filter(name => name !== "—")
+      .join(" / ") || "Lineup not posted";
   }
 
   if (!match) {

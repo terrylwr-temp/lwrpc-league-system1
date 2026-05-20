@@ -1,7 +1,7 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -23,7 +23,7 @@ export default function PlayerDashboardPage() {
   const [selectedUpcomingTeamId, setSelectedUpcomingTeamId] = useState("");
   const [historyFilter, setHistoryFilter] = useState("");
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -186,7 +186,7 @@ export default function PlayerDashboardPage() {
     setMatches(matchData);
     setPlayHistory(historyData);
     setLoading(false);
-  }
+  }, []);
 
   useEffect(() => {
     async function run() {
@@ -195,7 +195,7 @@ export default function PlayerDashboardPage() {
     }
 
     run();
-  }, []);
+  }, [loadData, router]);
 
   const upcomingMatchesBySelectedTeam = useMemo(() => {
     if (!selectedUpcomingTeamId) return [];

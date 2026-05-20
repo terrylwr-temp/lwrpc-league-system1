@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -27,12 +27,12 @@ export default function ScheduleEditorPage() {
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: matchData, error: matchError } = await supabase
       .from("matches")
       .select(`
@@ -108,7 +108,7 @@ export default function ScheduleEditorPage() {
     setTeams(teamData || []);
     setAvailability(availabilityData || []);
     setLeagueBlackouts(blackoutData || []);
-  }
+  }, []);
 
   function courtsNeededForMatch(match) {
     const setting = scheduleSettings.find(
@@ -533,7 +533,7 @@ export default function ScheduleEditorPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   const filteredDivisions = useMemo(() => {
     if (!leagueFilter) return divisions;

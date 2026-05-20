@@ -7,6 +7,7 @@ alter table public.divisions
   add column if not exists default_lines_config jsonb;
 
 alter table public.division_lines
+  add column if not exists team_win_points integer default 1,
   add column if not exists picklebreaker_win_points integer default 1,
   add column if not exists picklebreaker_loss_points integer default 0;
 

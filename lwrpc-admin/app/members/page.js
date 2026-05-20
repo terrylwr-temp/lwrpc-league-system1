@@ -1,7 +1,7 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -19,7 +19,7 @@ export default function MembersPage() {
   const [cleaningMembers, setCleaningMembers] = useState(false);
   const [showMaintenance, setShowMaintenance] = useState(false);
 
-  async function loadMembers() {
+  const loadMembers = useCallback(async function loadMembers() {
     setLoading(true);
 
     const user = await requireRole(router, "league_manager");
@@ -50,7 +50,7 @@ export default function MembersPage() {
 
     setMembers(data || []);
     setLoading(false);
-  }
+  }, [router]);
 
   async function deactivateMember() {
     alert("Your members table currently does not have an active/status field yet.");
@@ -166,9 +166,9 @@ export default function MembersPage() {
     return "Player";
   }
 
-  function getMemberRole(member) {
+  const getMemberRole = useCallback(function getMemberRole(member) {
     return formatRole(member.user_roles?.[0]?.role || "player");
-  }
+  }, []);
 
   function goToPage(value) {
     const requestedPage = Number(value);
@@ -188,7 +188,7 @@ export default function MembersPage() {
 
   useEffect(() => {
     loadMembers();
-  }, []);
+  }, [loadMembers]);
 
   useEffect(() => {
     setPage(1);
@@ -214,7 +214,7 @@ export default function MembersPage() {
         role.toLowerCase().includes(q)
       );
     });
-  }, [members, search]);
+  }, [getMemberRole, members, search]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 

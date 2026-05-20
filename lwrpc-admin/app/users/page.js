@@ -1,7 +1,7 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -16,12 +16,12 @@ export default function UsersPage() {
 
   const [search, setSearch] = useState("");
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "commissioner");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: memberData, error: memberError } = await supabase
       .from("members")
       .select(`
@@ -50,7 +50,7 @@ export default function UsersPage() {
     setMembers(memberData || []);
     setRoles(roleData || []);
     setLoading(false);
-  }
+  }, []);
 
   function getRole(memberId) {
     const role = roles.find(
@@ -106,7 +106,7 @@ const { error } = await supabase
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   const filteredMembers = useMemo(() => {
     return members.filter(member => {

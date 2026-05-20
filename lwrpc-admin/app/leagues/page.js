@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -21,12 +21,12 @@ export default function LeaguesPage() {
   const [editingSeasonId, setEditingSeasonId] = useState(null);
   const [editingLeagueId, setEditingLeagueId] = useState(null);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: seasonsData } = await supabase
       .from("seasons")
       .select("*")
@@ -44,7 +44,7 @@ export default function LeaguesPage() {
 
     setSeasons(seasonsData || []);
     setLeagues(leaguesData || []);
-  }
+  }, []);
 
   async function saveSeason(e) {
     e.preventDefault();
@@ -208,7 +208,7 @@ export default function LeaguesPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">

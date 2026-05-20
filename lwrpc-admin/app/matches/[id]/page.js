@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import LoadingScreen from "../../components/LoadingScreen";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
@@ -19,12 +19,12 @@ export default function MatchDetailPage() {
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [currentUserMember, setCurrentUserMember] = useState(null);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     setLoading(true);
 
     const {
@@ -218,7 +218,7 @@ export default function MatchDetailPage() {
     setSeasonRatings(ratingData);
     setGames(gameData);
     setLoading(false);
-  }
+  }, [id]);
 
   function rosterOptionName(row) {
     const member = row.members;
@@ -284,7 +284,7 @@ export default function MatchDetailPage() {
     return pieces.join(" · ");
   }
 
-  function getDisplayedLines(allLines) {
+  const getDisplayedLines = useCallback(function getDisplayedLines(allLines) {
     const seen = new Set();
 
     return [...allLines]
@@ -301,11 +301,11 @@ export default function MatchDetailPage() {
         seen.add(key);
         return true;
       });
-  }
+  }, []);
 
-  const displayedLines = useMemo(() => getDisplayedLines(lines), [lines, match]);
+  const displayedLines = useMemo(() => getDisplayedLines(lines), [getDisplayedLines, lines]);
 
-  function getLineSummary(line) {
+  const getLineSummary = useCallback(function getLineSummary(line) {
     const lineGames = games.filter((game) => game.match_line_id === line.id);
 
     let homeGameWins = 0;
@@ -354,7 +354,7 @@ export default function MatchDetailPage() {
       winningTeamId,
       winnerName,
     };
-  }
+  }, [games, match]);
 
   const playerAssignmentCounts = useMemo(() => {
     const counts = {};
@@ -455,7 +455,7 @@ export default function MatchDetailPage() {
       winningTeamId,
       winnerName,
     };
-  }, [displayedLines, games, match]);
+  }, [displayedLines, getLineSummary, match]);
 
   async function updateLinePlayer(lineId, field, value) {
     const selectedLine = lines.find((line) => line.id === lineId);
@@ -1002,7 +1002,7 @@ export default function MatchDetailPage() {
     }
 
     run();
-  }, [id]);
+  }, [checkAuth, id, loadData]);
 
   if (loading || !match) {
     return <LoadingScreen subtitle="Loading Match Operations..." />;
@@ -1298,6 +1298,30 @@ function TeamPlayers({
   updateLinePlayer,
   rosterOptionName,
 }) {
+  function selectedPlayerFor(field) {
+    const playerKey = field.replace(/_id$/, "");
+    const player = line[playerKey];
+    const playerId = line[field];
+
+    if (!playerId || !player) return null;
+
+    const existsInRoster = roster.some(
+      (row) => String(row.members?.id) === String(playerId)
+    );
+
+    if (existsInRoster) return null;
+
+    return {
+      id: playerId,
+      label: `${player.last_name || ""}, ${player.first_name || ""}`.trim() ||
+        `${player.first_name || ""} ${player.last_name || ""}`.trim() ||
+        "Selected Player",
+    };
+  }
+
+  const selectedPlayer1 = selectedPlayerFor(player1Field);
+  const selectedPlayer2 = selectedPlayerFor(player2Field);
+
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-2">
       <h3 className="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-900">
@@ -1314,6 +1338,9 @@ function TeamPlayers({
           className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
         >
           <option value="">Select Player 1</option>
+          {selectedPlayer1 && (
+            <option value={selectedPlayer1.id}>{selectedPlayer1.label}</option>
+          )}
 
           {roster.map((player) => (
             <option key={player.members?.id} value={player.members?.id}>
@@ -1328,6 +1355,9 @@ function TeamPlayers({
           className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
         >
           <option value="">Select Player 2</option>
+          {selectedPlayer2 && (
+            <option value={selectedPlayer2.id}>{selectedPlayer2.label}</option>
+          )}
 
           {roster.map((player) => (
             <option key={player.members?.id} value={player.members?.id}>

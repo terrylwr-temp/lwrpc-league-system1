@@ -16,7 +16,7 @@ export default function DashboardPage() {
     }
 
     run();
-  }, []);
+  }, [router]);
 
   if (!ready) {
     return (

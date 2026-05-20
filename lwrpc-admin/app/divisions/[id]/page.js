@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { supabase } from "../../lib/auth";
@@ -22,13 +22,10 @@ export default function DivisionDetailPage() {
   const [gamesPerTeam, setGamesPerTeam] = useState("3");
   const [pointsToWin, setPointsToWin] = useState("11");
   const [winBy, setWinBy] = useState("2");
-  const [picklebreakerEnabled, setPicklebreakerEnabled] = useState(false);
-  const [picklebreakerPoints, setPicklebreakerPoints] = useState("25");
-  const [picklebreakerWinPoints, setPicklebreakerWinPoints] = useState("1");
-  const [picklebreakerLossPoints, setPicklebreakerLossPoints] = useState("0");
+  const [teamWinPoints, setTeamWinPoints] = useState("1");
   const [editingId, setEditingId] = useState(null);
 
-  function normalizeDefaultLinesConfig(value) {
+  const normalizeDefaultLinesConfig = useCallback(function normalizeDefaultLinesConfig(value) {
     if (!value) return [];
 
     if (Array.isArray(value)) return value;
@@ -46,7 +43,7 @@ export default function DivisionDetailPage() {
     if (Array.isArray(value.default_lines)) return value.default_lines;
 
     return [];
-  }
+  }, []);
 
   function loadGlobalDefaultLinesConfig() {
     if (typeof window === "undefined") return [];
@@ -121,7 +118,7 @@ export default function DivisionDetailPage() {
     };
   }
 
-  function lineSnapshot(line, index) {
+  const lineSnapshot = useCallback(function lineSnapshot(line, index) {
     return {
       line_number: Number(line.line_number ?? index + 1),
       line_name: line.line_name ?? line.name ?? `Line ${index + 1}`,
@@ -131,15 +128,16 @@ export default function DivisionDetailPage() {
       games_per_line: Number(line.games_per_line ?? line.games_per_team ?? 3),
       points_to_win: Number(line.points_to_win ?? 11),
       win_by: Number(line.win_by ?? 2),
-      picklebreaker_enabled: line.picklebreaker_enabled ?? false,
-      picklebreaker_points: Number(line.picklebreaker_points ?? 25),
+      team_win_points: Number(line.team_win_points ?? 1),
+      picklebreaker_enabled: (line.line_type ?? "") === "picklebreaker",
+      picklebreaker_points: Number(line.picklebreaker_points ?? line.points_to_win ?? 25),
       picklebreaker_win_points: Number(line.picklebreaker_win_points ?? 1),
       picklebreaker_loss_points: Number(line.picklebreaker_loss_points ?? 0),
       sort_order: Number(line.sort_order ?? line.line_number ?? index + 1),
     };
-  }
+  }, []);
 
-  function mergeLineWithDefault(line, index, defaults) {
+  const mergeLineWithDefault = useCallback(function mergeLineWithDefault(line, index, defaults) {
     const matchingDefault =
       defaults.find(
         (item) => Number(item.line_number) === Number(line.line_number)
@@ -156,8 +154,8 @@ export default function DivisionDetailPage() {
       games_per_line: Number(line.games_per_line ?? fallback.games_per_line),
       points_to_win: Number(line.points_to_win ?? fallback.points_to_win),
       win_by: Number(line.win_by ?? fallback.win_by),
-      picklebreaker_enabled:
-        line.picklebreaker_enabled ?? fallback.picklebreaker_enabled,
+      team_win_points: Number(line.team_win_points ?? fallback.team_win_points ?? 1),
+      picklebreaker_enabled: (line.line_type || fallback.line_type) === "picklebreaker",
       picklebreaker_points: Number(
         line.picklebreaker_points ?? fallback.picklebreaker_points
       ),
@@ -169,7 +167,7 @@ export default function DivisionDetailPage() {
       ),
       sort_order: Number(line.sort_order ?? fallback.sort_order),
     };
-  }
+  }, [lineSnapshot]);
 
   function linePayloadFromConfig(line, index) {
     return {
@@ -184,7 +182,7 @@ export default function DivisionDetailPage() {
     );
   }
 
-  function hydrateConfiguredLines(divisionData, lineData) {
+  const hydrateConfiguredLines = useCallback(function hydrateConfiguredLines(divisionData, lineData) {
     const defaultConfig = normalizeDefaultLinesConfig(
       divisionData.default_lines_config
     );
@@ -210,14 +208,12 @@ export default function DivisionDetailPage() {
       ...line,
       id: line.id || `config-${line.line_number || index + 1}`,
     }));
-  }
+  }, [mergeLineWithDefault, normalizeDefaultLinesConfig, lineSnapshot]);
 
   function lineTypeLabel(value) {
     const labels = {
       doubles: "Doubles",
       mixed: "Mixed Doubles",
-      women: "Women",
-      men: "Men",
       singles: "Singles",
       picklebreaker: "Picklebreaker",
     };
@@ -283,7 +279,7 @@ export default function DivisionDetailPage() {
     saveGlobalDefaultLinesConfig(orderedLines);
   }
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const { data } = await supabase.auth.getSession();
 
     if (!data.session) {
@@ -292,9 +288,9 @@ export default function DivisionDetailPage() {
     }
 
     return true;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: divisionData, error: divisionError } = await supabase
       .from("divisions")
       .select(`
@@ -328,7 +324,7 @@ export default function DivisionDetailPage() {
 
     setDivision(divisionData);
     setLines(hydrateConfiguredLines(divisionData, lineData || []));
-  }
+  }, [hydrateConfiguredLines, id]);
 
   async function saveTeam(e) {
     e.preventDefault();
@@ -342,10 +338,11 @@ export default function DivisionDetailPage() {
       games_per_line: Number(gamesPerTeam || 3),
       points_to_win: Number(pointsToWin || 11),
       win_by: Number(winBy || 2),
-      picklebreaker_enabled: picklebreakerEnabled,
-      picklebreaker_points: Number(picklebreakerPoints || 25),
-      picklebreaker_win_points: Number(picklebreakerWinPoints || 1),
-      picklebreaker_loss_points: Number(picklebreakerLossPoints || 0),
+      team_win_points: Number(teamWinPoints || 1),
+      picklebreaker_enabled: teamType === "picklebreaker",
+      picklebreaker_points: Number(pointsToWin || 11),
+      picklebreaker_win_points: 1,
+      picklebreaker_loss_points: 0,
       sort_order: Number(teamNumber || 1),
     };
 
@@ -511,10 +508,11 @@ export default function DivisionDetailPage() {
             games_per_line: division.games_per_line || 3,
             points_to_win: division.points_to_win || 11,
             win_by: division.win_by || 2,
-            picklebreaker_enabled: division.picklebreaker_enabled || false,
-            picklebreaker_points: division.picklebreaker_points || 25,
-            picklebreaker_win_points: division.picklebreaker_win_points || 1,
-            picklebreaker_loss_points: division.picklebreaker_loss_points || 0,
+            team_win_points: 1,
+            picklebreaker_enabled: false,
+            picklebreaker_points: division.points_to_win || 11,
+            picklebreaker_win_points: 1,
+            picklebreaker_loss_points: 0,
             sort_order: index + 1,
           }));
 
@@ -576,10 +574,7 @@ export default function DivisionDetailPage() {
     setGamesPerTeam(String(line.games_per_line || 3));
     setPointsToWin(String(line.points_to_win || 11));
     setWinBy(String(line.win_by || 2));
-    setPicklebreakerEnabled(line.picklebreaker_enabled || false);
-    setPicklebreakerPoints(String(line.picklebreaker_points || 25));
-    setPicklebreakerWinPoints(String(line.picklebreaker_win_points ?? 1));
-    setPicklebreakerLossPoints(String(line.picklebreaker_loss_points ?? 0));
+    setTeamWinPoints(String(line.team_win_points ?? 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -593,10 +588,7 @@ export default function DivisionDetailPage() {
     setGamesPerTeam("3");
     setPointsToWin("11");
     setWinBy("2");
-    setPicklebreakerEnabled(false);
-    setPicklebreakerPoints("25");
-    setPicklebreakerWinPoints("1");
-    setPicklebreakerLossPoints("0");
+    setTeamWinPoints("1");
   }
 
   useEffect(() => {
@@ -609,7 +601,7 @@ export default function DivisionDetailPage() {
     }
 
     run();
-  }, [id]);
+  }, [checkAuth, id, loadData]);
 
   if (!division) {
     return (
@@ -718,8 +710,6 @@ export default function DivisionDetailPage() {
                 >
                   <option value="doubles">Doubles</option>
                   <option value="mixed">Mixed Doubles</option>
-                  <option value="women">Women</option>
-                  <option value="men">Men</option>
                   <option value="singles">Singles</option>
                   <option value="picklebreaker">Picklebreaker</option>
                 </select>
@@ -756,7 +746,7 @@ export default function DivisionDetailPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                 <div>
                   <FieldLabel label="Games / Line" />
                   <input
@@ -798,70 +788,21 @@ export default function DivisionDetailPage() {
                     Minimum margin needed to win.
                   </p>
                 </div>
-              </div>
 
-              <label className="flex items-start gap-3 rounded-xl border border-slate-300 px-4 py-3">
-                <input
-                  type="checkbox"
-                  checked={picklebreakerEnabled}
-                  onChange={(e) => setPicklebreakerEnabled(e.target.checked)}
-                  className="mt-1"
-                />
-                <span>
-                  <span className="block font-medium text-slate-700">Picklebreaker</span>
-                  <span className="mt-1 block text-xs text-slate-500">
-                    Enable a special deciding picklebreaker if needed.
-                  </span>
-                </span>
-              </label>
-
-              {picklebreakerEnabled && (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                  <div className="text-sm font-bold uppercase tracking-wide text-amber-900">
-                    Picklebreaker Setup
-                  </div>
-
-                  <div className="mt-4 space-y-4">
-                    <div>
-                      <FieldLabel label="Picklebreaker Winning Score" />
-                      <input
-                        type="number"
-                        value={picklebreakerPoints}
-                        onChange={(e) => setPicklebreakerPoints(e.target.value)}
-                        className="w-full rounded-xl border border-amber-300 bg-white px-4 py-3"
-                        placeholder="Picklebreaker Points"
-                      />
-                      <p className="mt-1 text-xs text-amber-800">
-                        Target score for the picklebreaker game.
-                      </p>
-                    </div>
-
-                    <div>
-                      <FieldLabel label="Picklebreaker Standings Point System" />
-                      <div className="grid grid-cols-2 gap-3">
-                        <input
-                          type="number"
-                          value={picklebreakerWinPoints}
-                          onChange={(e) => setPicklebreakerWinPoints(e.target.value)}
-                          className="rounded-xl border border-amber-300 bg-white px-4 py-3"
-                          placeholder="Win"
-                        />
-
-                        <input
-                          type="number"
-                          value={picklebreakerLossPoints}
-                          onChange={(e) => setPicklebreakerLossPoints(e.target.value)}
-                          className="rounded-xl border border-amber-300 bg-white px-4 py-3"
-                          placeholder="Loss"
-                        />
-                      </div>
-                      <p className="mt-1 text-xs text-amber-800">
-                        Separate standings points awarded when the picklebreaker decides the match.
-                      </p>
-                    </div>
-                  </div>
+                <div>
+                  <FieldLabel label="Team Win Points" />
+                  <input
+                    type="number"
+                    value={teamWinPoints}
+                    onChange={(e) => setTeamWinPoints(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    placeholder="Points"
+                  />
+                  <p className="mt-1 text-xs text-slate-500">
+                    Points awarded to the team that wins this game line.
+                  </p>
                 </div>
-              )}
+              </div>
 
               <div className="flex gap-3">
                 <button
@@ -909,11 +850,7 @@ export default function DivisionDetailPage() {
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">
-                        Games / Line: {line.games_per_line} · To {line.points_to_win} · Win by {line.win_by}
-                      </div>
-
-                      <div className="mt-1 text-sm text-slate-600">
-                        Picklebreaker: {line.picklebreaker_enabled ? `Yes (${line.picklebreaker_points}) · W=${line.picklebreaker_win_points ?? 1} / L=${line.picklebreaker_loss_points ?? 0}` : "No"}
+                        Games / Line: {line.games_per_line} · To {line.points_to_win} · Win by {line.win_by} · Team win points: {line.team_win_points ?? 1}
                       </div>
                     </div>
 

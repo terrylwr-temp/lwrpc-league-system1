@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
@@ -28,12 +28,12 @@ export default function TeamRosterPage() {
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState("");
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: teamData, error: teamError } = await supabase
       .from("teams")
       .select(`
@@ -233,7 +233,7 @@ export default function TeamRosterPage() {
     if (!selectedLocationId && teamData.home_location_id) {
       setSelectedLocationId(teamData.home_location_id);
     }
-  }
+  }, [id, selectedLocationId]);
 
   function getSeasonRating(memberId) {
     return seasonRatings.find(
@@ -361,7 +361,7 @@ function getAverageTeamRating() {
   return (total / ratings.length).toFixed(3);
 }
 
-  function getRosterRank(member) {
+  const getRosterRank = useCallback(function getRosterRank(member) {
     if (!member || !team) return 9;
 
     if (
@@ -381,7 +381,7 @@ function getAverageTeamRating() {
     }
 
     return 3;
-  }
+  }, [team]);
 
   function historyRowsForMember(memberId) {
     return sortHistoryRows(
@@ -418,7 +418,7 @@ function getAverageTeamRating() {
       return (aMember?.first_name || "")
         .localeCompare(bMember?.first_name || "");
     });
-  }, [roster, team]);
+  }, [getRosterRank, roster]);
 
   async function addPlayer() {
     if (!selectedMemberId) {
@@ -535,7 +535,7 @@ function getAverageTeamRating() {
     }
 
     run();
-  }, [id]);
+  }, [checkAuth, id, loadData]);
 
   const availableMembers = useMemo(() => {
     return members

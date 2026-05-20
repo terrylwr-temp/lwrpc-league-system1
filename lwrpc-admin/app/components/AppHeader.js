@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
@@ -19,7 +20,7 @@ export default function AppHeader({
   const [sidebarReady, setSidebarReady] = useState(false);
   const [openGroups, setOpenGroups] = useState({});
 
-  const primaryLinks = [
+  const primaryLinks = useMemo(() => [
     { label: "Dashboard", path: "/player-dashboard", role: "player", icon: "\u{1F3E0}" },
     { label: "Admin Dashboard", path: "/", role: "league_manager", icon: "\u{2699}\u{FE0F}" },
     {
@@ -28,9 +29,9 @@ export default function AppHeader({
       role: "captain",
       icon: "\u{1F9E2}"
     }
-  ];
+  ], []);
 
-  const groups = [
+  const groups = useMemo(() => [
     {
       key: "operations",
       label: "League Operations",
@@ -59,7 +60,7 @@ export default function AppHeader({
         { label: "Locations", path: "/locations", role: "league_manager", icon: "\u{1F4CD}" },
       ]
     }
-  ];
+  ], []);
 
   async function loadUser() {
     const {
@@ -98,9 +99,9 @@ export default function AppHeader({
     router.push("/login");
   }
 
-  function isActive(path) {
+  const isActive = useCallback(function isActive(path) {
     return pathname === path || (path !== "/" && pathname.startsWith(path));
-  }
+  }, [pathname]);
 
   useEffect(() => {
     loadUser();
@@ -130,11 +131,11 @@ export default function AppHeader({
     if (activeGroup) {
       setOpenGroups({ [activeGroup.key]: true });
     }
-  }, [pathname]);
+  }, [groups, isActive]);
 
   const visiblePrimaryLinks = useMemo(() => {
     return primaryLinks.filter(link => hasRole(role, link.role));
-  }, [role]);
+  }, [primaryLinks, role]);
 
   const visibleGroups = useMemo(() => {
     return groups
@@ -143,7 +144,7 @@ export default function AppHeader({
         links: group.links.filter(link => hasRole(role, link.role))
       }))
       .filter(group => group.links.length > 0);
-  }, [role]);
+  }, [groups, role]);
 
   function toggleGroup(key) {
     setOpenGroups(prev => (prev[key] ? {} : { [key]: true }));
@@ -228,9 +229,11 @@ export default function AppHeader({
       >
         <div className="flex h-full flex-col overflow-y-auto p-4">
           <div className="flex items-center gap-4 border-b border-white/10 pb-5">
-            <img
+            <Image
               src="https://lwrpickleballclub.com/lwrpc-logo.png"
               alt="Lakewood Ranch Pickleball Club"
+              width={56}
+              height={56}
               className="h-14 w-14 rounded-full bg-white object-contain p-1"
             />
 
@@ -313,9 +316,11 @@ export default function AppHeader({
               {"\u{2630}"}
             </button>
 
-            <img
+            <Image
               src="https://lwrpickleballclub.com/lwrpc-logo.png"
               alt="Lakewood Ranch Pickleball Club"
+              width={56}
+              height={56}
               className="h-14 w-14 rounded-full object-contain lg:hidden"
             />
 
@@ -359,9 +364,11 @@ export default function AppHeader({
 
           <div className="relative h-full w-80 max-w-[85vw] overflow-y-auto bg-slate-950 p-5 text-white shadow-2xl">
             <div className="flex items-center justify-between">
-              <img
+              <Image
                 src="https://lwrpickleballclub.com/lwrpc-logo.png"
                 alt="Lakewood Ranch Pickleball Club"
+                width={64}
+                height={64}
                 className="h-16 w-16 rounded-full bg-white object-contain p-1"
               />
 

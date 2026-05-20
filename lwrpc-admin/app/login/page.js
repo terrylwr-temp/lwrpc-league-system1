@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
@@ -118,9 +119,11 @@ export default function LoginPage() {
 
           <div className="text-center">
 
-            <img
+            <Image
               src="https://lwrpickleballclub.com/lwrpc-logo.png"
               alt="Lakewood Ranch Pickleball Club"
+              width={112}
+              height={112}
               className="mx-auto h-28 w-28 rounded-full bg-white object-contain"
             />
 

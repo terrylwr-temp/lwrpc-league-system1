@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -30,12 +30,12 @@ export default function MatchesPage() {
   const [generateStartWeek, setGenerateStartWeek] = useState("1");
   const [isGenerating, setIsGenerating] = useState(false);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: leagueData } = await supabase
       .from("leagues")
       .select("*")
@@ -90,7 +90,7 @@ export default function MatchesPage() {
     setTeams(teamData || []);
     setLocations(locationData || []);
     setMatches(matchData || []);
-  }
+  }, []);
 
   async function createMatch(e) {
     e.preventDefault();
@@ -407,7 +407,7 @@ export default function MatchesPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   const filteredDivisions = useMemo(() => {
     if (!selectedLeague) return [];

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { requireRole, supabase } from "../../lib/auth";
 
@@ -12,12 +12,12 @@ export default function MobileScoreEntryPage() {
   const [lines, setLines] = useState([]);
   const [games, setGames] = useState([]);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: matchData, error: matchError } = await supabase
       .from("matches")
       .select(`
@@ -76,7 +76,7 @@ export default function MobileScoreEntryPage() {
     setMatch(matchData);
     setLines(lineData || []);
     setGames(gameData);
-  }
+  }, [id]);
 
   async function updateGame(gameId, field, value) {
     const { error } = await supabase
@@ -222,7 +222,7 @@ export default function MobileScoreEntryPage() {
     }
 
     run();
-  }, [id]);
+  }, [checkAuth, id, loadData]);
 
   if (!match) {
     return (

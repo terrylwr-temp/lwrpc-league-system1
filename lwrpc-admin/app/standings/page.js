@@ -1,7 +1,7 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { hasRole } from "../lib/permissions";
@@ -19,13 +19,13 @@ export default function StandingsPage() {
   const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("");
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "player");
     if (user?.role) setCurrentRole(user.role);
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: leagueData } = await supabase
       .from("leagues")
       .select("*")
@@ -61,7 +61,7 @@ export default function StandingsPage() {
     }
 
     setLoading(false);
-  }
+  }, []);
 
   function compareTeams(a, b, division) {
     const rules = [
@@ -363,7 +363,7 @@ export default function StandingsPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   const filteredDivisions = useMemo(() => {
     if (!selectedLeague) return [];

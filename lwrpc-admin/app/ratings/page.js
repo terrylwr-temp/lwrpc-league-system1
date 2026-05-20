@@ -1,7 +1,7 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -27,12 +27,52 @@ export default function RatingsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadInitialData() {
+  const loadRatings = useCallback(async function loadRatings(seasonId) {
+    if (!seasonId) {
+      setRatings([]);
+      return;
+    }
+
+    setRatingsLoading(true);
+
+    const { data, error } = await supabase
+      .from("member_season_ratings")
+      .select(
+        "id, member_id, season_id, season_dupr_rating, season_primetime_rating"
+      )
+      .eq("season_id", seasonId);
+
+    if (error) {
+      alert(error.message);
+      setRatingsLoading(false);
+      return;
+    }
+
+    setRatings(data || []);
+    setRatingsLoading(false);
+  }, []);
+
+  const loadAllRatings = useCallback(async function loadAllRatings() {
+    const { data, error } = await supabase
+      .from("member_season_ratings")
+      .select(
+        "id, member_id, season_id, season_dupr_rating, season_primetime_rating"
+      );
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setAllRatings(data || []);
+  }, []);
+
+  const loadInitialData = useCallback(async function loadInitialData() {
     setLoading(true);
 
     const { data: memberData, error: memberError } = await supabase
@@ -70,47 +110,7 @@ export default function RatingsPage() {
     await loadAllRatings();
 
     setLoading(false);
-  }
-
-  async function loadRatings(seasonId) {
-    if (!seasonId) {
-      setRatings([]);
-      return;
-    }
-
-    setRatingsLoading(true);
-
-    const { data, error } = await supabase
-      .from("member_season_ratings")
-      .select(
-        "id, member_id, season_id, season_dupr_rating, season_primetime_rating"
-      )
-      .eq("season_id", seasonId);
-
-    if (error) {
-      alert(error.message);
-      setRatingsLoading(false);
-      return;
-    }
-
-    setRatings(data || []);
-    setRatingsLoading(false);
-  }
-
-  async function loadAllRatings() {
-    const { data, error } = await supabase
-      .from("member_season_ratings")
-      .select(
-        "id, member_id, season_id, season_dupr_rating, season_primetime_rating"
-      );
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    setAllRatings(data || []);
-  }
+  }, [loadAllRatings, loadRatings]);
 
   async function updateRating(memberId, field, value) {
     if (!selectedSeason) {
@@ -440,7 +440,7 @@ export default function RatingsPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadInitialData]);
 
   useEffect(() => {
     setPage(1);
@@ -454,7 +454,7 @@ export default function RatingsPage() {
     if (!selectedSeason) {
       setRatings([]);
     }
-  }, [selectedSeason]);
+  }, [loading, loadRatings, selectedSeason]);
 
   const filteredMembers = useMemo(() => {
     const q = search.trim().toLowerCase();

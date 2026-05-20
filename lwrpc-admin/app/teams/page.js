@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -104,12 +104,12 @@ export default function TeamsPage() {
     return groups;
   }, [filteredTeams]);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: leagueData } = await supabase
       .from("leagues")
       .select("id, name")
@@ -187,7 +187,7 @@ export default function TeamsPage() {
     setMembers(memberData || []);
     setTeams(teamData || []);
     setLoading(false);
-  }
+  }, []);
 
   async function upgradeMemberToCaptain(memberId) {
     if (!memberId) return;
@@ -358,7 +358,7 @@ export default function TeamsPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   function memberName(member) {
     return (

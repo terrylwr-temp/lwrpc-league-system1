@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -48,12 +48,12 @@ export default function SchedulingPage() {
   const [blackoutDate, setBlackoutDate] = useState("");
   const [blackoutReason, setBlackoutReason] = useState("");
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: leagueData, error: leagueError } = await supabase
       .from("leagues")
       .select("id, name")
@@ -102,7 +102,7 @@ export default function SchedulingPage() {
     setAvailability(availabilityData || []);
     setLeagueBlackouts(leagueBlackoutData || []);
     setMatches(matchData || []);
-  }
+  }, []);
 
   useEffect(() => {
     async function run() {
@@ -111,7 +111,7 @@ export default function SchedulingPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   const filteredDivisions = useMemo(() => {
     if (!selectedLeague) return [];

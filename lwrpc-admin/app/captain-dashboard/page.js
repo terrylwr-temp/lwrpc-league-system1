@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -17,12 +17,12 @@ export default function CaptainDashboardPage() {
   const [upcomingTeamFilter, setUpcomingTeamFilter] = useState("");
   const [loading, setLoading] = useState(true);
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     setLoading(true);
 
     const startedAt = Date.now();
@@ -210,7 +210,7 @@ export default function CaptainDashboardPage() {
 
     setByeWeeks(byeData || []);
     finishLoading(startedAt, setLoading);
-  }
+  }, []);
 
   useEffect(() => {
     async function run() {
@@ -222,7 +222,7 @@ export default function CaptainDashboardPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   const upcomingMatches = useMemo(() => {
     return matches.filter(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -41,12 +41,12 @@ export default function DivisionsPage() {
   const [tiebreak2, setTiebreak2] = useState("line_wins");
   const [tiebreak3, setTiebreak3] = useState("point_differential");
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadData() {
+  const loadData = useCallback(async function loadData() {
     const { data: leagueData, error: leagueError } = await supabase
       .from("leagues")
       .select(`
@@ -84,7 +84,7 @@ export default function DivisionsPage() {
 
     setLeagues(leagueData || []);
     setDivisions(divisionData || []);
-  }
+  }, []);
 
   async function saveDivision(e) {
     e.preventDefault();
@@ -269,7 +269,7 @@ export default function DivisionsPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadData]);
 
   const filteredDivisions = useMemo(() => {
     const search = divisionSearch.trim().toLowerCase();

@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 export default function LoadingScreen({
   title = "LWR PC League Management System",
   subtitle = "Loading..."
@@ -7,10 +9,11 @@ export default function LoadingScreen({
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
       <div className="w-full max-w-md rounded-3xl bg-white p-10 text-center shadow-2xl">
-
-        <img
+        <Image
           src="https://lwrpickleballclub.com/lwrpc-logo.png"
           alt="Lakewood Ranch Pickleball Club"
+          width={112}
+          height={112}
           className="mx-auto h-28 w-28 rounded-full bg-white object-contain"
         />
 
@@ -23,13 +26,13 @@ export default function LoadingScreen({
         </p>
 
         <div className="mt-8 flex justify-center">
-<div className="mt-8 flex justify-center">
-  <img
-    src="/favicon.ico"
-    alt="Loading"
-    className="h-16 w-16 animate-spin object-contain"
-  />
-</div>
+          <Image
+            src="/favicon.ico"
+            alt="Loading"
+            width={64}
+            height={64}
+            className="h-16 w-16 animate-spin object-contain"
+          />
         </div>
 
         <div className="mt-6 text-xs uppercase tracking-[0.2em] text-slate-400">

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -26,12 +26,12 @@ export default function LocationsPage() {
   const [clubPros, setClubPros] = useState("");
   const [courtNotes, setCourtNotes] = useState("");
 
-  async function checkAuth() {
+  const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
     return !!user;
-  }
+  }, [router]);
 
-  async function loadLocations() {
+  const loadLocations = useCallback(async function loadLocations() {
     const { data, error } = await supabase
       .from("locations")
       .select("*")
@@ -43,7 +43,7 @@ export default function LocationsPage() {
     }
 
     setLocations(data || []);
-  }
+  }, []);
 
   async function saveLocation(e) {
     e.preventDefault();
@@ -231,7 +231,7 @@ export default function LocationsPage() {
     }
 
     run();
-  }, []);
+  }, [checkAuth, loadLocations]);
 
   const filteredLocations = useMemo(() => {
     const search = locationSearch.trim().toLowerCase();
