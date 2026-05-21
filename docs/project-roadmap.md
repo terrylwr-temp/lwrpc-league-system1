@@ -204,3 +204,4 @@ As of 2026-05-20:
 - Admin Dashboard command-center header no longer includes the duplicate Open Schedule Editor button because Schedule Editor remains available in the Match Operations tool cards.
 - Admin Dashboard now places League Structure below Match Operations and replaces the bottom build-status placeholders with live operational counts for assigned app users, saved communication templates, and verified matches waiting for DUPR export.
 - Admin Dashboard System Snapshot now uses assigned app users, pending score verifications, and verified matches waiting for DUPR export; live signed-in user presence is not currently tracked by the app.
+- Admin Dashboard active-season metrics now scope players-on-teams, teams, this-week matches, pending verifications, average roster count, and average team DUPR rating to leagues whose season start/end dates include the current date.

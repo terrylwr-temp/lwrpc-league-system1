@@ -11,43 +11,55 @@ export default function DashboardPage() {
   const [dashboardCounts, setDashboardCounts] = useState(null);
 
   const loadDashboardCounts = useCallback(async function loadDashboardCounts() {
+    const today = localDateValue(new Date());
+    const { start, end } = currentWeekDateRange();
+
     const [
       membersCount,
-      playersOnTeamsCount,
-      teamsCount,
-      matchesThisWeekCount,
-      appUsersCount,
-      pendingVerificationCount,
-      duprExportQueueCount,
+      activeLeagueData,
+      teamData,
     ] = await Promise.all([
       countRows("members"),
-      countRows("team_members"),
-      countRows("teams"),
-      countRows("matches", (query) => {
-        const { start, end } = currentWeekDateRange();
-        return query
+      loadActiveLeagues(today),
+      loadTeamsForDashboard(),
+    ]);
+
+    const activeLeagueIds = activeLeagueData.leagueIds;
+    const activeSeasonIds = activeLeagueData.seasonIds;
+    const activeTeams = teamData.filter((team) =>
+      activeLeagueIds.includes(team.divisions?.league_id)
+    );
+    const activeTeamIds = activeTeams.map((team) => team.id).filter(Boolean);
+
+    const [
+      matchesThisWeekCount,
+      activeRosterData,
+      activeRatingData,
+      pendingVerificationCount,
+    ] = await Promise.all([
+      countActiveMatches(activeLeagueIds, (query) =>
+        query
           .gte("scheduled_date", start)
-          .lte("scheduled_date", end);
-      }),
-      countRows("user_roles"),
-      countRows("matches", (query) =>
+          .lte("scheduled_date", end)
+      ),
+      loadActiveRosterData(activeTeamIds),
+      loadActiveRatingData(activeSeasonIds),
+      countActiveMatches(activeLeagueIds, (query) =>
         query.eq("score_status", "pending_verification")
       ),
-      countRows("matches", (query) =>
-        query
-          .eq("score_status", "verified")
-          .is("score_exported_at", null)
-      ),
     ]);
+
+    const playersOnTeamsCount = activeRosterData.length;
+    const teamsCount = activeTeams.length;
 
     setDashboardCounts({
       members: membersCount,
       playersOnTeams: playersOnTeamsCount,
       teams: teamsCount,
       matchesThisWeek: matchesThisWeekCount,
-      appUsers: appUsersCount,
       pendingVerification: pendingVerificationCount,
-      duprExportQueue: duprExportQueueCount,
+      averageRosterCount: averageRosterCount(activeTeams, activeRosterData),
+      averageTeamDupr: averageTeamDupr(activeTeams, activeRosterData, activeRatingData),
     });
   }, []);
 
@@ -75,15 +87,15 @@ export default function DashboardPage() {
 
   const metricCards = [
     { label: "Members", value: formatCount(dashboardCounts?.members), helper: "Member records", tone: "slate" },
-    { label: "Players On Teams", value: formatCount(dashboardCounts?.playersOnTeams), helper: "Roster assignments", tone: "blue" },
-    { label: "Teams", value: formatCount(dashboardCounts?.teams), helper: "Total teams", tone: "emerald" },
-    { label: "This Week", value: formatCount(dashboardCounts?.matchesThisWeek), helper: "Scheduled matches", tone: "amber" },
+    { label: "Players On Teams", value: formatCount(dashboardCounts?.playersOnTeams), helper: "Active-season roster assignments", tone: "blue" },
+    { label: "Teams", value: formatCount(dashboardCounts?.teams), helper: "Active-season teams", tone: "emerald" },
+    { label: "This Week", value: formatCount(dashboardCounts?.matchesThisWeek), helper: "Active-season scheduled matches", tone: "amber" },
   ];
 
   const statusCards = [
-    { label: "Number of Users", value: formatCount(dashboardCounts?.appUsers), helper: "Assigned app users" },
+    { label: "Average Team Roster Count", value: formatDecimal(dashboardCounts?.averageRosterCount, 1), helper: "Players per active-season team" },
     { label: "Pending Verification", value: formatCount(dashboardCounts?.pendingVerification), helper: "Matches awaiting score review" },
-    { label: "DUPR Export Queue", value: formatCount(dashboardCounts?.duprExportQueue), helper: "Verified matches not exported" },
+    { label: "Average Team DUPR Rating", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: "Average roster DUPR by active-season team" },
   ];
 
   const sections = [
@@ -220,9 +232,163 @@ async function countRows(tableName, applyFilters) {
   return count ?? 0;
 }
 
+async function loadActiveLeagues(today) {
+  const { data, error } = await supabase
+    .from("leagues")
+    .select(`
+      id,
+      season_id,
+      seasons (
+        id,
+        start_date,
+        end_date
+      )
+    `);
+
+  if (error) {
+    console.error("Unable to load active leagues", error);
+    return { leagueIds: [], seasonIds: [] };
+  }
+
+  const activeLeagues = (data || []).filter((league) => {
+    const season = league.seasons;
+    if (!season?.start_date || !season?.end_date) return false;
+    return season.start_date <= today && season.end_date >= today;
+  });
+
+  return {
+    leagueIds: activeLeagues.map((league) => league.id).filter(Boolean),
+    seasonIds: uniqueValues(activeLeagues.map((league) => league.season_id)),
+  };
+}
+
+async function loadTeamsForDashboard() {
+  const { data, error } = await supabase
+    .from("teams")
+    .select(`
+      id,
+      divisions (
+        id,
+        league_id,
+        leagues (
+          id,
+          season_id
+        )
+      )
+    `);
+
+  if (error) {
+    console.error("Unable to load dashboard teams", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function countActiveMatches(activeLeagueIds, applyFilters) {
+  if (!activeLeagueIds.length) return 0;
+
+  return countRows("matches", (query) => {
+    let scopedQuery = query.in("league_id", activeLeagueIds);
+
+    if (applyFilters) {
+      scopedQuery = applyFilters(scopedQuery);
+    }
+
+    return scopedQuery;
+  });
+}
+
+async function loadActiveRosterData(teamIds) {
+  if (!teamIds.length) return [];
+
+  const { data, error } = await supabase
+    .from("team_members")
+    .select("team_id, member_id")
+    .in("team_id", teamIds);
+
+  if (error) {
+    console.error("Unable to load active roster data", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function loadActiveRatingData(seasonIds) {
+  if (!seasonIds.length) return [];
+
+  const { data, error } = await supabase
+    .from("member_season_ratings")
+    .select("member_id, season_id, season_dupr_rating")
+    .in("season_id", seasonIds);
+
+  if (error) {
+    console.error("Unable to load active season ratings", error);
+    return [];
+  }
+
+  return data || [];
+}
+
 function formatCount(value) {
   if (value === null || value === undefined) return "...";
   return Number(value).toLocaleString();
+}
+
+function formatDecimal(value, places) {
+  if (value === null || value === undefined) return "...";
+  if (Number.isNaN(Number(value))) return "...";
+  return Number(value).toFixed(places);
+}
+
+function averageRosterCount(teams, rosterRows) {
+  if (!teams.length) return null;
+  return rosterRows.length / teams.length;
+}
+
+function averageTeamDupr(teams, rosterRows, ratingRows) {
+  const ratingsByMemberSeason = {};
+
+  ratingRows.forEach((rating) => {
+    const value = Number(rating.season_dupr_rating);
+    if (Number.isNaN(value)) return;
+    ratingsByMemberSeason[memberSeasonKey(rating.member_id, rating.season_id)] = value;
+  });
+
+  const rosterByTeam = {};
+
+  rosterRows.forEach((row) => {
+    const teamId = String(row.team_id);
+    if (!rosterByTeam[teamId]) rosterByTeam[teamId] = [];
+    rosterByTeam[teamId].push(row);
+  });
+
+  const teamAverages = teams
+    .map((team) => {
+      const rows = rosterByTeam[String(team.id)] || [];
+      const seasonId = team.divisions?.leagues?.season_id;
+      const ratings = rows
+        .map((row) => ratingsByMemberSeason[memberSeasonKey(row.member_id, seasonId)])
+        .filter((rating) => rating !== undefined);
+
+      if (!ratings.length) return null;
+
+      return ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+    })
+    .filter((rating) => rating !== null);
+
+  if (!teamAverages.length) return null;
+
+  return teamAverages.reduce((sum, rating) => sum + rating, 0) / teamAverages.length;
+}
+
+function uniqueValues(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function memberSeasonKey(memberId, seasonId) {
+  return `${memberId || ""}:${seasonId || ""}`;
 }
 
 function currentWeekDateRange() {
