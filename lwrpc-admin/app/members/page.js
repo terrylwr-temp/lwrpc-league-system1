@@ -5,7 +5,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { formatPhoneNumberForStorage } from "../lib/phone";
+import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
+import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
+import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT } from "../lib/notificationPreferences";
 
 const PAGE_SIZE = 100;
 const CLEAN_MEMBERS_BATCH_SIZE = 25;
@@ -19,6 +21,9 @@ export default function MembersPage() {
   const [page, setPage] = useState(1);
   const [cleaningMembers, setCleaningMembers] = useState(false);
   const [showMaintenance, setShowMaintenance] = useState(false);
+  const [showAddMember, setShowAddMember] = useState(false);
+  const [savingNewMember, setSavingNewMember] = useState(false);
+  const [newMemberForm, setNewMemberForm] = useState(initialMemberForm());
 
   const loadMembers = useCallback(async function loadMembers() {
     setLoading(true);
@@ -131,6 +136,78 @@ export default function MembersPage() {
     alert(`Cleaned ${updates.length} member phone number${updates.length === 1 ? "" : "s"}.`);
   }
 
+  function updateNewMember(field, value) {
+    setNewMemberForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+  }
+
+  function closeAddMember() {
+    if (savingNewMember) return;
+    setShowAddMember(false);
+    setNewMemberForm(initialMemberForm());
+  }
+
+  async function addMember() {
+    const normalizedEmail = normalizeEmailAddress(newMemberForm.email);
+    const firstName = newMemberForm.first_name.trim();
+    const lastName = newMemberForm.last_name.trim();
+
+    if (!firstName && !lastName) {
+      alert("Please enter at least a first or last name.");
+      return;
+    }
+
+    if (normalizedEmail && !isValidEmailAddress(normalizedEmail)) {
+      alert("Please enter a valid email address, such as name@example.com.");
+      return;
+    }
+
+    setSavingNewMember(true);
+
+    const { data, error } = await supabase
+      .from("members")
+      .insert({
+        first_name: firstName || null,
+        last_name: lastName || null,
+        email: normalizedEmail || null,
+        phone: formatPhoneNumberForStorage(newMemberForm.phone) || null,
+        notification_preference: newMemberForm.notification_preference || NOTIFICATION_EMAIL,
+        club_location: newMemberForm.club_location.trim() || null,
+        dupr_id: newMemberForm.dupr_id.trim() || null,
+        renewal_date: newMemberForm.renewal_date || null,
+      })
+      .select("*")
+      .single();
+
+    if (error) {
+      alert(error.message);
+      setSavingNewMember(false);
+      return;
+    }
+
+    if (newMemberForm.role && newMemberForm.role !== "player") {
+      const { error: roleError } = await supabase
+        .from("user_roles")
+        .insert({
+          user_id: null,
+          member_id: data.id,
+          role: newMemberForm.role,
+        });
+
+      if (roleError) {
+        alert(`Member was created, but the role could not be saved: ${roleError.message}`);
+      }
+    }
+
+    setSavingNewMember(false);
+    setShowAddMember(false);
+    setNewMemberForm(initialMemberForm());
+    await loadMembers();
+    router.push(`/members/${data.id}?edit=1`);
+  }
+
   function openMember(memberId) {
     router.push(`/members/${memberId}`);
   }
@@ -195,6 +272,16 @@ export default function MembersPage() {
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
+  const clubLocations = useMemo(() => {
+    return [
+      ...new Set(
+        members
+          .map((member) => member.club_location)
+          .filter(Boolean)
+      ),
+    ].sort((a, b) => a.localeCompare(b));
+  }, [members]);
+
   const pagedMembers = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
     return filteredMembers.slice(start, start + PAGE_SIZE);
@@ -205,7 +292,7 @@ export default function MembersPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main className="min-h-screen bg-slate-100 p-4 md:p-6">
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="Member Administration"
@@ -219,6 +306,14 @@ export default function MembersPage() {
             </h2>
 
             <div className="flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowAddMember(true)}
+                className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800"
+              >
+                Add Member
+              </button>
+
               <button
                 type="button"
                 onClick={() => setShowMaintenance((value) => !value)}
@@ -421,8 +516,181 @@ export default function MembersPage() {
             />
           </div>
         </div>
+
+        {showAddMember && (
+          <AddMemberModal
+            form={newMemberForm}
+            locations={clubLocations}
+            saving={savingNewMember}
+            onChange={updateNewMember}
+            onClose={closeAddMember}
+            onSave={addMember}
+          />
+        )}
       </div>
     </main>
+  );
+}
+
+function initialMemberForm() {
+  return {
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    notification_preference: NOTIFICATION_EMAIL,
+    club_location: "",
+    dupr_id: "",
+    renewal_date: "",
+    role: "player",
+  };
+}
+
+function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+              Member Administration
+            </div>
+            <h2 className="mt-1 text-2xl font-black">Add New Member</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20 disabled:opacity-50"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="max-h-[72vh] overflow-auto p-5">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FormField label="First Name">
+              <input
+                value={form.first_name}
+                onChange={(e) => onChange("first_name", e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </FormField>
+
+            <FormField label="Last Name">
+              <input
+                value={form.last_name}
+                onChange={(e) => onChange("last_name", e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </FormField>
+
+            <FormField label="Email">
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => onChange("email", e.target.value)}
+                placeholder="name@example.com"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </FormField>
+
+            <FormField label="Phone">
+              <input
+                value={form.phone}
+                onChange={(e) => onChange("phone", formatPhoneNumberInput(e.target.value))}
+                placeholder="(999) 999-9999"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </FormField>
+
+            <FormField label="League Notifications">
+              <select
+                value={form.notification_preference}
+                onChange={(e) => onChange("notification_preference", e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              >
+                <option value={NOTIFICATION_EMAIL}>Email</option>
+                <option value={NOTIFICATION_TEXT}>Text</option>
+              </select>
+            </FormField>
+
+            <FormField label="Club / Home Community">
+              <input
+                list="member-location-options"
+                value={form.club_location}
+                onChange={(e) => onChange("club_location", e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+              <datalist id="member-location-options">
+                {locations.map((location) => (
+                  <option key={location} value={location} />
+                ))}
+              </datalist>
+            </FormField>
+
+            <FormField label="DUPR ID">
+              <input
+                value={form.dupr_id}
+                onChange={(e) => onChange("dupr_id", e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </FormField>
+
+            <FormField label="Renewal Date">
+              <input
+                type="date"
+                value={form.renewal_date}
+                onChange={(e) => onChange("renewal_date", e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+            </FormField>
+
+            <FormField label="Initial App Role">
+              <select
+                value={form.role}
+                onChange={(e) => onChange("role", e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              >
+                <option value="player">Player</option>
+                <option value="captain">Captain</option>
+                <option value="club_pro">Club Pro</option>
+                <option value="league_manager">League Manager</option>
+                <option value="commissioner">Commissioner</option>
+              </select>
+            </FormField>
+          </div>
+        </div>
+
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className="rounded-xl bg-slate-200 px-5 py-3 font-bold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={saving}
+            className="rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Create Member"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FormField({ label, children }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-sm font-bold text-slate-700">{label}</span>
+      {children}
+    </label>
   );
 }
 
