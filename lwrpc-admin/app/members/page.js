@@ -18,10 +18,15 @@ export default function MembersPage() {
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState([]);
   const [search, setSearch] = useState("");
+  const [showCurrentRosterOnly, setShowCurrentRosterOnly] = useState(false);
+  const [includeInactiveMembers, setIncludeInactiveMembers] = useState(false);
   const [page, setPage] = useState(1);
   const [cleaningMembers, setCleaningMembers] = useState(false);
+  const [markingAllInactive, setMarkingAllInactive] = useState(false);
+  const [resettingPasswordMemberId, setResettingPasswordMemberId] = useState("");
   const [showMaintenance, setShowMaintenance] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+  const [teamsMember, setTeamsMember] = useState(null);
   const [savingNewMember, setSavingNewMember] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState(initialMemberForm());
 
@@ -41,6 +46,7 @@ export default function MembersPage() {
         phone,
         club_location,
         dupr_id,
+        is_active_member,
         created_at,
         user_roles (
           role
@@ -54,13 +60,35 @@ export default function MembersPage() {
       return;
     }
 
-    setMembers(data || []);
+    const memberRows = data || [];
+    const memberIdSet = new Set(memberRows.map((member) => String(member.id)));
+    let teamsByMemberId = {};
+
+    if (memberIdSet.size > 0) {
+      const { rows: teamRows, error: teamError } = await loadAllMemberTeamRows();
+
+      if (teamError) {
+        alert(teamError.message);
+        setLoading(false);
+        return;
+      }
+
+      teamsByMemberId = (teamRows || []).reduce((byMember, row) => {
+        if (!memberIdSet.has(String(row.member_id))) return byMember;
+        if (!byMember[row.member_id]) byMember[row.member_id] = [];
+        if (row.teams) byMember[row.member_id].push(row.teams);
+        return byMember;
+      }, {});
+    }
+
+    setMembers(
+      memberRows.map((member) => ({
+        ...member,
+        teams: teamsByMemberId[member.id] || [],
+      }))
+    );
     setLoading(false);
   }, [router]);
-
-  async function deactivateMember() {
-    alert("Your members table currently does not have an active/status field yet.");
-  }
 
   async function cleanMembers() {
     if (cleaningMembers) return;
@@ -136,6 +164,50 @@ export default function MembersPage() {
     alert(`Cleaned ${updates.length} member phone number${updates.length === 1 ? "" : "s"}.`);
   }
 
+  async function markAllMembersInactive() {
+    if (markingAllInactive) return;
+
+    const activeCount = members.filter((member) => member.is_active_member !== false).length;
+
+    if (activeCount === 0) {
+      alert("All members are already inactive.");
+      return;
+    }
+
+    const ok = confirm(
+      [
+        `Mark ${activeCount} active member${activeCount === 1 ? "" : "s"} inactive?`,
+        "",
+        "Use this before a fresh MembershipWorks import when you want the import file to reactivate current members.",
+        "",
+        "Continue?",
+      ].join("\n")
+    );
+
+    if (!ok) return;
+
+    setMarkingAllInactive(true);
+
+    const { error } = await supabase
+      .from("members")
+      .update({
+        is_active_member: false,
+        updated_at: new Date().toISOString(),
+      })
+      .neq("is_active_member", false);
+
+    setMarkingAllInactive(false);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    await loadMembers();
+    setIncludeInactiveMembers(true);
+    alert(`${activeCount} member${activeCount === 1 ? "" : "s"} marked inactive.`);
+  }
+
   function updateNewMember(field, value) {
     setNewMemberForm((current) => ({
       ...current,
@@ -173,6 +245,7 @@ export default function MembersPage() {
         last_name: lastName || null,
         email: normalizedEmail || null,
         phone: formatPhoneNumberForStorage(newMemberForm.phone) || null,
+        membershipworks_account_id: manualMembershipWorksAccountId(),
         notification_preference: newMemberForm.notification_preference || NOTIFICATION_EMAIL,
         club_location: newMemberForm.club_location.trim() || null,
         dupr_id: newMemberForm.dupr_id.trim() || null,
@@ -212,6 +285,39 @@ export default function MembersPage() {
     router.push(`/members/${memberId}`);
   }
 
+  function openMemberTeams(member) {
+    setTeamsMember(member);
+  }
+
+  async function resetMemberPassword(member) {
+    const normalizedEmail = normalizeEmailAddress(member.email);
+
+    if (!normalizedEmail) {
+      alert("This member does not have an email address on file.");
+      return;
+    }
+
+    if (!isValidEmailAddress(normalizedEmail)) {
+      alert("This member does not have a valid email address on file.");
+      return;
+    }
+
+    setResettingPasswordMemberId(member.id);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+      redirectTo: "https://league.lwrpickleballclub.com/reset-password",
+    });
+
+    setResettingPasswordMemberId("");
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert(`Password reset email sent to ${normalizedEmail}.`);
+  }
+
   function formatRole(role) {
     if (role === "club_pro") return "Club Pro";
     if (role === "league_manager") return "League Manager";
@@ -246,14 +352,20 @@ export default function MembersPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [search]);
+  }, [includeInactiveMembers, search, showCurrentRosterOnly]);
 
   const filteredMembers = useMemo(() => {
     const q = search.trim().toLowerCase();
+    const activeFilteredMembers = includeInactiveMembers
+      ? members
+      : members.filter((member) => member.is_active_member !== false);
+    const rosterFilteredMembers = showCurrentRosterOnly
+      ? activeFilteredMembers.filter((member) => (member.teams?.length || 0) > 0)
+      : activeFilteredMembers;
 
-    if (!q) return members;
+    if (!q) return rosterFilteredMembers;
 
-    return members.filter((member) => {
+    return rosterFilteredMembers.filter((member) => {
       const fullName = `${member.first_name || ""} ${member.last_name || ""}`;
       const reverseName = `${member.last_name || ""} ${member.first_name || ""}`;
       const role = getMemberRole(member);
@@ -268,7 +380,7 @@ export default function MembersPage() {
         role.toLowerCase().includes(q)
       );
     });
-  }, [getMemberRole, members, search]);
+  }, [getMemberRole, includeInactiveMembers, members, search, showCurrentRosterOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
@@ -312,6 +424,30 @@ export default function MembersPage() {
                 className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800"
               >
                 Add Member
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowCurrentRosterOnly((value) => !value)}
+                className={`rounded-xl px-4 py-3 font-semibold ${
+                  showCurrentRosterOnly
+                    ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                    : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
+                }`}
+              >
+                {showCurrentRosterOnly ? "Show All Members" : "Current Rosters Only"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIncludeInactiveMembers((value) => !value)}
+                className={`rounded-xl px-4 py-3 font-semibold ${
+                  includeInactiveMembers
+                    ? "bg-red-700 text-white hover:bg-red-800"
+                    : "bg-red-100 text-red-900 hover:bg-red-200"
+                }`}
+              >
+                {includeInactiveMembers ? "Hide Inactive" : "Include Inactive"}
               </button>
 
               <button
@@ -390,6 +526,15 @@ export default function MembersPage() {
                 >
                   {cleaningMembers ? "Cleaning..." : "Clean Members"}
                 </button>
+
+                <button
+                  type="button"
+                  onClick={markAllMembersInactive}
+                  disabled={markingAllInactive}
+                  className="rounded-xl bg-red-700 px-5 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {markingAllInactive ? "Updating..." : "Mark All Inactive"}
+                </button>
               </div>
             </div>
           </div>
@@ -430,6 +575,7 @@ export default function MembersPage() {
                 <th className="px-4 py-4 text-left">Location</th>
                 <th className="px-4 py-4 text-left">Phone</th>
                 <th className="px-4 py-4 text-left">DUPR ID</th>
+                <th className="px-4 py-4 text-left">Status</th>
                 <th className="px-4 py-4 text-left">Role</th>
                 <th className="px-4 py-4 text-right">Actions</th>
               </tr>
@@ -447,7 +593,7 @@ export default function MembersPage() {
                       {member.last_name}, {member.first_name}
                     </div>
 
-                    <div className="text-sm text-slate-500">
+                    <div className="mt-1 text-sm text-slate-500">
                       {member.email || "No Email"}
                     </div>
                   </td>
@@ -464,12 +610,24 @@ export default function MembersPage() {
                     {member.dupr_id || "—"}
                   </td>
 
+                  <td className="px-4 py-4">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
+                        member.is_active_member === false
+                          ? "bg-red-100 text-red-800"
+                          : "bg-green-100 text-green-800"
+                      }`}
+                    >
+                      {member.is_active_member === false ? "Inactive" : "Active"}
+                    </span>
+                  </td>
+
                   <td className="px-4 py-4 text-sm font-semibold text-slate-700">
                     {getMemberRole(member)}
                   </td>
 
                   <td className="px-4 py-4 text-right">
-                    <div className="flex justify-end gap-2">
+                    <div className="flex flex-wrap justify-end gap-2">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
@@ -481,14 +639,28 @@ export default function MembersPage() {
                       </button>
 
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          deactivateMember(member.id);
+                          openMemberTeams(member);
                         }}
-                        className="rounded-lg bg-red-600 px-3 py-2 text-sm font-semibold text-white hover:bg-red-700"
+                        className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
                       >
-                        Deactivate
+                        Teams ({member.teams?.length || 0})
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          resetMemberPassword(member);
+                        }}
+                        disabled={resettingPasswordMemberId === member.id}
+                        className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {resettingPasswordMemberId === member.id ? "Sending..." : "Reset Password"}
+                      </button>
+
                     </div>
                   </td>
                 </tr>
@@ -497,7 +669,7 @@ export default function MembersPage() {
               {pagedMembers.length === 0 && (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="7"
                     className="px-4 py-10 text-center text-slate-500"
                   >
                     No members found.
@@ -527,9 +699,53 @@ export default function MembersPage() {
             onSave={addMember}
           />
         )}
+
+        {teamsMember && (
+          <MemberTeamsModal
+            member={teamsMember}
+            onClose={() => setTeamsMember(null)}
+          />
+        )}
       </div>
     </main>
   );
+}
+
+async function loadAllMemberTeamRows() {
+  const pageSize = 1000;
+  let from = 0;
+  const rows = [];
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("team_members")
+      .select(`
+        member_id,
+        teams (
+          id,
+          name,
+          divisions (
+            id,
+            name,
+            leagues (
+              id,
+              name
+            )
+          )
+        )
+      `)
+      .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+
+    if (!data || data.length < pageSize) break;
+
+    from += pageSize;
+  }
+
+  return { rows, error: null };
 }
 
 function initialMemberForm() {
@@ -544,6 +760,10 @@ function initialMemberForm() {
     renewal_date: "",
     role: "player",
   };
+}
+
+function manualMembershipWorksAccountId() {
+  return `manual:${crypto.randomUUID()}`;
 }
 
 function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) {
@@ -679,6 +899,60 @@ function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) 
           >
             {saving ? "Saving..." : "Create Member"}
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MemberTeamsModal({ member, onClose }) {
+  const teams = member.teams || [];
+  const memberName =
+    `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+    member.email ||
+    "Member";
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+      <div className="max-h-[85vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+              Current Teams
+            </div>
+            <h2 className="mt-1 text-2xl font-black">{memberName}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="max-h-[68vh] overflow-auto p-5">
+          {teams.length === 0 ? (
+            <div className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">
+              This member is not currently on any teams.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {teams.map((team) => (
+                <div
+                  key={team.id}
+                  className="rounded-xl border border-slate-200 bg-white p-4"
+                >
+                  <div className="text-lg font-black text-slate-900">
+                    {team.name || "Unnamed Team"}
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-600">
+                    {team.divisions?.leagues?.name || "League TBD"} / {team.divisions?.name || "Division TBD"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-05-20
+Last updated: 2026-05-21
 
 ## Purpose
 
@@ -96,9 +96,24 @@ Phone numbers entered or imported through member workflows are normalized to `(9
 
 Member email addresses are normalized to lowercase and validated for basic email shape before manual save or import.
 
+Password onboarding uses Supabase reset-password emails. The login page tells first-time users to use Forgot Password, Member Administration can send a reset/set-password email for a member, and Player Dashboard has a Change Password header action that opens the reset password screen directly for the logged-in player.
+
+Member Administration loads each member's current team memberships for a Teams count button. Clicking it opens a modal with the member's active team list and league/division context.
+Member Administration also has a Current Rosters Only filter. Team membership data is loaded in paged reads from `team_members` to avoid oversized Supabase `.in(...)` requests that can fail in the browser. The Deactivate placeholder action lives on the member edit screen and is visible only to `league_manager` / `commissioner` users until the members table has an active/status field.
+
+The captain Division Team Schedules modal displays each division team's season match record from `team_standings` beside team names.
+
+Season setup now lives on its own `/seasons` page under the Setup sidebar. `/leagues` is focused on league information, roster lock status, and league document mappings, with create/edit on the left and the current league list on the right.
+
+League setup supports five league-specific PDF document mappings stored on `leagues`: Code of Conduct, Captains Guide, League Rules, Score Sheet, and League Waiver. The app expects the columns from `lwrpc-admin/supabase-league-documents.sql`, uses `NEXT_PUBLIC_SUPABASE_LEAGUE_DOCUMENTS_BUCKET` or `league-documents` as the default bucket, and uses `NEXT_PUBLIC_SUPABASE_LEAGUE_DOCUMENTS_PREFIX` or `private` as the default Storage folder prefix for listing PDFs. Captain Dashboard team cards show configured league document buttons and open PDFs in an embedded viewer with download and print/open controls.
+Player Dashboard team cards show player-facing league document buttons for Code of Conduct, League Rules, and League Waiver using the same embedded PDF viewer. Captains still see all configured league documents, including Captains Guide and Score Sheet.
+
+Teams & Rosters displays roster counts on each team's Roster button.
+Season Ratings has Current Rosters Only and Missing Doubles Rating filters, highlights players missing a doubles rating, and omits member email addresses from the ratings table.
+
 ## Verified Status
 
-As of 2026-05-20:
+As of 2026-05-21:
 
 - `npm run build` succeeds in `lwrpc-admin`.
 - `npm run lint` succeeds with no warnings.
@@ -206,3 +221,8 @@ As of 2026-05-20:
 - Admin Dashboard System Snapshot now uses assigned app users, pending score verifications, and verified matches waiting for DUPR export; live signed-in user presence is not currently tracked by the app.
 - Admin Dashboard active-season metrics now scope players-on-teams, teams, this-week matches, pending verifications, average roster count, and average team DUPR rating to leagues whose season start/end dates include the current date.
 - Admin Dashboard now includes an Active Season / Not Active (Current Entries) scope toggle so preseason teams and rosters can be counted before the season date window opens.
+- Members use `members.is_active_member` for active/inactive status. Member Administration hides inactive members by default with an Include Inactive toggle, member edit supports deactivate/reactivate for League Manager and Commissioner roles, MembershipWorks import reactivates imported members, and ratings/team selection workflows exclude inactive members.
+- Member Administration now shows active/inactive status in the listing, includes a Data Tools action to mark all members inactive before a fresh MembershipWorks import, and the MembershipWorks import protects existing member fields by only overwriting email, phone, renewal date, active flag, and membership status while filling blank identifiers/profile fields.
+- Season Ratings hides the Ratings Import panel behind a Data Tools toggle by default. Player Dashboard and Captain Dashboard division schedule modals received a visual cleanup with stronger colored headers, status blocks, and more polished match/result cards.
+- Player Dashboard upcoming matches now use a purple visual treatment, player/captain team cards use stronger blue information panels, Captain Dashboard pending verification is red, and Season Ratings truncates entered DUPR doubles ratings to one decimal place before saving.
+- Manual member creation now satisfies the non-null MembershipWorks account constraint with a generated `manual:` account id. Future MembershipWorks CSV imports can match those members by email and replace the placeholder with the real MembershipWorks account id. Captain Dashboard upcoming match cards were restyled with Week headers, and Player Dashboard upcoming matches now separate Current Scores from a Match Details popup with team records/ranks and a map link.

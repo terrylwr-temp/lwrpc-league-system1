@@ -8,11 +8,13 @@ import LoadingScreen from "../../components/LoadingScreen";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
 import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../../lib/notificationPreferences";
+import { hasRole } from "../../lib/permissions";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const [userRole, setUserRole] = useState("player");
+  const [currentUserRole, setCurrentUserRole] = useState("player");
   const [roleRow, setRoleRow] = useState(null);
 
   const searchParams = useSearchParams();
@@ -27,6 +29,7 @@ export default function MemberDetailPage() {
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
+    if (user?.role) setCurrentUserRole(user.role);
     return !!user;
   }, [router]);
 
@@ -268,6 +271,20 @@ function formatRating(value) {
   return Number(value).toFixed(3);
 }
 
+function setMemberFormFromRow(row) {
+  setMember(row);
+  setForm({
+    first_name: row.first_name || "",
+    last_name: row.last_name || "",
+    email: row.email || "",
+    phone: formatPhoneNumberForStorage(row.phone),
+    notification_preference: row.notification_preference || NOTIFICATION_EMAIL,
+    club_location: row.club_location || "",
+    dupr_id: row.dupr_id || "",
+    renewal_date: row.renewal_date || "",
+  });
+}
+
 async function updateUserRole(newRole) {
   setUserRole(newRole);
 
@@ -308,9 +325,42 @@ async function updateUserRole(newRole) {
   }
 }
 
+async function updateMemberActiveStatus(nextIsActive) {
+  if (!nextIsActive) {
+    const ok = confirm(
+      "Deactivate this member? They will be hidden from normal member, roster, and rating workflows unless inactive members are included."
+    );
+
+    if (!ok) return;
+  }
+
+  setSaving(true);
+
+  const { data, error } = await supabase
+    .from("members")
+    .update({
+      is_active_member: nextIsActive,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  setSaving(false);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  setMemberFormFromRow(data);
+}
+
   if (!member) {
     return <LoadingScreen subtitle="Loading Member Detail..." />;
   }
+
+  const memberIsActive = member.is_active_member !== false;
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -402,7 +452,7 @@ async function updateUserRole(newRole) {
                     </div>
 	<div>
 	  <span className="font-semibold text-slate-800">
-	    App User Role:
+	    User Role:
 	  </span>{" "}
 	  {userRole === "club_pro"
 	    ? "Club Pro"
@@ -414,6 +464,20 @@ async function updateUserRole(newRole) {
 	    ? "Captain"
 	    : "Player"}
 	</div>
+                    <div>
+                      <span className="font-semibold text-slate-800">
+                        Status:
+                      </span>{" "}
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs font-bold uppercase ${
+                          memberIsActive
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {memberIsActive ? "Active" : "Inactive"}
+                      </span>
+                    </div>
                     <div>
                       <span className="font-semibold text-slate-800">
                         Renewal:
@@ -532,7 +596,7 @@ async function updateUserRole(newRole) {
                     </div>
 <div>
   <label className="mb-1 block text-sm font-semibold text-slate-700">
-    App User Role
+    User Role
   </label>
 
   <select
@@ -562,6 +626,35 @@ async function updateUserRole(newRole) {
                       />
                     </div>
                   </div>
+
+                  {hasRole(currentUserRole, "league_manager") && (
+                    <div className="mt-6 rounded-2xl border border-red-200 bg-red-50 p-4">
+                      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                          <div className="text-sm font-bold text-red-950">
+                            Member Status
+                          </div>
+                          <div className="mt-1 text-sm text-red-800">
+                            {memberIsActive
+                              ? "Deactivate this member to hide them from normal member, roster, and rating workflows."
+                              : "Reactivate this member to return them to normal member, roster, and rating workflows."}
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => updateMemberActiveStatus(!memberIsActive)}
+                          disabled={saving}
+                          className={`rounded-xl px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60 ${
+                            memberIsActive
+                              ? "bg-red-700 hover:bg-red-800"
+                              : "bg-green-700 hover:bg-green-800"
+                          }`}
+                        >
+                          {memberIsActive ? "Deactivate" : "Reactivate"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

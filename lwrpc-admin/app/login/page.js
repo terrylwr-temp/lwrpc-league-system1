@@ -237,6 +237,10 @@ export default function LoginPage() {
               Forgot Password?
             </button>
 
+            <p className="mt-3 rounded-xl bg-blue-50 px-4 py-3 text-center text-sm font-semibold text-blue-900">
+              First time logging in? Click Forgot Password to create your password.
+            </p>
+
             {message && (
               <div
                 role={isErrorMessage ? "alert" : "status"}

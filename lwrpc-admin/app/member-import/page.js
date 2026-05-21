@@ -271,6 +271,7 @@ return {
   phone,
   duprId,
   renewalDate,
+  matchedMember,
   matchedMemberId: matchedMember?.id || null,
   message,
   raw: row
@@ -393,21 +394,8 @@ return {
         throw new Error(auditError.message);
       }
 
-      setImportStatus("Processing members in bulk...");
-
-      const { data: result, error: bulkError } = await supabase.rpc(
-        "bulk_import_members",
-        {
-          import_rows: preview
-        }
-      );
-
-      if (bulkError) {
-        throw new Error(bulkError.message);
-      }
-
-      setImportStatus("Updating phone, DUPR ID, and renewal dates...");
-      await updateContactFieldsFromImport();
+      setImportStatus("Processing members with protected updates...");
+      const result = await processMemberImportRows();
 
       setImportSummary({
         newMembers: result?.newMembers || 0,
@@ -428,21 +416,60 @@ return {
     }
   }
 
-  async function updateContactFieldsFromImport() {
-    const rows = preview.filter(
-      (row) =>
-        row.action !== "skip" &&
-        (row.phone || row.duprId || row.renewalDate)
-    );
+  async function processMemberImportRows() {
+    const rows = preview.filter((row) => row.action !== "skip");
+    const now = new Date().toISOString();
+    const newRows = rows.filter((row) => row.action === "new");
+    const updateRows = rows.filter((row) => row.action === "update");
 
-    const updates = rows.map((row) => {
+    if (newRows.length > 0) {
+      const inserts = newRows.map((row) => ({
+        email: row.email || null,
+        first_name: row.firstName || null,
+        last_name: row.lastName || null,
+        phone: row.phone || null,
+        membershipworks_account_id: row.membershipWorksId || manualMembershipWorksAccountId(),
+        membership_status: "Active",
+        membership_level: row.membershipLevel || null,
+        membership_levels: row.membershipLevel || null,
+        club_location: row.clubLocation || null,
+        dupr_id: row.duprId || null,
+        renewal_date: row.renewalDate || null,
+        is_active_member: true,
+        updated_at: now,
+      }));
+
+      const { error } = await supabase.from("members").insert(inserts);
+      if (error) throw new Error(error.message);
+    }
+
+    const updates = updateRows.map((row) => {
+      const existing = row.matchedMember || {};
       const payload = {
-        updated_at: new Date().toISOString()
+        membership_status: "Active",
+        is_active_member: true,
+        updated_at: now
       };
 
+      if (row.email) payload.email = row.email;
       if (row.phone) payload.phone = row.phone;
-      if (row.duprId) payload.dupr_id = row.duprId;
       if (row.renewalDate) payload.renewal_date = row.renewalDate;
+
+      if (
+        row.membershipWorksId &&
+        (!existing.membershipworks_account_id ||
+          String(existing.membershipworks_account_id).startsWith("manual:")) &&
+        !existing.membershipworks_id
+      ) {
+        payload.membershipworks_account_id = row.membershipWorksId;
+      }
+
+      if (row.firstName && !existing.first_name) payload.first_name = row.firstName;
+      if (row.lastName && !existing.last_name) payload.last_name = row.lastName;
+      if (row.clubLocation && !existing.club_location) payload.club_location = row.clubLocation;
+      if (row.duprId && !existing.dupr_id) payload.dupr_id = row.duprId;
+      if (row.membershipLevel && !existing.membership_level) payload.membership_level = row.membershipLevel;
+      if (row.membershipLevel && !existing.membership_levels) payload.membership_levels = row.membershipLevel;
 
       return { row, payload };
     });
@@ -470,6 +497,12 @@ return {
       const failed = results.find((result) => result.error);
       if (failed?.error) throw new Error(failed.error.message);
     }
+
+    return {
+      newMembers: newRows.length,
+      updatedMembers: updateRows.length,
+      skippedRows: preview.filter(row => row.action === "skip").length
+    };
   }
 
   async function markMemberInactive(memberId) {
@@ -933,5 +966,9 @@ function SummaryBox({ label, value }) {
       </div>
     </div>
   );
+}
+
+function manualMembershipWorksAccountId() {
+  return `manual:${crypto.randomUUID()}`;
 }
 

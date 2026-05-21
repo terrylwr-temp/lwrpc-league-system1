@@ -13,6 +13,21 @@ import {
   sortHistoryRows,
 } from "../lib/playHistory";
 import { formatPhoneNumberForStorage } from "../lib/phone";
+import {
+  DEFAULT_LEAGUE_DOCUMENT_BUCKET,
+  LEAGUE_DOCUMENT_TYPES,
+  leagueDocumentPath,
+} from "../lib/leagueDocuments";
+
+const PLAYER_DOCUMENT_KEYS = new Set([
+  "code_of_conduct",
+  "league_rules",
+  "league_waiver",
+]);
+
+const PLAYER_LEAGUE_DOCUMENT_TYPES = LEAGUE_DOCUMENT_TYPES.filter((documentType) =>
+  PLAYER_DOCUMENT_KEYS.has(documentType.key)
+);
 
 export default function PlayerDashboardPage() {
   const router = useRouter();
@@ -26,6 +41,8 @@ export default function PlayerDashboardPage() {
   const [selectedUpcomingTeamId, setSelectedUpcomingTeamId] = useState("");
   const [selectedStandingsTeamId, setSelectedStandingsTeamId] = useState("");
   const [historyFilter, setHistoryFilter] = useState("");
+  const [pdfDocument, setPdfDocument] = useState(null);
+  const [matchDetails, setMatchDetails] = useState(null);
 
   const loadData = useCallback(async function loadData() {
     const {
@@ -69,7 +86,11 @@ export default function PlayerDashboardPage() {
             name,
             leagues (
               id,
-              name
+              name,
+              league_document_bucket,
+              code_of_conduct_pdf_path,
+              league_rules_pdf_path,
+              league_waiver_pdf_path
             )
           ),
           locations (
@@ -129,7 +150,11 @@ export default function PlayerDashboardPage() {
             ),
             locations (
               id,
-              name
+              name,
+              address,
+              city,
+              state,
+              zip_code
             ),
             home_team:teams!matches_home_team_id_fkey (
               id,
@@ -358,6 +383,42 @@ export default function PlayerDashboardPage() {
     }
   }
 
+  async function openLeagueDocument(team, documentType) {
+    const league = team?.divisions?.leagues;
+    const path = leagueDocumentPath(league, documentType);
+
+    if (!path) {
+      alert(`${documentType.label} is not configured for this league.`);
+      return;
+    }
+
+    const bucket = league?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET;
+    let documentUrl = "";
+
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(path, 60 * 60);
+
+    if (!error && data?.signedUrl) {
+      documentUrl = data.signedUrl;
+    } else {
+      const publicUrl = supabase.storage.from(bucket).getPublicUrl(path);
+      documentUrl = publicUrl.data?.publicUrl || "";
+    }
+
+    if (!documentUrl) {
+      alert("Unable to open this PDF. Check the Supabase Storage bucket and file path.");
+      return;
+    }
+
+    setPdfDocument({
+      title: documentType.label,
+      leagueName: league?.name || "League",
+      teamName: team?.name || "Team",
+      url: documentUrl,
+    });
+  }
+
   if (loading) {
     return <LoadingScreen subtitle="Loading Player Dashboard..." />;
   }
@@ -368,6 +429,26 @@ export default function PlayerDashboardPage() {
         <AppHeader
           title="Player Dashboard"
           subtitle="Your league teams, standings, and match access."
+          actions={
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
+              <button
+                type="button"
+                onClick={() => router.push("/reset-password")}
+                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-500"
+              >
+                Change Password
+              </button>
+
+              <a
+                href="https://lwrpickleballclub.com/manage-membership"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-950 hover:bg-slate-100"
+              >
+                Membership Info
+              </a>
+            </div>
+          }
         />
 
         <section className="overflow-hidden rounded-2xl bg-white shadow">
@@ -387,7 +468,11 @@ export default function PlayerDashboardPage() {
 
           <div className="grid grid-cols-1 gap-3 p-4 lg:grid-cols-2 md:p-5">
             {teams.map((team) => (
-              <TeamCard key={team.id} team={team} />
+              <TeamCard
+                key={team.id}
+                team={team}
+                onOpenDocument={openLeagueDocument}
+              />
             ))}
 
             {teams.length === 0 && (
@@ -397,7 +482,7 @@ export default function PlayerDashboardPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 border-t border-slate-100 p-4 md:grid-cols-3 md:p-5">
+          <div className="grid grid-cols-1 gap-3 border-t border-slate-100 bg-slate-50 p-4 md:grid-cols-3 md:p-5">
             <DashboardOption
               active={activePanel === "history"}
               label="My Play History"
@@ -416,7 +501,7 @@ export default function PlayerDashboardPage() {
               active={activePanel === "upcoming"}
               label="Upcoming Matches"
               value={upcomingMatchesBySelectedTeam.length || matches.filter((match) => match.status !== "completed" && match.status !== "cancelled").length}
-              tone="amber"
+              tone="purple"
               onClick={() => selectPanel("upcoming")}
             />
           </div>
@@ -424,12 +509,15 @@ export default function PlayerDashboardPage() {
 
         {activePanel === "standings" && (
           <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
-            <div className="flex flex-col gap-2 border-b border-slate-200 p-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-2 bg-gradient-to-r from-emerald-700 to-teal-700 p-6 text-white md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <div className="text-xs font-black uppercase tracking-wide text-emerald-100">
+                  Division Table
+                </div>
+                <h2 className="mt-1 text-xl font-black">
                   Division Standings: {selectedStandingsTeam?.divisions?.name || "Division"}
                 </h2>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm font-semibold text-emerald-50">
                 {selectedStandingsTeam?.divisions?.leagues?.name || ""}
                 </p>
               </div>
@@ -441,7 +529,7 @@ export default function PlayerDashboardPage() {
                   teams={teams}
                   label="Choose team for standings"
                 />
-                <div className="rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-bold text-white">
+                <div className="rounded-xl bg-white/15 px-4 py-2 text-center text-sm font-bold text-white">
                   {selectedDivisionStandings.length}
                 </div>
               </div>
@@ -463,7 +551,7 @@ export default function PlayerDashboardPage() {
                 </thead>
                 <tbody>
                   {selectedDivisionStandings.map((row) => (
-                    <tr key={row.id} className={`border-b border-slate-100 ${String(row.team_id) === String(selectedStandingsTeamId) ? "bg-blue-50" : ""}`}>
+                    <tr key={row.id} className={`border-b border-slate-100 ${String(row.team_id) === String(selectedStandingsTeamId) ? "bg-emerald-50" : "hover:bg-slate-50"}`}>
                       <td className="p-3 font-bold">#{row.rank}</td>
                       <td className="p-3 font-semibold">{row.teams?.name}</td>
                       <td className="p-3">{row.match_wins}-{row.match_losses}-{row.match_ties}</td>
@@ -471,7 +559,7 @@ export default function PlayerDashboardPage() {
                       <td className="p-3">{row.points_for}</td>
                       <td className="p-3">{row.points_against}</td>
                       <td className="p-3">{row.point_differential}</td>
-                      <td className="p-3 font-bold text-blue-700">{row.standings_points}</td>
+                      <td className="p-3 font-bold text-emerald-700">{row.standings_points}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -487,13 +575,16 @@ export default function PlayerDashboardPage() {
         )}
 
         {activePanel === "upcoming" && (
-          <div className="mt-6 rounded-2xl bg-white p-6 shadow">
-            <div className="mb-4 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+            <div className="flex flex-col gap-2 bg-gradient-to-r from-purple-700 to-fuchsia-700 p-6 text-white md:flex-row md:items-center md:justify-between">
               <div>
-                <h2 className="text-xl font-bold text-slate-900">
+                <div className="text-xs font-black uppercase tracking-wide text-purple-100">
+                  Match Calendar
+                </div>
+                <h2 className="mt-1 text-xl font-black">
                   Upcoming Matches: {selectedUpcomingTeam?.name || "Team"}
                 </h2>
-                <p className="mt-1 text-sm text-slate-600">
+                <p className="mt-1 text-sm font-semibold text-purple-100">
                   {selectedUpcomingTeam?.divisions?.leagues?.name || ""} / {selectedUpcomingTeam?.divisions?.name || ""}
                 </p>
               </div>
@@ -505,15 +596,21 @@ export default function PlayerDashboardPage() {
                   teams={teams}
                   label="Choose team for upcoming matches"
                 />
-                <div className="rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-bold text-white">
+                <div className="rounded-xl bg-white/15 px-4 py-2 text-center text-sm font-bold text-white">
                   {upcomingMatchesBySelectedTeam.length}
                 </div>
               </div>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3 p-5">
               {upcomingMatchesBySelectedTeam.map((match) => (
-                <MatchSummaryCard key={match.id} match={match} router={router} />
+                <MatchSummaryCard
+                  key={match.id}
+                  match={match}
+                  router={router}
+                  standings={standings}
+                  onOpenDetails={setMatchDetails}
+                />
               ))}
 
               {upcomingMatchesBySelectedTeam.length === 0 && (
@@ -526,14 +623,19 @@ export default function PlayerDashboardPage() {
         )}
 
         {activePanel === "history" && (
-        <div className="mt-6 rounded-2xl bg-white p-6 shadow">
-          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-xl font-bold text-slate-900">My Play History</h2>
+        <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          <div className="flex flex-col gap-3 bg-gradient-to-r from-blue-700 to-indigo-700 p-6 text-white md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-xs font-black uppercase tracking-wide text-blue-100">
+                Match Results
+              </div>
+              <h2 className="mt-1 text-xl font-black">My Play History</h2>
+            </div>
 
             <select
               value={historyFilter}
               onChange={(e) => setHistoryFilter(e.target.value)}
-              className="rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800"
+              className="rounded-xl border border-white/40 bg-white px-3 py-2 text-sm font-semibold text-slate-800"
               aria-label="Filter play history by league and season"
             >
               <option value="">All Leagues / Seasons</option>
@@ -545,14 +647,14 @@ export default function PlayerDashboardPage() {
             </select>
           </div>
 
-          <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
-            <HistoryStat label="Games Played" value={playHistoryStats.games} />
-            <HistoryStat label="Wins" value={playHistoryStats.wins} />
-            <HistoryStat label="Losses" value={playHistoryStats.losses} />
-            <HistoryStat label="Other" value={playHistoryStats.ties} />
+          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 md:grid-cols-4 md:p-5">
+            <HistoryStat label="Games Played" value={playHistoryStats.games} tone="slate" />
+            <HistoryStat label="Wins" value={playHistoryStats.wins} tone="emerald" />
+            <HistoryStat label="Losses" value={playHistoryStats.losses} tone="red" />
+            <HistoryStat label="Other" value={playHistoryStats.ties} tone="amber" />
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 p-5">
             {filteredPlayHistory.map((row) => (
               <PlayerHistoryRowWithScores
                 key={row.id}
@@ -568,6 +670,21 @@ export default function PlayerDashboardPage() {
             )}
           </div>
         </div>
+        )}
+
+        {pdfDocument && (
+          <PdfViewerModal
+            document={pdfDocument}
+            onClose={() => setPdfDocument(null)}
+          />
+        )}
+
+        {matchDetails && (
+          <MatchDetailsModal
+            match={matchDetails}
+            standings={standings}
+            onClose={() => setMatchDetails(null)}
+          />
         )}
       </div>
     </main>
@@ -585,6 +702,9 @@ function DashboardOption({ active, label, value, tone = "blue", onClick }) {
     amber: active
       ? "border-amber-500 bg-amber-400 text-slate-950"
       : "border-amber-200 bg-amber-50 text-amber-950 hover:border-amber-500",
+    purple: active
+      ? "border-purple-700 bg-purple-700 text-white"
+      : "border-purple-200 bg-purple-50 text-purple-950 hover:border-purple-500",
   };
   const badgeClass = active ? "bg-white/20" : "bg-white";
   const helperClass = active ? "text-white/80" : "text-slate-600";
@@ -610,30 +730,40 @@ function DashboardOption({ active, label, value, tone = "blue", onClick }) {
   );
 }
 
-function HistoryStat({ label, value }) {
+function HistoryStat({ label, value, tone = "slate" }) {
+  const tones = {
+    slate: "bg-slate-950 text-white",
+    emerald: "bg-emerald-600 text-white",
+    red: "bg-rose-600 text-white",
+    amber: "bg-amber-400 text-slate-950",
+  };
+  const labelClass = tone === "amber" ? "text-slate-800" : "text-white/75";
+
   return (
-    <div className="rounded-xl bg-slate-50 p-4">
-      <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+    <div className={`rounded-xl p-4 shadow-sm ${tones[tone] || tones.slate}`}>
+      <div className={`text-xs font-bold uppercase tracking-wide ${labelClass}`}>
         {label}
       </div>
-      <div className="mt-1 text-2xl font-black text-slate-900">{value}</div>
+      <div className="mt-1 text-2xl font-black">{value}</div>
     </div>
   );
 }
 
-function TeamCard({ team }) {
+function TeamCard({ team, onOpenDocument }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 text-sm shadow-sm">
-      <div className="border-b border-slate-200 bg-white px-4 py-3">
-        <div className="font-black text-slate-950">{team.name}</div>
-        <div className="mt-1 text-xs font-bold uppercase tracking-wide text-slate-500">
+    <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white text-sm shadow-md">
+      <div className="bg-gradient-to-r from-slate-950 to-blue-800 px-4 py-4 text-white">
+        <div className="font-black">{team.name}</div>
+        <div className="mt-1 text-xs font-bold uppercase tracking-wide text-blue-100">
           {team.locations?.name || "No Home Location"}
         </div>
       </div>
-      <div className="px-4 py-3 font-semibold text-slate-600">
-        {team.divisions?.leagues?.name || ""} / {team.divisions?.name || ""}
+      <div className="bg-blue-50 px-4 py-3">
+        <div className="rounded-xl bg-white px-4 py-3 font-bold text-blue-950 shadow-sm">
+          {team.divisions?.leagues?.name || ""} / {team.divisions?.name || ""}
+        </div>
       </div>
-      <div className="grid grid-cols-1 gap-2 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 bg-blue-50 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3">
         {teamCaptainContacts(team).map((contact) => (
           <div key={contact.label} className="rounded-xl bg-white px-3 py-2 shadow-sm">
             <div className="font-bold text-slate-900">{contact.label}</div>
@@ -641,6 +771,102 @@ function TeamCard({ team }) {
             {contact.phone && <div>{contact.phone}</div>}
           </div>
         ))}
+      </div>
+      <div className="border-t border-slate-200 bg-white px-4 py-3">
+        <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
+          League Documents
+        </div>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          {PLAYER_LEAGUE_DOCUMENT_TYPES.map((documentType) => {
+            const hasDocument = Boolean(leagueDocumentPath(team.divisions?.leagues, documentType));
+
+            return (
+              <button
+                key={documentType.key}
+                type="button"
+                onClick={() => onOpenDocument(team, documentType)}
+                disabled={!hasDocument}
+                className="rounded-xl bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-950 hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+              >
+                {documentType.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PdfViewerModal({ document, onClose }) {
+  const [viewerReady, setViewerReady] = useState(false);
+
+  useEffect(() => {
+    setViewerReady(true);
+  }, []);
+
+  function printDocument() {
+    const printWindow = window.open(document.url, "_blank", "width=1000,height=800");
+
+    if (!printWindow) {
+      alert("Unable to open the PDF for printing. Please allow popups for this site.");
+      return;
+    }
+
+    printWindow.focus();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+              {document.leagueName} / {document.teamName}
+            </div>
+            <h2 className="mt-1 text-2xl font-black">{document.title}</h2>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={document.url}
+              target="_blank"
+              rel="noreferrer"
+              download
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+            >
+              Download
+            </a>
+
+            <button
+              type="button"
+              onClick={printDocument}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Print
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        {viewerReady ? (
+          <iframe
+            title={document.title}
+            src={document.url}
+            className="h-[75vh] w-full bg-slate-100"
+          />
+        ) : (
+          <div className="flex h-[75vh] items-center justify-center bg-slate-100 text-sm font-semibold text-slate-600">
+            Loading PDF viewer...
+          </div>
+        )}
       </div>
     </div>
   );
@@ -681,9 +907,14 @@ function TeamSelect({ value, onChange, teams, label }) {
   );
 }
 
-function MatchSummaryCard({ match, router }) {
+function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
+  const homeStanding = teamStanding(standings, match.home_team_id);
+  const awayStanding = teamStanding(standings, match.away_team_id);
+
   return (
-    <div className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50">
+    <div className="overflow-hidden rounded-2xl border border-purple-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="h-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500" />
+      <div className="px-4 py-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="font-bold text-slate-900">
@@ -691,7 +922,10 @@ function MatchSummaryCard({ match, router }) {
           </div>
           <div className="mt-1 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
             <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-900">
-              Home: {match.home_team?.name || "Home"}
+              Home: {match.home_team?.name || "Home"} ({formatStandingRecord(homeStanding)})
+            </span>
+            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-purple-900">
+              Away: {match.away_team?.name || "Away"} ({formatStandingRecord(awayStanding)})
             </span>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">
               Played at: {match.locations?.name || "No Location"}
@@ -704,16 +938,164 @@ function MatchSummaryCard({ match, router }) {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => router.push(`/live-match/${match.id}`)}
-          className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-        >
-          Match Details
-        </button>
+        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:w-auto">
+          <button
+            type="button"
+            onClick={() => router.push(`/live-match/${match.id}`)}
+            className="rounded-xl bg-purple-700 px-4 py-2 text-sm font-bold text-white hover:bg-purple-800"
+          >
+            Current Scores
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onOpenDetails(match)}
+            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
+          >
+            Match Details
+          </button>
+        </div>
+      </div>
       </div>
     </div>
   );
+}
+
+function MatchDetailsModal({ match, standings, onClose }) {
+  const homeStanding = teamStanding(standings, match.home_team_id);
+  const awayStanding = teamStanding(standings, match.away_team_id);
+  const location = match.locations;
+  const mapUrl = mapLink(location);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+      <div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-purple-800 to-indigo-800 px-5 py-5 text-white md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-purple-100">
+              Week {match.week_number || "-"} Match Details
+            </div>
+            <h2 className="mt-1 text-2xl font-black">
+              {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+            </h2>
+            <div className="mt-2 text-sm font-semibold text-purple-100">
+              {formatDate(match.scheduled_date)} at {match.scheduled_time || "Time TBD"}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="grid gap-4 bg-slate-50 p-5 md:grid-cols-2">
+          <MatchTeamDetail
+            label="Home Team"
+            team={match.home_team}
+            standing={homeStanding}
+            tone="green"
+          />
+          <MatchTeamDetail
+            label="Away Team"
+            team={match.away_team}
+            standing={awayStanding}
+            tone="purple"
+          />
+        </div>
+
+        <div className="space-y-3 p-5">
+          <div className="rounded-2xl border border-slate-200 bg-white p-4">
+            <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+              Location
+            </div>
+            <div className="mt-1 text-lg font-black text-slate-900">
+              {location?.name || "Location TBD"}
+            </div>
+            <div className="mt-1 text-sm font-semibold text-slate-600">
+              {formatLocationAddress(location)}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {mapUrl && (
+              <a
+                href={mapUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-xl bg-purple-700 px-4 py-3 text-sm font-bold text-white hover:bg-purple-800"
+              >
+                Open Home Team Address Map
+              </a>
+            )}
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300"
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MatchTeamDetail({ label, team, standing, tone }) {
+  const tones = {
+    green: "bg-emerald-50 text-emerald-950",
+    purple: "bg-purple-50 text-purple-950",
+  };
+
+  return (
+    <div className={`rounded-2xl p-4 shadow-sm ${tones[tone] || tones.purple}`}>
+      <div className="text-xs font-black uppercase tracking-wide opacity-70">
+        {label}
+      </div>
+      <div className="mt-1 text-xl font-black">{team?.name || label}</div>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-bold">
+        <div className="rounded-xl bg-white px-3 py-2">
+          <div className="text-xs uppercase tracking-wide text-slate-500">Rank</div>
+          #{standing?.rank || "N/A"}
+        </div>
+        <div className="rounded-xl bg-white px-3 py-2">
+          <div className="text-xs uppercase tracking-wide text-slate-500">Record</div>
+          {formatStandingRecord(standing)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function teamStanding(standings, teamId) {
+  return standings.find((standing) => String(standing.team_id) === String(teamId));
+}
+
+function formatStandingRecord(standing) {
+  if (!standing) return "0-0-0";
+  return `${standing.match_wins ?? 0}-${standing.match_losses ?? 0}-${standing.match_ties ?? 0}`;
+}
+
+function formatLocationAddress(location) {
+  const parts = [
+    location?.address,
+    location?.city,
+    location?.state,
+    location?.zip_code,
+  ].filter(Boolean);
+
+  return parts.length > 0 ? parts.join(", ") : "Address not configured";
+}
+
+function mapLink(location) {
+  const address = formatLocationAddress(location);
+  if (!location || address === "Address not configured") return "";
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -758,7 +1140,17 @@ function PlayerHistoryRowWithScores({ row, memberId }) {
   const gameScores = formatGameScores(row, details.sideLabel);
 
   return (
-    <div className="rounded-xl border border-slate-200 px-4 py-3">
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div
+        className={`h-1 ${
+          details.result === "W"
+            ? "bg-emerald-500"
+            : details.result === "L"
+            ? "bg-rose-500"
+            : "bg-slate-400"
+        }`}
+      />
+      <div className="px-4 py-4">
       <div className="flex flex-wrap items-center gap-2">
         <span
           className={`rounded-full px-2 py-0.5 text-xs font-black ${
@@ -786,12 +1178,13 @@ function PlayerHistoryRowWithScores({ row, memberId }) {
       {gameScores.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-700">
           {gameScores.map((game) => (
-            <span key={game.key} className="rounded-lg bg-slate-100 px-2 py-1">
+            <span key={game.key} className="rounded-xl bg-blue-50 px-3 py-2 text-blue-950">
               {game.label} - {game.playerTeamName}: {game.players} vs {game.opponentTeamName}: {game.opponentPlayers}: {game.score}
             </span>
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }

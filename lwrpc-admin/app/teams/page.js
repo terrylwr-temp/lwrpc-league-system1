@@ -150,12 +150,14 @@ export default function TeamsPage() {
         email,
         self_rating,
         dupr_id,
+        is_active_member,
         location_id,
         locations (
           id,
           name
         )
       `)
+      .neq("is_active_member", false)
       .order("last_name", { ascending: true })
       .range(0, 2500);
 
@@ -200,11 +202,29 @@ export default function TeamsPage() {
       `)
       .order("name", { ascending: true });
 
+    const { rows: rosterRows, error: rosterError } = await loadAllRosterRows();
+
+    if (rosterError) {
+      alert(rosterError.message);
+      setLoading(false);
+      return;
+    }
+
+    const rosterCountByTeamId = (rosterRows || []).reduce((counts, row) => {
+      counts[row.team_id] = (counts[row.team_id] || 0) + 1;
+      return counts;
+    }, {});
+
     setLeagues(leagueData || []);
     setDivisions(divisionData || []);
     setLocations(locationData || []);
     setMembers(memberData || []);
-    setTeams(teamData || []);
+    setTeams(
+      (teamData || []).map((team) => ({
+        ...team,
+        roster_count: rosterCountByTeamId[team.id] || 0,
+      }))
+    );
     setLoading(false);
   }, []);
 
@@ -855,7 +875,7 @@ if (loading) {
                           {captainSummary(team)}
                         </div>
 
-                        <div className="flex flex-wrap gap-2 md:justify-end">
+                        <div className="grid grid-cols-2 gap-2 md:justify-end">
                           <button
                             onClick={() => openTeamSchedule(team)}
                             className="rounded-lg bg-indigo-100 px-3 py-1.5 text-xs font-semibold text-indigo-900 hover:bg-indigo-200"
@@ -874,7 +894,7 @@ if (loading) {
                             onClick={() => router.push(`/teams/${team.id}`)}
                             className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
                           >
-                            Roster
+                            Roster ({team.roster_count || 0})
                           </button>
 
                           <button
@@ -920,6 +940,29 @@ if (loading) {
       </div>
     </main>
   );
+}
+
+async function loadAllRosterRows() {
+  const pageSize = 1000;
+  let from = 0;
+  const rows = [];
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("team_members")
+      .select("team_id")
+      .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+
+    if (!data || data.length < pageSize) break;
+
+    from += pageSize;
+  }
+
+  return { rows, error: null };
 }
 
 function Field({ label, hint, children }) {

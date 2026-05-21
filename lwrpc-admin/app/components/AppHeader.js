@@ -9,7 +9,8 @@ import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function AppHeader({
   title = "LWR PC League Management System",
-  subtitle = "League Operations Dashboard"
+  subtitle = "League Operations Dashboard",
+  actions = null,
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -57,6 +58,7 @@ export default function AppHeader({
       key: "setup",
       label: "Setup",
       links: [
+        { label: "Seasons", path: "/seasons", role: "league_manager", icon: "\u{1F4C6}" },
         { label: "Leagues", path: "/leagues", role: "league_manager", icon: "\u{1F3DF}\u{FE0F}" },
         { label: "Divisions", path: "/divisions", role: "league_manager", icon: "\u{1F4CA}" },
         { label: "Locations", path: "/locations", role: "league_manager", icon: "\u{1F4CD}" },
@@ -311,7 +313,7 @@ export default function AppHeader({
 
       <div className="mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-white shadow">
         <div className="h-1.5 bg-gradient-to-r from-blue-700 via-sky-500 to-emerald-500" />
-        <div className="flex items-center justify-between gap-4 bg-gradient-to-r from-slate-950 to-blue-950 px-5 py-5 text-white">
+        <div className="flex flex-col gap-4 bg-gradient-to-r from-slate-950 to-blue-950 px-5 py-5 text-white md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setMenuOpen(true)}
@@ -343,17 +345,25 @@ export default function AppHeader({
             </div>
           </div>
 
-          <div className="hidden rounded-xl bg-white/10 px-4 py-3 text-right md:block">
-            <div className="text-xs uppercase tracking-wide text-sky-200">
-              Welcome
-            </div>
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+            {actions && (
+              <div className="flex flex-wrap gap-2 md:justify-end">
+                {actions}
+              </div>
+            )}
 
-            <div className="font-bold text-white">
-              {memberName || "User"}
-            </div>
+            <div className="hidden rounded-xl bg-white/10 px-4 py-3 text-right md:block">
+              <div className="text-xs uppercase tracking-wide text-sky-200">
+                Welcome
+              </div>
 
-            <div className="text-xs text-slate-200">
-              {roleLabel(role)}
+              <div className="font-bold text-white">
+                {memberName || "User"}
+              </div>
+
+              <div className="text-xs text-slate-200">
+                {roleLabel(role)}
+              </div>
             </div>
           </div>
         </div>

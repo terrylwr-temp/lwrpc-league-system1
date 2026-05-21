@@ -8,6 +8,11 @@ import { requireRole, supabase } from "../lib/auth";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import TeamScheduleModal from "../components/TeamScheduleModal";
+import {
+  DEFAULT_LEAGUE_DOCUMENT_BUCKET,
+  LEAGUE_DOCUMENT_TYPES,
+  leagueDocumentPath,
+} from "../lib/leagueDocuments";
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
@@ -30,6 +35,7 @@ export default function CaptainDashboardPage() {
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
   const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
+  const [pdfDocument, setPdfDocument] = useState(null);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -104,7 +110,13 @@ export default function CaptainDashboardPage() {
           leagues (
             id,
             name,
-            season_id
+            season_id,
+            league_document_bucket,
+            code_of_conduct_pdf_path,
+            captains_guide_pdf_path,
+            league_rules_pdf_path,
+            score_sheet_pdf_path,
+            league_waiver_pdf_path
           )
         ),
         locations (
@@ -395,33 +407,46 @@ export default function CaptainDashboardPage() {
     return (
       <div
         key={match.id}
-        className="rounded-lg border border-slate-200 px-3 py-2 hover:bg-slate-50"
+        className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
       >
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
+        <div className="bg-gradient-to-r from-blue-800 to-indigo-800 px-4 py-3 text-white">
+          <div className="text-xs font-black uppercase tracking-wide text-blue-100">
+            Week {match.week_number || "-"}
+          </div>
+          <div className="mt-1 text-lg font-black">
+            {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <div className="truncate text-base font-bold text-slate-900">
-                {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
-              </div>
-
-              <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-blue-900">
-                Week {match.week_number || "—"}
-              </span>
-
-              <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-green-900">
+            <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
+              <span className="rounded-full bg-green-100 px-2 py-1 text-green-900">
                 Home: {match.home_team?.name || "Home"}
               </span>
 
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-slate-700">
+              <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-900">
                 Away: {match.away_team?.name || "Away"}
+              </span>
+
+              <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+                {match.status || "scheduled"}
               </span>
             </div>
 
-            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
-              <span>{formatDate(match.scheduled_date)} at {match.scheduled_time || "—"}</span>
-              <span>{match.locations?.name || "No Location"}</span>
-              <span>{match.status || "scheduled"}</span>
-              <span>Score: <span className="font-semibold">{match.score_status || "not_entered"}</span></span>
+            <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                <div className="text-xs font-black uppercase tracking-wide text-slate-500">Date / Time</div>
+                <div className="font-bold text-slate-900">{formatDate(match.scheduled_date)} at {match.scheduled_time || "—"}</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                <div className="text-xs font-black uppercase tracking-wide text-slate-500">Location</div>
+                <div className="font-bold text-slate-900">{match.locations?.name || "No Location"}</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 px-3 py-2">
+                <div className="text-xs font-black uppercase tracking-wide text-slate-500">Score Status</div>
+                <div className="font-bold text-slate-900">{match.score_status || "not_entered"}</div>
+              </div>
             </div>
 
             {match.status === "completed" && (
@@ -881,7 +906,11 @@ export default function CaptainDashboardPage() {
     setDivisionScheduleMatches([]);
     setDivisionScheduleLoading(true);
 
-    const [{ data: divisionTeams, error: teamsError }, { data: divisionMatches, error: matchesError }] =
+    const [
+      { data: divisionTeams, error: teamsError },
+      { data: divisionMatches, error: matchesError },
+      { data: divisionStandings, error: standingsError },
+    ] =
       await Promise.all([
         supabase
           .from("teams")
@@ -937,6 +966,10 @@ export default function CaptainDashboardPage() {
           .eq("is_published", true)
           .order("scheduled_date", { ascending: true })
           .order("scheduled_time", { ascending: true }),
+        supabase
+          .from("team_standings")
+          .select("team_id, match_wins, match_losses, match_ties")
+          .eq("division_id", team.division_id),
       ]);
 
     setDivisionScheduleLoading(false);
@@ -951,8 +984,59 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    setDivisionScheduleTeams(divisionTeams || []);
+    if (standingsError) {
+      alert(standingsError.message);
+      return;
+    }
+
+    const standingsByTeamId = Object.fromEntries(
+      (divisionStandings || []).map((standing) => [String(standing.team_id), standing])
+    );
+
+    setDivisionScheduleTeams(
+      (divisionTeams || []).map((divisionTeam) => ({
+        ...divisionTeam,
+        standing: standingsByTeamId[String(divisionTeam.id)] || null,
+      }))
+    );
     setDivisionScheduleMatches(divisionMatches || []);
+  }
+
+  async function openLeagueDocument(team, documentType) {
+    const league = team?.divisions?.leagues;
+    const path = leagueDocumentPath(league, documentType);
+
+    if (!path) {
+      alert(`${documentType.label} is not configured for this league.`);
+      return;
+    }
+
+    const bucket = league?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET;
+    let documentUrl = "";
+
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(path, 60 * 60);
+
+    if (!error && data?.signedUrl) {
+      documentUrl = data.signedUrl;
+    } else {
+      const publicUrl = supabase.storage.from(bucket).getPublicUrl(path);
+      documentUrl = publicUrl.data?.publicUrl || "";
+    }
+
+    if (!documentUrl) {
+      alert("Unable to open this PDF. Check the Supabase Storage bucket and file path.");
+      return;
+    }
+
+    setPdfDocument({
+      title: documentType.label,
+      leagueName: league?.name || "League",
+      teamName: team?.name || "Team",
+      url: documentUrl,
+      path,
+    });
   }
 
   if (loading) {
@@ -987,7 +1071,7 @@ export default function CaptainDashboardPage() {
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           <SummaryCard label="My Teams" value={teams.length} tone="slate" />
           <SummaryCard label="Upcoming Items" value={upcomingItems.length} tone="blue" />
-          <SummaryCard label="Pending Verification" value={pendingVerification.length} tone="amber" />
+          <SummaryCard label="Pending Verification" value={pendingVerification.length} tone="red" />
           <SummaryCard label="Completed Matches" value={completedMatches.length} tone="emerald" />
         </div>
 
@@ -1134,12 +1218,12 @@ export default function CaptainDashboardPage() {
               const standing = stats.standing;
 
               return (
-              <div key={team.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="bg-slate-50 p-4">
+              <div key={team.id} className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-md">
+                <div className="bg-gradient-to-r from-slate-950 to-blue-800 p-4 text-white">
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <div className="text-lg font-black text-slate-950">{team.name}</div>
-                    <div className="mt-1 text-sm font-semibold text-slate-600">
+                    <div className="text-lg font-black">{team.name}</div>
+                    <div className="mt-1 text-sm font-semibold text-blue-100">
                       {team.divisions?.leagues?.name || "League"} / {team.divisions?.name || "Division"}
                     </div>
                   </div>
@@ -1169,8 +1253,8 @@ export default function CaptainDashboardPage() {
                 </div>
                 </div>
 
-                <div className="space-y-1 px-4 py-3 text-sm text-slate-600">
-                  <div>
+                <div className="bg-blue-50 px-4 py-3 text-sm text-slate-700">
+                  <div className="rounded-xl bg-white px-4 py-3 shadow-sm">
                     <span className="font-bold text-slate-900">Home Location:</span> {team.locations?.name || "—"}
                   </div>
                 </div>
@@ -1199,6 +1283,29 @@ export default function CaptainDashboardPage() {
                   >
                     Print Captains
                   </button>
+                </div>
+
+                <div className="border-t border-slate-100 p-4">
+                  <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
+                    League Documents
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {LEAGUE_DOCUMENT_TYPES.map((documentType) => {
+                      const hasDocument = Boolean(leagueDocumentPath(team.divisions?.leagues, documentType));
+
+                      return (
+                        <button
+                          key={documentType.key}
+                          type="button"
+                          onClick={() => openLeagueDocument(team, documentType)}
+                          disabled={!hasDocument}
+                          className="rounded-xl bg-emerald-100 px-3 py-3 text-sm font-bold text-emerald-950 shadow-sm hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
+                        >
+                          {documentType.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
               );
@@ -1278,6 +1385,13 @@ export default function CaptainDashboardPage() {
             }}
           />
         )}
+
+        {pdfDocument && (
+          <PdfViewerModal
+            document={pdfDocument}
+            onClose={() => setPdfDocument(null)}
+          />
+        )}
       </div>
     </main>
   );
@@ -1290,6 +1404,80 @@ function finishLoading(startedAt, setLoading) {
   setTimeout(() => {
     setLoading(false);
   }, remaining);
+}
+
+function PdfViewerModal({ document, onClose }) {
+  const [viewerReady, setViewerReady] = useState(false);
+
+  useEffect(() => {
+    setViewerReady(true);
+  }, []);
+
+  function printDocument() {
+    const printWindow = window.open(document.url, "_blank", "width=1000,height=800");
+
+    if (!printWindow) {
+      alert("Unable to open the PDF for printing. Please allow popups for this site.");
+      return;
+    }
+
+    printWindow.focus();
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+              {document.leagueName} / {document.teamName}
+            </div>
+            <h2 className="mt-1 text-2xl font-black">{document.title}</h2>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={document.url}
+              target="_blank"
+              rel="noreferrer"
+              download
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+            >
+              Download
+            </a>
+
+            <button
+              type="button"
+              onClick={printDocument}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Print
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        {viewerReady ? (
+          <iframe
+            title={document.title}
+            src={document.url}
+            className="h-[75vh] w-full bg-slate-100"
+          />
+        ) : (
+          <div className="flex h-[75vh] items-center justify-center bg-slate-100 text-sm font-semibold text-slate-600">
+            Loading PDF viewer...
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function formatDate(value) {
@@ -1461,6 +1649,7 @@ function SummaryCard({ label, value, tone = "slate" }) {
     slate: "border-slate-200 bg-slate-950 text-white",
     blue: "border-blue-200 bg-blue-700 text-white",
     amber: "border-amber-200 bg-amber-400 text-slate-950",
+    red: "border-red-200 bg-red-700 text-white",
     emerald: "border-emerald-200 bg-emerald-600 text-white",
   };
   const labelTone = tone === "amber" ? "text-slate-800" : "text-white/75";

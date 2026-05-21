@@ -16,6 +16,7 @@ export default function RatingsPage() {
   const [ratingsLoading, setRatingsLoading] = useState(false);
 
   const [members, setMembers] = useState([]);
+  const [currentRosterMemberIds, setCurrentRosterMemberIds] = useState(new Set());
   const [seasons, setSeasons] = useState([]);
   const [ratings, setRatings] = useState([]);
   const [allRatings, setAllRatings] = useState([]);
@@ -26,6 +27,9 @@ export default function RatingsPage() {
 
   const [selectedSeason, setSelectedSeason] = useState("");
   const [search, setSearch] = useState("");
+  const [showCurrentRosterOnly, setShowCurrentRosterOnly] = useState(false);
+  const [showMissingDoublesOnly, setShowMissingDoublesOnly] = useState(false);
+  const [showRatingImportTools, setShowRatingImportTools] = useState(false);
   const [page, setPage] = useState(1);
 
   const checkAuth = useCallback(async function checkAuth() {
@@ -78,7 +82,8 @@ export default function RatingsPage() {
 
     const { data: memberData, error: memberError } = await supabase
       .from("members")
-      .select("id, first_name, last_name, email, club_location, dupr_id")
+      .select("id, first_name, last_name, email, club_location, dupr_id, is_active_member")
+      .neq("is_active_member", false)
       .order("last_name", { ascending: true });
 
     if (memberError) {
@@ -98,7 +103,18 @@ export default function RatingsPage() {
       return;
     }
 
+    const { rows: rosterRows, error: rosterError } = await loadAllRatingRosterRows();
+
+    if (rosterError) {
+      alert(rosterError.message);
+      setLoading(false);
+      return;
+    }
+
     setMembers(memberData || []);
+    setCurrentRosterMemberIds(
+      new Set((rosterRows || []).map((row) => String(row.member_id)))
+    );
     setSeasons(seasonData || []);
 
     const firstSeasonId = seasonData?.[0]?.id || "";
@@ -119,7 +135,7 @@ export default function RatingsPage() {
       return;
     }
 
-    const cleanValue = value === "" ? null : Number(value);
+    const cleanValue = normalizeRatingInput(field, value);
 
     const existing = ratings.find(
       (r) => r.member_id === memberId && r.season_id === selectedSeason
@@ -183,6 +199,29 @@ export default function RatingsPage() {
 
     return row?.[field] ?? "";
   }
+
+  function normalizeRatingInput(field, value) {
+    if (value === "") return null;
+
+    const numberValue = Number(value);
+    if (Number.isNaN(numberValue)) return null;
+
+    if (field === "season_dupr_rating") {
+      return Math.trunc(numberValue * 10) / 10;
+    }
+
+    return numberValue;
+  }
+
+  const hasDoublesRating = useCallback(function hasDoublesRating(memberId) {
+    const row = ratings.find(
+      (rating) =>
+        rating.member_id === memberId &&
+        rating.season_id === selectedSeason
+    );
+    const value = row?.season_dupr_rating;
+    return value !== null && value !== undefined && value !== "";
+  }, [ratings, selectedSeason]);
 
   function seasonLabel(seasonId) {
     return seasons.find((season) => season.id === seasonId)?.name || "Unknown Season";
@@ -440,7 +479,7 @@ export default function RatingsPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [search, selectedSeason]);
+  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly]);
 
   useEffect(() => {
     if (!loading && selectedSeason) {
@@ -454,22 +493,32 @@ export default function RatingsPage() {
 
   const filteredMembers = useMemo(() => {
     const q = search.trim().toLowerCase();
+    let nextMembers = members;
 
-    if (!q) return members;
+    if (showCurrentRosterOnly) {
+      nextMembers = nextMembers.filter((member) =>
+        currentRosterMemberIds.has(String(member.id))
+      );
+    }
 
-    return members.filter((member) => {
+    if (showMissingDoublesOnly) {
+      nextMembers = nextMembers.filter((member) => !hasDoublesRating(member.id));
+    }
+
+    if (!q) return nextMembers;
+
+    return nextMembers.filter((member) => {
       const fullName = `${member.first_name || ""} ${member.last_name || ""}`;
       const reverseName = `${member.last_name || ""} ${member.first_name || ""}`;
 
       return (
         fullName.toLowerCase().includes(q) ||
         reverseName.toLowerCase().includes(q) ||
-        (member.email || "").toLowerCase().includes(q) ||
         (member.club_location || "").toLowerCase().includes(q) ||
         (member.dupr_id || "").toLowerCase().includes(q)
       );
     });
-  }, [members, search]);
+  }, [currentRosterMemberIds, hasDoublesRating, members, search, showCurrentRosterOnly, showMissingDoublesOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
@@ -548,7 +597,7 @@ function goToPage(value) {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by name, email, location, or DUPR ID"
+                placeholder="Search by name, location, or DUPR ID"
                 className="w-full rounded-xl border border-slate-300 px-4 py-3"
               />
             </div>
@@ -558,6 +607,8 @@ function goToPage(value) {
                 onClick={() => {
                   setSearch("");
                   setSelectedSeason(seasons?.[0]?.id || "");
+                  setShowCurrentRosterOnly(false);
+                  setShowMissingDoublesOnly(false);
                   setPage(1);
                 }}
                 className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300"
@@ -566,8 +617,47 @@ function goToPage(value) {
               </button>
             </div>
           </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => setShowCurrentRosterOnly((value) => !value)}
+              className={`rounded-xl px-4 py-3 font-semibold ${
+                showCurrentRosterOnly
+                  ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                  : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
+              }`}
+            >
+              {showCurrentRosterOnly ? "Show All Players" : "Current Rosters Only"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowMissingDoublesOnly((value) => !value)}
+              className={`rounded-xl px-4 py-3 font-semibold ${
+                showMissingDoublesOnly
+                  ? "bg-amber-600 text-white hover:bg-amber-700"
+                  : "bg-amber-100 text-amber-950 hover:bg-amber-200"
+              }`}
+            >
+              {showMissingDoublesOnly ? "Show All Ratings" : "Missing Doubles Rating"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowRatingImportTools((value) => !value)}
+              className={`rounded-xl px-4 py-3 font-semibold ${
+                showRatingImportTools
+                  ? "bg-blue-700 text-white hover:bg-blue-800"
+                  : "bg-blue-100 text-blue-900 hover:bg-blue-200"
+              }`}
+            >
+              {showRatingImportTools ? "Hide Data Tools" : "Data Tools"}
+            </button>
+          </div>
         </div>
 
+        {showRatingImportTools && (
         <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
@@ -672,6 +762,7 @@ function goToPage(value) {
             </div>
           )}
         </div>
+        )}
 
         <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
           <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 md:flex-row md:items-center md:justify-between">
@@ -744,24 +835,31 @@ function goToPage(value) {
             <tbody>
               {pagedMembers.map((member) => {
                 const history = getRatingHistory(member.id);
+                const missingDoublesRating = !hasDoublesRating(member.id);
 
                 return (
                   <tr
                     key={member.id}
-                    className="border-b border-slate-100 hover:bg-slate-50"
+                    className={`border-b border-slate-100 ${
+                      missingDoublesRating
+                        ? "bg-amber-50 hover:bg-amber-100"
+                        : "hover:bg-slate-50"
+                    }`}
                   >
                     <td className="px-4 py-4">
                       <div className="font-semibold text-slate-900">
                         {member.last_name}, {member.first_name}
                       </div>
 
-                      <div className="text-sm text-slate-500">
-                        {member.email || "No Email"}
-                      </div>
-
                       <div className="text-xs text-slate-500">
                         DUPR ID: {member.dupr_id || ""}
                       </div>
+
+                      {missingDoublesRating && (
+                        <div className="mt-2 inline-flex rounded-full bg-amber-200 px-2 py-1 text-xs font-bold text-amber-950">
+                          Missing Doubles Rating
+                        </div>
+                      )}
 
                       {history.length > 0 && (
                         <div className="mt-2 flex flex-wrap gap-1">
@@ -807,13 +905,15 @@ function goToPage(value) {
                         type="number"
                         step="0.01"
                         defaultValue={getRating(member.id, "season_dupr_rating")}
-                        onBlur={(e) =>
+                        onBlur={(e) => {
+                          const cleanValue = normalizeRatingInput("season_dupr_rating", e.target.value);
+                          e.target.value = cleanValue ?? "";
                           updateRating(
                             member.id,
                             "season_dupr_rating",
                             e.target.value
-                          )
-                        }
+                          );
+                        }}
                         className="w-32 rounded-xl border border-slate-300 px-3 py-2"
                         placeholder="3.50"
                       />
@@ -888,6 +988,29 @@ function goToPage(value) {
       </div>
     </main>
   );
+}
+
+async function loadAllRatingRosterRows() {
+  const pageSize = 1000;
+  let from = 0;
+  const rows = [];
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("team_members")
+      .select("member_id")
+      .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+
+    if (!data || data.length < pageSize) break;
+
+    from += pageSize;
+  }
+
+  return { rows, error: null };
 }
 
 function parseCsv(text) {

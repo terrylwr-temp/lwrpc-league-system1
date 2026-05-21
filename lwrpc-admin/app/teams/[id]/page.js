@@ -101,6 +101,7 @@ export default function TeamRosterPage() {
           dupr_id,
           self_rating,
           club_location,
+          is_active_member,
           location_id
         )
       `)
@@ -121,8 +122,10 @@ export default function TeamRosterPage() {
         dupr_id,
         self_rating,
         club_location,
+        is_active_member,
         location_id
       `)
+      .neq("is_active_member", false)
       .order("last_name", { ascending: true })
       .range(0, 5000);
 
