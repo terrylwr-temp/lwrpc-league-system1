@@ -501,7 +501,7 @@ export default function PlayerDashboardPage() {
               active={activePanel === "upcoming"}
               label="Upcoming Matches"
               value={upcomingMatchesBySelectedTeam.length || matches.filter((match) => match.status !== "completed" && match.status !== "cancelled").length}
-              tone="purple"
+              tone="gray"
               onClick={() => selectPanel("upcoming")}
             />
           </div>
@@ -576,15 +576,15 @@ export default function PlayerDashboardPage() {
 
         {activePanel === "upcoming" && (
           <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
-            <div className="flex flex-col gap-2 bg-gradient-to-r from-purple-700 to-fuchsia-700 p-6 text-white md:flex-row md:items-center md:justify-between">
+            <div className="flex flex-col gap-2 bg-gradient-to-r from-slate-700 to-zinc-700 p-6 text-white md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="text-xs font-black uppercase tracking-wide text-purple-100">
+                <div className="text-xs font-black uppercase tracking-wide text-slate-200">
                   Match Calendar
                 </div>
                 <h2 className="mt-1 text-xl font-black">
                   Upcoming Matches: {selectedUpcomingTeam?.name || "Team"}
                 </h2>
-                <p className="mt-1 text-sm font-semibold text-purple-100">
+                <p className="mt-1 text-sm font-semibold text-slate-200">
                   {selectedUpcomingTeam?.divisions?.leagues?.name || ""} / {selectedUpcomingTeam?.divisions?.name || ""}
                 </p>
               </div>
@@ -702,9 +702,9 @@ function DashboardOption({ active, label, value, tone = "blue", onClick }) {
     amber: active
       ? "border-amber-500 bg-amber-400 text-slate-950"
       : "border-amber-200 bg-amber-50 text-amber-950 hover:border-amber-500",
-    purple: active
-      ? "border-purple-700 bg-purple-700 text-white"
-      : "border-purple-200 bg-purple-50 text-purple-950 hover:border-purple-500",
+    gray: active
+      ? "border-slate-700 bg-slate-700 text-white"
+      : "border-slate-300 bg-slate-50 text-slate-950 hover:border-slate-500",
   };
   const badgeClass = active ? "bg-white/20" : "bg-white";
   const helperClass = active ? "text-white/80" : "text-slate-600";
@@ -912,8 +912,8 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
   const awayStanding = teamStanding(standings, match.away_team_id);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-purple-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="h-1 bg-gradient-to-r from-purple-500 via-fuchsia-500 to-indigo-500" />
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="h-1 bg-gradient-to-r from-slate-500 via-zinc-500 to-stone-500" />
       <div className="px-4 py-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
@@ -924,7 +924,7 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
             <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-900">
               Home: {match.home_team?.name || "Home"} ({formatStandingRecord(homeStanding)})
             </span>
-            <span className="rounded-full bg-purple-100 px-2 py-0.5 text-purple-900">
+            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-800">
               Away: {match.away_team?.name || "Away"} ({formatStandingRecord(awayStanding)})
             </span>
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">
@@ -942,7 +942,7 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
           <button
             type="button"
             onClick={() => router.push(`/live-match/${match.id}`)}
-            className="rounded-xl bg-purple-700 px-4 py-2 text-sm font-bold text-white hover:bg-purple-800"
+            className="rounded-xl bg-slate-700 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
           >
             Current Scores
           </button>
@@ -970,15 +970,15 @@ function MatchDetailsModal({ match, standings, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
       <div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-purple-800 to-indigo-800 px-5 py-5 text-white md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-800 to-zinc-800 px-5 py-5 text-white md:flex-row md:items-start md:justify-between">
           <div>
-            <div className="text-xs font-black uppercase tracking-wide text-purple-100">
+            <div className="text-xs font-black uppercase tracking-wide text-slate-200">
               Week {match.week_number || "-"} Match Details
             </div>
             <h2 className="mt-1 text-2xl font-black">
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
-            <div className="mt-2 text-sm font-semibold text-purple-100">
+            <div className="mt-2 text-sm font-semibold text-slate-200">
               {formatDate(match.scheduled_date)} at {match.scheduled_time || "Time TBD"}
             </div>
           </div>
@@ -1003,7 +1003,7 @@ function MatchDetailsModal({ match, standings, onClose }) {
             label="Away Team"
             team={match.away_team}
             standing={awayStanding}
-            tone="purple"
+            tone="gray"
           />
         </div>
 
@@ -1026,7 +1026,7 @@ function MatchDetailsModal({ match, standings, onClose }) {
                 href={mapUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-xl bg-purple-700 px-4 py-3 text-sm font-bold text-white hover:bg-purple-800"
+                className="rounded-xl bg-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
               >
                 Open Home Team Address Map
               </a>
@@ -1049,11 +1049,11 @@ function MatchDetailsModal({ match, standings, onClose }) {
 function MatchTeamDetail({ label, team, standing, tone }) {
   const tones = {
     green: "bg-emerald-50 text-emerald-950",
-    purple: "bg-purple-50 text-purple-950",
+    gray: "bg-slate-100 text-slate-950",
   };
 
   return (
-    <div className={`rounded-2xl p-4 shadow-sm ${tones[tone] || tones.purple}`}>
+    <div className={`rounded-2xl p-4 shadow-sm ${tones[tone] || tones.gray}`}>
       <div className="text-xs font-black uppercase tracking-wide opacity-70">
         {label}
       </div>
