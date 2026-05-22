@@ -138,22 +138,10 @@ export default function LoginPage() {
       return;
     }
 
-    setMessage("Sending password reset email...");
-
-    const { error } =
-      await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-        redirectTo:
-          "https://league.lwrpickleballclub.com/reset-password"
-      });
-
-    if (error) {
-      setMessage(error.message);
-      setLoading(false);
-      return;
-    }
-
     setMessage(
-      "Password reset email sent. Please check your inbox."
+      memberCheckResult.emailType === "invite"
+        ? "Account setup email sent. Please check your inbox."
+        : "Password reset email sent. Please check your inbox."
     );
 
     setLoading(false);

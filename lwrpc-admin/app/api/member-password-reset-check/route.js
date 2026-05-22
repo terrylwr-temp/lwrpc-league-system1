@@ -4,6 +4,8 @@ import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
 
 export const runtime = "nodejs";
 
+const RESET_REDIRECT_URL = "https://league.lwrpickleballclub.com/reset-password";
+
 export async function POST(req) {
   try {
     const { email } = await req.json();
@@ -58,11 +60,84 @@ export async function POST(req) {
       );
     }
 
+    if (!member?.id) {
+      return NextResponse.json({
+        success: true,
+        verification: "complete",
+        memberExists: false,
+        isActiveMember: false,
+        emailSent: false,
+      });
+    }
+
+    if (member.is_active_member === false) {
+      return NextResponse.json({
+        success: true,
+        verification: "complete",
+        memberExists: true,
+        isActiveMember: false,
+        emailSent: false,
+      });
+    }
+
+    const authUser = await findAuthUserByEmail(adminSupabase, normalizedEmail);
+
+    if (authUser?.id) {
+      await linkUserRole(adminSupabase, member.id, authUser.id);
+
+      const { error: resetError } = await adminSupabase.auth.resetPasswordForEmail(
+        normalizedEmail,
+        {
+          redirectTo: RESET_REDIRECT_URL,
+        }
+      );
+
+      if (resetError) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: resetError.message,
+          },
+          { status: 500 }
+        );
+      }
+
+      return NextResponse.json({
+        success: true,
+        verification: "complete",
+        memberExists: true,
+        isActiveMember: true,
+        emailSent: true,
+        emailType: "recovery",
+      });
+    }
+
+    const { data: invited, error: inviteError } =
+      await adminSupabase.auth.admin.inviteUserByEmail(normalizedEmail, {
+        redirectTo: RESET_REDIRECT_URL,
+      });
+
+    if (inviteError) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: inviteError.message,
+        },
+        { status: 500 }
+      );
+    }
+
+    if (invited?.user?.id) {
+      await linkUserRole(adminSupabase, member.id, invited.user.id);
+    }
+
     return NextResponse.json({
       success: true,
       verification: "complete",
-      memberExists: Boolean(member?.id),
-      isActiveMember: member?.is_active_member !== false,
+      memberExists: true,
+      isActiveMember: true,
+      emailSent: true,
+      emailType: "invite",
     });
   } catch (error) {
     return NextResponse.json(
@@ -73,4 +148,41 @@ export async function POST(req) {
       { status: 500 }
     );
   }
+}
+
+async function findAuthUserByEmail(adminSupabase, email) {
+  const targetEmail = normalizeEmailAddress(email);
+  let page = 1;
+  const perPage = 1000;
+
+  while (page < 20) {
+    const { data, error } = await adminSupabase.auth.admin.listUsers({
+      page,
+      perPage,
+    });
+
+    if (error) throw error;
+
+    const user = (data?.users || []).find(
+      (candidate) => normalizeEmailAddress(candidate.email) === targetEmail
+    );
+
+    if (user) return user;
+    if (!data?.users || data.users.length < perPage) return null;
+
+    page += 1;
+  }
+
+  return null;
+}
+
+async function linkUserRole(adminSupabase, memberId, userId) {
+  await adminSupabase
+    .from("user_roles")
+    .update({
+      user_id: userId,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("member_id", memberId)
+    .is("user_id", null);
 }
