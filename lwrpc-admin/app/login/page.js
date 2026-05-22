@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
+import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function LoginPage() {
@@ -14,6 +15,11 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   async function login(e) {
     e.preventDefault();
@@ -74,18 +80,68 @@ export default function LoginPage() {
   }
 
   async function forgotPassword() {
-    if (!email) {
+    const normalizedEmail = normalizeEmailAddress(email);
+
+    if (!normalizedEmail) {
       setMessage(
         "Enter your email address first, then click Forgot Password."
       );
       return;
     }
 
+    if (!isValidEmailAddress(normalizedEmail)) {
+      setMessage("Please enter a valid email address, such as name@example.com.");
+      return;
+    }
+
     setLoading(true);
+    setEmail(normalizedEmail);
+    setMessage("Checking member email...");
+
+    const memberCheck = await fetch("/api/member-password-reset-check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: normalizedEmail,
+      }),
+    });
+
+    const memberCheckResult = await memberCheck.json();
+
+    if (!memberCheck.ok || !memberCheckResult.success) {
+      setMessage(memberCheckResult.error || "Unable to verify that email address.");
+      setLoading(false);
+      return;
+    }
+
+    if (memberCheckResult.verification !== "complete") {
+      setMessage("Unable to verify that email address right now. Please contact league support.");
+      setLoading(false);
+      return;
+    }
+
+    if (
+      !memberCheckResult.memberExists
+    ) {
+      setMessage("That email address is not linked to a league member record. Please contact league support to confirm your account email.");
+      setLoading(false);
+      return;
+    }
+
+    if (
+      !memberCheckResult.isActiveMember
+    ) {
+      setMessage("That member record is currently inactive. Please contact league support before resetting your password.");
+      setLoading(false);
+      return;
+    }
+
     setMessage("Sending password reset email...");
 
     const { error } =
-      await supabase.auth.resetPasswordForEmail(email, {
+      await supabase.auth.resetPasswordForEmail(normalizedEmail, {
         redirectTo:
           "https://league.lwrpickleballclub.com/reset-password"
       });
@@ -110,6 +166,16 @@ export default function LoginPage() {
     messageText.includes("sending");
   const isErrorMessage =
     Boolean(message) && !isSuccessMessage && !isPendingMessage;
+
+  if (!mounted) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
+        <div className="w-full max-w-md rounded-3xl bg-white p-10 text-center text-sm font-semibold text-slate-500 shadow-2xl">
+          Loading sign in...
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
