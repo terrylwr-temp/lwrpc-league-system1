@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import RoleCapabilityModal from "../../components/RoleCapabilityModal";
 import { requireRole, supabase } from "../../lib/auth";
+import { formatDisplayDate } from "../../lib/dateTime";
 import LoadingScreen from "../../components/LoadingScreen";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
@@ -236,13 +237,7 @@ setUserRole(roleData?.role || "player");
   }
 
   function formatDate(value) {
-    if (!value) return "—";
-
-    try {
-      return new Date(value).toLocaleDateString();
-    } catch {
-      return value;
-    }
+    return formatDisplayDate(value, "-");
   }
 
   function getTeamRole(teamMembership) {
@@ -881,3 +876,4 @@ function locationIdForName(locations, name) {
 function normalizeLocationName(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
+

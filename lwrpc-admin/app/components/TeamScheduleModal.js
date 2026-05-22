@@ -1,5 +1,7 @@
 "use client";
 
+import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
+
 export default function TeamScheduleModal({
   title,
   subtitle,
@@ -136,7 +138,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById }) {
       <div className={compact ? "grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_14rem] md:items-start" : "flex flex-wrap items-start justify-between gap-3"}>
         <div className="min-w-0">
           <div className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-black text-blue-950">
-            {formatDate(match.scheduled_date)} at {match.scheduled_time || "Time TBD"}
+            {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
           </div>
           <div className={`${compact ? "break-words" : ""} mt-1 text-lg font-black text-slate-900`}>
             {formatTeamNameWithRecord(match.home_team, teamRecordById, "Home")} vs {formatTeamNameWithRecord(match.away_team, teamRecordById, "Away")}
@@ -236,11 +238,5 @@ function formatTeamNameWithRecord(team, teamRecordById, fallback) {
 }
 
 function formatDate(value) {
-  if (!value) return "Date TBD";
-
-  try {
-    return new Date(`${value}T12:00:00`).toLocaleDateString();
-  } catch {
-    return value;
-  }
+  return formatDisplayDate(value, "Date TBD");
 }

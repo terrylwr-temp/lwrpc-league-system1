@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
+import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 
 export default function MatchDetailPage() {
@@ -1221,7 +1222,7 @@ export default function MatchDetailPage() {
               </div>
 
               <div className="mt-1 text-sm text-slate-600 md:text-base">
-                {match.scheduled_date || "No Date"} - {match.scheduled_time || "No Time"} - {match.locations?.name || "No Location"}
+                {formatDisplayDate(match.scheduled_date, "No Date")} - {formatDisplayTime(match.scheduled_time, "No Time")} - {match.locations?.name || "No Location"}
               </div>
 
               <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-wide">

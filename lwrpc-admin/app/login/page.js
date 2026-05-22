@@ -174,9 +174,11 @@ export default function LoginPage() {
             />
 
             <h1 className="mt-6 text-3xl font-black text-slate-900">
-              LWR PC League
+              Lakewood Ranch
               <br />
-              Management System
+              Pickleball Club
+              <br />
+              <span className="text-blue-700">League Management System</span>
             </h1>
 
             <p className="mt-3 text-sm font-medium text-slate-500">

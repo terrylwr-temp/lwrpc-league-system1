@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 
 const TEMPLATE_KEY = "score_reminder";
@@ -597,7 +598,7 @@ function MatchRow({ match, selected, onToggle, onOpen }) {
             </div>
 
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
-              <span>{formatDate(match.scheduled_date)} at {match.scheduled_time || "TBD"}</span>
+              <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "TBD")}</span>
               <span>{match.leagues?.name || "No League"}</span>
               <span>{match.divisions?.name || "No Division"}</span>
               <span>{match.locations?.name || "No Location"}</span>
@@ -750,13 +751,7 @@ function formatMemberName(member) {
 }
 
 function formatDate(value) {
-  if (!value) return "TBD";
-
-  try {
-    return new Date(`${value}T12:00:00`).toLocaleDateString();
-  } catch {
-    return value;
-  }
+  return formatDisplayDate(value, "TBD");
 }
 
 function localDateString() {

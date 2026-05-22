@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { requireRole, supabase } from "../../lib/auth";
+import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
 
 export default function MobileScoreEntryPage() {
   const { id } = useParams();
@@ -250,7 +251,7 @@ export default function MobileScoreEntryPage() {
           </div>
 
           <div className="mt-1 text-sm text-slate-300">
-            {match.scheduled_date || "No date"} · {match.scheduled_time || "No time"}
+            {formatDisplayDate(match.scheduled_date, "No date")} · {formatDisplayTime(match.scheduled_time, "No time")}
           </div>
         </div>
 

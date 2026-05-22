@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { formatDisplayTime } from "../lib/dateTime";
 import {
   filterHistoryRows,
   formatDate,
@@ -1103,7 +1104,7 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
             </span>
           </div>
           <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
-            <span>{formatDate(match.scheduled_date)} at {match.scheduled_time || "—"}</span>
+            <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
             <span>{match.divisions?.name || "No Division"}</span>
             <span>{match.score_status ? match.score_status.replaceAll("_", " ") : match.status || "scheduled"}</span>
             <span>Week {match.week_number || "—"}</span>
@@ -1151,7 +1152,7 @@ function MatchDetailsModal({ match, standings, onClose }) {
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
             <div className="mt-2 text-sm font-semibold text-slate-200">
-              {formatDate(match.scheduled_date)} at {match.scheduled_time || "Time TBD"}
+              {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
             </div>
           </div>
 

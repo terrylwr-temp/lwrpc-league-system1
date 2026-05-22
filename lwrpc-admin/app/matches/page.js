@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function MatchesPage() {
@@ -496,11 +497,11 @@ export default function MatchesPage() {
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">
-                        Date: {match.scheduled_date || "—"}
+                        Date: {formatDisplayDate(match.scheduled_date, "No Date")}
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">
-                        Time: {match.scheduled_time || "—"}
+                        Time: {formatDisplayTime(match.scheduled_time, "No Time")}
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">

@@ -13,6 +13,7 @@ export default function DivisionsPage() {
   const [divisions, setDivisions] = useState([]);
   const [leagueFilter, setLeagueFilter] = useState("");
   const [divisionSearch, setDivisionSearch] = useState("");
+  const [openLeagueName, setOpenLeagueName] = useState("");
 
   const [editingId, setEditingId] = useState(null);
 
@@ -579,20 +580,31 @@ export default function DivisionsPage() {
             </div>
 
             <div className="space-y-6">
-              {Object.keys(groupedDivisions).map((leagueName) => (
+              {Object.keys(groupedDivisions).map((leagueName) => {
+                const isOpen = openLeagueName === leagueName;
+
+                return (
                 <div
                   key={leagueName}
                   className="overflow-hidden rounded-xl border border-blue-100 bg-blue-50/40"
                 >
-                  <div className="flex items-center justify-between gap-3 border-b border-blue-100 bg-blue-700 px-4 py-3 text-white">
+                  <button
+                    type="button"
+                    onClick={() => setOpenLeagueName((current) => current === leagueName ? "" : leagueName)}
+                    className="flex w-full items-center justify-between gap-3 border-b border-blue-100 bg-blue-700 px-4 py-3 text-left text-white hover:bg-blue-800"
+                  >
                     <h3 className="text-lg font-bold">
                       {leagueName}
                     </h3>
-                    <span className="rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">
-                      {groupedDivisions[leagueName].length} Divisions
+                    <span className="flex items-center gap-3">
+                      <span className="rounded-full bg-white/15 px-3 py-1 text-sm font-semibold">
+                        {groupedDivisions[leagueName].length} Divisions
+                      </span>
+                      <span className="text-xl font-black">{isOpen ? "-" : "+"}</span>
                     </span>
-                  </div>
+                  </button>
 
+                  {isOpen && (
                   <div className="space-y-3 p-3">
                     {groupedDivisions[leagueName].map((division) => (
                       <div
@@ -683,8 +695,10 @@ export default function DivisionsPage() {
                       </div>
                     ))}
                   </div>
+                  )}
                 </div>
-              ))}
+                );
+              })}
 
               {divisions.length === 0 && (
                 <div className="text-slate-500">No divisions created yet.</div>

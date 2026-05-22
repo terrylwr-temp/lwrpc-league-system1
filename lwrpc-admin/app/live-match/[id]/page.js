@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "../../lib/auth";
+import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
 
 export default function LiveMatchPage() {
   const { id } = useParams();
@@ -232,9 +233,9 @@ export default function LiveMatchPage() {
               </div>
 
               <div className="mt-1 text-slate-300">
-                {match.scheduled_date || "No date"}
+                {formatDisplayDate(match.scheduled_date, "No date")}
                 {" · "}
-                {match.scheduled_time || "No time"}
+                {formatDisplayTime(match.scheduled_time, "No time")}
               </div>
 
               <div className="mt-2 text-sm text-slate-400">

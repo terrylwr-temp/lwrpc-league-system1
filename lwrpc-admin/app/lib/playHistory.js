@@ -1,11 +1,7 @@
-export function formatDate(value) {
-  if (!value) return "—";
+import { formatDisplayDate } from "./dateTime";
 
-  try {
-    return new Date(`${value}T12:00:00`).toLocaleDateString();
-  } catch {
-    return value;
-  }
+export function formatDate(value) {
+  return formatDisplayDate(value, "-");
 }
 
 export function formatPlayerName(member) {

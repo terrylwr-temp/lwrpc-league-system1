@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { formatDisplayDate } from "../lib/dateTime";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function ScheduleEditorPage() {
@@ -171,13 +172,7 @@ export default function ScheduleEditorPage() {
   }
 
   function formatDate(value) {
-    if (!value || value === "No Date") return "No Date";
-
-    try {
-      return new Date(`${value}T12:00:00`).toLocaleDateString();
-    } catch {
-      return value;
-    }
+    return formatDisplayDate(value, "No Date");
   }
 
   function isAvailabilityMatch(row, locationId, matchDate, matchTime) {
@@ -934,7 +929,7 @@ export default function ScheduleEditorPage() {
       if (sortBy === "league") return leagueCompare || divisionCompare || dateCompare;
       if (sortBy === "division") return divisionCompare || dateCompare || teamCompare;
       if (sortBy === "team") return teamCompare || dateCompare;
-      return dateCompare || locationCompare || teamCompare;
+      return dateCompare || teamCompare || locationCompare;
     });
   })();
 

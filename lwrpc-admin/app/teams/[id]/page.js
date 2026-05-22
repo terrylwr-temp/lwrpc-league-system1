@@ -429,14 +429,11 @@ function getAverageTeamRating() {
   }, [getRosterRank, roster]);
 
   const rostersLocked = team?.divisions?.leagues?.rosters_locked === true;
-  const canModifyRoster = !rostersLocked || hasRole(currentUser?.role, "league_manager");
+  const canModifyRoster = hasRole(currentUser?.role, "captain");
+  const canViewSeasonRatings = hasRole(currentUser?.role, "league_manager");
+  const isCaptainOnly = currentUser?.role === "captain";
 
   async function addPlayer() {
-    if (!canModifyRoster) {
-      alert("Rosters are locked for this league. Only League Managers and Commissioners can modify team rosters.");
-      return;
-    }
-
     if (!selectedMemberId) {
       alert("Select a player");
       return;
@@ -478,6 +475,11 @@ function getAverageTeamRating() {
     }
 
     if (outsideRange) {
+      if (rostersLocked) {
+        alert(`${member.first_name} ${member.last_name} is outside the division ${getRatingLabel()} range and cannot be added while rosters are locked.`);
+        return;
+      }
+
       const ok = confirm(
         `${member.first_name} ${member.last_name} appears outside the division ${getRatingLabel()} range.\n\nContinue anyway?`
       );
@@ -489,6 +491,11 @@ function getAverageTeamRating() {
       playerRating === null ||
       Number.isNaN(playerRating)
     ) {
+      if (rostersLocked) {
+        alert(`${member.first_name} ${member.last_name} does not have a ${getRatingLabel()} entered for this season and cannot be added while rosters are locked.`);
+        return;
+      }
+
       const ok = confirm(
         `${member.first_name} ${member.last_name} does not have a ${getRatingLabel()} entered for this season.\n\nContinue anyway?`
       );
@@ -616,18 +623,26 @@ function getAverageTeamRating() {
         <div className="mb-6 flex flex-wrap gap-3">
 
           <button
-            onClick={() => router.push("/teams")}
+            onClick={() => {
+              if (isCaptainOnly) {
+                router.push("/captain-dashboard");
+              } else {
+                router.back();
+              }
+            }}
             className="rounded-xl bg-slate-200 px-4 py-2 font-semibold hover:bg-slate-300"
           >
-            ← Back to Teams
+            {isCaptainOnly ? "Back to Dashboard" : "Back"}
           </button>
 
+          {canViewSeasonRatings && (
           <button
             onClick={() => router.push("/ratings")}
             className="rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800"
           >
             Season Ratings
           </button>
+          )}
 
         </div>
 

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import TeamScheduleModal from "../components/TeamScheduleModal";
@@ -460,7 +461,7 @@ export default function CaptainDashboardPage() {
             <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
               <div className="rounded-xl bg-slate-50 px-3 py-2">
                 <div className="text-xs font-black uppercase tracking-wide text-slate-500">Date / Time</div>
-                <div className="font-bold text-slate-900">{formatDate(match.scheduled_date)} at {match.scheduled_time || "—"}</div>
+                <div className="font-bold text-slate-900">{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</div>
               </div>
               <div className="rounded-xl bg-slate-50 px-3 py-2">
                 <div className="text-xs font-black uppercase tracking-wide text-slate-500">Location</div>
@@ -801,7 +802,7 @@ export default function CaptainDashboardPage() {
       `${setupTeam.name} has entered its match setup.`,
       "",
       `Match: ${setupMatch.home_team?.name || "Home"} vs ${setupMatch.away_team?.name || "Away"}`,
-      `Date: ${formatDate(setupMatch.scheduled_date)} at ${setupMatch.scheduled_time || "Time TBD"}`,
+      `Date: ${formatDate(setupMatch.scheduled_date)} at ${formatDisplayTime(setupMatch.scheduled_time, "Time TBD")}`,
       `Division: ${setupTeam.divisions?.name || setupMatch.divisions?.name || "Division"}`,
       "",
       lineupText,
@@ -824,7 +825,7 @@ export default function CaptainDashboardPage() {
         <p><strong>${escapeHtml(setupTeam.name)}</strong> has entered its match setup.</p>
         <p>
           <strong>Match:</strong> ${escapeHtml(setupMatch.home_team?.name || "Home")} vs ${escapeHtml(setupMatch.away_team?.name || "Away")}<br />
-          <strong>Date:</strong> ${escapeHtml(formatDate(setupMatch.scheduled_date))} at ${escapeHtml(setupMatch.scheduled_time || "Time TBD")}<br />
+          <strong>Date:</strong> ${escapeHtml(formatDate(setupMatch.scheduled_date))} at ${escapeHtml(formatDisplayTime(setupMatch.scheduled_time, "Time TBD"))}<br />
           <strong>Division:</strong> ${escapeHtml(setupTeam.divisions?.name || setupMatch.divisions?.name || "Division")}
         </p>
         <ul>${htmlLineups}</ul>
@@ -1107,7 +1108,7 @@ export default function CaptainDashboardPage() {
                       {formatDate(setupMatch.scheduled_date)}
                     </span>
                     <span className="rounded-lg bg-white/15 px-3 py-1 text-lg font-black text-white md:text-xl">
-                      {setupMatch.scheduled_time || "Time TBD"}
+                      {formatDisplayTime(setupMatch.scheduled_time, "Time TBD")}
                     </span>
                     <span className="text-sm">{setupTeam.divisions?.leagues?.name || "League"}</span>
                     <span className="text-sm">{setupTeam.divisions?.name || "Division"}</span>
@@ -1541,13 +1542,7 @@ function PdfViewerModal({ document, onClose }) {
 }
 
 function formatDate(value) {
-  if (!value) return "—";
-
-  try {
-    return new Date(`${value}T12:00:00`).toLocaleDateString();
-  } catch {
-    return value;
-  }
+  return formatDisplayDate(value, "-");
 }
 
 function localDateString() {

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function SchedulingPage() {
@@ -77,7 +78,7 @@ export default function SchedulingPage() {
     const { data: settingsData, error: settingsError } = await supabase
       .from("league_schedule_settings")
       .select("*, leagues(name), divisions(name)")
-      .order("created_at", { ascending: false });
+      .order("name", { ascending: true });
     if (settingsError) return alert(settingsError.message);
 
     const { data: availabilityData, error: availabilityError } = await supabase
@@ -835,6 +836,35 @@ export default function SchedulingPage() {
     alert(`Deleted ${matchIds.length} match(es).`);
   }
 
+  function scheduleGenerationSummary(setting) {
+    const settingMatches = matches.filter((match) => {
+      const sameLeague = match.league_id === setting.league_id;
+      const sameDivision = match.division_id === setting.division_id;
+      const inStart = !setting.season_start_date || match.scheduled_date >= setting.season_start_date;
+      const inEnd = !setting.season_end_date || match.scheduled_date <= setting.season_end_date;
+
+      return sameLeague && sameDivision && inStart && inEnd;
+    });
+
+    if (settingMatches.length === 0) return "Not generated";
+
+    const timestamps = settingMatches
+      .map((match) => match.created_at || match.updated_at || match.published_at)
+      .filter(Boolean)
+      .sort();
+    const latest = timestamps[timestamps.length - 1];
+
+    if (!latest) return `Generated ${settingMatches.length} match(es)`;
+
+    return `Generated ${settingMatches.length} match(es) on ${formatDisplayDate(latest)} at ${formatDisplayTime(latest.slice(11, 19), "")}`;
+  }
+
+  const sortedSettings = useMemo(() => {
+    return [...settings].sort((a, b) =>
+      (a.name || "Unnamed Schedule").localeCompare(b.name || "Unnamed Schedule")
+    );
+  }, [settings]);
+
   const sectionCards = [
     {
       id: "settings",
@@ -1016,18 +1046,27 @@ export default function SchedulingPage() {
             </FormCard>
 
             <ListCard title="Saved Schedule Settings" subtitle="Generate or delete schedules from each saved setting." count={settings.length} emptyText="No schedule settings saved yet.">
-              {settings.map((setting) => (
-                <RecordCard key={setting.id} title={setting.name || "Unnamed Schedule"}>
+              {sortedSettings.map((setting) => {
+                const generationSummary = scheduleGenerationSummary(setting);
+
+                return (
+                <RecordCard
+                  key={setting.id}
+                  title={setting.name || "Unnamed Schedule"}
+                  status={generationSummary}
+                  statusTone={generationSummary.startsWith("Generated") ? "green" : "slate"}
+                >
                   <DetailGrid>
                     <Detail label="League" value={setting.leagues?.name || ""} />
                     <Detail label="Division" value={setting.divisions?.name || ""} />
-                    <Detail label="Season" value={`${setting.season_start_date || ""} - ${setting.season_end_date || ""}`} />
+                    <Detail label="Season" value={`${formatDisplayDate(setting.season_start_date, "")} - ${formatDisplayDate(setting.season_end_date, "")}`} />
                     <Detail label="Season Length" value={seasonWeeksLabel(setting.season_start_date, setting.season_end_date)} />
                     <Detail label="Actual Weeks" value={setting.actual_schedule_weeks || getSeasonWeeks(setting.season_start_date, setting.season_end_date) || ""} />
                     <Detail label="Match Day" value={dayName(setting.default_match_day)} />
-                    <Detail label="Match Time" value={setting.default_match_time || ""} />
+                    <Detail label="Match Time" value={formatDisplayTime(setting.default_match_time, "")} />
                     <Detail label="Frequency" value={setting.every_other_week ? "Every Other Week" : "Weekly"} />
                     <Detail label="Courts Needed" value={setting.courts_needed_per_match || ""} />
+                    <Detail label="Schedule Status" value={scheduleGenerationSummary(setting)} />
                   </DetailGrid>
                   {setting.notes && <NoteBox>{setting.notes}</NoteBox>}
                   <div className="mt-4 flex flex-wrap gap-2">
@@ -1037,7 +1076,8 @@ export default function SchedulingPage() {
                     <SmallButton color="red" onClick={() => deleteGeneratedSchedule(setting)}>Delete Schedule</SmallButton>
                   </div>
                 </RecordCard>
-              ))}
+                );
+              })}
             </ListCard>
           </section>
         )}
@@ -1097,8 +1137,8 @@ export default function SchedulingPage() {
                 <RecordCard key={row.id} title={row.locations?.name || "Unknown Location"}>
                   <DetailGrid>
                     <Detail label="Day" value={dayName(row.day_of_week)} />
-                    <Detail label="Specific Date" value={row.specific_date || ""} />
-                    <Detail label="Time" value={`${row.start_time || ""} - ${row.end_time || ""}`} />
+                    <Detail label="Specific Date" value={formatDisplayDate(row.specific_date, "")} />
+                    <Detail label="Time" value={`${formatDisplayTime(row.start_time, "")} - ${formatDisplayTime(row.end_time, "")}`} />
                     <Detail label="Courts Not Available" value={row.courts_unavailable ?? row.courts_available ?? ""} />
                   </DetailGrid>
                   {row.notes && <NoteBox>{row.notes}</NoteBox>}
@@ -1144,7 +1184,7 @@ export default function SchedulingPage() {
 
             <ListCard title="Saved League Blackout Dates" subtitle="These dates are skipped during schedule generation." count={leagueBlackouts.length} emptyText="No league blackout dates saved yet.">
               {leagueBlackouts.map((row) => (
-                <RecordCard key={row.id} title={row.blackout_date}>
+                <RecordCard key={row.id} title={formatDisplayDate(row.blackout_date, "")}>
                   <DetailGrid>
                     <Detail label="League" value={row.leagues?.name || ""} />
                     <Detail label="Division" value={row.divisions?.name || "All Divisions"} />
@@ -1202,10 +1242,22 @@ function ListCard({ title, subtitle, count, emptyText, children }) {
   );
 }
 
-function RecordCard({ title, children }) {
+function RecordCard({ title, status, statusTone = "slate", children }) {
+  const statusClasses = {
+    green: "bg-green-100 text-green-800",
+    slate: "bg-slate-100 text-slate-700",
+  };
+
   return (
     <div className="rounded-xl border border-slate-200 p-4">
-      <div className="text-lg font-bold text-slate-900">{title}</div>
+      <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+        <div className="text-lg font-bold text-slate-900">{title}</div>
+        {status && (
+          <div className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${statusClasses[statusTone] || statusClasses.slate}`}>
+            {status}
+          </div>
+        )}
+      </div>
       {children}
     </div>
   );

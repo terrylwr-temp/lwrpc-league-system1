@@ -584,7 +584,17 @@ export default function MembersPage() {
             />
           </div>
 
-          <table className="min-w-full">
+          <div className="overflow-x-auto">
+          <table className="min-w-[1180px] table-fixed">
+            <colgroup>
+              <col className="w-[280px]" />
+              <col className="w-[180px]" />
+              <col className="w-[160px]" />
+              <col className="w-[150px]" />
+              <col className="w-[120px]" />
+              <col className="w-[150px]" />
+              <col className="w-[340px]" />
+            </colgroup>
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
                 <th className="px-4 py-4 text-left">Member</th>
@@ -617,29 +627,29 @@ export default function MembersPage() {
                   onClick={() => openMember(member.id)}
                   className="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
                 >
-                  <td className="px-4 py-4">
-                    <div className="font-semibold text-slate-900">
+                  <td className="px-4 py-4 align-middle">
+                    <div className="truncate font-semibold text-slate-900">
                       {member.last_name}, {member.first_name}
                     </div>
 
-                    <div className="mt-1 text-sm text-slate-500">
+                    <div className="mt-1 truncate text-sm text-slate-500">
                       {member.email || "No Email"}
                     </div>
                   </td>
 
-                  <td className="px-4 py-4 text-sm text-slate-700">
+                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm text-slate-700">
                     {member.club_location || "—"}
                   </td>
 
-                  <td className="px-4 py-4 text-sm text-slate-700">
+                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm text-slate-700">
                     {formatPhoneNumberForStorage(member.phone) || "—"}
                   </td>
 
-                  <td className="px-4 py-4 text-sm text-slate-700">
+                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm text-slate-700">
                     {member.dupr_id || "—"}
                   </td>
 
-                  <td className="px-4 py-4">
+                  <td className="px-4 py-4 align-middle">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
                         member.is_active_member === false
@@ -651,18 +661,19 @@ export default function MembersPage() {
                     </span>
                   </td>
 
-                  <td className="px-4 py-4 text-sm font-semibold text-slate-700">
+                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm font-semibold text-slate-700">
                     {getMemberRole(member)}
                   </td>
 
-                  <td className="px-4 py-4 text-right">
-                    <div className="flex flex-wrap justify-end gap-2">
+                  <td className="px-4 py-4 text-right align-middle">
+                    <div className="flex flex-nowrap justify-end gap-2">
                       <button
+                        type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           router.push(`/members/${member.id}?edit=1`);
                         }}
-                        className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-700"
+                        className="h-9 whitespace-nowrap rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white hover:bg-slate-700"
                       >
                         Edit
                       </button>
@@ -673,7 +684,7 @@ export default function MembersPage() {
                           e.stopPropagation();
                           openMemberTeams(member);
                         }}
-                        className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-semibold text-white hover:bg-emerald-800"
+                        className="h-9 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white hover:bg-emerald-800"
                       >
                         Teams ({member.teams?.length || 0})
                       </button>
@@ -685,7 +696,7 @@ export default function MembersPage() {
                           resetMemberPassword(member);
                         }}
                         disabled={resettingPasswordMemberId === member.id}
-                        className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-9 whitespace-nowrap rounded-lg bg-blue-700 px-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {resettingPasswordMemberId === member.id ? "Sending..." : "Reset Password"}
                       </button>
@@ -707,6 +718,7 @@ export default function MembersPage() {
               )}
             </tbody>
           </table>
+          </div>
 
           <div className="flex justify-end border-t border-slate-200 px-4 py-4">
             <Pagination

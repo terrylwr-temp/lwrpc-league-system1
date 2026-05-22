@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
+import { formatDisplayDate } from "../lib/dateTime";
 
 export default function SeasonsPage() {
   const router = useRouter();
@@ -206,7 +207,7 @@ export default function SeasonsPage() {
                         {season.name}
                       </div>
                       <div className="mt-1 text-sm text-slate-600">
-                        {season.start_date || "—"} to {season.end_date || "—"}
+                        {formatDisplayDate(season.start_date, "—")} to {formatDisplayDate(season.end_date, "—")}
                       </div>
                     </div>
 
