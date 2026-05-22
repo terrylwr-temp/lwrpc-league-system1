@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
+import RoleCapabilityModal from "../../components/RoleCapabilityModal";
 import { requireRole, supabase } from "../../lib/auth";
 import LoadingScreen from "../../components/LoadingScreen";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
 import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
+import { hasAnotherCommissioner } from "../../lib/roleGuards";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
@@ -26,6 +28,7 @@ export default function MemberDetailPage() {
   const [teamMemberships, setTeamMemberships] = useState([]);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [roleHelpOpen, setRoleHelpOpen] = useState(false);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -285,6 +288,22 @@ function setMemberFormFromRow(row) {
 }
 
 async function updateUserRole(newRole) {
+  const previousRole = userRole;
+
+  if (previousRole === "commissioner" && newRole !== "commissioner") {
+    try {
+      const hasBackupCommissioner = await hasAnotherCommissioner(supabase, roleRow?.id);
+
+      if (!hasBackupCommissioner) {
+        alert("At least one Commissioner must remain in the system. Assign another Commissioner before changing this role.");
+        return;
+      }
+    } catch (error) {
+      alert(error.message);
+      return;
+    }
+  }
+
   setUserRole(newRole);
 
   if (roleRow) {
@@ -308,7 +327,7 @@ async function updateUserRole(newRole) {
     const { data, error } = await supabase
       .from("user_roles")
       .insert({
-        user_id: crypto.randomUUID(),
+        user_id: null,
         member_id: id,
         role: newRole,
       })
@@ -594,9 +613,20 @@ async function updateMemberActiveStatus(nextIsActive) {
                       />
                     </div>
 <div>
-  <label className="mb-1 block text-sm font-semibold text-slate-700">
-    User Role
-  </label>
+  <div className="mb-1 flex items-center gap-2">
+    <label className="block text-sm font-semibold text-slate-700">
+      User Role
+    </label>
+    <button
+      type="button"
+      onClick={() => setRoleHelpOpen(true)}
+      aria-label="Show role capability matrix"
+      title="Show role capability matrix"
+      className="flex h-6 w-6 items-center justify-center rounded-full bg-slate-900 text-sm font-black text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+    >
+      ?
+    </button>
+  </div>
 
   <select
     value={userRole}
@@ -811,6 +841,10 @@ async function updateMemberActiveStatus(nextIsActive) {
             </table>
           </div>
         </div>
+
+        {roleHelpOpen && (
+          <RoleCapabilityModal onClose={() => setRoleHelpOpen(false)} />
+        )}
       </div>
     </main>
   );

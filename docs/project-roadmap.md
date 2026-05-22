@@ -1,6 +1,6 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-05-21
+Last updated: 2026-05-22
 
 ## Purpose
 
@@ -67,10 +67,19 @@ The app appears to use role-based navigation and access checks around:
 
 - `player`
 - `captain`
+- `club_pro`
 - `league_manager`
 - `commissioner`
 
 Role logic lives in `lwrpc-admin/app/lib/permissions.js` and auth/session logic lives in `lwrpc-admin/app/lib/auth.js`.
+
+Role levels are hierarchical: `player < captain < club_pro < league_manager < commissioner`. Login routing sends players and club pros to the Player Dashboard, captains to the Captain Dashboard, and league managers/commissioners to the Admin Dashboard. Commissioner is the only role allowed to manage user roles, and the app now blocks changing the last remaining Commissioner to another role from both the User Roles page and Member Detail page.
+
+Auth guards should resolve role access through the signed-in user's member email/member id before falling back to `user_roles.user_id`, because some role rows may exist before an auth user is linked. Captain navigation intentionally keeps captains focused on the Captain Dashboard instead of showing the broader sidebar League Operations groups.
+
+Captain Dashboard operations use clickable status blocks for Pending Score Verification, Upcoming Matches, and Completed Matches. These blocks sit under My Teams, scope counts/results to the selected captain team, and the selected team card is highlighted. League Documents on captain team cards are collapsed by default. Password reset/account setup requests log whether Supabase accepted the `recovery` or `invite` email path so delivery issues can be diagnosed from server logs; Supabase Auth rate-limit errors are shown as a friendly "wait a minute" message.
+
+Member Administration now uses the same password-reset/account-setup route as the login screen. If a member has no Supabase Auth user yet, the action sends a Supabase invite/setup email; if the auth user exists, it sends a recovery/reset email. Role capability help is shared in `app/components/RoleCapabilityModal.js` and used from Users, Members, and Member Detail.
 
 League setup now supports a `leagues.rosters_locked` flag. When enabled, captains can view rosters but only `league_manager` and `commissioner` roles can add or remove roster players.
 

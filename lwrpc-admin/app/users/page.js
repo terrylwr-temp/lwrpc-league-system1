@@ -4,8 +4,10 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { requireRole, supabase } from "../lib/auth";
 import { roleLabel } from "../lib/permissions";
+import { wouldRemoveLastCommissioner } from "../lib/roleGuards";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -15,6 +17,7 @@ export default function UsersPage() {
   const [roles, setRoles] = useState([]);
 
   const [search, setSearch] = useState("");
+  const [roleHelpOpen, setRoleHelpOpen] = useState(false);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "commissioner");
@@ -64,6 +67,12 @@ export default function UsersPage() {
     const existing = roles.find(
       r => r.member_id === member.id
     );
+    const currentRole = existing?.role || "player";
+
+    if (wouldRemoveLastCommissioner(roles, currentRole, newRole, existing?.id)) {
+      alert("At least one Commissioner must remain in the system. Assign another Commissioner before changing this role.");
+      return;
+    }
 
     if (existing) {
       const { error } = await supabase
@@ -189,7 +198,18 @@ if (loading) {
                 </th>
 
                 <th className="p-4 text-left">
-                  Current Role
+                  <div className="flex items-center gap-2">
+                    <span>Current Role</span>
+                    <button
+                      type="button"
+                      onClick={() => setRoleHelpOpen(true)}
+                      aria-label="Show role capability matrix"
+                      title="Show role capability matrix"
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-slate-900 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                      ?
+                    </button>
+                  </div>
                 </th>
 
                 <th className="p-4 text-left">
@@ -296,6 +316,10 @@ if (loading) {
           </table>
 
         </div>
+
+        {roleHelpOpen && (
+          <RoleCapabilityModal onClose={() => setRoleHelpOpen(false)} />
+        )}
 
       </div>
     </main>

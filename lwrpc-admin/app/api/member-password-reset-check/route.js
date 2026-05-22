@@ -93,14 +93,25 @@ export async function POST(req) {
       );
 
       if (resetError) {
+        console.error("Password reset recovery email failed", {
+          email: normalizedEmail,
+          authUserId: authUser.id,
+          error: resetError.message,
+        });
+
         return NextResponse.json(
           {
             success: false,
-            error: resetError.message,
+            error: friendlyAuthEmailError(resetError.message),
           },
-          { status: 500 }
+          { status: isAuthEmailRateLimit(resetError.message) ? 429 : 500 }
         );
       }
+
+      console.info("Password reset recovery email accepted by Supabase", {
+        email: normalizedEmail,
+        authUserId: authUser.id,
+      });
 
       return NextResponse.json({
         success: true,
@@ -118,18 +129,28 @@ export async function POST(req) {
       });
 
     if (inviteError) {
+      console.error("Account setup invite email failed", {
+        email: normalizedEmail,
+        error: inviteError.message,
+      });
+
       return NextResponse.json(
         {
           success: false,
-          error: inviteError.message,
+          error: friendlyAuthEmailError(inviteError.message),
         },
-        { status: 500 }
+        { status: isAuthEmailRateLimit(inviteError.message) ? 429 : 500 }
       );
     }
 
     if (invited?.user?.id) {
       await linkUserRole(adminSupabase, member.id, invited.user.id);
     }
+
+    console.info("Account setup invite email accepted by Supabase", {
+      email: normalizedEmail,
+      authUserId: invited?.user?.id || null,
+    });
 
     return NextResponse.json({
       success: true,
@@ -185,4 +206,17 @@ async function linkUserRole(adminSupabase, memberId, userId) {
     })
     .eq("member_id", memberId)
     .is("user_id", null);
+}
+
+function isAuthEmailRateLimit(message) {
+  const text = String(message || "").toLowerCase();
+  return text.includes("only request this after") || text.includes("rate limit");
+}
+
+function friendlyAuthEmailError(message) {
+  if (isAuthEmailRateLimit(message)) {
+    return "A password reset or account setup email was requested recently. Please wait a minute, then try again.";
+  }
+
+  return message;
 }

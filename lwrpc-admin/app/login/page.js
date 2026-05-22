@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
+import { defaultDashboardForRole } from "../lib/permissions";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function LoginPage() {
@@ -66,17 +67,7 @@ export default function LoginPage() {
 
     const role = roleData?.role || "player";
 
-    if (role === "captain") {
-      router.push("/captain-dashboard");
-      return;
-    }
-
-    if (role === "player") {
-      router.push("/player-dashboard");
-      return;
-    }
-
-    router.push("/");
+    router.push(defaultDashboardForRole(role));
   }
 
   async function forgotPassword() {
@@ -140,7 +131,7 @@ export default function LoginPage() {
 
     setMessage(
       memberCheckResult.emailType === "invite"
-        ? "Account setup email sent. Please check your inbox."
+        ? "Account setup email sent. Please check your inbox, spam, and promotions folders."
         : "Password reset email sent. Please check your inbox."
     );
 

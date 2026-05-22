@@ -131,7 +131,8 @@ export default function DashboardPage() {
       title: "League Structure",
       desc: "Set up the season framework before teams start playing.",
       cards: [
-        { title: "Leagues", desc: "Manage seasons, leagues, and roster locking.", path: "/leagues", code: "LG", tone: "blue" },
+        { title: "Seasons", desc: "Create seasons and maintain season date ranges.", path: "/seasons", code: "SN", tone: "amber" },
+        { title: "Leagues", desc: "Manage leagues and roster locking.", path: "/leagues", code: "LG", tone: "blue" },
         { title: "Divisions", desc: "Manage division rules, DUPR limits, and game lines.", path: "/divisions", code: "DV", tone: "emerald" },
         { title: "Locations", desc: "Maintain clubs, courts, and court availability.", path: "/locations", code: "LC", tone: "slate" },
       ],

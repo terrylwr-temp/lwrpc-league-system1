@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT } from "../lib/notificationPreferences";
@@ -26,6 +27,7 @@ export default function MembersPage() {
   const [resettingPasswordMemberId, setResettingPasswordMemberId] = useState("");
   const [showMaintenance, setShowMaintenance] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
+  const [roleHelpOpen, setRoleHelpOpen] = useState(false);
   const [teamsMember, setTeamsMember] = useState(null);
   const [savingNewMember, setSavingNewMember] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState(initialMemberForm());
@@ -305,18 +307,39 @@ export default function MembersPage() {
 
     setResettingPasswordMemberId(member.id);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-      redirectTo: "https://league.lwrpickleballclub.com/reset-password",
+    const response = await fetch("/api/member-password-reset-check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: normalizedEmail,
+      }),
     });
+    const result = await response.json();
 
     setResettingPasswordMemberId("");
 
-    if (error) {
-      alert(error.message);
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to send the login email.");
       return;
     }
 
-    alert(`Password reset email sent to ${normalizedEmail}.`);
+    if (!result.memberExists) {
+      alert("That email address is not linked to a league member record.");
+      return;
+    }
+
+    if (!result.isActiveMember) {
+      alert("That member record is currently inactive. Reactivate the member before sending a login email.");
+      return;
+    }
+
+    alert(
+      result.emailType === "invite"
+        ? `Account setup email sent to ${normalizedEmail}.`
+        : `Password reset email sent to ${normalizedEmail}.`
+    );
   }
 
   function formatRole(role) {
@@ -569,7 +592,20 @@ export default function MembersPage() {
                 <th className="px-4 py-4 text-left">Phone</th>
                 <th className="px-4 py-4 text-left">DUPR ID</th>
                 <th className="px-4 py-4 text-left">Status</th>
-                <th className="px-4 py-4 text-left">Role</th>
+                <th className="px-4 py-4 text-left">
+                  <div className="flex items-center gap-2">
+                    <span>Role</span>
+                    <button
+                      type="button"
+                      onClick={() => setRoleHelpOpen(true)}
+                      aria-label="Show role capability matrix"
+                      title="Show role capability matrix"
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-slate-900 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    >
+                      ?
+                    </button>
+                  </div>
+                </th>
                 <th className="px-4 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -698,6 +734,10 @@ export default function MembersPage() {
             member={teamsMember}
             onClose={() => setTeamsMember(null)}
           />
+        )}
+
+        {roleHelpOpen && (
+          <RoleCapabilityModal onClose={() => setRoleHelpOpen(false)} />
         )}
       </div>
     </main>

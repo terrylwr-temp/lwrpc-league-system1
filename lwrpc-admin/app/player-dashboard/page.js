@@ -40,6 +40,7 @@ export default function PlayerDashboardPage() {
   const [activePanel, setActivePanel] = useState("history");
   const [selectedUpcomingTeamId, setSelectedUpcomingTeamId] = useState("");
   const [selectedStandingsTeamId, setSelectedStandingsTeamId] = useState("");
+  const [showAllTeamMatches, setShowAllTeamMatches] = useState(false);
   const [historyFilter, setHistoryFilter] = useState("");
   const [pdfDocument, setPdfDocument] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
@@ -166,6 +167,12 @@ export default function PlayerDashboardPage() {
             away_team:teams!matches_away_team_id_fkey (
               id,
               name
+            ),
+            match_lines (
+              id,
+              line_number,
+              home_team_games_won,
+              away_team_games_won
             )
           `)
           .or(
@@ -320,6 +327,7 @@ export default function PlayerDashboardPage() {
       playerTeams.map((team) => ({
         ...team,
         roster: sortRosterMembers(rostersByTeamId[team.id] || []),
+        standing: teamStanding(standingsData, team.id),
       }))
     );
     setMatches(matchData);
@@ -348,6 +356,21 @@ export default function PlayerDashboardPage() {
           String(match.away_team_id) === String(selectedUpcomingTeamId))
     );
   }, [matches, selectedUpcomingTeamId]);
+
+  const selectedTeamMatches = useMemo(() => {
+    if (!selectedUpcomingTeamId) return [];
+
+    return matches.filter((match) => {
+      const isSelectedTeam =
+        String(match.home_team_id) === String(selectedUpcomingTeamId) ||
+        String(match.away_team_id) === String(selectedUpcomingTeamId);
+
+      if (!isSelectedTeam || match.status === "cancelled") return false;
+      if (showAllTeamMatches) return true;
+
+      return match.status !== "completed";
+    });
+  }, [matches, selectedUpcomingTeamId, showAllTeamMatches]);
 
   const selectedUpcomingTeam = useMemo(() => {
     return teams.find(
@@ -615,7 +638,7 @@ export default function PlayerDashboardPage() {
                   Match Calendar
                 </div>
                 <h2 className="mt-1 text-xl font-black">
-                  Upcoming Matches: {selectedUpcomingTeam?.name || "Team"}
+                  {showAllTeamMatches ? "All Matches" : "Upcoming Matches"}: {selectedUpcomingTeam?.name || "Team"}
                 </h2>
                 <p className="mt-1 text-sm font-semibold text-slate-200">
                   {selectedUpcomingTeam?.divisions?.leagues?.name || ""} / {selectedUpcomingTeam?.divisions?.name || ""}
@@ -629,14 +652,21 @@ export default function PlayerDashboardPage() {
                   teams={teams}
                   label="Choose team for upcoming matches"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowAllTeamMatches((value) => !value)}
+                  className="rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-900 hover:bg-slate-100"
+                >
+                  {showAllTeamMatches ? "Upcoming Only" : "Show All Matches"}
+                </button>
                 <div className="rounded-xl bg-white/15 px-4 py-2 text-center text-sm font-bold text-white">
-                  {upcomingMatchesBySelectedTeam.length}
+                  {selectedTeamMatches.length}
                 </div>
               </div>
             </div>
 
             <div className="space-y-3 p-5">
-              {upcomingMatchesBySelectedTeam.map((match) => (
+              {selectedTeamMatches.map((match) => (
                 <MatchSummaryCard
                   key={match.id}
                   match={match}
@@ -646,9 +676,9 @@ export default function PlayerDashboardPage() {
                 />
               ))}
 
-              {upcomingMatchesBySelectedTeam.length === 0 && (
+              {selectedTeamMatches.length === 0 && (
                 <div className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">
-                  No upcoming matches found for this team.
+                  {showAllTeamMatches ? "No matches found for this team." : "No upcoming matches found for this team."}
                 </div>
               )}
             </div>
@@ -790,6 +820,8 @@ function HistoryStat({ label, value, tone = "slate" }) {
 }
 
 function TeamCard({ team, onOpenDocument, onOpenRoster }) {
+  const standing = team.standing;
+
   return (
     <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white text-sm shadow-md">
       <div className="bg-gradient-to-r from-slate-950 to-blue-800 px-4 py-4 text-white">
@@ -801,13 +833,21 @@ function TeamCard({ team, onOpenDocument, onOpenRoster }) {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => onOpenRoster(team)}
-            className="rounded-xl bg-white/15 px-3 py-2 text-left text-xs font-black uppercase tracking-wide text-white hover:bg-white/25"
-          >
-            Roster ({team.roster?.length || 0})
-          </button>
+          <div className="flex flex-wrap gap-2 sm:justify-end">
+            <div className="rounded-xl bg-white/15 px-3 py-2 text-xs font-black uppercase tracking-wide text-white">
+              Rank #{standing?.rank || "N/A"}
+            </div>
+            <div className="rounded-xl bg-white/15 px-3 py-2 text-xs font-black uppercase tracking-wide text-white">
+              {formatStandingRecord(standing)}
+            </div>
+            <button
+              type="button"
+              onClick={() => onOpenRoster(team)}
+              className="rounded-xl bg-white/15 px-3 py-2 text-left text-xs font-black uppercase tracking-wide text-white hover:bg-white/25"
+            >
+              Roster ({team.roster?.length || 0})
+            </button>
+          </div>
         </div>
       </div>
       <div className="bg-blue-50 px-4 py-3">
@@ -1033,6 +1073,9 @@ function TeamSelect({ value, onChange, teams, label }) {
 function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
   const homeStanding = teamStanding(standings, match.home_team_id);
   const awayStanding = teamStanding(standings, match.away_team_id);
+  const homeScore = matchTeamScore(match, "home");
+  const awayScore = matchTeamScore(match, "away");
+  const hasMatchScore = homeScore !== null && awayScore !== null;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -1044,6 +1087,11 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
             {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
           </div>
           <div className="mt-1 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
+            {hasMatchScore && (
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-900">
+                Total Score: {homeScore}-{awayScore}
+              </span>
+            )}
             <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-900">
               Home: {match.home_team?.name || "Home"} ({formatStandingRecord(homeStanding)})
             </span>
@@ -1057,6 +1105,7 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
           <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
             <span>{formatDate(match.scheduled_date)} at {match.scheduled_time || "—"}</span>
             <span>{match.divisions?.name || "No Division"}</span>
+            <span>{match.score_status ? match.score_status.replaceAll("_", " ") : match.status || "scheduled"}</span>
             <span>Week {match.week_number || "—"}</span>
           </div>
         </div>
@@ -1202,6 +1251,23 @@ function teamStanding(standings, teamId) {
 function formatStandingRecord(standing) {
   if (!standing) return "0-0-0";
   return `${standing.match_wins ?? 0}-${standing.match_losses ?? 0}-${standing.match_ties ?? 0}`;
+}
+
+function matchTeamScore(match, side) {
+  const scoreField = side === "home" ? "home_score" : "away_score";
+
+  if (match?.[scoreField] !== null && match?.[scoreField] !== undefined) {
+    return Number(match[scoreField]);
+  }
+
+  if (!match?.match_lines?.length || match.status !== "completed") return null;
+
+  const lineScoreField = side === "home" ? "home_team_games_won" : "away_team_games_won";
+
+  return match.match_lines.reduce(
+    (total, line) => total + Number(line[lineScoreField] || 0),
+    0
+  );
 }
 
 function formatLocationAddress(location) {

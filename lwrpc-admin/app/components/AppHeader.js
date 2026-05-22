@@ -142,7 +142,7 @@ export default function AppHeader({
   }, [primaryLinks, role]);
 
   const visibleGroups = useMemo(() => {
-    if (role === "player") return [];
+    if (role === "player" || role === "captain") return [];
 
     return groups
       .map(group => ({

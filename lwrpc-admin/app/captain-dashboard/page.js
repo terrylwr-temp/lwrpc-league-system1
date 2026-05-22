@@ -23,7 +23,9 @@ export default function CaptainDashboardPage() {
   const [byeWeeks, setByeWeeks] = useState([]);
   const [teamStats, setTeamStats] = useState({});
   const [matchSetupStatus, setMatchSetupStatus] = useState({});
-  const [upcomingTeamFilter, setUpcomingTeamFilter] = useState("");
+  const [selectedCaptainTeamId, setSelectedCaptainTeamId] = useState("");
+  const [captainSection, setCaptainSection] = useState("upcoming");
+  const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
   const [loading, setLoading] = useState(true);
   const [setupMatch, setSetupMatch] = useState(null);
   const [setupTeam, setSetupTeam] = useState(null);
@@ -136,6 +138,7 @@ export default function CaptainDashboardPage() {
     }
 
     setTeams(teamData || []);
+    setSelectedCaptainTeamId((current) => current || teamData?.[0]?.id || "");
 
     const teamIds = (teamData || []).map((team) => team.id);
 
@@ -345,33 +348,39 @@ export default function CaptainDashboardPage() {
     );
   }, [matches]);
 
-  const filteredUpcomingMatches = useMemo(() => {
-    if (!upcomingTeamFilter) return upcomingMatches;
+  const selectedCaptainTeam = useMemo(() => {
+    return teams.find((team) => String(team.id) === String(selectedCaptainTeamId)) || teams[0] || null;
+  }, [selectedCaptainTeamId, teams]);
+
+  const selectedTeamId = selectedCaptainTeam?.id || "";
+
+  const selectedUpcomingMatches = useMemo(() => {
+    if (!selectedTeamId) return upcomingMatches;
 
     return upcomingMatches.filter(
       (match) =>
-        String(match.home_team_id) === String(upcomingTeamFilter) ||
-        String(match.away_team_id) === String(upcomingTeamFilter)
+        String(match.home_team_id) === String(selectedTeamId) ||
+        String(match.away_team_id) === String(selectedTeamId)
     );
-  }, [upcomingMatches, upcomingTeamFilter]);
+  }, [upcomingMatches, selectedTeamId]);
 
-  const filteredByeWeeks = useMemo(() => {
-    if (!upcomingTeamFilter) return byeWeeks;
+  const selectedByeWeeks = useMemo(() => {
+    if (!selectedTeamId) return byeWeeks;
 
     return byeWeeks.filter(
-      (bye) => String(bye.team_id) === String(upcomingTeamFilter)
+      (bye) => String(bye.team_id) === String(selectedTeamId)
     );
-  }, [byeWeeks, upcomingTeamFilter]);
+  }, [byeWeeks, selectedTeamId]);
 
   const upcomingItems = useMemo(() => {
     return [
-      ...filteredUpcomingMatches.map((match) => ({
+      ...selectedUpcomingMatches.map((match) => ({
         type: "match",
         date: match.scheduled_date,
         time: match.scheduled_time || "00:00",
         data: match,
       })),
-      ...filteredByeWeeks.map((bye) => ({
+      ...selectedByeWeeks.map((bye) => ({
         type: "bye",
         date: bye.bye_date,
         time: "00:00",
@@ -382,15 +391,29 @@ export default function CaptainDashboardPage() {
       const bDate = new Date(`${b.date || "9999-12-31"}T${b.time || "00:00"}`);
       return aDate - bDate;
     });
-  }, [filteredUpcomingMatches, filteredByeWeeks]);
+  }, [selectedUpcomingMatches, selectedByeWeeks]);
 
   const pendingVerification = useMemo(() => {
-    return matches.filter((match) => match.score_status === "pending_verification");
-  }, [matches]);
+    return matches.filter((match) => {
+      const isSelectedTeam =
+        !selectedTeamId ||
+        String(match.home_team_id) === String(selectedTeamId) ||
+        String(match.away_team_id) === String(selectedTeamId);
+
+      return isSelectedTeam && match.score_status === "pending_verification";
+    });
+  }, [matches, selectedTeamId]);
 
   const completedMatches = useMemo(() => {
-    return matches.filter((match) => match.status === "completed");
-  }, [matches]);
+    return matches.filter((match) => {
+      const isSelectedTeam =
+        !selectedTeamId ||
+        String(match.home_team_id) === String(selectedTeamId) ||
+        String(match.away_team_id) === String(selectedTeamId);
+
+      return isSelectedTeam && match.status === "completed";
+    });
+  }, [matches, selectedTeamId]);
 
   function matchCard(match, options = {}) {
     const {
@@ -1068,13 +1091,6 @@ export default function CaptainDashboardPage() {
           subtitle="Captain tools, upcoming matches, score entry, and score verification."
         />
 
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-          <SummaryCard label="My Teams" value={teams.length} tone="slate" />
-          <SummaryCard label="Upcoming Items" value={upcomingItems.length} tone="blue" />
-          <SummaryCard label="Pending Verification" value={pendingVerification.length} tone="red" />
-          <SummaryCard label="Completed Matches" value={completedMatches.length} tone="emerald" />
-        </div>
-
         {setupMatch && setupTeam && (
           <div className="mt-6 rounded-2xl border border-blue-100 bg-white shadow">
             <div className="rounded-t-2xl bg-slate-950 p-5 text-white">
@@ -1216,10 +1232,17 @@ export default function CaptainDashboardPage() {
             {teams.map((team) => {
               const stats = teamStats[team.id] || {};
               const standing = stats.standing;
+              const selected = String(team.id) === String(selectedTeamId);
+              const documentsOpen = openLeagueDocuments[team.id] === true;
 
               return (
-              <div key={team.id} className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-md">
-                <div className="bg-gradient-to-r from-slate-950 to-blue-800 p-4 text-white">
+              <div
+                key={team.id}
+                className={`overflow-hidden rounded-2xl border bg-white shadow-md transition ${
+                  selected ? "border-4 border-emerald-500 shadow-lg" : "border-blue-100"
+                }`}
+              >
+                <div className={`p-4 text-white ${selected ? "bg-gradient-to-r from-emerald-800 to-blue-800" : "bg-gradient-to-r from-slate-950 to-blue-800"}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <div className="text-lg font-black">{team.name}</div>
@@ -1228,13 +1251,24 @@ export default function CaptainDashboardPage() {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`)}
-                    className="rounded-full bg-blue-700 px-3 py-1 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-800"
-                  >
-                    Rank {standing?.rank ? `#${standing.rank}` : "N/A"}
-                  </button>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedCaptainTeamId(team.id)}
+                      className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide text-white ${
+                        selected ? "bg-emerald-500" : "bg-white/15 hover:bg-white/25"
+                      }`}
+                    >
+                      {selected ? "Selected" : "Select Team"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`)}
+                      className="rounded-full bg-blue-700 px-3 py-1 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-800"
+                    >
+                      Rank {standing?.rank ? `#${standing.rank}` : "N/A"}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-bold text-slate-700">
@@ -1285,27 +1319,40 @@ export default function CaptainDashboardPage() {
                   </button>
                 </div>
 
-                <div className="border-t border-slate-100 p-4">
-                  <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
-                    League Documents
-                  </div>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {LEAGUE_DOCUMENT_TYPES.map((documentType) => {
-                      const hasDocument = Boolean(leagueDocumentPath(team.divisions?.leagues, documentType));
+                <div className="border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setOpenLeagueDocuments((current) => ({
+                        ...current,
+                        [team.id]: !current[team.id],
+                      }))
+                    }
+                    className="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-slate-600 hover:bg-slate-50"
+                  >
+                    <span>League Documents</span>
+                    <span>{documentsOpen ? "Hide" : "Show"}</span>
+                  </button>
 
-                      return (
-                        <button
-                          key={documentType.key}
-                          type="button"
-                          onClick={() => openLeagueDocument(team, documentType)}
-                          disabled={!hasDocument}
-                          className="rounded-xl bg-emerald-100 px-3 py-3 text-sm font-bold text-emerald-950 shadow-sm hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
-                        >
-                          {documentType.label}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {documentsOpen && (
+                    <div className="grid grid-cols-1 gap-2 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {LEAGUE_DOCUMENT_TYPES.map((documentType) => {
+                        const hasDocument = Boolean(leagueDocumentPath(team.divisions?.leagues, documentType));
+
+                        return (
+                          <button
+                            key={documentType.key}
+                            type="button"
+                            onClick={() => openLeagueDocument(team, documentType)}
+                            disabled={!hasDocument}
+                            className="rounded-xl bg-emerald-100 px-3 py-3 text-sm font-bold text-emerald-950 shadow-sm hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
+                          >
+                            {documentType.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
               );
@@ -1319,49 +1366,62 @@ export default function CaptainDashboardPage() {
           </div>
         </div>
 
-        <Section title="Pending Score Verification" count={pendingVerification.length}>
-          {pendingVerification.map((match) =>
-            matchCard(match, {
-              showSetup: false,
-              scoreButtonLabel: "Review / Validate Scores",
-              scoreButtonTitle: "Open score review, then validate or dispute",
-            })
-          )}
-          {pendingVerification.length === 0 && <Empty message="No scores currently need verification." />}
-        </Section>
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <CaptainSectionButton
+            active={captainSection === "pending"}
+            label="Pending Score Verification"
+            value={pendingVerification.length}
+            tone="red"
+            onClick={() => setCaptainSection("pending")}
+          />
+          <CaptainSectionButton
+            active={captainSection === "upcoming"}
+            label="Upcoming Matches"
+            value={upcomingItems.length}
+            tone="blue"
+            onClick={() => setCaptainSection("upcoming")}
+          />
+          <CaptainSectionButton
+            active={captainSection === "completed"}
+            label="Completed Matches"
+            value={completedMatches.length}
+            tone="emerald"
+            onClick={() => setCaptainSection("completed")}
+          />
+        </div>
 
-        <Section
-          title="Upcoming Matches / Byes"
-          count={upcomingItems.length}
-          actions={
-            teams.length > 1 ? (
-              <select
-                value={upcomingTeamFilter}
-                onChange={(e) => setUpcomingTeamFilter(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 md:w-64"
-                aria-label="Filter upcoming matches by team"
-              >
-                <option value="">All My Teams</option>
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-            ) : null
-          }
-        >
-          {upcomingItems.map((item) =>
-            item.type === "match" ? matchCard(item.data) : byeCard(item.data)
-          )}
+        {captainSection === "pending" && (
+          <Section title={`Pending Score Verification${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={pendingVerification.length}>
+            {pendingVerification.map((match) =>
+              matchCard(match, {
+                showSetup: false,
+                scoreButtonLabel: "Review / Validate Scores",
+                scoreButtonTitle: "Open score review, then validate or dispute",
+              })
+            )}
+            {pendingVerification.length === 0 && <Empty message="No scores currently need verification." />}
+          </Section>
+        )}
 
-          {upcomingItems.length === 0 && <Empty message="No upcoming matches or byes found." />}
-        </Section>
+        {captainSection === "upcoming" && (
+          <Section
+            title={`Upcoming Matches / Byes${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`}
+            count={upcomingItems.length}
+          >
+            {upcomingItems.map((item) =>
+              item.type === "match" ? matchCard(item.data) : byeCard(item.data)
+            )}
 
-        <Section title="Completed Matches" count={completedMatches.length}>
-          {completedMatches.map(matchCard)}
-          {completedMatches.length === 0 && <Empty message="No completed matches found." />}
-        </Section>
+            {upcomingItems.length === 0 && <Empty message="No upcoming matches or byes found." />}
+          </Section>
+        )}
+
+        {captainSection === "completed" && (
+          <Section title={`Completed Matches${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={completedMatches.length}>
+            {completedMatches.map(matchCard)}
+            {completedMatches.length === 0 && <Empty message="No completed matches found." />}
+          </Section>
+        )}
 
         {divisionScheduleTeam && (
           <TeamScheduleModal
@@ -1644,24 +1704,39 @@ function byeCard(bye) {
   );
 }
 
-function SummaryCard({ label, value, tone = "slate" }) {
+function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) {
   const tones = {
-    slate: "border-slate-200 bg-slate-950 text-white",
-    blue: "border-blue-200 bg-blue-700 text-white",
-    amber: "border-amber-200 bg-amber-400 text-slate-950",
-    red: "border-red-200 bg-red-700 text-white",
-    emerald: "border-emerald-200 bg-emerald-600 text-white",
+    blue: active
+      ? "border-blue-700 bg-blue-700 text-white"
+      : "border-blue-200 bg-blue-50 text-blue-950 hover:border-blue-500",
+    red: active
+      ? "border-red-700 bg-red-700 text-white"
+      : "border-red-200 bg-red-50 text-red-950 hover:border-red-500",
+    emerald: active
+      ? "border-emerald-700 bg-emerald-700 text-white"
+      : "border-emerald-200 bg-emerald-50 text-emerald-950 hover:border-emerald-500",
   };
-  const labelTone = tone === "amber" ? "text-slate-800" : "text-white/75";
+  const helperClass = active ? "text-white/80" : "text-slate-600";
+  const badgeClass = active ? "bg-white/20" : "bg-white";
 
   return (
-    <div className={`rounded-2xl border p-4 shadow-sm md:p-5 ${tones[tone] || tones.slate}`}>
-      <div className={`text-[11px] font-black uppercase tracking-wide ${labelTone}`}>
-        {label}
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-2xl border-2 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.blue}`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-sm font-black">{label}</div>
+          <div className={`mt-1 text-xs font-bold ${helperClass}`}>
+            Click to view
+          </div>
+        </div>
+        <div className={`rounded-xl px-3 py-1 text-sm font-black shadow-sm ${badgeClass}`}>
+          {value}
+        </div>
       </div>
-
-      <div className="mt-2 text-3xl font-black">{value}</div>
-    </div>
+    </button>
   );
 }
 
