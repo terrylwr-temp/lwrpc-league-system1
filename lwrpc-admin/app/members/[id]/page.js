@@ -103,13 +103,11 @@ if (roleError) {
 
 const { data: locationData } = await supabase
   .from("members")
-  .select("club_location")
+  .select("club_location, location_id")
   .not("club_location", "is", null)
   .order("club_location", { ascending: true });
 
-const uniqueLocations = [
-  ...new Set((locationData || []).map((row) => row.club_location).filter(Boolean)),
-];
+const uniqueLocations = uniqueMemberLocations(locationData || []);
 
 setLocations(uniqueLocations);
 setRoleRow(roleData || null);
@@ -191,6 +189,7 @@ setUserRole(roleData?.role || "player");
         phone: formatPhoneNumberForStorage(form.phone) || null,
         notification_preference: form.notification_preference || NOTIFICATION_EMAIL,
         club_location: form.club_location || null,
+        location_id: locationIdForName(locations, form.club_location),
         dupr_id: form.dupr_id || null,
         renewal_date: form.renewal_date || null,
       })
@@ -577,8 +576,8 @@ async function updateMemberActiveStatus(nextIsActive) {
     <option value="">Select Club / Home Community</option>
 
     {locations.map((location) => (
-      <option key={location} value={location}>
-        {location}
+      <option key={location.id || location.name} value={location.name}>
+        {location.name}
       </option>
     ))}
   </select>
@@ -815,4 +814,36 @@ async function updateMemberActiveStatus(nextIsActive) {
       </div>
     </main>
   );
+}
+
+function uniqueMemberLocations(rows) {
+  const byName = new Map();
+
+  rows.forEach((row) => {
+    if (!row.club_location) return;
+    const key = normalizeLocationName(row.club_location);
+    const existing = byName.get(key);
+
+    if (!existing || (!existing.id && row.location_id)) {
+      byName.set(key, {
+        id: row.location_id || null,
+        name: row.club_location,
+      });
+    }
+  });
+
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function locationIdForName(locations, name) {
+  const normalizedName = normalizeLocationName(name);
+  const location = (locations || []).find(
+    (item) => normalizeLocationName(item.name || item) === normalizedName
+  );
+
+  return location?.id || null;
+}
+
+function normalizeLocationName(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 }

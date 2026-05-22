@@ -560,13 +560,20 @@ function getAverageTeamRating() {
   }, [checkAuth, id, loadData]);
 
   const availableMembers = useMemo(() => {
+    const selectedLocation = locations.find(
+      (location) => String(location.id) === String(selectedLocationId)
+    );
+
     return members
       .filter(member => {
-        if (
-          selectedLocationId &&
-          String(member.location_id) !== String(selectedLocationId)
-        ) {
-          return false;
+        if (selectedLocationId) {
+          const memberLocationMatches =
+            String(member.location_id || "") === String(selectedLocationId) ||
+            normalizeLocationName(member.club_location) === normalizeLocationName(selectedLocation?.name);
+
+          if (!memberLocationMatches) {
+            return false;
+          }
         }
 
         return !roster.find(
@@ -585,7 +592,7 @@ function getAverageTeamRating() {
         return (a.first_name || "")
           .localeCompare(b.first_name || "");
       });
-  }, [members, roster, selectedLocationId]);
+  }, [locations, members, roster, selectedLocationId]);
 
   if (!team) {
     return (
@@ -776,7 +783,7 @@ function getAverageTeamRating() {
                 </select>
 
                 <p className="mt-2 text-xs text-slate-500">
-                  Only players from the selected location are shown.
+                  Players are matched by linked location or exact home-community name.
                 </p>
 
               </div>
@@ -1038,4 +1045,7 @@ function Info({ label, value }) {
   );
 }
 
+function normalizeLocationName(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
 

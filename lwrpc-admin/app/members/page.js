@@ -248,6 +248,7 @@ export default function MembersPage() {
         membershipworks_account_id: manualMembershipWorksAccountId(),
         notification_preference: newMemberForm.notification_preference || NOTIFICATION_EMAIL,
         club_location: newMemberForm.club_location.trim() || null,
+        location_id: locationIdForName(clubLocations, newMemberForm.club_location),
         dupr_id: newMemberForm.dupr_id.trim() || null,
         renewal_date: newMemberForm.renewal_date || null,
       })
@@ -384,15 +385,7 @@ export default function MembersPage() {
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
-  const clubLocations = useMemo(() => {
-    return [
-      ...new Set(
-        members
-          .map((member) => member.club_location)
-          .filter(Boolean)
-      ),
-    ].sort((a, b) => a.localeCompare(b));
-  }, [members]);
+  const clubLocations = uniqueMemberLocations(members);
 
   const pagedMembers = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
@@ -766,6 +759,38 @@ function manualMembershipWorksAccountId() {
   return `manual:${crypto.randomUUID()}`;
 }
 
+function locationIdForName(locations, name) {
+  const normalizedName = normalizeLocationName(name);
+  const location = (locations || []).find(
+    (item) => normalizeLocationName(item.name || item) === normalizedName
+  );
+
+  return location?.id || null;
+}
+
+function uniqueMemberLocations(members) {
+  const byName = new Map();
+
+  members.forEach((member) => {
+    if (!member.club_location) return;
+    const key = normalizeLocationName(member.club_location);
+    const existing = byName.get(key);
+
+    if (!existing || (!existing.id && member.location_id)) {
+      byName.set(key, {
+        id: member.location_id || null,
+        name: member.club_location,
+      });
+    }
+  });
+
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function normalizeLocationName(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
 function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
@@ -844,7 +869,7 @@ function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) 
               />
               <datalist id="member-location-options">
                 {locations.map((location) => (
-                  <option key={location} value={location} />
+                  <option key={location.id || location} value={location.name || location} />
                 ))}
               </datalist>
             </FormField>
