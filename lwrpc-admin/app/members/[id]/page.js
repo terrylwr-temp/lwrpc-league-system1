@@ -576,7 +576,7 @@ async function updateMemberActiveStatus(nextIsActive) {
     <option value="">Select Club / Home Community</option>
 
     {locations.map((location) => (
-      <option key={location.id || location.name} value={location.name}>
+      <option key={`${location.id || "no-id"}:${location.name}`} value={location.name}>
         {location.name}
       </option>
     ))}

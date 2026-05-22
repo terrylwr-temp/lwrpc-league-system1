@@ -43,6 +43,7 @@ export default function PlayerDashboardPage() {
   const [historyFilter, setHistoryFilter] = useState("");
   const [pdfDocument, setPdfDocument] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
+  const [rosterTeam, setRosterTeam] = useState(null);
 
   const loadData = useCallback(async function loadData() {
     const {
@@ -133,12 +134,14 @@ export default function PlayerDashboardPage() {
     let matchData = [];
     let standingsData = [];
     let historyData = [];
+    let rostersByTeamId = {};
 
     if (teamIds.length > 0) {
       const divisionIds = [...new Set(playerTeams.map((team) => team.divisions?.id).filter(Boolean))];
       const [
         { data, error },
         { data: standingsRows, error: standingsError },
+        { data: teamRosterRows, error: teamRosterError },
       ] = await Promise.all([
         supabase
           .from("matches")
@@ -182,6 +185,19 @@ export default function PlayerDashboardPage() {
           `)
           .in("division_id", divisionIds.length > 0 ? divisionIds : ["00000000-0000-0000-0000-000000000000"])
           .order("rank", { ascending: true }),
+        supabase
+          .from("team_members")
+          .select(`
+            team_id,
+            members (
+              id,
+              first_name,
+              last_name,
+              email,
+              phone
+            )
+          `)
+          .in("team_id", teamIds),
       ]);
 
       if (error) {
@@ -196,8 +212,19 @@ export default function PlayerDashboardPage() {
         return;
       }
 
+      if (teamRosterError) {
+        alert(teamRosterError.message);
+        setLoading(false);
+        return;
+      }
+
       matchData = data || [];
       standingsData = standingsRows || [];
+      rostersByTeamId = (teamRosterRows || []).reduce((byTeam, row) => {
+        if (!byTeam[row.team_id]) byTeam[row.team_id] = [];
+        if (row.members) byTeam[row.team_id].push(row.members);
+        return byTeam;
+      }, {});
     }
 
     const { data: playerHistoryData, error: playerHistoryError } = await supabase
@@ -289,7 +316,12 @@ export default function PlayerDashboardPage() {
 
     historyData = playerHistoryData || [];
 
-    setTeams(playerTeams);
+    setTeams(
+      playerTeams.map((team) => ({
+        ...team,
+        roster: sortRosterMembers(rostersByTeamId[team.id] || []),
+      }))
+    );
     setMatches(matchData);
     setStandings(standingsData);
     setPlayHistory(historyData);
@@ -472,6 +504,7 @@ export default function PlayerDashboardPage() {
                 key={team.id}
                 team={team}
                 onOpenDocument={openLeagueDocument}
+                onOpenRoster={setRosterTeam}
               />
             ))}
 
@@ -686,6 +719,13 @@ export default function PlayerDashboardPage() {
             onClose={() => setMatchDetails(null)}
           />
         )}
+
+        {rosterTeam && (
+          <RosterModal
+            team={rosterTeam}
+            onClose={() => setRosterTeam(null)}
+          />
+        )}
       </div>
     </main>
   );
@@ -749,13 +789,25 @@ function HistoryStat({ label, value, tone = "slate" }) {
   );
 }
 
-function TeamCard({ team, onOpenDocument }) {
+function TeamCard({ team, onOpenDocument, onOpenRoster }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white text-sm shadow-md">
       <div className="bg-gradient-to-r from-slate-950 to-blue-800 px-4 py-4 text-white">
-        <div className="font-black">{team.name}</div>
-        <div className="mt-1 text-xs font-bold uppercase tracking-wide text-blue-100">
-          {team.locations?.name || "No Home Location"}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div className="font-black">{team.name}</div>
+            <div className="mt-1 text-xs font-bold uppercase tracking-wide text-blue-100">
+              {team.locations?.name || "No Home Location"}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onOpenRoster(team)}
+            className="rounded-xl bg-white/15 px-3 py-2 text-left text-xs font-black uppercase tracking-wide text-white hover:bg-white/25"
+          >
+            Roster ({team.roster?.length || 0})
+          </button>
         </div>
       </div>
       <div className="bg-blue-50 px-4 py-3">
@@ -792,6 +844,69 @@ function TeamCard({ team, onOpenDocument }) {
               </button>
             );
           })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RosterModal({ team, onClose }) {
+  const roster = team.roster || [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+      <div className="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-950 to-blue-800 px-5 py-5 text-white md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-blue-100">
+              Team Roster
+            </div>
+            <h2 className="mt-1 text-2xl font-black">{team.name}</h2>
+            <div className="mt-1 text-sm font-semibold text-blue-100">
+              {team.divisions?.leagues?.name || ""} / {team.divisions?.name || ""}
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="overflow-auto p-5">
+          <table className="w-full border-collapse text-sm">
+            <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
+              <tr>
+                <th className="p-3 text-left">Player</th>
+                <th className="p-3 text-left">Email</th>
+                <th className="p-3 text-left">Phone</th>
+              </tr>
+            </thead>
+            <tbody>
+              {roster.map((player) => (
+                <tr key={player.id} className="border-b border-slate-100 hover:bg-slate-50">
+                  <td className="p-3 font-bold text-slate-900">
+                    {formatMemberName(player)}
+                  </td>
+                  <td className="p-3 text-slate-700">{player.email || ""}</td>
+                  <td className="p-3 text-slate-700">
+                    {formatPhoneNumberForStorage(player.phone) || ""}
+                  </td>
+                </tr>
+              ))}
+
+              {roster.length === 0 && (
+                <tr>
+                  <td colSpan="3" className="p-8 text-center text-slate-500">
+                    No roster players found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -887,6 +1002,14 @@ function teamCaptainContacts(team) {
 function formatMemberName(member) {
   if (!member) return "";
   return `${member.first_name || ""} ${member.last_name || ""}`.trim() || member.email || "";
+}
+
+function sortRosterMembers(members) {
+  return [...members].sort((a, b) => {
+    const lastCompare = (a.last_name || "").localeCompare(b.last_name || "");
+    if (lastCompare !== 0) return lastCompare;
+    return (a.first_name || "").localeCompare(b.first_name || "");
+  });
 }
 
 function TeamSelect({ value, onChange, teams, label }) {

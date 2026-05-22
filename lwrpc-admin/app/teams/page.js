@@ -157,7 +157,7 @@ export default function TeamsPage() {
           name
         )
       `)
-      .neq("is_active_member", false)
+      .or("is_active_member.eq.true,is_active_member.is.null")
       .order("last_name", { ascending: true })
       .range(0, 2500);
 

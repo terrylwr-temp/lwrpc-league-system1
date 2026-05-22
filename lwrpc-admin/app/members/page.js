@@ -868,9 +868,16 @@ function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) 
                 className="w-full rounded-xl border border-slate-300 px-4 py-3"
               />
               <datalist id="member-location-options">
-                {locations.map((location) => (
-                  <option key={location.id || location} value={location.name || location} />
-                ))}
+                {locations.map((location) => {
+                  const locationName = location.name || location;
+
+                  return (
+                    <option
+                      key={`${location.id || "no-id"}:${locationName}`}
+                      value={locationName}
+                    />
+                  );
+                })}
               </datalist>
             </FormField>
 

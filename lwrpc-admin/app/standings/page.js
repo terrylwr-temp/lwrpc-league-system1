@@ -29,12 +29,12 @@ export default function StandingsPage() {
     const { data: leagueData } = await supabase
       .from("leagues")
       .select("*")
-      .order("name");
+      .order("name", { ascending: true });
 
     const { data: divisionData } = await supabase
       .from("divisions")
       .select("*")
-      .order("sort_order");
+      .order("name", { ascending: true });
 
     const { data: standingsData } = await supabase
       .from("team_standings")
@@ -348,8 +348,12 @@ export default function StandingsPage() {
 
     return divisions.filter(
       d => d.league_id === selectedLeague
-    );
+    ).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   }, [divisions, selectedLeague]);
+
+  const sortedLeagues = useMemo(() => {
+    return [...leagues].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }, [leagues]);
 
   const filteredStandings = useMemo(() => {
     return standings.filter(row => {
@@ -403,7 +407,7 @@ if (loading) {
                 Select League
               </option>
 
-              {leagues.map(league => (
+              {sortedLeagues.map(league => (
                 <option
                   key={league.id}
                   value={league.id}

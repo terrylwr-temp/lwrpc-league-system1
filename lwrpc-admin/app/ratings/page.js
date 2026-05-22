@@ -83,7 +83,7 @@ export default function RatingsPage() {
     const { data: memberData, error: memberError } = await supabase
       .from("members")
       .select("id, first_name, last_name, email, club_location, dupr_id, is_active_member")
-      .neq("is_active_member", false)
+      .or("is_active_member.eq.true,is_active_member.is.null")
       .order("last_name", { ascending: true });
 
     if (memberError) {
