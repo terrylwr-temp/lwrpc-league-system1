@@ -28,6 +28,12 @@ alter table public.leagues
 alter table public.leagues
   add column if not exists match_setup_reminder_days_before integer not null default 2;
 
+alter table public.seasons
+  add column if not exists is_active boolean not null default true;
+
+alter table public.teams
+  add column if not exists is_active boolean not null default true;
+
 alter table public.members
   add column if not exists notification_preference text not null default 'email';
 

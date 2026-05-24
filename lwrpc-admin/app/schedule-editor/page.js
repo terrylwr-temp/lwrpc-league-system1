@@ -97,7 +97,7 @@ export default function ScheduleEditorPage() {
 
     const { data: teamData } = await supabase
       .from("teams")
-      .select("id, name, division_id, home_location_id");
+      .select("id, name, division_id, home_location_id, is_active");
 
     const { data: availabilityData } = await supabase
       .from("location_court_availability")
@@ -112,7 +112,7 @@ export default function ScheduleEditorPage() {
     setDivisions(divisionData || []);
     setLocations(locationData || []);
     setScheduleSettings(settingsData || []);
-    setTeams(teamData || []);
+    setTeams((teamData || []).filter((team) => team.is_active !== false));
     setAvailability(availabilityData || []);
     setLeagueBlackouts(blackoutData || []);
   }, []);
@@ -1644,5 +1644,4 @@ export default function ScheduleEditorPage() {
 function isMatchLocked(match) {
   return match?.status === "completed" && match?.score_status === "verified";
 }
-
 

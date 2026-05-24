@@ -612,8 +612,9 @@ export default function SchedulingPage() {
 
     const { data: divisionTeams, error: teamError } = await supabase
       .from("teams")
-      .select("id, name, home_location_id, locations(id, name)")
+      .select("id, name, home_location_id, is_active, locations(id, name)")
       .eq("division_id", setting.division_id)
+      .neq("is_active", false)
       .order("name", { ascending: true });
 
     if (teamError) return alert(teamError.message);

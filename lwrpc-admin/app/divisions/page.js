@@ -14,6 +14,10 @@ export default function DivisionsPage() {
   const [leagueFilter, setLeagueFilter] = useState("");
   const [divisionSearch, setDivisionSearch] = useState("");
   const [openLeagueName, setOpenLeagueName] = useState("");
+  const [copyDivision, setCopyDivision] = useState(null);
+  const [copyTargetLeague, setCopyTargetLeague] = useState("");
+  const [copyName, setCopyName] = useState("");
+  const [copyingDivision, setCopyingDivision] = useState(false);
 
   const [editingId, setEditingId] = useState(null);
 
@@ -160,6 +164,84 @@ export default function DivisionsPage() {
     }
 
     loadData();
+  }
+
+  function openCopyDivision(division) {
+    setCopyDivision(division);
+    setCopyTargetLeague("");
+    setCopyName(division.name || "");
+  }
+
+  function closeCopyDivision() {
+    setCopyDivision(null);
+    setCopyTargetLeague("");
+    setCopyName("");
+    setCopyingDivision(false);
+  }
+
+  async function copyDivisionWithLines() {
+    if (!copyDivision || !copyTargetLeague || !copyName.trim()) {
+      alert("Choose a target league and division name.");
+      return;
+    }
+
+    const targetLeague = leagues.find((league) => String(league.id) === String(copyTargetLeague));
+    const ok = confirm(
+      [
+        `Copy "${copyDivision.name}" to ${targetLeague?.name || "selected league"}?`,
+        "",
+        "This creates a new division and copies its configured game lines.",
+        "It does not copy teams, schedules, matches, scores, or standings.",
+      ].join("\n")
+    );
+
+    if (!ok) return;
+
+    setCopyingDivision(true);
+
+    const divisionPayload = copyDivisionPayload(copyDivision, copyTargetLeague, copyName.trim());
+
+    const { data: createdDivision, error: divisionError } = await supabase
+      .from("divisions")
+      .insert(divisionPayload)
+      .select("id")
+      .single();
+
+    if (divisionError) {
+      setCopyingDivision(false);
+      alert(divisionError.message);
+      return;
+    }
+
+    const { data: lineRows, error: lineError } = await supabase
+      .from("division_lines")
+      .select("*")
+      .eq("division_id", copyDivision.id)
+      .order("sort_order", { ascending: true })
+      .order("line_number", { ascending: true });
+
+    if (lineError) {
+      setCopyingDivision(false);
+      alert(lineError.message);
+      return;
+    }
+
+    if ((lineRows || []).length > 0) {
+      const { error: insertLineError } = await supabase
+        .from("division_lines")
+        .insert(
+          lineRows.map((line) => copyDivisionLinePayload(line, createdDivision.id))
+        );
+
+      if (insertLineError) {
+        setCopyingDivision(false);
+        alert(insertLineError.message);
+        return;
+      }
+    }
+
+    closeCopyDivision();
+    await loadData();
   }
 
   function editDivision(division) {
@@ -688,6 +770,14 @@ export default function DivisionsPage() {
 
                             <button
                               type="button"
+                              onClick={() => openCopyDivision(division)}
+                              className="rounded-lg bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 hover:bg-emerald-200"
+                            >
+                              Copy
+                            </button>
+
+                            <button
+                              type="button"
                               onClick={() => deleteDivision(division.id)}
                               className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
                             >
@@ -715,6 +805,70 @@ export default function DivisionsPage() {
             </div>
           </div>
         </div>
+
+        {copyDivision && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+            <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="bg-slate-950 px-5 py-4 text-white">
+                <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+                  Copy Division
+                </div>
+                <h2 className="mt-1 text-xl font-black">
+                  {copyDivision.name}
+                </h2>
+              </div>
+
+              <div className="space-y-4 p-5">
+                <Field label="New Division Name">
+                  <input
+                    value={copyName}
+                    onChange={(event) => setCopyName(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  />
+                </Field>
+
+                <Field label="Copy To League">
+                  <select
+                    value={copyTargetLeague}
+                    onChange={(event) => setCopyTargetLeague(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  >
+                    <option value="">Select Target League</option>
+                    {leagues.map((league) => (
+                      <option key={league.id} value={league.id}>
+                        {league.name}
+                        {league.seasons?.name ? ` (${league.seasons.name})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-950">
+                  This copies the division settings and configured game lines only. Teams, schedules,
+                  matches, scores, and standings are not copied.
+                </div>
+
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={closeCopyDivision}
+                    className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={copyDivisionWithLines}
+                    disabled={copyingDivision}
+                    className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+                  >
+                    {copyingDivision ? "Copying..." : "Copy Division"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
@@ -740,4 +894,45 @@ function ratingNumber(value) {
   if (Number.isNaN(number)) return null;
 
   return Math.round((number + Number.EPSILON) * 100) / 100;
+}
+
+function copyDivisionPayload(division, leagueId, name) {
+  const {
+    id,
+    leagues,
+    division_lines,
+    created_at,
+    updated_at,
+    ...rest
+  } = division;
+  void id;
+  void leagues;
+  void division_lines;
+  void created_at;
+  void updated_at;
+
+  return {
+    ...rest,
+    league_id: leagueId,
+    name,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function copyDivisionLinePayload(line, divisionId) {
+  const {
+    id,
+    created_at,
+    updated_at,
+    ...rest
+  } = line;
+  void id;
+  void created_at;
+  void updated_at;
+
+  return {
+    ...rest,
+    division_id: divisionId,
+    updated_at: new Date().toISOString(),
+  };
 }

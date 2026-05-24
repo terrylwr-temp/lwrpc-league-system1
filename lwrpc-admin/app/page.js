@@ -441,6 +441,7 @@ async function loadTeamsForDashboard() {
     .from("teams")
     .select(`
       id,
+      is_active,
       divisions (
         id,
         league_id,
@@ -456,7 +457,7 @@ async function loadTeamsForDashboard() {
     return [];
   }
 
-  return data || [];
+  return (data || []).filter((team) => team.is_active !== false);
 }
 
 async function countScopedMatches(scopedLeagueIds, applyFilters) {

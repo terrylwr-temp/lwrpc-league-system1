@@ -38,7 +38,8 @@ export default function StandingsPage() {
         *,
         teams (
           id,
-          name
+          name,
+          is_active
         )
       `)
       .order("rank", { ascending: true });
@@ -95,7 +96,7 @@ export default function StandingsPage() {
         return false;
       }
 
-      return true;
+      return row.teams?.is_active !== false;
     });
   }, [
     standings,

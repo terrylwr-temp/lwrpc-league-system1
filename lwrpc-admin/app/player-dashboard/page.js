@@ -44,8 +44,8 @@ export default function PlayerDashboardPage() {
   const [playHistory, setPlayHistory] = useState([]);
   const [playerRatings, setPlayerRatings] = useState([]);
   const [activePanel, setActivePanel] = useState("history");
-  const [selectedUpcomingTeamId, setSelectedUpcomingTeamId] = useState("");
-  const [selectedStandingsTeamId, setSelectedStandingsTeamId] = useState("");
+  const [selectedPlayerTeamId, setSelectedPlayerTeamId] = useState("");
+  const [showPreviousSeasonTeams, setShowPreviousSeasonTeams] = useState(false);
   const [showAllTeamMatches, setShowAllTeamMatches] = useState(false);
   const [historyFilter, setHistoryFilter] = useState("");
   const [pdfDocument, setPdfDocument] = useState(null);
@@ -94,6 +94,7 @@ export default function PlayerDashboardPage() {
         teams (
           id,
           name,
+          is_active,
           divisions (
             id,
             name,
@@ -102,6 +103,10 @@ export default function PlayerDashboardPage() {
               id,
               name,
               season_id,
+              seasons (
+                id,
+                name
+              ),
               league_document_bucket,
               code_of_conduct_pdf_path,
               league_rules_pdf_path,
@@ -143,7 +148,9 @@ export default function PlayerDashboardPage() {
       return;
     }
 
-    const playerTeams = (rosterData || []).map((row) => row.teams).filter(Boolean);
+    const playerTeams = (rosterData || [])
+      .map((row) => row.teams)
+      .filter(Boolean);
     const teamIds = playerTeams.map((team) => team.id);
     let matchData = [];
     let standingsData = [];
@@ -169,7 +176,11 @@ export default function PlayerDashboardPage() {
             leagues (
               id,
               name,
-              season_id
+              season_id,
+              seasons (
+                id,
+                name
+              )
             ),
             locations (
               id,
@@ -245,10 +256,11 @@ export default function PlayerDashboardPage() {
           .from("team_standings")
           .select(`
             *,
-            teams (
-              id,
-              name
-            )
+        teams (
+          id,
+          name,
+          is_active
+        )
           `)
           .in("division_id", divisionIds.length > 0 ? divisionIds : ["00000000-0000-0000-0000-000000000000"])
           .order("rank", { ascending: true }),
@@ -421,6 +433,14 @@ export default function PlayerDashboardPage() {
         standing: teamStanding(standingsData, team.id),
       }))
     );
+    setSelectedPlayerTeamId((current) => {
+      if (current && playerTeams.some((team) => String(team.id) === String(current))) {
+        return current;
+      }
+
+      const firstActiveTeam = playerTeams.find((team) => team.is_active !== false);
+      return firstActiveTeam?.id || playerTeams[0]?.id || "";
+    });
     setMatches(matchData);
     setStandings(standingsData);
     setPlayHistory(historyData);
@@ -437,44 +457,65 @@ export default function PlayerDashboardPage() {
     run();
   }, [loadData, router]);
 
+  const visibleTeams = useMemo(() => {
+    return showPreviousSeasonTeams
+      ? teams
+      : teams.filter((team) => team.is_active !== false);
+  }, [showPreviousSeasonTeams, teams]);
+
+  useEffect(() => {
+    if (visibleTeams.length === 0) {
+      if (selectedPlayerTeamId) setSelectedPlayerTeamId("");
+      return;
+    }
+
+    const selectedIsVisible = visibleTeams.some(
+      (team) => String(team.id) === String(selectedPlayerTeamId)
+    );
+
+    if (!selectedIsVisible) {
+      setSelectedPlayerTeamId(visibleTeams[0].id);
+    }
+  }, [selectedPlayerTeamId, visibleTeams]);
+
   const upcomingMatchesBySelectedTeam = useMemo(() => {
-    if (!selectedUpcomingTeamId) return [];
+    if (!selectedPlayerTeamId) return [];
 
     return matches.filter(
       (match) =>
         match.status !== "completed" &&
         match.status !== "cancelled" &&
-        (String(match.home_team_id) === String(selectedUpcomingTeamId) ||
-          String(match.away_team_id) === String(selectedUpcomingTeamId))
+        (String(match.home_team_id) === String(selectedPlayerTeamId) ||
+          String(match.away_team_id) === String(selectedPlayerTeamId))
     );
-  }, [matches, selectedUpcomingTeamId]);
+  }, [matches, selectedPlayerTeamId]);
 
   const selectedTeamMatches = useMemo(() => {
-    if (!selectedUpcomingTeamId) return [];
+    if (!selectedPlayerTeamId) return [];
 
     return matches.filter((match) => {
       const isSelectedTeam =
-        String(match.home_team_id) === String(selectedUpcomingTeamId) ||
-        String(match.away_team_id) === String(selectedUpcomingTeamId);
+        String(match.home_team_id) === String(selectedPlayerTeamId) ||
+        String(match.away_team_id) === String(selectedPlayerTeamId);
 
       if (!isSelectedTeam || match.status === "cancelled") return false;
       if (showAllTeamMatches) return true;
 
       return match.status !== "completed";
     });
-  }, [matches, selectedUpcomingTeamId, showAllTeamMatches]);
+  }, [matches, selectedPlayerTeamId, showAllTeamMatches]);
 
   const selectedUpcomingTeam = useMemo(() => {
     return teams.find(
-      (team) => String(team.id) === String(selectedUpcomingTeamId)
+      (team) => String(team.id) === String(selectedPlayerTeamId)
     );
-  }, [teams, selectedUpcomingTeamId]);
+  }, [teams, selectedPlayerTeamId]);
 
   const selectedStandingsTeam = useMemo(() => {
     return teams.find(
-      (team) => String(team.id) === String(selectedStandingsTeamId)
+      (team) => String(team.id) === String(selectedPlayerTeamId)
     );
-  }, [teams, selectedStandingsTeamId]);
+  }, [teams, selectedPlayerTeamId]);
 
   const selectedDivisionStandings = useMemo(() => {
     if (!selectedStandingsTeam) return [];
@@ -544,7 +585,7 @@ export default function PlayerDashboardPage() {
   }
 
   function mySeasonDuprSummary() {
-    const seasonDuprTeam = teams.find(
+    const seasonDuprTeam = visibleTeams.find(
       (team) => (team.divisions?.rating_type || "dupr") === "dupr"
     );
 
@@ -561,12 +602,8 @@ export default function PlayerDashboardPage() {
   function selectPanel(panel) {
     setActivePanel(panel);
 
-    if (panel === "standings" && !selectedStandingsTeamId && teams.length > 0) {
-      setSelectedStandingsTeamId(teams[0].id);
-    }
-
-    if (panel === "upcoming" && !selectedUpcomingTeamId && teams.length > 0) {
-      setSelectedUpcomingTeamId(teams[0].id);
+    if ((panel === "standings" || panel === "upcoming") && !selectedPlayerTeamId && visibleTeams.length > 0) {
+      setSelectedPlayerTeamId(visibleTeams[0].id);
     }
   }
 
@@ -758,7 +795,16 @@ export default function PlayerDashboardPage() {
                 <h2 className="mt-1 text-2xl font-black">My Teams</h2>
               </div>
               <div className="flex flex-col gap-1 text-sm font-semibold text-slate-300 md:items-end">
-                <span>{teams.length} team{teams.length === 1 ? "" : "s"}</span>
+                <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                  <span>{visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowPreviousSeasonTeams((value) => !value)}
+                    className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white hover:bg-white/20"
+                  >
+                    {showPreviousSeasonTeams ? "Show Active Teams" : "Previous Seasons Teams"}
+                  </button>
+                </div>
                 {mySeasonDuprSummary() && (
                   <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white">
                     My Season DUPR: {mySeasonDuprSummary()}
@@ -769,18 +815,22 @@ export default function PlayerDashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-3 p-4 lg:grid-cols-2 md:p-5">
-            {teams.map((team) => (
+            {visibleTeams.map((team) => (
               <TeamCard
                 key={team.id}
                 team={team}
+                selected={String(team.id) === String(selectedPlayerTeamId)}
+                onSelect={() => setSelectedPlayerTeamId(team.id)}
                 onOpenDocument={openLeagueDocument}
                 onOpenRoster={setRosterTeam}
               />
             ))}
 
-            {teams.length === 0 && (
+            {visibleTeams.length === 0 && (
               <div className="rounded-xl bg-slate-50 px-4 py-3 text-slate-500">
-                You are not currently listed on any team rosters.
+                {teams.length === 0
+                  ? "You are not currently listed on any team rosters."
+                  : "No active teams are currently shown. Use Previous Seasons Teams to view older teams."}
               </div>
             )}
           </div>
@@ -796,14 +846,14 @@ export default function PlayerDashboardPage() {
             <DashboardOption
               active={activePanel === "standings"}
               label="Division Standings"
-              value={selectedDivisionStandings.length || standings.length}
+              value={selectedDivisionStandings.length}
               tone="emerald"
               onClick={() => selectPanel("standings")}
             />
             <DashboardOption
               active={activePanel === "upcoming"}
               label="Team Matches"
-              value={upcomingMatchesBySelectedTeam.length || matches.filter((match) => match.status !== "completed" && match.status !== "cancelled").length}
+              value={upcomingMatchesBySelectedTeam.length}
               tone="gray"
               onClick={() => selectPanel("upcoming")}
             />
@@ -832,9 +882,9 @@ export default function PlayerDashboardPage() {
 
               <div className="flex flex-col gap-2 md:flex-row md:items-center">
                 <TeamSelect
-                  value={selectedStandingsTeamId}
-                  onChange={setSelectedStandingsTeamId}
-                  teams={teams}
+                  value={selectedPlayerTeamId}
+                  onChange={setSelectedPlayerTeamId}
+                  teams={visibleTeams}
                   label="Choose team for standings"
                 />
                 <div className="rounded-xl bg-white/15 px-4 py-2 text-center text-sm font-bold text-white">
@@ -851,7 +901,7 @@ export default function PlayerDashboardPage() {
                     type="button"
                     onClick={() => openDivisionScheduleFromStanding(row)}
                     className={`w-full rounded-xl border p-4 text-left shadow-sm ${
-                      String(row.team_id) === String(selectedStandingsTeamId)
+                      String(row.team_id) === String(selectedPlayerTeamId)
                         ? "border-emerald-300 bg-emerald-50"
                         : "border-slate-200 bg-white"
                     }`}
@@ -897,7 +947,7 @@ export default function PlayerDashboardPage() {
                     <tr
                       key={row.id}
                       onClick={() => openDivisionScheduleFromStanding(row)}
-                      className={`cursor-pointer border-b border-slate-100 ${String(row.team_id) === String(selectedStandingsTeamId) ? "bg-emerald-50" : "hover:bg-slate-50"}`}
+                      className={`cursor-pointer border-b border-slate-100 ${String(row.team_id) === String(selectedPlayerTeamId) ? "bg-emerald-50" : "hover:bg-slate-50"}`}
                     >
                       <td className="p-3 font-bold">#{row.rank}</td>
                       <td className="p-3 font-semibold">{row.teams?.name}</td>
@@ -937,12 +987,6 @@ export default function PlayerDashboardPage() {
               </div>
 
               <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                <TeamSelect
-                  value={selectedUpcomingTeamId}
-                  onChange={setSelectedUpcomingTeamId}
-                  teams={teams}
-                  label="Choose team for upcoming matches"
-                />
                 <button
                   type="button"
                   onClick={() => setShowAllTeamMatches((value) => !value)}
@@ -1138,43 +1182,53 @@ function HistoryStat({ label, value, tone = "slate" }) {
   );
 }
 
-function TeamCard({ team, onOpenDocument, onOpenRoster }) {
+function TeamCard({ team, selected, onSelect, onOpenDocument, onOpenRoster }) {
   const standing = team.standing;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white text-sm shadow-md">
-      <div className="bg-gradient-to-r from-slate-950 to-blue-800 px-4 py-4 text-white">
+    <div
+      onClick={onSelect}
+      className={`cursor-pointer overflow-hidden rounded-2xl border text-sm shadow-md transition hover:shadow-lg ${
+        selected ? "border-4 border-emerald-500 bg-blue-50" : "border-slate-200 bg-white"
+      }`}
+    >
+      <div className={`px-4 py-4 ${selected ? "bg-gradient-to-r from-emerald-800 to-blue-800 text-white" : "bg-white text-slate-950"}`}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="font-black">{team.name}</div>
-            <div className="mt-1 text-xs font-bold uppercase tracking-wide text-blue-100">
+            <div className={`mt-1 text-xs font-bold uppercase tracking-wide ${selected ? "text-blue-100" : "text-slate-500"}`}>
               {team.locations?.name || "No Home Location"}
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2 sm:justify-end">
-            <div className="rounded-xl bg-white/15 px-3 py-2 text-xs font-black uppercase tracking-wide text-white">
+            <div className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide ${selected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-800"}`}>
               Rank #{standing?.rank || "N/A"}
             </div>
-            <div className="rounded-xl bg-white/15 px-3 py-2 text-xs font-black uppercase tracking-wide text-white">
+            <div className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide ${selected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-800"}`}>
               {formatStandingRecord(standing)}
             </div>
             <button
               type="button"
-              onClick={() => onOpenRoster(team)}
-              className="rounded-xl bg-white/15 px-3 py-2 text-left text-xs font-black uppercase tracking-wide text-white hover:bg-white/25"
+              onClick={(event) => {
+                event.stopPropagation();
+                onOpenRoster(team);
+              }}
+              className={`rounded-xl px-3 py-2 text-left text-xs font-black uppercase tracking-wide ${
+                selected ? "bg-white/15 text-white hover:bg-white/25" : "bg-slate-100 text-slate-800 hover:bg-slate-200"
+              }`}
             >
               Roster ({team.roster?.length || 0})
             </button>
           </div>
         </div>
       </div>
-      <div className="bg-blue-50 px-4 py-3">
+      <div className={`${selected ? "bg-blue-50" : "bg-white"} px-4 py-3`}>
         <div className="rounded-xl bg-white px-4 py-3 font-bold text-blue-950 shadow-sm">
           {team.divisions?.leagues?.name || ""} / {team.divisions?.name || ""}
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-2 bg-blue-50 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3">
+      <div className={`grid grid-cols-1 gap-2 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3 ${selected ? "bg-blue-50" : "bg-white"}`}>
         {teamCaptainContacts(team).map((contact) => (
           <div key={contact.label} className="rounded-xl bg-white px-3 py-2 shadow-sm">
             <div className="font-bold text-slate-900">{contact.label}</div>
@@ -1195,7 +1249,10 @@ function TeamCard({ team, onOpenDocument, onOpenRoster }) {
               <button
                 key={documentType.key}
                 type="button"
-                onClick={() => onOpenDocument(team, documentType)}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  onOpenDocument(team, documentType);
+                }}
                 disabled={!hasDocument}
                 className="rounded-xl bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-950 hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
               >

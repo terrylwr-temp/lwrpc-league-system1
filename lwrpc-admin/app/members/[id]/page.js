@@ -75,6 +75,7 @@ export default function MemberDetailPage() {
         teams (
           id,
           name,
+          is_active,
           captain_member_id,
           co_captain_member_id,
           co_captain_2_member_id,
@@ -129,7 +130,7 @@ setUserRole(roleData?.role || "player");
       renewal_date: memberData.renewal_date || "",
     });
     setSeasonRatings(ratingData || []);
-    setTeamMemberships(teamData || []);
+    setTeamMemberships((teamData || []).filter((row) => row.teams?.is_active !== false));
   }, [id]);
 
   useEffect(() => {

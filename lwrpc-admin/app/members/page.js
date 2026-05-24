@@ -78,7 +78,7 @@ export default function MembersPage() {
       teamsByMemberId = (teamRows || []).reduce((byMember, row) => {
         if (!memberIdSet.has(String(row.member_id))) return byMember;
         if (!byMember[row.member_id]) byMember[row.member_id] = [];
-        if (row.teams) byMember[row.member_id].push(row.teams);
+        if (row.teams?.is_active !== false) byMember[row.member_id].push(row.teams);
         return byMember;
       }, {});
     }
@@ -769,6 +769,7 @@ async function loadAllMemberTeamRows() {
         teams (
           id,
           name,
+          is_active,
           divisions (
             id,
             name,

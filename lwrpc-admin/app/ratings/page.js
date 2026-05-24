@@ -115,7 +115,11 @@ export default function RatingsPage() {
 
     setMembers(memberData || []);
     setCurrentRosterMemberIds(
-      new Set((rosterRows || []).map((row) => String(row.member_id)))
+      new Set(
+        (rosterRows || [])
+          .filter((row) => row.teams?.is_active !== false)
+          .map((row) => String(row.member_id))
+      )
     );
     setSeasons(seasonData || []);
 
@@ -1063,7 +1067,13 @@ async function loadAllRatingRosterRows() {
   while (true) {
     const { data, error } = await supabase
       .from("team_members")
-      .select("member_id")
+      .select(`
+        member_id,
+        teams (
+          id,
+          is_active
+        )
+      `)
       .range(from, from + pageSize - 1);
 
     if (error) return { rows: [], error };

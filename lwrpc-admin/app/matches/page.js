@@ -83,7 +83,7 @@ export default function MatchesPage() {
 
     setLeagues(leagueData || []);
     setDivisions(divisionData || []);
-    setTeams(teamData || []);
+    setTeams((teamData || []).filter((team) => team.is_active !== false));
     setLocations(locationData || []);
     setMatches(matchData || []);
   }, []);

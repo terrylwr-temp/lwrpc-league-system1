@@ -24,6 +24,12 @@ export default function TeamsPage() {
   const [scheduleMatches, setScheduleMatches] = useState([]);
   const [scheduleRatings, setScheduleRatings] = useState([]);
   const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [copyTeam, setCopyTeam] = useState(null);
+  const [copyTeamName, setCopyTeamName] = useState("");
+  const [copyTargetLeague, setCopyTargetLeague] = useState("");
+  const [copyTargetDivision, setCopyTargetDivision] = useState("");
+  const [copyRoster, setCopyRoster] = useState(true);
+  const [copyingTeam, setCopyingTeam] = useState(false);
 
   const [editingTeamId, setEditingTeamId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -36,13 +42,29 @@ export default function TeamsPage() {
   const [captainId, setCaptainId] = useState("");
   const [coCaptain1Id, setCoCaptain1Id] = useState("");
   const [coCaptain2Id, setCoCaptain2Id] = useState("");
+  const [teamActive, setTeamActive] = useState(true);
   const [showAllCaptainCommunities, setShowAllCaptainCommunities] = useState(false);
   const [notes, setNotes] = useState("");
 
+  const activeLeagues = useMemo(() => {
+    return leagues.filter((league) => league.seasons?.is_active !== false);
+  }, [leagues]);
+
+  const activeLeagueIds = useMemo(() => {
+    return new Set(activeLeagues.map((league) => String(league.id)));
+  }, [activeLeagues]);
+
   const filteredDivisions = useMemo(() => {
     if (!selectedLeague) return [];
+    if (!activeLeagueIds.has(String(selectedLeague))) return [];
     return divisions.filter(d => d.league_id === selectedLeague);
-  }, [divisions, selectedLeague]);
+  }, [activeLeagueIds, divisions, selectedLeague]);
+
+  const copyTargetDivisions = useMemo(() => {
+    if (!copyTargetLeague) return [];
+    if (!activeLeagueIds.has(String(copyTargetLeague))) return [];
+    return divisions.filter((division) => division.league_id === copyTargetLeague);
+  }, [activeLeagueIds, copyTargetLeague, divisions]);
 
   const captainMemberChoices = useMemo(() => {
     const selectedCaptainIds = [captainId, coCaptain1Id, coCaptain2Id]
@@ -87,6 +109,7 @@ export default function TeamsPage() {
         team.divisions?.leagues?.name,
         team.divisions?.name,
         team.locations?.name,
+        team.is_active === false ? "inactive" : "active",
         displayMemberName(team.captain),
         displayMemberName(team.co_captain_1),
         displayMemberName(team.co_captain_2),
@@ -129,7 +152,15 @@ export default function TeamsPage() {
   const loadData = useCallback(async function loadData() {
     const { data: leagueData } = await supabase
       .from("leagues")
-      .select("id, name")
+      .select(`
+        id,
+        name,
+        seasons (
+          id,
+          name,
+          is_active
+        )
+      `)
       .order("name", { ascending: true });
 
     const { data: divisionData } = await supabase
@@ -293,6 +324,7 @@ export default function TeamsPage() {
       co_captain_member_id: coCaptain1Id || null,
       co_captain_2_member_id: coCaptain2Id || null,
       notes: notes || null,
+      is_active: teamActive,
       updated_at: new Date().toISOString()
     };
 
@@ -339,6 +371,7 @@ export default function TeamsPage() {
     setCaptainId("");
     setCoCaptain1Id("");
     setCoCaptain2Id("");
+    setTeamActive(true);
     setShowAllCaptainCommunities(false);
     setNotes("");
   }
@@ -360,6 +393,7 @@ export default function TeamsPage() {
     setCaptainId(team.captain_member_id || "");
     setCoCaptain1Id(team.co_captain_member_id || "");
     setCoCaptain2Id(team.co_captain_2_member_id || "");
+    setTeamActive(team.is_active !== false);
     setShowAllCaptainCommunities(
       captainIsOutsideHomeLocation(team.captain_member_id, team.home_location_id) ||
       captainIsOutsideHomeLocation(team.co_captain_member_id, team.home_location_id) ||
@@ -398,6 +432,157 @@ export default function TeamsPage() {
     loadData();
   }
 
+  async function toggleTeamActive(team) {
+    const currentlyActive = team.is_active !== false;
+
+    if (currentlyActive) {
+      const ok = confirm([
+        `Inactivate team "${team.name}"?`,
+        "",
+        "This will mark the team inactive and reset its standings record to 0.",
+        "Historical matches, scores, roster history, and player history will not be deleted.",
+      ].join("\n"));
+
+      if (!ok) return;
+    }
+
+    const { error } = await supabase
+      .from("teams")
+      .update({
+        is_active: !currentlyActive,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", team.id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    if (currentlyActive) {
+      const resetError = await resetTeamStanding(team.id);
+      if (resetError) {
+        alert(resetError.message);
+        return;
+      }
+    }
+
+    loadData();
+  }
+
+  async function resetTeamStanding(teamId) {
+    const { error } = await supabase
+      .from("team_standings")
+      .update({
+        rank: null,
+        matches_played: 0,
+        match_wins: 0,
+        match_losses: 0,
+        match_ties: 0,
+        line_wins: 0,
+        line_losses: 0,
+        line_ties: 0,
+        game_wins: 0,
+        game_losses: 0,
+        points_for: 0,
+        points_against: 0,
+        point_differential: 0,
+        standings_points: 0,
+        home_wins: 0,
+        home_losses: 0,
+        away_wins: 0,
+        away_losses: 0,
+        recent_form: "",
+        current_streak: "-",
+        updated_at: new Date().toISOString(),
+      })
+      .eq("team_id", teamId);
+
+    return error;
+  }
+
+  function openCopyTeam(team) {
+    setCopyTeam(team);
+    setCopyTeamName(team.name || "");
+    setCopyTargetLeague("");
+    setCopyTargetDivision("");
+    setCopyRoster(true);
+  }
+
+  function closeCopyTeam() {
+    if (copyingTeam) return;
+    setCopyTeam(null);
+    setCopyTeamName("");
+    setCopyTargetLeague("");
+    setCopyTargetDivision("");
+    setCopyRoster(true);
+  }
+
+  async function copyTeamToDivision() {
+    if (!copyTeam) return;
+
+    if (!copyTeamName.trim() || !copyTargetLeague || !copyTargetDivision) {
+      alert("Team name, target league, and target division are required.");
+      return;
+    }
+
+    setCopyingTeam(true);
+
+    const payload = copyTeamPayload(copyTeam, copyTeamName.trim(), copyTargetDivision);
+    const { data: createdTeam, error: teamError } = await supabase
+      .from("teams")
+      .insert(payload)
+      .select("id")
+      .single();
+
+    if (teamError) {
+      alert(teamError.message);
+      setCopyingTeam(false);
+      return;
+    }
+
+    if (copyRoster) {
+      const { data: rosterRows, error: rosterLoadError } = await supabase
+        .from("team_members")
+        .select("*")
+        .eq("team_id", copyTeam.id);
+
+      if (rosterLoadError) {
+        alert(rosterLoadError.message);
+        setCopyingTeam(false);
+        return;
+      }
+
+      const rosterPayload = (rosterRows || []).map((row) =>
+        copyRosterPayload(row, createdTeam.id)
+      );
+
+      if (rosterPayload.length > 0) {
+        const { error: rosterCopyError } = await supabase
+          .from("team_members")
+          .insert(rosterPayload);
+
+        if (rosterCopyError) {
+          alert(rosterCopyError.message);
+          setCopyingTeam(false);
+          return;
+        }
+      }
+    }
+
+    await upgradeMemberToCaptain(payload.captain_member_id);
+    await upgradeMemberToCaptain(payload.co_captain_member_id);
+    await upgradeMemberToCaptain(payload.co_captain_2_member_id);
+
+    setCopyTeam(null);
+    setCopyTeamName("");
+    setCopyTargetLeague("");
+    setCopyTargetDivision("");
+    setCopyRoster(true);
+    await loadData();
+    setCopyingTeam(false);
+  }
+
   async function openTeamSchedule(team) {
     setScheduleTeam(team);
     setScheduleTeams([]);
@@ -414,8 +599,9 @@ export default function TeamsPage() {
     ] = await Promise.all([
       supabase
         .from("teams")
-        .select("id, name, division_id")
+        .select("id, name, division_id, is_active")
         .eq("division_id", team.division_id)
+        .neq("is_active", false)
         .order("name", { ascending: true }),
       supabase
         .from("matches")
@@ -628,7 +814,7 @@ if (loading) {
                 >
                   <option value="">Select League</option>
 
-                  {leagues.map(league => (
+                  {activeLeagues.map(league => (
                     <option key={league.id} value={league.id}>
                       {league.name}
                     </option>
@@ -690,6 +876,21 @@ if (loading) {
                   <span className="font-semibold text-slate-900">Allow captain selection from any community</span>
                   <span className="block text-xs text-slate-500">
                     Use this when a captain or co-captain belongs to a different community than the home location.
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={teamActive}
+                  onChange={(e) => setTeamActive(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="font-semibold text-slate-900">Team is active</span>
+                  <span className="block text-xs text-slate-500">
+                    Inactive teams are kept for history but can be excluded from current-season operations over time.
                   </span>
                 </span>
               </label>
@@ -892,6 +1093,13 @@ if (loading) {
                             {team.name}
                             {team.abbreviation ? ` (${team.abbreviation})` : ""}
                           </div>
+                          <div className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide ${
+                            team.is_active === false
+                              ? "bg-slate-200 text-slate-700"
+                              : "bg-emerald-100 text-emerald-800"
+                          }`}>
+                            {team.is_active === false ? "Inactive" : "Active"}
+                          </div>
                           {team.notes && (
                             <div className="truncate text-xs text-slate-500">
                               {team.notes}
@@ -921,6 +1129,24 @@ if (loading) {
                             className="rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800"
                           >
                             Edit
+                          </button>
+
+                          <button
+                            onClick={() => openCopyTeam(team)}
+                            className="rounded-lg bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-200"
+                          >
+                            Copy
+                          </button>
+
+                          <button
+                            onClick={() => toggleTeamActive(team)}
+                            className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${
+                              team.is_active === false
+                                ? "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
+                                : "bg-amber-100 text-amber-900 hover:bg-amber-200"
+                            }`}
+                          >
+                            {team.is_active === false ? "Activate" : "Inactivate"}
                           </button>
 
                           <button
@@ -980,8 +1206,155 @@ if (loading) {
             }}
           />
         )}
+        {copyTeam && (
+          <CopyTeamModal
+            team={copyTeam}
+            teamName={copyTeamName}
+            leagues={activeLeagues}
+            divisions={copyTargetDivisions}
+            targetLeague={copyTargetLeague}
+            targetDivision={copyTargetDivision}
+            copyRoster={copyRoster}
+            copying={copyingTeam}
+            onTeamNameChange={setCopyTeamName}
+            onLeagueChange={(leagueId) => {
+              setCopyTargetLeague(leagueId);
+              setCopyTargetDivision("");
+            }}
+            onDivisionChange={setCopyTargetDivision}
+            onCopyRosterChange={setCopyRoster}
+            onClose={closeCopyTeam}
+            onCopy={copyTeamToDivision}
+          />
+        )}
       </div>
     </main>
+  );
+}
+
+function CopyTeamModal({
+  team,
+  teamName,
+  leagues,
+  divisions,
+  targetLeague,
+  targetDivision,
+  copyRoster,
+  copying,
+  onTeamNameChange,
+  onLeagueChange,
+  onDivisionChange,
+  onCopyRosterChange,
+  onClose,
+  onCopy,
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+              Copy Team
+            </div>
+            <h2 className="mt-1 text-2xl font-black">{team.name}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={copying}
+            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20 disabled:opacity-50"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="space-y-4 p-5">
+          <Field
+            label="New Team Name"
+            hint="Use a new-season name or keep the current team name."
+          >
+            <input
+              value={teamName}
+              onChange={(e) => onTeamNameChange(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+            />
+          </Field>
+
+          <Field
+            label="Target League"
+            hint="Only active-season leagues are available."
+          >
+            <select
+              value={targetLeague}
+              onChange={(e) => onLeagueChange(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+            >
+              <option value="">Select League</option>
+              {leagues.map((league) => (
+                <option key={league.id} value={league.id}>
+                  {league.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field
+            label="Target Division"
+            hint="The copied team will be placed in this division."
+          >
+            <select
+              value={targetDivision}
+              onChange={(e) => onDivisionChange(e.target.value)}
+              disabled={!targetLeague}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+            >
+              <option value="">
+                {targetLeague ? "Select Division" : "Select League First"}
+              </option>
+              {divisions.map((division) => (
+                <option key={division.id} value={division.id}>
+                  {division.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <label className="flex items-start gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={copyRoster}
+              onChange={(e) => onCopyRosterChange(e.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              <span className="font-semibold text-slate-900">Copy roster players</span>
+              <span className="block text-xs text-slate-500">
+                Captains and team settings are copied either way. Turn this off to create the team with an empty roster.
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={copying}
+            className="rounded-xl bg-slate-200 px-5 py-3 font-bold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onCopy}
+            disabled={copying}
+            className="rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+          >
+            {copying ? "Copying..." : "Copy Team"}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1006,6 +1379,37 @@ async function loadAllRosterRows() {
   }
 
   return { rows, error: null };
+}
+
+function copyTeamPayload(team, teamName, targetDivisionId) {
+  return {
+    name: teamName,
+    abbreviation: team.abbreviation || null,
+    division_id: targetDivisionId,
+    home_location_id: team.home_location_id || null,
+    captain_member_id: team.captain_member_id || null,
+    co_captain_member_id: team.co_captain_member_id || null,
+    co_captain_2_member_id: team.co_captain_2_member_id || null,
+    notes: team.notes || null,
+    is_active: true,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+function copyRosterPayload(row, teamId) {
+  const { id, team_id, created_at, updated_at, teams, members, ...copyableFields } = row;
+  void id;
+  void team_id;
+  void created_at;
+  void updated_at;
+  void teams;
+  void members;
+
+  return {
+    ...copyableFields,
+    team_id: teamId,
+    updated_at: new Date().toISOString(),
+  };
 }
 
 function Field({ label, hint, children }) {

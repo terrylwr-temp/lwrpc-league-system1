@@ -26,6 +26,7 @@ export default function CaptainDashboardPage() {
   const [teamStats, setTeamStats] = useState({});
   const [matchSetupStatus, setMatchSetupStatus] = useState({});
   const [selectedCaptainTeamId, setSelectedCaptainTeamId] = useState("");
+  const [showPreviousSeasonTeams, setShowPreviousSeasonTeams] = useState(false);
   const [captainSection, setCaptainSection] = useState("upcoming");
   const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
   const [loading, setLoading] = useState(true);
@@ -141,10 +142,19 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    setTeams(teamData || []);
-    setSelectedCaptainTeamId((current) => current || teamData?.[0]?.id || "");
+    const captainTeams = teamData || [];
+    const activeTeams = captainTeams.filter((team) => team.is_active !== false);
 
-    const teamIds = (teamData || []).map((team) => team.id);
+    setTeams(captainTeams);
+    setSelectedCaptainTeamId((current) => {
+      if (current && captainTeams.some((team) => String(team.id) === String(current))) {
+        return current;
+      }
+
+      return activeTeams?.[0]?.id || captainTeams?.[0]?.id || "";
+    });
+
+    const teamIds = captainTeams.map((team) => team.id);
 
     if (teamIds.length === 0) {
       setMatches([]);
@@ -352,9 +362,30 @@ export default function CaptainDashboardPage() {
     );
   }, [matches]);
 
+  const visibleTeams = useMemo(() => {
+    return showPreviousSeasonTeams
+      ? teams
+      : teams.filter((team) => team.is_active !== false);
+  }, [showPreviousSeasonTeams, teams]);
+
+  useEffect(() => {
+    if (visibleTeams.length === 0) {
+      if (selectedCaptainTeamId) setSelectedCaptainTeamId("");
+      return;
+    }
+
+    const selectedIsVisible = visibleTeams.some(
+      (team) => String(team.id) === String(selectedCaptainTeamId)
+    );
+
+    if (!selectedIsVisible) {
+      setSelectedCaptainTeamId(visibleTeams[0].id);
+    }
+  }, [selectedCaptainTeamId, visibleTeams]);
+
   const selectedCaptainTeam = useMemo(() => {
-    return teams.find((team) => String(team.id) === String(selectedCaptainTeamId)) || teams[0] || null;
-  }, [selectedCaptainTeamId, teams]);
+    return visibleTeams.find((team) => String(team.id) === String(selectedCaptainTeamId)) || visibleTeams[0] || null;
+  }, [selectedCaptainTeamId, visibleTeams]);
 
   const selectedTeamId = selectedCaptainTeam?.id || "";
 
@@ -1345,14 +1376,21 @@ export default function CaptainDashboardPage() {
                 </div>
                 <h2 className="mt-1 text-2xl font-black">My Teams</h2>
               </div>
-              <div className="text-sm font-semibold text-slate-300">
-                {teams.length} team{teams.length === 1 ? "" : "s"}
+              <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-300 md:justify-end">
+                <span>{visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}</span>
+                <button
+                  type="button"
+                  onClick={() => setShowPreviousSeasonTeams((value) => !value)}
+                  className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white hover:bg-white/20"
+                >
+                  {showPreviousSeasonTeams ? "Show Active Teams" : "Previous Seasons Teams"}
+                </button>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 md:p-6">
-            {teams.map((team) => {
+            {visibleTeams.map((team) => {
               const stats = teamStats[team.id] || {};
               const standing = stats.standing;
               const selected = String(team.id) === String(selectedTeamId);
@@ -1361,15 +1399,16 @@ export default function CaptainDashboardPage() {
               return (
               <div
                 key={team.id}
-                className={`overflow-hidden rounded-2xl border bg-white shadow-md transition ${
-                  selected ? "border-4 border-emerald-500 shadow-lg" : "border-blue-100"
+                onClick={() => setSelectedCaptainTeamId(team.id)}
+                className={`cursor-pointer overflow-hidden rounded-2xl border shadow-md transition hover:shadow-lg ${
+                  selected ? "border-4 border-emerald-500 bg-blue-50 shadow-lg" : "border-slate-200 bg-white"
                 }`}
               >
-                <div className={`p-4 text-white ${selected ? "bg-gradient-to-r from-emerald-800 to-blue-800" : "bg-gradient-to-r from-slate-950 to-blue-800"}`}>
+                <div className={`p-4 ${selected ? "bg-gradient-to-r from-emerald-800 to-blue-800 text-white" : "bg-white text-slate-950"}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
                     <div className="text-lg font-black">{team.name}</div>
-                    <div className="mt-1 text-sm font-semibold text-blue-100">
+                    <div className={`mt-1 text-sm font-semibold ${selected ? "text-blue-100" : "text-slate-600"}`}>
                       {team.divisions?.leagues?.name || "League"} / {team.divisions?.name || "Division"}
                     </div>
                   </div>
@@ -1377,16 +1416,10 @@ export default function CaptainDashboardPage() {
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
-                      onClick={() => setSelectedCaptainTeamId(team.id)}
-                      className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide text-white ${
-                        selected ? "bg-emerald-500" : "bg-white/15 hover:bg-white/25"
-                      }`}
-                    >
-                      {selected ? "Selected" : "Select Team"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`)}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`);
+                      }}
                       className="rounded-full bg-blue-700 px-3 py-1 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-800"
                     >
                       Rank {standing?.rank ? `#${standing.rank}` : "N/A"}
@@ -1410,7 +1443,7 @@ export default function CaptainDashboardPage() {
                 </div>
                 </div>
 
-                <div className="bg-blue-50 px-4 py-3 text-sm text-slate-700">
+                <div className={`${selected ? "bg-blue-50" : "bg-white"} px-4 py-3 text-sm text-slate-700`}>
                   <div className="rounded-xl bg-white px-4 py-3 shadow-sm">
                     <span className="font-bold text-slate-900">Home Location:</span> {team.locations?.name || "—"}
                   </div>
@@ -1419,7 +1452,10 @@ export default function CaptainDashboardPage() {
                 <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-3">
                   <button
                     type="button"
-                    onClick={() => router.push(`/teams/${team.id}`)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      router.push(`/teams/${team.id}`);
+                    }}
                     className="rounded-xl bg-slate-900 px-3 py-3 text-sm font-bold text-white shadow-sm hover:bg-slate-800"
                   >
                     Manage Roster
@@ -1427,7 +1463,10 @@ export default function CaptainDashboardPage() {
 
                   <button
                     type="button"
-                    onClick={() => openDivisionSchedule(team)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openDivisionSchedule(team);
+                    }}
                     className="rounded-xl bg-indigo-100 px-3 py-3 text-sm font-bold text-indigo-900 shadow-sm hover:bg-indigo-200"
                   >
                     Division Schedules
@@ -1435,7 +1474,10 @@ export default function CaptainDashboardPage() {
 
                   <button
                     type="button"
-                    onClick={() => displayPrintDivisionCaptains(team)}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      displayPrintDivisionCaptains(team);
+                    }}
                     className="rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
                   >
                     Print Captains
@@ -1445,12 +1487,13 @@ export default function CaptainDashboardPage() {
                 <div className="border-t border-slate-100">
                   <button
                     type="button"
-                    onClick={() =>
+                    onClick={(event) => {
+                      event.stopPropagation();
                       setOpenLeagueDocuments((current) => ({
                         ...current,
                         [team.id]: !current[team.id],
-                      }))
-                    }
+                      }));
+                    }}
                     className="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-slate-600 hover:bg-slate-50"
                   >
                     <span>League Documents</span>
@@ -1466,7 +1509,10 @@ export default function CaptainDashboardPage() {
                           <button
                             key={documentType.key}
                             type="button"
-                            onClick={() => openLeagueDocument(team, documentType)}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              openLeagueDocument(team, documentType);
+                            }}
                             disabled={!hasDocument}
                             className="rounded-xl bg-emerald-100 px-3 py-3 text-sm font-bold text-emerald-950 shadow-sm hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 disabled:shadow-none"
                           >
@@ -1481,9 +1527,11 @@ export default function CaptainDashboardPage() {
               );
             })}
 
-            {teams.length === 0 && (
+            {visibleTeams.length === 0 && (
               <div className="rounded-xl bg-slate-50 p-6 text-slate-500">
-                You are not currently assigned as captain or co-captain of any team.
+                {teams.length === 0
+                  ? "You are not currently assigned as captain or co-captain of any team."
+                  : "No active captain teams are currently shown. Use Previous Seasons Teams to view older teams."}
               </div>
             )}
           </div>
