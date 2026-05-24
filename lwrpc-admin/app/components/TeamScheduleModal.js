@@ -1,6 +1,7 @@
 "use client";
 
 import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
+import { useState } from "react";
 
 export default function TeamScheduleModal({
   title,
@@ -9,13 +10,18 @@ export default function TeamScheduleModal({
   selectedTeamId,
   onSelectTeam,
   matches = [],
+  ratings = [],
+  ratingType = "dupr",
   loading = false,
   compact = false,
   onClose,
 }) {
   const selectedTeam = teams.find((team) => String(team.id) === String(selectedTeamId));
   const teamRecordById = Object.fromEntries(
-    teams.map((team) => [String(team.id), formatTeamRecord(team)])
+    teams.map((team) => [String(team.id), formatTeamSummary(team)])
+  );
+  const ratingByMemberId = Object.fromEntries(
+    ratings.map((rating) => [String(rating.member_id), rating])
   );
   const visibleMatches = matches.filter(
     (match) =>
@@ -24,14 +30,14 @@ export default function TeamScheduleModal({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="flex max-h-[88vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-wrap items-start justify-between gap-3 bg-gradient-to-r from-slate-950 via-blue-950 to-emerald-900 px-6 py-5 text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
+      <div className="flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-wrap items-start justify-between gap-3 bg-gradient-to-r from-slate-950 via-blue-950 to-emerald-900 px-4 py-4 text-white sm:px-6 sm:py-5">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
               Division Schedule
             </div>
-            <h2 className="mt-1 text-2xl font-black">{title || "Team Schedule"}</h2>
+            <h2 className="mt-1 text-xl font-black sm:text-2xl">{title || "Team Schedule"}</h2>
             {subtitle && <p className="mt-1 text-sm font-semibold text-slate-200">{subtitle}</p>}
           </div>
           <button
@@ -44,11 +50,11 @@ export default function TeamScheduleModal({
         </div>
 
         <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[290px_minmax(0,1fr)]">
-          <aside className="max-h-[72vh] overflow-auto border-b border-slate-200 bg-slate-100 p-4 md:border-b-0 md:border-r">
+          <aside className="max-h-40 overflow-auto border-b border-slate-200 bg-slate-100 p-3 sm:p-4 md:max-h-[72vh] md:border-b-0 md:border-r">
             <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
               Teams
             </div>
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:block md:space-y-2">
               {teams.map((team) => (
                 <button
                   key={team.id}
@@ -66,24 +72,24 @@ export default function TeamScheduleModal({
                       ? "text-slate-300"
                       : "text-slate-500"
                   }`}>
-                    {formatTeamRecord(team)}
+                    {formatTeamSummary(team)}
                   </span>
                 </button>
               ))}
             </div>
           </aside>
 
-          <section className="max-h-[72vh] overflow-auto bg-slate-50 p-5">
-            <div className="mb-4 rounded-2xl bg-white p-4 shadow-sm">
+          <section className="min-h-0 overflow-auto bg-slate-50 p-3 sm:p-5 md:max-h-[72vh]">
+            <div className="mb-3 rounded-2xl bg-white p-3 shadow-sm sm:mb-4 sm:p-4">
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
                 Selected Team
               </div>
-              <div className="mt-1 text-2xl font-black text-slate-900">
+              <div className="mt-1 text-xl font-black text-slate-900 sm:text-2xl">
                 {selectedTeam?.name || "Select a team"}
               </div>
               {selectedTeam && (
                 <div className="mt-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-900">
-                  Season Record: {formatTeamRecord(selectedTeam)}
+                  Season Record: {formatTeamSummary(selectedTeam)}
                 </div>
               )}
             </div>
@@ -100,11 +106,13 @@ export default function TeamScheduleModal({
               <div className="space-y-3">
                 {visibleMatches.map((match) => (
                   <ScheduleMatchCard
-                    key={match.id}
+                    key={`${selectedTeamId}:${match.id}`}
                     match={match}
                     selectedTeamId={selectedTeamId}
                     compact={compact}
                     teamRecordById={teamRecordById}
+                    ratingByMemberId={ratingByMemberId}
+                    ratingType={ratingType}
                   />
                 ))}
               </div>
@@ -116,7 +124,8 @@ export default function TeamScheduleModal({
   );
 }
 
-function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById }) {
+function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById, ratingByMemberId, ratingType }) {
+  const [expanded, setExpanded] = useState(false);
   const isHome = String(match.home_team_id) === String(selectedTeamId);
   const opponent = isHome ? match.away_team : match.home_team;
   const selectedScore = isHome ? match.home_score : match.away_score;
@@ -134,19 +143,26 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className={`h-1 ${hasScore ? "bg-emerald-500" : "bg-blue-500"}`} />
-      <div className="p-4">
+      <div className="p-3 sm:p-4">
       <div className={compact ? "grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_14rem] md:items-start" : "flex flex-wrap items-start justify-between gap-3"}>
         <div className="min-w-0">
-          <div className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-sm font-black text-blue-950">
+          <div className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-950 sm:text-sm">
             {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
           </div>
-          <div className={`${compact ? "break-words" : ""} mt-1 text-lg font-black text-slate-900`}>
+          <div className={`${compact ? "break-words" : ""} mt-1 text-base font-black text-slate-900 sm:text-lg`}>
             {formatTeamNameWithRecord(match.home_team, teamRecordById, "Home")} vs {formatTeamNameWithRecord(match.away_team, teamRecordById, "Away")}
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-600">
             <span>{isHome ? "Home" : "Away"} vs {formatTeamNameWithRecord(opponent, teamRecordById, "Opponent")}</span>
             <span>{match.locations?.name || "Location TBD"}</span>
             <span>Week {match.week_number || "-"}</span>
+            <button
+              type="button"
+              onClick={() => setExpanded((current) => !current)}
+              className="rounded-lg bg-blue-100 px-3 py-1 text-xs font-black text-blue-900 hover:bg-blue-200"
+            >
+              {expanded ? "Hide Match Details" : "Show Match Details"}
+            </button>
           </div>
         </div>
 
@@ -166,9 +182,10 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById }) {
           )}
         </div>
       </div>
+      </div>
 
-      {!compact && match.match_lines?.length > 0 && (
-        <div className="mt-3 overflow-hidden rounded-lg border border-slate-100">
+      {expanded && match.match_lines?.length > 0 && (
+        <div className="mx-4 mb-4 overflow-hidden rounded-lg border border-slate-100">
           {match.match_lines
             .slice()
             .sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0))
@@ -182,21 +199,89 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById }) {
                     {line.home_team_games_won ?? 0}-{line.away_team_games_won ?? 0}
                   </span>
                 </div>
-                <div className="mt-1 flex flex-wrap gap-2 text-xs text-slate-600">
-                  {(line.line_games || [])
-                    .slice()
-                    .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
-                    .filter((game) => game.home_score !== null && game.home_score !== undefined && game.away_score !== null && game.away_score !== undefined)
-                    .map((game) => (
-                      <span key={game.id} className="rounded-full bg-slate-100 px-2 py-0.5">
-                        {game.game_number}: {game.home_score}-{game.away_score}
-                      </span>
-                    ))}
+                <div className="mt-2 grid grid-cols-1 gap-2 text-xs md:grid-cols-2">
+                  <TeamPlayers
+                    label="Home"
+                    players={[line.home_player_1, line.home_player_2]}
+                    ratingByMemberId={ratingByMemberId}
+                    ratingType={ratingType}
+                  />
+                  <TeamPlayers
+                    label="Away"
+                    players={[line.away_player_1, line.away_player_2]}
+                    ratingByMemberId={ratingByMemberId}
+                    ratingType={ratingType}
+                  />
                 </div>
+                <GameScoreRows line={line} />
               </div>
             ))}
         </div>
       )}
+      {expanded && !match.match_lines?.length && (
+        <div className="mx-4 mb-4 rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-500">
+          No game details have been entered for this match yet.
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GameScoreRows({ line }) {
+  const games = (line.line_games || [])
+    .slice()
+    .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
+
+  if (games.length === 0) {
+    return (
+      <div className="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-500">
+        No individual game scores entered.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-3 overflow-hidden rounded-lg border border-slate-100 text-xs">
+      {games.map((game) => (
+        <div
+          key={game.id}
+          className="grid grid-cols-1 gap-2 border-b border-slate-100 bg-white px-3 py-2 last:border-b-0 md:grid-cols-[minmax(0,1fr)_96px_minmax(0,1fr)] md:items-center"
+        >
+          <div className="font-semibold text-slate-700">
+            Home
+          </div>
+          <div className="rounded-lg bg-slate-950 px-3 py-2 text-center font-black text-white">
+            Game {game.game_number || "-"}: {game.home_score ?? "-"}-{game.away_score ?? "-"}
+          </div>
+          <div className="font-semibold text-slate-700 md:text-right">
+            Away
+          </div>
+          <div className="text-slate-600 md:col-span-3">
+            Result: {formatGameStatus(game.game_status)}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TeamPlayers({ label, players, ratingByMemberId, ratingType }) {
+  return (
+    <div className="rounded-lg bg-slate-50 px-3 py-2">
+      <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="mt-1 space-y-1 font-semibold text-slate-800">
+        {players.filter(Boolean).length === 0 ? (
+          <div className="text-slate-500">Players not entered</div>
+        ) : (
+          players.filter(Boolean).map((player) => (
+            <div key={player.id} className="flex items-center justify-between gap-2">
+              <span>{formatMemberName(player)}</span>
+              <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-black text-slate-700">
+                {formatPlayerRating(player, ratingByMemberId, ratingType)}
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
@@ -230,6 +315,13 @@ function formatTeamRecord(team) {
   return `${standing.match_wins ?? 0}-${standing.match_losses ?? 0}-${standing.match_ties ?? 0}`;
 }
 
+function formatTeamSummary(team) {
+  const standing = team?.standing;
+  const points = standing?.standings_points ?? 0;
+
+  return `${formatTeamRecord(team)} / ${points} pts`;
+}
+
 function formatTeamNameWithRecord(team, teamRecordById, fallback) {
   const name = team?.name || fallback;
   const record = team?.id ? teamRecordById?.[String(team.id)] : "";
@@ -237,6 +329,29 @@ function formatTeamNameWithRecord(team, teamRecordById, fallback) {
   return record ? `${name} (${record})` : name;
 }
 
+function formatGameStatus(status) {
+  return status ? status.replaceAll("_", " ") : "scheduled";
+}
+
 function formatDate(value) {
   return formatDisplayDate(value, "Date TBD");
+}
+
+function formatMemberName(member) {
+  return `${member?.first_name || ""} ${member?.last_name || ""}`.trim() || "Player";
+}
+
+function formatPlayerRating(player, ratingByMemberId, ratingType) {
+  const ratingRow = player?.id ? ratingByMemberId?.[String(player.id)] : null;
+  const rating =
+    ratingType === "primetime"
+      ? ratingRow?.season_primetime_rating
+      : ratingType === "self_rating"
+        ? player?.self_rating
+        : ratingRow?.season_dupr_rating;
+
+  if (rating === null || rating === undefined || rating === "") return "NR";
+
+  const number = Number(rating);
+  return Number.isNaN(number) ? "NR" : number.toFixed(2);
 }

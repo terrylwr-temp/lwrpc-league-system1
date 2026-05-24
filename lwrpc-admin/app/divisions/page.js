@@ -75,6 +75,9 @@ export default function DivisionsPage() {
           seasons (
             name
           )
+        ),
+        division_lines (
+          id
         )
       `)
       .order("sort_order", { ascending: true })
@@ -672,7 +675,7 @@ export default function DivisionsPage() {
                               onClick={() => router.push(`/divisions/${division.id}`)}
                               className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
                             >
-                              Configure Game Lines
+                              Configure Game Lines ({division.division_lines?.length || 0})
                             </button>
 
                             <button

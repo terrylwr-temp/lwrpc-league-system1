@@ -7,6 +7,7 @@ import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
+import { hasRole } from "../../lib/permissions";
 
 export default function MatchDetailPage() {
   const { id } = useParams();
@@ -20,10 +21,12 @@ export default function MatchDetailPage() {
   const [awayRoster, setAwayRoster] = useState([]);
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [currentUserMember, setCurrentUserMember] = useState(null);
+  const [currentUserRole, setCurrentUserRole] = useState("player");
   const [matchLineups, setMatchLineups] = useState([]);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
+    if (user?.role) setCurrentUserRole(user.role);
     return !!user;
   }, [router]);
 
@@ -594,6 +597,14 @@ export default function MatchDetailPage() {
   }
 
   async function updateGame(gameId, field, value) {
+    const game = games.find((item) => item.id === gameId);
+    const line = lines.find((item) => item.id === game?.match_line_id);
+
+    if ((field === "home_score" || field === "away_score") && line && lineHasBlockingRatingWarning(line)) {
+      alert("This game line has a team over the division rating maximum. Fix the players before entering scores for this line.");
+      return;
+    }
+
     const normalizedValue =
       field === "game_status" ? value || "completed" : value === "" ? null : Number(value);
 
@@ -664,7 +675,86 @@ export default function MatchDetailPage() {
   }
 
   function canManageScores() {
-    return isCaptainView();
+    return isCaptainView() || hasRole(currentUserRole, "league_manager");
+  }
+
+  function isManagerOverride() {
+    return hasRole(currentUserRole, "league_manager");
+  }
+
+  function lineHasBlockingRatingWarning(line) {
+    const doublesMax = match?.divisions?.team_dupr_max;
+    if (doublesMax === null || doublesMax === undefined || doublesMax === "") return false;
+
+    const homeRating = teamDuprRatingValue(line.home_player_1, line.home_player_2);
+    const awayRating = teamDuprRatingValue(line.away_player_1, line.away_player_2);
+
+    return (
+      (homeRating !== null && homeRating > Number(doublesMax)) ||
+      (awayRating !== null && awayRating > Number(doublesMax))
+    );
+  }
+
+  function isForfeitStatus(status) {
+    return status === "forfeit_home" || status === "forfeit_away";
+  }
+
+  function isRetiredStatus(status) {
+    return status === "retired_home" || status === "retired_away";
+  }
+
+  function linePlayerIds(line) {
+    return [
+      line.home_player_1_id,
+      line.home_player_2_id,
+      line.away_player_1_id,
+      line.away_player_2_id,
+    ];
+  }
+
+  function gameLineValidationIssues(line, lineGames) {
+    const issues = [];
+    const pointsToWin = Number(line.division_lines?.points_to_win || 0);
+
+    if (lineWarnings(line).length > 0) {
+      issues.push(...lineWarnings(line));
+    }
+
+    lineGames.forEach((game) => {
+      const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
+      const gameLabel = `${teamSlotLabel(line)} Game ${game.game_number || ""}`.trim();
+
+      if (isForfeitStatus(status)) return;
+
+      const hasAllPlayers = linePlayerIds(line).every(Boolean);
+
+      if (!hasAllPlayers) {
+        issues.push(`${gameLabel}: all players are required unless the result is a forfeit.`);
+      }
+
+      if (game.home_score === null || game.home_score === undefined || game.away_score === null || game.away_score === undefined) {
+        issues.push(`${gameLabel}: both scores are required unless the result is a forfeit.`);
+        return;
+      }
+
+      if (!isRetiredStatus(status) && pointsToWin > 0) {
+        const highScore = Math.max(Number(game.home_score || 0), Number(game.away_score || 0));
+        if (highScore < pointsToWin) {
+          issues.push(`${gameLabel}: at least one score must be ${pointsToWin} or higher for a completed game.`);
+        }
+      }
+    });
+
+    return issues;
+  }
+
+  function scoreValidationIssues() {
+    return displayedLines.flatMap((line) =>
+      gameLineValidationIssues(
+        line,
+        games.filter((game) => game.match_line_id === line.id)
+      )
+    );
   }
 
   async function saveCalculatedWinners(showAlert = true) {
@@ -673,16 +763,11 @@ export default function MatchDetailPage() {
       return false;
     }
 
-    if (
-      sameGameDuplicateLineIds.length > 0 ||
-      overLineLimitPlayerIds.length > 0 ||
-      displayedLines.some((line) => lineWarnings(line).length > 0)
-    ) {
-      const ok = confirm(
-        "Player assignment warnings are currently active for this match. Save winners anyway?"
-      );
+    const issues = scoreValidationIssues();
 
-      if (!ok) return false;
+    if (issues.length > 0) {
+      alert(["Scores cannot be saved yet.", "", ...issues.map((issue) => `- ${issue}`)].join("\n"));
+      return false;
     }
 
     for (const line of displayedLines) {
@@ -738,7 +823,12 @@ export default function MatchDetailPage() {
     }
 
     if (match.score_status === "pending_verification") {
-      alert("Scores are locked for verification. Use Validate Scores or Dispute Scores.");
+      if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
+    }
+
+    const issues = scoreValidationIssues();
+    if (issues.length > 0) {
+      alert(["Scores cannot be submitted yet.", "", ...issues.map((issue) => `- ${issue}`)].join("\n"));
       return;
     }
 
@@ -768,7 +858,7 @@ export default function MatchDetailPage() {
     }
 
     await rebuildDivisionStandings();
-    await sendVerificationEmails();
+    await sendScoreNotification("submitted");
 
     alert("Scores submitted, standings updated, and opposing captains notified.");
 
@@ -802,9 +892,11 @@ export default function MatchDetailPage() {
       return;
     }
 
+    await sendScoreNotification("verified");
+
     alert("Scores verified.");
 
-    loadData();
+    router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
   }
 
   async function disputeScores() {
@@ -837,17 +929,16 @@ export default function MatchDetailPage() {
     loadData();
   }
 
-  async function sendVerificationEmails() {
+  async function sendScoreNotification(notificationType) {
     try {
-      const opposingTeamId =
-        currentUserMember &&
-        (currentUserMember.id === match.home_team?.captain_member_id ||
-          currentUserMember.id === match.home_team?.co_captain_member_id ||
-          currentUserMember.id === match.home_team?.co_captain_2_member_id)
-          ? match.away_team_id
-          : match.home_team_id;
+      const teamIds = notificationTeamIdsForCurrentUser();
 
-      const { data: opposingTeam, error } = await supabase
+      if (teamIds.length === 0) {
+        console.log("No opposing captain team found for score notification.");
+        return;
+      }
+
+      const { data: teams, error } = await supabase
         .from("teams")
         .select(`
           id,
@@ -876,19 +967,20 @@ export default function MatchDetailPage() {
             notification_preference
           )
         `)
-        .eq("id", opposingTeamId)
-        .single();
+        .in("id", teamIds);
 
       if (error) {
         console.error(error);
         return;
       }
 
-      const { emails, phones } = splitNotificationRecipients([
-        opposingTeam?.captain,
-        opposingTeam?.co_captain_1,
-        opposingTeam?.co_captain_2,
-      ]);
+      const { emails, phones } = splitNotificationRecipients(
+        (teams || []).flatMap((team) => [
+          team?.captain,
+          team?.co_captain_1,
+          team?.co_captain_2,
+        ])
+      );
 
       if (emails.length === 0 && phones.length === 0) {
         console.log("No opposing captain emails or phone numbers found.");
@@ -910,11 +1002,40 @@ export default function MatchDetailPage() {
           enteredBy: currentUserMember
             ? `${currentUserMember.first_name} ${currentUserMember.last_name}`
             : "Unknown",
+          notificationType,
         }),
       });
     } catch (err) {
-      console.error("Email send failed", err);
+      console.error("Score notification send failed", err);
     }
+  }
+
+  function notificationTeamIdsForCurrentUser() {
+    const memberId = currentUserMember?.id;
+    const homeCaptainIds = [
+      match.home_team?.captain_member_id,
+      match.home_team?.co_captain_member_id,
+      match.home_team?.co_captain_2_member_id,
+    ].filter(Boolean);
+    const awayCaptainIds = [
+      match.away_team?.captain_member_id,
+      match.away_team?.co_captain_member_id,
+      match.away_team?.co_captain_2_member_id,
+    ].filter(Boolean);
+
+    if (memberId && homeCaptainIds.some((captainId) => String(captainId) === String(memberId))) {
+      return [match.away_team_id].filter(Boolean);
+    }
+
+    if (memberId && awayCaptainIds.some((captainId) => String(captainId) === String(memberId))) {
+      return [match.home_team_id].filter(Boolean);
+    }
+
+    if (hasRole(currentUserRole, "league_manager")) {
+      return [match.home_team_id, match.away_team_id].filter(Boolean);
+    }
+
+    return [];
   }
 
   async function rebuildDivisionStandings() {
@@ -1128,7 +1249,9 @@ export default function MatchDetailPage() {
   }
 
   const scoreActionsAllowed = canManageScores();
-  const scoreEntryEditable = scoreActionsAllowed && match.score_status !== "pending_verification";
+  const scoreEntryEditable =
+    scoreActionsAllowed &&
+    (isManagerOverride() || match.score_status !== "verified");
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
@@ -1138,11 +1261,11 @@ export default function MatchDetailPage() {
           subtitle="Assign players by team, enter game scores, and submit final results."
         />
 
-        <div className="mb-4 flex flex-wrap gap-3">
+        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:gap-3">
           <button
             type="button"
             onClick={() => router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor")}
-            className="rounded-xl bg-slate-200 px-4 py-2 font-semibold hover:bg-slate-300"
+            className="rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 lg:py-2"
           >
             Back to {isCaptainView() ? "Captain Dashboard" : "Schedule Editor"}
           </button>
@@ -1151,7 +1274,7 @@ export default function MatchDetailPage() {
             type="button"
             onClick={completeMatch}
             disabled={!scoreEntryEditable}
-            className="rounded-xl bg-green-700 px-4 py-2 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="rounded-xl bg-green-700 px-4 py-3 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
           >
             Submit Scores
           </button>
@@ -1162,7 +1285,7 @@ export default function MatchDetailPage() {
                 type="button"
                 onClick={verifyScores}
                 disabled={!scoreActionsAllowed}
-                className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
               >
                 Validate Scores
               </button>
@@ -1171,7 +1294,7 @@ export default function MatchDetailPage() {
                 type="button"
                 onClick={disputeScores}
                 disabled={!scoreActionsAllowed}
-                className="rounded-xl bg-red-700 px-4 py-2 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="rounded-xl bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
               >
                 Dispute Scores
               </button>
@@ -1183,7 +1306,7 @@ export default function MatchDetailPage() {
           <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
             <div className="font-black">Score Verification Mode</div>
             <div className="mt-1 text-sm">
-              Scores are locked for review. Use Validate Scores or Dispute Scores at the top of this screen.
+              Captains may still correct scores until they are validated. Use Validate Scores when the final review is complete.
             </div>
           </div>
         )}
@@ -1245,7 +1368,7 @@ export default function MatchDetailPage() {
               )}
             </div>
 
-            <div className="rounded-2xl bg-slate-900 p-5 text-white shadow-lg">
+            <div className="w-full rounded-2xl bg-slate-900 p-5 text-white shadow-lg lg:w-auto">
               <div className="text-xs uppercase tracking-wide text-slate-300">Match Score</div>
               <div className="mt-1 text-4xl font-bold">
                 {matchSummary.homeWins} - {matchSummary.awayWins}
@@ -1268,6 +1391,7 @@ export default function MatchDetailPage() {
             const lineGames = games.filter((game) => game.match_line_id === line.id);
             const lineSummary = getLineSummary(line);
             const warnings = lineWarnings(line);
+            const scoresBlockedForLine = lineHasBlockingRatingWarning(line);
 
             const hasDuplicate =
               sameGameDuplicateLineIds.includes(line.id) ||
@@ -1343,7 +1467,67 @@ export default function MatchDetailPage() {
                   />
                 </div>
 
-                <div className="mt-4 overflow-x-auto">
+                <div className="mt-4 space-y-3 md:hidden">
+                  {lineGames.map((game) => {
+                    const gameWinner = gameWinnerName(game);
+
+                    return (
+                      <div key={game.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                        <div className="mb-3 flex items-center justify-between gap-2">
+                          <div className="font-black text-slate-900">Game {game.game_number}</div>
+                          <div className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700">
+                            Winner: {gameWinner}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <label className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                            {match.home_team?.name || "Home"}
+                            <input
+                              type="number"
+                              value={game.home_score ?? ""}
+                              onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
+                              disabled={!scoreEntryEditable || scoresBlockedForLine}
+                              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-3 text-center text-base font-bold"
+                            />
+                          </label>
+
+                          <label className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                            {match.away_team?.name || "Away"}
+                            <input
+                              type="number"
+                              value={game.away_score ?? ""}
+                              onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
+                              disabled={!scoreEntryEditable || scoresBlockedForLine}
+                              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-3 text-center text-base font-bold"
+                            />
+                          </label>
+                        </div>
+
+                        <select
+                          value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
+                          onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
+                          disabled={!scoreEntryEditable}
+                          className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-3 text-sm"
+                        >
+                          {gameStatusOptions().map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    );
+                  })}
+
+                  {lineGames.length === 0 && (
+                    <div className="rounded-xl bg-slate-50 p-4 text-center text-slate-500">
+                      No score rows found for this team.
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 hidden overflow-x-auto md:block">
                   <table className="w-full border-collapse text-xs md:text-sm">
                     <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
                       <tr>
@@ -1370,7 +1554,7 @@ export default function MatchDetailPage() {
                                 type="number"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
-                                disabled={!scoreEntryEditable}
+                                disabled={!scoreEntryEditable || scoresBlockedForLine}
                                 className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-center font-bold"
                               />
                             </td>
@@ -1380,7 +1564,7 @@ export default function MatchDetailPage() {
                                 type="number"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
-                                disabled={!scoreEntryEditable}
+                                disabled={!scoreEntryEditable || scoresBlockedForLine}
                                 className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-center font-bold"
                               />
                             </td>
@@ -1486,7 +1670,7 @@ function TeamPlayers({
             value=""
             onChange={(e) => applySavedLineup(e.target.value)}
             disabled={disabled}
-            className="w-full rounded-lg border border-blue-200 bg-blue-50 px-2 py-1.5 text-sm font-semibold text-blue-950"
+          className="w-full rounded-lg border border-blue-200 bg-blue-50 px-2 py-3 text-sm font-semibold text-blue-950 md:py-1.5"
           >
             <option value="">Use this saved team</option>
             {savedLineups.map((lineup) => (
@@ -1503,7 +1687,7 @@ function TeamPlayers({
           value={line[player1Field] || ""}
           onChange={(e) => updateLinePlayer(line.id, player1Field, e.target.value)}
           disabled={disabled}
-          className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+          className="w-full rounded-lg border border-slate-300 px-2 py-3 text-sm md:py-1.5"
         >
           <option value="">Select Player 1</option>
           {selectedPlayer1 && (
@@ -1521,7 +1705,7 @@ function TeamPlayers({
           value={line[player2Field] || ""}
           onChange={(e) => updateLinePlayer(line.id, player2Field, e.target.value)}
           disabled={disabled}
-          className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+          className="w-full rounded-lg border border-slate-300 px-2 py-3 text-sm md:py-1.5"
         >
           <option value="">Select Player 2</option>
           {selectedPlayer2 && (

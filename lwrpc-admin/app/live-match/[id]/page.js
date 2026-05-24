@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
+import { specialGameStatus } from "../../lib/playHistory";
 
 export default function LiveMatchPage() {
   const { id } = useParams();
@@ -106,17 +107,30 @@ export default function LiveMatchPage() {
     let completedGames = 0;
 
     lineGames.forEach(game => {
-      if (
+      const special = specialGameStatus(game.game_status);
+
+      if (special?.winnerSide === "Home") {
+        completedGames += 1;
+        homeGameWins += 1;
+      } else if (special?.winnerSide === "Away") {
+        completedGames += 1;
+        awayGameWins += 1;
+      } else if (
         game.home_score !== null &&
         game.away_score !== null
       ) {
         completedGames += 1;
 
-        homePoints += Number(game.home_score || 0);
-        awayPoints += Number(game.away_score || 0);
-
         if (game.home_score > game.away_score) homeGameWins++;
         if (game.away_score > game.home_score) awayGameWins++;
+      }
+
+      if (game.home_score !== null) {
+        homePoints += Number(game.home_score || 0);
+      }
+
+      if (game.away_score !== null) {
+        awayPoints += Number(game.away_score || 0);
       }
     });
 
@@ -370,12 +384,7 @@ export default function LiveMatchPage() {
                       </div>
 
                       <div className="text-right text-sm font-bold text-slate-600">
-                        {game.home_score == null ||
-                        game.away_score == null
-                          ? "Pending"
-                          : game.home_score > game.away_score
-                            ? match.home_team?.name
-                            : match.away_team?.name}
+                        {gameResultLabel(game, match)}
                       </div>
                     </div>
                   ))}
@@ -413,6 +422,24 @@ export default function LiveMatchPage() {
       </div>
     </main>
   );
+}
+
+function gameResultLabel(game, match) {
+  const special = specialGameStatus(game.game_status);
+
+  if (special) return special.label;
+
+  if (game.home_score == null || game.away_score == null) return "Pending";
+
+  if (Number(game.home_score) > Number(game.away_score)) {
+    return match.home_team?.name || "Home";
+  }
+
+  if (Number(game.away_score) > Number(game.home_score)) {
+    return match.away_team?.name || "Away";
+  }
+
+  return "Tied";
 }
 
 function TeamPanel({ team, players, gameWins, points }) {

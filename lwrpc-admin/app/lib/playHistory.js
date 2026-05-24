@@ -73,6 +73,18 @@ export function playerLineDetails(row, memberId) {
   };
 }
 
+export function specialGameStatus(gameStatus) {
+  if (gameStatus === "forfeit_home") return { type: "forfeit", winnerSide: "Home", label: "Forfeit to Home" };
+  if (gameStatus === "forfeit_away") return { type: "forfeit", winnerSide: "Away", label: "Forfeit to Away" };
+  if (gameStatus === "retired_home") return { type: "retired", winnerSide: "Home", label: "Retired to Home" };
+  if (gameStatus === "retired_away") return { type: "retired", winnerSide: "Away", label: "Retired to Away" };
+  return null;
+}
+
+export function rowHasSpecialGame(row) {
+  return (row.line_games || []).some((game) => specialGameStatus(game.game_status));
+}
+
 export function sortHistoryRows(historyRows) {
   return [...historyRows].sort((a, b) => {
     const aDate = `${a.matches?.scheduled_date || "0000-00-00"}T${a.matches?.scheduled_time || "00:00"}`;

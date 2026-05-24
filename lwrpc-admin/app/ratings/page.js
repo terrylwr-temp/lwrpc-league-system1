@@ -29,6 +29,8 @@ export default function RatingsPage() {
   const [search, setSearch] = useState("");
   const [showCurrentRosterOnly, setShowCurrentRosterOnly] = useState(false);
   const [showMissingDoublesOnly, setShowMissingDoublesOnly] = useState(false);
+  const [showNrDoublesOnly, setShowNrDoublesOnly] = useState(false);
+  const [showNrAgeOnly, setShowNrAgeOnly] = useState(false);
   const [showRatingImportTools, setShowRatingImportTools] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -223,6 +225,16 @@ export default function RatingsPage() {
     return value !== null && value !== undefined && value !== "";
   }, [ratings, selectedSeason]);
 
+  const hasNumericRating = useCallback(function hasNumericRating(memberId, field) {
+    const row = ratings.find(
+      (rating) =>
+        rating.member_id === memberId &&
+        rating.season_id === selectedSeason
+    );
+    const value = row?.[field];
+    return value !== null && value !== undefined && value !== "" && !Number.isNaN(Number(value));
+  }, [ratings, selectedSeason]);
+
   function seasonLabel(seasonId) {
     return seasons.find((season) => season.id === seasonId)?.name || "Unknown Season";
   }
@@ -291,6 +303,17 @@ export default function RatingsPage() {
 
   function memberFullName(member) {
     return `${member.first_name || ""} ${member.last_name || ""}`.trim();
+  }
+
+  async function copyMemberName(member) {
+    const name = memberFullName(member);
+    if (!name) return;
+
+    try {
+      await navigator.clipboard.writeText(name);
+    } catch {
+      window.prompt("Copy player name", name);
+    }
   }
 
   function normalizeText(value) {
@@ -479,7 +502,7 @@ export default function RatingsPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly]);
+  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly]);
 
   useEffect(() => {
     if (!loading && selectedSeason) {
@@ -505,6 +528,14 @@ export default function RatingsPage() {
       nextMembers = nextMembers.filter((member) => !hasDoublesRating(member.id));
     }
 
+    if (showNrDoublesOnly) {
+      nextMembers = nextMembers.filter((member) => !hasNumericRating(member.id, "season_dupr_rating"));
+    }
+
+    if (showNrAgeOnly) {
+      nextMembers = nextMembers.filter((member) => !hasNumericRating(member.id, "season_primetime_rating"));
+    }
+
     if (!q) return nextMembers;
 
     return nextMembers.filter((member) => {
@@ -518,7 +549,7 @@ export default function RatingsPage() {
         (member.dupr_id || "").toLowerCase().includes(q)
       );
     });
-  }, [currentRosterMemberIds, hasDoublesRating, members, search, showCurrentRosterOnly, showMissingDoublesOnly]);
+  }, [currentRosterMemberIds, hasDoublesRating, hasNumericRating, members, search, showCurrentRosterOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
@@ -609,6 +640,8 @@ function goToPage(value) {
                   setSelectedSeason(seasons?.[0]?.id || "");
                   setShowCurrentRosterOnly(false);
                   setShowMissingDoublesOnly(false);
+                  setShowNrDoublesOnly(false);
+                  setShowNrAgeOnly(false);
                   setPage(1);
                 }}
                 className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300"
@@ -641,6 +674,30 @@ function goToPage(value) {
               }`}
             >
               {showMissingDoublesOnly ? "Show All Ratings" : "Missing Doubles Rating"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowNrDoublesOnly((value) => !value)}
+              className={`rounded-xl px-4 py-3 font-semibold ${
+                showNrDoublesOnly
+                  ? "bg-red-700 text-white hover:bg-red-800"
+                  : "bg-red-100 text-red-900 hover:bg-red-200"
+              }`}
+            >
+              NR DUPR Rating
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowNrAgeOnly((value) => !value)}
+              className={`rounded-xl px-4 py-3 font-semibold ${
+                showNrAgeOnly
+                  ? "bg-purple-700 text-white hover:bg-purple-800"
+                  : "bg-purple-100 text-purple-900 hover:bg-purple-200"
+              }`}
+            >
+              NR Age-Based Rating
             </button>
 
             <button
@@ -850,6 +907,14 @@ function goToPage(value) {
                       <div className="font-semibold text-slate-900">
                         {member.last_name}, {member.first_name}
                       </div>
+
+                      <button
+                        type="button"
+                        onClick={() => copyMemberName(member)}
+                        className="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200"
+                      >
+                        Copy Name
+                      </button>
 
                       <div className="text-xs text-slate-500">
                         DUPR ID: {member.dupr_id || ""}

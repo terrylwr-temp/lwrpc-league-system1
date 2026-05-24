@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
+import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 
 export default function MobileScoreEntryPage() {
   const { id } = useParams();
@@ -12,6 +13,7 @@ export default function MobileScoreEntryPage() {
   const [match, setMatch] = useState(null);
   const [lines, setLines] = useState([]);
   const [games, setGames] = useState([]);
+  const [currentUserMember, setCurrentUserMember] = useState(null);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -19,12 +21,38 @@ export default function MobileScoreEntryPage() {
   }, [router]);
 
   const loadData = useCallback(async function loadData() {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user?.email) {
+      const { data: memberData } = await supabase
+        .from("members")
+        .select("*")
+        .eq("email", user.email)
+        .maybeSingle();
+
+      setCurrentUserMember(memberData || null);
+    }
+
     const { data: matchData, error: matchError } = await supabase
       .from("matches")
       .select(`
         *,
-        home_team:teams!matches_home_team_id_fkey(id, name),
-        away_team:teams!matches_away_team_id_fkey(id, name),
+        home_team:teams!matches_home_team_id_fkey(
+          id,
+          name,
+          captain_member_id,
+          co_captain_member_id,
+          co_captain_2_member_id
+        ),
+        away_team:teams!matches_away_team_id_fkey(
+          id,
+          name,
+          captain_member_id,
+          co_captain_member_id,
+          co_captain_2_member_id
+        ),
         locations(name),
         divisions(name)
       `)
@@ -208,9 +236,102 @@ export default function MobileScoreEntryPage() {
       return;
     }
 
-    alert("Scores submitted for verification.");
+    await sendScoreSubmittedNotification(homeLines, awayLines);
+
+    alert("Scores submitted for verification and opposing captains notified.");
 
     router.push(`/matches/${id}`);
+  }
+
+  async function sendScoreSubmittedNotification(homeLines, awayLines) {
+    try {
+      const opposingTeamId = opposingTeamIdForCurrentUser();
+
+      if (!opposingTeamId) return;
+
+      const { data: opposingTeam, error } = await supabase
+        .from("teams")
+        .select(`
+          id,
+          captain:members!teams_captain_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
+          ),
+          co_captain_1:members!teams_co_captain_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
+          ),
+          co_captain_2:members!teams_co_captain_2_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
+          )
+        `)
+        .eq("id", opposingTeamId)
+        .single();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+
+      const { emails, phones } = splitNotificationRecipients([
+        opposingTeam?.captain,
+        opposingTeam?.co_captain_1,
+        opposingTeam?.co_captain_2,
+      ]);
+
+      if (emails.length === 0 && phones.length === 0) return;
+
+      await fetch("/api/score-notification", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          emails,
+          phones,
+          homeTeam: match.home_team?.name,
+          awayTeam: match.away_team?.name,
+          score: `${homeLines}-${awayLines}`,
+          matchDate: match.scheduled_date,
+          enteredBy: currentUserMember
+            ? `${currentUserMember.first_name} ${currentUserMember.last_name}`
+            : "Unknown",
+          notificationType: "submitted",
+        }),
+      });
+    } catch (error) {
+      console.error("Score notification send failed", error);
+    }
+  }
+
+  function opposingTeamIdForCurrentUser() {
+    const memberId = currentUserMember?.id;
+    if (!memberId || !match) return "";
+
+    const homeCaptainIds = [
+      match.home_team?.captain_member_id,
+      match.home_team?.co_captain_member_id,
+      match.home_team?.co_captain_2_member_id,
+    ].filter(Boolean);
+
+    if (homeCaptainIds.some((captainId) => String(captainId) === String(memberId))) {
+      return match.away_team_id;
+    }
+
+    return match.home_team_id;
   }
 
   useEffect(() => {

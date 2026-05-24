@@ -330,8 +330,20 @@ export default function DivisionDetailPage() {
   async function saveTeam(e) {
     e.preventDefault();
 
+    const requestedLineNumber = Number(teamNumber || 1);
+    const duplicateLine = lines.find(
+      (line) =>
+        Number(line.line_number) === requestedLineNumber &&
+        (!editingId || String(line.id) !== String(editingId))
+    );
+
+    if (duplicateLine) {
+      alert(`Game Number ${requestedLineNumber} is already configured for this division. Choose a different Game Number or edit the existing line.`);
+      return;
+    }
+
     const snapshot = {
-      line_number: Number(teamNumber || 1),
+      line_number: requestedLineNumber,
       line_name: teamName || null,
       posted_to_dupr: postedToDupr,
       line_type: teamType || null,
@@ -344,7 +356,7 @@ export default function DivisionDetailPage() {
       picklebreaker_points: Number(pointsToWin || 11),
       picklebreaker_win_points: 1,
       picklebreaker_loss_points: 0,
-      sort_order: Number(teamNumber || 1),
+      sort_order: requestedLineNumber,
     };
 
     const payload = {

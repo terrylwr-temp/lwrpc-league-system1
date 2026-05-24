@@ -4,6 +4,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import LoginMessageModal from "../components/LoginMessageModal";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
@@ -37,8 +38,10 @@ export default function CaptainDashboardPage() {
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
   const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
+  const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
   const [pdfDocument, setPdfDocument] = useState(null);
+  const [scoreDetailsMatch, setScoreDetailsMatch] = useState(null);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -421,6 +424,7 @@ export default function CaptainDashboardPage() {
       showSetup = true,
       scoreButtonLabel = "Enter Match Scores",
       scoreButtonTitle = "Enter match scores",
+      scoreButtonAction = null,
     } = options;
     const canEnterScores =
       match.scheduled_date &&
@@ -489,13 +493,18 @@ export default function CaptainDashboardPage() {
           <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:w-auto lg:min-w-44 lg:grid-cols-1">
             {setupTeams.map((team) => {
               const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
+              const setupComplete = setupStatus?.complete === true;
 
               return (
                 <div key={team.id} className="flex flex-col gap-1">
                   <button
                     type="button"
                     onClick={() => openMatchSetup(match, team)}
-                    className="rounded-lg bg-blue-100 px-3 py-2.5 text-sm font-bold text-blue-900 hover:bg-blue-200"
+                    className={`rounded-lg px-3 py-2.5 text-sm font-bold ${
+                      setupComplete
+                        ? "bg-blue-100 text-blue-900 hover:bg-blue-200"
+                        : "bg-red-600 text-white hover:bg-red-700"
+                    }`}
                   >
                     Match Setup
                   </button>
@@ -510,6 +519,10 @@ export default function CaptainDashboardPage() {
               type="button"
               disabled={!canEnterScores}
               onClick={() => {
+                if (scoreButtonAction) {
+                  scoreButtonAction(match);
+                  return;
+                }
                 if (canEnterScores) router.push(`/matches/${match.id}`);
               }}
               className="rounded-lg bg-slate-900 px-3 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
@@ -699,7 +712,17 @@ export default function CaptainDashboardPage() {
   }
 
   function setupLineIssue(lineup) {
+    if (!lineup.player_1_member_id || !lineup.player_2_member_id) {
+      return `Team ${lineup.line_number} needs two players before match setup can be saved.`;
+    }
+
     return setupDuplicateWarning(lineup) || setupLineWarning(lineup);
+  }
+
+  function setupValidationIssues() {
+    return setupLineups
+      .map(setupLineIssue)
+      .filter(Boolean);
   }
 
   function updateSetupLineup(lineNumber, field, value) {
@@ -713,10 +736,18 @@ export default function CaptainDashboardPage() {
   async function saveMatchSetup() {
     if (!setupMatch || !setupTeam) return;
 
-    const warning = setupLineups.map(setupLineIssue).find(Boolean);
+    const validationIssues = setupValidationIssues();
 
-    if (warning) {
-      alert(`${warning}\n\nThis setup cannot be saved until players are only used once and every doubles team is at or below the division maximum.`);
+    if (validationIssues.length > 0) {
+      alert(
+        [
+          "Match setup cannot be saved yet.",
+          "",
+          ...validationIssues.map((issue) => `- ${issue}`),
+          "",
+          "Complete every doubles team and clear all lineup warnings before saving.",
+        ].join("\n")
+      );
       return;
     }
 
@@ -756,8 +787,9 @@ export default function CaptainDashboardPage() {
       [matchSetupKey(setupMatch.id, setupTeam.id)]: nextStatus,
     }));
 
-    await sendMatchSetupNotification().catch((error) => {
+    const notificationSent = await sendMatchSetupNotification().catch((error) => {
       console.warn("Match setup notification failed.", error);
+      return false;
     });
 
     setSetupMatch(null);
@@ -765,7 +797,39 @@ export default function CaptainDashboardPage() {
     setSetupRoster([]);
     setSetupLineups([]);
     setSetupRatings([]);
-    alert("Match setup saved.");
+      alert(notificationSent ? "Match setup saved and opponent captain notification sent." : "Match setup saved, but the opponent notification could not be sent.");
+  }
+
+  async function openScoreDetails(match) {
+    const { data, error } = await supabase
+      .from("matches")
+      .select(`
+        *,
+        locations(id, name),
+        home_team:teams!matches_home_team_id_fkey(id, name),
+        away_team:teams!matches_away_team_id_fkey(id, name),
+        match_lines(
+          id,
+          line_number,
+          home_team_games_won,
+          away_team_games_won,
+          home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name),
+          home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name),
+          away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name),
+          away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name),
+          line_games(id, game_number, home_score, away_score, game_status),
+          division_lines(line_name)
+        )
+      `)
+      .eq("id", match.id)
+      .single();
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setScoreDetailsMatch(data);
   }
 
   async function sendMatchSetupNotification() {
@@ -777,7 +841,7 @@ export default function CaptainDashboardPage() {
     const { emails, phones } = splitNotificationRecipients(captainContacts(opponentTeam));
 
     if (emails.length === 0 && phones.length === 0) {
-      return;
+      return false;
     }
 
     const opponentStatus =
@@ -850,7 +914,14 @@ export default function CaptainDashboardPage() {
 
     if (!response.ok) {
       console.warn("Match setup notification failed.");
+      return false;
     }
+
+    const result = await response.json().catch(() => null);
+    const emailSent = Number(result?.email?.sent || 0);
+    const smsSent = Number(result?.sms?.sent || 0);
+
+    return emailSent + smsSent > 0;
   }
 
   async function displayPrintDivisionCaptains(team) {
@@ -928,12 +999,15 @@ export default function CaptainDashboardPage() {
     setDivisionScheduleTeam(team);
     setDivisionScheduleTeams([]);
     setDivisionScheduleMatches([]);
+    setDivisionScheduleRatings([]);
     setDivisionScheduleLoading(true);
 
+    const seasonId = team.divisions?.leagues?.season_id;
     const [
       { data: divisionTeams, error: teamsError },
       { data: divisionMatches, error: matchesError },
       { data: divisionStandings, error: standingsError },
+      { data: divisionRatings, error: ratingsError },
     ] =
       await Promise.all([
         supabase
@@ -970,7 +1044,7 @@ export default function CaptainDashboardPage() {
               id,
               name
             ),
-            match_lines (
+              match_lines (
               id,
               line_number,
               home_team_games_won,
@@ -978,6 +1052,10 @@ export default function CaptainDashboardPage() {
               division_lines (
                 line_name
               ),
+              home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
+              home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
+              away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, self_rating),
+              away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, self_rating),
               line_games (
                 id,
                 game_number,
@@ -992,8 +1070,14 @@ export default function CaptainDashboardPage() {
           .order("scheduled_time", { ascending: true }),
         supabase
           .from("team_standings")
-          .select("team_id, match_wins, match_losses, match_ties")
+          .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
           .eq("division_id", team.division_id),
+        seasonId
+          ? supabase
+              .from("member_season_ratings")
+              .select("member_id, season_dupr_rating, season_primetime_rating")
+              .eq("season_id", seasonId)
+          : Promise.resolve({ data: [], error: null }),
       ]);
 
     setDivisionScheduleLoading(false);
@@ -1013,6 +1097,11 @@ export default function CaptainDashboardPage() {
       return;
     }
 
+    if (ratingsError) {
+      alert(ratingsError.message);
+      return;
+    }
+
     const standingsByTeamId = Object.fromEntries(
       (divisionStandings || []).map((standing) => [String(standing.team_id), standing])
     );
@@ -1021,9 +1110,10 @@ export default function CaptainDashboardPage() {
       (divisionTeams || []).map((divisionTeam) => ({
         ...divisionTeam,
         standing: standingsByTeamId[String(divisionTeam.id)] || null,
-      }))
+      })).sort(compareDivisionScheduleTeams)
     );
     setDivisionScheduleMatches(divisionMatches || []);
+    setDivisionScheduleRatings(divisionRatings || []);
   }
 
   async function openLeagueDocument(team, documentType) {
@@ -1090,6 +1180,38 @@ export default function CaptainDashboardPage() {
         <AppHeader
           title="Captain Dashboard"
           subtitle="Captain tools, upcoming matches, score entry, and score verification."
+          actions={
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
+              <button
+                type="button"
+                onClick={() => router.push("/reset-password")}
+                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-500"
+              >
+                Change Password
+              </button>
+
+              <a
+                href="https://lwrpickleballclub.com/manage-membership"
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-950 hover:bg-slate-100"
+              >
+                Membership Info
+              </a>
+
+              <a
+                href="mailto:info@lwrpickleballclub.com"
+                className="rounded-xl bg-emerald-500 px-4 py-2 text-center text-sm font-bold text-white hover:bg-emerald-400"
+              >
+                Contact League
+              </a>
+            </div>
+          }
+        />
+
+        <LoginMessageModal
+          templateKey="captain_login_popup"
+          audienceLabel="Captain Message"
         />
 
         {setupMatch && setupTeam && (
@@ -1128,18 +1250,18 @@ export default function CaptainDashboardPage() {
               </div>
             </div>
 
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-950">
                 <span className="font-bold">Doubles Team Maximum:</span>{" "}
                 {setupTeam.divisions?.team_dupr_max ?? "None"} ({setupRatingLabel()})
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 <button
                   type="button"
                   onClick={saveMatchSetup}
                   disabled={savingSetup}
-                  className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
+                  className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50 sm:py-2"
                 >
                   {savingSetup ? "Saving..." : "Save Match Setup"}
                 </button>
@@ -1152,7 +1274,7 @@ export default function CaptainDashboardPage() {
                     setSetupRoster([]);
                     setSetupLineups([]);
                   }}
-                  className="rounded-xl bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-slate-300"
+                  className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-300 sm:py-2"
                 >
                   Close
                 </button>
@@ -1177,7 +1299,7 @@ export default function CaptainDashboardPage() {
                       <select
                         value={lineup.player_1_member_id}
                         onChange={(e) => updateSetupLineup(lineup.line_number, "player_1_member_id", e.target.value)}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm sm:py-2"
                       >
                         <option value="">Select Player 1</option>
                         {setupRoster.map((row) => (
@@ -1190,7 +1312,7 @@ export default function CaptainDashboardPage() {
                       <select
                         value={lineup.player_2_member_id}
                         onChange={(e) => updateSetupLineup(lineup.line_number, "player_2_member_id", e.target.value)}
-                        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                        className="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm sm:py-2"
                       >
                         <option value="">Select Player 2</option>
                         {setupRoster.map((row) => (
@@ -1419,7 +1541,14 @@ export default function CaptainDashboardPage() {
 
         {captainSection === "completed" && (
           <Section title={`Completed Matches${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={completedMatches.length}>
-            {completedMatches.map(matchCard)}
+            {completedMatches.map((match) =>
+              matchCard(match, {
+                showSetup: false,
+                scoreButtonLabel: "Match Score Details",
+                scoreButtonTitle: "View match score details",
+                scoreButtonAction: openScoreDetails,
+              })
+            )}
             {completedMatches.length === 0 && <Empty message="No completed matches found." />}
           </Section>
         )}
@@ -1437,12 +1566,15 @@ export default function CaptainDashboardPage() {
               })
             }
             matches={divisionScheduleMatches}
+            ratings={divisionScheduleRatings}
+            ratingType={divisionScheduleTeam.divisions?.rating_type || "dupr"}
             loading={divisionScheduleLoading}
             compact
             onClose={() => {
               setDivisionScheduleTeam(null);
               setDivisionScheduleTeams([]);
               setDivisionScheduleMatches([]);
+              setDivisionScheduleRatings([]);
             }}
           />
         )}
@@ -1451,6 +1583,13 @@ export default function CaptainDashboardPage() {
           <PdfViewerModal
             document={pdfDocument}
             onClose={() => setPdfDocument(null)}
+          />
+        )}
+
+        {scoreDetailsMatch && (
+          <MatchScoreDetailsModal
+            match={scoreDetailsMatch}
+            onClose={() => setScoreDetailsMatch(null)}
           />
         )}
       </div>
@@ -1541,6 +1680,105 @@ function PdfViewerModal({ document, onClose }) {
   );
 }
 
+function MatchScoreDetailsModal({ match, onClose }) {
+  const lines = [...(match.match_lines || [])].sort(
+    (a, b) => Number(a.line_number || 0) - Number(b.line_number || 0)
+  );
+
+  function printScoreDetails() {
+    window.localStorage.setItem(
+      "lwrpc-print-payload",
+      JSON.stringify({
+        title: `${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"} Score Details`,
+        body: matchScoreDetailsPrintHtml(match, lines),
+      })
+    );
+
+    const printWindow = window.open("/print", "_blank", "width=900,height=700");
+
+    if (!printWindow) {
+      alert("Unable to open print preview. Please allow popups for this site.");
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
+      <div className="flex max-h-[94dvh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 bg-slate-950 px-4 py-4 text-white md:flex-row md:items-start md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-blue-200">
+              Match Score Details
+            </div>
+            <h2 className="mt-1 text-xl font-black sm:text-2xl">
+              {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+            </h2>
+            <div className="mt-1 flex flex-wrap gap-2 text-sm font-semibold text-slate-200">
+              <span>{formatDate(match.scheduled_date)}</span>
+              <span>{match.locations?.name || "Home Location TBD"}</span>
+              <span>Score: {match.home_score ?? 0}-{match.away_score ?? 0}</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={printScoreDetails}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+            >
+              Print
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-auto p-3 sm:p-5">
+          <div className="space-y-3">
+            {lines.map((line) => (
+              <div key={line.id} className="rounded-xl border border-slate-200 p-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="font-black text-slate-900">
+                    Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
+                  </div>
+                  <div className="rounded-full bg-slate-100 px-3 py-1 text-sm font-bold text-slate-800">
+                    {line.home_team_games_won ?? 0}-{line.away_team_games_won ?? 0}
+                  </div>
+                </div>
+                <div className="mt-2 grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
+                  <div className="rounded-lg bg-green-50 px-3 py-2 font-semibold text-green-950">
+                    Home: {formatMemberName(line.home_player_1)} / {formatMemberName(line.home_player_2)}
+                  </div>
+                  <div className="rounded-lg bg-indigo-50 px-3 py-2 font-semibold text-indigo-950">
+                    Away: {formatMemberName(line.away_player_1)} / {formatMemberName(line.away_player_2)}
+                  </div>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-700">
+                  {[...(line.line_games || [])]
+                    .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
+                    .map((game) => (
+                      <span key={game.id} className="rounded-full bg-slate-100 px-2 py-1">
+                        Game {game.game_number}: {game.home_score ?? "-"}-{game.away_score ?? "-"} {game.game_status && game.game_status !== "completed" && game.game_status !== "scheduled" ? `(${game.game_status.replaceAll("_", " ")})` : ""}
+                      </span>
+                    ))}
+                </div>
+              </div>
+            ))}
+            {lines.length === 0 && (
+              <div className="rounded-xl bg-slate-50 p-8 text-center text-slate-500">
+                No game details found.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function formatDate(value) {
   return formatDisplayDate(value, "-");
 }
@@ -1574,6 +1812,24 @@ function buildMatchSetupStatus(matches, lineups) {
 
 function scheduleWeekKey(divisionId, weekNumber, date) {
   return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
+}
+
+function compareDivisionScheduleTeams(a, b) {
+  const aStanding = a.standing || {};
+  const bStanding = b.standing || {};
+  const aRank = Number(aStanding.rank || 0);
+  const bRank = Number(bStanding.rank || 0);
+
+  if (aRank && bRank && aRank !== bRank) return aRank - bRank;
+  if (aRank && !bRank) return -1;
+  if (!aRank && bRank) return 1;
+
+  const pointsDifference =
+    Number(bStanding.standings_points || 0) - Number(aStanding.standings_points || 0);
+
+  if (pointsDifference !== 0) return pointsDifference;
+
+  return String(a.name || "").localeCompare(String(b.name || ""));
 }
 
 function buildSingleMatchSetupStatus(match, teamId, lineups) {
@@ -1662,6 +1918,58 @@ function divisionCaptainsPrintHtml({ leagueName, divisionName, teams }) {
       </thead>
       <tbody>
         ${rows || `<tr><td colspan="5">No captains found for this division.</td></tr>`}
+      </tbody>
+    </table>
+  `;
+}
+
+function matchScoreDetailsPrintHtml(match, lines) {
+  const rows = lines.map((line) => {
+    const games = [...(line.line_games || [])]
+      .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
+      .map((game) => (
+        `Game ${escapeHtml(game.game_number)}: ${escapeHtml(game.home_score ?? "-")}-${escapeHtml(game.away_score ?? "-")}${game.game_status && game.game_status !== "completed" && game.game_status !== "scheduled" ? ` (${escapeHtml(game.game_status.replaceAll("_", " "))})` : ""}`
+      ))
+      .join("<br />");
+
+    return `
+      <tr>
+        <td>${escapeHtml(line.line_number || "-")}</td>
+        <td>${escapeHtml(line.division_lines?.line_name || "")}</td>
+        <td>${escapeHtml(formatMemberName(line.home_player_1))} / ${escapeHtml(formatMemberName(line.home_player_2))}</td>
+        <td>${escapeHtml(formatMemberName(line.away_player_1))} / ${escapeHtml(formatMemberName(line.away_player_2))}</td>
+        <td>${escapeHtml(line.home_team_games_won ?? 0)}-${escapeHtml(line.away_team_games_won ?? 0)}</td>
+        <td>${games || "No game scores"}</td>
+      </tr>
+    `;
+  }).join("");
+
+  return `
+    <style>
+      h1 { margin: 0 0 4px; font-size: 24px; }
+      h2 { margin: 0 0 18px; color: #475569; font-size: 15px; font-weight: 600; }
+      table { width: 100%; border-collapse: collapse; }
+      th { background: #0f172a; color: white; text-align: left; }
+      th, td { border: 1px solid #cbd5e1; padding: 9px; font-size: 12px; vertical-align: top; }
+      tr:nth-child(even) td { background: #f8fafc; }
+      .score { margin: 12px 0 18px; font-size: 16px; font-weight: 700; }
+    </style>
+    <h1>${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")}</h1>
+    <h2>${escapeHtml(formatDate(match.scheduled_date))} / ${escapeHtml(match.locations?.name || "Home Location TBD")}</h2>
+    <div class="score">Match Score: ${escapeHtml(match.home_score ?? 0)}-${escapeHtml(match.away_score ?? 0)}</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Game</th>
+          <th>Line</th>
+          <th>Home Players</th>
+          <th>Away Players</th>
+          <th>Line Score</th>
+          <th>Game Scores</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows || `<tr><td colspan="6">No game details found.</td></tr>`}
       </tbody>
     </table>
   `;

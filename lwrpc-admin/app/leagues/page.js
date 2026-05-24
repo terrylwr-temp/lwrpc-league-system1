@@ -22,6 +22,7 @@ export default function LeaguesPage() {
   const [leagueName, setLeagueName] = useState("");
   const [selectedSeason, setSelectedSeason] = useState("");
   const [rostersLocked, setRostersLocked] = useState(false);
+  const [matchSetupReminderDaysBefore, setMatchSetupReminderDaysBefore] = useState("2");
   const [documentBucket, setDocumentBucket] = useState(DEFAULT_LEAGUE_DOCUMENT_BUCKET);
   const [documentPrefix, setDocumentPrefix] = useState(DEFAULT_LEAGUE_DOCUMENT_PREFIX);
   const [leagueDocuments, setLeagueDocuments] = useState(initialLeagueDocuments());
@@ -69,6 +70,7 @@ export default function LeaguesPage() {
       name: leagueName,
       season_id: selectedSeason,
       rosters_locked: rostersLocked,
+      match_setup_reminder_days_before: Number(matchSetupReminderDaysBefore || 0),
       league_document_bucket: documentBucket.trim() || null,
       ...leagueDocumentPayload(leagueDocuments),
     };
@@ -120,6 +122,7 @@ export default function LeaguesPage() {
     setLeagueName(league.name || "");
     setSelectedSeason(league.season_id || "");
     setRostersLocked(league.rosters_locked === true);
+    setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
     setDocumentBucket(league.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET);
     setLeagueDocuments(
       Object.fromEntries(
@@ -136,6 +139,7 @@ export default function LeaguesPage() {
     setLeagueName("");
     setSelectedSeason("");
     setRostersLocked(false);
+    setMatchSetupReminderDaysBefore("2");
     setDocumentBucket(DEFAULT_LEAGUE_DOCUMENT_BUCKET);
     setDocumentPrefix(DEFAULT_LEAGUE_DOCUMENT_PREFIX);
     setLeagueDocuments(initialLeagueDocuments());
@@ -264,6 +268,16 @@ export default function LeaguesPage() {
                 </span>
               </label>
 
+              <Field label="Number of days before game date to email captains to enter their teams">
+                <input
+                  type="number"
+                  min="0"
+                  value={matchSetupReminderDaysBefore}
+                  onChange={(e) => setMatchSetupReminderDaysBefore(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                />
+              </Field>
+
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_12rem_auto] md:items-end">
                   <Field label="Document Bucket">
@@ -378,6 +392,9 @@ export default function LeaguesPage() {
                         }`}>
                           Rosters {league.rosters_locked ? "Locked" : "Open"}
                         </span>
+                      </div>
+                      <div className="mt-2 text-sm font-semibold text-slate-600">
+                        Match setup reminder: {league.match_setup_reminder_days_before ?? 2} day{Number(league.match_setup_reminder_days_before ?? 2) === 1 ? "" : "s"} before match date
                       </div>
                       <div className="mt-3 flex flex-wrap gap-1">
                         {LEAGUE_DOCUMENT_TYPES.map((documentType) => (

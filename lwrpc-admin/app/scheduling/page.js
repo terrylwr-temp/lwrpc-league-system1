@@ -45,6 +45,7 @@ export default function SchedulingPage() {
   const [endTime, setEndTime] = useState("");
   const [courtsUnavailable, setCourtsUnavailable] = useState("0");
   const [availabilityNotes, setAvailabilityNotes] = useState("");
+  const [availabilitySearch, setAvailabilitySearch] = useState("");
 
   const [blackoutLeague, setBlackoutLeague] = useState("");
   const [blackoutDivision, setBlackoutDivision] = useState("");
@@ -115,6 +116,31 @@ export default function SchedulingPage() {
 
     run();
   }, [checkAuth, loadData]);
+
+  const filteredAvailability = useMemo(() => {
+    const q = availabilitySearch.trim().toLowerCase();
+
+    return [...availability]
+      .sort((a, b) =>
+        (a.locations?.name || "").localeCompare(b.locations?.name || "") ||
+        (a.specific_date || "").localeCompare(b.specific_date || "") ||
+        Number(a.day_of_week ?? 99) - Number(b.day_of_week ?? 99) ||
+        (a.start_time || "").localeCompare(b.start_time || "")
+      )
+      .filter((row) => {
+        if (!q) return true;
+        const text = [
+          row.locations?.name,
+          row.specific_date,
+          dayName(row.day_of_week),
+          row.start_time,
+          row.end_time,
+          row.notes,
+        ].join(" ").toLowerCase();
+
+        return text.includes(q);
+      });
+  }, [availability, availabilitySearch]);
 
   const filteredDivisions = useMemo(() => {
     if (!selectedLeague) return [];
@@ -1132,8 +1158,15 @@ export default function SchedulingPage() {
               </form>
             </FormCard>
 
-            <ListCard title="Saved Court Unavailability" subtitle="These records reduce or block courts when generating schedules." count={availability.length} emptyText="No court unavailability records saved yet.">
-              {availability.map((row) => (
+            <ListCard title="Saved Court Unavailability" subtitle="These records reduce or block courts when generating schedules." count={filteredAvailability.length} emptyText="No court unavailability records saved yet.">
+              <input
+                type="search"
+                value={availabilitySearch}
+                onChange={(e) => setAvailabilitySearch(e.target.value)}
+                placeholder="Search court unavailability"
+                className="mb-4 w-full rounded-xl border border-slate-300 px-4 py-3"
+              />
+              {filteredAvailability.map((row) => (
                 <RecordCard key={row.id} title={row.locations?.name || "Unknown Location"}>
                   <DetailGrid>
                     <Detail label="Day" value={dayName(row.day_of_week)} />

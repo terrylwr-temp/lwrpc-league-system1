@@ -23,6 +23,7 @@ export default function ScheduleEditorPage() {
   const [divisionFilters, setDivisionFilters] = useState([]);
   const [locationFilter, setLocationFilter] = useState("");
   const [teamNameFilter, setTeamNameFilter] = useState("");
+  const [matchSearch, setMatchSearch] = useState("");
   const [dateFilter, setDateFilter] = useState("");
   const [weekFilter, setWeekFilter] = useState("");
   const [publishedFilter, setPublishedFilter] = useState("all");
@@ -171,6 +172,20 @@ export default function ScheduleEditorPage() {
     return `${usage.used}/${usage.available || usage.total || "?"} courts used`;
   }
 
+  function courtIssueReasonForMatch(match, sourceMatches = matches) {
+    const usage = courtUsageForMatch(match, sourceMatches);
+
+    if (usage.unavailable > 0 && usage.hasIssue) {
+      return `${locationName(match.location_id)} has ${usage.unavailable} court${usage.unavailable === 1 ? "" : "s"} blocked by Court Unavailability at this date/time.`;
+    }
+
+    if (usage.hasIssue) {
+      return `${locationName(match.location_id)} may not have enough courts at this date/time.`;
+    }
+
+    return "";
+  }
+
   function formatDate(value) {
     return formatDisplayDate(value, "No Date");
   }
@@ -244,6 +259,12 @@ export default function ScheduleEditorPage() {
   }
 
   function toggleMatchSelection(matchId) {
+    const match = matches.find((row) => row.id === matchId);
+    if (isMatchLocked(match)) {
+      alert("Completed and verified matches are locked. Use Reset Scores before changing them.");
+      return;
+    }
+
     setSelectedMatchIds((current) =>
       current.includes(matchId)
         ? current.filter((id) => id !== matchId)
@@ -252,7 +273,7 @@ export default function ScheduleEditorPage() {
   }
 
   function selectVisibleMatches() {
-    setSelectedMatchIds(filteredMatches.map((match) => match.id));
+    setSelectedMatchIds(filteredMatches.filter((match) => !isMatchLocked(match)).map((match) => match.id));
   }
 
   async function publishSelectedMatches(shouldPublish) {
@@ -260,6 +281,11 @@ export default function ScheduleEditorPage() {
 
     if (selected.length === 0) {
       alert("Select one or more matches first.");
+      return;
+    }
+
+    if (selected.some(isMatchLocked)) {
+      alert("Completed and verified matches are locked. Use Reset Scores before changing schedule or publish status.");
       return;
     }
 
@@ -300,6 +326,11 @@ export default function ScheduleEditorPage() {
 
     if (selected.length === 0) {
       alert("Select one or more team-vs-team matches first.");
+      return;
+    }
+
+    if (selected.some(isMatchLocked)) {
+      alert("Completed and verified matches are locked. Use Reset Scores before changing teams or locations.");
       return;
     }
 
@@ -424,6 +455,11 @@ export default function ScheduleEditorPage() {
   }
 
   async function swapHomeAway(match) {
+    if (isMatchLocked(match)) {
+      alert("This match is completed and verified. Use Reset Scores before changing teams or schedule details.");
+      return;
+    }
+
     const newLocationId = match.away_team?.home_location_id || null;
 
     if (!newLocationId) {
@@ -446,7 +482,7 @@ export default function ScheduleEditorPage() {
         [
           `Swap ${match.home_team?.name || "Home"} and ${match.away_team?.name || "Away"} anyway?`,
           "",
-          `${locationName(newLocationId)} may not have enough available courts at this date/time.`,
+          courtIssueReasonForMatch(proposedMatch, proposedMatches) || `${locationName(newLocationId)} may not have enough available courts at this date/time.`,
           `Proposed: ${courtUsageTextForMatch(proposedMatch, proposedMatches)}`,
         ].join("\n")
       );
@@ -484,6 +520,12 @@ export default function ScheduleEditorPage() {
   }
 
   async function updateMatch(matchId, field, value) {
+    const match = matches.find((row) => row.id === matchId);
+    if (isMatchLocked(match)) {
+      alert("This match is completed and verified. Use Reset Scores before changing schedule details.");
+      return;
+    }
+
     const payload = {
       [field]: value === "" ? null : value,
       updated_at: new Date().toISOString()
@@ -502,7 +544,12 @@ export default function ScheduleEditorPage() {
     loadData();
   }
 
-  async function deleteMatch(matchId) {
+  async function deleteMatch(match) {
+    if (isMatchLocked(match)) {
+      alert("This match is completed and verified. Use Reset Scores before deleting it.");
+      return;
+    }
+
     const ok = confirmDeleteAction({
       title: "Delete this match and its generated game rows?",
       details: "This deletes the match, match lines, and individual game score rows. Any entered players, scores, verification state, DUPR export readiness, and standings impact for this match will be lost.",
@@ -513,7 +560,7 @@ export default function ScheduleEditorPage() {
     const { data: linesToDelete, error: findLineError } = await supabase
       .from("match_lines")
       .select("id")
-      .eq("match_id", matchId);
+      .eq("match_id", match.id);
 
     if (findLineError) {
       alert(findLineError.message);
@@ -536,7 +583,7 @@ export default function ScheduleEditorPage() {
       const { error: lineError } = await supabase
         .from("match_lines")
         .delete()
-        .eq("match_id", matchId);
+        .eq("match_id", match.id);
 
       if (lineError) {
         alert(lineError.message);
@@ -547,7 +594,7 @@ export default function ScheduleEditorPage() {
     const { error } = await supabase
       .from("matches")
       .delete()
-      .eq("id", matchId);
+      .eq("id", match.id);
 
     if (error) {
       alert(error.message);
@@ -561,7 +608,8 @@ export default function ScheduleEditorPage() {
     const response = window.prompt(
       [
         `Reset ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}?`,
-        "This clears saved match setup teams, selected score-entry players, all game scores, winners, score verification/dispute state, and DUPR export status.",
+        "This clears selected score-entry players, all game scores, winners, score verification/dispute state, and DUPR export status.",
+        "Saved Match Setup teams will remain.",
         "The scheduled match, date, time, location, teams, week, and published status will remain.",
         'Type "RESET" to continue.',
       ].join("\n\n")
@@ -620,16 +668,6 @@ export default function ScheduleEditorPage() {
       }
     }
 
-    const { error: lineupError } = await supabase
-      .from("match_lineups")
-      .delete()
-      .eq("match_id", match.id);
-
-    if (lineupError) {
-      alert(lineupError.message);
-      return;
-    }
-
     const { error: matchError } = await supabase
       .from("matches")
       .update({
@@ -656,7 +694,7 @@ export default function ScheduleEditorPage() {
     }
 
     await rebuildDivisionStandings(match.division_id);
-    alert("Match reset. Captains can enter match setup and scores again.");
+    alert("Scores reset. Saved Match Setup teams were preserved.");
     loadData();
   }
 
@@ -892,6 +930,23 @@ export default function ScheduleEditorPage() {
           .includes(teamNameFilter.trim().toLowerCase())
       ) return false;
 
+      if (matchSearch) {
+        const q = matchSearch.trim().toLowerCase();
+        const text = [
+          match.home_team?.name,
+          match.away_team?.name,
+          match.leagues?.name,
+          match.divisions?.name,
+          match.locations?.name,
+          match.scheduled_date,
+          match.week_number,
+          match.status,
+          match.score_status,
+        ].join(" ").toLowerCase();
+
+        if (!text.includes(q)) return false;
+      }
+
       if (
         dateFilter &&
         match.scheduled_date !== dateFilter
@@ -1031,12 +1086,13 @@ export default function ScheduleEditorPage() {
   function toggleMatchGroup(groupKey) {
     setCollapsedMatchGroups((current) => ({
       ...current,
-      [groupKey]: !current[groupKey],
+      [groupKey]: current[groupKey] !== false ? false : true,
     }));
   }
 
   function renderScheduledMatch(match) {
     const courtUsage = courtUsageForMatch(match);
+    const locked = isMatchLocked(match);
 
     return (
       <div
@@ -1049,14 +1105,15 @@ export default function ScheduleEditorPage() {
             : "border-amber-200 bg-amber-50"
         }`}
       >
-        <div className="grid grid-cols-1 gap-2 xl:grid-cols-[32px_minmax(260px,1.35fr)_130px_120px_minmax(180px,1fr)_130px_85px_minmax(190px,auto)] xl:items-center">
+        <div className="grid grid-cols-1 gap-2 xl:grid-cols-[32px_minmax(320px,1.7fr)_130px_120px_minmax(180px,1fr)_130px_minmax(190px,auto)] xl:items-center">
           <label className="flex items-center xl:justify-center">
             <input
               type="checkbox"
               checked={selectedMatchIds.includes(match.id)}
               onChange={() => toggleMatchSelection(match.id)}
+              disabled={locked}
               aria-label={`Select ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`}
-              className="h-4 w-4"
+              className="h-4 w-4 disabled:cursor-not-allowed"
             />
           </label>
 
@@ -1073,13 +1130,19 @@ export default function ScheduleEditorPage() {
               {courtUsage.hasIssue ? " - Overbooked" : ""}
               {isLeagueBlackoutDate(match) ? " - Blackout date" : ""}
             </div>
+            {locked && (
+              <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">
+                Locked: completed and verified
+              </div>
+            )}
           </div>
 
           <input
             type="date"
             value={match.scheduled_date || ""}
             onChange={e => updateMatch(match.id, "scheduled_date", e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            disabled={locked}
+            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
             aria-label="Match date"
           />
 
@@ -1087,14 +1150,16 @@ export default function ScheduleEditorPage() {
             type="time"
             value={match.scheduled_time || ""}
             onChange={e => updateMatch(match.id, "scheduled_time", e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            disabled={locked}
+            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
             aria-label="Match time"
           />
 
           <select
             value={match.location_id || ""}
             onChange={e => updateMatch(match.id, "location_id", e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            disabled={locked}
+            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
             aria-label="Match location"
           >
             <option value="">No Location</option>
@@ -1108,7 +1173,8 @@ export default function ScheduleEditorPage() {
           <select
             value={match.status || "draft"}
             onChange={e => updateMatch(match.id, "status", e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            disabled={locked}
+            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
             aria-label="Match status"
           >
             <option value="draft">Draft</option>
@@ -1118,19 +1184,6 @@ export default function ScheduleEditorPage() {
             <option value="cancelled">Cancelled</option>
             <option value="rainout">Rainout</option>
           </select>
-
-          <label className="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm">
-            <span className="text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Week
-            </span>
-            <input
-              type="number"
-              value={match.week_number || ""}
-              onChange={e => updateMatch(match.id, "week_number", e.target.value)}
-              className="min-w-0 flex-1 border-0 p-0 text-sm outline-none"
-              aria-label="Match week"
-            />
-          </label>
 
           <div className="flex w-full flex-wrap gap-1.5 xl:justify-end">
             <span className={`rounded-full px-2 py-1 text-xs font-bold ${
@@ -1142,7 +1195,8 @@ export default function ScheduleEditorPage() {
             </span>
             <button
               onClick={() => swapHomeAway(match)}
-              className="rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-semibold text-blue-800 hover:bg-blue-200"
+              disabled={locked}
+              className="rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-semibold text-blue-800 hover:bg-blue-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
             >
               Swap
             </button>
@@ -1156,11 +1210,12 @@ export default function ScheduleEditorPage() {
               onClick={() => resetMatch(match)}
               className="rounded-lg bg-orange-100 px-2.5 py-1.5 text-xs font-semibold text-orange-900 hover:bg-orange-200"
             >
-              Reset
+              Reset Scores
             </button>
             <button
-              onClick={() => deleteMatch(match.id)}
-              className="rounded-lg bg-red-100 px-2.5 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200"
+              onClick={() => deleteMatch(match)}
+              disabled={locked}
+              className="rounded-lg bg-red-100 px-2.5 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
             >
               Delete
             </button>
@@ -1171,7 +1226,8 @@ export default function ScheduleEditorPage() {
           <textarea
             value={match.notes || ""}
             onChange={e => updateMatch(match.id, "notes", e.target.value)}
-            className="mt-2 h-9 w-full resize-y rounded-lg border border-slate-300 px-2 py-1.5 text-sm"
+            disabled={locked}
+            className="mt-2 h-9 w-full resize-y rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
             placeholder="Notes"
             aria-label="Match notes"
           />
@@ -1185,6 +1241,7 @@ export default function ScheduleEditorPage() {
     setDivisionFilters([]);
     setLocationFilter("");
     setTeamNameFilter("");
+    setMatchSearch("");
     setDateFilter("");
     setWeekFilter("");
     setPublishedFilter("all");
@@ -1234,7 +1291,7 @@ export default function ScheduleEditorPage() {
 
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-9">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
 
             <select
               value={leagueFilter}
@@ -1242,7 +1299,7 @@ export default function ScheduleEditorPage() {
                 setLeagueFilter(e.target.value);
                 setDivisionFilters([]);
               }}
-              className="rounded-xl border border-slate-300 px-4 py-3"
+              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-2"
             >
               <option value="">All Leagues</option>
 
@@ -1256,7 +1313,7 @@ export default function ScheduleEditorPage() {
               ))}
             </select>
 
-            <div className="max-h-32 overflow-y-auto rounded-xl border border-slate-300 bg-white px-3 py-2">
+            <div className="max-h-32 overflow-y-auto rounded-xl border border-slate-300 bg-white px-3 py-2 md:col-span-4">
               <div className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-500">
                 Divisions
               </div>
@@ -1289,7 +1346,7 @@ export default function ScheduleEditorPage() {
             <select
               value={locationFilter}
               onChange={e => setLocationFilter(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3"
+              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-2"
             >
               <option value="">All Locations</option>
 
@@ -1323,7 +1380,7 @@ export default function ScheduleEditorPage() {
             <select
               value={publishedFilter}
               onChange={e => setPublishedFilter(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3"
+              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-2"
             >
               <option value="all">
                 Published + Draft
@@ -1343,21 +1400,30 @@ export default function ScheduleEditorPage() {
               value={teamNameFilter}
               onChange={e => setTeamNameFilter(e.target.value)}
               placeholder="Team name"
-              className="rounded-xl border border-slate-300 px-4 py-3"
+              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
+            />
+
+            <input
+              type="search"
+              value={matchSearch}
+              onChange={e => setMatchSearch(e.target.value)}
+              placeholder="Keyword search"
+              title="Searches league, division, teams, location, status, date, and notes."
+              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
             />
 
             <input
               type="date"
               value={dateFilter}
               onChange={e => setDateFilter(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3"
+              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
               aria-label="Specific match date"
             />
 
             <select
               value={sortBy}
               onChange={e => setSortBy(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3"
+              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
             >
               <option value="date">Sort by Date</option>
               <option value="location">Sort by Location</option>
@@ -1453,6 +1519,7 @@ export default function ScheduleEditorPage() {
               >
                 Unpublish Selected
               </button>
+
             </div>
 
             <div className="text-sm font-semibold text-slate-600">
@@ -1574,6 +1641,8 @@ export default function ScheduleEditorPage() {
   );
 }
 
-
+function isMatchLocked(match) {
+  return match?.status === "completed" && match?.score_status === "verified";
+}
 
 

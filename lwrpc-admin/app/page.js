@@ -5,11 +5,36 @@ import { useRouter } from "next/navigation";
 import AppHeader from "./components/AppHeader";
 import { requireRole, supabase } from "./lib/auth";
 
+const LOGIN_MESSAGE_TEMPLATES = [
+  {
+    key: "captain_login_popup",
+    label: "Captain Message",
+    defaultSubject: "Captain Message",
+  },
+  {
+    key: "player_login_popup",
+    label: "Player Message",
+    defaultSubject: "Player Message",
+  },
+];
+
 export default function DashboardPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [dashboardCounts, setDashboardCounts] = useState(null);
   const [dashboardScope, setDashboardScope] = useState("active");
+  const [loginMessages, setLoginMessages] = useState(() =>
+    Object.fromEntries(
+      LOGIN_MESSAGE_TEMPLATES.map((template) => [
+        template.key,
+        {
+          subject: template.defaultSubject,
+          body: "",
+        },
+      ])
+    )
+  );
+  const [savingMessageKey, setSavingMessageKey] = useState("");
 
   const loadDashboardCounts = useCallback(async function loadDashboardCounts() {
     setDashboardCounts(null);
@@ -66,17 +91,74 @@ export default function DashboardPage() {
     });
   }, [dashboardScope]);
 
+  const loadLoginMessages = useCallback(async function loadLoginMessages() {
+    const { data } = await supabase
+      .from("notification_templates")
+      .select("template_key, subject, body")
+      .in("template_key", LOGIN_MESSAGE_TEMPLATES.map((template) => template.key));
+
+    if (!data?.length) return;
+
+    setLoginMessages((current) => {
+      const next = { ...current };
+
+      data.forEach((template) => {
+        next[template.template_key] = {
+          subject: template.subject || next[template.template_key]?.subject || "",
+          body: template.body || "",
+        };
+      });
+
+      return next;
+    });
+  }, []);
+
   useEffect(() => {
     async function run() {
       const user = await requireRole(router, "league_manager");
       if (user) {
         setReady(true);
         loadDashboardCounts();
+        loadLoginMessages();
       }
     }
 
     run();
-  }, [loadDashboardCounts, router]);
+  }, [loadDashboardCounts, loadLoginMessages, router]);
+
+  function updateLoginMessage(templateKey, field, value) {
+    setLoginMessages((current) => ({
+      ...current,
+      [templateKey]: {
+        ...current[templateKey],
+        [field]: value,
+      },
+    }));
+  }
+
+  async function saveLoginMessage(template) {
+    const message = loginMessages[template.key] || {};
+
+    setSavingMessageKey(template.key);
+    const { error } = await supabase
+      .from("notification_templates")
+      .upsert({
+        template_key: template.key,
+        subject: message.subject?.trim() || template.defaultSubject,
+        body: message.body || "",
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: "template_key",
+      });
+    setSavingMessageKey("");
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert(`${template.label} saved.`);
+  }
 
   if (!ready) {
     return (
@@ -222,6 +304,63 @@ export default function DashboardPage() {
             </section>
           ))}
         </div>
+
+        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          <div className="border-b border-slate-200 px-4 py-5 md:px-6">
+            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="text-xl font-black text-slate-950">Dashboard Messages</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-600">
+                  Create login messages for captains and players.
+                </p>
+              </div>
+              <div className="text-xs font-black uppercase tracking-wide text-slate-400">
+                Login popups
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 md:p-6">
+            {LOGIN_MESSAGE_TEMPLATES.map((template) => {
+              const message = loginMessages[template.key] || {};
+
+              return (
+                <div key={template.key} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="text-sm font-black uppercase tracking-wide text-slate-500">
+                    {template.label}
+                  </div>
+
+                  <input
+                    type="text"
+                    value={message.subject || ""}
+                    onChange={(event) => updateLoginMessage(template.key, "subject", event.target.value)}
+                    placeholder={`${template.label} subject`}
+                    className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+                  />
+
+                  <textarea
+                    value={message.body || ""}
+                    onChange={(event) => updateLoginMessage(template.key, "body", event.target.value)}
+                    placeholder={`Enter the ${template.label.toLowerCase()} to show on login. Leave blank to hide the popup.`}
+                    rows={5}
+                    className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+                  />
+
+                  <div className="mt-3 flex justify-end">
+                    <button
+                      type="button"
+                      onClick={() => saveLoginMessage(template)}
+                      disabled={savingMessageKey === template.key}
+                      className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-50"
+                    >
+                      {savingMessageKey === template.key ? "Saving..." : "Save Message"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
 
         <div className="mt-6 rounded-2xl bg-white p-4 shadow md:p-6">
           <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">

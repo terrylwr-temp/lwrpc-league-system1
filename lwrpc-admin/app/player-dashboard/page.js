@@ -4,6 +4,8 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import LoginMessageModal from "../components/LoginMessageModal";
+import TeamScheduleModal from "../components/TeamScheduleModal";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayTime } from "../lib/dateTime";
 import {
@@ -11,7 +13,9 @@ import {
   formatDate,
   historyFilterOptions,
   playerLineDetails,
+  rowHasSpecialGame,
   sortHistoryRows,
+  specialGameStatus,
 } from "../lib/playHistory";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import {
@@ -38,6 +42,7 @@ export default function PlayerDashboardPage() {
   const [matches, setMatches] = useState([]);
   const [standings, setStandings] = useState([]);
   const [playHistory, setPlayHistory] = useState([]);
+  const [playerRatings, setPlayerRatings] = useState([]);
   const [activePanel, setActivePanel] = useState("history");
   const [selectedUpcomingTeamId, setSelectedUpcomingTeamId] = useState("");
   const [selectedStandingsTeamId, setSelectedStandingsTeamId] = useState("");
@@ -46,6 +51,11 @@ export default function PlayerDashboardPage() {
   const [pdfDocument, setPdfDocument] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
   const [rosterTeam, setRosterTeam] = useState(null);
+  const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
+  const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
+  const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
+  const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
+  const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
 
   const loadData = useCallback(async function loadData() {
     const {
@@ -87,9 +97,11 @@ export default function PlayerDashboardPage() {
           divisions (
             id,
             name,
+            rating_type,
             leagues (
               id,
               name,
+              season_id,
               league_document_bucket,
               code_of_conduct_pdf_path,
               league_rules_pdf_path,
@@ -151,7 +163,13 @@ export default function PlayerDashboardPage() {
             *,
             divisions (
               id,
-              name
+              name,
+              rating_type
+            ),
+            leagues (
+              id,
+              name,
+              season_id
             ),
             locations (
               id,
@@ -173,7 +191,48 @@ export default function PlayerDashboardPage() {
               id,
               line_number,
               home_team_games_won,
-              away_team_games_won
+              away_team_games_won,
+              winning_team_id,
+              division_lines (
+                id,
+                line_name,
+                line_type
+              ),
+              home_player_1:members!match_lines_home_player_1_id_fkey (
+                id,
+                first_name,
+                last_name,
+                email,
+                self_rating
+              ),
+              home_player_2:members!match_lines_home_player_2_id_fkey (
+                id,
+                first_name,
+                last_name,
+                email,
+                self_rating
+              ),
+              away_player_1:members!match_lines_away_player_1_id_fkey (
+                id,
+                first_name,
+                last_name,
+                email,
+                self_rating
+              ),
+              away_player_2:members!match_lines_away_player_2_id_fkey (
+                id,
+                first_name,
+                last_name,
+                email,
+                self_rating
+              ),
+              line_games (
+                id,
+                game_number,
+                home_score,
+                away_score,
+                game_status
+              )
             )
           `)
           .or(
@@ -258,25 +317,29 @@ export default function PlayerDashboardPage() {
           id,
           first_name,
           last_name,
-          email
+          email,
+          self_rating
         ),
         home_player_2:members!match_lines_home_player_2_id_fkey (
           id,
           first_name,
           last_name,
-          email
+          email,
+          self_rating
         ),
         away_player_1:members!match_lines_away_player_1_id_fkey (
           id,
           first_name,
           last_name,
-          email
+          email,
+          self_rating
         ),
         away_player_2:members!match_lines_away_player_2_id_fkey (
           id,
           first_name,
           last_name,
-          email
+          email,
+          self_rating
         ),
         division_lines (
           id,
@@ -300,11 +363,13 @@ export default function PlayerDashboardPage() {
           ),
           divisions (
             id,
-            name
+            name,
+            rating_type
           ),
           leagues (
             id,
             name,
+            season_id,
             seasons (
               id,
               name
@@ -324,6 +389,31 @@ export default function PlayerDashboardPage() {
 
     historyData = playerHistoryData || [];
 
+    const seasonIds = [
+      ...new Set(
+        [
+          ...playerTeams.map((team) => team.divisions?.leagues?.season_id),
+          ...historyData.map((row) => row.matches?.leagues?.season_id),
+        ].filter(Boolean)
+      ),
+    ];
+    let ratingRows = [];
+
+    if (seasonIds.length > 0) {
+      const { data, error } = await supabase
+        .from("member_season_ratings")
+        .select("member_id, season_id, season_dupr_rating, season_primetime_rating")
+        .in("season_id", seasonIds);
+
+      if (error) {
+        alert(error.message);
+        setLoading(false);
+        return;
+      }
+
+      ratingRows = data || [];
+    }
+
     setTeams(
       playerTeams.map((team) => ({
         ...team,
@@ -334,6 +424,7 @@ export default function PlayerDashboardPage() {
     setMatches(matchData);
     setStandings(standingsData);
     setPlayHistory(historyData);
+    setPlayerRatings(ratingRows);
     setLoading(false);
   }, []);
 
@@ -412,9 +503,15 @@ export default function PlayerDashboardPage() {
 
         stats.games += 1;
 
-        if (details.result === "W") stats.wins += 1;
-        if (details.result === "L") stats.losses += 1;
-        if (details.result !== "W" && details.result !== "L") stats.ties += 1;
+        if (rowHasSpecialGame(row)) {
+          stats.other += 1;
+        } else if (details.result === "W") {
+          stats.wins += 1;
+        } else if (details.result === "L") {
+          stats.losses += 1;
+        } else {
+          stats.ties += 1;
+        }
 
         return stats;
       },
@@ -423,9 +520,43 @@ export default function PlayerDashboardPage() {
         wins: 0,
         losses: 0,
         ties: 0,
+        other: 0,
       }
     );
   }, [filteredPlayHistory, member]);
+
+  function ratingForMember(memberId, seasonId, ratingType, fallbackMember = null) {
+    const ratingRow = playerRatings.find(
+      (rating) =>
+        String(rating.member_id) === String(memberId) &&
+        String(rating.season_id) === String(seasonId)
+    );
+    const value =
+      ratingType === "primetime"
+        ? ratingRow?.season_primetime_rating
+        : ratingType === "self_rating"
+        ? fallbackMember?.self_rating
+        : ratingRow?.season_dupr_rating;
+
+    if (value === null || value === undefined || value === "") return "NR";
+    const number = Number(value);
+    return Number.isNaN(number) ? "NR" : number.toFixed(2);
+  }
+
+  function mySeasonDuprSummary() {
+    const seasonDuprTeam = teams.find(
+      (team) => (team.divisions?.rating_type || "dupr") === "dupr"
+    );
+
+    if (!seasonDuprTeam) return null;
+
+    return ratingForMember(
+      member?.id,
+      seasonDuprTeam.divisions?.leagues?.season_id,
+      "dupr",
+      member
+    );
+  }
 
   function selectPanel(panel) {
     setActivePanel(panel);
@@ -437,6 +568,109 @@ export default function PlayerDashboardPage() {
     if (panel === "upcoming" && !selectedUpcomingTeamId && teams.length > 0) {
       setSelectedUpcomingTeamId(teams[0].id);
     }
+  }
+
+  async function openDivisionScheduleFromStanding(row) {
+    const divisionId = selectedStandingsTeam?.division_id || selectedStandingsTeam?.divisions?.id;
+    if (!divisionId) return;
+
+    const baseTeam = {
+      id: row.team_id,
+      name: row.teams?.name || "Team",
+      division_id: divisionId,
+      divisions: selectedStandingsTeam.divisions,
+    };
+
+    setDivisionScheduleTeam(baseTeam);
+    setDivisionScheduleTeams([]);
+    setDivisionScheduleMatches([]);
+    setDivisionScheduleRatings([]);
+    setDivisionScheduleLoading(true);
+
+    const seasonId = selectedStandingsTeam.divisions?.leagues?.season_id;
+    const [
+      { data: divisionTeams, error: teamsError },
+      { data: divisionMatches, error: matchesError },
+      { data: divisionStandings, error: standingsError },
+      { data: divisionRatings, error: ratingsError },
+    ] = await Promise.all([
+      supabase
+        .from("teams")
+        .select("id, name, division_id")
+        .eq("division_id", divisionId)
+        .order("name", { ascending: true }),
+      supabase
+        .from("matches")
+        .select(`
+          id,
+          league_id,
+          division_id,
+          home_team_id,
+          away_team_id,
+          location_id,
+          scheduled_date,
+          scheduled_time,
+          week_number,
+          status,
+          score_status,
+          home_score,
+          away_score,
+          winning_team_id,
+          is_published,
+          locations ( id, name ),
+          home_team:teams!matches_home_team_id_fkey ( id, name ),
+          away_team:teams!matches_away_team_id_fkey ( id, name ),
+          match_lines (
+            id,
+            line_number,
+            home_team_games_won,
+            away_team_games_won,
+            division_lines ( line_name ),
+            home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
+            home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
+            away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, self_rating),
+            away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, self_rating),
+            line_games ( id, game_number, home_score, away_score, game_status )
+          )
+        `)
+        .eq("division_id", divisionId)
+        .eq("is_published", true)
+        .order("scheduled_date", { ascending: true })
+        .order("scheduled_time", { ascending: true }),
+      supabase
+        .from("team_standings")
+        .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
+        .eq("division_id", divisionId),
+      seasonId
+        ? supabase
+            .from("member_season_ratings")
+            .select("member_id, season_dupr_rating, season_primetime_rating")
+            .eq("season_id", seasonId)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    setDivisionScheduleLoading(false);
+
+    const firstError = teamsError || matchesError || standingsError || ratingsError;
+    if (firstError) {
+      alert(firstError.message);
+      return;
+    }
+
+    const standingsByTeamId = Object.fromEntries(
+      (divisionStandings || []).map((standing) => [String(standing.team_id), standing])
+    );
+
+    setDivisionScheduleTeams(
+      (divisionTeams || [])
+        .map((team) => ({
+          ...team,
+          standing: standingsByTeamId[String(team.id)] || null,
+        }))
+        .sort(compareDivisionScheduleTeams)
+    );
+    setDivisionScheduleMatches(divisionMatches || []);
+    setDivisionScheduleRatings(divisionRatings || []);
   }
 
   async function openLeagueDocument(team, documentType) {
@@ -503,6 +737,13 @@ export default function PlayerDashboardPage() {
               >
                 Membership Info
               </a>
+
+              <a
+                href="mailto:info@lwrpickleballclub.com"
+                className="rounded-xl bg-emerald-500 px-4 py-2 text-center text-sm font-bold text-white hover:bg-emerald-400"
+              >
+                Contact League
+              </a>
             </div>
           }
         />
@@ -516,8 +757,13 @@ export default function PlayerDashboardPage() {
                 </div>
                 <h2 className="mt-1 text-2xl font-black">My Teams</h2>
               </div>
-              <div className="text-sm font-semibold text-slate-300">
-                {teams.length} team{teams.length === 1 ? "" : "s"}
+              <div className="flex flex-col gap-1 text-sm font-semibold text-slate-300 md:items-end">
+                <span>{teams.length} team{teams.length === 1 ? "" : "s"}</span>
+                {mySeasonDuprSummary() && (
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white">
+                    My Season DUPR: {mySeasonDuprSummary()}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -556,13 +802,18 @@ export default function PlayerDashboardPage() {
             />
             <DashboardOption
               active={activePanel === "upcoming"}
-              label="Upcoming Matches"
+              label="Team Matches"
               value={upcomingMatchesBySelectedTeam.length || matches.filter((match) => match.status !== "completed" && match.status !== "cancelled").length}
               tone="gray"
               onClick={() => selectPanel("upcoming")}
             />
           </div>
         </section>
+
+        <LoginMessageModal
+          templateKey="player_login_popup"
+          audienceLabel="Player Message"
+        />
 
         {activePanel === "standings" && (
           <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
@@ -592,7 +843,42 @@ export default function PlayerDashboardPage() {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
+            <div className="p-4 md:hidden">
+              <div className="space-y-3">
+                {selectedDivisionStandings.map((row) => (
+                  <button
+                    key={row.id}
+                    type="button"
+                    onClick={() => openDivisionScheduleFromStanding(row)}
+                    className={`w-full rounded-xl border p-4 text-left shadow-sm ${
+                      String(row.team_id) === String(selectedStandingsTeamId)
+                        ? "border-emerald-300 bg-emerald-50"
+                        : "border-slate-200 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="text-xs font-black uppercase tracking-wide text-emerald-700">
+                          Rank #{row.rank}
+                        </div>
+                        <div className="mt-1 font-black text-slate-950">{row.teams?.name}</div>
+                      </div>
+                      <div className="rounded-xl bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-900">
+                        {row.standings_points} pts
+                      </div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-semibold text-slate-700">
+                      <span className="rounded-lg bg-slate-50 px-3 py-2">W-L-T: {row.match_wins}-{row.match_losses}-{row.match_ties}</span>
+                      <span className="rounded-lg bg-slate-50 px-3 py-2">Games: {row.game_wins}-{row.game_losses}</span>
+                      <span className="rounded-lg bg-slate-50 px-3 py-2">PF: {row.points_for}</span>
+                      <span className="rounded-lg bg-slate-50 px-3 py-2">PA: {row.points_against}</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="hidden overflow-x-auto md:block">
               <table className="w-full border-collapse text-sm">
                 <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
                   <tr>
@@ -608,7 +894,11 @@ export default function PlayerDashboardPage() {
                 </thead>
                 <tbody>
                   {selectedDivisionStandings.map((row) => (
-                    <tr key={row.id} className={`border-b border-slate-100 ${String(row.team_id) === String(selectedStandingsTeamId) ? "bg-emerald-50" : "hover:bg-slate-50"}`}>
+                    <tr
+                      key={row.id}
+                      onClick={() => openDivisionScheduleFromStanding(row)}
+                      className={`cursor-pointer border-b border-slate-100 ${String(row.team_id) === String(selectedStandingsTeamId) ? "bg-emerald-50" : "hover:bg-slate-50"}`}
+                    >
                       <td className="p-3 font-bold">#{row.rank}</td>
                       <td className="p-3 font-semibold">{row.teams?.name}</td>
                       <td className="p-3">{row.match_wins}-{row.match_losses}-{row.match_ties}</td>
@@ -715,7 +1005,7 @@ export default function PlayerDashboardPage() {
             <HistoryStat label="Games Played" value={playHistoryStats.games} tone="slate" />
             <HistoryStat label="Wins" value={playHistoryStats.wins} tone="emerald" />
             <HistoryStat label="Losses" value={playHistoryStats.losses} tone="red" />
-            <HistoryStat label="Other" value={playHistoryStats.ties} tone="amber" />
+            <HistoryStat label="Other" value={playHistoryStats.other} tone="amber" />
           </div>
 
           <div className="space-y-3 p-5">
@@ -724,6 +1014,7 @@ export default function PlayerDashboardPage() {
                 key={row.id}
                 row={row}
                 memberId={member?.id}
+                ratingForMember={ratingForMember}
               />
             ))}
 
@@ -747,6 +1038,7 @@ export default function PlayerDashboardPage() {
           <MatchDetailsModal
             match={matchDetails}
             standings={standings}
+            ratingForMember={ratingForMember}
             onClose={() => setMatchDetails(null)}
           />
         )}
@@ -755,6 +1047,32 @@ export default function PlayerDashboardPage() {
           <RosterModal
             team={rosterTeam}
             onClose={() => setRosterTeam(null)}
+          />
+        )}
+
+        {divisionScheduleTeam && (
+          <TeamScheduleModal
+            title="Division Team Schedules"
+            subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} / ${divisionScheduleTeam.divisions?.name || "Division"}`}
+            teams={divisionScheduleTeams}
+            selectedTeamId={divisionScheduleTeam.id}
+            onSelectTeam={(team) =>
+              setDivisionScheduleTeam({
+                ...divisionScheduleTeam,
+                ...team,
+              })
+            }
+            matches={divisionScheduleMatches}
+            ratings={divisionScheduleRatings}
+            ratingType={divisionScheduleTeam.divisions?.rating_type || "dupr"}
+            loading={divisionScheduleLoading}
+            compact
+            onClose={() => {
+              setDivisionScheduleTeam(null);
+              setDivisionScheduleTeams([]);
+              setDivisionScheduleMatches([]);
+              setDivisionScheduleRatings([]);
+            }}
           />
         )}
       </div>
@@ -895,14 +1213,14 @@ function RosterModal({ team, onClose }) {
   const roster = team.roster || [];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="flex max-h-[88vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-950 to-blue-800 px-5 py-5 text-white md:flex-row md:items-start md:justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
+      <div className="flex max-h-[94dvh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-950 to-blue-800 px-4 py-4 text-white md:flex-row md:items-start md:justify-between">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-blue-100">
               Team Roster
             </div>
-            <h2 className="mt-1 text-2xl font-black">{team.name}</h2>
+            <h2 className="mt-1 text-xl font-black sm:text-2xl">{team.name}</h2>
             <div className="mt-1 text-sm font-semibold text-blue-100">
               {team.divisions?.leagues?.name || ""} / {team.divisions?.name || ""}
             </div>
@@ -917,8 +1235,23 @@ function RosterModal({ team, onClose }) {
           </button>
         </div>
 
-        <div className="overflow-auto p-5">
-          <table className="w-full border-collapse text-sm">
+        <div className="overflow-auto p-3 sm:p-5">
+          <div className="space-y-2 md:hidden">
+            {roster.map((player) => (
+              <div key={player.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div className="font-black text-slate-950">{formatMemberName(player)}</div>
+                <div className="mt-1 break-words text-sm text-slate-700">{player.email || ""}</div>
+                <div className="mt-1 text-sm text-slate-700">{formatPhoneNumberForStorage(player.phone) || ""}</div>
+              </div>
+            ))}
+            {roster.length === 0 && (
+              <div className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">
+                No roster players found.
+              </div>
+            )}
+          </div>
+
+          <table className="hidden w-full border-collapse text-sm md:table">
             <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
               <tr>
                 <th className="p-3 text-left">Player</th>
@@ -1058,7 +1391,7 @@ function TeamSelect({ value, onChange, teams, label }) {
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="min-w-64 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800"
+      className="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800 md:min-w-64"
       aria-label={label}
     >
       <option value="">Select Team</option>
@@ -1077,6 +1410,7 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
   const homeScore = matchTeamScore(match, "home");
   const awayScore = matchTeamScore(match, "away");
   const hasMatchScore = homeScore !== null && awayScore !== null;
+  const isVerifiedCompleted = match.status === "completed" && match.score_status === "verified";
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -1111,21 +1445,22 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
           </div>
         </div>
 
-        <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:w-auto">
-          <button
-            type="button"
-            onClick={() => router.push(`/live-match/${match.id}`)}
-            className="rounded-xl bg-slate-700 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
-          >
-            Current Scores
-          </button>
-
+        <div className={`grid w-full grid-cols-1 gap-2 ${isVerifiedCompleted ? "" : "sm:grid-cols-2"} md:w-auto`}>
+          {!isVerifiedCompleted && (
+            <button
+              type="button"
+              onClick={() => router.push(`/live-match/${match.id}`)}
+              className="rounded-xl bg-slate-700 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
+            >
+              Current Scores
+            </button>
+          )}
           <button
             type="button"
             onClick={() => onOpenDetails(match)}
             className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
           >
-            Match Details
+            {isVerifiedCompleted ? "Match Results" : "Match Details"}
           </button>
         </div>
       </div>
@@ -1134,25 +1469,33 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
   );
 }
 
-function MatchDetailsModal({ match, standings, onClose }) {
+function MatchDetailsModal({ match, standings, ratingForMember, onClose }) {
   const homeStanding = teamStanding(standings, match.home_team_id);
   const awayStanding = teamStanding(standings, match.away_team_id);
   const location = match.locations;
   const mapUrl = mapLink(location);
+  const isVerifiedCompleted = match.status === "completed" && match.score_status === "verified";
+  const homeScore = matchTeamScore(match, "home");
+  const awayScore = matchTeamScore(match, "away");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-800 to-zinc-800 px-5 py-5 text-white md:flex-row md:items-start md:justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
+      <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-800 to-zinc-800 px-4 py-4 text-white md:flex-row md:items-start md:justify-between">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-slate-200">
-              Week {match.week_number || "-"} Match Details
+              Week {match.week_number || "-"} {isVerifiedCompleted ? "Match Results" : "Match Details"}
             </div>
-            <h2 className="mt-1 text-2xl font-black">
+            <h2 className="mt-1 text-xl font-black sm:text-2xl">
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
-            <div className="mt-2 text-sm font-semibold text-slate-200">
-              {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+            <div className="mt-2 flex flex-wrap gap-2 text-sm font-semibold text-slate-200">
+              <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
+              {homeScore !== null && awayScore !== null && (
+                <span className="rounded-full bg-white/15 px-3 py-0.5 text-white">
+                  Match Score: {homeScore}-{awayScore}
+                </span>
+              )}
             </div>
           </div>
 
@@ -1165,55 +1508,160 @@ function MatchDetailsModal({ match, standings, onClose }) {
           </button>
         </div>
 
-        <div className="grid gap-4 bg-slate-50 p-5 md:grid-cols-2">
-          <MatchTeamDetail
-            label="Home Team"
-            team={match.home_team}
-            standing={homeStanding}
-            tone="green"
-          />
-          <MatchTeamDetail
-            label="Away Team"
-            team={match.away_team}
-            standing={awayStanding}
-            tone="gray"
-          />
-        </div>
-
-        <div className="space-y-3 p-5">
-          <div className="rounded-2xl border border-slate-200 bg-white p-4">
-            <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-              Location
-            </div>
-            <div className="mt-1 text-lg font-black text-slate-900">
-              {location?.name || "Location TBD"}
-            </div>
-            <div className="mt-1 text-sm font-semibold text-slate-600">
-              {formatLocationAddress(location)}
-            </div>
+        <div className="overflow-y-auto">
+          <div className="grid gap-3 bg-slate-50 p-3 sm:p-5 md:grid-cols-2">
+            <MatchTeamDetail
+              label="Home Team"
+              team={match.home_team}
+              standing={homeStanding}
+              tone="green"
+            />
+            <MatchTeamDetail
+              label="Away Team"
+              team={match.away_team}
+              standing={awayStanding}
+              tone="gray"
+            />
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            {mapUrl && (
-              <a
-                href={mapUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="rounded-xl bg-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
-              >
-                Open Home Team Address Map
-              </a>
+          <div className="space-y-3 p-3 sm:p-5">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                Location
+              </div>
+              <div className="mt-1 text-lg font-black text-slate-900">
+                {location?.name || "Location TBD"}
+              </div>
+              <div className="mt-1 text-sm font-semibold text-slate-600">
+                {formatLocationAddress(location)}
+              </div>
+            </div>
+
+            {isVerifiedCompleted && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                  Games
+                </div>
+                <div className="mt-3 space-y-3">
+                  {[...(match.match_lines || [])]
+                    .sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0))
+                    .map((line) => (
+                      <MatchLineResult
+                        key={line.id}
+                        line={line}
+                        match={match}
+                        ratingForMember={ratingForMember}
+                      />
+                    ))}
+
+                  {!match.match_lines?.length && (
+                    <div className="rounded-xl bg-slate-50 p-4 text-center text-sm font-semibold text-slate-500">
+                      No game results have been entered for this match.
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300"
-            >
-              Done
-            </button>
+            <div className="flex flex-wrap gap-2">
+              {mapUrl && (
+                <a
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-xl bg-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
+                >
+                  Open Home Team Address Map
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function MatchLineResult({ line, match, ratingForMember }) {
+  const wins = lineGameWinCounts(line);
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-slate-200">
+      <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100 px-4 py-3">
+        <div>
+          <div className="text-sm font-black text-slate-900">
+            Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
+          </div>
+          <div className="mt-0.5 text-xs font-semibold text-slate-600">
+            {line.division_lines?.line_type || "Line"}
+          </div>
+        </div>
+        <div className="rounded-full bg-slate-950 px-3 py-1 text-sm font-black text-white">
+          {wins.hasGames ? `${wins.home}-${wins.away}` : `${line.home_team_games_won ?? 0}-${line.away_team_games_won ?? 0}`}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
+        <ResultTeamPlayers
+          label={match.home_team?.name || "Home"}
+          players={[line.home_player_1, line.home_player_2]}
+          match={match}
+          ratingForMember={ratingForMember}
+        />
+        <ResultTeamPlayers
+          label={match.away_team?.name || "Away"}
+          players={[line.away_player_1, line.away_player_2]}
+          match={match}
+          ratingForMember={ratingForMember}
+        />
+      </div>
+
+      <div className="border-t border-slate-100 px-4 py-3">
+        <div className="flex flex-wrap gap-2 text-xs font-bold text-slate-700">
+          {[...(line.line_games || [])]
+            .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
+            .map((game) => (
+              <span key={game.id} className="rounded-xl bg-blue-50 px-3 py-2 text-blue-950">
+                Game {game.game_number || "-"}: {game.home_score ?? "-"}-{game.away_score ?? "-"} Result: {gameResultText(game)}
+              </span>
+            ))}
+          {!line.line_games?.length && (
+            <span className="rounded-xl bg-slate-50 px-3 py-2 text-slate-500">
+              No game scores entered.
+            </span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ResultTeamPlayers({ label, players, match, ratingForMember }) {
+  return (
+    <div className="rounded-xl bg-slate-50 px-3 py-2">
+      <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+        {label}
+      </div>
+      <div className="mt-1 space-y-1 text-sm font-semibold text-slate-800">
+        {players.filter(Boolean).map((player) => (
+          <div key={player.id} className="flex items-center justify-between gap-2">
+            <span>{formatMemberName(player)}</span>
+            <span className="rounded-full bg-white px-2 py-0.5 text-xs font-black text-slate-700">
+              {ratingForMember(player.id, match.leagues?.season_id, match.divisions?.rating_type || "dupr", player)}
+            </span>
+          </div>
+        ))}
+        {players.filter(Boolean).length === 0 && (
+          <div className="text-slate-500">Players not entered</div>
+        )}
       </div>
     </div>
   );
@@ -1249,6 +1697,24 @@ function teamStanding(standings, teamId) {
   return standings.find((standing) => String(standing.team_id) === String(teamId));
 }
 
+function compareDivisionScheduleTeams(a, b) {
+  const aStanding = a.standing || {};
+  const bStanding = b.standing || {};
+  const aRank = Number(aStanding.rank || 0);
+  const bRank = Number(bStanding.rank || 0);
+
+  if (aRank && bRank && aRank !== bRank) return aRank - bRank;
+  if (aRank && !bRank) return -1;
+  if (!aRank && bRank) return 1;
+
+  const pointsDifference =
+    Number(bStanding.standings_points || 0) - Number(aStanding.standings_points || 0);
+
+  if (pointsDifference !== 0) return pointsDifference;
+
+  return String(a.name || "").localeCompare(String(b.name || ""));
+}
+
 function formatStandingRecord(standing) {
   if (!standing) return "0-0-0";
   return `${standing.match_wins ?? 0}-${standing.match_losses ?? 0}-${standing.match_ties ?? 0}`;
@@ -1257,18 +1723,72 @@ function formatStandingRecord(standing) {
 function matchTeamScore(match, side) {
   const scoreField = side === "home" ? "home_score" : "away_score";
 
+  if (match?.match_lines?.length) {
+    let hasAnyLineScore = false;
+
+    const score = match.match_lines.reduce((total, line) => {
+      const wins = lineGameWinCounts(line);
+      const lineScoreField = side === "home" ? "home_team_games_won" : "away_team_games_won";
+      const fallbackWins = Number(line[lineScoreField] || 0);
+      const sideWins = side === "home" ? wins.home : wins.away;
+
+      if (wins.hasGames || fallbackWins > 0) {
+        hasAnyLineScore = true;
+      }
+
+      return total + (wins.hasGames ? sideWins : fallbackWins);
+    }, 0);
+
+    if (hasAnyLineScore) return score;
+  }
+
   if (match?.[scoreField] !== null && match?.[scoreField] !== undefined) {
     return Number(match[scoreField]);
   }
 
-  if (!match?.match_lines?.length || match.status !== "completed") return null;
+  return null;
+}
 
-  const lineScoreField = side === "home" ? "home_team_games_won" : "away_team_games_won";
+function lineGameWinCounts(line) {
+  const games = line.line_games || [];
+  let home = 0;
+  let away = 0;
+  let hasGames = false;
 
-  return match.match_lines.reduce(
-    (total, line) => total + Number(line[lineScoreField] || 0),
-    0
-  );
+  games.forEach((game) => {
+    const special = specialGameStatus(game.game_status);
+
+    if (special?.winnerSide === "Home") {
+      home += 1;
+      hasGames = true;
+      return;
+    }
+
+    if (special?.winnerSide === "Away") {
+      away += 1;
+      hasGames = true;
+      return;
+    }
+
+    if (game.home_score !== null && game.away_score !== null) {
+      hasGames = true;
+
+      if (Number(game.home_score) > Number(game.away_score)) home += 1;
+      if (Number(game.away_score) > Number(game.home_score)) away += 1;
+    }
+  });
+
+  return { home, away, hasGames };
+}
+
+function gameResultText(game) {
+  const special = specialGameStatus(game.game_status);
+
+  if (special) return special.label;
+  if (game.home_score === null || game.away_score === null) return "Pending";
+  if (Number(game.home_score) > Number(game.away_score)) return "Home";
+  if (Number(game.away_score) > Number(game.home_score)) return "Away";
+  return "Tie";
 }
 
 function formatLocationAddress(location) {
@@ -1324,10 +1844,10 @@ function PlayerHistoryRow({ row, memberId }) {
   );
 }
 
-function PlayerHistoryRowWithScores({ row, memberId }) {
+function PlayerHistoryRowWithScores({ row, memberId, ratingForMember }) {
   const match = row.matches;
   const details = playerLineDetails(row, memberId);
-  const gameScores = formatGameScores(row, details.sideLabel);
+  const gameScores = formatGameScores(row, details.sideLabel, ratingForMember);
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -1379,21 +1899,25 @@ function PlayerHistoryRowWithScores({ row, memberId }) {
   );
 }
 
-function formatGameScores(row, sideLabel) {
-  const players = linePlayerNames(row, sideLabel);
+function formatGameScores(row, sideLabel, ratingForMember) {
+  const players = linePlayerNames(row, sideLabel, ratingForMember);
   const opponentSideLabel = sideLabel === "Home" ? "Away" : "Home";
-  const opponentPlayers = linePlayerNames(row, opponentSideLabel);
+  const opponentPlayers = linePlayerNames(row, opponentSideLabel, ratingForMember);
   const match = row.matches;
   const playerTeamName = sideLabel === "Home" ? match?.home_team?.name || "Home" : match?.away_team?.name || "Away";
   const opponentTeamName = sideLabel === "Home" ? match?.away_team?.name || "Away" : match?.home_team?.name || "Home";
 
   return [...(row.line_games || [])]
     .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
-    .filter((game) => game.home_score !== null && game.away_score !== null)
+    .filter((game) => {
+      const special = specialGameStatus(game.game_status);
+      return special || (game.home_score !== null && game.away_score !== null);
+    })
     .map((game) => {
       const isHome = sideLabel === "Home";
       const playerScore = isHome ? game.home_score : game.away_score;
       const opponentScore = isHome ? game.away_score : game.home_score;
+      const special = specialGameStatus(game.game_status);
 
       return {
         key: game.id || game.game_number,
@@ -1402,20 +1926,30 @@ function formatGameScores(row, sideLabel) {
         players,
         opponentTeamName,
         opponentPlayers,
-        score: `${playerScore}-${opponentScore}`,
+        score: special
+          ? `${playerScore ?? "-"}-${opponentScore ?? "-"} Result: ${special.label}`
+          : `${playerScore}-${opponentScore}`,
       };
     });
 }
 
-function linePlayerNames(row, sideLabel) {
+function linePlayerNames(row, sideLabel, ratingForMember) {
   const members =
     sideLabel === "Home"
       ? [row.home_player_1, row.home_player_2]
       : [row.away_player_1, row.away_player_2];
+  const match = row.matches;
+  const ratingType = match?.divisions?.rating_type || "dupr";
+  const seasonId = match?.leagues?.season_id;
 
   return members
     .filter(Boolean)
-    .map(formatMemberName)
+    .map((member) => {
+      const rating = ratingForMember
+        ? ratingForMember(member.id, seasonId, ratingType, member)
+        : "NR";
+      return `${formatMemberName(member)} (${rating})`;
+    })
     .filter(Boolean)
     .join(" / ") || "Players TBD";
 }

@@ -404,6 +404,23 @@ function getAverageTeamRating() {
     );
   }
 
+  function playerRosterRecord(memberId) {
+    const rows = historyRowsForMember(memberId);
+
+    return rows.reduce(
+      (record, row) => {
+        const details = playerLineDetails(row, memberId);
+        record.games += 1;
+        if (details.result === "W") record.wins += 1;
+        if (details.result === "L") record.losses += 1;
+        if (details.result !== "W" && details.result !== "L") record.other += 1;
+        record.record = `${record.wins}-${record.losses}-${record.other}`;
+        return record;
+      },
+      { games: 0, wins: 0, losses: 0, other: 0, record: "0-0-0" }
+    );
+  }
+
   const sortedRoster = useMemo(() => {
     return [...roster].sort((a, b) => {
       const aMember = a.members;
@@ -430,7 +447,6 @@ function getAverageTeamRating() {
 
   const rostersLocked = team?.divisions?.leagues?.rosters_locked === true;
   const canModifyRoster = hasRole(currentUser?.role, "captain");
-  const canViewSeasonRatings = hasRole(currentUser?.role, "league_manager");
   const isCaptainOnly = currentUser?.role === "captain";
 
   async function addPlayer() {
@@ -634,15 +650,6 @@ function getAverageTeamRating() {
           >
             {isCaptainOnly ? "Back to Dashboard" : "Back"}
           </button>
-
-          {canViewSeasonRatings && (
-          <button
-            onClick={() => router.push("/ratings")}
-            className="rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white hover:bg-slate-800"
-          >
-            Season Ratings
-          </button>
-          )}
 
         </div>
 
@@ -900,6 +907,17 @@ function getAverageTeamRating() {
 
                           <div>
                             {member?.club_location || "—"}
+                          </div>
+
+                          <div>
+                            Games:{" "}
+                            <span className="font-semibold">
+                              {playerRosterRecord(member?.id).games}
+                            </span>{" "}
+                            Record:{" "}
+                            <span className="font-semibold">
+                              {playerRosterRecord(member?.id).record}
+                            </span>
                           </div>
 
                         </div>

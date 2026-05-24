@@ -14,7 +14,8 @@ export async function POST(req) {
       awayTeam,
       score,
       matchDate,
-      enteredBy
+      enteredBy,
+      notificationType = "submitted"
     } = body;
 
     if ((!emails || emails.length === 0) && (!phones || phones.length === 0)) {
@@ -24,20 +25,31 @@ export async function POST(req) {
       });
     }
 
-    const subject = `Score Verification Required: ${homeTeam} vs ${awayTeam}`;
-    const text = `Scores have been entered for ${homeTeam} vs ${awayTeam}.
+    const isVerified = notificationType === "verified";
+    const subject = isVerified
+      ? `Scores Validated: ${homeTeam} vs ${awayTeam}`
+      : `Score Verification Required: ${homeTeam} vs ${awayTeam}`;
+    const heading = isVerified ? "Match Scores Validated" : "Match Scores Submitted";
+    const actionText = isVerified
+      ? "Scores have been validated for this match."
+      : "Scores have been entered for this match.";
+    const footerText = isVerified
+      ? "The match result is now finalized in the league system."
+      : "Please log into the league system to verify or dispute the scores.";
+    const submittedByLabel = isVerified ? "Validated By" : "Submitted By";
+    const text = `${actionText} ${homeTeam} vs ${awayTeam}.
 
 Match Date: ${matchDate || "N/A"}
 Current Match Score: ${score}
-Submitted By: ${enteredBy || "Unknown"}
+${submittedByLabel}: ${enteredBy || "Unknown"}
 
-Please log into the league system to verify or dispute the scores.`;
+${footerText}`;
 
     const html = `
         <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h2>Match Scores Submitted</h2>
+          <h2>${heading}</h2>
 
-          <p>Scores have been entered for:</p>
+          <p>${actionText}</p>
 
           <p><strong>${homeTeam} vs ${awayTeam}</strong></p>
 
@@ -45,9 +57,9 @@ Please log into the league system to verify or dispute the scores.`;
 
           <p>Current Match Score: <strong>${score}</strong></p>
 
-          <p>Submitted By: <strong>${enteredBy || "Unknown"}</strong></p>
+          <p>${submittedByLabel}: <strong>${enteredBy || "Unknown"}</strong></p>
 
-          <p>Please log into the league system to verify or dispute the scores.</p>
+          <p>${footerText}</p>
 
           <hr />
 
@@ -57,7 +69,9 @@ Please log into the league system to verify or dispute the scores.`;
         </div>
       `;
 
-    const smsBody = `LWRPC scores entered: ${homeTeam} vs ${awayTeam}, ${score}. Please log in to verify or dispute.`;
+    const smsBody = isVerified
+      ? `LWRPC scores validated: ${homeTeam} vs ${awayTeam}, ${score}.`
+      : `LWRPC scores entered: ${homeTeam} vs ${awayTeam}, ${score}. Please log in to verify or dispute.`;
 
     const [emailResult, smsResult] = await Promise.all([
       sendEmailMessages({

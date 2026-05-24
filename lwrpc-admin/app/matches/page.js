@@ -194,7 +194,12 @@ export default function MatchesPage() {
     }
   }
 
-  async function deleteMatch(matchId) {
+  async function deleteMatch(match) {
+    if (isMatchLocked(match)) {
+      alert("This match is completed and verified. Use Reset Scores in Schedule Editor before deleting it.");
+      return;
+    }
+
     const ok = confirmDeleteAction({
       title: "Delete this match?",
       details: "This will delete the match plus generated match lines and individual game score rows. Any entered scores, DUPR export readiness, and standings impact for this match will be lost.",
@@ -205,7 +210,7 @@ export default function MatchesPage() {
     const { data: linesToDelete, error: findLineError } = await supabase
       .from("match_lines")
       .select("id")
-      .eq("match_id", matchId);
+      .eq("match_id", match.id);
 
     if (findLineError) {
       alert(findLineError.message);
@@ -228,7 +233,7 @@ export default function MatchesPage() {
       const { error: lineError } = await supabase
         .from("match_lines")
         .delete()
-        .eq("match_id", matchId);
+        .eq("match_id", match.id);
 
       if (lineError) {
         alert(lineError.message);
@@ -239,7 +244,7 @@ export default function MatchesPage() {
     const { error } = await supabase
       .from("matches")
       .delete()
-      .eq("id", matchId);
+      .eq("id", match.id);
 
     if (error) {
       alert(error.message);
@@ -530,8 +535,9 @@ export default function MatchesPage() {
                       </button>
 
                       <button
-                        onClick={() => deleteMatch(match.id)}
-                        className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
+                        onClick={() => deleteMatch(match)}
+                        disabled={isMatchLocked(match)}
+                        className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                       >
                         Delete
                       </button>
@@ -559,4 +565,8 @@ function FieldLabel({ label }) {
       {label}
     </label>
   );
+}
+
+function isMatchLocked(match) {
+  return match?.status === "completed" && match?.score_status === "verified";
 }
