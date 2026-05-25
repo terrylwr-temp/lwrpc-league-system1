@@ -32,6 +32,13 @@ export default function DashboardPage() {
   const [ready, setReady] = useState(false);
   const [dashboardCounts, setDashboardCounts] = useState(null);
   const [dashboardScope, setDashboardScope] = useState("active");
+  const [dashboardFilter, setDashboardFilter] = useState("scope");
+  const [dashboardRosterCountMode, setDashboardRosterCountMode] = useState("assignments");
+  const [dashboardFilterOptions, setDashboardFilterOptions] = useState({
+    seasons: [],
+    leagues: [],
+    divisions: [],
+  });
   const [loginMessages, setLoginMessages] = useState(() =>
     Object.fromEntries(
       LOGIN_MESSAGE_TEMPLATES.map((template) => [
@@ -60,21 +67,25 @@ export default function DashboardPage() {
     const today = localDateValue(new Date());
     const { start, end } = currentWeekDateRange();
 
-    const [
-      membersCount,
-      scopedLeagueData,
-      teamData,
-    ] = await Promise.all([
+    const [membersCount, leagueData, teamData] = await Promise.all([
       countRows("members"),
-      loadDashboardLeagues(today, dashboardScope),
+      loadDashboardLeagues(today, dashboardScope, dashboardFilter),
       loadTeamsForDashboard(),
     ]);
 
-    const scopedLeagueIds = scopedLeagueData.leagueIds;
-    const scopedSeasonIds = scopedLeagueData.seasonIds;
-    const scopedTeams = teamData.filter((team) =>
-      scopedLeagueIds.includes(team.divisions?.league_id)
-    );
+    const scopedLeagueIds = leagueData.leagueIds;
+    const scopedDivisionIds = leagueData.divisionIds;
+    const scopedSeasonIds = leagueData.seasonIds;
+    const scopedTeams = teamData.filter((team) => {
+      const divisionId = team.divisions?.id;
+      const leagueId = team.divisions?.league_id;
+
+      if (scopedDivisionIds.length > 0) {
+        return scopedDivisionIds.includes(divisionId);
+      }
+
+      return scopedLeagueIds.includes(leagueId);
+    });
     const scopedTeamIds = scopedTeams.map((team) => team.id).filter(Boolean);
 
     const [
@@ -83,31 +94,47 @@ export default function DashboardPage() {
       scopedRatingData,
       pendingVerificationCount,
     ] = await Promise.all([
-      countScopedMatches(scopedLeagueIds, (query) =>
+      countScopedMatches(leagueData, (query) =>
         query
           .gte("scheduled_date", start)
           .lte("scheduled_date", end)
       ),
       loadScopedRosterData(scopedTeamIds),
       loadScopedRatingData(scopedSeasonIds),
-      countScopedMatches(scopedLeagueIds, (query) =>
+      countScopedMatches(leagueData, (query) =>
         query.eq("score_status", "pending_verification")
       ),
     ]);
 
-    const playersOnTeamsCount = scopedRosterData.length;
+    const rosterAssignmentCount = scopedRosterData.length;
+    const uniqueRosterPlayerCount = uniqueValues(scopedRosterData.map((row) => row.member_id)).length;
     const teamsCount = scopedTeams.length;
 
     setDashboardCounts({
       members: membersCount,
-      playersOnTeams: playersOnTeamsCount,
+      playersOnTeamsAssignments: rosterAssignmentCount,
+      playersOnTeamsUnique: uniqueRosterPlayerCount,
       teams: teamsCount,
       matchesThisWeek: matchesThisWeekCount,
       pendingVerification: pendingVerificationCount,
       averageRosterCount: averageRosterCount(scopedTeams, scopedRosterData),
       averageTeamDupr: averageTeamDupr(scopedTeams, scopedRosterData, scopedRatingData),
     });
-  }, [dashboardScope]);
+  }, [dashboardFilter, dashboardScope]);
+
+  const loadDashboardFilterOptions = useCallback(async function loadDashboardFilterOptions() {
+    const [{ data: seasonData }, { data: leagueData }, { data: divisionData }] = await Promise.all([
+      supabase.from("seasons").select("id, name").order("name", { ascending: true }),
+      supabase.from("leagues").select("id, name, season_id, seasons(name)").order("name", { ascending: true }),
+      supabase.from("divisions").select("id, name, league_id, leagues(name, season_id, seasons(name))").order("name", { ascending: true }),
+    ]);
+
+    setDashboardFilterOptions({
+      seasons: seasonData || [],
+      leagues: leagueData || [],
+      divisions: divisionData || [],
+    });
+  }, []);
 
   const loadLoginMessages = useCallback(async function loadLoginMessages() {
     const { data } = await supabase
@@ -152,13 +179,14 @@ export default function DashboardPage() {
       if (user) {
         setReady(true);
         loadDashboardCounts();
+        loadDashboardFilterOptions();
         loadLoginMessages();
         loadGuideDocuments();
       }
     }
 
     run();
-  }, [loadDashboardCounts, loadGuideDocuments, loadLoginMessages, router]);
+  }, [loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, router]);
 
   function updateLoginMessage(templateKey, field, value) {
     setLoginMessages((current) => ({
@@ -352,13 +380,48 @@ export default function DashboardPage() {
   }
 
   const scopeHelper =
-    dashboardScope === "active"
-      ? "Active-season"
-      : "Current-entry";
+    dashboardFilterLabel(dashboardFilter, dashboardFilterOptions, dashboardScope);
+  const playersOnTeamsCount =
+    dashboardRosterCountMode === "unique"
+      ? dashboardCounts?.playersOnTeamsUnique
+      : dashboardCounts?.playersOnTeamsAssignments;
 
   const metricCards = [
     { label: "Members", value: formatCount(dashboardCounts?.members), helper: "Member records", tone: "slate" },
-    { label: "Players On Teams", value: formatCount(dashboardCounts?.playersOnTeams), helper: `${scopeHelper} roster assignments`, tone: "blue" },
+    {
+      label: "Players On Teams",
+      value: formatCount(playersOnTeamsCount),
+      helper: dashboardRosterCountMode === "unique"
+        ? `${scopeHelper} unique players`
+        : `${scopeHelper} roster assignments`,
+      tone: "blue",
+      action: (
+        <div className="mt-3 grid grid-cols-2 rounded-xl bg-white/15 p-1 text-[10px] font-black uppercase tracking-wide">
+          <button
+            type="button"
+            onClick={() => setDashboardRosterCountMode("assignments")}
+            className={`rounded-lg px-2 py-1.5 transition ${
+              dashboardRosterCountMode === "assignments"
+                ? "bg-white text-blue-900"
+                : "text-white hover:bg-white/10"
+            }`}
+          >
+            All Players
+          </button>
+          <button
+            type="button"
+            onClick={() => setDashboardRosterCountMode("unique")}
+            className={`rounded-lg px-2 py-1.5 transition ${
+              dashboardRosterCountMode === "unique"
+                ? "bg-white text-blue-900"
+                : "text-white hover:bg-white/10"
+            }`}
+          >
+            Unique
+          </button>
+        </div>
+      ),
+    },
     { label: "Teams", value: formatCount(dashboardCounts?.teams), helper: `${scopeHelper} teams`, tone: "emerald" },
     { label: "This Week", value: formatCount(dashboardCounts?.matchesThisWeek), helper: `${scopeHelper} scheduled matches`, tone: "amber" },
   ];
@@ -433,29 +496,71 @@ export default function DashboardPage() {
                   Jump into the administrative workflows used most often during setup, scheduling, match play, and scoring.
                 </p>
               </div>
-              <div className="flex rounded-2xl bg-white/10 p-1">
-                <button
-                  type="button"
-                  onClick={() => setDashboardScope("active")}
-                  className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
-                    dashboardScope === "active"
-                      ? "bg-white text-slate-950"
-                      : "text-slate-200 hover:bg-white/10"
-                  }`}
-                >
-                  Active Season
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setDashboardScope("current")}
-                  className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
-                    dashboardScope === "current"
-                      ? "bg-white text-slate-950"
-                      : "text-slate-200 hover:bg-white/10"
-                  }`}
-                >
-                  Not Active (Current Entries)
-                </button>
+              <div className="flex flex-col gap-3 md:items-end">
+                <label className="w-full md:w-96">
+                  <span className="mb-1 block text-xs font-black uppercase tracking-wide text-blue-200">
+                    Dashboard Scope
+                  </span>
+                  <select
+                    value={dashboardFilter}
+                    onChange={(event) => setDashboardFilter(event.target.value)}
+                    className="w-full rounded-xl border border-white/20 bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm"
+                  >
+                    <option value="scope">Use Active / Current Toggle</option>
+                    <option value="all">All Seasons</option>
+                    <optgroup label="Seasons">
+                      {dashboardFilterOptions.seasons.map((season) => (
+                        <option key={season.id} value={`season:${season.id}`}>
+                          {season.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Leagues">
+                      {dashboardFilterOptions.leagues.map((league) => (
+                        <option key={league.id} value={`league:${league.id}`}>
+                          {league.name}{league.seasons?.name ? ` / ${league.seasons.name}` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="Divisions">
+                      {dashboardFilterOptions.divisions.map((division) => (
+                        <option key={division.id} value={`division:${division.id}`}>
+                          {division.name}{division.leagues?.name ? ` / ${division.leagues.name}` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  </select>
+                </label>
+
+                <div className="flex rounded-2xl bg-white/10 p-1">
+                  <button
+                    type="button"
+                    onClick={() => setDashboardScope("active")}
+                    className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
+                      dashboardScope === "active"
+                        ? "bg-white text-slate-950"
+                        : "text-slate-200 hover:bg-white/10"
+                    }`}
+                  >
+                    Active Season
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDashboardScope("current")}
+                    className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
+                      dashboardScope === "current"
+                        ? "bg-white text-slate-950"
+                        : "text-slate-200 hover:bg-white/10"
+                    }`}
+                  >
+                    Not Active (Current Entries)
+                  </button>
+                </div>
+                {dashboardFilter !== "scope" && (
+                  <div className="max-w-sm text-right text-[11px] font-bold text-slate-300">
+                    Active / Current only applies when the dashboard scope uses the toggle.
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -686,6 +791,25 @@ export default function DashboardPage() {
   );
 }
 
+function dashboardFilterLabel(dashboardFilter, filterOptions, dashboardScope) {
+  const [filterType, filterId] = String(dashboardFilter || "scope").split(":");
+
+  if (filterType === "all") return "All-season";
+  if (filterType === "scope") {
+    return dashboardScope === "current" ? "Current-entry" : "Active-season";
+  }
+
+  const optionLists = {
+    season: filterOptions?.seasons || [],
+    league: filterOptions?.leagues || [],
+    division: filterOptions?.divisions || [],
+  };
+  const match = optionLists[filterType]?.find((option) => String(option.id) === String(filterId));
+
+  if (!match?.name) return "Selected";
+  return match.name;
+}
+
 async function countRows(tableName, applyFilters) {
   let query = supabase
     .from(tableName)
@@ -705,25 +829,73 @@ async function countRows(tableName, applyFilters) {
   return count ?? 0;
 }
 
-async function loadDashboardLeagues(today, dashboardScope) {
-  const { data, error } = await supabase
-    .from("leagues")
-    .select(`
-      id,
-      season_id,
-      seasons (
+async function loadDashboardLeagues(today, dashboardScope, dashboardFilter) {
+  const [{ data, error }, { data: divisionData, error: divisionError }] = await Promise.all([
+    supabase
+      .from("leagues")
+      .select(`
         id,
-        start_date,
-        end_date
-      )
-    `);
+        season_id,
+        seasons (
+          id,
+          start_date,
+          end_date
+        )
+      `),
+    supabase
+      .from("divisions")
+      .select("id, league_id"),
+  ]);
 
-  if (error) {
+  if (error || divisionError) {
     console.error("Unable to load dashboard leagues", error);
-    return { leagueIds: [], seasonIds: [] };
+    return { leagueIds: [], seasonIds: [], divisionIds: [] };
   }
 
-  const scopedLeagues = (data || []).filter((league) => {
+  const allLeagues = data || [];
+  const allDivisions = divisionData || [];
+  const [filterType, filterId] = String(dashboardFilter || "scope").split(":");
+
+  if (filterType === "all") {
+    return {
+      leagueIds: allLeagues.map((league) => league.id).filter(Boolean),
+      seasonIds: uniqueValues(allLeagues.map((league) => league.season_id)),
+      divisionIds: [],
+    };
+  }
+
+  if (filterType === "season") {
+    const scopedLeagues = allLeagues.filter((league) => String(league.season_id) === String(filterId));
+
+    return {
+      leagueIds: scopedLeagues.map((league) => league.id).filter(Boolean),
+      seasonIds: uniqueValues(scopedLeagues.map((league) => league.season_id)),
+      divisionIds: [],
+    };
+  }
+
+  if (filterType === "league") {
+    const league = allLeagues.find((row) => String(row.id) === String(filterId));
+
+    return {
+      leagueIds: league?.id ? [league.id] : [],
+      seasonIds: league?.season_id ? [league.season_id] : [],
+      divisionIds: [],
+    };
+  }
+
+  if (filterType === "division") {
+    const division = allDivisions.find((row) => String(row.id) === String(filterId));
+    const league = allLeagues.find((row) => String(row.id) === String(division?.league_id));
+
+    return {
+      leagueIds: division?.league_id ? [division.league_id] : [],
+      seasonIds: league?.season_id ? [league.season_id] : [],
+      divisionIds: division?.id ? [division.id] : [],
+    };
+  }
+
+  const scopedLeagues = allLeagues.filter((league) => {
     if (dashboardScope === "current") return true;
 
     const season = league.seasons;
@@ -734,6 +906,7 @@ async function loadDashboardLeagues(today, dashboardScope) {
   return {
     leagueIds: scopedLeagues.map((league) => league.id).filter(Boolean),
     seasonIds: uniqueValues(scopedLeagues.map((league) => league.season_id)),
+    divisionIds: [],
   };
 }
 
@@ -761,11 +934,15 @@ async function loadTeamsForDashboard() {
   return (data || []).filter((team) => team.is_active !== false);
 }
 
-async function countScopedMatches(scopedLeagueIds, applyFilters) {
-  if (!scopedLeagueIds.length) return 0;
+async function countScopedMatches(scopeData, applyFilters) {
+  if (!scopeData.leagueIds.length) return 0;
 
   return countRows("matches", (query) => {
-    let scopedQuery = query.in("league_id", scopedLeagueIds);
+    let scopedQuery = query.in("league_id", scopeData.leagueIds);
+
+    if (scopeData.divisionIds.length > 0) {
+      scopedQuery = scopedQuery.in("division_id", scopeData.divisionIds);
+    }
 
     if (applyFilters) {
       scopedQuery = applyFilters(scopedQuery);
@@ -889,7 +1066,7 @@ function localDateValue(date) {
   return `${year}-${month}-${day}`;
 }
 
-function MetricCard({ label, value, helper, tone }) {
+function MetricCard({ label, value, helper, tone, action }) {
   const tones = {
     slate: "bg-slate-900 text-white",
     blue: "bg-blue-700 text-white",
@@ -908,6 +1085,7 @@ function MetricCard({ label, value, helper, tone }) {
           {helper}
         </div>
       )}
+      {action}
     </div>
   );
 }
