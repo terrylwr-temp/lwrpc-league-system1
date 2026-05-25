@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
+import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { useState } from "react";
 
 export default function TeamScheduleModal({
@@ -70,7 +70,7 @@ export default function TeamScheduleModal({
         <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[290px_minmax(0,1fr)]">
           <aside className="max-h-40 overflow-auto border-b border-slate-200 bg-slate-100 p-3 sm:p-4 md:max-h-[72vh] md:border-b-0 md:border-r">
             <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-              Teams
+              Teams sorted by Rank
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:block md:space-y-2">
               {teams.map((team) => (
@@ -84,7 +84,7 @@ export default function TeamScheduleModal({
                       : "border-white bg-white text-slate-800 hover:border-blue-200 hover:bg-blue-50"
                   }`}
                 >
-                  <span>{team.name}</span>
+                  <span>{team.standing?.rank ? `#${team.standing.rank} ` : ""}{team.name}</span>
                   <span className={`mt-1 block text-xs ${
                     String(team.id) === String(selectedTeamId)
                       ? "text-slate-300"
@@ -219,7 +219,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById, rat
 
         <div className={compact ? "w-full rounded-xl border border-slate-200 bg-slate-50 p-3 md:w-56 md:justify-self-end" : "rounded-lg bg-slate-100 px-3 py-2 text-right"}>
           <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
-            {match.score_status ? match.score_status.replaceAll("_", " ") : match.status || "scheduled"}
+            {formatScoreStatus(match)}
           </div>
           {compact ? (
             <div className="mt-2 space-y-1">
@@ -388,6 +388,23 @@ function formatTeamNameWithRecord(team, teamRecordById, fallback) {
 
 function formatGameStatus(status) {
   return status ? status.replaceAll("_", " ") : "scheduled";
+}
+
+function formatScoreStatus(match) {
+  const status = match?.score_status || "not_entered";
+
+  if (status === "not_entered") return "Not Entered";
+
+  const label = status.replaceAll("_", " ");
+  const titleLabel = label.replace(/\b\w/g, (letter) => letter.toUpperCase());
+  const timestamp =
+    status === "verified"
+      ? match?.score_verified_at
+      : match?.score_entered_at;
+
+  return timestamp
+    ? `${titleLabel} - ${formatDisplayTimestampShort(timestamp)}`
+    : titleLabel;
 }
 
 function formatDate(value) {

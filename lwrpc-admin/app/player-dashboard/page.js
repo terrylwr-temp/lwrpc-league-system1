@@ -647,19 +647,30 @@ export default function PlayerDashboardPage() {
     return Number.isNaN(number) ? "NR" : number.toFixed(2);
   }
 
-  function mySeasonDuprSummary() {
-    const seasonDuprTeam = visibleTeams.find(
-      (team) => (team.divisions?.rating_type || "dupr") === "dupr"
-    );
+  function mySelectedTeamRatingSummary() {
+    const selectedTeam =
+      visibleTeams.find((team) => String(team.id) === String(selectedPlayerTeamId)) ||
+      visibleTeams[0];
 
-    if (!seasonDuprTeam) return null;
+    if (!selectedTeam) return null;
 
-    return ratingForMember(
-      member?.id,
-      seasonDuprTeam.divisions?.leagues?.season_id,
-      "dupr",
-      member
-    );
+    const ratingType = selectedTeam.divisions?.rating_type || "dupr";
+    const label =
+      ratingType === "primetime"
+        ? "My Age-Based Rating"
+        : ratingType === "self_rating"
+          ? "My Self Rating"
+          : "My Season DUPR";
+
+    return {
+      label,
+      value: ratingForMember(
+        member?.id,
+        selectedTeam.divisions?.leagues?.season_id,
+        ratingType,
+        member
+      ),
+    };
   }
 
   function selectPanel(panel) {
@@ -715,6 +726,8 @@ export default function PlayerDashboardPage() {
           week_number,
           status,
           score_status,
+          score_entered_at,
+          score_verified_at,
           home_score,
           away_score,
           winning_team_id,
@@ -851,6 +864,7 @@ export default function PlayerDashboardPage() {
                 href="https://lwrpickleballclub.com/manage-membership"
                 target="_blank"
                 rel="noreferrer"
+                title="This will take you to the Manage Membership website."
                 className="rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-950 hover:bg-slate-100"
               >
                 Membership Info
@@ -875,9 +889,16 @@ export default function PlayerDashboardPage() {
                 </div>
                 <h2 className="mt-1 text-2xl font-black">My Teams</h2>
               </div>
-              <div className="flex flex-col gap-1 text-sm font-semibold text-slate-300 md:items-end">
+              <div className="flex flex-col gap-2 text-sm font-semibold text-slate-300 md:items-end">
                 <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                  <span>{visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}</span>
+                  <span className="rounded-xl bg-white/10 px-3 py-2 text-xs font-black text-white">
+                    {visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}
+                  </span>
+                  {mySelectedTeamRatingSummary() && (
+                    <span className="rounded-xl bg-emerald-400 px-3 py-2 text-xs font-black text-slate-950">
+                      {mySelectedTeamRatingSummary().label}: {mySelectedTeamRatingSummary().value}
+                    </span>
+                  )}
                   <button
                     type="button"
                     onClick={() => setShowPreviousSeasonTeams((value) => !value)}
@@ -886,11 +907,6 @@ export default function PlayerDashboardPage() {
                     {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
                   </button>
                 </div>
-                {mySeasonDuprSummary() && (
-                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white">
-                    My Season DUPR: {mySeasonDuprSummary()}
-                  </span>
-                )}
               </div>
             </div>
           </div>
@@ -916,7 +932,8 @@ export default function PlayerDashboardPage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 gap-3 border-t border-slate-100 bg-slate-50 p-4 md:grid-cols-3 md:p-5">
+          <div className="border-t border-slate-100 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-4 shadow-inner md:p-5">
+          <div className="grid grid-cols-1 gap-3 rounded-2xl border border-white/80 bg-white/70 p-3 shadow-xl ring-1 ring-slate-200 md:grid-cols-3">
             <DashboardOption
               active={activePanel === "history"}
               label="My Play History"
@@ -938,6 +955,7 @@ export default function PlayerDashboardPage() {
               tone="gray"
               onClick={() => selectPanel("upcoming")}
             />
+          </div>
           </div>
         </section>
 
@@ -1233,7 +1251,7 @@ function DashboardOption({ active, label, value, tone = "blue", onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`group rounded-2xl border-2 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.blue}`}
+      className={`group rounded-2xl border-2 p-4 text-left shadow-lg ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.blue}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div>
@@ -1317,11 +1335,19 @@ function TeamCard({ team, selected, onSelect, onOpenDocument, onOpenRoster }) {
       </div>
       <div className={`grid grid-cols-1 gap-2 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3 ${selected ? "bg-blue-50" : "bg-white"}`}>
         {teamCaptainContacts(team).map((contact) => (
-          <div key={contact.label} className="rounded-xl bg-white px-3 py-2 shadow-sm">
+          <a
+            key={contact.label}
+            href={contact.email ? `mailto:${contact.email}` : undefined}
+            title={contact.email ? `Send an email to ${contact.name || contact.label}.` : "No email address on file."}
+            onClick={(event) => event.stopPropagation()}
+            className={`rounded-xl bg-white px-3 py-2 shadow-sm transition ${
+              contact.email ? "hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md" : "cursor-default"
+            }`}
+          >
             <div className="font-bold text-slate-900">{contact.label}</div>
             <div>{contact.name || "Not assigned"}</div>
             {contact.phone && <div>{contact.phone}</div>}
-          </div>
+          </a>
         ))}
       </div>
       <div className="border-t border-slate-200 bg-white px-4 py-3">
@@ -1514,6 +1540,7 @@ function teamCaptainContacts(team) {
     label: item.label,
     name: formatMemberName(item.member),
     phone: formatPhoneNumberForStorage(item.member?.phone),
+    email: item.member?.email || "",
   }));
 }
 

@@ -52,6 +52,10 @@ export default function TeamRosterPage() {
             id,
             name,
             season_id,
+            seasons (
+              id,
+              name
+            ),
             rosters_locked
           )
         ),
@@ -339,6 +343,123 @@ export default function TeamRosterPage() {
     return rating.toFixed(2);
   }
 
+  function hasNrDuprDoublesRating(member) {
+    const ratingRow = getSeasonRating(member.id);
+    const rawRating = ratingRow?.dupr_doubles_rating;
+
+    return String(rawRating || "").trim().toUpperCase() === "NR";
+  }
+
+  function ratingRangeLabel() {
+    const minRating = team?.divisions?.min_dupr;
+    const maxRating = team?.divisions?.max_dupr;
+
+    if (minRating !== null && minRating !== undefined && maxRating !== null && maxRating !== undefined) {
+      return `${minRating} to ${maxRating}`;
+    }
+
+    if (maxRating !== null && maxRating !== undefined) {
+      return `at or below ${maxRating}`;
+    }
+
+    if (minRating !== null && minRating !== undefined) {
+      return `at or above ${minRating}`;
+    }
+
+    return "not set";
+  }
+
+  function selectedSeasonName() {
+    return team?.divisions?.leagues?.seasons?.name || "Season not set";
+  }
+
+  function playerRatingEligibility(member) {
+    const playerRating = getPlayerRating(member);
+    const minRating = team?.divisions?.min_dupr;
+    const maxRating = team?.divisions?.max_dupr;
+
+    if (playerRating === null || Number.isNaN(playerRating)) {
+      return "Rating Needed";
+    }
+
+    if (
+      minRating !== null &&
+      minRating !== undefined &&
+      playerRating < Number(minRating)
+    ) {
+      return "Not Eligible";
+    }
+
+    if (
+      maxRating !== null &&
+      maxRating !== undefined &&
+      playerRating > Number(maxRating)
+    ) {
+      return "Not Eligible";
+    }
+
+    return "Eligible";
+  }
+
+  function captainAlertDetails() {
+    const captains = [
+      team?.captain,
+      team?.co_captain_1,
+      team?.co_captain_2,
+    ].filter(Boolean);
+
+    return captains
+      .map((captain, index) => ({
+        label: index === 0 ? "Captain" : `Co-Captain ${index}`,
+        name: formatMemberName(captain) || "Unknown",
+        email: captain.email || "No email on file",
+      }))
+      .map((captain) => `${captain.label}: ${captain.name} <${captain.email}>`)
+      .join("\n") || "No captain listed";
+  }
+
+  async function sendRatingCheckAlert(member, reason) {
+    const playerName = formatMemberName(member) || "Unknown player";
+    const subject = `Roster rating check needed: ${playerName}`;
+    const text = [
+      "A player was added to a team roster and needs a rating check.",
+      "",
+      `Player: ${playerName}`,
+      `Team: ${team?.name || "Unknown team"}`,
+      `Reason: ${reason}`,
+      `Rating Type: ${getRatingLabel()}`,
+      `Team Rating Range: ${ratingRangeLabel()}`,
+      "",
+      "Captain Contacts:",
+      captainAlertDetails(),
+      "",
+      "Please check this player and update their rating if needed.",
+    ].join("\n");
+
+    const response = await fetch("/api/notifications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        emails: ["info@lwrpickleballclub.com"],
+        phones: [],
+        subject,
+        text,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Rating check alert failed");
+    }
+
+    const result = await response.json();
+
+    if (Number(result?.email?.sent || 0) < 1) {
+      throw new Error(result?.email?.reason || "Rating check alert was not sent");
+    }
+  }
+
 function getAverageTeamRating() {
   if (!roster.length) {
     return "—";
@@ -465,6 +586,10 @@ function getAverageTeamRating() {
     }
 
     const playerRating = getPlayerRating(member);
+    const missingRating =
+      playerRating === null ||
+      Number.isNaN(playerRating);
+    const nrDuprDoublesRating = hasNrDuprDoublesRating(member);
     const minRating = team?.divisions?.min_dupr;
     const maxRating = team?.divisions?.max_dupr;
 
@@ -491,22 +616,13 @@ function getAverageTeamRating() {
     }
 
     if (outsideRange) {
-      if (rostersLocked) {
-        alert(`${member.first_name} ${member.last_name} is outside the division ${getRatingLabel()} range and cannot be added while rosters are locked.`);
-        return;
-      }
-
-      const ok = confirm(
-        `${member.first_name} ${member.last_name} appears outside the division ${getRatingLabel()} range.\n\nContinue anyway?`
+      alert(
+        `${formatMemberName(member)} is outside the Team Rating Range (${ratingRangeLabel()}) and cannot be added.`
       );
-
-      if (!ok) return;
+      return;
     }
 
-    if (
-      playerRating === null ||
-      Number.isNaN(playerRating)
-    ) {
+    if (missingRating) {
       if (rostersLocked) {
         alert(`${member.first_name} ${member.last_name} does not have a ${getRatingLabel()} entered for this season and cannot be added while rosters are locked.`);
         return;
@@ -538,6 +654,17 @@ function getAverageTeamRating() {
     if (error) {
       alert(error.message);
       return;
+    }
+
+    if (missingRating || nrDuprDoublesRating) {
+      const reasons = [];
+      if (missingRating) reasons.push(`No ${getRatingLabel()} entered`);
+      if (nrDuprDoublesRating) reasons.push("NR DUPR Doubles rating");
+
+      await sendRatingCheckAlert(member, reasons.join("; ")).catch((alertError) => {
+        console.warn("Roster rating check alert failed.", alertError);
+        alert("Player added, but the rating check email could not be sent. Please notify the league manually.");
+      });
     }
 
     setSelectedMemberId("");
@@ -653,13 +780,13 @@ function getAverageTeamRating() {
 
         </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow">
+        <div className="rounded-2xl bg-white p-4 shadow md:p-5">
 
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
 
             <div>
 
-              <h1 className="text-3xl font-bold text-slate-900">
+              <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
                 {team.name}
               </h1>
 
@@ -669,13 +796,13 @@ function getAverageTeamRating() {
 
             </div>
 
-            <div className="rounded-2xl bg-slate-900 p-6 text-white shadow-lg">
+            <div className="rounded-xl bg-slate-900 p-4 text-white shadow-lg">
 
               <div className="text-xs uppercase tracking-wide text-slate-300">
                 Active Players
               </div>
 
-              <div className="mt-2 text-4xl font-bold">
+              <div className="mt-1 text-3xl font-bold">
                 {roster.length}
               </div>
 
@@ -683,7 +810,7 @@ function getAverageTeamRating() {
 
           </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-5">
+          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-6">
 
             <Info
               label="Division"
@@ -697,12 +824,17 @@ function getAverageTeamRating() {
 
             <Info
               label="Team Rating Range"
-              value={`${team.divisions?.min_dupr ?? "—"} to ${team.divisions?.max_dupr ?? "—"}`}
+              value={ratingRangeLabel()}
             />
-	<Info
-	  label="Team Average Rating"
-	  value={getAverageTeamRating()}
-	/>
+            <Info
+              label="Season"
+              value={selectedSeasonName()}
+            />
+
+            <Info
+              label="Team Average Rating"
+              value={getAverageTeamRating()}
+            />
             <Info
               label="Home Location"
               value={team.locations?.name || "—"}
@@ -728,7 +860,7 @@ function getAverageTeamRating() {
               </h2>
 
               <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
-                {availableMembers.length} Eligible
+                {availableMembers.length} Available
               </div>
 
             </div>
@@ -778,7 +910,7 @@ function getAverageTeamRating() {
               <div>
 
                 <label className="mb-1 block text-sm font-semibold text-slate-700">
-                  Eligible Players
+                  Available Players
                 </label>
 
                 <select
@@ -799,7 +931,7 @@ function getAverageTeamRating() {
                       {" · "}
                       {getRatingLabel()}: {getRatingDisplay(member)}
                       {" · "}
-                      DUPR ID: {member.dupr_id || "—"}
+                      {playerRatingEligibility(member)}
                     </option>
                   ))}
                 </select>

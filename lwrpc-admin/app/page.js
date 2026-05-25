@@ -35,6 +35,7 @@ export default function DashboardPage() {
     )
   );
   const [savingMessageKey, setSavingMessageKey] = useState("");
+  const [masterResetting, setMasterResetting] = useState(false);
 
   const loadDashboardCounts = useCallback(async function loadDashboardCounts() {
     setDashboardCounts(null);
@@ -168,6 +169,57 @@ export default function DashboardPage() {
     }
 
     alert(`${template.label} saved.`);
+  }
+
+  async function runMasterResetAll() {
+    const firstOk = confirm([
+      "Master Reset All will permanently remove generated league operations data.",
+      "",
+      "It will delete all matches, match lines, game scores, saved match setup lineups, byes, standings, and team roster rows.",
+      "It will clear team captains/co-captains, mark all teams inactive, and change Captain user roles back to Player.",
+      "Saved Schedule Settings will not be deleted.",
+      "",
+      "Continue?",
+    ].join("\n"));
+
+    if (!firstOk) return;
+
+    const secondOk = confirm("This cannot be undone from the app. Are you absolutely sure you want to reset all leagues and teams?");
+    if (!secondOk) return;
+
+    const typed = prompt('Final confirmation: type MASTER RESET ALL to continue.');
+    if (String(typed || "").trim() !== "MASTER RESET ALL") return;
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before running Master Reset All.");
+      return;
+    }
+
+    setMasterResetting(true);
+
+    const response = await fetch("/api/master-reset", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        confirmation: "MASTER RESET ALL",
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setMasterResetting(false);
+
+    if (!response.ok || !result.success) {
+      alert(result.error || "Master Reset All failed.");
+      return;
+    }
+
+    alert("Master Reset All complete.");
+    loadDashboardCounts();
   }
 
   if (!ready) {
@@ -369,6 +421,25 @@ export default function DashboardPage() {
                 </div>
               );
             })}
+          </div>
+        </section>
+
+        <section className="mt-6 overflow-hidden rounded-2xl border border-red-200 bg-white shadow">
+          <div className="border-b border-red-100 bg-red-50 px-4 py-5 md:px-6">
+            <h2 className="text-xl font-black text-red-950">Master Reset</h2>
+            <p className="mt-1 text-sm font-semibold text-red-800">
+              Deletes generated schedules, matches, scores, standings, byes, rosters, and captain assignments. Saved Schedule Settings are preserved.
+            </p>
+          </div>
+          <div className="p-4 md:p-6">
+            <button
+              type="button"
+              onClick={runMasterResetAll}
+              disabled={masterResetting}
+              className="rounded-xl bg-red-700 px-5 py-3 text-sm font-black uppercase tracking-wide text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            >
+              {masterResetting ? "Resetting..." : "Master Reset All"}
+            </button>
           </div>
         </section>
 

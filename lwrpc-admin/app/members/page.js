@@ -78,7 +78,12 @@ export default function MembersPage() {
       teamsByMemberId = (teamRows || []).reduce((byMember, row) => {
         if (!memberIdSet.has(String(row.member_id))) return byMember;
         if (!byMember[row.member_id]) byMember[row.member_id] = [];
-        if (row.teams?.is_active !== false) byMember[row.member_id].push(row.teams);
+        if (row.teams?.is_active !== false) {
+          byMember[row.member_id].push({
+            ...row.teams,
+            roster_role: memberTeamRole(row.member_id, row.teams),
+          });
+        }
         return byMember;
       }, {});
     }
@@ -770,6 +775,9 @@ async function loadAllMemberTeamRows() {
           id,
           name,
           is_active,
+          captain_member_id,
+          co_captain_member_id,
+          co_captain_2_member_id,
           divisions (
             id,
             name,
@@ -792,6 +800,21 @@ async function loadAllMemberTeamRows() {
   }
 
   return { rows, error: null };
+}
+
+function memberTeamRole(memberId, team) {
+  if (String(team?.captain_member_id || "") === String(memberId || "")) {
+    return "Captain";
+  }
+
+  if (
+    String(team?.co_captain_member_id || "") === String(memberId || "") ||
+    String(team?.co_captain_2_member_id || "") === String(memberId || "")
+  ) {
+    return "Co-Captain";
+  }
+
+  return "Player";
 }
 
 function initialMemberForm() {
@@ -1030,6 +1053,9 @@ function MemberTeamsModal({ member, onClose }) {
                 >
                   <div className="text-lg font-black text-slate-900">
                     {team.name || "Unnamed Team"}
+                  </div>
+                  <div className="mt-1 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-blue-900">
+                    {team.roster_role || "Player"}
                   </div>
                   <div className="mt-1 text-sm font-semibold text-slate-600">
                     {team.divisions?.leagues?.name || "League TBD"} / {team.divisions?.name || "Division TBD"}

@@ -621,6 +621,8 @@ export default function TeamsPage() {
           week_number,
           status,
           score_status,
+          score_entered_at,
+          score_verified_at,
           home_score,
           away_score,
           winning_team_id,

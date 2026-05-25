@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
+import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 
 const TEMPLATE_KEY = "score_reminder";
@@ -61,6 +61,7 @@ export default function ScoringPage() {
   const [templateOpen, setTemplateOpen] = useState(false);
   const [exportingScores, setExportingScores] = useState(false);
   const [includeAlreadyExported, setIncludeAlreadyExported] = useState(false);
+  const [scoreMembersById, setScoreMembersById] = useState({});
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -96,6 +97,10 @@ export default function ScoringPage() {
         week_number,
         status,
         score_status,
+        score_entered_by_member_id,
+        score_entered_at,
+        score_verified_by_member_id,
+        score_verified_at,
         score_exported_at,
         home_score,
         away_score,
@@ -178,6 +183,22 @@ export default function ScoringPage() {
     }
 
     const sortedMatches = [...(data || [])].sort(compareScoringMatches);
+    const scoreMemberIds = [
+      ...sortedMatches.map((match) => match.score_entered_by_member_id),
+      ...sortedMatches.map((match) => match.score_verified_by_member_id),
+    ].filter(Boolean);
+
+    if (scoreMemberIds.length > 0) {
+      const { data: scoreMembers } = await supabase
+        .from("members")
+        .select("id, first_name, last_name, email")
+        .in("id", [...new Set(scoreMemberIds)]);
+
+      setScoreMembersById(Object.fromEntries((scoreMembers || []).map((member) => [String(member.id), member])));
+    } else {
+      setScoreMembersById({});
+    }
+
     setMatches(sortedMatches);
     setSelectedMatchIds(
       sortedMatches
@@ -551,6 +572,7 @@ export default function ScoringPage() {
                 key={match.id}
                 match={match}
                 selected={selectedMatchIds.includes(match.id)}
+                membersById={scoreMembersById}
                 onToggle={() => toggleMatch(match.id)}
                 onOpen={() => router.push(`/matches/${match.id}`)}
               />
@@ -568,7 +590,7 @@ export default function ScoringPage() {
   );
 }
 
-function MatchRow({ match, selected, onToggle, onOpen }) {
+function MatchRow({ match, selected, membersById, onToggle, onOpen }) {
   const contacts = captainContacts(match);
 
   return (
@@ -604,6 +626,10 @@ function MatchRow({ match, selected, onToggle, onOpen }) {
               <span>{match.locations?.name || "No Location"}</span>
               <span>Status: {match.status || "scheduled"}</span>
             </div>
+
+            {match.status === "completed" && (
+              <ScoreAuditDetails match={match} membersById={membersById} />
+            )}
 
             <div className="mt-2 text-sm text-slate-700">
               <span className="font-semibold">Captains:</span>{" "}
@@ -671,6 +697,32 @@ function duprPlayerName(member) {
     member.full_name ||
     `${member.first_name || ""} ${member.last_name || ""}`.trim()
   );
+}
+
+function ScoreAuditDetails({ match, membersById }) {
+  const enteredBy = scoreMemberName(membersById?.[String(match.score_entered_by_member_id || "")]);
+  const verifiedBy = scoreMemberName(membersById?.[String(match.score_verified_by_member_id || "")]);
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold text-slate-600">
+      {match.score_entered_at && (
+        <span>
+          Entered: {formatDisplayTimestampShort(match.score_entered_at)}
+          {enteredBy ? ` by ${enteredBy}` : ""}
+        </span>
+      )}
+      {match.score_verified_at && (
+        <span>
+          Verified: {formatDisplayTimestampShort(match.score_verified_at)}
+          {verifiedBy ? ` by ${verifiedBy}` : ""}
+        </span>
+      )}
+    </div>
+  );
+}
+
+function scoreMemberName(member) {
+  return `${member?.first_name || ""} ${member?.last_name || ""}`.trim() || member?.email || "";
 }
 
 function ScoreStatusBadge({ value }) {

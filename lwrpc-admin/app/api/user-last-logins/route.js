@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { hasRole } from "../../lib/permissions";
+import { normalizeEmailAddress } from "../../lib/email";
 
 export const runtime = "nodejs";
 
@@ -13,7 +14,7 @@ function adminClient() {
     process.env.SERVICE_ROLE_KEY;
 
   if (!url || !key) {
-    throw new Error("Notification template saves require SUPABASE_SERVICE_ROLE_KEY on the server.");
+    throw new Error("Last login lookup requires SUPABASE_SERVICE_ROLE_KEY on the server.");
   }
 
   return createClient(url, key, {
@@ -42,41 +43,6 @@ function anonClient() {
 
 export async function GET(req) {
   try {
-    const url = new URL(req.url);
-    const templateKey = url.searchParams.get("template_key");
-
-    if (!templateKey) {
-      return NextResponse.json(
-        { success: false, error: "Template key is required." },
-        { status: 400 }
-      );
-    }
-
-    const supabase = adminClient();
-    const { data, error } = await supabase
-      .from("notification_templates")
-      .select("id, template_key, subject, body, updated_at")
-      .eq("template_key", templateKey)
-      .maybeSingle();
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ success: true, template: data || null });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(req) {
-  try {
     const authHeader = req.headers.get("authorization") || "";
     const token = authHeader.replace(/^Bearer\s+/i, "").trim();
 
@@ -98,7 +64,7 @@ export async function POST(req) {
     }
 
     const supabase = adminClient();
-    const { data: roleRows, error: roleError } = await supabase
+    const { data: memberRow, error: roleError } = await supabase
       .from("members")
       .select("id, user_roles(role)")
       .eq("email", userData.user.email)
@@ -111,44 +77,40 @@ export async function POST(req) {
       );
     }
 
-    const role = roleRows?.user_roles?.[0]?.role || "player";
+    const role = memberRow?.user_roles?.[0]?.role || "player";
 
-    if (!hasRole(role, "league_manager")) {
+    if (!hasRole(role, "commissioner")) {
       return NextResponse.json(
-        { success: false, error: "Only League Managers and Commissioners can save dashboard messages." },
+        { success: false, error: "Only Commissioners can view user last logins." },
         { status: 403 }
       );
     }
 
-    const { template_key, subject, body } = await req.json();
+    const lastLoginsByEmail = {};
+    let page = 1;
+    const perPage = 1000;
 
-    if (!template_key) {
-      return NextResponse.json(
-        { success: false, error: "Template key is required." },
-        { status: 400 }
-      );
+    while (page < 20) {
+      const { data, error } = await supabase.auth.admin.listUsers({
+        page,
+        perPage,
+      });
+
+      if (error) throw error;
+
+      (data?.users || []).forEach((user) => {
+        const email = normalizeEmailAddress(user.email);
+        if (email) lastLoginsByEmail[email] = user.last_sign_in_at || null;
+      });
+
+      if (!data?.users || data.users.length < perPage) break;
+      page += 1;
     }
 
-    const { error } = await supabase
-      .from("notification_templates")
-      .upsert(
-        {
-          template_key,
-          subject: subject || "",
-          body: body || "",
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "template_key" }
-      );
-
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({
+      success: true,
+      lastLoginsByEmail,
+    });
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message },

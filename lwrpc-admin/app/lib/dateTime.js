@@ -67,3 +67,26 @@ export function formatDisplayTimestamp(value, fallback = "-") {
     timeZoneName: "short",
   }).format(date);
 }
+
+export function formatDisplayTimestampShort(value, fallback = "-") {
+  if (!value) return fallback;
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TIME_ZONE,
+    month: "numeric",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).formatToParts(date);
+  const byType = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+
+  return `${byType.month}/${byType.day}/${byType.year} ${byType.hour}:${byType.minute}${byType.dayPeriod}`;
+}

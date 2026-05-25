@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
-import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
+import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
 
@@ -1354,7 +1354,7 @@ export default function MatchDetailPage() {
                   Status: {match.status || "scheduled"}
                 </span>
                 <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-900">
-                  Score: {match.score_status || "not_entered"}
+                  Score: {formatMatchScoreStatus(match)}
                 </span>
                 <span className="rounded-full bg-green-100 px-3 py-1 text-green-900">
                   Winner: {matchSummary.winnerName}
@@ -1744,6 +1744,21 @@ function capitalizeFirst(value) {
   const text = String(value).trim();
   if (!text) return "";
   return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function formatMatchScoreStatus(match) {
+  const status = match?.score_status || "not_entered";
+
+  if (status === "not_entered") return "not_entered";
+
+  const timestamp =
+    status === "verified"
+      ? match?.score_verified_at
+      : match?.score_entered_at;
+
+  return timestamp
+    ? `${status} - ${formatDisplayTimestampShort(timestamp)}`
+    : status;
 }
 
 

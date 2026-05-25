@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/auth";
 
 export default function LoginMessageModal({ templateKey, audienceLabel }) {
   const [message, setMessage] = useState(null);
@@ -11,11 +10,9 @@ export default function LoginMessageModal({ templateKey, audienceLabel }) {
     let active = true;
 
     async function loadMessage() {
-      const { data } = await supabase
-        .from("notification_templates")
-        .select("id, subject, body, updated_at")
-        .eq("template_key", templateKey)
-        .maybeSingle();
+      const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(templateKey)}`);
+      const result = await response.json().catch(() => ({}));
+      const data = result?.template;
 
       if (!active || !data?.body?.trim()) return;
 

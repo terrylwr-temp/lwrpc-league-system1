@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { formatDisplayDate } from "../lib/dateTime";
+import { formatDisplayDate, formatDisplayTimestampShort } from "../lib/dateTime";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function ScheduleEditorPage() {
@@ -18,6 +18,7 @@ export default function ScheduleEditorPage() {
   const [teams, setTeams] = useState([]);
   const [availability, setAvailability] = useState([]);
   const [leagueBlackouts, setLeagueBlackouts] = useState([]);
+  const [scoreMembersById, setScoreMembersById] = useState({});
 
   const [leagueFilter, setLeagueFilter] = useState("");
   const [divisionFilters, setDivisionFilters] = useState([]);
@@ -693,6 +694,22 @@ export default function ScheduleEditorPage() {
       return;
     }
 
+    const scoreMemberIds = [
+      ...(matchData || []).map((match) => match.score_entered_by_member_id),
+      ...(matchData || []).map((match) => match.score_verified_by_member_id),
+    ].filter(Boolean);
+
+    if (scoreMemberIds.length > 0) {
+      const { data: scoreMembers } = await supabase
+        .from("members")
+        .select("id, first_name, last_name, email")
+        .in("id", [...new Set(scoreMemberIds)]);
+
+      setScoreMembersById(Object.fromEntries((scoreMembers || []).map((member) => [String(member.id), member])));
+    } else {
+      setScoreMembersById({});
+    }
+
     await rebuildDivisionStandings(match.division_id);
     alert("Scores reset. Saved Match Setup teams were preserved.");
     loadData();
@@ -1134,6 +1151,9 @@ export default function ScheduleEditorPage() {
               <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">
                 Locked: completed and verified
               </div>
+            )}
+            {match.status === "completed" && (
+              <ScoreAuditDetails match={match} membersById={scoreMembersById} />
             )}
           </div>
 
@@ -1643,4 +1663,30 @@ export default function ScheduleEditorPage() {
 
 function isMatchLocked(match) {
   return match?.status === "completed" && match?.score_status === "verified";
+}
+
+function ScoreAuditDetails({ match, membersById }) {
+  const enteredBy = scoreMemberName(membersById?.[String(match.score_entered_by_member_id || "")]);
+  const verifiedBy = scoreMemberName(membersById?.[String(match.score_verified_by_member_id || "")]);
+
+  return (
+    <div className="mt-1 space-y-0.5 text-xs font-semibold text-slate-600">
+      {match.score_entered_at && (
+        <div>
+          Entered: {formatDisplayTimestampShort(match.score_entered_at)}
+          {enteredBy ? ` by ${enteredBy}` : ""}
+        </div>
+      )}
+      {match.score_verified_at && (
+        <div>
+          Verified: {formatDisplayTimestampShort(match.score_verified_at)}
+          {verifiedBy ? ` by ${verifiedBy}` : ""}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function scoreMemberName(member) {
+  return `${member?.first_name || ""} ${member?.last_name || ""}`.trim() || member?.email || "";
 }

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import { requireRole, supabase } from "../lib/auth";
-import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
+import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import TeamScheduleModal from "../components/TeamScheduleModal";
@@ -505,7 +505,7 @@ export default function CaptainDashboardPage() {
               </div>
               <div className="rounded-xl bg-slate-50 px-3 py-2">
                 <div className="text-xs font-black uppercase tracking-wide text-slate-500">Score Status</div>
-                <div className="font-bold text-slate-900">{match.score_status || "not_entered"}</div>
+                <div className="font-bold text-slate-900">{formatScoreStatus(match)}</div>
               </div>
             </div>
 
@@ -1063,6 +1063,8 @@ export default function CaptainDashboardPage() {
             week_number,
             status,
             score_status,
+            score_entered_at,
+            score_verified_at,
             home_score,
             away_score,
             is_published,
@@ -1457,7 +1459,7 @@ export default function CaptainDashboardPage() {
                     {stats.playerCount ?? 0}
                   </span>
                   <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
-                    <span className="block text-[10px] uppercase tracking-wide text-slate-500">Points</span>
+                    <span className="block text-[10px] uppercase tracking-wide text-slate-500">Season Points</span>
                     {standing?.standings_points ?? 0}
                   </span>
                   <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
@@ -1493,7 +1495,7 @@ export default function CaptainDashboardPage() {
                     }}
                     className="rounded-xl bg-indigo-100 px-3 py-3 text-sm font-bold text-indigo-900 shadow-sm hover:bg-indigo-200"
                   >
-                    Division Schedules
+                    Schedules/Standings
                   </button>
 
                   <button
@@ -1561,7 +1563,8 @@ export default function CaptainDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="mt-4 rounded-2xl border border-white/80 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-3 shadow-xl ring-1 ring-slate-200">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <CaptainSectionButton
             active={captainSection === "pending"}
             label="Pending Score Verification"
@@ -1583,6 +1586,7 @@ export default function CaptainDashboardPage() {
             tone="emerald"
             onClick={() => setCaptainSection("completed")}
           />
+        </div>
         </div>
 
         {captainSection === "pending" && (
@@ -1627,7 +1631,7 @@ export default function CaptainDashboardPage() {
 
         {divisionScheduleTeam && (
           <TeamScheduleModal
-            title="Division Team Schedules"
+            title="Division Team Schedules/Standings"
             subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} · ${divisionScheduleTeam.divisions?.name || "Division"}`}
             teams={divisionScheduleTeams}
             selectedTeamId={divisionScheduleTeam.id}
@@ -1855,6 +1859,21 @@ function MatchScoreDetailsModal({ match, onClose }) {
 
 function formatDate(value) {
   return formatDisplayDate(value, "-");
+}
+
+function formatScoreStatus(match) {
+  const status = match?.score_status || "not_entered";
+
+  if (status === "not_entered") return "not_entered";
+
+  const timestamp =
+    status === "verified"
+      ? match?.score_verified_at
+      : match?.score_entered_at;
+
+  return timestamp
+    ? `${status} - ${formatDisplayTimestampShort(timestamp)}`
+    : status;
 }
 
 function localDateString() {
@@ -2112,7 +2131,7 @@ function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) 
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-2xl border-2 p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.blue}`}
+      className={`rounded-2xl border-2 p-4 text-left shadow-lg ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.blue}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div>

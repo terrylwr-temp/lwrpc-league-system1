@@ -41,7 +41,6 @@ export default function AppHeader({
         { label: "Members", path: "/members", role: "league_manager", icon: "\u{1F465}" },
         { label: "Ratings", path: "/ratings", role: "league_manager", icon: "\u{2B50}" },
         { label: "Teams", path: "/teams", role: "captain", icon: "\u{1F3D3}" },
-        { label: "Matches", path: "/matches", role: "captain", icon: "\u{1F4CB}" },
         { label: "Scoring", path: "/scoring", role: "league_manager", icon: "\u{2705}" },
         { label: "Standings", path: "/standings", role: "player", icon: "\u{1F3C6}" }
       ]
@@ -51,7 +50,8 @@ export default function AppHeader({
       label: "Scheduling",
       links: [
         { label: "Scheduling", path: "/scheduling", role: "league_manager", icon: "\u{1F4C5}" },
-        { label: "Schedule Editor", path: "/schedule-editor", role: "league_manager", icon: "\u{1F6E0}\u{FE0F}" }
+        { label: "Schedule Editor", path: "/schedule-editor", role: "league_manager", icon: "\u{1F6E0}\u{FE0F}" },
+        { label: "Matches", path: "/matches", role: "captain", icon: "\u{1F4CB}" }
       ]
     },
     {

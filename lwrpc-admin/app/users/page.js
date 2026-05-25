@@ -8,6 +8,8 @@ import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { requireRole, supabase } from "../lib/auth";
 import { roleLabel } from "../lib/permissions";
 import { wouldRemoveLastCommissioner } from "../lib/roleGuards";
+import { normalizeEmailAddress } from "../lib/email";
+import { formatDisplayTimestamp } from "../lib/dateTime";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -15,6 +17,7 @@ export default function UsersPage() {
 
   const [members, setMembers] = useState([]);
   const [roles, setRoles] = useState([]);
+  const [lastLoginsByEmail, setLastLoginsByEmail] = useState({});
 
   const [search, setSearch] = useState("");
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
@@ -52,6 +55,23 @@ export default function UsersPage() {
 
     setMembers(memberData || []);
     setRoles(roleData || []);
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (accessToken) {
+      const response = await fetch("/api/user-last-logins", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (response.ok && result.success) {
+        setLastLoginsByEmail(result.lastLoginsByEmail || {});
+      }
+    }
+
     setLoading(false);
   }, []);
 
@@ -198,6 +218,10 @@ if (loading) {
                 </th>
 
                 <th className="p-4 text-left">
+                  Last Login
+                </th>
+
+                <th className="p-4 text-left">
                   <div className="flex items-center gap-2">
                     <span>Current Role</span>
                     <button
@@ -247,6 +271,10 @@ if (loading) {
 
                     <td className="p-4 text-slate-700">
                       {member.club_location || "—"}
+                    </td>
+
+                    <td className="p-4 text-sm font-semibold text-slate-700">
+                      {formatDisplayTimestamp(lastLoginsByEmail[normalizeEmailAddress(member.email)], "Never")}
                     </td>
 
                     <td className="p-4">
@@ -302,7 +330,7 @@ if (loading) {
                 <tr>
 
                   <td
-                    colSpan="4"
+                    colSpan="5"
                     className="p-10 text-center text-slate-500"
                   >
                     No members found.

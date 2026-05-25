@@ -36,6 +36,7 @@ export default function RatingsPage() {
   const [showMissingDoublesOnly, setShowMissingDoublesOnly] = useState(false);
   const [showNrDoublesOnly, setShowNrDoublesOnly] = useState(false);
   const [showNrAgeOnly, setShowNrAgeOnly] = useState(false);
+  const [showInvalidDuprIdsOnly, setShowInvalidDuprIdsOnly] = useState(false);
   const [showRatingImportTools, setShowRatingImportTools] = useState(false);
   const [page, setPage] = useState(1);
 
@@ -792,7 +793,7 @@ export default function RatingsPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly]);
+  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly, showInvalidDuprIdsOnly]);
 
   useEffect(() => {
     if (!loading && selectedSeason) {
@@ -826,6 +827,10 @@ export default function RatingsPage() {
       nextMembers = nextMembers.filter((member) => !hasNumericRating(member.id, "season_primetime_rating"));
     }
 
+    if (showInvalidDuprIdsOnly) {
+      nextMembers = nextMembers.filter((member) => String(member.dupr_id || "").trim().length !== 6);
+    }
+
     if (!q) return nextMembers;
 
     return nextMembers.filter((member) => {
@@ -839,7 +844,7 @@ export default function RatingsPage() {
         (member.dupr_id || "").toLowerCase().includes(q)
       );
     });
-  }, [currentRosterMemberIds, hasDoublesRating, hasNumericRating, members, search, showCurrentRosterOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly]);
+  }, [currentRosterMemberIds, hasDoublesRating, hasNumericRating, members, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
@@ -932,6 +937,7 @@ function goToPage(value) {
                   setShowMissingDoublesOnly(false);
                   setShowNrDoublesOnly(false);
                   setShowNrAgeOnly(false);
+                  setShowInvalidDuprIdsOnly(false);
                   setPage(1);
                 }}
                 className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300"
@@ -988,6 +994,18 @@ function goToPage(value) {
               }`}
             >
               NR Age-Based Rating
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setShowInvalidDuprIdsOnly((value) => !value)}
+              className={`rounded-xl px-4 py-3 font-semibold ${
+                showInvalidDuprIdsOnly
+                  ? "bg-slate-800 text-white hover:bg-slate-900"
+                  : "bg-slate-200 text-slate-900 hover:bg-slate-300"
+              }`}
+            >
+              Missing / Invalid DUPR ID
             </button>
 
             <button
@@ -1263,6 +1281,14 @@ function goToPage(value) {
                         className="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200"
                       >
                         Copy Name
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => router.push(`/members/${member.id}`)}
+                        className="ml-2 mt-2 rounded-lg bg-blue-100 px-2 py-1 text-xs font-bold text-blue-800 hover:bg-blue-200"
+                      >
+                        Edit Member
                       </button>
 
                       <div className="text-xs text-slate-500">

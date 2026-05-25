@@ -288,7 +288,7 @@ export default function LeaguesPage() {
                 <span>
                   Lock team rosters
                   <span className="mt-1 block text-xs font-normal text-slate-500">
-                    Captains cannot add or remove roster players while locked. League Managers and Commissioners can still modify rosters.
+                    Captains cannot add or remove ineligible rated players while locked. League Managers and Commissioners can still modify rosters.
                   </span>
                 </span>
               </label>

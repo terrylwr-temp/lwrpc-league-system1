@@ -226,6 +226,7 @@ export default function MobileScoreEntryPage() {
         home_score: homeLines,
         away_score: awayLines,
         winning_team_id: winningTeamId,
+        score_entered_by_member_id: currentUserMember?.id || null,
         score_entered_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       })
