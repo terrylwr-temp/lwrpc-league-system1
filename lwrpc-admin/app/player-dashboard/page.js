@@ -1310,6 +1310,7 @@ function HistoryStat({ label, value, tone = "slate" }) {
 
 function TeamCard({ team, selected, onSelect, onOpenDocument, onOpenRoster }) {
   const standing = team.standing;
+  const captainContacts = teamCaptainContacts(team);
 
   return (
     <div
@@ -1354,23 +1355,25 @@ function TeamCard({ team, selected, onSelect, onOpenDocument, onOpenRoster }) {
           {team.divisions?.leagues?.name || ""} / {team.divisions?.name || ""}
         </div>
       </div>
-      <div className={`grid grid-cols-1 gap-2 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3 ${selected ? "bg-blue-50" : "bg-white"}`}>
-        {teamCaptainContacts(team).map((contact) => (
-          <a
-            key={contact.label}
-            href={contact.email ? `mailto:${contact.email}` : undefined}
-            title={contact.email ? `Send an email to ${contact.name || contact.label}.` : "No email address on file."}
-            onClick={(event) => event.stopPropagation()}
-            className={`rounded-xl bg-white px-3 py-2 shadow-sm transition ${
-              contact.email ? "hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md" : "cursor-default"
-            }`}
-          >
-            <div className="font-bold text-slate-900">{contact.label}</div>
-            <div>{contact.name || "Not assigned"}</div>
-            {contact.phone && <div>{contact.phone}</div>}
-          </a>
-        ))}
-      </div>
+      {captainContacts.length > 0 && (
+        <div className={`grid grid-cols-1 gap-2 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3 ${selected ? "bg-blue-50" : "bg-white"}`}>
+          {captainContacts.map((contact) => (
+            <a
+              key={contact.label}
+              href={contact.email ? `mailto:${contact.email}` : undefined}
+              title={contact.email ? `Send an email to ${contact.name || contact.label}.` : "No email address on file."}
+              onClick={(event) => event.stopPropagation()}
+              className={`rounded-xl bg-white px-3 py-2 shadow-sm transition ${
+                contact.email ? "hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md" : "cursor-default"
+              }`}
+            >
+              <div className="font-bold text-slate-900">{contact.label}</div>
+              <div>{contact.name}</div>
+              {contact.phone && <div>{contact.phone}</div>}
+            </a>
+          ))}
+        </div>
+      )}
       <div className="border-t border-slate-200 bg-white px-4 py-3">
         <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
           League Documents
@@ -1558,12 +1561,14 @@ function teamCaptainContacts(team) {
     { label: "Co-Captain 1", member: team.co_captain_1 },
     { label: "Co-Captain 2", member: team.co_captain_2 },
     { label: "Club Pro", member: team.club_pro },
-  ].map((item) => ({
-    label: item.label,
-    name: formatMemberName(item.member),
-    phone: formatPhoneNumberForStorage(item.member?.phone),
-    email: item.member?.email || "",
-  }));
+  ]
+    .filter((item) => item.member)
+    .map((item) => ({
+      label: item.label,
+      name: formatMemberName(item.member),
+      phone: formatPhoneNumberForStorage(item.member?.phone),
+      email: item.member?.email || "",
+    }));
 }
 
 function formatMemberName(member) {
