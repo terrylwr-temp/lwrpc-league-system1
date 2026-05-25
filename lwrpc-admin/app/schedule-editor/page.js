@@ -747,6 +747,7 @@ export default function ScheduleEditorPage() {
       `)
       .eq("division_id", divisionId)
       .eq("status", "completed")
+      .eq("score_status", "verified")
       .order("scheduled_date", { ascending: true });
 
     if (error) {
@@ -1677,7 +1678,7 @@ function ScoreAuditDetails({ match, membersById }) {
           {enteredBy ? ` by ${enteredBy}` : ""}
         </div>
       )}
-      {match.score_verified_at && (
+      {match.score_status === "verified" && match.score_verified_at && (
         <div>
           Verified: {formatDisplayTimestampShort(match.score_verified_at)}
           {verifiedBy ? ` by ${verifiedBy}` : ""}

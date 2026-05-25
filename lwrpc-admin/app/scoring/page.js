@@ -253,6 +253,20 @@ export default function ScoringPage() {
     setSelectedMatchIds((current) => [...new Set([...current, ...visibleIds])]);
   }
 
+  function toggleUnverifiedFilter() {
+    if (showUnverifiedOnly) {
+      setShowUnverifiedOnly(false);
+      return;
+    }
+
+    const unverifiedIds = matches
+      .filter((match) => match.score_status !== "verified")
+      .map((match) => match.id);
+
+    setSelectedMatchIds(unverifiedIds);
+    setShowUnverifiedOnly(true);
+  }
+
   async function saveTemplate() {
     setSavingTemplate(true);
     window.localStorage.setItem("lwrpc-score-reminder-subject", emailSubject);
@@ -513,7 +527,7 @@ export default function ScoringPage() {
             <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => setShowUnverifiedOnly((value) => !value)}
+                onClick={toggleUnverifiedFilter}
                 className={`rounded-xl px-4 py-3 font-semibold ${
                   showUnverifiedOnly
                     ? "bg-blue-700 text-white hover:bg-blue-800"
@@ -711,7 +725,7 @@ function ScoreAuditDetails({ match, membersById }) {
           {enteredBy ? ` by ${enteredBy}` : ""}
         </span>
       )}
-      {match.score_verified_at && (
+      {match.score_status === "verified" && match.score_verified_at && (
         <span>
           Verified: {formatDisplayTimestampShort(match.score_verified_at)}
           {verifiedBy ? ` by ${verifiedBy}` : ""}

@@ -846,6 +846,9 @@ export default function MatchDetailPage() {
         score_status: "pending_verification",
         score_entered_by_member_id: currentMemberId,
         score_entered_at: new Date().toISOString(),
+        score_verified_by_member_id: null,
+        score_verified_at: null,
+        finalized_at: null,
         home_score: matchSummary.homeWins,
         away_score: matchSummary.awayWins,
         winning_team_id: matchSummary.winningTeamId,
@@ -858,10 +861,9 @@ export default function MatchDetailPage() {
       return;
     }
 
-    await rebuildDivisionStandings();
     await sendScoreNotification("submitted");
 
-    alert("Scores submitted, standings updated, and opposing captains notified.");
+    alert("Scores submitted for verification and opposing captains notified.");
 
     loadData();
   }
@@ -893,9 +895,10 @@ export default function MatchDetailPage() {
       return;
     }
 
+    await rebuildDivisionStandings();
     await sendScoreNotification("verified");
 
-    alert("Scores verified.");
+    alert("Scores verified and standings updated.");
 
     router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
   }
@@ -916,6 +919,9 @@ export default function MatchDetailPage() {
         score_status: "disputed",
         score_disputed: true,
         score_dispute_notes: notes,
+        score_verified_by_member_id: null,
+        score_verified_at: null,
+        finalized_at: null,
         updated_at: new Date().toISOString(),
       })
       .eq("id", id);
@@ -1071,6 +1077,7 @@ export default function MatchDetailPage() {
       `)
       .eq("division_id", match.division_id)
       .eq("status", "completed")
+      .eq("score_status", "verified")
       .order("scheduled_date", { ascending: true });
 
     if (error) {

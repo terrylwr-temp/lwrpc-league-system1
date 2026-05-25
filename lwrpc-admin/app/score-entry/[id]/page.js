@@ -228,6 +228,9 @@ export default function MobileScoreEntryPage() {
         winning_team_id: winningTeamId,
         score_entered_by_member_id: currentUserMember?.id || null,
         score_entered_at: new Date().toISOString(),
+        score_verified_by_member_id: null,
+        score_verified_at: null,
+        finalized_at: null,
         updated_at: new Date().toISOString()
       })
       .eq("id", id);
