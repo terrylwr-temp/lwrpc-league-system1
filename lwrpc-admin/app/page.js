@@ -4,6 +4,15 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "./components/AppHeader";
 import { requireRole, supabase } from "./lib/auth";
+import {
+  DEFAULT_GUIDE_BUCKET,
+  DEFAULT_GUIDE_PREFIX,
+  GUIDE_DOCUMENT_TYPES,
+  guideDocumentBody,
+  initialGuideDocuments,
+  loadGuideDocument,
+  openGuideDocument,
+} from "./lib/dashboardGuides";
 
 const LOGIN_MESSAGE_TEMPLATES = [
   {
@@ -36,6 +45,14 @@ export default function DashboardPage() {
   );
   const [savingMessageKey, setSavingMessageKey] = useState("");
   const [masterResetting, setMasterResetting] = useState(false);
+  const [guideDocuments, setGuideDocuments] = useState(initialGuideDocuments());
+  const [guideBucket, setGuideBucket] = useState(DEFAULT_GUIDE_BUCKET);
+  const [guidePrefix, setGuidePrefix] = useState(DEFAULT_GUIDE_PREFIX);
+  const [guideFiles, setGuideFiles] = useState([]);
+  const [guideFilesStatus, setGuideFilesStatus] = useState("");
+  const [loadingGuideFiles, setLoadingGuideFiles] = useState(false);
+  const [savingGuideKey, setSavingGuideKey] = useState("");
+  const adminGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "admin_guide_pdf");
 
   const loadDashboardCounts = useCallback(async function loadDashboardCounts() {
     setDashboardCounts(null);
@@ -114,6 +131,21 @@ export default function DashboardPage() {
     });
   }, []);
 
+  const loadGuideDocuments = useCallback(async function loadGuideDocuments() {
+    const entries = await Promise.all(
+      GUIDE_DOCUMENT_TYPES.map(async (guideType) => [
+        guideType.key,
+        await loadGuideDocument(guideType.key),
+      ])
+    );
+
+    const nextGuideDocuments = Object.fromEntries(entries);
+    setGuideDocuments(nextGuideDocuments);
+
+    const firstConfigured = entries.map(([, document]) => document).find((document) => document?.bucket);
+    if (firstConfigured?.bucket) setGuideBucket(firstConfigured.bucket);
+  }, []);
+
   useEffect(() => {
     async function run() {
       const user = await requireRole(router, "league_manager");
@@ -121,11 +153,12 @@ export default function DashboardPage() {
         setReady(true);
         loadDashboardCounts();
         loadLoginMessages();
+        loadGuideDocuments();
       }
     }
 
     run();
-  }, [loadDashboardCounts, loadLoginMessages, router]);
+  }, [loadDashboardCounts, loadGuideDocuments, loadLoginMessages, router]);
 
   function updateLoginMessage(templateKey, field, value) {
     setLoginMessages((current) => ({
@@ -169,6 +202,92 @@ export default function DashboardPage() {
     }
 
     alert(`${template.label} saved.`);
+  }
+
+  function updateGuideDocument(templateKey, field, value) {
+    setGuideDocuments((current) => ({
+      ...current,
+      [templateKey]: {
+        ...(current[templateKey] || {
+          bucket: guideBucket,
+          path: "",
+        }),
+        [field]: value,
+      },
+    }));
+  }
+
+  async function loadGuideFiles() {
+    const bucket = guideBucket.trim();
+    const prefix = guidePrefix.trim().replace(/^\/+|\/+$/g, "");
+
+    if (!bucket) {
+      setGuideFiles([]);
+      setGuideFilesStatus("Enter a Supabase Storage bucket name first.");
+      return;
+    }
+
+    setLoadingGuideFiles(true);
+    setGuideFilesStatus(`Loading PDFs${prefix ? ` from ${prefix}/` : ""}...`);
+
+    const { files, error } = await listPdfFiles(bucket, prefix);
+
+    setLoadingGuideFiles(false);
+
+    if (error) {
+      setGuideFiles([]);
+      setGuideFilesStatus(error.message);
+      return;
+    }
+
+    setGuideFiles(files);
+    setGuideFilesStatus(
+      files.length === 0
+        ? `No PDFs found${prefix ? ` in ${prefix}/` : " in this bucket"}.`
+        : `${files.length} PDF file${files.length === 1 ? "" : "s"} found.`
+    );
+  }
+
+  async function saveGuideDocument(guideType) {
+    const document = {
+      ...(guideDocuments[guideType.key] || {}),
+      bucket: guideBucket.trim() || DEFAULT_GUIDE_BUCKET,
+    };
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before saving guide PDFs.");
+      return;
+    }
+
+    setSavingGuideKey(guideType.key);
+
+    const response = await fetch("/api/notification-templates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        template_key: guideType.key,
+        subject: guideType.label,
+        body: guideDocumentBody(document),
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setSavingGuideKey("");
+
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to save guide PDF.");
+      return;
+    }
+
+    setGuideDocuments((current) => ({
+      ...current,
+      [guideType.key]: document,
+    }));
+    alert(`${guideType.label} saved.`);
   }
 
   async function runMasterResetAll() {
@@ -289,6 +408,15 @@ export default function DashboardPage() {
         <AppHeader
           title="Admin Dashboard"
           subtitle="League operations, scheduling, scoring, rosters, and access."
+          actions={
+            <button
+              type="button"
+              onClick={() => openGuideDocument(supabase, adminGuide)}
+              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
+            >
+              Admin Guide
+            </button>
+          }
         />
 
         <section className="overflow-hidden rounded-2xl bg-white shadow">
@@ -366,6 +494,98 @@ export default function DashboardPage() {
             </section>
           ))}
         </div>
+
+        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          <div className="border-b border-slate-200 px-4 py-5 md:px-6">
+            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="text-xl font-black text-slate-950">Dashboard Guides</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-600">
+                  Select the guide PDFs shown on the Player, Captain, and Admin dashboards.
+                </p>
+              </div>
+              <div className="text-xs font-black uppercase tracking-wide text-slate-400">
+                PDF guides
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4 p-4 md:p-6">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-[1fr_12rem_auto] md:items-end">
+              <GuideField label="Document Bucket">
+                <input
+                  type="text"
+                  value={guideBucket}
+                  onChange={(event) => setGuideBucket(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  placeholder="league-documents"
+                />
+              </GuideField>
+
+              <GuideField label="Folder">
+                <input
+                  type="text"
+                  value={guidePrefix}
+                  onChange={(event) => setGuidePrefix(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  placeholder="private"
+                />
+              </GuideField>
+
+              <button
+                type="button"
+                onClick={loadGuideFiles}
+                disabled={loadingGuideFiles}
+                className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-50"
+              >
+                {loadingGuideFiles ? "Loading..." : "Load PDFs"}
+              </button>
+            </div>
+
+            {guideFilesStatus && (
+              <div className="text-sm font-semibold text-slate-600">
+                {guideFilesStatus}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-3">
+              {GUIDE_DOCUMENT_TYPES.map((guideType) => {
+                const selectedPath = guideDocuments[guideType.key]?.path || "";
+
+                return (
+                  <div key={guideType.key} className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto] md:items-end">
+                    <GuideField label={guideType.label}>
+                      <select
+                        value={selectedPath}
+                        onChange={(event) => updateGuideDocument(guideType.key, "path", event.target.value)}
+                        className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                      >
+                        <option value="">No PDF selected</option>
+                        {selectedPath && !guideFiles.includes(selectedPath) && (
+                          <option value={selectedPath}>{selectedPath}</option>
+                        )}
+                        {guideFiles.map((filePath) => (
+                          <option key={filePath} value={filePath}>
+                            {filePath}
+                          </option>
+                        ))}
+                      </select>
+                    </GuideField>
+
+                    <button
+                      type="button"
+                      onClick={() => saveGuideDocument(guideType)}
+                      disabled={savingGuideKey === guideType.key}
+                      className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:opacity-50"
+                    >
+                      {savingGuideKey === guideType.key ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
 
         <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
           <div className="border-b border-slate-200 px-4 py-5 md:px-6">
@@ -724,6 +944,51 @@ function AdminActionCard({ card, onClick }) {
       </div>
     </button>
   );
+}
+
+function GuideField({ label, children }) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-sm font-bold text-slate-700">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
+async function listPdfFiles(bucket, prefix = "", depth = 0) {
+  const { data, error } = await supabase.storage
+    .from(bucket)
+    .list(prefix, {
+      limit: 1000,
+      sortBy: {
+        column: "name",
+        order: "asc",
+      },
+    });
+
+  if (error) return { files: [], error };
+
+  const files = [];
+
+  for (const item of data || []) {
+    const path = prefix ? `${prefix}/${item.name}` : item.name;
+    const isPdf = item.name.toLowerCase().endsWith(".pdf");
+
+    if (isPdf) {
+      files.push(path);
+      continue;
+    }
+
+    if (!item.name.includes(".") && depth < 3) {
+      const nested = await listPdfFiles(bucket, path, depth + 1);
+      if (nested.error) return nested;
+      files.push(...nested.files);
+    }
+  }
+
+  return { files, error: null };
 }
 
 function Status({ label, value, helper }) {

@@ -15,9 +15,11 @@ import {
   LEAGUE_DOCUMENT_TYPES,
   leagueDocumentPath,
 } from "../lib/leagueDocuments";
+import { GUIDE_DOCUMENT_TYPES, openGuideDocument } from "../lib/dashboardGuides";
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
+  const captainGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "captain_guide_pdf");
 
   const [currentMember, setCurrentMember] = useState(null);
   const [teams, setTeams] = useState([]);
@@ -28,6 +30,7 @@ export default function CaptainDashboardPage() {
   const [selectedCaptainTeamId, setSelectedCaptainTeamId] = useState("");
   const [showPreviousSeasonTeams, setShowPreviousSeasonTeams] = useState(false);
   const [captainSection, setCaptainSection] = useState("upcoming");
+  const [captainSectionDefaulted, setCaptainSectionDefaulted] = useState(false);
   const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
   const [loading, setLoading] = useState(true);
   const [setupMatch, setSetupMatch] = useState(null);
@@ -439,6 +442,17 @@ export default function CaptainDashboardPage() {
       return isSelectedTeam && match.score_status === "pending_verification";
     });
   }, [matches, selectedTeamId]);
+
+  const allPendingVerification = useMemo(() => {
+    return matches.filter((match) => match.score_status === "pending_verification");
+  }, [matches]);
+
+  useEffect(() => {
+    if (loading || captainSectionDefaulted) return;
+
+    setCaptainSection(allPendingVerification.length > 0 ? "pending" : "upcoming");
+    setCaptainSectionDefaulted(true);
+  }, [allPendingVerification.length, captainSectionDefaulted, loading]);
 
   const completedMatches = useMemo(() => {
     return matches.filter((match) => {
@@ -1237,6 +1251,15 @@ export default function CaptainDashboardPage() {
         <AppHeader
           title="Captain Dashboard"
           subtitle="Captain tools, upcoming matches, score entry, and score verification."
+          welcomeAction={
+            <button
+              type="button"
+              onClick={() => openGuideDocument(supabase, captainGuide)}
+              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
+            >
+              Captains Guide
+            </button>
+          }
           actions={
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
               <button

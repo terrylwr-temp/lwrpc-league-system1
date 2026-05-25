@@ -23,6 +23,7 @@ import {
   LEAGUE_DOCUMENT_TYPES,
   leagueDocumentPath,
 } from "../lib/leagueDocuments";
+import { GUIDE_DOCUMENT_TYPES, openGuideDocument } from "../lib/dashboardGuides";
 
 const PLAYER_DOCUMENT_KEYS = new Set([
   "code_of_conduct",
@@ -36,6 +37,7 @@ const PLAYER_LEAGUE_DOCUMENT_TYPES = LEAGUE_DOCUMENT_TYPES.filter((documentType)
 
 export default function PlayerDashboardPage() {
   const router = useRouter();
+  const playerGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "player_guide_pdf");
   const [loading, setLoading] = useState(true);
   const [member, setMember] = useState(null);
   const [teams, setTeams] = useState([]);
@@ -850,6 +852,15 @@ export default function PlayerDashboardPage() {
         <AppHeader
           title="Player Dashboard"
           subtitle="Your league teams, standings, and match access."
+          welcomeAction={
+            <button
+              type="button"
+              onClick={() => openGuideDocument(supabase, playerGuide)}
+              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
+            >
+              Players Guide
+            </button>
+          }
           actions={
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
               <button

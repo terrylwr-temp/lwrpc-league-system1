@@ -25,6 +25,7 @@ export default function MatchesPage() {
   const [scheduledTime, setScheduledTime] = useState("");
   const [weekNumber, setWeekNumber] = useState("1");
   const [notes, setNotes] = useState("");
+  const [matchSearch, setMatchSearch] = useState("");
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -294,6 +295,29 @@ export default function MatchesPage() {
     );
   }, [teams, selectedDivision]);
 
+  const filteredMatches = useMemo(() => {
+    const q = matchSearch.trim().toLowerCase();
+
+    if (!q) return matches;
+
+    return matches.filter((match) => {
+      const text = [
+        match.home_team?.name,
+        match.away_team?.name,
+        match.divisions?.name,
+        match.locations?.name,
+        match.scheduled_date,
+        match.scheduled_time,
+        match.week_number,
+        match.status,
+        match.score_status,
+        match.notes,
+      ].join(" ").toLowerCase();
+
+      return text.includes(q);
+    });
+  }, [matchSearch, matches]);
+
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-7xl">
@@ -469,67 +493,87 @@ export default function MatchesPage() {
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
               <h2 className="text-xl font-bold text-slate-900">
                 Scheduled Matches
               </h2>
 
               <div className="text-sm text-slate-500">
-                {matches.length} total scheduled matches
+                {filteredMatches.length} shown / {matches.length} total scheduled matches
+              </div>
+
+              <div className="w-full md:w-80">
+                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
+                  Search / Filter
+                </label>
+                <input
+                  value={matchSearch}
+                  onChange={(event) => setMatchSearch(event.target.value)}
+                  placeholder="Teams, division, date, location..."
+                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold"
+                />
               </div>
             </div>
 
-            <div className="space-y-3">
-              {matches.map(match => (
+            <div className="space-y-2">
+              {filteredMatches.map(match => (
                 <div
                   key={match.id}
-                  className="rounded-xl border border-slate-200 p-4"
+                  className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-lg font-bold text-slate-900">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="truncate text-base font-bold text-slate-900">
                         {match.home_team?.name || "Home"}
                         {" vs "}
                         {match.away_team?.name || "Away"}
                       </div>
 
-                      <div className="mt-1 text-sm text-slate-600">
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-slate-600">
+                        <span>{match.divisions?.name || "No Division"}</span>
+                        <span>{formatDisplayDate(match.scheduled_date, "No Date")} at {formatDisplayTime(match.scheduled_time, "No Time")}</span>
+                        <span>{match.locations?.name || "No Location"}</span>
+                        <span>Week {match.week_number || "-"}</span>
+                        <span>{match.status || "scheduled"}</span>
+                      </div>
+
+                      <div className="hidden">
                         Division: {match.divisions?.name || "—"}
                       </div>
 
-                      <div className="mt-1 text-sm text-slate-600">
+                      <div className="hidden">
                         Location: {match.locations?.name || "—"}
                       </div>
 
-                      <div className="mt-1 text-sm text-slate-600">
+                      <div className="hidden">
                         Date: {formatDisplayDate(match.scheduled_date, "No Date")}
                       </div>
 
-                      <div className="mt-1 text-sm text-slate-600">
+                      <div className="hidden">
                         Time: {formatDisplayTime(match.scheduled_time, "No Time")}
                       </div>
 
-                      <div className="mt-1 text-sm text-slate-600">
+                      <div className="hidden">
                         Week: {match.week_number || "—"}
                       </div>
 
-                      <div className="mt-1 text-sm text-slate-600">
+                      <div className="hidden">
                         Status: {match.status || "scheduled"}
                       </div>
 
                       {match.notes && (
-                        <div className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+                        <div className="mt-2 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">
                           Note: {match.notes}
                         </div>
                       )}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex shrink-0 flex-wrap gap-2">
                       <button
                         onClick={() =>
                           router.push(`/matches/${match.id}`)
                         }
-                        className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
+                        className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
                       >
                         Open Match
                       </button>
@@ -537,7 +581,7 @@ export default function MatchesPage() {
                       <button
                         onClick={() => deleteMatch(match)}
                         disabled={isMatchLocked(match)}
-                        className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                        className="rounded-lg bg-red-100 px-3 py-2 text-sm font-semibold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                       >
                         Delete
                       </button>
@@ -546,9 +590,9 @@ export default function MatchesPage() {
                 </div>
               ))}
 
-              {matches.length === 0 && (
+              {filteredMatches.length === 0 && (
                 <div className="text-slate-500">
-                  No matches scheduled yet.
+                  {matches.length === 0 ? "No matches scheduled yet." : "No matches match the current search."}
                 </div>
               )}
             </div>

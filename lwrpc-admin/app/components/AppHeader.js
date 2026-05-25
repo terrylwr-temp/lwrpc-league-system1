@@ -11,6 +11,7 @@ export default function AppHeader({
   title = "LWR PC League Management System",
   subtitle = "League Operations Dashboard",
   actions = null,
+  welcomeAction = null,
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -366,6 +367,12 @@ export default function AppHeader({
               <div className="text-xs text-slate-200">
                 {roleLabel(role)}
               </div>
+
+              {welcomeAction && (
+                <div className="mt-3 flex justify-end">
+                  {welcomeAction}
+                </div>
+              )}
             </div>
           </div>
         </div>
