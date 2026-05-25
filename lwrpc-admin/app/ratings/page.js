@@ -8,6 +8,7 @@ import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 
 const PAGE_SIZE = 100;
+const RATING_SELECT = "id, member_id, season_id, dupr_doubles_rating, season_dupr_rating, season_primetime_rating";
 
 export default function RatingsPage() {
   const router = useRouter();
@@ -24,6 +25,10 @@ export default function RatingsPage() {
   const [ratingImportStatus, setRatingImportStatus] = useState("");
   const [isImportingRatings, setIsImportingRatings] = useState(false);
   const [isDeletingSeasonRatings, setIsDeletingSeasonRatings] = useState(false);
+  const [copySourceSeason, setCopySourceSeason] = useState("");
+  const [copyTargetSeason, setCopyTargetSeason] = useState("");
+  const [isCopyingRatings, setIsCopyingRatings] = useState(false);
+  const [isCleaningRatings, setIsCleaningRatings] = useState(false);
 
   const [selectedSeason, setSelectedSeason] = useState("");
   const [search, setSearch] = useState("");
@@ -49,9 +54,7 @@ export default function RatingsPage() {
 
     const { data, error } = await supabase
       .from("member_season_ratings")
-      .select(
-        "id, member_id, season_id, season_dupr_rating, season_primetime_rating"
-      )
+      .select(RATING_SELECT)
       .eq("season_id", seasonId);
 
     if (error) {
@@ -67,9 +70,7 @@ export default function RatingsPage() {
   const loadAllRatings = useCallback(async function loadAllRatings() {
     const { data, error } = await supabase
       .from("member_season_ratings")
-      .select(
-        "id, member_id, season_id, season_dupr_rating, season_primetime_rating"
-      );
+      .select(RATING_SELECT);
 
     if (error) {
       alert(error.message);
@@ -121,9 +122,10 @@ export default function RatingsPage() {
           .map((row) => String(row.member_id))
       )
     );
-    setSeasons(seasonData || []);
+    setSeasons((seasonData || []).filter((season) => season.is_active !== false));
 
-    const firstSeasonId = seasonData?.[0]?.id || "";
+    const activeSeasonRows = (seasonData || []).filter((season) => season.is_active !== false);
+    const firstSeasonId = activeSeasonRows?.[0]?.id || "";
     setSelectedSeason(firstSeasonId);
 
     if (firstSeasonId) {
@@ -175,6 +177,7 @@ export default function RatingsPage() {
       const newRow = {
         member_id: memberId,
         season_id: selectedSeason,
+        dupr_doubles_rating: null,
         season_dupr_rating: null,
         season_primetime_rating: null,
         [field]: cleanValue,
@@ -183,9 +186,7 @@ export default function RatingsPage() {
       const { data, error } = await supabase
         .from("member_season_ratings")
         .insert(newRow)
-        .select(
-          "id, member_id, season_id, season_dupr_rating, season_primetime_rating"
-        )
+        .select(RATING_SELECT)
         .single();
 
       if (error) {
@@ -209,6 +210,15 @@ export default function RatingsPage() {
   function normalizeRatingInput(field, value) {
     if (value === "") return null;
 
+    if (field === "dupr_doubles_rating") {
+      const text = String(value || "").trim();
+      if (!text) return null;
+      if (text.toUpperCase() === "NR") return "NR";
+
+      const numberValue = Number(text);
+      return Number.isNaN(numberValue) ? null : numberValue.toFixed(3);
+    }
+
     const numberValue = Number(value);
     if (Number.isNaN(numberValue)) return null;
 
@@ -225,7 +235,7 @@ export default function RatingsPage() {
         rating.member_id === memberId &&
         rating.season_id === selectedSeason
     );
-    const value = row?.season_dupr_rating;
+    const value = row?.dupr_doubles_rating ?? row?.season_dupr_rating;
     return value !== null && value !== undefined && value !== "";
   }, [ratings, selectedSeason]);
 
@@ -263,6 +273,14 @@ export default function RatingsPage() {
     if (value === null || value === undefined || value === "") return "NR";
     const numberValue = Number(value);
     return Number.isNaN(numberValue) ? "NR" : numberValue.toFixed(2);
+  }
+
+  function formatDuprDoublesRating(value) {
+    if (value === null || value === undefined || value === "") return "NR";
+    const text = String(value).trim();
+    if (text.toUpperCase() === "NR") return "NR";
+    const numberValue = Number(text);
+    return Number.isNaN(numberValue) ? "NR" : numberValue.toFixed(3);
   }
 
   async function deleteRatingsForSelectedSeason() {
@@ -335,10 +353,45 @@ export default function RatingsPage() {
   function findCsvValue(row, names) {
     const keys = Object.keys(row);
     for (const name of names) {
-      const key = keys.find((candidate) => candidate.trim().toLowerCase() === name.toLowerCase());
+      const key = keys.find((candidate) => normalizeCsvHeader(candidate) === normalizeCsvHeader(name));
       if (key) return row[key];
     }
     return "";
+  }
+
+  function findAgeBasedRatingValue(row) {
+    const exactValue = findCsvValue(row, [
+      "age-based rating",
+      "age based rating",
+      "agebased rating",
+      "age-based dupr rating",
+      "age based dupr rating",
+      "age dupr rating",
+      "age rating",
+      "age doubles rating",
+      "age-based doubles rating",
+      "age based doubles rating",
+      "age bracket rating",
+      "primetime rating",
+      "prime time rating",
+    ]);
+
+    if (exactValue !== "") return exactValue;
+
+    const ageKey = Object.keys(row).find((key) => {
+      const normalized = normalizeCsvHeader(key);
+      return (
+        (normalized.includes("age") && normalized.includes("rating")) ||
+        normalized.includes("primetime") ||
+        normalized.includes("primetimerating")
+      );
+    });
+
+    return ageKey ? row[ageKey] : "";
+  }
+
+  function normalizeCsvHeader(value) {
+    return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   }
 
   function parseRating(value) {
@@ -346,6 +399,15 @@ export default function RatingsPage() {
     if (!cleaned) return null;
     const rating = Number(cleaned);
     return Number.isNaN(rating) ? null : rating;
+  }
+
+  function parseDuprDoublesRating(value) {
+    const text = normalizeText(value);
+    if (!text) return null;
+    if (text.toUpperCase() === "NR") return "NR";
+
+    const rating = parseRating(text);
+    return rating === null ? null : rating.toFixed(3);
   }
 
   async function handleRatingsImportFile(event) {
@@ -375,21 +437,27 @@ export default function RatingsPage() {
       const lastName = normalizeText(findCsvValue(row, ["last name", "lastname", "last"]));
       const name = normalizeText(findCsvValue(row, ["name", "member name", "player", "player name"]));
       const duprId = normalizeText(findCsvValue(row, ["dupr id", "duprid", "dupr", "dupr number"]));
-      const doublesRating = parseRating(findCsvValue(row, ["doubles rating", "doubles", "dupr doubles", "doubles dupr", "rating"]));
-      const ageRating = parseRating(findCsvValue(row, ["age-based rating", "age based rating", "age rating", "age doubles rating", "age bracket rating", "primetime rating", "prime time rating"]));
+      const duprDoublesRating = parseDuprDoublesRating(findCsvValue(row, ["doubles rating", "doubles", "dupr doubles", "dupr doubles rating", "doubles dupr", "rating"]));
+      const ageRating = parseRating(findAgeBasedRatingValue(row));
       const lookupName = name || `${firstName} ${lastName}`.trim();
       const member = (email && byEmail[email]) || byName[normalizeName(lookupName)] || null;
 
+      const hasRating = duprDoublesRating !== null || ageRating !== null;
+
       return {
         rowNumber: index + 1,
-        action: member ? "ready" : "skip",
-        message: member ? "Matched member." : "No matching member by email or name.",
+        action: member && hasRating ? "ready" : "skip",
+        message: !member
+          ? "No matching member by email or name."
+          : hasRating
+            ? "Matched member."
+            : "Matched member, but no numeric rating was found in this CSV row.",
         memberId: member?.id || null,
         memberName: member ? memberFullName(member) : lookupName,
         email,
         duprId,
         shouldUpdateDuprId: Boolean(member && duprId && !member.dupr_id),
-        doublesRating,
+        duprDoublesRating,
         ageRating,
       };
     });
@@ -443,10 +511,11 @@ export default function RatingsPage() {
 
       readyRows.forEach((row) => {
         const payload = {
-          season_dupr_rating: row.doublesRating,
-          season_primetime_rating: row.ageRating,
           updated_at: now,
         };
+
+        if (row.duprDoublesRating !== null) payload.dupr_doubles_rating = row.duprDoublesRating;
+        if (row.ageRating !== null) payload.season_primetime_rating = row.ageRating;
         const existing = existingByMember[row.memberId];
 
         if (existing) {
@@ -457,7 +526,8 @@ export default function RatingsPage() {
           inserts.push({
             member_id: row.memberId,
             season_id: selectedSeason,
-            season_dupr_rating: row.doublesRating,
+            dupr_doubles_rating: row.duprDoublesRating,
+            season_dupr_rating: null,
             season_primetime_rating: row.ageRating,
             updated_at: now,
           });
@@ -490,6 +560,222 @@ export default function RatingsPage() {
     } finally {
       setIsImportingRatings(false);
     }
+  }
+
+  async function copyRatingsBetweenSeasons() {
+    if (!copySourceSeason || !copyTargetSeason) {
+      alert("Select both a source season and target season.");
+      return;
+    }
+
+    if (copySourceSeason === copyTargetSeason) {
+      alert("Source and target seasons must be different.");
+      return;
+    }
+
+    const sourceName = seasonLabel(copySourceSeason);
+    const targetName = seasonLabel(copyTargetSeason);
+    const sourceRows = allRatings.filter((rating) => rating.season_id === copySourceSeason);
+
+    if (sourceRows.length === 0) {
+      alert(`No ratings found for ${sourceName}.`);
+      return;
+    }
+
+    const ok = confirm(
+      `Copy ${sourceRows.length} rating record(s) from ${sourceName} to ${targetName}?\n\nExisting target-season ratings for matching players will be updated. Missing target-season rows will be created.`
+    );
+
+    if (!ok) return;
+
+    setIsCopyingRatings(true);
+
+    const now = new Date().toISOString();
+    const targetByMemberId = Object.fromEntries(
+      allRatings
+        .filter((rating) => rating.season_id === copyTargetSeason)
+        .map((rating) => [String(rating.member_id), rating])
+    );
+    const inserts = [];
+    const updateRequests = [];
+
+    sourceRows.forEach((sourceRow) => {
+      const payload = {
+        dupr_doubles_rating: sourceRow.dupr_doubles_rating,
+        season_dupr_rating: sourceRow.season_dupr_rating,
+        season_primetime_rating: sourceRow.season_primetime_rating,
+        updated_at: now,
+      };
+      const existing = targetByMemberId[String(sourceRow.member_id)];
+
+      if (existing) {
+        updateRequests.push(
+          supabase.from("member_season_ratings").update(payload).eq("id", existing.id)
+        );
+      } else {
+        inserts.push({
+          member_id: sourceRow.member_id,
+          season_id: copyTargetSeason,
+          ...payload,
+        });
+      }
+    });
+
+    for (let i = 0; i < updateRequests.length; i += 25) {
+      const results = await Promise.all(updateRequests.slice(i, i + 25));
+      const failed = results.find((result) => result.error);
+      if (failed?.error) {
+        alert(failed.error.message);
+        setIsCopyingRatings(false);
+        return;
+      }
+    }
+
+    if (inserts.length > 0) {
+      const { error } = await supabase.from("member_season_ratings").insert(inserts);
+
+      if (error) {
+        alert(error.message);
+        setIsCopyingRatings(false);
+        return;
+      }
+    }
+
+    await loadAllRatings();
+
+    if (selectedSeason === copyTargetSeason) {
+      await loadRatings(copyTargetSeason);
+    }
+
+    setRatingImportStatus(`Copied ${sourceRows.length} rating record(s) from ${sourceName} to ${targetName}.`);
+    setIsCopyingRatings(false);
+  }
+
+  async function cleanRatingsForSelectedSeason() {
+    if (!selectedSeason) {
+      alert("Select a season first.");
+      return;
+    }
+
+    const ok = confirm(
+      `Clean ratings for ${selectedSeasonLabel()}?\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.`
+    );
+
+    if (!ok) return;
+
+    setIsCleaningRatings(true);
+    setRatingImportStatus("Cleaning ratings...");
+
+    const { data: rosterRows, error: rosterError } = await supabase
+      .from("team_members")
+      .select(`
+        member_id,
+        teams (
+          id,
+          is_active,
+          divisions (
+            id,
+            max_dupr,
+            leagues (
+              id,
+              season_id
+            )
+          )
+        )
+      `);
+
+    if (rosterError) {
+      alert(rosterError.message);
+      setIsCleaningRatings(false);
+      return;
+    }
+
+    const maxRatingByMemberId = {};
+
+    (rosterRows || []).forEach((row) => {
+      const team = row.teams;
+      const division = team?.divisions;
+      const maxDupr = Number(division?.max_dupr);
+
+      if (
+        team?.is_active === false ||
+        String(division?.leagues?.season_id || "") !== String(selectedSeason) ||
+        Number.isNaN(maxDupr)
+      ) {
+        return;
+      }
+
+      const key = String(row.member_id);
+      maxRatingByMemberId[key] = Math.max(maxRatingByMemberId[key] ?? 0, maxDupr);
+    });
+
+    const now = new Date().toISOString();
+    const rowsByMemberId = Object.fromEntries(
+      ratings
+        .filter((rating) => String(rating.season_id) === String(selectedSeason))
+        .map((rating) => [String(rating.member_id), rating])
+    );
+    const inserts = [];
+    const updateRequests = [];
+    let cleanedCount = 0;
+    let skippedCount = 0;
+
+    members.forEach((member) => {
+      const existing = rowsByMemberId[String(member.id)];
+      const rawValue = existing?.dupr_doubles_rating;
+      const cleanedValue = cleanedSeasonDuprRating(rawValue, maxRatingByMemberId[String(member.id)]);
+
+      if (cleanedValue === null) {
+        skippedCount += 1;
+        return;
+      }
+
+      cleanedCount += 1;
+
+      const payload = {
+        season_dupr_rating: cleanedValue,
+        updated_at: now,
+      };
+
+      if (existing) {
+        updateRequests.push(
+          supabase.from("member_season_ratings").update(payload).eq("id", existing.id)
+        );
+      } else {
+        inserts.push({
+          member_id: member.id,
+          season_id: selectedSeason,
+          dupr_doubles_rating: null,
+          season_primetime_rating: null,
+          ...payload,
+        });
+      }
+    });
+
+    for (let i = 0; i < updateRequests.length; i += 25) {
+      const results = await Promise.all(updateRequests.slice(i, i + 25));
+      const failed = results.find((result) => result.error);
+      if (failed?.error) {
+        alert(failed.error.message);
+        setIsCleaningRatings(false);
+        return;
+      }
+    }
+
+    if (inserts.length > 0) {
+      const { error } = await supabase.from("member_season_ratings").insert(inserts);
+
+      if (error) {
+        alert(error.message);
+        setIsCleaningRatings(false);
+        return;
+      }
+    }
+
+    await loadRatings(selectedSeason);
+    await loadAllRatings();
+    setRatingImportStatus(`Cleaned ${cleanedCount} Season DUPR rating(s). Skipped ${skippedCount} player(s) without a numeric DUPR Doubles Rating or usable NR team range.`);
+    setIsCleaningRatings(false);
   }
 
   useEffect(() => {
@@ -533,7 +819,7 @@ export default function RatingsPage() {
     }
 
     if (showNrDoublesOnly) {
-      nextMembers = nextMembers.filter((member) => !hasNumericRating(member.id, "season_dupr_rating"));
+      nextMembers = nextMembers.filter((member) => !hasNumericRating(member.id, "dupr_doubles_rating"));
     }
 
     if (showNrAgeOnly) {
@@ -677,7 +963,7 @@ function goToPage(value) {
                   : "bg-amber-100 text-amber-950 hover:bg-amber-200"
               }`}
             >
-              {showMissingDoublesOnly ? "Show All Ratings" : "Missing Doubles Rating"}
+              {showMissingDoublesOnly ? "Show All Ratings" : "Missing DUPR Doubles Rating"}
             </button>
 
             <button
@@ -755,22 +1041,80 @@ function goToPage(value) {
             </div>
 
             <div className="flex items-end">
-              <button
-                type="button"
-                onClick={deleteRatingsForSelectedSeason}
-                disabled={
-                  !selectedSeason ||
-                  ratingsLoading ||
-                  isDeletingSeasonRatings ||
-                  ratings.length === 0
-                }
-                className="w-full rounded-xl bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {isDeletingSeasonRatings
-                  ? "Deleting..."
-                  : "Delete Season Ratings"}
-              </button>
+              <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={cleanRatingsForSelectedSeason}
+                  disabled={!selectedSeason || ratingsLoading || isCleaningRatings || ratings.length === 0}
+                  className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isCleaningRatings ? "Cleaning..." : "Clean Ratings"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={deleteRatingsForSelectedSeason}
+                  disabled={
+                    !selectedSeason ||
+                    ratingsLoading ||
+                    isDeletingSeasonRatings ||
+                    ratings.length === 0
+                  }
+                  className="rounded-xl bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isDeletingSeasonRatings
+                    ? "Deleting..."
+                    : "Delete Season Ratings"}
+                </button>
+              </div>
             </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-1 gap-3 rounded-2xl border border-blue-200 bg-white p-4 md:grid-cols-[1fr_1fr_auto] md:items-end">
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Copy From Season
+              </label>
+              <select
+                value={copySourceSeason}
+                onChange={(e) => setCopySourceSeason(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              >
+                <option value="">Select Source Season</option>
+                {seasons.map((season) => (
+                  <option key={season.id} value={season.id}>
+                    {season.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-semibold text-slate-700">
+                Copy To Season
+              </label>
+              <select
+                value={copyTargetSeason}
+                onChange={(e) => setCopyTargetSeason(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+              >
+                <option value="">Select Target Season</option>
+                {seasons.map((season) => (
+                  <option key={season.id} value={season.id}>
+                    {season.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <button
+              type="button"
+              onClick={copyRatingsBetweenSeasons}
+              disabled={isCopyingRatings || !copySourceSeason || !copyTargetSeason}
+              className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isCopyingRatings ? "Copying..." : "Copy Ratings"}
+            </button>
           </div>
 
           {ratingImportStatus && (
@@ -789,7 +1133,7 @@ function goToPage(value) {
                     <th className="p-3 text-left">Member</th>
                     <th className="p-3 text-left">Email</th>
                     <th className="p-3 text-left">DUPR ID</th>
-                    <th className="p-3 text-left">Doubles</th>
+                    <th className="p-3 text-left">DUPR Doubles</th>
                     <th className="p-3 text-left">Age-Based</th>
                     <th className="p-3 text-left">Message</th>
                   </tr>
@@ -808,7 +1152,7 @@ function goToPage(value) {
                       <td className="p-3 font-semibold text-slate-900">{row.memberName}</td>
                       <td className="p-3">{row.email}</td>
                       <td className="p-3">{row.duprId}{row.shouldUpdateDuprId ? " (will update)" : ""}</td>
-                      <td className="p-3">{row.doublesRating ?? ""}</td>
+                      <td className="p-3">{row.duprDoublesRating ?? ""}</td>
                       <td className="p-3">{row.ageRating ?? ""}</td>
                       <td className="p-3 text-slate-600">{row.message}</td>
                     </tr>
@@ -888,7 +1232,8 @@ function goToPage(value) {
                 <th className="px-4 py-4 text-left">Player</th>
                 <th className="px-4 py-4 text-left">Location</th>
                 <th className="px-4 py-4 text-left">Season</th>
-                <th className="px-4 py-4 text-left">Doubles Rating</th>
+                <th className="px-4 py-4 text-left">DUPR Doubles Rating</th>
+                <th className="px-4 py-4 text-left">Season DUPR Rating</th>
                 <th className="px-4 py-4 text-left">Age-Based Rating</th>
               </tr>
             </thead>
@@ -926,7 +1271,7 @@ function goToPage(value) {
 
                       {missingDoublesRating && (
                         <div className="mt-2 inline-flex rounded-full bg-amber-200 px-2 py-1 text-xs font-bold text-amber-950">
-                          Missing Doubles Rating
+                          Missing DUPR Doubles Rating
                         </div>
                       )}
 
@@ -941,7 +1286,8 @@ function goToPage(value) {
                                   : "bg-slate-100 text-slate-700"
                               }`}
                             >
-                              {seasonLabel(rating.season_id)}: D{" "}
+                              {seasonLabel(rating.season_id)}: DUPR{" "}
+                              {formatDuprDoublesRating(rating.dupr_doubles_rating)} / Season{" "}
                               {formatRating(rating.season_dupr_rating)} / A{" "}
                               {formatRating(rating.season_primetime_rating)}
                             </span>
@@ -970,7 +1316,26 @@ function goToPage(value) {
 
                     <td className="px-4 py-4">
                       <input
-                        key={`${member.id}-${selectedSeason}-dupr`}
+                        key={`${member.id}-${selectedSeason}-dupr-doubles`}
+                        type="text"
+                        defaultValue={getRating(member.id, "dupr_doubles_rating")}
+                        onBlur={(e) => {
+                          const cleanValue = normalizeRatingInput("dupr_doubles_rating", e.target.value);
+                          e.target.value = cleanValue ?? "";
+                          updateRating(
+                            member.id,
+                            "dupr_doubles_rating",
+                            e.target.value
+                          );
+                        }}
+                        className="w-32 rounded-xl border border-slate-300 px-3 py-2"
+                        placeholder="3.999 or NR"
+                      />
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <input
+                        key={`${member.id}-${selectedSeason}-season-dupr`}
                         type="number"
                         step="0.01"
                         defaultValue={getRating(member.id, "season_dupr_rating")}
@@ -1014,7 +1379,7 @@ function goToPage(value) {
               {pagedMembers.length === 0 && (
                 <tr>
                   <td
-                    colSpan="5"
+                    colSpan="6"
                     className="px-4 py-10 text-center text-slate-500"
                   >
                     No players found.
@@ -1142,6 +1507,28 @@ function splitCsvLine(line) {
 
   values.push(current.trim());
   return values;
+}
+
+function cleanedSeasonDuprRating(rawValue, highestMaxRating) {
+  const text = String(rawValue ?? "").trim();
+
+  if (!text) return null;
+
+  if (text.toUpperCase() === "NR") {
+    const maxRating = Number(highestMaxRating);
+    if (Number.isNaN(maxRating) || maxRating <= 0) return null;
+
+    return truncateToTenth(maxRating - 0.5);
+  }
+
+  const numberValue = Number(text);
+  if (Number.isNaN(numberValue)) return null;
+
+  return truncateToTenth(numberValue);
+}
+
+function truncateToTenth(value) {
+  return Math.trunc(Number(value) * 10) / 10;
 }
 
 

@@ -18,6 +18,7 @@ export default function DivisionDetailPage() {
   const [teamNumber, setTeamNumber] = useState("1");
   const [teamName, setTeamName] = useState("");
   const [postedToDupr, setPostedToDupr] = useState(true);
+  const [usesSavedMatchLineups, setUsesSavedMatchLineups] = useState(true);
   const [teamType, setTeamType] = useState("doubles");
   const [gameFormat, setGameFormat] = useState("");
   const [gamesPerTeam, setGamesPerTeam] = useState("3");
@@ -124,6 +125,7 @@ export default function DivisionDetailPage() {
       line_number: Number(line.line_number ?? index + 1),
       line_name: line.line_name ?? line.name ?? `Line ${index + 1}`,
       posted_to_dupr: line.posted_to_dupr ?? true,
+      uses_saved_match_lineups: line.uses_saved_match_lineups ?? true,
       line_type: line.line_type ?? "doubles",
       game_format: line.game_format ?? line.format ?? null,
       games_per_line: Number(line.games_per_line ?? line.games_per_team ?? 3),
@@ -150,6 +152,7 @@ export default function DivisionDetailPage() {
       line_number: Number(line.line_number ?? fallback.line_number),
       line_name: line.line_name || fallback.line_name,
       posted_to_dupr: line.posted_to_dupr ?? fallback.posted_to_dupr,
+      uses_saved_match_lineups: line.uses_saved_match_lineups ?? fallback.uses_saved_match_lineups ?? true,
       line_type: line.line_type || fallback.line_type,
       game_format: line.game_format || fallback.game_format,
       games_per_line: Number(line.games_per_line ?? fallback.games_per_line),
@@ -346,6 +349,7 @@ export default function DivisionDetailPage() {
       line_number: requestedLineNumber,
       line_name: teamName || null,
       posted_to_dupr: postedToDupr,
+      uses_saved_match_lineups: usesSavedMatchLineups,
       line_type: teamType || null,
       game_format: gameFormat || null,
       games_per_line: Number(gamesPerTeam || 3),
@@ -519,6 +523,7 @@ export default function DivisionDetailPage() {
             line_number: index + 1,
             line_name: `Line ${index + 1}`,
             posted_to_dupr: true,
+            uses_saved_match_lineups: true,
             line_type: "doubles",
             game_format: division.default_game_format || null,
             games_per_line: division.games_per_line || 3,
@@ -593,6 +598,7 @@ export default function DivisionDetailPage() {
     setTeamNumber(String(line.line_number || 1));
     setTeamName(line.line_name || "");
     setPostedToDupr(line.posted_to_dupr ?? true);
+    setUsesSavedMatchLineups(line.uses_saved_match_lineups ?? true);
     setTeamType(line.line_type || "doubles");
     setGameFormat(line.game_format || "");
     setGamesPerTeam(String(line.games_per_line || 3));
@@ -607,6 +613,7 @@ export default function DivisionDetailPage() {
     setTeamNumber("1");
     setTeamName("");
     setPostedToDupr(true);
+    setUsesSavedMatchLineups(true);
     setTeamType("doubles");
     setGameFormat("");
     setGamesPerTeam("3");
@@ -758,6 +765,21 @@ export default function DivisionDetailPage() {
                 </span>
               </label>
 
+              <label className="flex items-start gap-3 rounded-xl border border-slate-300 px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={usesSavedMatchLineups}
+                  onChange={(e) => setUsesSavedMatchLineups(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="block font-medium text-slate-700">Use Saved Match Team Lines</span>
+                  <span className="mt-1 block text-xs text-slate-500">
+                    When enabled, score entry shows the saved Match Setup team dropdown for this game line.
+                  </span>
+                </span>
+              </label>
+
               <div>
                 <FieldLabel label="Game Format" />
                 <input
@@ -868,6 +890,10 @@ export default function DivisionDetailPage() {
 
                       <div className="mt-1 text-sm text-slate-600">
                         DUPR Posted: {line.posted_to_dupr ? "Yes" : "No"}
+                      </div>
+
+                      <div className="mt-1 text-sm text-slate-600">
+                        Saved Match Team Lines: {line.uses_saved_match_lineups === false ? "No" : "Yes"}
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">

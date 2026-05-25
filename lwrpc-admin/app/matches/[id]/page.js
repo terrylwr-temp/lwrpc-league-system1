@@ -92,7 +92,8 @@ export default function MatchDetailPage() {
           game_format,
           games_per_line,
           points_to_win,
-          posted_to_dupr
+          posted_to_dupr,
+          uses_saved_match_lineups
         ),
         home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name),
         home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name),
@@ -1441,6 +1442,7 @@ export default function MatchDetailPage() {
                     teamRating={teamDuprRating(line.home_player_1, line.home_player_2)}
                     ratingLabel={ratingLabel()}
                     savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.home_team_id))}
+                    useSavedLineups={line.division_lines?.uses_saved_match_lineups !== false}
                     roster={homeRoster}
                     line={line}
                     player1Field="home_player_1_id"
@@ -1456,6 +1458,7 @@ export default function MatchDetailPage() {
                     teamRating={teamDuprRating(line.away_player_1, line.away_player_2)}
                     ratingLabel={ratingLabel()}
                     savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.away_team_id))}
+                    useSavedLineups={line.division_lines?.uses_saved_match_lineups !== false}
                     roster={awayRoster}
                     line={line}
                     player1Field="away_player_1_id"
@@ -1619,6 +1622,7 @@ function TeamPlayers({
   teamRating,
   ratingLabel,
   savedLineups,
+  useSavedLineups,
   roster,
   line,
   player1Field,
@@ -1661,7 +1665,7 @@ function TeamPlayers({
         </span>
       </h3>
 
-      {savedLineups.length > 0 && (
+      {useSavedLineups && savedLineups.length > 0 && (
         <div className="mt-2">
           <div className="mb-1 text-xs font-bold uppercase tracking-wide text-blue-900">
             Saved Match Setup Team

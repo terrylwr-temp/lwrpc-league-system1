@@ -22,6 +22,7 @@ export default function TeamsPage() {
   const [scheduleTeam, setScheduleTeam] = useState(null);
   const [scheduleTeams, setScheduleTeams] = useState([]);
   const [scheduleMatches, setScheduleMatches] = useState([]);
+  const [scheduleByes, setScheduleByes] = useState([]);
   const [scheduleRatings, setScheduleRatings] = useState([]);
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const [copyTeam, setCopyTeam] = useState(null);
@@ -47,7 +48,7 @@ export default function TeamsPage() {
   const [notes, setNotes] = useState("");
 
   const activeLeagues = useMemo(() => {
-    return leagues.filter((league) => league.seasons?.is_active !== false);
+    return leagues.filter((league) => league.is_active !== false && league.seasons?.is_active !== false);
   }, [leagues]);
 
   const activeLeagueIds = useMemo(() => {
@@ -57,13 +58,13 @@ export default function TeamsPage() {
   const filteredDivisions = useMemo(() => {
     if (!selectedLeague) return [];
     if (!activeLeagueIds.has(String(selectedLeague))) return [];
-    return divisions.filter(d => d.league_id === selectedLeague);
+    return divisions.filter(d => d.league_id === selectedLeague && d.is_active !== false);
   }, [activeLeagueIds, divisions, selectedLeague]);
 
   const copyTargetDivisions = useMemo(() => {
     if (!copyTargetLeague) return [];
     if (!activeLeagueIds.has(String(copyTargetLeague))) return [];
-    return divisions.filter((division) => division.league_id === copyTargetLeague);
+    return divisions.filter((division) => division.league_id === copyTargetLeague && division.is_active !== false);
   }, [activeLeagueIds, copyTargetLeague, divisions]);
 
   const captainMemberChoices = useMemo(() => {
@@ -155,6 +156,7 @@ export default function TeamsPage() {
       .select(`
         id,
         name,
+        is_active,
         seasons (
           id,
           name,
@@ -165,7 +167,7 @@ export default function TeamsPage() {
 
     const { data: divisionData } = await supabase
       .from("divisions")
-      .select("id, name, league_id")
+      .select("id, name, league_id, is_active")
       .order("name", { ascending: true });
 
     const { data: locationData } = await supabase
@@ -587,6 +589,7 @@ export default function TeamsPage() {
     setScheduleTeam(team);
     setScheduleTeams([]);
     setScheduleMatches([]);
+    setScheduleByes([]);
     setScheduleRatings([]);
     setScheduleLoading(true);
 
@@ -594,6 +597,7 @@ export default function TeamsPage() {
     const [
       { data: divisionTeams, error: teamsError },
       { data: divisionMatches, error: matchesError },
+      { data: divisionByes, error: byesError },
       { data: divisionStandings, error: standingsError },
       { data: divisionRatings, error: ratingsError },
     ] = await Promise.all([
@@ -642,6 +646,15 @@ export default function TeamsPage() {
         .order("scheduled_date", { ascending: true })
         .order("scheduled_time", { ascending: true }),
       supabase
+        .from("team_byes")
+        .select(`
+          *,
+          teams ( id, name ),
+          divisions ( id, name )
+        `)
+        .eq("division_id", team.division_id)
+        .order("bye_date", { ascending: true }),
+      supabase
         .from("team_standings")
         .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
         .eq("division_id", team.division_id),
@@ -655,7 +668,7 @@ export default function TeamsPage() {
 
     setScheduleLoading(false);
 
-    const firstError = teamsError || matchesError || standingsError || ratingsError;
+    const firstError = teamsError || matchesError || byesError || standingsError || ratingsError;
     if (firstError) {
       alert(firstError.message);
       return;
@@ -674,6 +687,7 @@ export default function TeamsPage() {
         .sort(compareScheduleTeams)
     );
     setScheduleMatches(divisionMatches || []);
+    setScheduleByes(filterByesForPublishedSchedule(divisionByes || [], divisionMatches || []));
     setScheduleRatings(divisionRatings || []);
   }
 
@@ -1194,6 +1208,7 @@ if (loading) {
               })
             }
             matches={scheduleMatches}
+            byes={scheduleByes}
             ratings={scheduleRatings}
             ratingType={scheduleTeam.divisions?.rating_type || "dupr"}
             loading={scheduleLoading}
@@ -1202,6 +1217,7 @@ if (loading) {
               setScheduleTeam(null);
               setScheduleTeams([]);
               setScheduleMatches([]);
+              setScheduleByes([]);
               setScheduleRatings([]);
             }}
           />
@@ -1453,5 +1469,21 @@ function compareScheduleTeams(a, b) {
   if (pointsDifference !== 0) return pointsDifference;
 
   return String(a.name || "").localeCompare(String(b.name || ""));
+}
+
+function filterByesForPublishedSchedule(byes, matches) {
+  const publishedScheduleKeys = new Set(
+    matches.map((match) =>
+      scheduleWeekKey(match.division_id, match.week_number, match.scheduled_date)
+    )
+  );
+
+  return byes.filter((bye) =>
+    publishedScheduleKeys.has(scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date))
+  );
+}
+
+function scheduleWeekKey(divisionId, weekNumber, date) {
+  return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
 }
 

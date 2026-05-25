@@ -123,8 +123,8 @@ export default function SeasonsPage() {
 
     if (!firstOk) return;
 
-    const typed = prompt(`Type INACTIVATE to confirm inactivating "${season.name}".`);
-    if (typed !== "INACTIVATE") return;
+    const typed = prompt(`Type Inactivate to confirm inactivating "${season.name}".`);
+    if (String(typed || "").trim().toLowerCase() !== "inactivate") return;
 
     const { error } = await inactivateSeasonCascade(season.id);
 

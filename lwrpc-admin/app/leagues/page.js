@@ -48,13 +48,14 @@ export default function LeaguesPage() {
         .select(`
           *,
           seasons (
-            name
+            name,
+            is_active
           )
         `)
         .order("name", { ascending: true }),
     ]);
 
-    setSeasons(seasonsData || []);
+    setSeasons((seasonsData || []).filter((season) => season.is_active !== false));
     setLeagues(leaguesData || []);
   }, []);
 
@@ -108,6 +109,30 @@ export default function LeaguesPage() {
       .from("leagues")
       .delete()
       .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    loadData();
+  }
+
+  async function toggleLeagueActive(league) {
+    const currentlyActive = league.is_active !== false;
+
+    if (currentlyActive) {
+      const ok = confirm(`Inactivate league "${league.name}"? It will be hidden from current setup dropdowns.`);
+      if (!ok) return;
+    }
+
+    const { error } = await supabase
+      .from("leagues")
+      .update({
+        is_active: !currentlyActive,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", league.id);
 
     if (error) {
       alert(error.message);
@@ -385,6 +410,13 @@ export default function LeaguesPage() {
                         Season: {league.seasons?.name || "—"}
                       </div>
                       <div className="mt-2">
+                        <span className={`mr-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                          league.is_active === false
+                            ? "bg-slate-200 text-slate-700"
+                            : "bg-emerald-100 text-emerald-800"
+                        }`}>
+                          {league.is_active === false ? "Inactive" : "Active"}
+                        </span>
                         <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
                           league.rosters_locked
                             ? "bg-red-100 text-red-800"
@@ -413,6 +445,17 @@ export default function LeaguesPage() {
                     </div>
 
                     <div className="flex shrink-0 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => toggleLeagueActive(league)}
+                        className={`rounded-lg px-3 py-1 text-sm font-semibold ${
+                          league.is_active === false
+                            ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                            : "bg-amber-100 text-amber-900 hover:bg-amber-200"
+                        }`}
+                      >
+                        {league.is_active === false ? "Activate" : "Inactivate"}
+                      </button>
                       <button
                         type="button"
                         onClick={() => editLeague(league)}

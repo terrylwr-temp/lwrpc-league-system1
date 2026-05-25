@@ -39,6 +39,7 @@ export default function CaptainDashboardPage() {
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
   const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
+  const [divisionScheduleByes, setDivisionScheduleByes] = useState([]);
   const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
   const [pdfDocument, setPdfDocument] = useState(null);
@@ -1030,6 +1031,7 @@ export default function CaptainDashboardPage() {
     setDivisionScheduleTeam(team);
     setDivisionScheduleTeams([]);
     setDivisionScheduleMatches([]);
+    setDivisionScheduleByes([]);
     setDivisionScheduleRatings([]);
     setDivisionScheduleLoading(true);
 
@@ -1037,6 +1039,7 @@ export default function CaptainDashboardPage() {
     const [
       { data: divisionTeams, error: teamsError },
       { data: divisionMatches, error: matchesError },
+      { data: divisionByes, error: byesError },
       { data: divisionStandings, error: standingsError },
       { data: divisionRatings, error: ratingsError },
     ] =
@@ -1100,6 +1103,21 @@ export default function CaptainDashboardPage() {
           .order("scheduled_date", { ascending: true })
           .order("scheduled_time", { ascending: true }),
         supabase
+          .from("team_byes")
+          .select(`
+            *,
+            teams (
+              id,
+              name
+            ),
+            divisions (
+              id,
+              name
+            )
+          `)
+          .eq("division_id", team.division_id)
+          .order("bye_date", { ascending: true }),
+        supabase
           .from("team_standings")
           .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
           .eq("division_id", team.division_id),
@@ -1120,6 +1138,11 @@ export default function CaptainDashboardPage() {
 
     if (matchesError) {
       alert(matchesError.message);
+      return;
+    }
+
+    if (byesError) {
+      alert(byesError.message);
       return;
     }
 
@@ -1144,6 +1167,7 @@ export default function CaptainDashboardPage() {
       })).sort(compareDivisionScheduleTeams)
     );
     setDivisionScheduleMatches(divisionMatches || []);
+    setDivisionScheduleByes(filterByesForPublishedSchedule(divisionByes || [], divisionMatches || []));
     setDivisionScheduleRatings(divisionRatings || []);
   }
 
@@ -1383,7 +1407,7 @@ export default function CaptainDashboardPage() {
                   onClick={() => setShowPreviousSeasonTeams((value) => !value)}
                   className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white hover:bg-white/20"
                 >
-                  {showPreviousSeasonTeams ? "Show Active Teams" : "Previous Seasons Teams"}
+                  {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
                 </button>
               </div>
             </div>
@@ -1614,6 +1638,7 @@ export default function CaptainDashboardPage() {
               })
             }
             matches={divisionScheduleMatches}
+            byes={divisionScheduleByes}
             ratings={divisionScheduleRatings}
             ratingType={divisionScheduleTeam.divisions?.rating_type || "dupr"}
             loading={divisionScheduleLoading}
@@ -1622,6 +1647,7 @@ export default function CaptainDashboardPage() {
               setDivisionScheduleTeam(null);
               setDivisionScheduleTeams([]);
               setDivisionScheduleMatches([]);
+              setDivisionScheduleByes([]);
               setDivisionScheduleRatings([]);
             }}
           />
@@ -1860,6 +1886,18 @@ function buildMatchSetupStatus(matches, lineups) {
 
 function scheduleWeekKey(divisionId, weekNumber, date) {
   return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
+}
+
+function filterByesForPublishedSchedule(byes, matches) {
+  const publishedScheduleKeys = new Set(
+    matches.map((match) =>
+      scheduleWeekKey(match.division_id, match.week_number, match.scheduled_date)
+    )
+  );
+
+  return byes.filter((bye) =>
+    publishedScheduleKeys.has(scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date))
+  );
 }
 
 function compareDivisionScheduleTeams(a, b) {

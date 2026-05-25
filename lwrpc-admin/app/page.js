@@ -138,22 +138,32 @@ export default function DashboardPage() {
 
   async function saveLoginMessage(template) {
     const message = loginMessages[template.key] || {};
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before saving dashboard messages.");
+      return;
+    }
 
     setSavingMessageKey(template.key);
-    const { error } = await supabase
-      .from("notification_templates")
-      .upsert({
+    const response = await fetch("/api/notification-templates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
         template_key: template.key,
         subject: message.subject?.trim() || template.defaultSubject,
         body: message.body || "",
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: "template_key",
-      });
+      }),
+    });
+    const result = await response.json();
     setSavingMessageKey("");
 
-    if (error) {
-      alert(error.message);
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to save dashboard message.");
       return;
     }
 

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { formatDisplayDate, formatDisplayTime } from "../lib/dateTime";
+import { formatDisplayDate, formatDisplayTime, formatDisplayTimestamp } from "../lib/dateTime";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 
 export default function SchedulingPage() {
@@ -60,13 +60,13 @@ export default function SchedulingPage() {
   const loadData = useCallback(async function loadData() {
     const { data: leagueData, error: leagueError } = await supabase
       .from("leagues")
-      .select("id, name")
+      .select("id, name, is_active, seasons(is_active)")
       .order("name", { ascending: true });
     if (leagueError) return alert(leagueError.message);
 
     const { data: divisionData, error: divisionError } = await supabase
       .from("divisions")
-      .select("id, name, league_id")
+      .select("id, name, league_id, is_active")
       .order("name", { ascending: true });
     if (divisionError) return alert(divisionError.message);
 
@@ -99,8 +99,8 @@ export default function SchedulingPage() {
       .select("*");
     if (matchError) return alert(matchError.message);
 
-    setLeagues(leagueData || []);
-    setDivisions(divisionData || []);
+    setLeagues((leagueData || []).filter((league) => league.is_active !== false && league.seasons?.is_active !== false));
+    setDivisions((divisionData || []).filter((division) => division.is_active !== false));
     setLocations(locationData || []);
     setSettings(settingsData || []);
     setAvailability(availabilityData || []);
@@ -429,6 +429,30 @@ export default function SchedulingPage() {
     return rounds;
   }
 
+  function scheduleRoundsForWeeks(teamList, requestedWeeks) {
+    const baseRounds = generateRoundRobin(teamList);
+    const weekCount = Number(requestedWeeks || 0);
+
+    if (!weekCount || weekCount <= baseRounds.length) {
+      return baseRounds.slice(0, weekCount || undefined);
+    }
+
+    return Array.from({ length: weekCount }, (_, index) => {
+      const cycle = Math.floor(index / baseRounds.length);
+      const shouldFlipHomeAway = cycle % 2 === 1;
+
+      return baseRounds[index % baseRounds.length].map((game) => {
+        if (!shouldFlipHomeAway || game.is_bye) return { ...game };
+
+        return {
+          ...game,
+          home_team_id: game.away_team_id,
+          away_team_id: game.home_team_id,
+        };
+      });
+    });
+  }
+
   function getDayNumber(value) {
     const days = {
       sunday: 0,
@@ -646,16 +670,15 @@ export default function SchedulingPage() {
     setIsGeneratingSchedule(true);
 
     try {
-      const rounds = generateRoundRobin(divisionTeams).slice(0, scheduleWeekCount || undefined);
+      const rounds = scheduleRoundsForWeeks(divisionTeams, scheduleWeekCount);
       const rowsToInsert = [];
       const warnings = [];
       const byeRows = [];
+      let nextWeekOffset = 0;
 
       rounds.forEach((roundGames, roundIndex) => {
-        const weekOffset = setting.every_other_week ? roundIndex * 2 : roundIndex;
-
         let matchDate;
-        let adjustedWeekOffset = weekOffset;
+        let adjustedWeekOffset = nextWeekOffset;
         let blackoutSkips = 0;
 
         while (true) {
@@ -682,6 +705,8 @@ export default function SchedulingPage() {
             return;
           }
         }
+
+        nextWeekOffset = adjustedWeekOffset + (setting.every_other_week ? 2 : 1);
 
         roundGames.forEach((game) => {
           const homeTeam = divisionTeams.find((team) => team.id === game.home_team_id);
@@ -883,7 +908,7 @@ export default function SchedulingPage() {
 
     if (!latest) return `Generated ${settingMatches.length} match(es)`;
 
-    return `Generated ${settingMatches.length} match(es) on ${formatDisplayDate(latest)} at ${formatDisplayTime(latest.slice(11, 19), "")}`;
+    return `Generated ${settingMatches.length} match(es) on ${formatDisplayTimestamp(latest)}`;
   }
 
   const sortedSettings = useMemo(() => {
@@ -1218,7 +1243,7 @@ export default function SchedulingPage() {
 
             <ListCard title="Saved League Blackout Dates" subtitle="These dates are skipped during schedule generation." count={leagueBlackouts.length} emptyText="No league blackout dates saved yet.">
               {leagueBlackouts.map((row) => (
-                <RecordCard key={row.id} title={formatDisplayDate(row.blackout_date, "")}>
+                <RecordCard key={row.id} title={`${formatDisplayDate(row.blackout_date, "")}${dayOfWeekForDate(row.blackout_date) ? ` - ${dayOfWeekForDate(row.blackout_date)}` : ""}`}>
                   <DetailGrid>
                     <Detail label="League" value={row.leagues?.name || ""} />
                     <Detail label="Division" value={row.divisions?.name || "All Divisions"} />
@@ -1350,6 +1375,13 @@ function Detail({ label, value }) {
       <span className="font-semibold text-slate-800">{label}:</span> {value}
     </div>
   );
+}
+
+function dayOfWeekForDate(value) {
+  if (!value) return "";
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-US", { weekday: "long" });
 }
 
 function NoteBox({ children }) {

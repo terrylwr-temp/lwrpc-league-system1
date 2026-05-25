@@ -10,6 +10,7 @@ export default function TeamScheduleModal({
   selectedTeamId,
   onSelectTeam,
   matches = [],
+  byes = [],
   ratings = [],
   ratingType = "dupr",
   loading = false,
@@ -28,6 +29,23 @@ export default function TeamScheduleModal({
       String(match.home_team_id) === String(selectedTeamId) ||
       String(match.away_team_id) === String(selectedTeamId)
   );
+  const visibleByes = byes.filter((bye) => String(bye.team_id) === String(selectedTeamId));
+  const scheduleItems = [
+    ...visibleMatches.map((match) => ({
+      type: "match",
+      key: `match:${match.id}`,
+      date: match.scheduled_date,
+      time: match.scheduled_time || "00:00",
+      data: match,
+    })),
+    ...visibleByes.map((bye) => ({
+      type: "bye",
+      key: `bye:${bye.id}`,
+      date: bye.bye_date,
+      time: "00:00",
+      data: bye,
+    })),
+  ].sort(compareScheduleItems);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
@@ -98,26 +116,59 @@ export default function TeamScheduleModal({
               <div className="rounded-xl bg-slate-50 p-8 text-center text-slate-500">
                 Loading schedule...
               </div>
-            ) : visibleMatches.length === 0 ? (
+            ) : scheduleItems.length === 0 ? (
               <div className="rounded-xl bg-slate-50 p-8 text-center text-slate-500">
                 No schedule found for this team.
               </div>
             ) : (
               <div className="space-y-3">
-                {visibleMatches.map((match) => (
-                  <ScheduleMatchCard
-                    key={`${selectedTeamId}:${match.id}`}
-                    match={match}
-                    selectedTeamId={selectedTeamId}
-                    compact={compact}
-                    teamRecordById={teamRecordById}
-                    ratingByMemberId={ratingByMemberId}
-                    ratingType={ratingType}
-                  />
-                ))}
+                {scheduleItems.map((item) =>
+                  item.type === "bye" ? (
+                    <ScheduleByeCard key={`${selectedTeamId}:${item.key}`} bye={item.data} />
+                  ) : (
+                    <ScheduleMatchCard
+                      key={`${selectedTeamId}:${item.key}`}
+                      match={item.data}
+                      selectedTeamId={selectedTeamId}
+                      compact={compact}
+                      teamRecordById={teamRecordById}
+                      ratingByMemberId={ratingByMemberId}
+                      ratingType={ratingType}
+                    />
+                  )
+                )}
               </div>
             )}
           </section>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ScheduleByeCard({ bye }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 shadow-sm">
+      <div className="h-1 bg-amber-500" />
+      <div className="p-3 sm:p-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="min-w-0">
+            <div className="inline-flex rounded-full bg-amber-200 px-3 py-1 text-xs font-black uppercase tracking-wide text-amber-950">
+              Bye Week
+            </div>
+            <div className="mt-2 text-base font-black text-amber-950 sm:text-lg">
+              {bye.teams?.name || "Team"} has no match scheduled
+            </div>
+            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold text-amber-900">
+              <span>{formatDate(bye.bye_date)}</span>
+              <span>Week {bye.week_number || "-"}</span>
+              <span>{bye.divisions?.name || "Division"}</span>
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-white px-3 py-2 text-sm font-black uppercase tracking-wide text-amber-900 shadow-sm">
+            No Match Scheduled
+          </div>
         </div>
       </div>
     </div>
@@ -225,6 +276,12 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById, rat
       )}
     </div>
   );
+}
+
+function compareScheduleItems(a, b) {
+  const aDate = new Date(`${a.date || "9999-12-31"}T${a.time || "00:00"}`);
+  const bDate = new Date(`${b.date || "9999-12-31"}T${b.time || "00:00"}`);
+  return aDate - bDate;
 }
 
 function GameScoreRows({ line }) {

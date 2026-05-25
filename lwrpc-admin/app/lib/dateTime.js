@@ -1,3 +1,5 @@
+export const APP_TIME_ZONE = "America/New_York";
+
 export function formatDisplayDate(value, fallback = "-") {
   if (!value) return fallback;
 
@@ -43,4 +45,25 @@ export function formatDisplayDateTime(date, time, fallback = "Date / time TBD") 
   if (!date && !time) return fallback;
 
   return `${formatDisplayDate(date, "Date TBD")} at ${formatDisplayTime(time, "Time TBD")}`;
+}
+
+export function formatDisplayTimestamp(value, fallback = "-") {
+  if (!value) return fallback;
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TIME_ZONE,
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+    timeZoneName: "short",
+  }).format(date);
 }

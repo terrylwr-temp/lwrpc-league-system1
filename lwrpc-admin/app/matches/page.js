@@ -34,7 +34,7 @@ export default function MatchesPage() {
   const loadData = useCallback(async function loadData() {
     const { data: leagueData } = await supabase
       .from("leagues")
-      .select("*")
+      .select("*, seasons(is_active)")
       .order("name", { ascending: true });
 
     const { data: divisionData } = await supabase
@@ -81,8 +81,8 @@ export default function MatchesPage() {
       `)
       .order("scheduled_date", { ascending: true });
 
-    setLeagues(leagueData || []);
-    setDivisions(divisionData || []);
+    setLeagues((leagueData || []).filter((league) => league.is_active !== false && league.seasons?.is_active !== false));
+    setDivisions((divisionData || []).filter((division) => division.is_active !== false));
     setTeams((teamData || []).filter((team) => team.is_active !== false));
     setLocations(locationData || []);
     setMatches(matchData || []);

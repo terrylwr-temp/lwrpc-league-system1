@@ -10,10 +10,25 @@ alter table public.divisions
 alter table public.matches
   add column if not exists score_exported_at timestamptz;
 
+alter table public.member_season_ratings
+  add column if not exists dupr_doubles_rating text;
+
+alter table public.member_season_ratings
+  drop constraint if exists member_season_ratings_dupr_doubles_rating_check;
+
+alter table public.member_season_ratings
+  add constraint member_season_ratings_dupr_doubles_rating_check
+  check (
+    dupr_doubles_rating is null
+    or upper(trim(dupr_doubles_rating)) = 'NR'
+    or trim(dupr_doubles_rating) ~ '^[0-9](\.[0-9]{1,3})?$'
+  );
+
 alter table public.division_lines
   add column if not exists team_win_points integer default 1,
   add column if not exists picklebreaker_win_points integer default 1,
-  add column if not exists picklebreaker_loss_points integer default 0;
+  add column if not exists picklebreaker_loss_points integer default 0,
+  add column if not exists uses_saved_match_lineups boolean not null default true;
 
 alter table public.match_lines
   add column if not exists home_team_games_won integer default 0,
@@ -28,7 +43,13 @@ alter table public.leagues
 alter table public.leagues
   add column if not exists match_setup_reminder_days_before integer not null default 2;
 
+alter table public.leagues
+  add column if not exists is_active boolean not null default true;
+
 alter table public.seasons
+  add column if not exists is_active boolean not null default true;
+
+alter table public.divisions
   add column if not exists is_active boolean not null default true;
 
 alter table public.teams
@@ -67,74 +88,3 @@ create table if not exists public.match_lineups (
   updated_at timestamptz not null default now(),
   unique (match_id, team_id, line_number)
 );
-
-alter table public.match_lineups enable row level security;
-
-create or replace function public.current_user_is_lwrpc_admin()
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select exists (
-    select 1
-    from public.user_roles ur
-    where ur.user_id = auth.uid()
-      and ur.role in ('league_manager', 'commissioner')
-  )
-$$;
-
-create or replace function public.current_user_can_manage_match_lineup(lineup_team_id uuid)
-returns boolean
-language sql
-stable
-security definer
-set search_path = public
-as $$
-  select public.current_user_is_lwrpc_admin()
-    or exists (
-      select 1
-      from public.user_roles ur
-      join public.teams t on t.id = lineup_team_id
-      where ur.user_id = auth.uid()
-        and ur.role in ('captain', 'league_manager', 'commissioner')
-        and ur.member_id in (
-          t.captain_member_id,
-          t.co_captain_member_id,
-          t.co_captain_2_member_id
-        )
-    )
-$$;
-
-grant execute on function public.current_user_is_lwrpc_admin() to authenticated;
-grant execute on function public.current_user_can_manage_match_lineup(uuid) to authenticated;
-
-drop policy if exists "match_lineups_select_authenticated" on public.match_lineups;
-create policy "match_lineups_select_authenticated"
-  on public.match_lineups
-  for select
-  to authenticated
-  using (true);
-
-drop policy if exists "match_lineups_insert_captains_and_managers" on public.match_lineups;
-create policy "match_lineups_insert_captains_and_managers"
-  on public.match_lineups
-  for insert
-  to authenticated
-  with check (public.current_user_can_manage_match_lineup(team_id));
-
-drop policy if exists "match_lineups_update_captains_and_managers" on public.match_lineups;
-create policy "match_lineups_update_captains_and_managers"
-  on public.match_lineups
-  for update
-  to authenticated
-  using (public.current_user_can_manage_match_lineup(team_id))
-  with check (public.current_user_can_manage_match_lineup(team_id));
-
-drop policy if exists "match_lineups_delete_captains_and_managers" on public.match_lineups;
-create policy "match_lineups_delete_captains_and_managers"
-  on public.match_lineups
-  for delete
-  to authenticated
-  using (public.current_user_can_manage_match_lineup(team_id));

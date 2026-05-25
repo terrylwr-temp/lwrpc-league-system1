@@ -40,6 +40,7 @@ export default function PlayerDashboardPage() {
   const [member, setMember] = useState(null);
   const [teams, setTeams] = useState([]);
   const [matches, setMatches] = useState([]);
+  const [byeWeeks, setByeWeeks] = useState([]);
   const [standings, setStandings] = useState([]);
   const [playHistory, setPlayHistory] = useState([]);
   const [playerRatings, setPlayerRatings] = useState([]);
@@ -54,6 +55,7 @@ export default function PlayerDashboardPage() {
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
   const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
+  const [divisionScheduleByes, setDivisionScheduleByes] = useState([]);
   const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
 
@@ -83,6 +85,7 @@ export default function PlayerDashboardPage() {
 
     if (!memberData?.id) {
       setTeams([]);
+      setByeWeeks([]);
       setLoading(false);
       return;
     }
@@ -153,6 +156,7 @@ export default function PlayerDashboardPage() {
       .filter(Boolean);
     const teamIds = playerTeams.map((team) => team.id);
     let matchData = [];
+    let byeData = [];
     let standingsData = [];
     let historyData = [];
     let rostersByTeamId = {};
@@ -161,6 +165,7 @@ export default function PlayerDashboardPage() {
       const divisionIds = [...new Set(playerTeams.map((team) => team.divisions?.id).filter(Boolean))];
       const [
         { data, error },
+        { data: teamByeRows, error: teamByeError },
         { data: standingsRows, error: standingsError },
         { data: teamRosterRows, error: teamRosterError },
       ] = await Promise.all([
@@ -253,6 +258,21 @@ export default function PlayerDashboardPage() {
           .order("scheduled_date", { ascending: true })
           .order("scheduled_time", { ascending: true }),
         supabase
+          .from("team_byes")
+          .select(`
+            *,
+            teams (
+              id,
+              name
+            ),
+            divisions (
+              id,
+              name
+            )
+          `)
+          .in("team_id", teamIds)
+          .order("bye_date", { ascending: true }),
+        supabase
           .from("team_standings")
           .select(`
             *,
@@ -285,6 +305,12 @@ export default function PlayerDashboardPage() {
         return;
       }
 
+      if (teamByeError) {
+        alert(teamByeError.message);
+        setLoading(false);
+        return;
+      }
+
       if (standingsError) {
         alert(standingsError.message);
         setLoading(false);
@@ -298,6 +324,7 @@ export default function PlayerDashboardPage() {
       }
 
       matchData = data || [];
+      byeData = filterByesForPublishedSchedule(teamByeRows || [], matchData);
       standingsData = standingsRows || [];
       rostersByTeamId = (teamRosterRows || []).reduce((byTeam, row) => {
         if (!byTeam[row.team_id]) byTeam[row.team_id] = [];
@@ -442,6 +469,7 @@ export default function PlayerDashboardPage() {
       return firstActiveTeam?.id || playerTeams[0]?.id || "";
     });
     setMatches(matchData);
+    setByeWeeks(byeData);
     setStandings(standingsData);
     setPlayHistory(historyData);
     setPlayerRatings(ratingRows);
@@ -481,14 +509,21 @@ export default function PlayerDashboardPage() {
   const upcomingMatchesBySelectedTeam = useMemo(() => {
     if (!selectedPlayerTeamId) return [];
 
-    return matches.filter(
+    const upcomingMatchCount = matches.filter(
       (match) =>
         match.status !== "completed" &&
         match.status !== "cancelled" &&
         (String(match.home_team_id) === String(selectedPlayerTeamId) ||
           String(match.away_team_id) === String(selectedPlayerTeamId))
-    );
-  }, [matches, selectedPlayerTeamId]);
+    ).length;
+    const upcomingByeCount = byeWeeks.filter(
+      (bye) =>
+        String(bye.team_id) === String(selectedPlayerTeamId) &&
+        (!bye.bye_date || bye.bye_date >= localDateString())
+    ).length;
+
+    return Array.from({ length: upcomingMatchCount + upcomingByeCount });
+  }, [byeWeeks, matches, selectedPlayerTeamId]);
 
   const selectedTeamMatches = useMemo(() => {
     if (!selectedPlayerTeamId) return [];
@@ -504,6 +539,34 @@ export default function PlayerDashboardPage() {
       return match.status !== "completed";
     });
   }, [matches, selectedPlayerTeamId, showAllTeamMatches]);
+
+  const selectedTeamScheduleItems = useMemo(() => {
+    if (!selectedPlayerTeamId) return [];
+
+    const matchItems = selectedTeamMatches.map((match) => ({
+      type: "match",
+      key: `match:${match.id}`,
+      date: match.scheduled_date,
+      time: match.scheduled_time || "00:00",
+      data: match,
+    }));
+    const byeItems = byeWeeks
+      .filter((bye) => {
+        if (String(bye.team_id) !== String(selectedPlayerTeamId)) return false;
+        if (showAllTeamMatches) return true;
+
+        return !bye.bye_date || bye.bye_date >= localDateString();
+      })
+      .map((bye) => ({
+        type: "bye",
+        key: `bye:${bye.id}`,
+        date: bye.bye_date,
+        time: "00:00",
+        data: bye,
+      }));
+
+    return [...matchItems, ...byeItems].sort(compareScheduleItems);
+  }, [byeWeeks, selectedPlayerTeamId, selectedTeamMatches, showAllTeamMatches]);
 
   const selectedUpcomingTeam = useMemo(() => {
     return teams.find(
@@ -621,6 +684,7 @@ export default function PlayerDashboardPage() {
     setDivisionScheduleTeam(baseTeam);
     setDivisionScheduleTeams([]);
     setDivisionScheduleMatches([]);
+    setDivisionScheduleByes([]);
     setDivisionScheduleRatings([]);
     setDivisionScheduleLoading(true);
 
@@ -628,6 +692,7 @@ export default function PlayerDashboardPage() {
     const [
       { data: divisionTeams, error: teamsError },
       { data: divisionMatches, error: matchesError },
+      { data: divisionByes, error: byesError },
       { data: divisionStandings, error: standingsError },
       { data: divisionRatings, error: ratingsError },
     ] = await Promise.all([
@@ -675,6 +740,21 @@ export default function PlayerDashboardPage() {
         .order("scheduled_date", { ascending: true })
         .order("scheduled_time", { ascending: true }),
       supabase
+        .from("team_byes")
+        .select(`
+          *,
+          teams (
+            id,
+            name
+          ),
+          divisions (
+            id,
+            name
+          )
+        `)
+        .eq("division_id", divisionId)
+        .order("bye_date", { ascending: true }),
+      supabase
         .from("team_standings")
         .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
         .eq("division_id", divisionId),
@@ -688,7 +768,7 @@ export default function PlayerDashboardPage() {
 
     setDivisionScheduleLoading(false);
 
-    const firstError = teamsError || matchesError || standingsError || ratingsError;
+    const firstError = teamsError || matchesError || byesError || standingsError || ratingsError;
     if (firstError) {
       alert(firstError.message);
       return;
@@ -707,6 +787,7 @@ export default function PlayerDashboardPage() {
         .sort(compareDivisionScheduleTeams)
     );
     setDivisionScheduleMatches(divisionMatches || []);
+    setDivisionScheduleByes(filterByesForPublishedSchedule(divisionByes || [], divisionMatches || []));
     setDivisionScheduleRatings(divisionRatings || []);
   }
 
@@ -802,7 +883,7 @@ export default function PlayerDashboardPage() {
                     onClick={() => setShowPreviousSeasonTeams((value) => !value)}
                     className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white hover:bg-white/20"
                   >
-                    {showPreviousSeasonTeams ? "Show Active Teams" : "Previous Seasons Teams"}
+                    {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
                   </button>
                 </div>
                 {mySeasonDuprSummary() && (
@@ -995,23 +1076,27 @@ export default function PlayerDashboardPage() {
                   {showAllTeamMatches ? "Upcoming Only" : "Show All Matches"}
                 </button>
                 <div className="rounded-xl bg-white/15 px-4 py-2 text-center text-sm font-bold text-white">
-                  {selectedTeamMatches.length}
+                  {selectedTeamScheduleItems.length}
                 </div>
               </div>
             </div>
 
             <div className="space-y-3 p-5">
-              {selectedTeamMatches.map((match) => (
-                <MatchSummaryCard
-                  key={match.id}
-                  match={match}
-                  router={router}
-                  standings={standings}
-                  onOpenDetails={setMatchDetails}
-                />
-              ))}
+              {selectedTeamScheduleItems.map((item) =>
+                item.type === "bye" ? (
+                  <ByeSummaryCard key={item.key} bye={item.data} />
+                ) : (
+                  <MatchSummaryCard
+                    key={item.key}
+                    match={item.data}
+                    router={router}
+                    standings={standings}
+                    onOpenDetails={setMatchDetails}
+                  />
+                )
+              )}
 
-              {selectedTeamMatches.length === 0 && (
+              {selectedTeamScheduleItems.length === 0 && (
                 <div className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">
                   {showAllTeamMatches ? "No matches found for this team." : "No upcoming matches found for this team."}
                 </div>
@@ -1107,6 +1192,7 @@ export default function PlayerDashboardPage() {
               })
             }
             matches={divisionScheduleMatches}
+            byes={divisionScheduleByes}
             ratings={divisionScheduleRatings}
             ratingType={divisionScheduleTeam.divisions?.rating_type || "dupr"}
             loading={divisionScheduleLoading}
@@ -1115,6 +1201,7 @@ export default function PlayerDashboardPage() {
               setDivisionScheduleTeam(null);
               setDivisionScheduleTeams([]);
               setDivisionScheduleMatches([]);
+              setDivisionScheduleByes([]);
               setDivisionScheduleRatings([]);
             }}
           />
@@ -1526,6 +1613,40 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
   );
 }
 
+function ByeSummaryCard({ bye }) {
+  return (
+    <div className="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 shadow-sm">
+      <div className="h-1 bg-amber-500" />
+      <div className="px-4 py-4">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="font-bold text-amber-950">
+              Bye Week
+            </div>
+            <div className="mt-1 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
+              <span className="rounded-full bg-amber-200 px-2 py-0.5 text-amber-950">
+                {bye.teams?.name || "Team"}
+              </span>
+              <span className="rounded-full bg-white px-2 py-0.5 text-amber-900">
+                No Match Scheduled
+              </span>
+            </div>
+            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-amber-900">
+              <span>{formatDate(bye.bye_date)}</span>
+              <span>{bye.divisions?.name || "No Division"}</span>
+              <span>Week {bye.week_number || "-"}</span>
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-white px-4 py-2 text-center text-sm font-black uppercase tracking-wide text-amber-900">
+            Bye
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MatchDetailsModal({ match, standings, ratingForMember, onClose }) {
   const homeStanding = teamStanding(standings, match.home_team_id);
   const awayStanding = teamStanding(standings, match.away_team_id);
@@ -1770,6 +1891,35 @@ function compareDivisionScheduleTeams(a, b) {
   if (pointsDifference !== 0) return pointsDifference;
 
   return String(a.name || "").localeCompare(String(b.name || ""));
+}
+
+function compareScheduleItems(a, b) {
+  const aDate = new Date(`${a.date || "9999-12-31"}T${a.time || "00:00"}`);
+  const bDate = new Date(`${b.date || "9999-12-31"}T${b.time || "00:00"}`);
+  return aDate - bDate;
+}
+
+function filterByesForPublishedSchedule(byes, matches) {
+  const publishedScheduleKeys = new Set(
+    matches.map((match) =>
+      scheduleWeekKey(match.division_id, match.week_number, match.scheduled_date)
+    )
+  );
+
+  return byes.filter((bye) =>
+    publishedScheduleKeys.has(scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date))
+  );
+}
+
+function scheduleWeekKey(divisionId, weekNumber, date) {
+  return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
+}
+
+function localDateString() {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
 }
 
 function formatStandingRecord(standing) {

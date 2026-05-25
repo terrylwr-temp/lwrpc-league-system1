@@ -60,8 +60,10 @@ export default function DivisionsPage() {
         id,
         name,
         seasons (
-          name
-        )
+          name,
+          is_active
+        ),
+        is_active
       `)
       .order("name", { ascending: true });
 
@@ -76,12 +78,11 @@ export default function DivisionsPage() {
         *,
         leagues (
           name,
+          is_active,
           seasons (
-            name
+            name,
+            is_active
           )
-        ),
-        division_lines (
-          id
         )
       `)
       .order("sort_order", { ascending: true })
@@ -92,8 +93,29 @@ export default function DivisionsPage() {
       return;
     }
 
+    const { data: lineCountData, error: lineCountError } = await supabase
+      .from("division_lines")
+      .select("division_id, line_number");
+
+    if (lineCountError) {
+      alert(lineCountError.message);
+      return;
+    }
+
+    const lineNumbersByDivisionId = (lineCountData || []).reduce((map, line) => {
+      const key = String(line.division_id || "");
+      if (!map[key]) map[key] = new Set();
+      map[key].add(String(line.line_number || ""));
+      return map;
+    }, {});
+
     setLeagues(leagueData || []);
-    setDivisions(divisionData || []);
+    setDivisions(
+      (divisionData || []).map((division) => ({
+        ...division,
+        configured_line_count: lineNumbersByDivisionId[String(division.id)]?.size || 0,
+      }))
+    );
   }, []);
 
   async function saveDivision(e) {
@@ -157,6 +179,30 @@ export default function DivisionsPage() {
     if (!ok) return;
 
     const { error } = await supabase.from("divisions").delete().eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    loadData();
+  }
+
+  async function toggleDivisionActive(division) {
+    const currentlyActive = division.is_active !== false;
+
+    if (currentlyActive) {
+      const ok = confirm(`Inactivate division "${division.name}"? It will be hidden from current setup dropdowns.`);
+      if (!ok) return;
+    }
+
+    const { error } = await supabase
+      .from("divisions")
+      .update({
+        is_active: !currentlyActive,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", division.id);
 
     if (error) {
       alert(error.message);
@@ -393,6 +439,10 @@ export default function DivisionsPage() {
     return groups;
   }, [filteredDivisions]);
 
+  const activeLeagues = useMemo(() => {
+    return leagues.filter((league) => league.is_active !== false && league.seasons?.is_active !== false);
+  }, [leagues]);
+
   function ratingTypeLabel(type) {
     if (type === "primetime") return "Season PrimeTime";
     if (type === "self_rating") return "Self Rating";
@@ -440,7 +490,7 @@ export default function DivisionsPage() {
                 >
                   <option value="">Select League</option>
 
-                  {leagues.map((league) => (
+                  {activeLeagues.map((league) => (
                     <option key={league.id} value={league.id}>
                       {league.name}
                       {league.seasons?.name ? ` (${league.seasons.name})` : ""}
@@ -629,7 +679,7 @@ export default function DivisionsPage() {
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
                 >
                   <option value="">All Leagues</option>
-                  {leagues.map((league) => (
+                  {activeLeagues.map((league) => (
                     <option key={league.id} value={league.id}>
                       {league.name}
                       {league.seasons?.name ? ` (${league.seasons.name})` : ""}
@@ -702,6 +752,14 @@ export default function DivisionsPage() {
                               {division.name}
                             </div>
 
+                            <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                              division.is_active === false
+                                ? "bg-slate-200 text-slate-700"
+                                : "bg-emerald-100 text-emerald-800"
+                            }`}>
+                              {division.is_active === false ? "Inactive" : "Active"}
+                            </div>
+
                             <div className="mt-1 text-sm text-slate-600">
                               Rating Type: {ratingTypeLabel(division.rating_type)}
                             </div>
@@ -754,10 +812,22 @@ export default function DivisionsPage() {
                           <div className="flex gap-2">
                             <button
                               type="button"
+                              onClick={() => toggleDivisionActive(division)}
+                              className={`rounded-lg px-3 py-1 text-sm font-semibold ${
+                                division.is_active === false
+                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                  : "bg-amber-100 text-amber-900 hover:bg-amber-200"
+                              }`}
+                            >
+                              {division.is_active === false ? "Activate" : "Inactivate"}
+                            </button>
+
+                            <button
+                              type="button"
                               onClick={() => router.push(`/divisions/${division.id}`)}
                               className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
                             >
-                              Configure Game Lines ({division.division_lines?.length || 0})
+                              Configure Game Lines ({division.configured_line_count || 0})
                             </button>
 
                             <button
@@ -834,7 +904,7 @@ export default function DivisionsPage() {
                     className="w-full rounded-xl border border-slate-300 px-4 py-3"
                   >
                     <option value="">Select Target League</option>
-                    {leagues.map((league) => (
+                    {activeLeagues.map((league) => (
                       <option key={league.id} value={league.id}>
                         {league.name}
                         {league.seasons?.name ? ` (${league.seasons.name})` : ""}
