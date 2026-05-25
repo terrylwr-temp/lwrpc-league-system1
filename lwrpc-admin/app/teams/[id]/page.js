@@ -29,7 +29,7 @@ export default function TeamRosterPage() {
   const [historyFilters, setHistoryFilters] = useState({});
 
   const [selectedMemberId, setSelectedMemberId] = useState("");
-  const [selectedLocationId, setSelectedLocationId] = useState("");
+  const [selectedLocationId, setSelectedLocationId] = useState(null);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -242,7 +242,7 @@ export default function TeamRosterPage() {
     setSeasonRatings(ratingData);
     setPlayHistory(historyData);
 
-    if (!selectedLocationId && teamData.home_location_id) {
+    if (selectedLocationId === null && teamData.home_location_id) {
       setSelectedLocationId(teamData.home_location_id);
     }
   }, [id, selectedLocationId]);
@@ -880,7 +880,7 @@ function getAverageTeamRating() {
                 </label>
 
                 <select
-                  value={selectedLocationId}
+                  value={selectedLocationId ?? ""}
                   onChange={e => {
                     setSelectedLocationId(e.target.value);
                     setSelectedMemberId("");

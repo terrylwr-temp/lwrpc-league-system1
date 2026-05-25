@@ -74,11 +74,19 @@ export async function loadGuideDocument(templateKey) {
 }
 
 export async function openGuideDocument(supabase, guideType) {
+  const document = await guidePdfDocument(supabase, guideType);
+
+  if (!document) return;
+
+  window.open(document.url, "_blank", "noopener,noreferrer");
+}
+
+export async function guidePdfDocument(supabase, guideType) {
   const guideDocument = await loadGuideDocument(guideType.key);
 
   if (!guideDocument.path) {
     alert(`${guideType.label} is not configured yet.`);
-    return;
+    return null;
   }
 
   const { data, error } = await supabase.storage
@@ -86,8 +94,13 @@ export async function openGuideDocument(supabase, guideType) {
     .createSignedUrl(guideDocument.path, 60 * 60);
 
   if (!error && data?.signedUrl) {
-    window.open(data.signedUrl, "_blank", "noopener,noreferrer");
-    return;
+    return {
+      title: guideType.label,
+      leagueName: "Dashboard Guide",
+      teamName: guideType.buttonLabel,
+      url: data.signedUrl,
+      path: guideDocument.path,
+    };
   }
 
   const publicUrl = supabase.storage
@@ -97,8 +110,14 @@ export async function openGuideDocument(supabase, guideType) {
 
   if (!documentUrl) {
     alert("Unable to open this guide. Check the Supabase Storage bucket and file path.");
-    return;
+    return null;
   }
 
-  window.open(documentUrl, "_blank", "noopener,noreferrer");
+  return {
+    title: guideType.label,
+    leagueName: "Dashboard Guide",
+    teamName: guideType.buttonLabel,
+    url: documentUrl,
+    path: guideDocument.path,
+  };
 }

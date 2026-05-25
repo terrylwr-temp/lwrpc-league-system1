@@ -23,7 +23,7 @@ import {
   LEAGUE_DOCUMENT_TYPES,
   leagueDocumentPath,
 } from "../lib/leagueDocuments";
-import { GUIDE_DOCUMENT_TYPES, openGuideDocument } from "../lib/dashboardGuides";
+import { GUIDE_DOCUMENT_TYPES, guidePdfDocument } from "../lib/dashboardGuides";
 
 const PLAYER_DOCUMENT_KEYS = new Set([
   "code_of_conduct",
@@ -855,7 +855,10 @@ export default function PlayerDashboardPage() {
           welcomeAction={
             <button
               type="button"
-              onClick={() => openGuideDocument(supabase, playerGuide)}
+              onClick={async () => {
+                const document = await guidePdfDocument(supabase, playerGuide);
+                if (document) setPdfDocument(document);
+              }}
               className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
             >
               Players Guide
