@@ -142,6 +142,13 @@ export default function PlayerDashboardPage() {
             last_name,
             email,
             phone
+          ),
+          club_pro:members!teams_club_pro_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone
           )
         )
       `)
@@ -1550,6 +1557,7 @@ function teamCaptainContacts(team) {
     { label: "Captain", member: team.captain },
     { label: "Co-Captain 1", member: team.co_captain_1 },
     { label: "Co-Captain 2", member: team.co_captain_2 },
+    { label: "Club Pro", member: team.club_pro },
   ].map((item) => ({
     label: item.label,
     name: formatMemberName(item.member),

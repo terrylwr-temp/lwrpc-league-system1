@@ -59,14 +59,16 @@ export default function MatchDetailPage() {
           name,
           captain_member_id,
           co_captain_member_id,
-          co_captain_2_member_id
+          co_captain_2_member_id,
+          club_pro_member_id
         ),
         away_team:teams!matches_away_team_id_fkey(
           id,
           name,
           captain_member_id,
           co_captain_member_id,
-          co_captain_2_member_id
+          co_captain_2_member_id,
+          club_pro_member_id
         ),
         winning_team:teams!matches_winning_team_id_fkey(id, name)
       `)
@@ -669,9 +671,11 @@ export default function MatchDetailPage() {
       match.home_team?.captain_member_id,
       match.home_team?.co_captain_member_id,
       match.home_team?.co_captain_2_member_id,
+      match.home_team?.club_pro_member_id,
       match.away_team?.captain_member_id,
       match.away_team?.co_captain_member_id,
       match.away_team?.co_captain_2_member_id,
+      match.away_team?.club_pro_member_id,
     ].some((captainId) => String(captainId) === String(memberId));
   }
 
@@ -972,6 +976,14 @@ export default function MatchDetailPage() {
             email,
             phone,
             notification_preference
+          ),
+          club_pro:members!teams_club_pro_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
           )
         `)
         .in("id", teamIds);
@@ -986,6 +998,7 @@ export default function MatchDetailPage() {
           team?.captain,
           team?.co_captain_1,
           team?.co_captain_2,
+          team?.club_pro,
         ])
       );
 
@@ -1023,11 +1036,13 @@ export default function MatchDetailPage() {
       match.home_team?.captain_member_id,
       match.home_team?.co_captain_member_id,
       match.home_team?.co_captain_2_member_id,
+      match.home_team?.club_pro_member_id,
     ].filter(Boolean);
     const awayCaptainIds = [
       match.away_team?.captain_member_id,
       match.away_team?.co_captain_member_id,
       match.away_team?.co_captain_2_member_id,
+      match.away_team?.club_pro_member_id,
     ].filter(Boolean);
 
     if (memberId && homeCaptainIds.some((captainId) => String(captainId) === String(memberId))) {

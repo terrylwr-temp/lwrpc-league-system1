@@ -31,11 +31,12 @@ as $function$
       from public.user_roles ur
       join public.teams t on t.id = lineup_team_id
       where ur.user_id = auth.uid()
-        and ur.role in ('captain', 'league_manager', 'commissioner')
+        and ur.role in ('captain', 'club_pro', 'league_manager', 'commissioner')
         and ur.member_id in (
           t.captain_member_id,
           t.co_captain_member_id,
-          t.co_captain_2_member_id
+          t.co_captain_2_member_id,
+          t.club_pro_member_id
         )
     )
 $function$;

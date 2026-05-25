@@ -79,6 +79,7 @@ export default function MemberDetailPage() {
           captain_member_id,
           co_captain_member_id,
           co_captain_2_member_id,
+          club_pro_member_id,
           divisions (
             id,
             name,
@@ -254,6 +255,8 @@ setUserRole(roleData?.role || "player");
     ) {
       return "Co-Captain";
     }
+
+    if (team.club_pro_member_id === id) return "Club Pro";
 
     return teamMembership.role || "Player";
   }

@@ -33,7 +33,7 @@ function addDays(date, days) {
 }
 
 function captainContacts(team) {
-  const contacts = [team?.captain, team?.co_captain_1, team?.co_captain_2].filter(Boolean);
+  const contacts = [team?.captain, team?.co_captain_1, team?.co_captain_2, team?.club_pro].filter(Boolean);
   const seen = new Set();
 
   return contacts.filter((member) => {
@@ -107,14 +107,16 @@ export async function POST(req) {
             name,
             captain:members!teams_captain_member_id_fkey(id, first_name, last_name, email, phone, notification_preference),
             co_captain_1:members!teams_co_captain_member_id_fkey(id, first_name, last_name, email, phone, notification_preference),
-            co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, email, phone, notification_preference)
+            co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, email, phone, notification_preference),
+            club_pro:members!teams_club_pro_member_id_fkey(id, first_name, last_name, email, phone, notification_preference)
           ),
           away_team:teams!matches_away_team_id_fkey(
             id,
             name,
             captain:members!teams_captain_member_id_fkey(id, first_name, last_name, email, phone, notification_preference),
             co_captain_1:members!teams_co_captain_member_id_fkey(id, first_name, last_name, email, phone, notification_preference),
-            co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, email, phone, notification_preference)
+            co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, email, phone, notification_preference),
+            club_pro:members!teams_club_pro_member_id_fkey(id, first_name, last_name, email, phone, notification_preference)
           )
         `)
         .eq("league_id", league.id)

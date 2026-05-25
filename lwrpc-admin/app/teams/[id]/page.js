@@ -83,6 +83,13 @@ export default function TeamRosterPage() {
           first_name,
           last_name,
           email
+        ),
+        club_pro:members!teams_club_pro_member_id_fkey (
+          id,
+          full_name,
+          first_name,
+          last_name,
+          email
         )
       `)
       .eq("id", id)
@@ -269,10 +276,11 @@ export default function TeamRosterPage() {
       ["Captain", formatMemberName(team?.captain)],
       ["Co-Captain 1", formatMemberName(team?.co_captain_1)],
       ["Co-Captain 2", formatMemberName(team?.co_captain_2)],
+      ["Club Pro", formatMemberName(team?.club_pro)],
     ].filter(([, name]) => name);
 
     if (captains.length === 0) {
-      return "No captains assigned";
+      return "No team leads assigned";
     }
 
     return captains.map(([label, name]) => `${label}: ${name}`).join(" · ");
@@ -403,16 +411,17 @@ export default function TeamRosterPage() {
 
   function captainAlertDetails() {
     const captains = [
-      team?.captain,
-      team?.co_captain_1,
-      team?.co_captain_2,
-    ].filter(Boolean);
+      ["Captain", team?.captain],
+      ["Co-Captain 1", team?.co_captain_1],
+      ["Co-Captain 2", team?.co_captain_2],
+      ["Club Pro", team?.club_pro],
+    ].filter(([, member]) => member);
 
     return captains
-      .map((captain, index) => ({
-        label: index === 0 ? "Captain" : `Co-Captain ${index}`,
-        name: formatMemberName(captain) || "Unknown",
-        email: captain.email || "No email on file",
+      .map(([label, member]) => ({
+        label,
+        name: formatMemberName(member) || "Unknown",
+        email: member.email || "No email on file",
       }))
       .map((captain) => `${captain.label}: ${captain.name} <${captain.email}>`)
       .join("\n") || "No captain listed";
@@ -507,6 +516,13 @@ function getAverageTeamRating() {
         String(member.id)
     ) {
       return 2;
+    }
+
+    if (
+      String(team.club_pro_member_id) ===
+      String(member.id)
+    ) {
+      return 3;
     }
 
     return 3;
@@ -989,6 +1005,10 @@ function getAverageTeamRating() {
                   String(team.co_captain_2_member_id) ===
                     String(member?.id);
 
+                const isClubPro =
+                  String(team.club_pro_member_id) ===
+                  String(member?.id);
+
                 return (
                   <div
                     key={player.id}
@@ -1014,6 +1034,12 @@ function getAverageTeamRating() {
                           {isCoCaptain && (
                             <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-bold uppercase text-purple-800">
                               Co-Captain
+                            </span>
+                          )}
+
+                          {isClubPro && (
+                            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold uppercase text-emerald-800">
+                              Club Pro
                             </span>
                           )}
 

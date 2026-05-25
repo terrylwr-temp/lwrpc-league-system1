@@ -142,6 +142,14 @@ export default function ScoringPage() {
             email,
             phone,
             notification_preference
+          ),
+          club_pro:members!teams_club_pro_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
           )
         ),
         away_team:teams!matches_away_team_id_fkey (
@@ -164,6 +172,14 @@ export default function ScoringPage() {
             notification_preference
           ),
           co_captain_2:members!teams_co_captain_2_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
+          ),
+          club_pro:members!teams_club_pro_member_id_fkey (
             id,
             first_name,
             last_name,
@@ -757,9 +773,11 @@ function captainContacts(match) {
     match.home_team?.captain,
     match.home_team?.co_captain_1,
     match.home_team?.co_captain_2,
+    match.home_team?.club_pro,
     match.away_team?.captain,
     match.away_team?.co_captain_1,
     match.away_team?.co_captain_2,
+    match.away_team?.club_pro,
   ]
     .filter(Boolean)
     .map((member) => ({

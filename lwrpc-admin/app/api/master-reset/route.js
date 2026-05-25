@@ -132,6 +132,7 @@ export async function POST(req) {
         captain_member_id: null,
         co_captain_member_id: null,
         co_captain_2_member_id: null,
+        club_pro_member_id: null,
         is_active: false,
         updated_at: now,
       })

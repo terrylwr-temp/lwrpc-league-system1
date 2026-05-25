@@ -24,7 +24,7 @@ export function roleLabel(role) {
 }
 
 export function defaultDashboardForRole(role) {
-  if (role === "captain") return "/captain-dashboard";
+  if (role === "captain" || role === "club_pro") return "/captain-dashboard";
   if (role === "league_manager" || role === "commissioner") return "/";
 
   return "/player-dashboard";

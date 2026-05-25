@@ -44,14 +44,16 @@ export default function MobileScoreEntryPage() {
           name,
           captain_member_id,
           co_captain_member_id,
-          co_captain_2_member_id
+          co_captain_2_member_id,
+          club_pro_member_id
         ),
         away_team:teams!matches_away_team_id_fkey(
           id,
           name,
           captain_member_id,
           co_captain_member_id,
-          co_captain_2_member_id
+          co_captain_2_member_id,
+          club_pro_member_id
         ),
         locations(name),
         divisions(name)
@@ -280,6 +282,14 @@ export default function MobileScoreEntryPage() {
             email,
             phone,
             notification_preference
+          ),
+          club_pro:members!teams_club_pro_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
           )
         `)
         .eq("id", opposingTeamId)
@@ -294,6 +304,7 @@ export default function MobileScoreEntryPage() {
         opposingTeam?.captain,
         opposingTeam?.co_captain_1,
         opposingTeam?.co_captain_2,
+        opposingTeam?.club_pro,
       ]);
 
       if (emails.length === 0 && phones.length === 0) return;
@@ -329,6 +340,7 @@ export default function MobileScoreEntryPage() {
       match.home_team?.captain_member_id,
       match.home_team?.co_captain_member_id,
       match.home_team?.co_captain_2_member_id,
+      match.home_team?.club_pro_member_id,
     ].filter(Boolean);
 
     if (homeCaptainIds.some((captainId) => String(captainId) === String(memberId))) {

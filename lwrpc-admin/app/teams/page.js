@@ -43,6 +43,7 @@ export default function TeamsPage() {
   const [captainId, setCaptainId] = useState("");
   const [coCaptain1Id, setCoCaptain1Id] = useState("");
   const [coCaptain2Id, setCoCaptain2Id] = useState("");
+  const [clubProId, setClubProId] = useState("");
   const [teamActive, setTeamActive] = useState(true);
   const [showAllCaptainCommunities, setShowAllCaptainCommunities] = useState(false);
   const [notes, setNotes] = useState("");
@@ -68,7 +69,7 @@ export default function TeamsPage() {
   }, [activeLeagueIds, copyTargetLeague, divisions]);
 
   const captainMemberChoices = useMemo(() => {
-    const selectedCaptainIds = [captainId, coCaptain1Id, coCaptain2Id]
+    const selectedCaptainIds = [captainId, coCaptain1Id, coCaptain2Id, clubProId]
       .filter(Boolean)
       .map(String);
 
@@ -81,7 +82,7 @@ export default function TeamsPage() {
         return String(member.location_id) === String(selectedLocation);
       })
       .sort((a, b) => memberBaseName(a).localeCompare(memberBaseName(b)));
-  }, [captainId, coCaptain1Id, coCaptain2Id, members, selectedLocation, showAllCaptainCommunities]);
+  }, [captainId, clubProId, coCaptain1Id, coCaptain2Id, members, selectedLocation, showAllCaptainCommunities]);
 
   const filteredTeams = useMemo(() => {
     const q = teamSearch.trim().toLowerCase();
@@ -114,6 +115,7 @@ export default function TeamsPage() {
         displayMemberName(team.captain),
         displayMemberName(team.co_captain_1),
         displayMemberName(team.co_captain_2),
+        displayMemberName(team.club_pro),
       ].join(" ").toLowerCase();
 
       return searchText.includes(q);
@@ -235,6 +237,13 @@ export default function TeamsPage() {
           first_name,
           last_name,
           email
+        ),
+        club_pro:members!teams_club_pro_member_id_fkey (
+          id,
+          full_name,
+          first_name,
+          last_name,
+          email
         )
       `)
       .order("name", { ascending: true });
@@ -307,6 +316,48 @@ export default function TeamsPage() {
       });
   }
 
+  async function upgradeMemberToClubPro(memberId) {
+    if (!memberId) return;
+
+    const { data: existingRole } = await supabase
+      .from("user_roles")
+      .select("*")
+      .eq("member_id", memberId)
+      .maybeSingle();
+
+    const roleRank = {
+      player: 1,
+      captain: 2,
+      club_pro: 3,
+      league_manager: 4,
+      commissioner: 5
+    };
+
+    if (existingRole) {
+      const currentRank = roleRank[existingRole.role] || 1;
+
+      if (currentRank < roleRank.club_pro) {
+        await supabase
+          .from("user_roles")
+          .update({
+            role: "club_pro",
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", existingRole.id);
+      }
+
+      return;
+    }
+
+    await supabase
+      .from("user_roles")
+      .insert({
+        user_id: null,
+        member_id: memberId,
+        role: "club_pro"
+      });
+  }
+
   async function saveTeam(e) {
     e.preventDefault();
 
@@ -325,6 +376,7 @@ export default function TeamsPage() {
       captain_member_id: captainId || null,
       co_captain_member_id: coCaptain1Id || null,
       co_captain_2_member_id: coCaptain2Id || null,
+      club_pro_member_id: clubProId || null,
       notes: notes || null,
       is_active: teamActive,
       updated_at: new Date().toISOString()
@@ -356,6 +408,7 @@ export default function TeamsPage() {
     await upgradeMemberToCaptain(captainId);
     await upgradeMemberToCaptain(coCaptain1Id);
     await upgradeMemberToCaptain(coCaptain2Id);
+    await upgradeMemberToClubPro(clubProId);
 
     resetForm();
     await loadData();
@@ -373,6 +426,7 @@ export default function TeamsPage() {
     setCaptainId("");
     setCoCaptain1Id("");
     setCoCaptain2Id("");
+    setClubProId("");
     setTeamActive(true);
     setShowAllCaptainCommunities(false);
     setNotes("");
@@ -395,11 +449,13 @@ export default function TeamsPage() {
     setCaptainId(team.captain_member_id || "");
     setCoCaptain1Id(team.co_captain_member_id || "");
     setCoCaptain2Id(team.co_captain_2_member_id || "");
+    setClubProId(team.club_pro_member_id || "");
     setTeamActive(team.is_active !== false);
     setShowAllCaptainCommunities(
       captainIsOutsideHomeLocation(team.captain_member_id, team.home_location_id) ||
       captainIsOutsideHomeLocation(team.co_captain_member_id, team.home_location_id) ||
-      captainIsOutsideHomeLocation(team.co_captain_2_member_id, team.home_location_id)
+      captainIsOutsideHomeLocation(team.co_captain_2_member_id, team.home_location_id) ||
+      captainIsOutsideHomeLocation(team.club_pro_member_id, team.home_location_id)
     );
     setNotes(team.notes || "");
 
@@ -575,6 +631,7 @@ export default function TeamsPage() {
     await upgradeMemberToCaptain(payload.captain_member_id);
     await upgradeMemberToCaptain(payload.co_captain_member_id);
     await upgradeMemberToCaptain(payload.co_captain_2_member_id);
+    await upgradeMemberToClubPro(payload.club_pro_member_id);
 
     setCopyTeam(null);
     setCopyTeamName("");
@@ -740,6 +797,7 @@ export default function TeamsPage() {
       displayMemberName(team.captain),
       displayMemberName(team.co_captain_1),
       displayMemberName(team.co_captain_2),
+      displayMemberName(team.club_pro),
     ].filter(Boolean);
 
     return names.join(", ");
@@ -891,7 +949,7 @@ if (loading) {
                 <span>
                   <span className="font-semibold text-slate-900">Allow captain selection from any community</span>
                   <span className="block text-xs text-slate-500">
-                    Use this when a captain or co-captain belongs to a different community than the home location.
+                    Use this when a captain, co-captain, or club pro belongs to a different community than the home location.
                   </span>
                 </span>
               </label>
@@ -971,6 +1029,25 @@ if (loading) {
                 </select>
               </Field>
 
+              <Field label="Club Pro" hint="Optional team club pro. Club Pros use the Captain Dashboard and see this team in My Teams.">
+                <select
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  value={clubProId}
+                  onChange={e => setClubProId(e.target.value)}
+                  disabled={!selectedLocation && !showAllCaptainCommunities}
+                >
+                  <option value="">
+                    {selectedLocation || showAllCaptainCommunities ? "Select Club Pro" : "Select Location First"}
+                  </option>
+
+                  {captainMemberChoices.map(member => (
+                    <option key={member.id} value={member.id}>
+                      {memberName(member)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
               <Field label="Team Notes" hint="Optional internal notes about this team.">
                 <textarea
                   className="w-full rounded-xl border border-slate-300 px-4 py-3"
@@ -1019,7 +1096,7 @@ if (loading) {
                 <input
                   value={teamSearch}
                   onChange={(e) => setTeamSearch(e.target.value)}
-                  placeholder="Filter teams, leagues, divisions, captains..."
+                  placeholder="Filter teams, leagues, divisions, captains, club pros..."
                   className="min-w-72 rounded-xl border border-slate-300 px-4 py-3"
                 />
 
@@ -1128,7 +1205,7 @@ if (loading) {
                         </div>
 
                         <div className="truncate text-slate-700">
-                          <span className="font-semibold text-slate-900">Captains:</span>{" "}
+                          <span className="font-semibold text-slate-900">Team Leads:</span>{" "}
                           {captainSummary(team)}
                         </div>
 
@@ -1347,7 +1424,7 @@ function CopyTeamModal({
             <span>
               <span className="font-semibold text-slate-900">Copy roster players</span>
               <span className="block text-xs text-slate-500">
-                Captains and team settings are copied either way. Turn this off to create the team with an empty roster.
+                Captains, club pro, and team settings are copied either way. Turn this off to create the team with an empty roster.
               </span>
             </span>
           </label>
@@ -1408,6 +1485,7 @@ function copyTeamPayload(team, teamName, targetDivisionId) {
     captain_member_id: team.captain_member_id || null,
     co_captain_member_id: team.co_captain_member_id || null,
     co_captain_2_member_id: team.co_captain_2_member_id || null,
+    club_pro_member_id: team.club_pro_member_id || null,
     notes: team.notes || null,
     is_active: true,
     updated_at: new Date().toISOString(),

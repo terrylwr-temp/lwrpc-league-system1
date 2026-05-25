@@ -136,7 +136,7 @@ export default function CaptainDashboardPage() {
         )
       `)
       .or(
-        `captain_member_id.eq.${memberData.id},co_captain_member_id.eq.${memberData.id},co_captain_2_member_id.eq.${memberData.id}`
+        `captain_member_id.eq.${memberData.id},co_captain_member_id.eq.${memberData.id},co_captain_2_member_id.eq.${memberData.id},club_pro_member_id.eq.${memberData.id}`
       )
       .order("name", { ascending: true });
 
@@ -260,6 +260,14 @@ export default function CaptainDashboardPage() {
             email,
             phone,
             notification_preference
+          ),
+          club_pro:members!teams_club_pro_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
           )
         ),
         away_team:teams!matches_away_team_id_fkey (
@@ -282,6 +290,14 @@ export default function CaptainDashboardPage() {
             notification_preference
           ),
           co_captain_2:members!teams_co_captain_2_member_id_fkey (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            notification_preference
+          ),
+          club_pro:members!teams_club_pro_member_id_fkey (
             id,
             first_name,
             last_name,
@@ -1004,6 +1020,14 @@ export default function CaptainDashboardPage() {
           email,
           phone,
           notification_preference
+        ),
+        club_pro:members!teams_club_pro_member_id_fkey (
+          id,
+          first_name,
+          last_name,
+          email,
+          phone,
+          notification_preference
         )
       `)
       .eq("division_id", team.division_id)
@@ -1582,8 +1606,8 @@ export default function CaptainDashboardPage() {
             {visibleTeams.length === 0 && (
               <div className="rounded-xl bg-slate-50 p-6 text-slate-500">
                 {teams.length === 0
-                  ? "You are not currently assigned as captain or co-captain of any team."
-                  : "No active captain teams are currently shown. Use Previous Seasons Teams to view older teams."}
+                  ? "You are not currently assigned as captain, co-captain, or club pro of any team."
+                  : "No active captain or club pro teams are currently shown. Use Previous Seasons Teams to view older teams."}
               </div>
             )}
           </div>
@@ -1986,6 +2010,7 @@ function captainContacts(team) {
     team?.captain,
     team?.co_captain_1,
     team?.co_captain_2,
+    team?.club_pro,
   ].filter(Boolean);
   const seen = new Set();
 
@@ -2013,6 +2038,7 @@ function divisionCaptainsPrintHtml({ leagueName, divisionName, teams }) {
       ["Captain", team.captain],
       ["Co-Captain", team.co_captain_1],
       ["Co-Captain", team.co_captain_2],
+      ["Club Pro", team.club_pro],
     ]
       .filter(([, member]) => member)
       .map(([role, member]) => `

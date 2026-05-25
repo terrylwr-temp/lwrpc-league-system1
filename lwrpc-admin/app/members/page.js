@@ -778,6 +778,7 @@ async function loadAllMemberTeamRows() {
           captain_member_id,
           co_captain_member_id,
           co_captain_2_member_id,
+          club_pro_member_id,
           divisions (
             id,
             name,
@@ -812,6 +813,10 @@ function memberTeamRole(memberId, team) {
     String(team?.co_captain_2_member_id || "") === String(memberId || "")
   ) {
     return "Co-Captain";
+  }
+
+  if (String(team?.club_pro_member_id || "") === String(memberId || "")) {
+    return "Club Pro";
   }
 
   return "Player";
