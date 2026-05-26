@@ -7,6 +7,8 @@ import { formatPhoneNumberForStorage } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { useRouter } from "next/navigation";
 
+const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
+
 export default function MemberImportPage() {
   const router = useRouter();
 
@@ -93,12 +95,17 @@ export default function MemberImportPage() {
         email,
         first_name,
         last_name,
+        phone,
         membershipworks_id,
         membershipworks_account_id,
         membership_status,
         membership_level,
         membership_levels,
-        is_active_member
+        renewal_date,
+        is_active_member,
+        user_roles (
+          role
+        )
       `)
       .range(0, 5000);
 
@@ -247,7 +254,10 @@ const clubLocation = normalizeText(
       let action = "new";
       let message = "New member will be created.";
 
-      if (!email) {
+      if (matchedMember && matchType === "account id") {
+        action = "update";
+        message = "Matched existing member by account id.";
+      } else if (!email) {
         action = "skip";
         message = "Missing email address.";
       } else if (!isValidEmailAddress(email)) {
@@ -273,6 +283,8 @@ return {
   renewalDate,
   matchedMember,
   matchedMemberId: matchedMember?.id || null,
+  matchType,
+  hasInactiveProtectedRole: memberHasInactiveProtectedRole(matchedMember),
   message,
   raw: row
 };
@@ -290,6 +302,7 @@ return {
 
     const missing = currentMembers.filter(member => {
       if (member.is_active_member === false) return false;
+      if (memberHasInactiveProtectedRole(member)) return false;
 
       const email = normalizeEmail(member.email);
 
@@ -445,13 +458,18 @@ return {
 
     const updates = updateRows.map((row) => {
       const existing = row.matchedMember || {};
+      const matchedByAccountId = row.matchType === "account id";
+      const protectedStatus = row.hasInactiveProtectedRole === true;
       const payload = {
-        membership_status: "Active",
-        is_active_member: true,
         updated_at: now
       };
 
-      if (row.email) payload.email = row.email;
+      if (!protectedStatus) {
+        payload.membership_status = "Active";
+        payload.is_active_member = true;
+      }
+
+      if (row.email && isValidEmailAddress(row.email)) payload.email = row.email;
       if (row.phone) payload.phone = row.phone;
       if (row.renewalDate) payload.renewal_date = row.renewalDate;
 
@@ -464,8 +482,8 @@ return {
         payload.membershipworks_account_id = row.membershipWorksId;
       }
 
-      if (row.firstName && !existing.first_name) payload.first_name = row.firstName;
-      if (row.lastName && !existing.last_name) payload.last_name = row.lastName;
+      if (row.firstName && (matchedByAccountId || !existing.first_name)) payload.first_name = row.firstName;
+      if (row.lastName && (matchedByAccountId || !existing.last_name)) payload.last_name = row.lastName;
       if (row.clubLocation && !existing.club_location) payload.club_location = row.clubLocation;
       if (row.duprId && !existing.dupr_id) payload.dupr_id = row.duprId;
       if (row.membershipLevel && !existing.membership_level) payload.membership_level = row.membershipLevel;
@@ -506,6 +524,13 @@ return {
   }
 
   async function markMemberInactive(memberId) {
+    const member = missingMembers.find((row) => String(row.id) === String(memberId));
+
+    if (memberHasInactiveProtectedRole(member)) {
+      alert("League Managers, Club Pros, and Commissioners are protected from inactive cleanup.");
+      return;
+    }
+
     const ok = confirm("Mark this member inactive?");
     if (!ok) return;
 
@@ -539,7 +564,16 @@ return {
 
     if (!ok) return;
 
-    const ids = missingMembers.map(member => member.id);
+    const eligibleMembers = missingMembers.filter(
+      (member) => !memberHasInactiveProtectedRole(member)
+    );
+
+    if (eligibleMembers.length === 0) {
+      alert("No eligible missing members. League Managers, Club Pros, and Commissioners are protected.");
+      return;
+    }
+
+    const ids = eligibleMembers.map(member => member.id);
 
     const { error } = await supabase
       .from("members")
@@ -554,8 +588,10 @@ return {
       return;
     }
 
-    alert(`${missingMembers.length} members marked inactive.`);
-    setMissingMembers([]);
+    alert(`${eligibleMembers.length} members marked inactive.`);
+    setMissingMembers(prev =>
+      prev.filter(member => !ids.includes(member.id))
+    );
   }
 
   const stats = useMemo(() => {
@@ -887,6 +923,12 @@ Field names are flexible and common variations are supported automatically.`
 
       </div>
     </main>
+  );
+}
+
+function memberHasInactiveProtectedRole(member) {
+  return (member?.user_roles || []).some((roleRow) =>
+    INACTIVE_PROTECTED_ROLES.has(roleRow.role)
   );
 }
 

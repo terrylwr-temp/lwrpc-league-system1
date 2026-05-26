@@ -12,6 +12,7 @@ import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT } from "../lib/notificationPrefer
 
 const PAGE_SIZE = 100;
 const CLEAN_MEMBERS_BATCH_SIZE = 25;
+const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
 
 export default function MembersPage() {
   const router = useRouter();
@@ -174,10 +175,18 @@ export default function MembersPage() {
   async function markAllMembersInactive() {
     if (markingAllInactive) return;
 
-    const activeCount = members.filter((member) => member.is_active_member !== false).length;
+    const activeMembers = members.filter((member) => member.is_active_member !== false);
+    const eligibleMembers = activeMembers.filter(
+      (member) => member.is_active_member !== false && !memberHasInactiveProtectedRole(member)
+    );
+    const activeCount = eligibleMembers.length;
 
     if (activeCount === 0) {
-      alert("All members are already inactive.");
+      alert(
+        activeMembers.length === 0
+          ? "All members are already inactive."
+          : "No eligible active members. League Managers, Club Pros, and Commissioners are protected."
+      );
       return;
     }
 
@@ -186,6 +195,7 @@ export default function MembersPage() {
         `Mark ${activeCount} active member${activeCount === 1 ? "" : "s"} inactive?`,
         "",
         "Use this before a fresh MembershipWorks import when you want the import file to reactivate current members.",
+        "League Managers, Club Pros, and Commissioners will be left active.",
         "",
         "Continue?",
       ].join("\n")
@@ -201,7 +211,7 @@ export default function MembersPage() {
         is_active_member: false,
         updated_at: new Date().toISOString(),
       })
-      .neq("is_active_member", false);
+      .in("id", eligibleMembers.map((member) => member.id));
 
     setMarkingAllInactive(false);
 
@@ -872,6 +882,12 @@ function normalizeLocationName(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 }
 
+function memberHasInactiveProtectedRole(member) {
+  return (member.user_roles || []).some((roleRow) =>
+    INACTIVE_PROTECTED_ROLES.has(roleRow.role)
+  );
+}
+
 function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
@@ -942,13 +958,12 @@ function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) 
             </FormField>
 
             <FormField label="Club / Home Community">
-              <input
-                list="member-location-options"
+              <select
                 value={form.club_location}
                 onChange={(e) => onChange("club_location", e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-4 py-3"
-              />
-              <datalist id="member-location-options">
+              >
+                <option value="">Select Club / Home Community</option>
                 {locations.map((location) => {
                   const locationName = location.name || location;
 
@@ -956,10 +971,12 @@ function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) 
                     <option
                       key={`${location.id || "no-id"}:${locationName}`}
                       value={locationName}
-                    />
+                    >
+                      {locationName}
+                    </option>
                   );
                 })}
-              </datalist>
+              </select>
             </FormField>
 
             <FormField label="DUPR ID">

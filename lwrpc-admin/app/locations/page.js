@@ -10,6 +10,7 @@ export default function LocationsPage() {
   const router = useRouter();
 
   const [locations, setLocations] = useState([]);
+  const [members, setMembers] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [isMerging, setIsMerging] = useState(false);
   const [locationSearch, setLocationSearch] = useState("");
@@ -24,7 +25,7 @@ export default function LocationsPage() {
   const [stateValue, setStateValue] = useState("FL");
   const [zipCode, setZipCode] = useState("");
   const [numberOfCourts, setNumberOfCourts] = useState("");
-  const [clubPros, setClubPros] = useState("");
+  const [clubProMemberId, setClubProMemberId] = useState("");
   const [courtNotes, setCourtNotes] = useState("");
 
   const checkAuth = useCallback(async function checkAuth() {
@@ -35,7 +36,15 @@ export default function LocationsPage() {
   const loadLocations = useCallback(async function loadLocations() {
     const { data, error } = await supabase
       .from("locations")
-      .select("*")
+      .select(`
+        *,
+        club_pro:members!locations_club_pro_member_id_fkey (
+          id,
+          first_name,
+          last_name,
+          email
+        )
+      `)
       .order("name", { ascending: true });
 
     if (error) {
@@ -44,6 +53,21 @@ export default function LocationsPage() {
     }
 
     setLocations(data || []);
+  }, []);
+
+  const loadMembers = useCallback(async function loadMembers() {
+    const { data, error } = await supabase
+      .from("members")
+      .select("id, first_name, last_name, email, is_active_member")
+      .or("is_active_member.eq.true,is_active_member.is.null")
+      .order("last_name", { ascending: true });
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setMembers(data || []);
   }, []);
 
   async function saveLocation(e) {
@@ -61,7 +85,7 @@ export default function LocationsPage() {
       state: stateValue || null,
       zip_code: zipCode || null,
       number_of_courts: numberOfCourts ? Number(numberOfCourts) : 0,
-      club_pros: clubPros || null,
+      club_pro_member_id: clubProMemberId || null,
       court_notes: courtNotes || null,
       updated_at: new Date().toISOString(),
     };
@@ -75,8 +99,49 @@ export default function LocationsPage() {
       return;
     }
 
+    await upgradeMemberToClubPro(clubProMemberId);
+
     clearForm();
     await loadLocations();
+  }
+
+  async function upgradeMemberToClubPro(memberId) {
+    if (!memberId) return;
+
+    const roleRank = {
+      player: 1,
+      captain: 2,
+      club_pro: 3,
+      league_manager: 4,
+      commissioner: 5,
+    };
+
+    const { data: existingRole } = await supabase
+      .from("user_roles")
+      .select("*")
+      .eq("member_id", memberId)
+      .maybeSingle();
+
+    const currentRank = roleRank[existingRole?.role || "player"] || 1;
+
+    if (existingRole) {
+      if (currentRank < roleRank.club_pro) {
+        await supabase
+          .from("user_roles")
+          .update({ role: "club_pro" })
+          .eq("id", existingRole.id);
+      }
+
+      return;
+    }
+
+    await supabase
+      .from("user_roles")
+      .insert({
+        user_id: null,
+        member_id: memberId,
+        role: "club_pro",
+      });
   }
 
   async function deleteLocation(id) {
@@ -214,7 +279,7 @@ export default function LocationsPage() {
         ? ""
         : String(location.number_of_courts)
     );
-    setClubPros(location.club_pros || "");
+    setClubProMemberId(location.club_pro_member_id || "");
     setCourtNotes(location.court_notes || "");
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -228,7 +293,7 @@ export default function LocationsPage() {
     setStateValue("FL");
     setZipCode("");
     setNumberOfCourts("");
-    setClubPros("");
+    setClubProMemberId("");
     setCourtNotes("");
   }
 
@@ -237,12 +302,12 @@ export default function LocationsPage() {
       const ok = await checkAuth();
 
       if (ok) {
-        await loadLocations();
+        await Promise.all([loadLocations(), loadMembers()]);
       }
     }
 
     run();
-  }, [checkAuth, loadLocations]);
+  }, [checkAuth, loadLocations, loadMembers]);
 
   const filteredLocations = useMemo(() => {
     const search = locationSearch.trim().toLowerCase();
@@ -262,11 +327,19 @@ export default function LocationsPage() {
       return (
         (location.name || "").toLowerCase().includes(search) ||
         address.toLowerCase().includes(search) ||
-        (location.club_pros || "").toLowerCase().includes(search) ||
+        formatMemberName(location.club_pro).toLowerCase().includes(search) ||
         (location.court_notes || "").toLowerCase().includes(search)
       );
     });
   }, [locations, locationSearch]);
+
+  const clubProMembers = useMemo(() => {
+    return [...members].sort((a, b) => {
+      const lastCompare = (a.last_name || "").localeCompare(b.last_name || "");
+      if (lastCompare !== 0) return lastCompare;
+      return (a.first_name || "").localeCompare(b.first_name || "");
+    });
+  }, [members]);
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -355,13 +428,19 @@ export default function LocationsPage() {
                 </div>
 
                 <div>
-                  <FieldLabel label="Club Pros" />
-                  <textarea
+                  <FieldLabel label="Club Pro" />
+                  <select
                     className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                    placeholder="Club Pros"
-                    value={clubPros}
-                    onChange={(e) => setClubPros(e.target.value)}
-                  />
+                    value={clubProMemberId}
+                    onChange={(e) => setClubProMemberId(e.target.value)}
+                  >
+                    <option value="">Select Club Pro</option>
+                    {clubProMembers.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {formatMemberNameLastFirst(member)}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div>
@@ -548,7 +627,7 @@ export default function LocationsPage() {
                   </div>
 
                   <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                    <Info label="Club Pros" value={location.club_pros} />
+                    <Info label="Club Pro" value={formatMemberName(location.club_pro)} />
                     <Info label="Court Notes" value={location.court_notes} />
                   </div>
                 </div>
@@ -577,6 +656,21 @@ function FieldLabel({ label }) {
       {label}
     </label>
   );
+}
+
+function formatMemberName(member) {
+  if (!member) return "";
+  return `${member.first_name || ""} ${member.last_name || ""}`.trim() || member.email || "";
+}
+
+function formatMemberNameLastFirst(member) {
+  if (!member) return "";
+
+  const last = member.last_name || "";
+  const first = member.first_name || "";
+  const name = last && first ? `${last}, ${first}` : `${last}${first}`.trim();
+
+  return name || member.email || "";
 }
 
 function Info({ label, value }) {

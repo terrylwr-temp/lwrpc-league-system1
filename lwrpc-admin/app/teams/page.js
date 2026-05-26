@@ -177,7 +177,7 @@ export default function TeamsPage() {
       .select("id, name")
       .order("name", { ascending: true });
 
-    const { data: memberData } = await supabase
+    const { data: memberData, error: memberError } = await supabase
       .from("members")
       .select(`
         id,
@@ -189,14 +189,17 @@ export default function TeamsPage() {
         dupr_id,
         is_active_member,
         location_id,
-        locations (
-          id,
-          name
-        )
+        club_location
       `)
       .or("is_active_member.eq.true,is_active_member.is.null")
       .order("last_name", { ascending: true })
       .range(0, 2500);
+
+    if (memberError) {
+      alert(memberError.message);
+      setLoading(false);
+      return;
+    }
 
     const { data: teamData } = await supabase
       .from("teams")
@@ -764,7 +767,7 @@ export default function TeamsPage() {
 
   function memberName(member) {
     const name = memberBaseName(member);
-    const locationName = member.locations?.name;
+    const locationName = member.club_location;
 
     return showAllCaptainCommunities && locationName
       ? `${name} - ${locationName}`
@@ -949,7 +952,7 @@ if (loading) {
                 <span>
                   <span className="font-semibold text-slate-900">Allow captain selection from any community</span>
                   <span className="block text-xs text-slate-500">
-                    Use this when a captain, co-captain, or club pro belongs to a different community than the home location.
+                    Use this when a captain or co-captain belongs to a different community than the home location.
                   </span>
                 </span>
               </label>
@@ -1019,25 +1022,6 @@ if (loading) {
                 >
                   <option value="">
                     {selectedLocation || showAllCaptainCommunities ? "Select Co-Captain 2" : "Select Location First"}
-                  </option>
-
-                  {captainMemberChoices.map(member => (
-                    <option key={member.id} value={member.id}>
-                      {memberName(member)}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              <Field label="Club Pro" hint="Optional team club pro. Club Pros use the Captain Dashboard and see this team in My Teams.">
-                <select
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                  value={clubProId}
-                  onChange={e => setClubProId(e.target.value)}
-                  disabled={!selectedLocation && !showAllCaptainCommunities}
-                >
-                  <option value="">
-                    {selectedLocation || showAllCaptainCommunities ? "Select Club Pro" : "Select Location First"}
                   </option>
 
                   {captainMemberChoices.map(member => (

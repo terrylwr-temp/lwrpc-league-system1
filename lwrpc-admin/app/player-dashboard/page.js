@@ -41,6 +41,7 @@ export default function PlayerDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [member, setMember] = useState(null);
   const [teams, setTeams] = useState([]);
+  const [matchTeamRosters, setMatchTeamRosters] = useState({});
   const [matches, setMatches] = useState([]);
   const [byeWeeks, setByeWeeks] = useState([]);
   const [standings, setStandings] = useState([]);
@@ -87,6 +88,7 @@ export default function PlayerDashboardPage() {
 
     if (!memberData?.id) {
       setTeams([]);
+      setMatchTeamRosters({});
       setByeWeeks([]);
       setLoading(false);
       return;
@@ -176,7 +178,6 @@ export default function PlayerDashboardPage() {
         { data, error },
         { data: teamByeRows, error: teamByeError },
         { data: standingsRows, error: standingsError },
-        { data: teamRosterRows, error: teamRosterError },
       ] = await Promise.all([
         supabase
           .from("matches")
@@ -293,19 +294,6 @@ export default function PlayerDashboardPage() {
           `)
           .in("division_id", divisionIds.length > 0 ? divisionIds : ["00000000-0000-0000-0000-000000000000"])
           .order("rank", { ascending: true }),
-        supabase
-          .from("team_members")
-          .select(`
-            team_id,
-            members (
-              id,
-              first_name,
-              last_name,
-              email,
-              phone
-            )
-          `)
-          .in("team_id", teamIds),
       ]);
 
       if (error) {
@@ -326,16 +314,39 @@ export default function PlayerDashboardPage() {
         return;
       }
 
-      if (teamRosterError) {
-        alert(teamRosterError.message);
+      matchData = data || [];
+      byeData = filterByesForPublishedSchedule(teamByeRows || [], matchData);
+      standingsData = standingsRows || [];
+      const matchTeamIds = [
+        ...new Set(
+          [
+            ...teamIds,
+            ...matchData.flatMap((match) => [match.home_team_id, match.away_team_id]),
+          ].filter(Boolean)
+        ),
+      ];
+      const { data: matchRosterRows, error: matchRosterError } = await supabase
+        .from("team_members")
+        .select(`
+          team_id,
+          members (
+            id,
+            first_name,
+            last_name,
+            email,
+            phone,
+            self_rating
+          )
+        `)
+        .in("team_id", matchTeamIds);
+
+      if (matchRosterError) {
+        alert(matchRosterError.message);
         setLoading(false);
         return;
       }
 
-      matchData = data || [];
-      byeData = filterByesForPublishedSchedule(teamByeRows || [], matchData);
-      standingsData = standingsRows || [];
-      rostersByTeamId = (teamRosterRows || []).reduce((byTeam, row) => {
+      rostersByTeamId = (matchRosterRows || []).reduce((byTeam, row) => {
         if (!byTeam[row.team_id]) byTeam[row.team_id] = [];
         if (row.members) byTeam[row.team_id].push(row.members);
         return byTeam;
@@ -468,6 +479,14 @@ export default function PlayerDashboardPage() {
         roster: sortRosterMembers(rostersByTeamId[team.id] || []),
         standing: teamStanding(standingsData, team.id),
       }))
+    );
+    setMatchTeamRosters(
+      Object.fromEntries(
+        Object.entries(rostersByTeamId).map(([teamId, roster]) => [
+          teamId,
+          sortRosterMembers(roster),
+        ])
+      )
     );
     setSelectedPlayerTeamId((current) => {
       if (current && playerTeams.some((team) => String(team.id) === String(current))) {
@@ -654,6 +673,65 @@ export default function PlayerDashboardPage() {
     if (value === null || value === undefined || value === "") return "NR";
     const number = Number(value);
     return Number.isNaN(number) ? "NR" : number.toFixed(2);
+  }
+
+  function teamWithRoster(teamId) {
+    const sourceMatch =
+      (String(matchDetails?.home_team?.id || "") === String(teamId) ||
+        String(matchDetails?.away_team?.id || "") === String(teamId)) && matchDetails
+        ? matchDetails
+        : null;
+    const team =
+      teams.find((item) => String(item.id) === String(teamId)) ||
+      (String(matchDetails?.home_team?.id || "") === String(teamId) && matchDetails?.home_team) ||
+      (String(matchDetails?.away_team?.id || "") === String(teamId) && matchDetails?.away_team);
+
+    if (!team) return null;
+
+    return {
+      ...team,
+      divisions: team.divisions || (
+        sourceMatch?.divisions
+          ? {
+              ...sourceMatch.divisions,
+              leagues: sourceMatch.leagues || team.leagues,
+            }
+          : team.divisions
+      ),
+      roster: sortRosterMembers(matchTeamRosters[team.id] || team.roster || []),
+    };
+  }
+
+  function playerTeamRecord(teamId, memberId) {
+    const record = { wins: 0, losses: 0, ties: 0 };
+
+    matches
+      .filter(
+        (match) =>
+          match.status === "completed" &&
+          match.score_status === "verified" &&
+          (String(match.home_team_id) === String(teamId) || String(match.away_team_id) === String(teamId))
+      )
+      .forEach((match) => {
+        (match.match_lines || []).forEach((line) => {
+          const side = playerLineSide(line, memberId);
+          if (!side) return;
+
+          if (!line.winning_team_id) {
+            record.ties += 1;
+            return;
+          }
+
+          const won =
+            (side === "home" && String(line.winning_team_id) === String(match.home_team_id)) ||
+            (side === "away" && String(line.winning_team_id) === String(match.away_team_id));
+
+          if (won) record.wins += 1;
+          else record.losses += 1;
+        });
+      });
+
+    return record;
   }
 
   function mySelectedTeamRatingSummary() {
@@ -1207,6 +1285,8 @@ export default function PlayerDashboardPage() {
             match={matchDetails}
             standings={standings}
             ratingForMember={ratingForMember}
+            teamWithRoster={teamWithRoster}
+            onOpenRoster={setRosterTeam}
             onClose={() => setMatchDetails(null)}
           />
         )}
@@ -1214,6 +1294,8 @@ export default function PlayerDashboardPage() {
         {rosterTeam && (
           <RosterModal
             team={rosterTeam}
+            ratingForMember={ratingForMember}
+            playerRecordForTeam={playerTeamRecord}
             onClose={() => setRosterTeam(null)}
           />
         )}
@@ -1403,8 +1485,11 @@ function TeamCard({ team, selected, onSelect, onOpenDocument, onOpenRoster }) {
   );
 }
 
-function RosterModal({ team, onClose }) {
+function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
   const roster = team.roster || [];
+  const seasonId = team.divisions?.leagues?.season_id;
+  const ratingType = team.divisions?.rating_type || "dupr";
+  const hidePlayerContacts = team.hidePlayerContacts === true;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
@@ -1434,8 +1519,18 @@ function RosterModal({ team, onClose }) {
             {roster.map((player) => (
               <div key={player.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="font-black text-slate-950">{formatMemberName(player)}</div>
-                <div className="mt-1 break-words text-sm text-slate-700">{player.email || ""}</div>
-                <div className="mt-1 text-sm text-slate-700">{formatPhoneNumberForStorage(player.phone) || ""}</div>
+                <div className="mt-1 text-sm font-bold text-blue-900">
+                  Rating: {ratingForMember(player.id, seasonId, ratingType, player)}
+                </div>
+                <div className="mt-1 text-sm font-semibold text-slate-700">
+                  Record: {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
+                </div>
+                {!hidePlayerContacts && (
+                  <>
+                    <div className="mt-1 break-words text-sm text-slate-700">{player.email || ""}</div>
+                    <div className="mt-1 text-sm text-slate-700">{formatPhoneNumberForStorage(player.phone) || ""}</div>
+                  </>
+                )}
               </div>
             ))}
             {roster.length === 0 && (
@@ -1449,8 +1544,14 @@ function RosterModal({ team, onClose }) {
             <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
               <tr>
                 <th className="p-3 text-left">Player</th>
-                <th className="p-3 text-left">Email</th>
-                <th className="p-3 text-left">Phone</th>
+                <th className="p-3 text-left">Rating</th>
+                <th className="p-3 text-left">Season Record</th>
+                {!hidePlayerContacts && (
+                  <>
+                    <th className="p-3 text-left">Email</th>
+                    <th className="p-3 text-left">Phone</th>
+                  </>
+                )}
               </tr>
             </thead>
             <tbody>
@@ -1459,16 +1560,26 @@ function RosterModal({ team, onClose }) {
                   <td className="p-3 font-bold text-slate-900">
                     {formatMemberName(player)}
                   </td>
-                  <td className="p-3 text-slate-700">{player.email || ""}</td>
-                  <td className="p-3 text-slate-700">
-                    {formatPhoneNumberForStorage(player.phone) || ""}
+                  <td className="p-3 font-bold text-blue-900">
+                    {ratingForMember(player.id, seasonId, ratingType, player)}
                   </td>
+                  <td className="p-3 font-semibold text-slate-700">
+                    {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
+                  </td>
+                  {!hidePlayerContacts && (
+                    <>
+                      <td className="p-3 text-slate-700">{player.email || ""}</td>
+                      <td className="p-3 text-slate-700">
+                        {formatPhoneNumberForStorage(player.phone) || ""}
+                      </td>
+                    </>
+                  )}
                 </tr>
               ))}
 
               {roster.length === 0 && (
                 <tr>
-                  <td colSpan="3" className="p-8 text-center text-slate-500">
+                  <td colSpan={hidePlayerContacts ? 3 : 5} className="p-8 text-center text-slate-500">
                     No roster players found.
                   </td>
                 </tr>
@@ -1607,8 +1718,8 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
   const awayStanding = teamStanding(standings, match.away_team_id);
   const homeScore = matchTeamScore(match, "home");
   const awayScore = matchTeamScore(match, "away");
-  const hasMatchScore = homeScore !== null && awayScore !== null;
   const isVerifiedCompleted = match.status === "completed" && match.score_status === "verified";
+  const hasVerifiedMatchScore = isVerifiedCompleted && homeScore !== null && awayScore !== null;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
@@ -1616,15 +1727,15 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
       <div className="px-4 py-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
-          <div className="font-bold text-slate-900">
-            {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
-          </div>
-          <div className="mt-1 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
-            {hasMatchScore && (
-              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-900">
+          <div className="flex flex-wrap items-center gap-2 font-bold text-slate-900">
+            <span>{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</span>
+            {hasVerifiedMatchScore && (
+              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-950 ring-1 ring-emerald-200">
                 Total Score: {homeScore}-{awayScore}
               </span>
             )}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
             <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-900">
               Home: {match.home_team?.name || "Home"} ({formatStandingRecord(homeStanding)})
             </span>
@@ -1701,7 +1812,7 @@ function ByeSummaryCard({ bye }) {
   );
 }
 
-function MatchDetailsModal({ match, standings, ratingForMember, onClose }) {
+function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, onOpenRoster, onClose }) {
   const homeStanding = teamStanding(standings, match.home_team_id);
   const awayStanding = teamStanding(standings, match.away_team_id);
   const location = match.locations;
@@ -1709,6 +1820,27 @@ function MatchDetailsModal({ match, standings, ratingForMember, onClose }) {
   const isVerifiedCompleted = match.status === "completed" && match.score_status === "verified";
   const homeScore = matchTeamScore(match, "home");
   const awayScore = matchTeamScore(match, "away");
+  const homeTeam = teamWithRoster(match.home_team_id);
+  const awayTeam = teamWithRoster(match.away_team_id);
+  const lines = [...(match.match_lines || [])].sort(
+    (a, b) => Number(a.line_number || 0) - Number(b.line_number || 0)
+  );
+
+  function printMatchResults() {
+    window.localStorage.setItem(
+      "lwrpc-print-payload",
+      JSON.stringify({
+        title: `${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"} Match Results`,
+        body: matchResultsPrintHtml(match, lines),
+      })
+    );
+
+    const printWindow = window.open("/print", "_blank", "width=900,height=700");
+
+    if (!printWindow) {
+      alert("Unable to open print preview. Please allow popups for this site.");
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
@@ -1721,53 +1853,66 @@ function MatchDetailsModal({ match, standings, ratingForMember, onClose }) {
             <h2 className="mt-1 text-xl font-black sm:text-2xl">
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
-            <div className="mt-2 flex flex-wrap gap-2 text-sm font-semibold text-slate-200">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-200">
               <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
               {homeScore !== null && awayScore !== null && (
-                <span className="rounded-full bg-white/15 px-3 py-0.5 text-white">
+                <span className="rounded-full bg-white/15 px-4 py-1.5 text-lg font-black text-white">
                   Match Score: {homeScore}-{awayScore}
                 </span>
               )}
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
-          >
-            Close
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={printMatchResults}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+            >
+              Print
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Close
+            </button>
+          </div>
         </div>
 
         <div className="overflow-y-auto">
           <div className="grid gap-3 bg-slate-50 p-3 sm:p-5 md:grid-cols-2">
             <MatchTeamDetail
               label="Home Team"
-              team={match.home_team}
+              team={homeTeam || match.home_team}
               standing={homeStanding}
               tone="green"
+              onOpenRoster={homeTeam ? () => onOpenRoster({ ...homeTeam, hidePlayerContacts: true }) : null}
             />
             <MatchTeamDetail
               label="Away Team"
-              team={match.away_team}
+              team={awayTeam || match.away_team}
               standing={awayStanding}
               tone="gray"
+              onOpenRoster={awayTeam ? () => onOpenRoster({ ...awayTeam, hidePlayerContacts: true }) : null}
             />
           </div>
 
           <div className="space-y-3 p-3 sm:p-5">
-            <div className="rounded-2xl border border-slate-200 bg-white p-4">
-              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                Location
+            {!isVerifiedCompleted && (
+              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                  Location
+                </div>
+                <div className="mt-1 text-lg font-black text-slate-900">
+                  {location?.name || "Location TBD"}
+                </div>
+                <div className="mt-1 text-sm font-semibold text-slate-600">
+                  {formatLocationAddress(location)}
+                </div>
               </div>
-              <div className="mt-1 text-lg font-black text-slate-900">
-                {location?.name || "Location TBD"}
-              </div>
-              <div className="mt-1 text-sm font-semibold text-slate-600">
-                {formatLocationAddress(location)}
-              </div>
-            </div>
+            )}
 
             {isVerifiedCompleted && (
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -1775,9 +1920,7 @@ function MatchDetailsModal({ match, standings, ratingForMember, onClose }) {
                   Games
                 </div>
                 <div className="mt-3 space-y-3">
-                  {[...(match.match_lines || [])]
-                    .sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0))
-                    .map((line) => (
+                  {lines.map((line) => (
                       <MatchLineResult
                         key={line.id}
                         line={line}
@@ -1795,26 +1938,28 @@ function MatchDetailsModal({ match, standings, ratingForMember, onClose }) {
               </div>
             )}
 
-            <div className="flex flex-wrap gap-2">
-              {mapUrl && (
-                <a
-                  href={mapUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-xl bg-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
-                >
-                  Open Home Team Address Map
-                </a>
-              )}
+            {!isVerifiedCompleted && (
+              <div className="flex flex-wrap gap-2">
+                {mapUrl && (
+                  <a
+                    href={mapUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-xl bg-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
+                  >
+                    Open Home Team Address Map
+                  </a>
+                )}
 
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300"
-              >
-                Done
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300"
+                >
+                  Done
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1823,21 +1968,28 @@ function MatchDetailsModal({ match, standings, ratingForMember, onClose }) {
 }
 
 function MatchLineResult({ line, match, ratingForMember }) {
-  const wins = lineGameWinCounts(line);
+  const winnerName = matchLineWinnerName(line, match);
+  const winnerSide = matchLineWinnerSide(line, match);
+  const winnerClass =
+    winnerSide === "home"
+      ? "bg-emerald-50 text-emerald-950"
+      : winnerSide === "away"
+        ? "bg-indigo-50 text-indigo-950"
+        : "bg-slate-100 text-slate-900";
 
   return (
-    <div className="overflow-hidden rounded-xl border border-slate-200">
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100 px-4 py-3">
+    <div className="overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
         <div>
-          <div className="text-sm font-black text-slate-900">
+          <div className="text-base font-black text-slate-950">
             Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
           </div>
           <div className="mt-0.5 text-xs font-semibold text-slate-600">
             {line.division_lines?.line_type || "Line"}
           </div>
         </div>
-        <div className="rounded-full bg-slate-950 px-3 py-1 text-sm font-black text-white">
-          {wins.hasGames ? `${wins.home}-${wins.away}` : `${line.home_team_games_won ?? 0}-${line.away_team_games_won ?? 0}`}
+        <div className={`rounded-full px-4 py-2 text-sm font-black ${winnerClass}`}>
+          {winnerName}
         </div>
       </div>
 
@@ -1846,27 +1998,29 @@ function MatchLineResult({ line, match, ratingForMember }) {
           label={match.home_team?.name || "Home"}
           players={[line.home_player_1, line.home_player_2]}
           match={match}
+          tone="home"
           ratingForMember={ratingForMember}
         />
         <ResultTeamPlayers
           label={match.away_team?.name || "Away"}
           players={[line.away_player_1, line.away_player_2]}
           match={match}
+          tone="away"
           ratingForMember={ratingForMember}
         />
       </div>
 
       <div className="border-t border-slate-100 px-4 py-3">
-        <div className="flex flex-wrap gap-2 text-xs font-bold text-slate-700">
+        <div className="flex flex-wrap gap-2">
           {[...(line.line_games || [])]
             .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
             .map((game) => (
-              <span key={game.id} className="rounded-xl bg-blue-50 px-3 py-2 text-blue-950">
-                Game {game.game_number || "-"}: {game.home_score ?? "-"}-{game.away_score ?? "-"} Result: {gameResultText(game)}
+              <span key={game.id} className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-950">
+                {gameScoreText(game)}
               </span>
             ))}
           {!line.line_games?.length && (
-            <span className="rounded-xl bg-slate-50 px-3 py-2 text-slate-500">
+            <span className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-500">
               No game scores entered.
             </span>
           )}
@@ -1876,9 +2030,14 @@ function MatchLineResult({ line, match, ratingForMember }) {
   );
 }
 
-function ResultTeamPlayers({ label, players, match, ratingForMember }) {
+function ResultTeamPlayers({ label, players, match, ratingForMember, tone = "home" }) {
+  const toneClass =
+    tone === "away"
+      ? "bg-indigo-50 text-indigo-950"
+      : "bg-emerald-50 text-emerald-950";
+
   return (
-    <div className="rounded-xl bg-slate-50 px-3 py-2">
+    <div className={`rounded-xl px-3 py-3 ${toneClass}`}>
       <div className="text-xs font-black uppercase tracking-wide text-slate-500">
         {label}
       </div>
@@ -1891,6 +2050,11 @@ function ResultTeamPlayers({ label, players, match, ratingForMember }) {
             </span>
           </div>
         ))}
+        {players.filter(Boolean).length > 0 && (
+          <div className="pt-1 text-xs font-black uppercase tracking-wide text-slate-600">
+            Team Rating: {teamLineRating(players, match, ratingForMember)}
+          </div>
+        )}
         {players.filter(Boolean).length === 0 && (
           <div className="text-slate-500">Players not entered</div>
         )}
@@ -1899,10 +2063,10 @@ function ResultTeamPlayers({ label, players, match, ratingForMember }) {
   );
 }
 
-function MatchTeamDetail({ label, team, standing, tone }) {
+function MatchTeamDetail({ label, team, standing, tone, onOpenRoster }) {
   const tones = {
     green: "bg-emerald-50 text-emerald-950",
-    gray: "bg-slate-100 text-slate-950",
+    gray: "bg-indigo-50 text-indigo-950",
   };
 
   return (
@@ -1921,12 +2085,96 @@ function MatchTeamDetail({ label, team, standing, tone }) {
           {formatStandingRecord(standing)}
         </div>
       </div>
+      {onOpenRoster && (
+        <button
+          type="button"
+          onClick={onOpenRoster}
+          className="mt-3 w-full rounded-xl bg-slate-950 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800"
+        >
+          Team Roster ({team?.roster?.length || 0})
+        </button>
+      )}
     </div>
   );
 }
 
+function matchLineWinnerName(line, match) {
+  const side = matchLineWinnerSide(line, match);
+
+  if (side === "home") return match.home_team?.name || "Home Team";
+  if (side === "away") return match.away_team?.name || "Away Team";
+  return "No winner";
+}
+
+function matchLineWinnerSide(line, match) {
+  if (line.winning_team_id) {
+    if (String(line.winning_team_id) === String(match.home_team_id)) {
+      return "home";
+    }
+
+    if (String(line.winning_team_id) === String(match.away_team_id)) {
+      return "away";
+    }
+  }
+
+  const wins = lineGameWinCounts(line);
+  const homeWins = wins.hasGames ? wins.home : Number(line.home_team_games_won || 0);
+  const awayWins = wins.hasGames ? wins.away : Number(line.away_team_games_won || 0);
+
+  if (homeWins > awayWins) return "home";
+  if (awayWins > homeWins) return "away";
+  return "";
+}
+
 function teamStanding(standings, teamId) {
   return standings.find((standing) => String(standing.team_id) === String(teamId));
+}
+
+function playerLineSide(line, memberId) {
+  const id = String(memberId || "");
+  if (!id) return "";
+
+  if (
+    String(line.home_player_1?.id || line.home_player_1_id || "") === id ||
+    String(line.home_player_2?.id || line.home_player_2_id || "") === id
+  ) {
+    return "home";
+  }
+
+  if (
+    String(line.away_player_1?.id || line.away_player_1_id || "") === id ||
+    String(line.away_player_2?.id || line.away_player_2_id || "") === id
+  ) {
+    return "away";
+  }
+
+  return "";
+}
+
+function formatPlayerRecord(record) {
+  const wins = Number(record?.wins || 0);
+  const losses = Number(record?.losses || 0);
+  const ties = Number(record?.ties || 0);
+  return ties > 0 ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;
+}
+
+function teamLineRating(players, match, ratingForMember) {
+  const ratings = players
+    .filter(Boolean)
+    .map((player) =>
+      Number(
+        ratingForMember(
+          player.id,
+          match.leagues?.season_id,
+          match.divisions?.rating_type || "dupr",
+          player
+        )
+      )
+    )
+    .filter((rating) => !Number.isNaN(rating));
+
+  if (!ratings.length) return "NR";
+  return ratings.reduce((sum, rating) => sum + rating, 0).toFixed(2);
 }
 
 function compareDivisionScheduleTeams(a, b) {
@@ -2042,14 +2290,75 @@ function lineGameWinCounts(line) {
   return { home, away, hasGames };
 }
 
-function gameResultText(game) {
+function gameScoreText(game) {
   const special = specialGameStatus(game.game_status);
+  const score = `Game ${game.game_number || "-"}: ${game.home_score ?? "-"}-${game.away_score ?? "-"}`;
 
-  if (special) return special.label;
-  if (game.home_score === null || game.away_score === null) return "Pending";
-  if (Number(game.home_score) > Number(game.away_score)) return "Home";
-  if (Number(game.away_score) > Number(game.home_score)) return "Away";
-  return "Tie";
+  if (special) return `${score} Result: ${special.label}`;
+  if (game.home_score === null || game.away_score === null) return `${score} Result: Pending`;
+  if (Number(game.home_score) === Number(game.away_score)) return `${score} Result: Tie`;
+  return score;
+}
+
+function matchResultsPrintHtml(match, lines) {
+  const rows = lines.map((line) => {
+    const games = [...(line.line_games || [])]
+      .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
+      .map((game) => (
+        escapeHtml(gameScoreText(game))
+      ))
+      .join("<br />");
+
+    return `
+      <tr>
+        <td>${escapeHtml(line.line_number || "-")}</td>
+        <td>${escapeHtml(line.division_lines?.line_name || "")}</td>
+        <td>${escapeHtml(matchLineWinnerName(line, match))}</td>
+        <td>${escapeHtml(formatMemberName(line.home_player_1))} / ${escapeHtml(formatMemberName(line.home_player_2))}</td>
+        <td>${escapeHtml(formatMemberName(line.away_player_1))} / ${escapeHtml(formatMemberName(line.away_player_2))}</td>
+        <td>${games || "No game scores"}</td>
+      </tr>
+    `;
+  }).join("");
+
+  return `
+    <style>
+      h1 { margin: 0 0 4px; font-size: 24px; }
+      h2 { margin: 0 0 18px; color: #475569; font-size: 15px; font-weight: 600; }
+      table { width: 100%; border-collapse: collapse; }
+      th { background: #0f172a; color: white; text-align: left; }
+      th, td { border: 1px solid #cbd5e1; padding: 9px; font-size: 12px; vertical-align: top; }
+      tr:nth-child(even) td { background: #f8fafc; }
+      .score { margin: 12px 0 18px; font-size: 16px; font-weight: 700; }
+    </style>
+    <h1>${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")}</h1>
+    <h2>${escapeHtml(formatDate(match.scheduled_date))} / ${escapeHtml(match.locations?.name || "Home Location TBD")}</h2>
+    <div class="score">Match Score: ${escapeHtml(matchTeamScore(match, "home") ?? 0)}-${escapeHtml(matchTeamScore(match, "away") ?? 0)}</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Game</th>
+          <th>Line</th>
+          <th>Winner</th>
+          <th>Home Players</th>
+          <th>Away Players</th>
+          <th>Game Scores</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows || `<tr><td colspan="6">No game details found.</td></tr>`}
+      </tbody>
+    </table>
+  `;
+}
+
+function escapeHtml(value) {
+  return String(value || "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function formatLocationAddress(location) {

@@ -294,7 +294,7 @@ export default function AppHeader({
                 </button>
 
                 <div className="mt-5 text-center text-[11px] leading-relaxed text-slate-400">
-                  {"\u{00A9}"} {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club.
+                  {"\u{00A9}"} {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club
                   <br />
                   All rights reserved.
                   <br />
@@ -355,24 +355,22 @@ export default function AppHeader({
               </div>
             )}
 
-            <div className="hidden rounded-xl bg-white/10 px-4 py-3 text-right md:block">
-              <div className="text-xs uppercase tracking-wide text-sky-200">
-                Welcome
-              </div>
-
-              <div className="font-bold text-white">
-                {memberName || "User"}
-              </div>
-
-              <div className="text-xs text-slate-200">
-                {roleLabel(role)}
-              </div>
-
-              {welcomeAction && (
-                <div className="mt-3 flex justify-end">
-                  {welcomeAction}
+            <div className="hidden flex-col items-end gap-2 md:flex">
+              <div className="rounded-xl bg-white/10 px-4 py-3 text-right">
+                <div className="text-xs uppercase tracking-wide text-sky-200">
+                  Welcome
                 </div>
-              )}
+
+                <div className="font-bold text-white">
+                  {memberName || "User"}
+                </div>
+
+                <div className="text-xs text-slate-200">
+                  {roleLabel(role)}
+                </div>
+              </div>
+
+              {welcomeAction}
             </div>
           </div>
         </div>
@@ -421,7 +419,7 @@ export default function AppHeader({
             </button>
 
             <div className="mt-6 text-center text-[11px] leading-relaxed text-slate-400">
-              {"\u{00A9}"} {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club.
+              {"\u{00A9}"} {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club
               <br />
               All rights reserved.
               <br />
