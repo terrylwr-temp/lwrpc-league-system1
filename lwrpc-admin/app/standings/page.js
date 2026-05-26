@@ -4,6 +4,8 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { hasRole } from "../lib/permissions";
+import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
 import { useRouter } from "next/navigation";
 
 export default function StandingsPage() {
@@ -15,9 +17,12 @@ export default function StandingsPage() {
   const [standings, setStandings] = useState([]);
   const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("");
+  const [currentUserRole, setCurrentUserRole] = useState("player");
+  const [rebuilding, setRebuilding] = useState(false);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "player");
+    if (user?.role) setCurrentUserRole(user.role);
     return !!user;
   }, [router]);
 
@@ -104,6 +109,33 @@ export default function StandingsPage() {
     selectedDivision
   ]);
 
+  async function rebuildLeagueStatistics() {
+    if (!selectedDivision) {
+      alert("Select a division before rebuilding statistics.");
+      return;
+    }
+
+    const selectedDivisionName =
+      divisions.find((division) => String(division.id) === String(selectedDivision))?.name || "this division";
+    const confirmation = prompt(
+      `This will recalculate match scores, W-L-T, points, and rankings for ${selectedDivisionName} using verified matches only.\n\nType REBUILD to continue.`
+    );
+
+    if (confirmation !== "REBUILD") return;
+
+    setRebuilding(true);
+    const result = await rebuildDivisionStandingsForDivision(supabase, selectedDivision);
+    setRebuilding(false);
+
+    if (!result.success) {
+      alert(result.error || "Unable to rebuild league statistics.");
+      return;
+    }
+
+    await loadData();
+    alert(`League statistics rebuilt for ${result.teams} teams from ${result.matches} verified matches.`);
+  }
+
 if (loading) {
   return <LoadingScreen subtitle="Loading Standings Engine..." />;
 }
@@ -166,6 +198,17 @@ if (loading) {
                 )
               )}
             </select>
+
+            {hasRole(currentUserRole, "league_manager") && (
+              <button
+                type="button"
+                onClick={rebuildLeagueStatistics}
+                disabled={!selectedDivision || rebuilding}
+                className="rounded-xl bg-slate-900 px-4 py-3 font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
+                {rebuilding ? "Rebuilding..." : "Rebuild League Statistics"}
+              </button>
+            )}
 
           </div>
 

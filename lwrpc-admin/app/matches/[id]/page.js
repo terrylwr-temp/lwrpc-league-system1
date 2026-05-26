@@ -8,6 +8,7 @@ import { requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
+import { rebuildDivisionStandingsForDivision } from "../../lib/standingsRebuild";
 
 export default function MatchDetailPage() {
   const { id } = useParams();
@@ -94,6 +95,7 @@ export default function MatchDetailPage() {
           game_format,
           games_per_line,
           points_to_win,
+          win_by,
           posted_to_dupr,
           uses_saved_match_lineups
         ),
@@ -339,6 +341,14 @@ export default function MatchDetailPage() {
 
   const displayedLines = useMemo(() => getDisplayedLines(lines), [getDisplayedLines, lines]);
 
+  function canEditScoreEntry() {
+    if (!canManageScores()) return false;
+    if (isManagerOverride()) return true;
+    if (match?.score_status === "verified") return false;
+
+    return match?.score_status !== "pending_verification" || currentUserSubmittedScores();
+  }
+
   const getLineSummary = useCallback(function getLineSummary(line) {
     const lineGames = games.filter((game) => game.match_line_id === line.id);
 
@@ -506,6 +516,11 @@ export default function MatchDetailPage() {
   }, [displayedLines, getLineSummary, match]);
 
   async function updateLinePlayer(lineId, field, value) {
+    if (!canEditScoreEntry()) {
+      alert("Only the captain or co-captain who submitted these pending scores can make corrections.");
+      return;
+    }
+
     const selectedLine = lines.find((line) => line.id === lineId);
 
     if (!selectedLine) return;
@@ -559,6 +574,11 @@ export default function MatchDetailPage() {
   }
 
   async function applySavedLineup(line, side, lineupId) {
+    if (!canEditScoreEntry()) {
+      alert("Only the captain or co-captain who submitted these pending scores can make corrections.");
+      return;
+    }
+
     if (!lineupId) return;
 
     const lineup = matchLineups.find((item) => item.id === lineupId);
@@ -600,6 +620,11 @@ export default function MatchDetailPage() {
   }
 
   async function updateGame(gameId, field, value) {
+    if (!canEditScoreEntry()) {
+      alert("Only the captain or co-captain who submitted these pending scores can make corrections.");
+      return;
+    }
+
     const game = games.find((item) => item.id === gameId);
     const line = lines.find((item) => item.id === game?.match_line_id);
 
@@ -667,6 +692,42 @@ export default function MatchDetailPage() {
     const memberId = currentUserMember?.id;
     if (!memberId || !match) return false;
 
+    return Boolean(memberCaptainSide(memberId));
+  }
+
+  function memberCaptainSide(memberId) {
+    if (!memberId || !match) return "";
+
+    const id = String(memberId);
+    const homeCaptainIds = [
+      match.home_team?.captain_member_id,
+      match.home_team?.co_captain_member_id,
+      match.home_team?.co_captain_2_member_id,
+      match.home_team?.club_pro_member_id,
+    ].map((captainId) => String(captainId || ""));
+    const awayCaptainIds = [
+      match.away_team?.captain_member_id,
+      match.away_team?.co_captain_member_id,
+      match.away_team?.co_captain_2_member_id,
+      match.away_team?.club_pro_member_id,
+    ].map((captainId) => String(captainId || ""));
+
+    if (homeCaptainIds.includes(id)) return "home";
+    if (awayCaptainIds.includes(id)) return "away";
+
+    return "";
+  }
+
+  function isOpposingCaptainForSubmittedScores() {
+    const currentSide = memberCaptainSide(currentUserMember?.id);
+    const submitterSide = memberCaptainSide(match?.score_entered_by_member_id);
+
+    return Boolean(currentSide && submitterSide && currentSide !== submitterSide);
+  }
+
+  function isMatchCaptainMember(memberId) {
+    if (!memberId || !match) return false;
+
     return [
       match.home_team?.captain_member_id,
       match.home_team?.co_captain_member_id,
@@ -696,7 +757,12 @@ export default function MatchDetailPage() {
   }
 
   function canReviewSubmittedScores() {
-    return canManageScores() && (isManagerOverride() || !currentUserSubmittedScores());
+    return (
+      canManageScores() &&
+      (isManagerOverride() ||
+        !isMatchCaptainMember(match?.score_entered_by_member_id) ||
+        isOpposingCaptainForSubmittedScores())
+    );
   }
 
   function lineHasBlockingRatingWarning(line) {
@@ -732,6 +798,7 @@ export default function MatchDetailPage() {
   function gameLineValidationIssues(line, lineGames) {
     const issues = [];
     const pointsToWin = Number(line.division_lines?.points_to_win || 0);
+    const winBy = Number(line.division_lines?.win_by || 0);
 
     if (lineWarnings(line).length > 0) {
       issues.push(...lineWarnings(line));
@@ -755,7 +822,22 @@ export default function MatchDetailPage() {
       }
 
       if (!isRetiredStatus(status) && pointsToWin > 0) {
-        const highScore = Math.max(Number(game.home_score || 0), Number(game.away_score || 0));
+        const homeScore = Number(game.home_score || 0);
+        const awayScore = Number(game.away_score || 0);
+        const highScore = Math.max(homeScore, awayScore);
+
+        if (winBy === 1) {
+          if (highScore > pointsToWin) {
+            issues.push(`${gameLabel}: Win By 1 games cannot have a score higher than ${pointsToWin}.`);
+          }
+
+          if (homeScore !== pointsToWin && awayScore !== pointsToWin) {
+            issues.push(`${gameLabel}: Win By 1 games must have one team score exactly ${pointsToWin}.`);
+          }
+
+          return;
+        }
+
         if (highScore < pointsToWin) {
           issues.push(`${gameLabel}: at least one score must be ${pointsToWin} or higher for a completed game.`);
         }
@@ -881,7 +963,7 @@ export default function MatchDetailPage() {
 
     alert("Scores submitted for verification and opposing captains notified.");
 
-    loadData();
+    router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
   }
 
   async function verifyScores() {
@@ -891,7 +973,7 @@ export default function MatchDetailPage() {
     }
 
     if (!canReviewSubmittedScores()) {
-      alert("The captain or co-captain who submitted these scores cannot also validate them.");
+      alert("Only the opposing captain or co-captain can validate these scores.");
       return;
     }
 
@@ -931,7 +1013,7 @@ export default function MatchDetailPage() {
     }
 
     if (!canReviewSubmittedScores()) {
-      alert("The captain or co-captain who submitted these scores cannot also dispute them.");
+      alert("Only the opposing captain or co-captain can dispute these scores.");
       return;
     }
 
@@ -1085,196 +1167,9 @@ export default function MatchDetailPage() {
   async function rebuildDivisionStandings() {
     if (!match?.division_id) return;
 
-    const { data: division, error: divisionError } = await supabase
-      .from("divisions")
-      .select("*")
-      .eq("id", match.division_id)
-      .single();
+    const result = await rebuildDivisionStandingsForDivision(supabase, match.division_id);
 
-    if (divisionError) {
-      alert(divisionError.message);
-      return;
-    }
-
-    const { data: completedMatches, error } = await supabase
-      .from("matches")
-      .select(`
-        *,
-        match_lines (
-          *,
-          winning_team_id,
-          home_team_games_won,
-          away_team_games_won,
-          home_team_points,
-          away_team_points,
-          division_lines (
-            team_win_points
-          )
-        )
-      `)
-      .eq("division_id", match.division_id)
-      .eq("status", "completed")
-      .eq("score_status", "verified")
-      .order("scheduled_date", { ascending: true });
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    const standingsMap = {};
-
-    function ensureTeam(teamId) {
-      if (!standingsMap[teamId]) {
-        standingsMap[teamId] = {
-          league_id: division.league_id,
-          division_id: division.id,
-          team_id: teamId,
-          matches_played: 0,
-          match_wins: 0,
-          match_losses: 0,
-          match_ties: 0,
-          line_wins: 0,
-          line_losses: 0,
-          line_ties: 0,
-          game_wins: 0,
-          game_losses: 0,
-          points_for: 0,
-          points_against: 0,
-          point_differential: 0,
-          standings_points: 0,
-          home_wins: 0,
-          home_losses: 0,
-          away_wins: 0,
-          away_losses: 0,
-          recentResults: [],
-        };
-      }
-
-      return standingsMap[teamId];
-    }
-
-    completedMatches.forEach((matchRow) => {
-      const home = ensureTeam(matchRow.home_team_id);
-      const away = ensureTeam(matchRow.away_team_id);
-
-      home.matches_played += 1;
-      away.matches_played += 1;
-
-      let homeLinesWon = 0;
-      let awayLinesWon = 0;
-
-      (matchRow.match_lines || []).forEach((line) => {
-        const hg = Number(line.home_team_games_won || 0);
-        const ag = Number(line.away_team_games_won || 0);
-        const hp = Number(line.home_team_points || 0);
-        const ap = Number(line.away_team_points || 0);
-
-        home.game_wins += hg;
-        home.game_losses += ag;
-        away.game_wins += ag;
-        away.game_losses += hg;
-        home.points_for += hp;
-        home.points_against += ap;
-        away.points_for += ap;
-        away.points_against += hp;
-
-        if (line.winning_team_id === matchRow.home_team_id) {
-          home.line_wins += 1;
-          away.line_losses += 1;
-          homeLinesWon += 1;
-        } else if (line.winning_team_id === matchRow.away_team_id) {
-          away.line_wins += 1;
-          home.line_losses += 1;
-          awayLinesWon += 1;
-        } else {
-          home.line_ties += 1;
-          away.line_ties += 1;
-        }
-
-        const teamWinPoints = Number(line.division_lines?.team_win_points ?? 1);
-        home.standings_points += hg * teamWinPoints;
-        away.standings_points += ag * teamWinPoints;
-      });
-
-      if (homeLinesWon > awayLinesWon) {
-        home.match_wins += 1;
-        away.match_losses += 1;
-        home.home_wins += 1;
-        away.away_losses += 1;
-        home.recentResults.push("W");
-        away.recentResults.push("L");
-      } else if (awayLinesWon > homeLinesWon) {
-        away.match_wins += 1;
-        home.match_losses += 1;
-        away.away_wins += 1;
-        home.home_losses += 1;
-        away.recentResults.push("W");
-        home.recentResults.push("L");
-      } else {
-        home.match_ties += 1;
-        away.match_ties += 1;
-        home.recentResults.push("T");
-        away.recentResults.push("T");
-      }
-    });
-
-    const ordered = Object.values(standingsMap).map((team) => {
-      team.point_differential = team.points_for - team.points_against;
-      const recent = team.recentResults.slice(-5);
-      team.recent_form = recent.join("");
-
-      if (recent.length > 0) {
-        const last = recent[recent.length - 1];
-        let streak = 0;
-
-        for (let i = recent.length - 1; i >= 0; i--) {
-          if (recent[i] === last) {
-            streak++;
-          } else {
-            break;
-          }
-        }
-
-        team.current_streak = last + streak;
-      } else {
-        team.current_streak = "-";
-      }
-
-      delete team.recentResults;
-      return team;
-    });
-
-    ordered.sort((a, b) => {
-      const rules = [
-        division.standings_tiebreak_1,
-        division.standings_tiebreak_2,
-        division.standings_tiebreak_3,
-      ];
-
-      for (const rule of rules) {
-        if ((b[rule] || 0) !== (a[rule] || 0)) {
-          return (b[rule] || 0) - (a[rule] || 0);
-        }
-      }
-
-      return 0;
-    });
-
-    ordered.forEach((team, index) => {
-      team.rank = index + 1;
-      team.updated_at = new Date().toISOString();
-    });
-
-    await supabase.from("team_standings").delete().eq("division_id", match.division_id);
-
-    if (ordered.length > 0) {
-      const { error: insertError } = await supabase.from("team_standings").insert(ordered);
-
-      if (insertError) {
-        alert(insertError.message);
-      }
-    }
+    if (!result.success) alert(result.error || "Unable to rebuild standings.");
   }
 
   useEffect(() => {
@@ -1293,11 +1188,8 @@ export default function MatchDetailPage() {
     return <LoadingScreen subtitle="Loading Match Operations..." />;
   }
 
-  const scoreActionsAllowed = canManageScores();
   const scoreReviewAllowed = canReviewSubmittedScores();
-  const scoreEntryEditable =
-    scoreActionsAllowed &&
-    (isManagerOverride() || match.score_status !== "verified");
+  const scoreEntryEditable = canEditScoreEntry();
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
@@ -1316,22 +1208,22 @@ export default function MatchDetailPage() {
             Back to {isCaptainView() ? "Captain Dashboard" : "Schedule Editor"}
           </button>
 
-          <button
-            type="button"
-            onClick={completeMatch}
-            disabled={!scoreEntryEditable}
-            className="rounded-xl bg-green-700 px-4 py-3 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
-          >
-            Submit Scores
-          </button>
+          {scoreEntryEditable && (
+            <button
+              type="button"
+              onClick={completeMatch}
+              className="rounded-xl bg-green-700 px-4 py-3 font-semibold text-white hover:bg-green-800 lg:py-2"
+            >
+              Submit Scores
+            </button>
+          )}
 
-          {match.score_status === "pending_verification" && (
+          {match.score_status !== "verified" && scoreReviewAllowed && (
             <>
               <button
                 type="button"
                 onClick={verifyScores}
-                disabled={!scoreReviewAllowed}
-                className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
+                className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 lg:py-2"
               >
                 Validate Scores
               </button>
@@ -1339,8 +1231,7 @@ export default function MatchDetailPage() {
               <button
                 type="button"
                 onClick={disputeScores}
-                disabled={!scoreReviewAllowed}
-                className="rounded-xl bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
+                className="rounded-xl bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 lg:py-2"
               >
                 Dispute Scores
               </button>

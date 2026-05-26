@@ -596,7 +596,7 @@ export default function CaptainDashboardPage() {
         String(match.home_team_id) === String(selectedTeamId) ||
         String(match.away_team_id) === String(selectedTeamId);
 
-      return isSelectedTeam && match.status === "completed";
+      return isSelectedTeam && match.status === "completed" && match.score_status === "verified";
     });
   }, [matches, selectedTeamId]);
 
@@ -1843,7 +1843,7 @@ export default function CaptainDashboardPage() {
           />
           <CaptainSectionButton
             active={captainSection === "upcoming"}
-            label="Upcoming Matches"
+            label="Upcoming/Unverified Matches"
             value={upcomingItems.length}
             tone="blue"
             onClick={() => setCaptainSection("upcoming")}
@@ -1873,14 +1873,14 @@ export default function CaptainDashboardPage() {
 
         {captainSection === "upcoming" && (
           <Section
-            title={`Upcoming Matches / Byes${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`}
+            title={`Upcoming/Unverified Matches / Byes${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`}
             count={upcomingItems.length}
           >
             {upcomingItems.map((item) =>
               item.type === "match" ? matchCard(item.data) : byeCard(item.data)
             )}
 
-            {upcomingItems.length === 0 && <Empty message="No upcoming matches or byes found." />}
+            {upcomingItems.length === 0 && <Empty message="No upcoming or unverified matches or byes found." />}
           </Section>
         )}
 
