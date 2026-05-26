@@ -26,6 +26,7 @@ export default function MatchesPage() {
   const [weekNumber, setWeekNumber] = useState("1");
   const [notes, setNotes] = useState("");
   const [matchSearch, setMatchSearch] = useState("");
+  const [showMatchNotes, setShowMatchNotes] = useState(false);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -502,16 +503,30 @@ export default function MatchesPage() {
                 {filteredMatches.length} shown / {matches.length} total scheduled matches
               </div>
 
-              <div className="w-full md:w-80">
-                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
-                  Search / Filter
-                </label>
-                <input
-                  value={matchSearch}
-                  onChange={(event) => setMatchSearch(event.target.value)}
-                  placeholder="Teams, division, date, location..."
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold"
-                />
+              <div className="flex w-full flex-col gap-2 md:w-auto md:min-w-[28rem] md:flex-row md:items-end">
+                <div className="min-w-0 flex-1">
+                  <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
+                    Search / Filter
+                  </label>
+                  <input
+                    value={matchSearch}
+                    onChange={(event) => setMatchSearch(event.target.value)}
+                    placeholder="Teams, division, date, location..."
+                    className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowMatchNotes((value) => !value)}
+                  className={`rounded-xl px-4 py-2.5 text-sm font-bold ${
+                    showMatchNotes
+                      ? "bg-amber-100 text-amber-950 hover:bg-amber-200"
+                      : "bg-slate-200 text-slate-900 hover:bg-slate-300"
+                  }`}
+                >
+                  {showMatchNotes ? "Hide Notes" : "Show Notes"}
+                </button>
               </div>
             </div>
 
@@ -561,7 +576,7 @@ export default function MatchesPage() {
                         Status: {match.status || "scheduled"}
                       </div>
 
-                      {match.notes && (
+                      {showMatchNotes && match.notes && (
                         <div className="mt-2 rounded-lg bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-900">
                           Note: {match.notes}
                         </div>
