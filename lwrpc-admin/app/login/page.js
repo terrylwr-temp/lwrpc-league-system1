@@ -157,11 +157,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
+    <main className="flex min-h-screen items-center justify-center bg-slate-100 p-4 sm:p-6">
 
       <div className="w-full max-w-md">
 
-        <div className="rounded-3xl bg-white p-10 shadow-2xl">
+        <div className="rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
 
           <div className="text-center">
 
@@ -170,21 +170,21 @@ export default function LoginPage() {
               alt="Lakewood Ranch Pickleball Club"
               width={112}
               height={112}
-              className="mx-auto h-28 w-28 rounded-full bg-white object-contain"
+              className="mx-auto h-20 w-20 rounded-full bg-white object-contain sm:h-24 sm:w-24"
             />
 
-            <h1 className="mt-6 text-3xl font-black text-slate-900">
+            <h1 className="mt-4 text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
               Lakewood Ranch
               <br />
               Pickleball Club
               <br />
-              <span className="text-blue-700">League Management System</span>
+              <span className="mt-1 block text-xl text-blue-700 sm:text-2xl">League Management System</span>
             </h1>
           </div>
 
           <form
             onSubmit={login}
-            className="mt-8"
+            className="mt-6"
           >
 
             <div>
@@ -203,11 +203,22 @@ export default function LoginPage() {
 
             </div>
 
-            <div className="mt-5">
+            <div className="mt-4">
 
-              <label className="text-sm font-semibold text-slate-700">
-                Password
-              </label>
+              <div className="flex items-center justify-between gap-3">
+                <label className="text-sm font-semibold text-slate-700">
+                  Password
+                </label>
+
+                <button
+                  type="button"
+                  onClick={forgotPassword}
+                  disabled={loading}
+                  className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
+                >
+                  Forgot Password?
+                </button>
+              </div>
 
               <div className="relative mt-1">
                 <input
@@ -270,47 +281,21 @@ export default function LoginPage() {
               {loading ? "Signing In..." : "Sign In"}
             </button>
 
-            <button
-              type="button"
-              onClick={forgotPassword}
-              disabled={loading}
-              className="mt-3 w-full rounded-xl bg-slate-100 px-5 py-3 font-semibold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
-            >
-              Forgot Password?
-            </button>
-
             <p className="mt-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-center text-sm font-normal text-teal-900">
               First time logging in? Enter your email and click Forgot Password.
             </p>
 
-            {message && (
+            {message && !isErrorMessage && (
               <div
-                role={isErrorMessage ? "alert" : "status"}
-                aria-live={isErrorMessage ? "assertive" : "polite"}
+                role="status"
+                aria-live="polite"
                 className={`mt-5 rounded-xl border px-4 py-3 text-sm ${
                   isSuccessMessage
                     ? "border-green-300 bg-green-50 font-medium text-green-800"
-                    : isErrorMessage
-                    ? "border-2 border-red-500 bg-red-100 font-bold text-red-950 shadow-lg shadow-red-200/70"
                     : "border-blue-300 bg-blue-50 font-medium text-blue-800"
                 }`}
               >
-                <div className="flex items-start gap-3">
-                  {isErrorMessage && (
-                    <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-700 text-sm font-black text-white">
-                      !
-                    </span>
-                  )}
-
-                  <div>
-                    {isErrorMessage && (
-                      <p className="mb-1 text-xs font-black uppercase tracking-wide text-red-800">
-                        Sign in problem
-                      </p>
-                    )}
-                    <p>{message}</p>
-                  </div>
-                </div>
+                <p>{message}</p>
               </div>
             )}
 
@@ -318,6 +303,34 @@ export default function LoginPage() {
           </form>
 
         </div>
+
+        {isErrorMessage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+            <div
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="login-error-title"
+              className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl"
+            >
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-xl font-black text-red-700">
+                !
+              </div>
+              <h2 id="login-error-title" className="mt-4 text-xl font-black text-slate-950">
+                Sign In Problem
+              </h2>
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
+                {message}
+              </p>
+              <button
+                type="button"
+                onClick={() => setMessage("")}
+                className="mt-5 w-full rounded-xl bg-blue-700 px-5 py-3 font-bold text-white transition hover:bg-blue-800"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="mt-6 text-center text-xs leading-relaxed text-slate-500">
           © {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club.

@@ -51,6 +51,7 @@ export default function PlayerDashboardPage() {
   const [selectedPlayerTeamId, setSelectedPlayerTeamId] = useState("");
   const [showPreviousSeasonTeams, setShowPreviousSeasonTeams] = useState(false);
   const [showAllTeamMatches, setShowAllTeamMatches] = useState(false);
+  const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
   const [historyFilter, setHistoryFilter] = useState("");
   const [pdfDocument, setPdfDocument] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
@@ -1016,7 +1017,14 @@ export default function PlayerDashboardPage() {
                 key={team.id}
                 team={team}
                 selected={String(team.id) === String(selectedPlayerTeamId)}
+                documentsOpen={openLeagueDocuments[team.id] === true}
                 onSelect={() => setSelectedPlayerTeamId(team.id)}
+                onToggleDocuments={() =>
+                  setOpenLeagueDocuments((current) => ({
+                    ...current,
+                    [team.id]: !current[team.id],
+                  }))
+                }
                 onOpenDocument={openLeagueDocument}
                 onOpenRoster={setRosterTeam}
               />
@@ -1206,7 +1214,6 @@ export default function PlayerDashboardPage() {
                   <MatchSummaryCard
                     key={item.key}
                     match={item.data}
-                    router={router}
                     standings={standings}
                     onOpenDetails={setMatchDetails}
                   />
@@ -1390,7 +1397,15 @@ function HistoryStat({ label, value, tone = "slate" }) {
   );
 }
 
-function TeamCard({ team, selected, onSelect, onOpenDocument, onOpenRoster }) {
+function TeamCard({
+  team,
+  selected,
+  documentsOpen,
+  onSelect,
+  onToggleDocuments,
+  onOpenDocument,
+  onOpenRoster,
+}) {
   const standing = team.standing;
   const captainContacts = teamCaptainContacts(team);
 
@@ -1456,30 +1471,45 @@ function TeamCard({ team, selected, onSelect, onOpenDocument, onOpenRoster }) {
           ))}
         </div>
       )}
-      <div className="border-t border-slate-200 bg-white px-4 py-3">
-        <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">
-          League Documents
-        </div>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          {PLAYER_LEAGUE_DOCUMENT_TYPES.map((documentType) => {
-            const hasDocument = Boolean(leagueDocumentPath(team.divisions?.leagues, documentType));
+      <div className="border-t border-blue-100 bg-gradient-to-r from-blue-50 via-cyan-50 to-slate-50">
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggleDocuments();
+          }}
+          className="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-blue-950 hover:bg-white/50"
+        >
+          <span className="rounded-full bg-blue-700 px-3 py-1 text-white shadow-sm">
+            League Documents
+          </span>
+          <span className="rounded-full bg-white px-3 py-1 text-blue-900 shadow-sm">
+            {documentsOpen ? "Hide" : "Show"}
+          </span>
+        </button>
 
-            return (
-              <button
-                key={documentType.key}
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  onOpenDocument(team, documentType);
-                }}
-                disabled={!hasDocument}
-                className="rounded-xl bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-950 hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
-              >
-                {documentType.label}
-              </button>
-            );
-          })}
-        </div>
+        {documentsOpen && (
+          <div className="grid grid-cols-1 gap-2 px-4 pb-4 sm:grid-cols-3">
+            {PLAYER_LEAGUE_DOCUMENT_TYPES.map((documentType) => {
+              const hasDocument = Boolean(leagueDocumentPath(team.divisions?.leagues, documentType));
+
+              return (
+                <button
+                  key={documentType.key}
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onOpenDocument(team, documentType);
+                  }}
+                  disabled={!hasDocument}
+                  className="rounded-xl bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-950 hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                >
+                  {documentType.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1713,7 +1743,7 @@ function TeamSelect({ value, onChange, teams, label }) {
   );
 }
 
-function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
+function MatchSummaryCard({ match, standings, onOpenDetails }) {
   const homeStanding = teamStanding(standings, match.home_team_id);
   const awayStanding = teamStanding(standings, match.away_team_id);
   const homeScore = matchTeamScore(match, "home");
@@ -1754,16 +1784,7 @@ function MatchSummaryCard({ match, router, standings, onOpenDetails }) {
           </div>
         </div>
 
-        <div className={`grid w-full grid-cols-1 gap-2 ${isVerifiedCompleted ? "" : "sm:grid-cols-2"} md:w-auto`}>
-          {!isVerifiedCompleted && (
-            <button
-              type="button"
-              onClick={() => router.push(`/live-match/${match.id}`)}
-              className="rounded-xl bg-slate-700 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
-            >
-              Current Scores
-            </button>
-          )}
+        <div className="grid w-full grid-cols-1 gap-2 md:w-auto">
           <button
             type="button"
             onClick={() => onOpenDetails(match)}
