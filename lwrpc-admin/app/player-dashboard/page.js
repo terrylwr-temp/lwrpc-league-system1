@@ -1752,15 +1752,27 @@ function MatchSummaryCard({ match, standings, onOpenDetails }) {
   const hasVerifiedMatchScore = isVerifiedCompleted && homeScore !== null && awayScore !== null;
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className="h-1 bg-gradient-to-r from-slate-500 via-zinc-500 to-stone-500" />
+    <div
+      className={`overflow-hidden rounded-2xl border shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+        isVerifiedCompleted
+          ? "border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-blue-50 ring-1 ring-emerald-200"
+          : "border-slate-200 bg-white"
+      }`}
+    >
+      <div
+        className={`h-1 ${
+          isVerifiedCompleted
+            ? "bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500"
+            : "bg-gradient-to-r from-slate-500 via-zinc-500 to-stone-500"
+        }`}
+      />
       <div className="px-4 py-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2 font-bold text-slate-900">
             <span>{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</span>
             {hasVerifiedMatchScore && (
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-950 ring-1 ring-emerald-200">
+              <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-black uppercase tracking-wide text-white shadow-sm ring-1 ring-emerald-300">
                 Total Score: {homeScore}-{awayScore}
               </span>
             )}
@@ -1788,7 +1800,9 @@ function MatchSummaryCard({ match, standings, onOpenDetails }) {
           <button
             type="button"
             onClick={() => onOpenDetails(match)}
-            className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800"
+            className={`rounded-xl px-4 py-2 text-sm font-bold text-white ${
+              isVerifiedCompleted ? "bg-emerald-700 hover:bg-emerald-800" : "bg-slate-900 hover:bg-slate-800"
+            }`}
           >
             {isVerifiedCompleted ? "Match Results" : "Match Details"}
           </button>

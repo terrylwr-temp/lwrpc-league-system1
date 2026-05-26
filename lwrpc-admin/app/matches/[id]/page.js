@@ -687,6 +687,18 @@ export default function MatchDetailPage() {
     return hasRole(currentUserRole, "league_manager");
   }
 
+  function currentUserSubmittedScores() {
+    return (
+      currentUserMember?.id &&
+      match?.score_entered_by_member_id &&
+      String(match.score_entered_by_member_id) === String(currentUserMember.id)
+    );
+  }
+
+  function canReviewSubmittedScores() {
+    return canManageScores() && (isManagerOverride() || !currentUserSubmittedScores());
+  }
+
   function lineHasBlockingRatingWarning(line) {
     const doublesMax = match?.divisions?.team_dupr_max;
     if (doublesMax === null || doublesMax === undefined || doublesMax === "") return false;
@@ -878,6 +890,11 @@ export default function MatchDetailPage() {
       return;
     }
 
+    if (!canReviewSubmittedScores()) {
+      alert("The captain or co-captain who submitted these scores cannot also validate them.");
+      return;
+    }
+
     if (!currentUserMember?.id) {
       alert("Unable to identify current member.");
       return;
@@ -910,6 +927,11 @@ export default function MatchDetailPage() {
   async function disputeScores() {
     if (!canManageScores()) {
       alert("Only captains for this match can dispute scores.");
+      return;
+    }
+
+    if (!canReviewSubmittedScores()) {
+      alert("The captain or co-captain who submitted these scores cannot also dispute them.");
       return;
     }
 
@@ -1272,6 +1294,7 @@ export default function MatchDetailPage() {
   }
 
   const scoreActionsAllowed = canManageScores();
+  const scoreReviewAllowed = canReviewSubmittedScores();
   const scoreEntryEditable =
     scoreActionsAllowed &&
     (isManagerOverride() || match.score_status !== "verified");
@@ -1307,7 +1330,7 @@ export default function MatchDetailPage() {
               <button
                 type="button"
                 onClick={verifyScores}
-                disabled={!scoreActionsAllowed}
+                disabled={!scoreReviewAllowed}
                 className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
               >
                 Validate Scores
@@ -1316,7 +1339,7 @@ export default function MatchDetailPage() {
               <button
                 type="button"
                 onClick={disputeScores}
-                disabled={!scoreActionsAllowed}
+                disabled={!scoreReviewAllowed}
                 className="rounded-xl bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
               >
                 Dispute Scores
@@ -1329,7 +1352,9 @@ export default function MatchDetailPage() {
           <div className="mb-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-950">
             <div className="font-black">Score Verification Mode</div>
             <div className="mt-1 text-sm">
-              Captains may still correct scores until they are validated. Use Validate Scores when the final review is complete.
+              {currentUserSubmittedScores() && !isManagerOverride()
+                ? "You submitted these scores, so you may still correct and resubmit them here until the opposing captain validates or disputes them."
+                : "Captains may still correct scores until they are validated. Use Validate Scores when the final review is complete."}
             </div>
           </div>
         )}

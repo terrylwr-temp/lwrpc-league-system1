@@ -480,11 +480,17 @@ export default function CaptainDashboardPage() {
     run();
   }, [checkAuth, loadData]);
 
+  const currentMemberId = currentMember?.id || "";
+
   const upcomingMatches = useMemo(() => {
     return matches.filter(
-      (match) => match.status !== "completed" && match.status !== "cancelled"
+      (match) =>
+        (match.status !== "completed" && match.status !== "cancelled") ||
+        (match.score_status === "pending_verification" &&
+          currentMemberId &&
+          String(match.score_entered_by_member_id || "") === String(currentMemberId))
     );
-  }, [matches]);
+  }, [currentMemberId, matches]);
 
   const visibleTeams = useMemo(() => {
     return showPreviousSeasonTeams
@@ -558,14 +564,23 @@ export default function CaptainDashboardPage() {
         !selectedTeamId ||
         String(match.home_team_id) === String(selectedTeamId) ||
         String(match.away_team_id) === String(selectedTeamId);
+      const wasSubmittedByCurrentMember =
+        currentMemberId &&
+        String(match.score_entered_by_member_id || "") === String(currentMemberId);
 
-      return isSelectedTeam && match.score_status === "pending_verification";
+      return isSelectedTeam && match.score_status === "pending_verification" && !wasSubmittedByCurrentMember;
     });
-  }, [matches, selectedTeamId]);
+  }, [currentMemberId, matches, selectedTeamId]);
 
   const allPendingVerification = useMemo(() => {
-    return matches.filter((match) => match.score_status === "pending_verification");
-  }, [matches]);
+    return matches.filter((match) => {
+      const wasSubmittedByCurrentMember =
+        currentMemberId &&
+        String(match.score_entered_by_member_id || "") === String(currentMemberId);
+
+      return match.score_status === "pending_verification" && !wasSubmittedByCurrentMember;
+    });
+  }, [currentMemberId, matches]);
 
   useEffect(() => {
     if (loading || captainSectionDefaulted) return;
