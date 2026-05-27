@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
@@ -14,6 +14,7 @@ export default function MobileScoreEntryPage() {
   const [lines, setLines] = useState([]);
   const [games, setGames] = useState([]);
   const [currentUserMember, setCurrentUserMember] = useState(null);
+  const pendingGameUpdatesRef = useRef(new Map());
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -111,21 +112,59 @@ export default function MobileScoreEntryPage() {
     setGames(gameData);
   }, [id]);
 
-  async function updateGame(gameId, field, value) {
-    const { error } = await supabase
-      .from("line_games")
-      .update({
-        [field]: value === "" ? null : Number(value),
-        updated_at: new Date().toISOString()
+  function queueGameUpdate(gameId, field, normalizedValue) {
+    const key = `${gameId}:${field}`;
+    const previousUpdate = pendingGameUpdatesRef.current.get(key) || Promise.resolve();
+
+    const updatePromise = previousUpdate
+      .catch(() => {})
+      .then(async () => {
+        const { error } = await supabase
+          .from("line_games")
+          .update({
+            [field]: normalizedValue,
+            updated_at: new Date().toISOString()
+          })
+          .eq("id", gameId);
+
+        if (error) throw error;
       })
-      .eq("id", gameId);
+      .catch((error) => {
+        alert(error.message);
+        loadData();
+      });
 
-    if (error) {
-      alert(error.message);
-      return;
-    }
+    const trackedPromise = updatePromise.finally(() => {
+      if (pendingGameUpdatesRef.current.get(key) === trackedPromise) {
+        pendingGameUpdatesRef.current.delete(key);
+      }
+    });
 
-    loadData();
+    pendingGameUpdatesRef.current.set(key, trackedPromise);
+    return trackedPromise;
+  }
+
+  async function flushPendingGameUpdates() {
+    const pendingUpdates = Array.from(pendingGameUpdatesRef.current.values());
+    if (pendingUpdates.length === 0) return;
+    await Promise.all(pendingUpdates);
+  }
+
+  async function updateGame(gameId, field, value) {
+    const normalizedValue = value === "" ? null : Number(value);
+
+    setGames((currentGames) =>
+      currentGames.map((game) =>
+        game.id === gameId
+          ? {
+              ...game,
+              [field]: normalizedValue,
+            }
+          : game
+      )
+    );
+
+    await queueGameUpdate(gameId, field, normalizedValue);
   }
 
   function getLineSummary(line) {
@@ -188,6 +227,8 @@ export default function MobileScoreEntryPage() {
 
 
   async function submitScores() {
+    await flushPendingGameUpdates();
+
     for (const line of lines) {
       const summary = getLineSummary(line);
 

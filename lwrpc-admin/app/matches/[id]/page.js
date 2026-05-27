@@ -1,7 +1,7 @@
 "use client";
 
 import LoadingScreen from "../../components/LoadingScreen";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
@@ -24,6 +24,7 @@ export default function MatchDetailPage() {
   const [currentUserMember, setCurrentUserMember] = useState(null);
   const [currentUserRole, setCurrentUserRole] = useState("player");
   const [matchLineups, setMatchLineups] = useState([]);
+  const pendingGameUpdatesRef = useRef(new Map());
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -418,6 +419,22 @@ export default function MatchDetailPage() {
     };
   }, [match]);
 
+  function formatLineTeamPoints(linePoints) {
+    const homePoints = Number(linePoints.home || 0);
+    const awayPoints = Number(linePoints.away || 0);
+    const labels = [];
+
+    if (homePoints > 0) {
+      labels.push(`${homePoints} to ${match?.home_team?.name || "Home"}`);
+    }
+
+    if (awayPoints > 0) {
+      labels.push(`${awayPoints} to ${match?.away_team?.name || "Away"}`);
+    }
+
+    return labels.length > 0 ? labels.join(" / ") : "-";
+  }
+
   const playerAssignmentCounts = useMemo(() => {
     const counts = {};
 
@@ -638,6 +655,44 @@ export default function MatchDetailPage() {
     );
   }
 
+  function queueGameUpdate(gameId, field, normalizedValue) {
+    const key = `${gameId}:${field}`;
+    const previousUpdate = pendingGameUpdatesRef.current.get(key) || Promise.resolve();
+
+    const updatePromise = previousUpdate
+      .catch(() => {})
+      .then(async () => {
+        const { error } = await supabase
+          .from("line_games")
+          .update({
+            [field]: normalizedValue,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", gameId);
+
+        if (error) throw error;
+      })
+      .catch((error) => {
+        alert(error.message);
+        loadData();
+      });
+
+    const trackedPromise = updatePromise.finally(() => {
+      if (pendingGameUpdatesRef.current.get(key) === trackedPromise) {
+        pendingGameUpdatesRef.current.delete(key);
+      }
+    });
+
+    pendingGameUpdatesRef.current.set(key, trackedPromise);
+    return trackedPromise;
+  }
+
+  async function flushPendingGameUpdates() {
+    const pendingUpdates = Array.from(pendingGameUpdatesRef.current.values());
+    if (pendingUpdates.length === 0) return;
+    await Promise.all(pendingUpdates);
+  }
+
   async function updateGame(gameId, field, value) {
     if (!canEditScoreEntry()) {
       alert("Only the captain or co-captain who submitted these pending scores can make corrections.");
@@ -666,18 +721,7 @@ export default function MatchDetailPage() {
       )
     );
 
-    const { error } = await supabase
-      .from("line_games")
-      .update({
-        [field]: normalizedValue,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", gameId);
-
-    if (error) {
-      alert(error.message);
-      loadData();
-    }
+    await queueGameUpdate(gameId, field, normalizedValue);
   }
 
   function gameStatusOptions() {
@@ -881,6 +925,8 @@ export default function MatchDetailPage() {
       return false;
     }
 
+    await flushPendingGameUpdates();
+
     const issues = scoreValidationIssues();
 
     if (issues.length > 0) {
@@ -943,6 +989,8 @@ export default function MatchDetailPage() {
     if (match.score_status === "pending_verification") {
       if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
     }
+
+    await flushPendingGameUpdates();
 
     const issues = scoreValidationIssues();
     if (issues.length > 0) {
@@ -1348,6 +1396,7 @@ export default function MatchDetailPage() {
             const divisionLine = line.division_lines;
             const lineGames = games.filter((game) => game.match_line_id === line.id);
             const lineSummary = getLineSummary(line);
+            const linePoints = lineTeamWinPoints(line, lineSummary);
             const warnings = lineWarnings(line);
             const scoresBlockedForLine = lineHasBlockingRatingWarning(line);
 
@@ -1372,15 +1421,14 @@ export default function MatchDetailPage() {
                       {divisionLine?.line_name ? ` - ${divisionLine.line_name}` : ""}
                     </h2>
 
-                    <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-600">
-                      <span>{formatLineInfo(line, lineGames)}</span>
-                      <span className="font-semibold text-slate-800">
-                        Score: {lineSummary.homeGameWins} - {lineSummary.awayGameWins}
+                      <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-600">
+                        <span>{formatLineInfo(line, lineGames)}</span>
+                        <span className="font-semibold text-slate-800">
+                        Team Points: {formatLineTeamPoints(linePoints)}
                       </span>
                       <span>
                         Points: {lineSummary.homePoints} - {lineSummary.awayPoints}
                       </span>
-                      <span>Winner: {lineSummary.winnerName}</span>
                     </div>
 
                     {warnings.length > 0 && (

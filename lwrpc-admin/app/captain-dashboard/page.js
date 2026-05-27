@@ -684,6 +684,20 @@ export default function CaptainDashboardPage() {
     return record;
   }
 
+  function selectedTeamMatchResult(match) {
+    if (
+      !selectedTeamId ||
+      match.status !== "completed" ||
+      !match.winning_team_id ||
+      (String(match.home_team_id) !== String(selectedTeamId) &&
+        String(match.away_team_id) !== String(selectedTeamId))
+    ) {
+      return "";
+    }
+
+    return String(match.winning_team_id) === String(selectedTeamId) ? "win" : "loss";
+  }
+
   function matchCard(match, options = {}) {
     const {
       showSetup = true,
@@ -696,14 +710,21 @@ export default function CaptainDashboardPage() {
       match.scheduled_date <= localDateString();
 
     const setupTeams = showSetup ? getCaptainTeamsForMatch(match) : [];
+    const selectedResult = selectedTeamMatchResult(match);
+    const headingClass =
+      selectedResult === "win"
+        ? "bg-gradient-to-r from-emerald-700 to-green-700"
+        : selectedResult === "loss"
+          ? "bg-gradient-to-r from-rose-700 to-red-700"
+          : "bg-gradient-to-r from-blue-800 to-indigo-800";
 
     return (
       <div
         key={match.id}
         className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
       >
-        <div className="bg-gradient-to-r from-blue-800 to-indigo-800 px-4 py-3 text-white">
-          <div className="text-xs font-black uppercase tracking-wide text-blue-100">
+        <div className={`${headingClass} px-4 py-3 text-white`}>
+          <div className="text-xs font-black uppercase tracking-wide text-white/80">
             Week {match.week_number || "-"}
           </div>
           <div className="mt-1 text-lg font-black">
@@ -1096,7 +1117,7 @@ export default function CaptainDashboardPage() {
           away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, email, self_rating),
           away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, email, self_rating),
           line_games(id, game_number, home_score, away_score, game_status),
-          division_lines(line_name, line_type)
+          division_lines(line_name, line_type, team_win_points, standings_points_mode)
         )
       `)
       .eq("id", match.id)
@@ -2385,7 +2406,7 @@ function MatchLineResult({ line, match, ratingForMember }) {
             .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
             .map((game) => (
               <span key={game.id} className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-950">
-                {gameScoreText(game)}
+                {gameScoreText(game, line, match)}
               </span>
             ))}
           {!line.line_games?.length && (
@@ -2524,14 +2545,47 @@ function matchLineWinnerSide(line, match) {
   return "";
 }
 
-function gameScoreText(game) {
+function gameWinnerSide(game) {
+  if (game.game_status === "forfeit_home" || game.game_status === "retired_home") {
+    return "home";
+  }
+
+  if (game.game_status === "forfeit_away" || game.game_status === "retired_away") {
+    return "away";
+  }
+
+  if (game.home_score !== null && game.away_score !== null) {
+    if (Number(game.home_score) > Number(game.away_score)) return "home";
+    if (Number(game.away_score) > Number(game.home_score)) return "away";
+  }
+
+  return "";
+}
+
+function teamNameForSide(side, match) {
+  if (side === "home") return match.home_team?.name || "Home";
+  if (side === "away") return match.away_team?.name || "Away";
+  return "";
+}
+
+function gameTeamPointsText(game, line, match) {
+  const configuredPoints = Number(line.division_lines?.team_win_points ?? 1);
+  const pointsMode = line.division_lines?.standings_points_mode || "line_result";
+  const winnerSide = pointsMode === "per_game" ? gameWinnerSide(game) : matchLineWinnerSide(line, match);
+  const winnerName = teamNameForSide(winnerSide, match);
+
+  return winnerName ? `Team Points: ${configuredPoints} to ${winnerName}` : "Team Points: -";
+}
+
+function gameScoreText(game, line = null, match = null) {
   const special = specialGameStatus(game.game_status);
   const score = `Game ${game.game_number || "-"}: ${game.home_score ?? "-"}-${game.away_score ?? "-"}`;
+  const teamPoints = line && match ? ` | ${gameTeamPointsText(game, line, match)}` : "";
 
-  if (special) return `${score} Result: ${special.label}`;
-  if (game.home_score === null || game.away_score === null) return `${score} Result: Pending`;
-  if (Number(game.home_score) === Number(game.away_score)) return `${score} Result: Tie`;
-  return score;
+  if (special) return `${score} Result: ${special.label}${teamPoints}`;
+  if (game.home_score === null || game.away_score === null) return `${score} Result: Pending${teamPoints}`;
+  if (Number(game.home_score) === Number(game.away_score)) return `${score} Result: Tie${teamPoints}`;
+  return `${score}${teamPoints}`;
 }
 
 function formatDate(value) {
@@ -2816,7 +2870,7 @@ function matchScoreDetailsPrintHtml(match, lines) {
     const games = [...(line.line_games || [])]
       .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
       .map((game) => (
-        escapeHtml(gameScoreText(game))
+        escapeHtml(gameScoreText(game, line, match))
       ))
       .join("<br />");
 
