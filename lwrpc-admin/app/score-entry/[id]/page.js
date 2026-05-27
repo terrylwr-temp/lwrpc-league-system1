@@ -74,7 +74,9 @@ export default function MobileScoreEntryPage() {
           line_name,
           line_number,
           line_type,
-          games_per_line
+          games_per_line,
+          team_win_points,
+          standings_points_mode
         )
       `)
       .eq("match_id", id)
@@ -168,6 +170,23 @@ export default function MobileScoreEntryPage() {
     };
   }
 
+  function lineTeamWinPoints(line, summary) {
+    const configuredPoints = Number(line.division_lines?.team_win_points ?? 1);
+
+    if (line.division_lines?.standings_points_mode === "per_game") {
+      return {
+        home: summary.homeGameWins * configuredPoints,
+        away: summary.awayGameWins * configuredPoints,
+      };
+    }
+
+    return {
+      home: summary.homeGameWins > summary.awayGameWins ? configuredPoints : 0,
+      away: summary.awayGameWins > summary.homeGameWins ? configuredPoints : 0,
+    };
+  }
+
+
   async function submitScores() {
     for (const line of lines) {
       const summary = getLineSummary(line);
@@ -205,9 +224,10 @@ export default function MobileScoreEntryPage() {
 
     lines.forEach(line => {
       const summary = getLineSummary(line);
+      const points = lineTeamWinPoints(line, summary);
 
-      if (summary.homeGameWins > summary.awayGameWins) homeLines++;
-      if (summary.awayGameWins > summary.homeGameWins) awayLines++;
+      homeLines += points.home;
+      awayLines += points.away;
     });
 
     let winningTeamId = null;

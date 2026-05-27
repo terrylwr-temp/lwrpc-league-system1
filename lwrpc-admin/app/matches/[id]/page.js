@@ -96,6 +96,8 @@ export default function MatchDetailPage() {
           games_per_line,
           points_to_win,
           win_by,
+          team_win_points,
+          standings_points_mode,
           posted_to_dupr,
           uses_saved_match_lineups
         ),
@@ -400,6 +402,22 @@ export default function MatchDetailPage() {
     };
   }, [games, match]);
 
+  const lineTeamWinPoints = useCallback(function lineTeamWinPoints(line, summary) {
+    const configuredPoints = Number(line.division_lines?.team_win_points ?? 1);
+
+    if (line.division_lines?.standings_points_mode === "per_game") {
+      return {
+        home: summary.homeGameWins * configuredPoints,
+        away: summary.awayGameWins * configuredPoints,
+      };
+    }
+
+    return {
+      home: summary.winningTeamId === match?.home_team_id ? configuredPoints : 0,
+      away: summary.winningTeamId === match?.away_team_id ? configuredPoints : 0,
+    };
+  }, [match]);
+
   const playerAssignmentCounts = useMemo(() => {
     const counts = {};
 
@@ -489,9 +507,10 @@ export default function MatchDetailPage() {
 
     displayedLines.forEach((line) => {
       const summary = getLineSummary(line);
+      const points = lineTeamWinPoints(line, summary);
 
-      if (summary.winningTeamId === match?.home_team_id) homeWins++;
-      if (summary.winningTeamId === match?.away_team_id) awayWins++;
+      homeWins += points.home;
+      awayWins += points.away;
     });
 
     let winningTeamId = null;
@@ -513,7 +532,7 @@ export default function MatchDetailPage() {
       winningTeamId,
       winnerName,
     };
-  }, [displayedLines, getLineSummary, match]);
+  }, [displayedLines, getLineSummary, lineTeamWinPoints, match]);
 
   async function updateLinePlayer(lineId, field, value) {
     if (!canEditScoreEntry()) {

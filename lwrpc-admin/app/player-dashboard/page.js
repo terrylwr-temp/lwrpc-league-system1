@@ -18,6 +18,7 @@ import {
   specialGameStatus,
 } from "../lib/playHistory";
 import { formatPhoneNumberForStorage } from "../lib/phone";
+import { sortStandingsByDivisionRules } from "../lib/standingsSort";
 import {
   DEFAULT_LEAGUE_DOCUMENT_BUCKET,
   LEAGUE_DOCUMENT_TYPES,
@@ -107,6 +108,10 @@ export default function PlayerDashboardPage() {
             id,
             name,
             rating_type,
+            playoff_team_count,
+            standings_tiebreak_1,
+            standings_tiebreak_2,
+            standings_tiebreak_3,
             leagues (
               id,
               name,
@@ -187,7 +192,8 @@ export default function PlayerDashboardPage() {
             divisions (
               id,
               name,
-              rating_type
+              rating_type,
+              playoff_team_count
             ),
             leagues (
               id,
@@ -612,10 +618,27 @@ export default function PlayerDashboardPage() {
   const selectedDivisionStandings = useMemo(() => {
     if (!selectedStandingsTeam) return [];
 
-    return standings.filter(
+    const visibleRows = standings.filter(
       (row) => String(row.division_id) === String(selectedStandingsTeam.divisions?.id)
     );
+
+    return sortStandingsByDivisionRules(visibleRows, selectedStandingsTeam.divisions);
   }, [selectedStandingsTeam, standings]);
+
+  const selectedDivisionPlayoffTeamCount = Number(
+    selectedStandingsTeam?.divisions?.playoff_team_count || 0
+  );
+  const selectedDivisionPlayoffTeamIds = useMemo(() => {
+    return new Set(
+      selectedDivisionStandings
+        .slice(0, selectedDivisionPlayoffTeamCount > 0 ? selectedDivisionPlayoffTeamCount : 0)
+        .map((row) => String(row.team_id || row.id))
+    );
+  }, [selectedDivisionPlayoffTeamCount, selectedDivisionStandings]);
+
+  function isSelectedDivisionPlayoffTeam(row) {
+    return selectedDivisionPlayoffTeamIds.has(String(row.team_id || row.id));
+  }
 
   const sortedPlayHistory = useMemo(() => {
     return sortHistoryRows(playHistory);
@@ -1100,8 +1123,16 @@ export default function PlayerDashboardPage() {
             </div>
 
             <div className="p-4 md:hidden">
+              {selectedDivisionPlayoffTeamCount > 0 && (
+                <div className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-950">
+                  Top {selectedDivisionPlayoffTeamCount} teams highlighted for Playoffs/Championship Day.
+                </div>
+              )}
               <div className="space-y-3">
-                {selectedDivisionStandings.map((row) => (
+                {selectedDivisionStandings.map((row, index) => {
+                  const displayRank = index + 1;
+
+                  return (
                   <button
                     key={row.id}
                     type="button"
@@ -1109,15 +1140,22 @@ export default function PlayerDashboardPage() {
                     className={`w-full rounded-xl border p-4 text-left shadow-sm ${
                       String(row.team_id) === String(selectedPlayerTeamId)
                         ? "border-emerald-300 bg-emerald-50"
+                        : isSelectedDivisionPlayoffTeam(row)
+                        ? "border-emerald-200 bg-emerald-50"
                         : "border-slate-200 bg-white"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="text-xs font-black uppercase tracking-wide text-emerald-700">
-                          Rank #{row.rank}
+                          Rank #{displayRank}
                         </div>
                         <div className="mt-1 font-black text-slate-950">{row.teams?.name}</div>
+                        {isSelectedDivisionPlayoffTeam(row) && (
+                          <div className="mt-2 inline-flex rounded-full bg-emerald-700 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-white">
+                            Playoffs/Championship
+                          </div>
+                        )}
                       </div>
                       <div className="rounded-xl bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-900">
                         {row.standings_points} pts
@@ -1130,11 +1168,17 @@ export default function PlayerDashboardPage() {
                       <span className="rounded-lg bg-slate-50 px-3 py-2">PA: {row.points_against}</span>
                     </div>
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
             <div className="hidden overflow-x-auto md:block">
+              {selectedDivisionPlayoffTeamCount > 0 && (
+                <div className="border-b border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-950">
+                  Top {selectedDivisionPlayoffTeamCount} teams highlighted for Playoffs/Championship Day.
+                </div>
+              )}
               <table className="w-full border-collapse text-sm">
                 <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
                   <tr>
@@ -1149,14 +1193,34 @@ export default function PlayerDashboardPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedDivisionStandings.map((row) => (
+                  {selectedDivisionStandings.map((row, index) => {
+                    const displayRank = index + 1;
+
+                    return (
                     <tr
                       key={row.id}
                       onClick={() => openDivisionScheduleFromStanding(row)}
-                      className={`cursor-pointer border-b border-slate-100 ${String(row.team_id) === String(selectedPlayerTeamId) ? "bg-emerald-50" : "hover:bg-slate-50"}`}
+                      className={`cursor-pointer border-b border-slate-100 ${
+                        String(row.team_id) === String(selectedPlayerTeamId) || isSelectedDivisionPlayoffTeam(row)
+                          ? "bg-emerald-50 hover:bg-emerald-100"
+                          : "hover:bg-slate-50"
+                      }`}
                     >
-                      <td className="p-3 font-bold">#{row.rank}</td>
-                      <td className="p-3 font-semibold">{row.teams?.name}</td>
+                      <td className="p-3 font-bold">
+                        <span className={isSelectedDivisionPlayoffTeam(row) ? "rounded-full bg-emerald-700 px-2 py-1 text-white" : ""}>
+                          #{displayRank}
+                        </span>
+                      </td>
+                      <td className="p-3 font-semibold">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span>{row.teams?.name}</span>
+                          {isSelectedDivisionPlayoffTeam(row) && (
+                            <span className="rounded-full bg-emerald-700 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-white">
+                              Playoffs/Championship
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="p-3">{row.match_wins}-{row.match_losses}-{row.match_ties}</td>
                       <td className="p-3">{row.game_wins}-{row.game_losses}</td>
                       <td className="p-3">{row.points_for}</td>
@@ -1164,7 +1228,8 @@ export default function PlayerDashboardPage() {
                       <td className="p-3">{row.point_differential}</td>
                       <td className="p-3 font-bold text-emerald-700">{row.standings_points}</td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
 
@@ -2453,30 +2518,39 @@ function PlayerHistoryRowWithScores({ row, memberId, ratingForMember }) {
   const match = row.matches;
   const details = playerLineDetails(row, memberId);
   const gameScores = formatGameScores(row, details.sideLabel, ratingForMember);
+  const isWin = details.result === "W";
+  const isLoss = details.result === "L";
+  const resultLabel = isWin ? "Win" : isLoss ? "Loss" : "Other";
+  const resultTone = isWin
+    ? {
+        shell: "border-emerald-200 bg-emerald-50",
+        bar: "bg-emerald-600",
+        badge: "bg-emerald-700 text-white",
+        score: "border-emerald-300 bg-white text-emerald-950",
+      }
+    : isLoss
+    ? {
+        shell: "border-rose-200 bg-rose-50",
+        bar: "bg-rose-600",
+        badge: "bg-rose-700 text-white",
+        score: "border-rose-300 bg-white text-rose-950",
+      }
+    : {
+        shell: "border-slate-200 bg-slate-50",
+        bar: "bg-slate-500",
+        badge: "bg-slate-700 text-white",
+        score: "border-slate-300 bg-white text-slate-950",
+      };
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div
-        className={`h-1 ${
-          details.result === "W"
-            ? "bg-emerald-500"
-            : details.result === "L"
-            ? "bg-rose-500"
-            : "bg-slate-400"
-        }`}
-      />
+    <div className={`overflow-hidden rounded-2xl border shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${resultTone.shell}`}>
+      <div className={`h-1.5 ${resultTone.bar}`} />
       <div className="px-4 py-4">
       <div className="flex flex-wrap items-center gap-2">
         <span
-          className={`rounded-full px-2 py-0.5 text-xs font-black ${
-            details.result === "W"
-              ? "bg-green-100 text-green-800"
-              : details.result === "L"
-              ? "bg-red-100 text-red-800"
-              : "bg-slate-100 text-slate-700"
-          }`}
+          className={`rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide ${resultTone.badge}`}
         >
-          {details.result}
+          {resultLabel}
         </span>
         <span className="font-bold text-slate-900">
           {formatDate(match?.scheduled_date)}
@@ -2491,11 +2565,29 @@ function PlayerHistoryRowWithScores({ row, memberId, ratingForMember }) {
       </div>
 
       {gameScores.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-700">
+        <div className="mt-4 grid gap-2">
           {gameScores.map((game) => (
-            <span key={game.key} className="rounded-xl bg-blue-50 px-3 py-2 text-blue-950">
-              {game.label} - {game.playerTeamName}: {game.players} vs {game.opponentTeamName}: {game.opponentPlayers}: {game.score}
-            </span>
+            <div key={game.key} className={`rounded-xl border px-3 py-3 shadow-sm ${resultTone.score}`}>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-xs font-black uppercase tracking-wide">
+                  {game.label}
+                </div>
+                <div className="rounded-lg bg-slate-950 px-3 py-1.5 text-center text-lg font-black leading-none text-white shadow-sm">
+                  {game.score}
+                </div>
+              </div>
+              <div className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-700">
+                <div>
+                  <span className="font-black text-slate-950">{game.playerTeamName}:</span> {game.players}
+                </div>
+                <div>
+                  <span className="font-black text-slate-950">{game.opponentTeamName}:</span> {game.opponentPlayers}
+                </div>
+                {game.specialLabel && (
+                  <div className="font-black text-amber-800">{game.specialLabel}</div>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       )}
@@ -2532,8 +2624,9 @@ function formatGameScores(row, sideLabel, ratingForMember) {
         opponentTeamName,
         opponentPlayers,
         score: special
-          ? `${playerScore ?? "-"}-${opponentScore ?? "-"} Result: ${special.label}`
+          ? `${playerScore ?? "-"}-${opponentScore ?? "-"}`
           : `${playerScore}-${opponentScore}`,
+        specialLabel: special?.label || "",
       };
     });
 }

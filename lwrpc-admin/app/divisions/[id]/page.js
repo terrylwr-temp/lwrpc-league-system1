@@ -25,6 +25,7 @@ export default function DivisionDetailPage() {
   const [pointsToWin, setPointsToWin] = useState("11");
   const [winBy, setWinBy] = useState("2");
   const [teamWinPoints, setTeamWinPoints] = useState("1");
+  const [standingsPointsMode, setStandingsPointsMode] = useState("line_result");
   const [editingId, setEditingId] = useState(null);
 
   const normalizeDefaultLinesConfig = useCallback(function normalizeDefaultLinesConfig(value) {
@@ -132,6 +133,7 @@ export default function DivisionDetailPage() {
       points_to_win: Number(line.points_to_win ?? 11),
       win_by: Number(line.win_by ?? 2),
       team_win_points: Number(line.team_win_points ?? 1),
+      standings_points_mode: line.standings_points_mode ?? "line_result",
       picklebreaker_enabled: (line.line_type ?? "") === "picklebreaker",
       picklebreaker_points: Number(line.picklebreaker_points ?? line.points_to_win ?? 25),
       picklebreaker_win_points: Number(line.picklebreaker_win_points ?? 1),
@@ -159,6 +161,7 @@ export default function DivisionDetailPage() {
       points_to_win: Number(line.points_to_win ?? fallback.points_to_win),
       win_by: Number(line.win_by ?? fallback.win_by),
       team_win_points: Number(line.team_win_points ?? fallback.team_win_points ?? 1),
+      standings_points_mode: line.standings_points_mode ?? fallback.standings_points_mode ?? "line_result",
       picklebreaker_enabled: (line.line_type || fallback.line_type) === "picklebreaker",
       picklebreaker_points: Number(
         line.picklebreaker_points ?? fallback.picklebreaker_points
@@ -356,6 +359,7 @@ export default function DivisionDetailPage() {
       points_to_win: Number(pointsToWin || 11),
       win_by: Number(winBy || 2),
       team_win_points: Number(teamWinPoints || 1),
+      standings_points_mode: standingsPointsMode,
       picklebreaker_enabled: teamType === "picklebreaker",
       picklebreaker_points: Number(pointsToWin || 11),
       picklebreaker_win_points: 1,
@@ -530,6 +534,7 @@ export default function DivisionDetailPage() {
             points_to_win: division.points_to_win || 11,
             win_by: division.win_by || 2,
             team_win_points: 1,
+            standings_points_mode: "line_result",
             picklebreaker_enabled: false,
             picklebreaker_points: division.points_to_win || 11,
             picklebreaker_win_points: 1,
@@ -605,6 +610,7 @@ export default function DivisionDetailPage() {
     setPointsToWin(String(line.points_to_win || 11));
     setWinBy(String(line.win_by || 2));
     setTeamWinPoints(String(line.team_win_points ?? 1));
+    setStandingsPointsMode(line.standings_points_mode || "line_result");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -620,6 +626,7 @@ export default function DivisionDetailPage() {
     setPointsToWin("11");
     setWinBy("2");
     setTeamWinPoints("1");
+    setStandingsPointsMode("line_result");
   }
 
   useEffect(() => {
@@ -793,7 +800,7 @@ export default function DivisionDetailPage() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
                   <FieldLabel label="Games / Line" />
                   <input
@@ -835,18 +842,40 @@ export default function DivisionDetailPage() {
                     Minimum margin needed to win.
                   </p>
                 </div>
+              </div>
 
-                <div>
-                  <FieldLabel label="Team Win Points" />
+              <div className="rounded-xl border border-slate-300 px-4 py-3">
+                {Number(gamesPerTeam || 0) > 1 && (
+                  <label className="flex items-start gap-3">
+                    <input
+                      type="checkbox"
+                      checked={standingsPointsMode === "per_game"}
+                      onChange={(e) => setStandingsPointsMode(e.target.checked ? "per_game" : "line_result")}
+                      className="mt-1"
+                    />
+                    <span>
+                      <span className="block font-medium text-slate-700">Team Points Awarded per Line</span>
+                      <span className="mt-1 block text-xs text-slate-500">
+                        Checked = team points below for EACH won GAME in the same line. Unchecked = receive points below for the FULL LINE (ALL games) win.
+                      </span>
+                    </span>
+                  </label>
+                )}
+
+                <div className={Number(gamesPerTeam || 0) > 1 ? "mt-4 border-t border-slate-200 pt-4" : ""}>
+                  <FieldLabel label="Team Points Awarded" />
                   <input
                     type="number"
+                    min="0"
                     value={teamWinPoints}
                     onChange={(e) => setTeamWinPoints(e.target.value)}
                     className="w-full rounded-xl border border-slate-300 px-4 py-3"
                     placeholder="Points"
                   />
                   <p className="mt-1 text-xs text-slate-500">
-                    Points awarded to the team that wins this game line.
+                    {standingsPointsMode === "per_game" && Number(gamesPerTeam || 0) > 1
+                      ? "EACH GAME winner receives this many team points per game."
+                      : "The LINE winner receives this many team points."}
                   </p>
                 </div>
               </div>
@@ -901,7 +930,7 @@ export default function DivisionDetailPage() {
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">
-                        Games / Line: {line.games_per_line} · To {line.points_to_win} · Win by {line.win_by} · Team win points: {line.team_win_points ?? 1}
+                        Games / Line: {line.games_per_line} · To {line.points_to_win} · Win by {line.win_by} · Team points: {line.standings_points_mode === "per_game" ? `${line.team_win_points ?? 1} per score-row win` : `Line winner gets ${line.team_win_points ?? 1}`}
                       </div>
                     </div>
 

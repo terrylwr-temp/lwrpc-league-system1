@@ -99,7 +99,7 @@ Score entry is restricted to captains assigned to the match. Match score rows us
 
 Teams & Rosters supports assigning captains/co-captains from outside the team's home community through an explicit all-communities toggle. Team lists are grouped by league/division and start collapsed as accordions.
 
-Standings points are calculated from configured game line `team_win_points` multiplied by games won on each line, rather than only from match-level win/loss/tie points. The visible app version is centralized in `lwrpc-admin/app/lib/version.js` and displayed near the copyright footer.
+Standings points are calculated from configured game-line scoring rules rather than only from match-level win/loss/tie points. Each division line defaults to `standings_points_mode = 'line_result'`, where the line winner receives configured `team_win_points`; `standings_points_mode = 'per_game'` awards configured `team_win_points` for each completed score-row win. Standings displays sort teams by the division's configured Standings Tiebreak Order. Divisions can set `playoff_team_count` to highlight the top ranked teams as Playoffs/Championship Day teams in standings displays. The visible app version is centralized in `lwrpc-admin/app/lib/version.js` and displayed near the copyright footer.
 
 Player Dashboard uses inline panels for play history, division standings, and upcoming matches. Team summaries appear above the dashboard action buttons and include captain/co-captain contact details. Play history includes top-level games/wins/losses totals plus individual game scores when entered.
 

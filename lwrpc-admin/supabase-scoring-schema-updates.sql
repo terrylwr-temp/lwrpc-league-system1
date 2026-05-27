@@ -5,6 +5,7 @@ alter table public.divisions
   add column if not exists picklebreaker_win_points integer default 1,
   add column if not exists picklebreaker_loss_points integer default 0,
   add column if not exists team_dupr_max numeric,
+  add column if not exists playoff_team_count integer,
   add column if not exists default_lines_config jsonb;
 
 alter table public.matches
@@ -26,9 +27,17 @@ alter table public.member_season_ratings
 
 alter table public.division_lines
   add column if not exists team_win_points integer default 1,
+  add column if not exists standings_points_mode text not null default 'line_result',
   add column if not exists picklebreaker_win_points integer default 1,
   add column if not exists picklebreaker_loss_points integer default 0,
   add column if not exists uses_saved_match_lineups boolean not null default true;
+
+alter table public.division_lines
+  drop constraint if exists division_lines_standings_points_mode_check;
+
+alter table public.division_lines
+  add constraint division_lines_standings_points_mode_check
+  check (standings_points_mode in ('line_result', 'per_game'));
 
 alter table public.match_lines
   add column if not exists home_team_games_won integer default 0,

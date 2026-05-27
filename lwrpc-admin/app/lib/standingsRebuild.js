@@ -44,6 +44,23 @@ function emptyStanding(division, teamId) {
   };
 }
 
+function lineStandingsPoints(line, winningTeamId, matchRow) {
+  const mode = line.division_lines?.standings_points_mode || "line_result";
+  const teamWinPoints = Number(line.division_lines?.team_win_points ?? 1);
+
+  if (mode === "per_game") {
+    return {
+      home: Number(line.rebuilt?.homeGameWins || 0) * teamWinPoints,
+      away: Number(line.rebuilt?.awayGameWins || 0) * teamWinPoints,
+    };
+  }
+
+  return {
+    home: winningTeamId === matchRow.home_team_id ? teamWinPoints : 0,
+    away: winningTeamId === matchRow.away_team_id ? teamWinPoints : 0,
+  };
+}
+
 function applyRecentFields(team) {
   const recent = team.recentResults.slice(-5);
   team.recent_form = recent.join("");
@@ -126,6 +143,10 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
         away_team_games_won,
         home_team_points,
         away_team_points,
+        division_lines (
+          team_win_points,
+          standings_points_mode
+        ),
         line_games (
           id,
           game_number,
@@ -166,8 +187,8 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
   for (const matchRow of verifiedMatches || []) {
     const home = ensureTeam(matchRow.home_team_id);
     const away = ensureTeam(matchRow.away_team_id);
-    let homeLinesWon = 0;
-    let awayLinesWon = 0;
+    let homeTeamWinPoints = 0;
+    let awayTeamWinPoints = 0;
 
     (matchRow.match_lines || []).forEach((line) => {
       let homeGameWins = 0;
@@ -210,28 +231,30 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
       if (winningTeamId === matchRow.home_team_id) {
         home.line_wins += 1;
         away.line_losses += 1;
-        homeLinesWon += 1;
       } else if (winningTeamId === matchRow.away_team_id) {
         away.line_wins += 1;
         home.line_losses += 1;
-        awayLinesWon += 1;
       } else {
         home.line_ties += 1;
         away.line_ties += 1;
       }
+
+      const points = lineStandingsPoints(line, winningTeamId, matchRow);
+      homeTeamWinPoints += points.home;
+      awayTeamWinPoints += points.away;
     });
 
     const matchWinningTeamId =
-      homeLinesWon > awayLinesWon
+      homeTeamWinPoints > awayTeamWinPoints
         ? matchRow.home_team_id
-        : awayLinesWon > homeLinesWon
+        : awayTeamWinPoints > homeTeamWinPoints
         ? matchRow.away_team_id
         : null;
 
     home.matches_played += 1;
     away.matches_played += 1;
-    home.standings_points += homeLinesWon;
-    away.standings_points += awayLinesWon;
+    home.standings_points += homeTeamWinPoints;
+    away.standings_points += awayTeamWinPoints;
 
     if (matchWinningTeamId === matchRow.home_team_id) {
       home.match_wins += 1;
@@ -274,8 +297,8 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
     const { error: matchUpdateError } = await supabase
       .from("matches")
       .update({
-        home_score: homeLinesWon,
-        away_score: awayLinesWon,
+        home_score: homeTeamWinPoints,
+        away_score: awayTeamWinPoints,
         winning_team_id: matchWinningTeamId,
         updated_at: new Date().toISOString(),
       })

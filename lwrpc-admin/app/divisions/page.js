@@ -28,6 +28,7 @@ export default function DivisionsPage() {
   const [maxDupr, setMaxDupr] = useState("");
   const [teamDuprMax, setTeamDuprMax] = useState("");
   const [sortOrder, setSortOrder] = useState("");
+  const [playoffTeamCount, setPlayoffTeamCount] = useState("");
 
   const [numberOfTeams, setNumberOfTeams] = useState("3");
   const [defaultGameFormat, setDefaultGameFormat] = useState("");
@@ -134,6 +135,7 @@ export default function DivisionsPage() {
       max_dupr: ratingNumber(maxDupr),
       team_dupr_max: ratingNumber(teamDuprMax),
       sort_order: sortOrder ? Number(sortOrder) : 0,
+      playoff_team_count: playoffTeamCount ? Number(playoffTeamCount) : null,
 
       number_of_lines: Number(numberOfTeams || 3),
       default_game_format: defaultGameFormat || null,
@@ -301,6 +303,9 @@ export default function DivisionsPage() {
     setMaxDupr(division.max_dupr == null ? "" : String(division.max_dupr));
     setTeamDuprMax(division.team_dupr_max == null ? "" : String(division.team_dupr_max));
     setSortOrder(division.sort_order == null ? "" : String(division.sort_order));
+    setPlayoffTeamCount(
+      division.playoff_team_count == null ? "" : String(division.playoff_team_count)
+    );
 
     setNumberOfTeams(
       division.number_of_lines == null ? "3" : String(division.number_of_lines)
@@ -375,6 +380,7 @@ export default function DivisionsPage() {
     setMaxDupr("");
     setTeamDuprMax("");
     setSortOrder("");
+    setPlayoffTeamCount("");
 
     setNumberOfTeams("3");
     setDefaultGameFormat("");
@@ -613,13 +619,18 @@ export default function DivisionsPage() {
                 </div>
               </Field>
 
-              <Field label="Display Sort Order">
+              <Field label="Top teams in Playoffs/Championship">
                 <input
                   type="number"
-                  value={sortOrder}
-                  onChange={(e) => setSortOrder(e.target.value)}
+                  min="0"
+                  value={playoffTeamCount}
+                  onChange={(e) => setPlayoffTeamCount(e.target.value)}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  placeholder="Example: 4"
                 />
+                <p className="mt-2 text-xs text-slate-500">
+                  Highlights the top ranked teams in standings as Playoffs/Championship Day teams.
+                </p>
               </Field>
 
               <Field label="Additional Division Rules / Notes">
@@ -775,6 +786,10 @@ export default function DivisionsPage() {
 
                             <div className="mt-1 text-sm text-slate-600">
                               Number of Teams: {division.number_of_lines ?? 3}
+                            </div>
+
+                            <div className="mt-1 text-sm text-slate-600">
+                              Playoffs/Championship Teams: {division.playoff_team_count ?? "—"}
                             </div>
 
                             {false && (

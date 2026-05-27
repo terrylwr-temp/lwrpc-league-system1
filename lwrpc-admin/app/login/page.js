@@ -148,7 +148,7 @@ export default function LoginPage() {
 
   if (!mounted) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
+      <main className="full-screen-main flex min-h-screen items-center justify-center bg-slate-100 p-6">
         <div className="w-full max-w-md rounded-3xl bg-white p-10 text-center text-sm font-semibold text-slate-500 shadow-2xl">
           Loading sign in...
         </div>
@@ -157,7 +157,7 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 p-4 sm:p-6">
+    <main className="full-screen-main flex min-h-screen items-center justify-center bg-slate-100 p-4 sm:p-6">
 
       <div className="w-full max-w-md">
 

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
+import { sortStandingsByDivisionRules } from "../lib/standingsSort";
 import { useRouter } from "next/navigation";
 
 export default function StandingsPage() {
@@ -88,10 +89,14 @@ export default function StandingsPage() {
     return [...leagues].sort((a, b) => (a.name || "").localeCompare(b.name || ""));
   }, [leagues]);
 
+  const selectedDivisionRow = useMemo(() => {
+    return divisions.find((division) => String(division.id) === String(selectedDivision)) || null;
+  }, [divisions, selectedDivision]);
+
   const filteredStandings = useMemo(() => {
     if (!selectedLeague || !selectedDivision) return [];
 
-    return standings.filter(row => {
+    const visibleRows = standings.filter(row => {
       if (row.league_id !== selectedLeague) {
         return false;
       }
@@ -102,11 +107,27 @@ export default function StandingsPage() {
 
       return row.teams?.is_active !== false;
     });
+
+    return sortStandingsByDivisionRules(visibleRows, selectedDivisionRow);
   }, [
     standings,
     selectedLeague,
-    selectedDivision
+    selectedDivision,
+    selectedDivisionRow
   ]);
+
+  const playoffTeamCount = Number(selectedDivisionRow?.playoff_team_count || 0);
+  const playoffTeamIds = useMemo(() => {
+    return new Set(
+      filteredStandings
+        .slice(0, playoffTeamCount > 0 ? playoffTeamCount : 0)
+        .map((team) => String(team.team_id || team.id))
+    );
+  }, [filteredStandings, playoffTeamCount]);
+
+  function isPlayoffTeam(team) {
+    return playoffTeamIds.has(String(team.team_id || team.id));
+  }
 
   const canRebuildLeagueStatistics =
     currentUserRole === "league_manager" || currentUserRole === "commissioner";
@@ -222,6 +243,11 @@ if (loading) {
           </div>
         ) : (
         <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          {playoffTeamCount > 0 && (
+            <div className="border-b border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-950">
+              Top {playoffTeamCount} teams highlighted for Playoffs/Championship Day.
+            </div>
+          )}
 
           <table className="w-full border-collapse">
 
@@ -287,18 +313,34 @@ if (loading) {
 
             <tbody>
 
-              {filteredStandings.map(team => (
+              {filteredStandings.map((team, index) => {
+                const displayRank = index + 1;
+
+                return (
                 <tr
                   key={team.id}
-                  className="border-b border-slate-100 hover:bg-slate-50"
+                  className={`border-b border-slate-100 ${
+                    isPlayoffTeam(team)
+                      ? "bg-emerald-50 ring-1 ring-inset ring-emerald-200 hover:bg-emerald-100"
+                      : "hover:bg-slate-50"
+                  }`}
                 >
 
                   <td className="p-3 font-bold">
-                    #{team.rank}
+                    <span className={isPlayoffTeam(team) ? "rounded-full bg-emerald-700 px-2 py-1 text-white" : ""}>
+                      #{displayRank}
+                    </span>
                   </td>
 
                   <td className="p-3 font-semibold">
-                    {team.teams?.name}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span>{team.teams?.name}</span>
+                      {isPlayoffTeam(team) && (
+                        <span className="rounded-full bg-emerald-700 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-white">
+                          Playoffs/Championship
+                        </span>
+                      )}
+                    </div>
                   </td>
 
                   <td className="p-3">
@@ -352,7 +394,8 @@ if (loading) {
                   </td>
 
                 </tr>
-              ))}
+                );
+              })}
 
             </tbody>
 
