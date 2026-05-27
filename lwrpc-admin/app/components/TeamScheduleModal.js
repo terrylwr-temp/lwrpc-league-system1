@@ -18,9 +18,6 @@ export default function TeamScheduleModal({
   onClose,
 }) {
   const selectedTeam = teams.find((team) => String(team.id) === String(selectedTeamId));
-  const teamRecordById = Object.fromEntries(
-    teams.map((team) => [String(team.id), formatTeamSummary(team)])
-  );
   const ratingByMemberId = Object.fromEntries(
     ratings.map((rating) => [String(rating.member_id), rating])
   );
@@ -146,7 +143,6 @@ export default function TeamScheduleModal({
                       match={item.data}
                       selectedTeamId={selectedTeamId}
                       compact={compact}
-                      teamRecordById={teamRecordById}
                       ratingByMemberId={ratingByMemberId}
                       ratingType={ratingType}
                     />
@@ -190,7 +186,7 @@ function ScheduleByeCard({ bye }) {
   );
 }
 
-function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById, ratingByMemberId, ratingType }) {
+function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, ratingType }) {
   const [expanded, setExpanded] = useState(false);
   const isHome = String(match.home_team_id) === String(selectedTeamId);
   const opponent = isHome ? match.away_team : match.home_team;
@@ -216,10 +212,10 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById, rat
             {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
           </div>
           <div className={`${compact ? "break-words" : ""} mt-1 text-base font-black text-slate-900 sm:text-lg`}>
-            {formatTeamNameWithRecord(match.home_team, teamRecordById, "Home")} vs {formatTeamNameWithRecord(match.away_team, teamRecordById, "Away")}
+            {formatTeamName(match.home_team, "Home")} vs {formatTeamName(match.away_team, "Away")}
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-600">
-            <span>{isHome ? "Home" : "Away"} vs {formatTeamNameWithRecord(opponent, teamRecordById, "Opponent")}</span>
+            <span>{isHome ? "Home" : "Away"} vs {formatTeamName(opponent, "Opponent")}</span>
             <span>{match.locations?.name || "Location TBD"}</span>
             <span>Week {match.week_number || "-"}</span>
             <button
@@ -238,8 +234,8 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, teamRecordById, rat
           </div>
           {compact ? (
             <div className="mt-2 space-y-1">
-              <ScoreRow label="Home" name={formatTeamNameWithRecord(match.home_team, teamRecordById, "Home")} score={homeScore} won={homeWon} />
-              <ScoreRow label="Away" name={formatTeamNameWithRecord(match.away_team, teamRecordById, "Away")} score={awayScore} won={awayWon} />
+              <ScoreRow label="Home" name={formatTeamName(match.home_team, "Home")} score={homeScore} won={homeWon} />
+              <ScoreRow label="Away" name={formatTeamName(match.away_team, "Away")} score={awayScore} won={awayWon} />
             </div>
           ) : (
             <div className="mt-1 text-lg font-black text-slate-900">
@@ -398,11 +394,8 @@ function formatHomeLocation(team) {
   return team?.locations?.name || "No Home Location";
 }
 
-function formatTeamNameWithRecord(team, teamRecordById, fallback) {
-  const name = team?.name || fallback;
-  const record = team?.id ? teamRecordById?.[String(team.id)] : "";
-
-  return record ? `${name} (${record})` : name;
+function formatTeamName(team, fallback) {
+  return team?.name || fallback;
 }
 
 function formatGameStatus(status) {
