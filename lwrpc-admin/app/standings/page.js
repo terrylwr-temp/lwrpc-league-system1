@@ -4,7 +4,6 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { hasRole } from "../lib/permissions";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
 import { useRouter } from "next/navigation";
 
@@ -109,6 +108,9 @@ export default function StandingsPage() {
     selectedDivision
   ]);
 
+  const canRebuildLeagueStatistics =
+    currentUserRole === "league_manager" || currentUserRole === "commissioner";
+
   async function rebuildLeagueStatistics() {
     if (!selectedDivision) {
       alert("Select a division before rebuilding statistics.");
@@ -199,7 +201,7 @@ if (loading) {
               )}
             </select>
 
-            {hasRole(currentUserRole, "league_manager") && (
+            {canRebuildLeagueStatistics && (
               <button
                 type="button"
                 onClick={rebuildLeagueStatistics}

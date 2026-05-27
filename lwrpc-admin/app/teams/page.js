@@ -778,8 +778,8 @@ export default function TeamsPage() {
     if (!member) return "";
 
     return (
-      member.full_name ||
       `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+      member.full_name ||
       member.email ||
       "Unnamed Member"
     );
@@ -1155,14 +1155,14 @@ if (loading) {
                   </button>
 
                   {expanded && (
-                  <div className="divide-y divide-slate-100">
+                  <div className="space-y-3 bg-slate-100 p-3">
                     {group.teams.map(team => (
                       <div
                         key={team.id}
-                        className={`grid grid-cols-1 gap-2 px-4 py-2 text-sm md:grid-cols-[minmax(160px,1.2fr)_minmax(120px,0.8fr)_minmax(180px,1fr)_auto] md:items-center ${
+                        className={`grid grid-cols-1 gap-3 rounded-2xl border px-4 py-4 text-sm shadow-sm ring-1 transition hover:-translate-y-0.5 hover:shadow-md md:grid-cols-[minmax(170px,1.1fr)_minmax(130px,0.7fr)_minmax(190px,1fr)_minmax(220px,auto)] md:items-center ${
                           editingTeamId === team.id
-                            ? "bg-blue-50"
-                            : "bg-white hover:bg-slate-50"
+                            ? "border-blue-300 bg-blue-50 ring-blue-200"
+                            : "border-slate-200 bg-white ring-slate-100"
                         }`}
                       >
                         <div className="min-w-0">
@@ -1193,7 +1193,7 @@ if (loading) {
                           {captainSummary(team)}
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 md:justify-end">
+                        <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-inner md:justify-end">
                           <button
                             onClick={() => openTeamSchedule(team)}
                             className="rounded-lg bg-indigo-100 px-3 py-1.5 text-xs font-semibold text-indigo-900 hover:bg-indigo-200"
@@ -1510,8 +1510,8 @@ function Field({ label, hint, children }) {
 
 function memberBaseName(member) {
   return (
-    member.full_name ||
     `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+    member.full_name ||
     member.email ||
     "Unnamed Member"
   );

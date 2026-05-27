@@ -8,17 +8,26 @@ import { requireRole, supabase } from "../lib/auth";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
-import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT } from "../lib/notificationPreferences";
+import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../lib/notificationPreferences";
 
 const PAGE_SIZE = 100;
 const CLEAN_MEMBERS_BATCH_SIZE = 25;
 const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
+const MEMBER_EXPORT_TYPES = [
+  { value: "membership_all", label: "Membership (All)" },
+  { value: "players", label: "Players" },
+  { value: "captains", label: "Captains" },
+  { value: "club_pro", label: "Club Pro" },
+  { value: "league_manager", label: "League Manager" },
+  { value: "commissioner", label: "Commissioner" },
+];
 
 export default function MembersPage() {
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState([]);
+  const [seasons, setSeasons] = useState([]);
   const [search, setSearch] = useState("");
   const [showCurrentRosterOnly, setShowCurrentRosterOnly] = useState(false);
   const [includeInactiveMembers, setIncludeInactiveMembers] = useState(false);
@@ -29,6 +38,10 @@ export default function MembersPage() {
   const [showMaintenance, setShowMaintenance] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportType, setExportType] = useState("membership_all");
+  const [exportSeasonId, setExportSeasonId] = useState("");
+  const [exportingMembers, setExportingMembers] = useState(false);
   const [teamsMember, setTeamsMember] = useState(null);
   const [savingNewMember, setSavingNewMember] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState(initialMemberForm());
@@ -39,26 +52,41 @@ export default function MembersPage() {
     const user = await requireRole(router, "league_manager");
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from("members")
-      .select(`
-        id,
-        first_name,
-        last_name,
-        email,
-        phone,
-        club_location,
-        dupr_id,
-        is_active_member,
-        created_at,
-        user_roles (
-          role
-        )
-      `)
-      .order("last_name", { ascending: true });
+    const [
+      { data, error },
+      { data: seasonData, error: seasonError },
+    ] = await Promise.all([
+      supabase
+        .from("members")
+        .select(`
+          id,
+          first_name,
+          last_name,
+          email,
+          phone,
+          club_location,
+          dupr_id,
+          is_active_member,
+          created_at,
+          user_roles (
+            role
+          )
+        `)
+        .order("last_name", { ascending: true }),
+      supabase
+        .from("seasons")
+        .select("id, name, is_active, start_date")
+        .order("start_date", { ascending: false }),
+    ]);
 
     if (error) {
       alert(error.message);
+      setLoading(false);
+      return;
+    }
+
+    if (seasonError) {
+      alert(seasonError.message);
       setLoading(false);
       return;
     }
@@ -95,6 +123,7 @@ export default function MembersPage() {
         teams: teamsByMemberId[member.id] || [],
       }))
     );
+    setSeasons(seasonData || []);
     setLoading(false);
   }, [router]);
 
@@ -305,6 +334,111 @@ export default function MembersPage() {
 
   function openMemberTeams(member) {
     setTeamsMember(member);
+  }
+
+  async function exportMembers() {
+    if (exportingMembers) return;
+
+    setExportingMembers(true);
+
+    const [
+      { rows: memberRows, error: memberError },
+      { rows: teamRows, error: teamError },
+      { rows: ratingRows, error: ratingError },
+    ] = await Promise.all([
+      loadAllExportMemberRows(),
+      loadAllMemberTeamRows(),
+      loadAllRatingRows(exportSeasonId),
+    ]);
+
+    if (memberError || teamError || ratingError) {
+      alert(memberError?.message || teamError?.message || ratingError?.message);
+      setExportingMembers(false);
+      return;
+    }
+
+    const selectedSeason = seasons.find((season) => String(season.id) === String(exportSeasonId));
+    const ratingsByMemberSeason = (ratingRows || []).reduce((byKey, rating) => {
+      byKey[`${rating.member_id}:${rating.season_id}`] = rating;
+      return byKey;
+    }, {});
+    const teamRowsByMemberId = (teamRows || []).reduce((byMember, row) => {
+      if (!row.member_id) return byMember;
+      if (!byMember[row.member_id]) byMember[row.member_id] = [];
+      byMember[row.member_id].push(row);
+      return byMember;
+    }, {});
+
+    const filteredMembers = (memberRows || []).filter((member) =>
+      memberMatchesExportType(member, teamRowsByMemberId[member.id] || [], exportType, exportSeasonId)
+    );
+
+    const header = [
+      "Last",
+      "First",
+      "Full Name",
+      "Email",
+      "Phone",
+      "Notification Option",
+      "Club",
+      "DUPR ID",
+      "User Role",
+      "Status",
+      "Season",
+      "DUPR Doubles Rating",
+      "Season Rating",
+      "PrimeTime Rating",
+      "Team Name",
+      "League",
+      "Division",
+      "Team Role",
+    ];
+
+    const rows = [header];
+
+    filteredMembers.forEach((member) => {
+      const memberTeams = (teamRowsByMemberId[member.id] || []).filter((row) =>
+        teamRowMatchesSeason(row, exportSeasonId)
+      );
+      const exportTeamRows = memberTeams.length > 0 ? memberTeams : [null];
+
+      exportTeamRows.forEach((teamRow) => {
+        const team = teamRow?.teams || null;
+        const seasonId = exportSeasonId || team?.divisions?.leagues?.season_id || "";
+        const rating = ratingsByMemberSeason[`${member.id}:${seasonId}`] || {};
+
+        rows.push([
+          member.last_name || "",
+          member.first_name || "",
+          memberFullName(member),
+          member.email || "",
+          member.phone || "",
+          notificationPreferenceLabel(member.notification_preference),
+          member.club_location || "",
+          member.dupr_id || "",
+          memberRole(member),
+          member.is_active_member === false ? "Inactive" : "Active",
+          selectedSeason?.name || team?.divisions?.leagues?.seasons?.name || "",
+          rating.dupr_doubles_rating ?? "",
+          rating.season_dupr_rating ?? "",
+          rating.season_primetime_rating ?? "",
+          team?.name || "",
+          team?.divisions?.leagues?.name || "",
+          team?.divisions?.name || "",
+          team ? memberTeamRole(member.id, team) : "",
+        ]);
+      });
+    });
+
+    const csv = toCsv(rows);
+    const exportLabel = MEMBER_EXPORT_TYPES.find((item) => item.value === exportType)?.label || "members";
+    downloadCsv(
+      csv,
+      `lwrpc-member-export-${slugify(exportLabel)}-${selectedSeason ? slugify(selectedSeason.name) : "all-seasons"}-${localDateString()}.csv`
+    );
+
+    setExportingMembers(false);
+    setExportModalOpen(false);
   }
 
   async function resetMemberPassword(member) {
@@ -551,6 +685,14 @@ export default function MembersPage() {
 
                 <button
                   type="button"
+                  onClick={() => setExportModalOpen(true)}
+                  className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800"
+                >
+                  Member Export
+                </button>
+
+                <button
+                  type="button"
                   onClick={cleanMembers}
                   disabled={cleaningMembers}
                   className="rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
@@ -766,6 +908,21 @@ export default function MembersPage() {
         {roleHelpOpen && (
           <RoleCapabilityModal onClose={() => setRoleHelpOpen(false)} />
         )}
+
+        {exportModalOpen && (
+          <MemberExportModal
+            exportType={exportType}
+            exportSeasonId={exportSeasonId}
+            exporting={exportingMembers}
+            seasons={seasons}
+            onExportTypeChange={setExportType}
+            onExportSeasonChange={setExportSeasonId}
+            onClose={() => {
+              if (!exportingMembers) setExportModalOpen(false);
+            }}
+            onExport={exportMembers}
+          />
+        )}
       </div>
     </main>
   );
@@ -794,12 +951,82 @@ async function loadAllMemberTeamRows() {
             name,
             leagues (
               id,
-              name
+              name,
+              season_id,
+              seasons (
+                id,
+                name
+              )
             )
           )
         )
       `)
       .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+
+    if (!data || data.length < pageSize) break;
+
+    from += pageSize;
+  }
+
+  return { rows, error: null };
+}
+
+async function loadAllExportMemberRows() {
+  const pageSize = 1000;
+  let from = 0;
+  const rows = [];
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("members")
+      .select(`
+        id,
+        first_name,
+        last_name,
+        full_name,
+        email,
+        phone,
+        notification_preference,
+        club_location,
+        dupr_id,
+        is_active_member,
+        user_roles (
+          role
+        )
+      `)
+      .order("last_name", { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+
+    if (!data || data.length < pageSize) break;
+
+    from += pageSize;
+  }
+
+  return { rows, error: null };
+}
+
+async function loadAllRatingRows(seasonId) {
+  const pageSize = 1000;
+  let from = 0;
+  const rows = [];
+
+  while (true) {
+    let query = supabase
+      .from("member_season_ratings")
+      .select("member_id, season_id, dupr_doubles_rating, season_dupr_rating, season_primetime_rating")
+      .range(from, from + pageSize - 1);
+
+    if (seasonId) query = query.eq("season_id", seasonId);
+
+    const { data, error } = await query;
 
     if (error) return { rows: [], error };
 
@@ -830,6 +1057,83 @@ function memberTeamRole(memberId, team) {
   }
 
   return "Player";
+}
+
+function memberRole(member) {
+  return member.user_roles?.[0]?.role || "player";
+}
+
+function memberFullName(member) {
+  return (
+    `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+    member.full_name ||
+    member.email ||
+    ""
+  );
+}
+
+function teamRowMatchesSeason(row, seasonId) {
+  if (!seasonId) return true;
+  return String(row.teams?.divisions?.leagues?.season_id || "") === String(seasonId);
+}
+
+function memberMatchesExportType(member, teamRows, exportType, seasonId) {
+  if (exportType === "membership_all") return true;
+
+  const role = memberRole(member);
+  const matchingTeamRows = teamRows.filter((row) => teamRowMatchesSeason(row, seasonId));
+
+  if (exportType === "players") return role === "player";
+  if (exportType === "captains") {
+    return (
+      role === "captain" ||
+      matchingTeamRows.some((row) => {
+        const teamRole = memberTeamRole(member.id, row.teams);
+        return teamRole === "Captain" || teamRole === "Co-Captain";
+      })
+    );
+  }
+
+  return role === exportType;
+}
+
+function toCsv(rows) {
+  return rows
+    .map((row) =>
+      row
+        .map((value) => {
+          const text = String(value ?? "");
+          return /[",\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+        })
+        .join(",")
+    )
+    .join("\r\n");
+}
+
+function downloadCsv(csv, filename) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function localDateString() {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function slugify(value) {
+  return String(value || "export")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function initialMemberForm() {
@@ -885,6 +1189,96 @@ function normalizeLocationName(value) {
 function memberHasInactiveProtectedRole(member) {
   return (member.user_roles || []).some((roleRow) =>
     INACTIVE_PROTECTED_ROLES.has(roleRow.role)
+  );
+}
+
+function MemberExportModal({
+  exportType,
+  exportSeasonId,
+  exporting,
+  seasons,
+  onExportTypeChange,
+  onExportSeasonChange,
+  onClose,
+  onExport,
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+      <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+              Data Tools
+            </div>
+            <h2 className="mt-1 text-2xl font-black">Member Export</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={exporting}
+            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20 disabled:opacity-50"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="space-y-4 p-5">
+          <FormField label="Export Group">
+            <select
+              value={exportType}
+              onChange={(event) => onExportTypeChange(event.target.value)}
+              disabled={exporting}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+            >
+              {MEMBER_EXPORT_TYPES.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </FormField>
+
+          <FormField label="Season">
+            <select
+              value={exportSeasonId}
+              onChange={(event) => onExportSeasonChange(event.target.value)}
+              disabled={exporting}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+            >
+              <option value="">All Seasons</option>
+              {seasons.map((season) => (
+                <option key={season.id} value={season.id}>
+                  {season.name}{season.is_active === false ? " (Inactive)" : ""}
+                </option>
+              ))}
+            </select>
+          </FormField>
+
+          <div className="rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-950">
+            The CSV includes member contact details, role/status, ratings, and one row for each matching team assignment.
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={exporting}
+              className="rounded-xl bg-slate-200 px-5 py-3 font-semibold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={onExport}
+              disabled={exporting}
+              className="rounded-xl bg-emerald-700 px-5 py-3 font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
+            >
+              {exporting ? "Exporting..." : "Export CSV"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
