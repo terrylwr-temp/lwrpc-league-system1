@@ -333,14 +333,7 @@ if (loading) {
                   </td>
 
                   <td className="p-3 font-semibold">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span>{team.teams?.name}</span>
-                      {isPlayoffTeam(team) && (
-                        <span className="rounded-full bg-emerald-700 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-white">
-                          Playoffs/Championship
-                        </span>
-                      )}
-                    </div>
+                    {team.teams?.name}
                   </td>
 
                   <td className="p-3">

@@ -1151,11 +1151,6 @@ export default function PlayerDashboardPage() {
                           Rank #{displayRank}
                         </div>
                         <div className="mt-1 font-black text-slate-950">{row.teams?.name}</div>
-                        {isSelectedDivisionPlayoffTeam(row) && (
-                          <div className="mt-2 inline-flex rounded-full bg-emerald-700 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-white">
-                            Playoffs/Championship
-                          </div>
-                        )}
                       </div>
                       <div className="rounded-xl bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-900">
                         {row.standings_points} pts
@@ -1212,14 +1207,7 @@ export default function PlayerDashboardPage() {
                         </span>
                       </td>
                       <td className="p-3 font-semibold">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span>{row.teams?.name}</span>
-                          {isSelectedDivisionPlayoffTeam(row) && (
-                            <span className="rounded-full bg-emerald-700 px-2 py-0.5 text-xs font-black uppercase tracking-wide text-white">
-                              Playoffs/Championship
-                            </span>
-                          )}
-                        </div>
+                        {row.teams?.name}
                       </td>
                       <td className="p-3">{row.match_wins}-{row.match_losses}-{row.match_ties}</td>
                       <td className="p-3">{row.game_wins}-{row.game_losses}</td>
