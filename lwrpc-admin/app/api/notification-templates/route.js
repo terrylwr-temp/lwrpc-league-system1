@@ -4,6 +4,11 @@ import { hasRole } from "../../lib/permissions";
 
 export const runtime = "nodejs";
 
+const DASHBOARD_MESSAGE_AUDIENCES = {
+  captain_login_popup: "Captain Message",
+  player_login_popup: "Player Message",
+};
+
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const key =
@@ -100,7 +105,7 @@ export async function POST(req) {
     const supabase = adminClient();
     const { data: roleRows, error: roleError } = await supabase
       .from("members")
-      .select("id, user_roles(role)")
+      .select("id, email, user_roles(role)")
       .eq("email", userData.user.email)
       .maybeSingle();
 
@@ -120,7 +125,7 @@ export async function POST(req) {
       );
     }
 
-    const { template_key, subject, body } = await req.json();
+    const { template_key, subject, body, audience } = await req.json();
 
     if (!template_key) {
       return NextResponse.json(
@@ -129,6 +134,7 @@ export async function POST(req) {
       );
     }
 
+    const now = new Date().toISOString();
     const { error } = await supabase
       .from("notification_templates")
       .upsert(
@@ -136,7 +142,7 @@ export async function POST(req) {
           template_key,
           subject: subject || "",
           body: body || "",
-          updated_at: new Date().toISOString(),
+          updated_at: now,
         },
         { onConflict: "template_key" }
       );
@@ -146,6 +152,28 @@ export async function POST(req) {
         { success: false, error: error.message },
         { status: 500 }
       );
+    }
+
+    if (DASHBOARD_MESSAGE_AUDIENCES[template_key]) {
+      const { error: historyError } = await supabase
+        .from("notification_template_history")
+        .insert({
+          template_key,
+          audience: audience || DASHBOARD_MESSAGE_AUDIENCES[template_key],
+          subject: subject || "",
+          body: body || "",
+          saved_by_member_id: roleRows?.id || null,
+          saved_by_email: roleRows?.email || userData.user.email,
+          created_at: now,
+          updated_at: now,
+        });
+
+      if (historyError) {
+        return NextResponse.json(
+          { success: false, error: historyError.message },
+          { status: 500 }
+        );
+      }
     }
 
     return NextResponse.json({ success: true });

@@ -86,6 +86,21 @@ create table if not exists public.notification_templates (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.notification_template_history (
+  id uuid primary key default gen_random_uuid(),
+  template_key text not null,
+  audience text not null,
+  subject text not null,
+  body text not null,
+  saved_by_member_id uuid references public.members(id),
+  saved_by_email text,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists notification_template_history_template_key_created_at_idx
+  on public.notification_template_history (template_key, created_at desc);
+
 create table if not exists public.match_lineups (
   id uuid primary key default gen_random_uuid(),
   match_id uuid not null references public.matches(id) on delete cascade,

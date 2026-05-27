@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "./components/AppHeader";
 import { requireRole, supabase } from "./lib/auth";
+import { formatDisplayTimestampShort } from "./lib/dateTime";
 import {
   DEFAULT_GUIDE_BUCKET,
   DEFAULT_GUIDE_PREFIX,
@@ -50,7 +51,10 @@ export default function DashboardPage() {
       ])
     )
   );
+  const [messageHistory, setMessageHistory] = useState([]);
+  const [loadingMessageHistory, setLoadingMessageHistory] = useState(false);
   const [savingMessageKey, setSavingMessageKey] = useState("");
+  const [deletingHistoryId, setDeletingHistoryId] = useState("");
   const [masterResetting, setMasterResetting] = useState(false);
   const [guideDocuments, setGuideDocuments] = useState(initialGuideDocuments());
   const [guideBucket, setGuideBucket] = useState(DEFAULT_GUIDE_BUCKET);
@@ -158,6 +162,29 @@ export default function DashboardPage() {
     });
   }, []);
 
+  const loadMessageHistory = useCallback(async function loadMessageHistory() {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) return;
+
+    setLoadingMessageHistory(true);
+    const response = await fetch("/api/notification-template-history", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const result = await response.json().catch(() => ({}));
+    setLoadingMessageHistory(false);
+
+    if (!response.ok || !result.success) {
+      setMessageHistory([]);
+      return;
+    }
+
+    setMessageHistory(result.history || []);
+  }, []);
+
   const loadGuideDocuments = useCallback(async function loadGuideDocuments() {
     const entries = await Promise.all(
       GUIDE_DOCUMENT_TYPES.map(async (guideType) => [
@@ -181,12 +208,13 @@ export default function DashboardPage() {
         loadDashboardCounts();
         loadDashboardFilterOptions();
         loadLoginMessages();
+        loadMessageHistory();
         loadGuideDocuments();
       }
     }
 
     run();
-  }, [loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, router]);
+  }, [loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, loadMessageHistory, router]);
 
   function updateLoginMessage(templateKey, field, value) {
     setLoginMessages((current) => ({
@@ -217,6 +245,7 @@ export default function DashboardPage() {
       },
       body: JSON.stringify({
         template_key: template.key,
+        audience: template.label,
         subject: message.subject?.trim() || template.defaultSubject,
         body: message.body || "",
       }),
@@ -229,7 +258,99 @@ export default function DashboardPage() {
       return;
     }
 
+    await loadLoginMessages();
+    await loadMessageHistory();
     alert(`${template.label} saved.`);
+  }
+
+  async function clearLoginMessage(template) {
+    const ok = confirm(`Clear the active ${template.label}? Players or captains will no longer see this popup until a new message is saved.`);
+    if (!ok) return;
+
+    setLoginMessages((current) => ({
+      ...current,
+      [template.key]: {
+        subject: current[template.key]?.subject || template.defaultSubject,
+        body: "",
+      },
+    }));
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before clearing dashboard messages.");
+      return;
+    }
+
+    setSavingMessageKey(template.key);
+    const response = await fetch("/api/notification-templates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        template_key: template.key,
+        audience: template.label,
+        subject: template.defaultSubject,
+        body: "",
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setSavingMessageKey("");
+
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to clear dashboard message.");
+      return;
+    }
+
+    await loadLoginMessages();
+    await loadMessageHistory();
+    alert(`${template.label} cleared.`);
+  }
+
+  function editMessageHistoryItem(item) {
+    setLoginMessages((current) => ({
+      ...current,
+      [item.template_key]: {
+        subject: item.subject || templateDefaultSubject(item.template_key),
+        body: item.body || "",
+      },
+    }));
+
+    const editor = document.getElementById(`dashboard-message-${item.template_key}`);
+    if (editor) editor.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  async function deleteMessageHistoryItem(item) {
+    const ok = confirm(`Delete this ${item.audience || "dashboard message"} history row? This will not change the active popup.`);
+    if (!ok) return;
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before deleting dashboard message history.");
+      return;
+    }
+
+    setDeletingHistoryId(item.id);
+    const response = await fetch(`/api/notification-template-history?id=${encodeURIComponent(item.id)}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const result = await response.json().catch(() => ({}));
+    setDeletingHistoryId("");
+
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to delete dashboard message history.");
+      return;
+    }
+
+    await loadMessageHistory();
   }
 
   function updateGuideDocument(templateKey, field, value) {
@@ -712,7 +833,7 @@ export default function DashboardPage() {
               const message = loginMessages[template.key] || {};
 
               return (
-                <div key={template.key} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <div id={`dashboard-message-${template.key}`} key={template.key} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
                   <div className="text-sm font-black uppercase tracking-wide text-slate-500">
                     {template.label}
                   </div>
@@ -733,7 +854,15 @@ export default function DashboardPage() {
                     className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
                   />
 
-                  <div className="mt-3 flex justify-end">
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                    <button
+                      type="button"
+                      onClick={() => clearLoginMessage(template)}
+                      disabled={savingMessageKey === template.key}
+                      className="rounded-xl bg-slate-200 px-4 py-2 text-sm font-bold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+                    >
+                      Clear Current Message
+                    </button>
                     <button
                       type="button"
                       onClick={() => saveLoginMessage(template)}
@@ -746,6 +875,79 @@ export default function DashboardPage() {
                 </div>
               );
             })}
+          </div>
+
+          <div className="border-t border-slate-200 p-4 md:p-6">
+            <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h3 className="text-lg font-black text-slate-950">Message History</h3>
+                <p className="mt-1 text-sm font-semibold text-slate-600">
+                  Review saved dashboard messages, reload one into the editor, or delete old history rows.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={loadMessageHistory}
+                disabled={loadingMessageHistory}
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-800 disabled:opacity-50"
+              >
+                {loadingMessageHistory ? "Loading..." : "Refresh History"}
+              </button>
+            </div>
+
+            <div className="mt-4 space-y-3">
+              {messageHistory.map((item) => (
+                <div key={item.id} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-blue-900">
+                          {item.audience || templateLabel(item.template_key)}
+                        </span>
+                        <span className="text-xs font-bold text-slate-500">
+                          {formatDisplayTimestampShort(item.created_at)}
+                        </span>
+                        {item.saved_by_email && (
+                          <span className="text-xs font-bold text-slate-500">
+                            by {item.saved_by_email}
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-2 font-black text-slate-950">
+                        {item.subject || templateDefaultSubject(item.template_key)}
+                      </div>
+                      <div className="mt-2 max-h-24 overflow-auto whitespace-pre-wrap rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold leading-6 text-slate-700">
+                        {item.body?.trim() || "No active message body."}
+                      </div>
+                    </div>
+
+                    <div className="flex shrink-0 flex-col gap-2 sm:flex-row lg:flex-col">
+                      <button
+                        type="button"
+                        onClick={() => editMessageHistoryItem(item)}
+                        className="rounded-xl bg-blue-100 px-4 py-2 text-sm font-bold text-blue-900 hover:bg-blue-200"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => deleteMessageHistoryItem(item)}
+                        disabled={deletingHistoryId === item.id}
+                        className="rounded-xl bg-red-100 px-4 py-2 text-sm font-bold text-red-800 hover:bg-red-200 disabled:opacity-50"
+                      >
+                        {deletingHistoryId === item.id ? "Deleting..." : "Delete"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {!loadingMessageHistory && messageHistory.length === 0 && (
+                <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm font-semibold text-slate-500">
+                  No dashboard message history has been saved yet.
+                </div>
+              )}
+            </div>
           </div>
         </section>
 
@@ -1042,6 +1244,18 @@ function uniqueValues(values) {
 
 function memberSeasonKey(memberId, seasonId) {
   return `${memberId || ""}:${seasonId || ""}`;
+}
+
+function templateConfig(templateKey) {
+  return LOGIN_MESSAGE_TEMPLATES.find((template) => template.key === templateKey) || null;
+}
+
+function templateLabel(templateKey) {
+  return templateConfig(templateKey)?.label || templateKey || "Dashboard Message";
+}
+
+function templateDefaultSubject(templateKey) {
+  return templateConfig(templateKey)?.defaultSubject || "Dashboard Message";
 }
 
 function currentWeekDateRange() {
