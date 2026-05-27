@@ -49,6 +49,7 @@ export default function CaptainDashboardPage() {
   const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
   const [pdfDocument, setPdfDocument] = useState(null);
+  const [divisionCaptainsPreview, setDivisionCaptainsPreview] = useState(null);
   const [scoreDetailsMatch, setScoreDetailsMatch] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
   const [rosterTeam, setRosterTeam] = useState(null);
@@ -1201,7 +1202,7 @@ export default function CaptainDashboardPage() {
     return emailSent + smsSent > 0;
   }
 
-  async function displayPrintDivisionCaptains(team) {
+  async function displayDivisionCaptains(team) {
     if (!team?.division_id) {
       alert("This team is not assigned to a division.");
       return;
@@ -1253,26 +1254,11 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    const body = divisionCaptainsPrintHtml({
+    setDivisionCaptainsPreview({
       leagueName: team.divisions?.leagues?.name || "League",
       divisionName: team.divisions?.name || "Division",
       teams: data || [],
     });
-
-    window.localStorage.setItem(
-      "lwrpc-print-payload",
-      JSON.stringify({
-        title: `${team.divisions?.name || "Division"} Captains`,
-        body,
-      })
-    );
-
-    const printWindow = window.open("/print", "_blank", "width=900,height=700");
-
-    if (!printWindow) {
-      alert("Unable to open print preview. Please allow popups for this site.");
-      return;
-    }
   }
 
   async function openDivisionSchedule(team) {
@@ -1747,7 +1733,7 @@ export default function CaptainDashboardPage() {
                       event.stopPropagation();
                       router.push(`/teams/${team.id}`);
                     }}
-                    className="rounded-xl bg-slate-900 px-3 py-3 text-sm font-bold text-white shadow-sm hover:bg-slate-800"
+                    className="rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
                   >
                     Manage Roster
                   </button>
@@ -1767,11 +1753,11 @@ export default function CaptainDashboardPage() {
                     type="button"
                     onClick={(event) => {
                       event.stopPropagation();
-                      displayPrintDivisionCaptains(team);
+                      displayDivisionCaptains(team);
                     }}
                     className="rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
                   >
-                    Print Captains
+                    Division Captains
                   </button>
                 </div>
 
@@ -1933,6 +1919,13 @@ export default function CaptainDashboardPage() {
           />
         )}
 
+        {divisionCaptainsPreview && (
+          <DivisionCaptainsModal
+            data={divisionCaptainsPreview}
+            onClose={() => setDivisionCaptainsPreview(null)}
+          />
+        )}
+
         {scoreDetailsMatch && (
           <MatchScoreDetailsModal
             match={scoreDetailsMatch}
@@ -2044,6 +2037,95 @@ function PdfViewerModal({ document, onClose }) {
             Loading PDF viewer...
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+function DivisionCaptainsModal({ data, onClose }) {
+  const rows = divisionCaptainRows(data.teams);
+
+  function printCaptains() {
+    const body = divisionCaptainsPrintHtml(data);
+
+    window.localStorage.setItem(
+      "lwrpc-print-payload",
+      JSON.stringify({
+        title: `${data.divisionName || "Division"} Captains`,
+        body,
+      })
+    );
+
+    const printWindow = window.open("/print", "_blank", "width=900,height=700");
+
+    if (!printWindow) {
+      alert("Unable to open print preview. Please allow popups for this site.");
+      return;
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-3 sm:p-4">
+      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-blue-200">
+              {data.leagueName}
+            </div>
+            <h2 className="mt-1 text-2xl font-black">{data.divisionName} Captains</h2>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={printCaptains}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+            >
+              Print
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-auto p-4">
+          <table className="w-full min-w-[900px] border-collapse text-sm">
+            <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
+              <tr>
+                <th className="border border-slate-300 p-3 text-left">Team</th>
+                <th className="border border-slate-300 p-3 text-left">Role</th>
+                <th className="border border-slate-300 p-3 text-left">Name</th>
+                <th className="border border-slate-300 p-3 text-left">Email</th>
+                <th className="border border-slate-300 p-3 text-left">Phone</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={`${row.teamName}:${row.role}:${row.member.id || row.member.email}`} className="even:bg-slate-50">
+                  <td className="whitespace-nowrap border border-slate-300 p-3 font-semibold text-slate-950">{row.teamName}</td>
+                  <td className="whitespace-nowrap border border-slate-300 p-3">{row.role}</td>
+                  <td className="whitespace-nowrap border border-slate-300 p-3">{formatMemberName(row.member)}</td>
+                  <td className="whitespace-nowrap border border-slate-300 p-3">{row.member.email || ""}</td>
+                  <td className="whitespace-nowrap border border-slate-300 p-3">{formatPhoneNumberForStorage(row.member.phone)}</td>
+                </tr>
+              ))}
+
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="border border-slate-300 p-6 text-center text-slate-500">
+                    No captains found for this division.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
@@ -2673,8 +2755,8 @@ function formatMemberName(member) {
   );
 }
 
-function divisionCaptainsPrintHtml({ leagueName, divisionName, teams }) {
-  const rows = teams.flatMap((team) => {
+function divisionCaptainRows(teams) {
+  return (teams || []).flatMap((team) => {
     return [
       ["Captain", team.captain],
       ["Co-Captain", team.co_captain_1],
@@ -2682,24 +2764,38 @@ function divisionCaptainsPrintHtml({ leagueName, divisionName, teams }) {
       ["Club Pro", team.club_pro],
     ]
       .filter(([, member]) => member)
-      .map(([role, member]) => `
+      .map(([role, member]) => ({
+        teamName: team.name || "",
+        role,
+        member,
+      }));
+  });
+}
+
+function divisionCaptainsPrintHtml({ leagueName, divisionName, teams }) {
+  const rows = divisionCaptainRows(teams).map((row) => `
         <tr>
-          <td>${escapeHtml(team.name)}</td>
-          <td>${escapeHtml(role)}</td>
-          <td>${escapeHtml(formatMemberName(member))}</td>
-          <td>${escapeHtml(member.email || "")}</td>
-          <td>${escapeHtml(formatPhoneNumberForStorage(member.phone))}</td>
+          <td>${escapeHtml(row.teamName)}</td>
+          <td>${escapeHtml(row.role)}</td>
+          <td>${escapeHtml(formatMemberName(row.member))}</td>
+          <td>${escapeHtml(row.member.email || "")}</td>
+          <td>${escapeHtml(formatPhoneNumberForStorage(row.member.phone))}</td>
         </tr>
-      `);
-  }).join("");
+      `).join("");
 
   return `
     <style>
+      @page { size: landscape; }
       h1 { margin: 0 0 4px; font-size: 24px; }
-      h2 { margin: 0 0 24px; color: #475569; font-size: 16px; font-weight: 600; }
-      table { width: 100%; border-collapse: collapse; }
+      h2 { margin: 0 0 18px; color: #475569; font-size: 15px; font-weight: 600; }
+      table { width: 100%; border-collapse: collapse; table-layout: auto; }
       th { background: #0f172a; color: white; text-align: left; }
-      th, td { border: 1px solid #cbd5e1; padding: 10px; font-size: 13px; }
+      th, td { border: 1px solid #cbd5e1; padding: 6px 8px; font-size: 11px; line-height: 1.2; vertical-align: top; white-space: nowrap; }
+      th:nth-child(1), td:nth-child(1) { width: 24%; }
+      th:nth-child(2), td:nth-child(2) { width: 12%; }
+      th:nth-child(3), td:nth-child(3) { width: 20%; }
+      th:nth-child(4), td:nth-child(4) { width: 30%; }
+      th:nth-child(5), td:nth-child(5) { width: 14%; }
       tr:nth-child(even) td { background: #f8fafc; }
     </style>
     <h1>${escapeHtml(divisionName)} Captains</h1>

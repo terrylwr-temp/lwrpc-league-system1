@@ -74,16 +74,7 @@ export default function PrintPage() {
           }
 
           .print-footer {
-            position: fixed;
-            bottom: -0.55in;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-between;
-            border-top: 1px solid #cbd5e1;
-            padding-top: 6px;
-            font-size: 9px;
-            color: #475569;
+            display: none;
           }
 
           .screen-note {
