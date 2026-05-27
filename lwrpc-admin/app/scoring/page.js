@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -75,11 +75,9 @@ export default function ScoringPage() {
     if (localSubject) setEmailSubject(localSubject);
     if (localBody) setEmailTemplate(localBody);
 
-    const { data } = await supabase
-      .from("notification_templates")
-      .select("subject, body")
-      .eq("template_key", TEMPLATE_KEY)
-      .maybeSingle();
+    const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(TEMPLATE_KEY)}`);
+    const result = await response.json().catch(() => null);
+    const data = result?.template;
 
     if (data) {
       setEmailSubject(data.subject || DEFAULT_SUBJECT);
@@ -284,29 +282,40 @@ export default function ScoringPage() {
   }
 
   async function saveTemplate() {
-    setSavingTemplate(true);
     window.localStorage.setItem("lwrpc-score-reminder-subject", emailSubject);
     window.localStorage.setItem("lwrpc-score-reminder-template", emailTemplate);
 
-    const { error } = await supabase
-      .from("notification_templates")
-      .upsert({
-        template_key: TEMPLATE_KEY,
-        subject: emailSubject,
-        body: emailTemplate,
-        updated_at: new Date().toISOString(),
-      }, {
-        onConflict: "template_key",
-      });
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
 
-    setSavingTemplate(false);
-
-    if (error) {
-      alert("Template saved in this browser. Run the scoring schema SQL to save templates for all managers.");
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before saving the score reminder template.");
       return;
     }
 
-    alert("Email template saved.");
+    setSavingTemplate(true);
+    const response = await fetch("/api/notification-templates", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        template_key: TEMPLATE_KEY,
+        subject: emailSubject,
+        body: emailTemplate,
+      }),
+    });
+    const result = await response.json().catch(() => null);
+
+    setSavingTemplate(false);
+
+    if (!response.ok || !result?.success) {
+      alert(result?.error || "Template saved in this browser, but could not be saved for all managers.");
+      return;
+    }
+
+    alert("Score reminder template saved for all managers.");
   }
 
   async function sendReminders() {
@@ -468,7 +477,7 @@ export default function ScoringPage() {
             <div>
               <h2 className="text-xl font-bold text-slate-900">Score Reminder Template</h2>
               <p className="mt-1 text-sm text-slate-600">
-                HTML email body. Available placeholders: {"{{matches}}"}, {"{{match_count}}"}, {"{{date}}"}.
+                Edit the reminder email visually. Available placeholders: {"{{matches}}"}, {"{{match_count}}"}, {"{{date}}"}.
               </p>
             </div>
 
@@ -508,14 +517,12 @@ export default function ScoringPage() {
 
             <div>
               <FieldLabel label="Email Body" />
-              <textarea
+              <RichEmailEditor
                 value={emailTemplate}
-                onChange={(e) => setEmailTemplate(e.target.value)}
-                rows={8}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3 font-mono text-sm"
+                onChange={setEmailTemplate}
               />
               <p className="mt-2 text-xs text-slate-500">
-                You can use regular HTML for logo images, bold text, headings, links, colors, and basic layout styles.
+                The editor saves email-ready HTML behind the scenes.
               </p>
             </div>
             </div>
@@ -868,6 +875,120 @@ function downloadCsv(csv, filename) {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+}
+
+function RichEmailEditor({ value, onChange }) {
+  const editorRef = useRef(null);
+  const initializedRef = useRef(false);
+  const lastHtmlRef = useRef(value || "");
+
+  useEffect(() => {
+    if (!editorRef.current) return;
+    const nextValue = value || "";
+
+    if (!initializedRef.current) {
+      editorRef.current.innerHTML = nextValue;
+      lastHtmlRef.current = nextValue;
+      initializedRef.current = true;
+      return;
+    }
+
+    if (document.activeElement === editorRef.current) return;
+    if (nextValue === lastHtmlRef.current) return;
+
+    editorRef.current.innerHTML = nextValue;
+    lastHtmlRef.current = nextValue;
+  }, [value]);
+
+  function syncValue() {
+    const html = editorRef.current?.innerHTML || "";
+    lastHtmlRef.current = html;
+    onChange(html);
+  }
+
+  function focusEditor() {
+    editorRef.current?.focus();
+  }
+
+  function runCommand(command, commandValue = null) {
+    focusEditor();
+    document.execCommand(command, false, commandValue);
+    syncValue();
+  }
+
+  function insertHtml(html) {
+    focusEditor();
+    document.execCommand("insertHTML", false, html);
+    syncValue();
+  }
+
+  function addLink() {
+    const url = prompt("Enter the link URL");
+    if (!url) return;
+    runCommand("createLink", url);
+  }
+
+  return (
+    <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
+      <div className="flex flex-wrap gap-1 border-b border-slate-200 bg-slate-50 p-2">
+        <EditorButton label="B" title="Bold" onClick={() => runCommand("bold")} />
+        <EditorButton label="I" title="Italic" onClick={() => runCommand("italic")} />
+        <EditorButton label="U" title="Underline" onClick={() => runCommand("underline")} />
+        <EditorButton label="H2" title="Heading" onClick={() => runCommand("formatBlock", "h2")} />
+        <EditorButton label="P" title="Paragraph" onClick={() => runCommand("formatBlock", "p")} />
+        <EditorButton label="Bullets" title="Bullet list" onClick={() => runCommand("insertUnorderedList")} />
+        <EditorButton label="Numbers" title="Numbered list" onClick={() => runCommand("insertOrderedList")} />
+        <EditorButton label="Link" title="Add link" onClick={addLink} />
+        <EditorButton
+          label="Logo"
+          title="Insert club logo"
+          onClick={() =>
+            insertHtml(
+              '<p><img src="https://lwrpickleballclub.com/lwrpc-logo.png" alt="Lakewood Ranch Pickleball Club" style="width: 84px; height: 84px; object-fit: contain;" /></p>'
+            )
+          }
+        />
+        <EditorButton
+          label="Matches"
+          title="Insert match list placeholder"
+          onClick={() => insertHtml("<p>{{matches}}</p>")}
+        />
+        <EditorButton
+          label="Date"
+          title="Insert date placeholder"
+          onClick={() => insertHtml("{{date}}")}
+        />
+        <EditorButton
+          label="Clear"
+          title="Clear formatting"
+          onClick={() => runCommand("removeFormat")}
+        />
+      </div>
+
+      <div
+        ref={editorRef}
+        contentEditable
+        suppressContentEditableWarning
+        onInput={syncValue}
+        onBlur={syncValue}
+        className="min-h-72 overflow-auto px-4 py-3 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-200"
+      />
+    </div>
+  );
+}
+
+function EditorButton({ label, title, onClick }) {
+  return (
+    <button
+      type="button"
+      title={title}
+      onMouseDown={(event) => event.preventDefault()}
+      onClick={onClick}
+      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm hover:bg-blue-50 hover:text-blue-900"
+    >
+      {label}
+    </button>
+  );
 }
 
 function SummaryCard({ label, value }) {
