@@ -1285,7 +1285,7 @@ export default function CaptainDashboardPage() {
       await Promise.all([
         supabase
           .from("teams")
-          .select("id, name, division_id")
+          .select("id, name, division_id, locations(id, name)")
           .eq("division_id", team.division_id)
           .order("name", { ascending: true }),
         supabase
@@ -1718,12 +1718,6 @@ export default function CaptainDashboardPage() {
                     {standing?.match_wins ?? 0}-{standing?.match_losses ?? 0}-{standing?.match_ties ?? 0}
                   </span>
                 </div>
-                </div>
-
-                <div className={`${selected ? "bg-blue-50" : "bg-white"} px-4 py-3 text-sm text-slate-700`}>
-                  <div className="rounded-xl bg-white px-4 py-3 shadow-sm">
-                    <span className="font-bold text-slate-900">Home Location:</span> {team.locations?.name || "—"}
-                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-3">

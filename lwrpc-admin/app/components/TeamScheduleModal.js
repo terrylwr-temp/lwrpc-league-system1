@@ -98,16 +98,31 @@ export default function TeamScheduleModal({
           </aside>
 
           <section className="min-h-0 overflow-auto bg-slate-50 p-3 sm:p-5 md:max-h-[72vh]">
-            <div className="mb-3 rounded-2xl bg-white p-3 shadow-sm sm:mb-4 sm:p-4">
-              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+            <div className="mb-3 overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-700 via-blue-800 to-emerald-700 p-4 text-white shadow-lg sm:mb-4 sm:p-5">
+              <div className="text-xs font-black uppercase tracking-wide text-blue-100">
                 Selected Team
               </div>
-              <div className="mt-1 text-xl font-black text-slate-900 sm:text-2xl">
+              <div className="mt-1 text-xl font-black sm:text-2xl">
                 {selectedTeam?.name || "Select a team"}
               </div>
               {selectedTeam && (
-                <div className="mt-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-sm font-black text-emerald-900">
-                  Season Record: {formatTeamSummary(selectedTeam)}
+                <div className="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+                  <div className="rounded-xl bg-white/15 px-3 py-2 shadow-sm">
+                    <div className="text-[10px] font-black uppercase tracking-wide text-blue-100">
+                      Season Record
+                    </div>
+                    <div className="mt-1 font-black text-white">
+                      {formatTeamSummary(selectedTeam)}
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-white/15 px-3 py-2 shadow-sm">
+                    <div className="text-[10px] font-black uppercase tracking-wide text-blue-100">
+                      Home Location
+                    </div>
+                    <div className="mt-1 font-black text-white">
+                      {formatHomeLocation(selectedTeam)}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -377,6 +392,10 @@ function formatTeamSummary(team) {
   const points = standing?.standings_points ?? 0;
 
   return `${formatTeamRecord(team)} / ${points} pts`;
+}
+
+function formatHomeLocation(team) {
+  return team?.locations?.name || "No Home Location";
 }
 
 function formatTeamNameWithRecord(team, teamRecordById, fallback) {
