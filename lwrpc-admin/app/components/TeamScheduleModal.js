@@ -193,6 +193,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
   const selectedScore = isHome ? match.home_score : match.away_score;
   const opponentScore = isHome ? match.away_score : match.home_score;
   const hasScore = selectedScore !== null && selectedScore !== undefined && opponentScore !== null && opponentScore !== undefined;
+  const showMatchDetails = hasScore && match.score_status === "verified";
   const homeScore = match.home_score;
   const awayScore = match.away_score;
   const homeWon =
@@ -218,13 +219,15 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
             <span>{isHome ? "Home" : "Away"} vs {formatTeamName(opponent, "Opponent")}</span>
             <span>{match.locations?.name || "Location TBD"}</span>
             <span>Week {match.week_number || "-"}</span>
-            <button
-              type="button"
-              onClick={() => setExpanded((current) => !current)}
-              className="rounded-lg bg-blue-100 px-3 py-1 text-xs font-black text-blue-900 hover:bg-blue-200"
-            >
-              {expanded ? "Hide Match Details" : "Show Match Details"}
-            </button>
+            {showMatchDetails && (
+              <button
+                type="button"
+                onClick={() => setExpanded((current) => !current)}
+                className="rounded-lg bg-blue-100 px-3 py-1 text-xs font-black text-blue-900 hover:bg-blue-200"
+              >
+                {expanded ? "Hide Match Details" : "Show Match Details"}
+              </button>
+            )}
           </div>
         </div>
 
@@ -246,7 +249,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
       </div>
       </div>
 
-      {expanded && match.match_lines?.length > 0 && (
+      {showMatchDetails && expanded && match.match_lines?.length > 0 && (
         <div className="mx-4 mb-4 overflow-hidden rounded-lg border border-slate-100">
           {match.match_lines
             .slice()
@@ -280,7 +283,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
             ))}
         </div>
       )}
-      {expanded && !match.match_lines?.length && (
+      {showMatchDetails && expanded && !match.match_lines?.length && (
         <div className="mx-4 mb-4 rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-500">
           No game details have been entered for this match yet.
         </div>
