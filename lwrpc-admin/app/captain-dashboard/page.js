@@ -2539,18 +2539,20 @@ function MatchLineResult({ line, match, ratingForMember }) {
 
       <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
         <div className="rounded-xl bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-950">
-          <div>Home: {match.home_team?.name || "Home"}</div>
-          <div className="mt-1">
-            {formatMemberNameWithRating(line.home_player_1, match, ratingForMember)} / {formatMemberNameWithRating(line.home_player_2, match, ratingForMember)}
+          <div className="text-xs font-black uppercase tracking-wide text-emerald-800">Home: {match.home_team?.name || "Home"}</div>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <PlayerScoreCard member={line.home_player_1} match={match} ratingForMember={ratingForMember} tone="home" />
+            <PlayerScoreCard member={line.home_player_2} match={match} ratingForMember={ratingForMember} tone="home" />
           </div>
           <div className="mt-1 text-xs font-black uppercase tracking-wide text-emerald-800">
             Team Rating: {teamLineRating([line.home_player_1, line.home_player_2], match, ratingForMember)}
           </div>
         </div>
         <div className="rounded-xl bg-indigo-50 px-3 py-3 text-sm font-semibold text-indigo-950">
-          <div>Away: {match.away_team?.name || "Away"}</div>
-          <div className="mt-1">
-            {formatMemberNameWithRating(line.away_player_1, match, ratingForMember)} / {formatMemberNameWithRating(line.away_player_2, match, ratingForMember)}
+          <div className="text-xs font-black uppercase tracking-wide text-indigo-800">Away: {match.away_team?.name || "Away"}</div>
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            <PlayerScoreCard member={line.away_player_1} match={match} ratingForMember={ratingForMember} tone="away" />
+            <PlayerScoreCard member={line.away_player_2} match={match} ratingForMember={ratingForMember} tone="away" />
           </div>
           <div className="mt-1 text-xs font-black uppercase tracking-wide text-indigo-800">
             Team Rating: {teamLineRating([line.away_player_1, line.away_player_2], match, ratingForMember)}
@@ -2559,20 +2561,68 @@ function MatchLineResult({ line, match, ratingForMember }) {
       </div>
 
       <div className="border-t border-slate-100 px-4 py-3">
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {[...(line.line_games || [])]
             .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
             .map((game) => (
-              <span key={game.id} className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-950">
-                {gameScoreText(game, line, match)}
-              </span>
+              <GameScoreCard key={game.id} game={game} line={line} match={match} />
             ))}
           {!line.line_games?.length && (
-            <span className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-500">
+            <span className="rounded-xl bg-slate-100 px-4 py-2 text-center text-sm font-bold text-slate-500 sm:col-span-3">
               No game scores entered.
             </span>
           )}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PlayerScoreCard({ member, match, ratingForMember, tone }) {
+  const tones = {
+    home: "border-emerald-200 bg-white text-emerald-950",
+    away: "border-indigo-200 bg-white text-indigo-950",
+  };
+
+  return (
+    <div className={`rounded-lg border px-3 py-2 shadow-sm ${tones[tone] || tones.home}`}>
+      <div className="text-base font-black leading-tight text-slate-950">
+        {formatMemberName(member) || "Player TBD"}
+      </div>
+      <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">
+        Rating {member?.id ? ratingForMember(member.id, match.leagues?.season_id, match.divisions?.rating_type, member) : "NR"}
+      </div>
+    </div>
+  );
+}
+
+function GameScoreCard({ game, line, match }) {
+  const special = specialGameStatus(game.game_status);
+  const result = gameResultLabel(game, special);
+  const winnerSide = gameWinnerSide(game);
+  const winnerName = special ? special.label : teamNameForSide(winnerSide, match);
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-center shadow-sm">
+      <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+        Game {game.game_number || "-"}
+      </div>
+      <div className="mt-1 flex items-center justify-center gap-3">
+        <div>
+          <div className="text-[10px] font-black uppercase tracking-wide text-emerald-700">Home</div>
+          <div className="text-2xl font-black text-emerald-950">{game.home_score ?? "-"}</div>
+        </div>
+        <div className="text-lg font-black text-slate-400">-</div>
+        <div>
+          <div className="text-[10px] font-black uppercase tracking-wide text-indigo-700">Away</div>
+          <div className="text-2xl font-black text-indigo-950">{game.away_score ?? "-"}</div>
+        </div>
+      </div>
+      <div className="mt-1 text-xs font-bold text-slate-700">
+        {result}{winnerName && !special ? `: ${winnerName}` : ""}
+      </div>
+      <div className="mt-1 text-[11px] font-semibold text-slate-500">
+        {gameTeamPointsText(game, line, match)}
       </div>
     </div>
   );
@@ -2746,6 +2796,13 @@ function gameScoreText(game, line = null, match = null) {
   return `${score}${teamPoints}`;
 }
 
+function gameResultLabel(game, special = null) {
+  if (special) return "Result";
+  if (game.home_score === null || game.away_score === null) return "Pending";
+  if (Number(game.home_score) === Number(game.away_score)) return "Tie";
+  return "Winner";
+}
+
 function formatDate(value) {
   return formatDisplayDate(value, "-");
 }
@@ -2902,17 +2959,6 @@ function mapLink(location) {
   const address = formatLocationAddress(location);
   if (!location?.name && address === "Address not listed") return "";
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${location?.name || ""} ${address}`.trim())}`;
-}
-
-function formatMemberNameWithRating(member, match, ratingForMember) {
-  if (!member) return "Player TBD";
-  const rating = ratingForMember(
-    member.id,
-    match.leagues?.season_id,
-    match.divisions?.rating_type || "dupr",
-    member
-  );
-  return `${formatMemberName(member)} (${rating})`;
 }
 
 function teamLineRating(players, match, ratingForMember) {
