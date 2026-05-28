@@ -113,6 +113,8 @@ export default function TeamRosterPage() {
           self_rating,
           club_location,
           is_active_member,
+          membership_status,
+          renewal_date,
           location_id
         )
       `)
@@ -134,6 +136,8 @@ export default function TeamRosterPage() {
         self_rating,
         club_location,
         is_active_member,
+        membership_status,
+        renewal_date,
         location_id
       `)
       .or("is_active_member.eq.true,is_active_member.is.null")
@@ -1045,27 +1049,7 @@ function getAverageTeamRating() {
 
                         </div>
 
-                        <div className="mt-1 flex flex-wrap items-center gap-4 text-sm text-slate-600">
-
-                          <div>
-                            {getRatingLabel()}:
-                            {" "}
-                            <span className="font-semibold">
-                              {member ? getRatingDisplay(member) : "—"}
-                            </span>
-                          </div>
-
-                          <div>
-                            DUPR ID:
-                            {" "}
-                            <span className="font-semibold">
-                              {member?.dupr_id || "—"}
-                            </span>
-                          </div>
-
-                          <div>
-                            {member?.club_location || "—"}
-                          </div>
+                        <div className="mt-2 space-y-1 text-sm text-slate-600">
 
                           <div>
                             Games:{" "}
@@ -1076,6 +1060,26 @@ function getAverageTeamRating() {
                             <span className="font-semibold">
                               {playerRosterRecord(member?.id).record}
                             </span>
+                          </div>
+
+                          <div>
+                            {getRatingLabel()}:
+                            {" "}
+                            <span className="font-semibold">
+                              {member ? getRatingDisplay(member) : "—"}
+                            </span>
+                            {"  "}
+                            DUPR ID:
+                            {" "}
+                            <span className="font-semibold">
+                              {member?.dupr_id || "—"}
+                            </span>
+                            {"  "}
+                            {member?.club_location || "—"}
+                          </div>
+
+                          <div className={membershipRenewalNeedsAttention(member) ? "font-black text-red-700" : ""}>
+                            {membershipInfoLabel(member)}
                           </div>
 
                         </div>
@@ -1234,6 +1238,41 @@ function Info({ label, value }) {
       </div>
     </div>
   );
+}
+
+function membershipInfoLabel(member) {
+  if (!member) return "Membership: unknown";
+
+  const rawStatus = String(member.membership_status || "").trim();
+  const status = rawStatus || (member.is_active_member === false ? "Inactive" : "Active");
+  const renewal = member.renewal_date
+    ? ` with renewal on ${formatDate(member.renewal_date)}`
+    : "";
+
+  return `Membership: ${status.toLowerCase()}${renewal}`;
+}
+
+function membershipRenewalNeedsAttention(member) {
+  if (!member?.renewal_date) return false;
+
+  const renewalDate = dateOnly(member.renewal_date);
+  if (!renewalDate) return false;
+
+  const today = dateOnly(new Date());
+  const warningDate = new Date(today);
+  warningDate.setDate(warningDate.getDate() + 30);
+
+  return renewalDate <= warningDate;
+}
+
+function dateOnly(value) {
+  const date = value instanceof Date ? value : new Date(`${String(value).slice(0, 10)}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
 
 function normalizeLocationName(value) {

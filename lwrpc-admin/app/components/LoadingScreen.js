@@ -7,7 +7,7 @@ export default function LoadingScreen({
   subtitle = "Loading..."
 }) {
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-100 p-6">
+    <main className="full-screen-main flex min-h-screen items-center justify-center bg-slate-100 p-6">
       <div className="w-full max-w-md rounded-3xl bg-white p-10 text-center shadow-2xl">
         <Image
           src="https://lwrpickleballclub.com/lwrpc-logo.png"

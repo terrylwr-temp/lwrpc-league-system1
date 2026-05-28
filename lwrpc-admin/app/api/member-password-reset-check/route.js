@@ -44,11 +44,11 @@ export async function POST(req) {
       },
     });
 
-    const { data: member, error } = await adminSupabase
+    const { data: memberRows, error } = await adminSupabase
       .from("members")
       .select("id, is_active_member")
       .eq("email", normalizedEmail)
-      .maybeSingle();
+      .order("created_at", { ascending: true });
 
     if (error) {
       return NextResponse.json(
@@ -60,6 +60,10 @@ export async function POST(req) {
       );
     }
 
+    const members = memberRows || [];
+    const activeMembers = members.filter((row) => row.is_active_member !== false);
+    const member = activeMembers[0] || members[0] || null;
+
     if (!member?.id) {
       return NextResponse.json({
         success: true,
@@ -70,7 +74,7 @@ export async function POST(req) {
       });
     }
 
-    if (member.is_active_member === false) {
+    if (activeMembers.length === 0) {
       return NextResponse.json({
         success: true,
         verification: "complete",
@@ -83,7 +87,7 @@ export async function POST(req) {
     const authUser = await findAuthUserByEmail(adminSupabase, normalizedEmail);
 
     if (authUser?.id) {
-      await linkUserRole(adminSupabase, member.id, authUser.id);
+      await linkUserRoles(adminSupabase, activeMembers, authUser.id);
 
       const { error: resetError } = await adminSupabase.auth.resetPasswordForEmail(
         normalizedEmail,
@@ -144,7 +148,7 @@ export async function POST(req) {
     }
 
     if (invited?.user?.id) {
-      await linkUserRole(adminSupabase, member.id, invited.user.id);
+      await linkUserRoles(adminSupabase, activeMembers, invited.user.id);
     }
 
     console.info("Account setup invite email accepted by Supabase", {
@@ -197,14 +201,20 @@ async function findAuthUserByEmail(adminSupabase, email) {
   return null;
 }
 
-async function linkUserRole(adminSupabase, memberId, userId) {
+async function linkUserRoles(adminSupabase, members, userId) {
+  const memberIds = (members || [])
+    .map((member) => member.id)
+    .filter(Boolean);
+
+  if (memberIds.length === 0) return;
+
   await adminSupabase
     .from("user_roles")
     .update({
       user_id: userId,
       updated_at: new Date().toISOString(),
     })
-    .eq("member_id", memberId)
+    .in("member_id", memberIds)
     .is("user_id", null);
 }
 

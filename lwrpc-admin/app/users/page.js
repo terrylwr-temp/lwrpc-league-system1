@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { requireRole, supabase } from "../lib/auth";
-import { roleLabel } from "../lib/permissions";
+import { ROLE_LEVELS, roleLabel } from "../lib/permissions";
 import { wouldRemoveLastCommissioner } from "../lib/roleGuards";
 import { normalizeEmailAddress } from "../lib/email";
 import { formatDisplayTimestamp } from "../lib/dateTime";
@@ -20,6 +20,10 @@ export default function UsersPage() {
   const [lastLoginsByEmail, setLastLoginsByEmail] = useState({});
 
   const [search, setSearch] = useState("");
+  const [sortConfig, setSortConfig] = useState({
+    key: "member",
+    direction: "asc",
+  });
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
 
   const checkAuth = useCallback(async function checkAuth() {
@@ -81,6 +85,14 @@ export default function UsersPage() {
     );
 
     return role?.role || "player";
+  }
+
+  function changeSort(key) {
+    setSortConfig((current) => ({
+      key,
+      direction:
+        current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
   }
 
   async function updateRole(member, newRole) {
@@ -152,6 +164,23 @@ const { error } = await supabase
     });
   }, [members, search]);
 
+  const sortedMembers = useMemo(() => {
+    const direction = sortConfig.direction === "desc" ? -1 : 1;
+
+    return [...filteredMembers].sort((a, b) => {
+      const aValue = userSortValue(a, sortConfig.key, roles, lastLoginsByEmail);
+      const bValue = userSortValue(b, sortConfig.key, roles, lastLoginsByEmail);
+      const aMissing = aValue === null || aValue === undefined || aValue === "";
+      const bMissing = bValue === null || bValue === undefined || bValue === "";
+
+      if (sortConfig.key === "last_login" && aMissing !== bMissing) {
+        return aMissing ? 1 : -1;
+      }
+
+      return compareSortValues(aValue, bValue) * direction;
+    });
+  }, [filteredMembers, lastLoginsByEmail, roles, sortConfig]);
+
 if (loading) {
   return <LoadingScreen subtitle="Loading All Users..." />;
 }
@@ -209,21 +238,41 @@ if (loading) {
 
               <tr>
 
-                <th className="p-4 text-left">
-                  Member
+                <th className="p-4 text-left" aria-sort={sortAria("member", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "member"}
+                    direction={sortConfig.direction}
+                    label="Member"
+                    onClick={() => changeSort("member")}
+                  />
                 </th>
 
-                <th className="p-4 text-left">
-                  Location
+                <th className="p-4 text-left" aria-sort={sortAria("location", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "location"}
+                    direction={sortConfig.direction}
+                    label="Location"
+                    onClick={() => changeSort("location")}
+                  />
                 </th>
 
-                <th className="p-4 text-left">
-                  Last Login
+                <th className="p-4 text-left" aria-sort={sortAria("last_login", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "last_login"}
+                    direction={sortConfig.direction}
+                    label="Last Login"
+                    onClick={() => changeSort("last_login")}
+                  />
                 </th>
 
-                <th className="p-4 text-left">
+                <th className="p-4 text-left" aria-sort={sortAria("role", sortConfig)}>
                   <div className="flex items-center gap-2">
-                    <span>Current Role</span>
+                    <SortHeader
+                      active={sortConfig.key === "role"}
+                      direction={sortConfig.direction}
+                      label="Current Role"
+                      onClick={() => changeSort("role")}
+                    />
                     <button
                       type="button"
                       onClick={() => setRoleHelpOpen(true)}
@@ -236,8 +285,13 @@ if (loading) {
                   </div>
                 </th>
 
-                <th className="p-4 text-left">
-                  Change Role
+                <th className="p-4 text-left" aria-sort={sortAria("change_role", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "change_role"}
+                    direction={sortConfig.direction}
+                    label="Change Role"
+                    onClick={() => changeSort("change_role")}
+                  />
                 </th>
 
               </tr>
@@ -246,7 +300,7 @@ if (loading) {
 
             <tbody>
 
-              {filteredMembers.map(member => {
+              {sortedMembers.map(member => {
                 const currentRole =
                   getRole(member.id);
 
@@ -326,7 +380,7 @@ if (loading) {
                 );
               })}
 
-              {filteredMembers.length === 0 && (
+              {sortedMembers.length === 0 && (
                 <tr>
 
                   <td
@@ -352,4 +406,60 @@ if (loading) {
       </div>
     </main>
   );
+}
+
+function SortHeader({ active, direction, label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex items-center gap-2 rounded-lg px-2 py-1 text-left font-black text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-300"
+    >
+      <span>{label}</span>
+      <span className={`rounded-full px-2 py-0.5 text-[10px] ${active ? "bg-blue-300 text-slate-950" : "bg-white/10 text-slate-300"}`}>
+        {active ? (direction === "asc" ? "ASC" : "DESC") : "SORT"}
+      </span>
+    </button>
+  );
+}
+
+function sortAria(key, sortConfig) {
+  if (sortConfig.key !== key) return "none";
+  return sortConfig.direction === "asc" ? "ascending" : "descending";
+}
+
+function userSortValue(member, key, roles, lastLoginsByEmail) {
+  const role = roleForMemberId(roles, member.id);
+
+  if (key === "location") {
+    return member.club_location || "";
+  }
+
+  if (key === "last_login") {
+    const rawValue = lastLoginsByEmail[normalizeEmailAddress(member.email)];
+    const timestamp = rawValue ? Date.parse(rawValue) : null;
+    return Number.isNaN(timestamp) ? null : timestamp;
+  }
+
+  if (key === "role" || key === "change_role") {
+    return ROLE_LEVELS[role] || 0;
+  }
+
+  return `${member.last_name || ""} ${member.first_name || ""} ${member.email || ""}`;
+}
+
+function roleForMemberId(roles, memberId) {
+  const role = (roles || []).find((row) => row.member_id === memberId);
+  return role?.role || "player";
+}
+
+function compareSortValues(aValue, bValue) {
+  if (typeof aValue === "number" && typeof bValue === "number") {
+    return aValue - bValue;
+  }
+
+  return String(aValue || "").localeCompare(String(bValue || ""), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
 }

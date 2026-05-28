@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
-import { defaultDashboardForRole } from "../lib/permissions";
+import { ROLE_LEVELS, defaultDashboardForRole } from "../lib/permissions";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function LoginPage() {
@@ -48,24 +48,22 @@ export default function LoginPage() {
       return;
     }
 
-    const { data: member } = await supabase
+    const { data: memberRows } = await supabase
       .from("members")
-      .select("id")
+      .select("id, is_active_member, user_roles(role)")
       .eq("email", user.email)
-      .maybeSingle();
+      .order("created_at", { ascending: true });
+
+    const members = memberRows || [];
+    const activeMembers = members.filter((member) => member.is_active_member !== false);
+    const member = activeMembers[0] || members[0] || null;
 
     if (!member?.id) {
       router.push("/");
       return;
     }
 
-    const { data: roleData } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("member_id", member.id)
-      .maybeSingle();
-
-    const role = roleData?.role || "player";
+    const role = highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [member]);
 
     router.push(defaultDashboardForRole(role));
   }
@@ -142,7 +140,8 @@ export default function LoginPage() {
   const isSuccessMessage = messageText.includes("sent");
   const isPendingMessage =
     messageText.includes("signing") ||
-    messageText.includes("sending");
+    messageText.includes("sending") ||
+    messageText.includes("checking");
   const isErrorMessage =
     Boolean(message) && !isSuccessMessage && !isPendingMessage;
 
@@ -285,7 +284,7 @@ export default function LoginPage() {
               First time logging in? Enter your email and click Forgot Password.
             </p>
 
-            {message && !isErrorMessage && (
+            {message && !isErrorMessage && !isSuccessMessage && (
               <div
                 role="status"
                 aria-live="polite"
@@ -303,6 +302,34 @@ export default function LoginPage() {
           </form>
 
         </div>
+
+        {isSuccessMessage && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+            <div
+              role="alertdialog"
+              aria-modal="true"
+              aria-labelledby="login-success-title"
+              className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl"
+            >
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-sm font-black text-green-700">
+                OK
+              </div>
+              <h2 id="login-success-title" className="mt-4 text-xl font-black text-slate-950">
+                Email Sent
+              </h2>
+              <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
+                {message}
+              </p>
+              <button
+                type="button"
+                onClick={() => setMessage("")}
+                className="mt-5 w-full rounded-xl bg-blue-700 px-5 py-3 font-bold text-white transition hover:bg-blue-800"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        )}
 
         {isErrorMessage && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
@@ -344,4 +371,17 @@ export default function LoginPage() {
 
     </main>
   );
+}
+
+function highestRoleForMembers(members) {
+  return (members || []).reduce((highestRole, member) => {
+    const memberRoles = member.user_roles || [];
+
+    return memberRoles.reduce((currentHighest, roleRow) => {
+      const role = roleRow?.role || "player";
+      return (ROLE_LEVELS[role] || 0) > (ROLE_LEVELS[currentHighest] || 0)
+        ? role
+        : currentHighest;
+    }, highestRole);
+  }, "player");
 }

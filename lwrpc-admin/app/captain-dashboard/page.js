@@ -17,6 +17,7 @@ import {
 } from "../lib/leagueDocuments";
 import { GUIDE_DOCUMENT_TYPES, guidePdfDocument } from "../lib/dashboardGuides";
 import { specialGameStatus } from "../lib/playHistory";
+import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
@@ -49,6 +50,7 @@ export default function CaptainDashboardPage() {
   const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
   const [pdfDocument, setPdfDocument] = useState(null);
+  const [scoreSheetPreview, setScoreSheetPreview] = useState(null);
   const [divisionCaptainsPreview, setDivisionCaptainsPreview] = useState(null);
   const [scoreDetailsMatch, setScoreDetailsMatch] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
@@ -732,8 +734,8 @@ export default function CaptainDashboardPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0 flex-1">
+        <div className="p-4">
+          <div className="min-w-0">
             <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
               <span className="rounded-full bg-green-100 px-2 py-1 text-green-900">
                 Home: {match.home_team?.name || "Home"}
@@ -747,6 +749,46 @@ export default function CaptainDashboardPage() {
                 {match.status || "scheduled"}
               </span>
             </div>
+
+            {setupTeams.length > 0 && (
+              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                      Match Setup
+                    </div>
+                    <div className="mt-1 flex flex-wrap gap-2">
+                      {setupTeams.map((team) => {
+                        const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
+                        const setupComplete = setupStatus?.complete === true;
+
+                        return (
+                          <span
+                            key={team.id}
+                            className={`text-xs font-bold ${setupComplete ? "text-green-700" : "text-amber-700"}`}
+                          >
+                            {team.name}: {setupComplete ? "Setup Complete" : "Setup Pending"}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {setupTeams.map((team) => (
+                      <button
+                        key={team.id}
+                        type="button"
+                        onClick={() => openMatchSetup(match, team)}
+                        className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800"
+                      >
+                        Match Setup
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
               <div className="rounded-xl bg-slate-50 px-3 py-2">
@@ -763,6 +805,44 @@ export default function CaptainDashboardPage() {
               </div>
             </div>
 
+            <div className="mt-3 flex flex-wrap gap-2">
+              {showSetup && (
+                <button
+                  type="button"
+                  onClick={() => setMatchDetails(match)}
+                  className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800"
+                >
+                  Match Details
+                </button>
+              )}
+
+              {showSetup && (
+                <button
+                  type="button"
+                  onClick={() => openMatchScoreSheet(match)}
+                  className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-800"
+                >
+                  Match Score Sheet
+                </button>
+              )}
+
+              <button
+                type="button"
+                disabled={!canEnterScores}
+                onClick={() => {
+                  if (scoreButtonAction) {
+                    scoreButtonAction(match);
+                    return;
+                  }
+                  if (canEnterScores) router.push(`/matches/${match.id}`);
+                }}
+                className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                title={canEnterScores ? scoreButtonTitle : "Scores unlock on the scheduled match date"}
+              >
+                {scoreButtonLabel}
+              </button>
+            </div>
+
             {match.status === "completed" && (
               <div className="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900">
                 Score: {match.home_score ?? 0} - {match.away_score ?? 0} · Winner: {match.winning_team?.name || "—"}
@@ -774,58 +854,6 @@ export default function CaptainDashboardPage() {
                 Disputed: {match.score_dispute_notes || "No notes provided."}
               </div>
             )}
-          </div>
-
-          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:w-auto lg:min-w-44 lg:grid-cols-1">
-            {setupTeams.map((team) => {
-              const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
-              const setupComplete = setupStatus?.complete === true;
-
-              return (
-                <div key={team.id} className="flex flex-col gap-1">
-                  <button
-                    type="button"
-                    onClick={() => openMatchSetup(match, team)}
-                    className={`rounded-lg px-3 py-2.5 text-sm font-bold ${
-                      setupComplete
-                        ? "bg-blue-100 text-blue-900 hover:bg-blue-200"
-                        : "bg-red-600 text-white hover:bg-red-700"
-                    }`}
-                  >
-                    Match Setup
-                  </button>
-                  <span className={`rounded-full px-2 py-0.5 text-center text-xs font-bold uppercase tracking-wide ${setupStatus?.complete ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-900"}`}>
-                    {setupStatus?.complete ? "Setup Complete" : "Setup Pending"}
-                  </span>
-                </div>
-              );
-            })}
-
-            {showSetup && (
-              <button
-                type="button"
-                onClick={() => setMatchDetails(match)}
-                className="rounded-lg bg-blue-700 px-3 py-2.5 text-sm font-bold text-white hover:bg-blue-800"
-              >
-                Match Details
-              </button>
-            )}
-
-            <button
-              type="button"
-              disabled={!canEnterScores}
-              onClick={() => {
-                if (scoreButtonAction) {
-                  scoreButtonAction(match);
-                  return;
-                }
-                if (canEnterScores) router.push(`/matches/${match.id}`);
-              }}
-              className="rounded-lg bg-slate-900 px-3 py-2.5 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-              title={canEnterScores ? scoreButtonTitle : "Scores unlock on the scheduled match date"}
-            >
-              {scoreButtonLabel}
-            </button>
           </div>
         </div>
       </div>
@@ -907,7 +935,33 @@ export default function CaptainDashboardPage() {
       })
     );
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function openMatchScoreSheet(match) {
+    const { data, error } = await supabase
+      .from("match_lineups")
+      .select(`
+        match_id,
+        team_id,
+        line_number,
+        player_1_member_id,
+        player_2_member_id,
+        player_1:members!match_lineups_player_1_member_id_fkey(id, first_name, last_name, email, self_rating),
+        player_2:members!match_lineups_player_2_member_id_fkey(id, first_name, last_name, email, self_rating)
+      `)
+      .eq("match_id", match.id)
+      .order("line_number", { ascending: true });
+
+    if (error) {
+      alert("Unable to load saved match setup teams. Run the match_lineups schema update if needed, then try again.");
+      return;
+    }
+
+    setScoreSheetPreview({
+      title: `${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"} Score Sheet`,
+      subtitle: `${formatDate(match.scheduled_date)} / ${match.divisions?.name || "Division"}`,
+      html: matchScoreSheetPrintHtml(match, data || [], ratingForMember),
+    });
   }
 
   function setupMemberRating(member) {
@@ -1544,8 +1598,9 @@ export default function CaptainDashboardPage() {
         />
 
         {setupMatch && setupTeam && (
-          <div className="mt-6 rounded-2xl border border-blue-100 bg-white shadow">
-            <div className="rounded-t-2xl bg-slate-950 p-5 text-white">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+          <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-2xl">
+            <div className="bg-slate-950 p-5 text-white">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-blue-200">
@@ -1579,7 +1634,7 @@ export default function CaptainDashboardPage() {
               </div>
             </div>
 
-            <div className="p-4 sm:p-6">
+            <div className="overflow-y-auto p-4 sm:p-6">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-950">
                 <span className="font-bold">Doubles Team Maximum:</span>{" "}
@@ -1663,6 +1718,7 @@ export default function CaptainDashboardPage() {
             </div>
             </div>
           </div>
+          </div>
         )}
 
         <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
@@ -1718,7 +1774,7 @@ export default function CaptainDashboardPage() {
                         event.stopPropagation();
                         router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`);
                       }}
-                      className="rounded-full bg-blue-700 px-3 py-1 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-800"
+                      className="rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
                     >
                       Rank {standing?.rank ? `#${standing.rank}` : "N/A"}
                     </button>
@@ -1836,13 +1892,6 @@ export default function CaptainDashboardPage() {
         <div className="mt-4 rounded-2xl border border-white/80 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-3 shadow-xl ring-1 ring-slate-200">
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           <CaptainSectionButton
-            active={captainSection === "pending"}
-            label="Pending Score Verification"
-            value={pendingVerification.length}
-            tone="red"
-            onClick={() => setCaptainSection("pending")}
-          />
-          <CaptainSectionButton
             active={captainSection === "upcoming"}
             label="Upcoming/Unverified Matches"
             value={upcomingItems.length}
@@ -1855,6 +1904,13 @@ export default function CaptainDashboardPage() {
             value={completedMatches.length}
             tone="emerald"
             onClick={() => setCaptainSection("completed")}
+          />
+          <CaptainSectionButton
+            active={captainSection === "pending"}
+            label="Pending Score Verification"
+            value={pendingVerification.length}
+            tone="red"
+            onClick={() => setCaptainSection("pending")}
           />
         </div>
         </div>
@@ -1931,6 +1987,13 @@ export default function CaptainDashboardPage() {
           <PdfViewerModal
             document={pdfDocument}
             onClose={() => setPdfDocument(null)}
+          />
+        )}
+
+        {scoreSheetPreview && (
+          <PrintableDocumentModal
+            document={scoreSheetPreview}
+            onClose={() => setScoreSheetPreview(null)}
           />
         )}
 
@@ -2050,6 +2113,101 @@ function PdfViewerModal({ document, onClose }) {
         ) : (
           <div className="flex h-[75vh] items-center justify-center bg-slate-100 text-sm font-semibold text-slate-600">
             Loading PDF viewer...
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function PrintableDocumentModal({ document, onClose }) {
+  const [viewerReady, setViewerReady] = useState(false);
+
+  useEffect(() => {
+    setViewerReady(true);
+  }, []);
+
+  function printDocument() {
+    window.localStorage.setItem(
+      "lwrpc-print-payload",
+      JSON.stringify({
+        title: document.title,
+        body: document.html,
+      })
+    );
+
+    const printWindow = window.open("/print", "_blank", "width=1000,height=800");
+
+    if (!printWindow) {
+      alert("Unable to open print preview. Please allow popups for this site.");
+      return;
+    }
+
+    printWindow.focus();
+  }
+
+  function downloadDocument() {
+    const blob = new Blob([printableHtmlDocument(document)], {
+      type: "text/html;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = window.document.createElement("a");
+
+    link.href = url;
+    link.download = `${slugifyFileName(document.title)}.html`;
+    window.document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+              {document.subtitle}
+            </div>
+            <h2 className="mt-1 text-2xl font-black">{document.title}</h2>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={downloadDocument}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+            >
+              Download
+            </button>
+
+            <button
+              type="button"
+              onClick={printDocument}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Print
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        {viewerReady ? (
+          <iframe
+            title={document.title}
+            srcDoc={printableHtmlDocument(document)}
+            className="h-[75vh] w-full bg-slate-100"
+          />
+        ) : (
+          <div className="flex h-[75vh] items-center justify-center bg-slate-100 text-sm font-semibold text-slate-600">
+            Loading preview...
           </div>
         )}
       </div>
@@ -2915,6 +3073,278 @@ function matchScoreDetailsPrintHtml(match, lines) {
       </tbody>
     </table>
   `;
+}
+
+function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
+  const homeLineups = scoreSheetLineupsForTeam(lineups, match.home_team_id);
+  const awayLineups = scoreSheetLineupsForTeam(lineups, match.away_team_id);
+  const rows = Array.from({ length: 3 }, (_, index) => {
+    const lineNumber = index + 1;
+    const homeLineup = homeLineups[lineNumber] || {};
+    const awayLineup = awayLineups[lineNumber] || {};
+    const homePlayers = [homeLineup.player_1, homeLineup.player_2];
+    const awayPlayers = [awayLineup.player_1, awayLineup.player_2];
+
+    return `
+      <tr>
+        <td class="line-cell">
+          <div class="line-number">${lineNumber}</div>
+          <div>${scoreSheetPlayerLine(awayPlayers[0], match, ratingForMember)}</div>
+          <div>${scoreSheetPlayerLine(awayPlayers[1], match, ratingForMember)}</div>
+          <div class="team-rating">Team Rating: ${escapeHtml(scoreSheetTeamRating(awayPlayers, match, ratingForMember))}</div>
+        </td>
+        <td class="line-cell">
+          <div class="line-number">${lineNumber}</div>
+          <div>${scoreSheetPlayerLine(homePlayers[0], match, ratingForMember)}</div>
+          <div>${scoreSheetPlayerLine(homePlayers[1], match, ratingForMember)}</div>
+          <div class="team-rating">Team Rating: ${escapeHtml(scoreSheetTeamRating(homePlayers, match, ratingForMember))}</div>
+        </td>
+      </tr>
+    `;
+  }).join("");
+
+  return `
+    <style>
+      .score-sheet {
+        color: #111827;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        line-height: 1.2;
+      }
+      .score-sheet h1 {
+        margin: 0;
+        text-align: center;
+        font-size: 20px;
+        font-weight: 900;
+      }
+      .score-sheet .meta {
+        margin-top: 8px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 6px;
+      }
+      .score-sheet .box {
+        border: 1px solid #111827;
+        padding: 6px;
+        min-height: 34px;
+      }
+      .score-sheet .label {
+        display: block;
+        font-size: 9px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+      .score-sheet .value {
+        display: block;
+        margin-top: 3px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .score-sheet table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .score-sheet th,
+      .score-sheet td {
+        border: 1px solid #111827;
+        padding: 7px;
+        vertical-align: top;
+      }
+      .score-sheet th {
+        background: #e5e7eb;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 900;
+      }
+      .score-sheet .header-score {
+        display: inline-block;
+        margin-left: 16px;
+        font-size: 12px;
+        font-weight: 900;
+      }
+      .score-sheet .lineups {
+        margin-top: 10px;
+      }
+      .score-sheet .line-cell {
+        width: 50%;
+        min-height: 68px;
+        font-size: 13px;
+        font-weight: 800;
+      }
+      .score-sheet .line-number {
+        float: left;
+        margin-right: 7px;
+        font-size: 18px;
+        font-weight: 900;
+      }
+      .score-sheet .rating {
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .score-sheet .team-rating {
+        margin-top: 4px;
+        font-size: 11px;
+        font-weight: 900;
+      }
+      .score-sheet .rounds {
+        margin-top: 10px;
+      }
+      .score-sheet .rounds td {
+        height: 34px;
+        vertical-align: middle;
+      }
+      .score-sheet .rounds td:first-child {
+        font-weight: 900;
+      }
+      .score-sheet .rounds td:not(:first-child) {
+        text-align: center;
+      }
+      .score-sheet .notes {
+        margin-top: 10px;
+        font-size: 10px;
+        line-height: 1.25;
+      }
+      .score-sheet .copyright {
+        margin-top: 10px;
+        border-top: 1px solid #cbd5e1;
+        padding-top: 6px;
+        text-align: center;
+        font-size: 9px;
+        color: #475569;
+      }
+      .score-sheet .signatures {
+        margin-top: 8px;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .score-sheet .signature-line {
+        border-bottom: 1px solid #111827;
+        height: 26px;
+      }
+    </style>
+    <div class="score-sheet">
+      <h1>Lakewood Ranch Pickleball Club<br />Weekday DUPR League Score Sheet</h1>
+
+      <div class="meta">
+        <div class="box"><span class="label">Date</span><span class="value">${escapeHtml(formatDate(match.scheduled_date))}</span></div>
+        <div class="box"><span class="label">Away Team</span><span class="value">${escapeHtml(match.away_team?.name || "Away Team")}</span></div>
+        <div class="box"><span class="label">Home Team</span><span class="value">${escapeHtml(match.home_team?.name || "Home Team")}</span></div>
+        <div class="box"><span class="label">Level</span><span class="value">${escapeHtml(match.divisions?.name || "Division")}</span></div>
+      </div>
+
+      <div class="signatures">
+        <div>Captain Signature (Away)<div class="signature-line"></div></div>
+        <div>Captain Signature (Home)<div class="signature-line"></div></div>
+      </div>
+
+      <table class="lineups">
+        <thead>
+          <tr>
+            <th>AWAY Teams <span class="header-score">Score: ______</span></th>
+            <th>HOME Teams <span class="header-score">Score: ______</span></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+
+      <table class="rounds">
+        <tbody>
+          <tr><th colspan="3">Round 1 (Circle Winning Team)</th></tr>
+          <tr><td>Away 1 vs. Home 1</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+          <tr><td>Away 2 vs. Home 2</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+          <tr><td>Away 3 vs. Home 3</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+          <tr><th colspan="3">Round 2</th></tr>
+          <tr><td>Away 1 vs. Home 2</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+          <tr><td>Away 2 vs. Home 3</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+          <tr><td>Away 3 vs. Home 1</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+          <tr><th colspan="3">Round 3</th></tr>
+          <tr><td>Away 1 vs. Home 3</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+          <tr><td>Away 2 vs. Home 1</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+          <tr><td>Away 3 vs. Home 2</td><td>Away Score ______</td><td>Home Score ______</td></tr>
+        </tbody>
+      </table>
+
+      <div class="notes">
+        Game format is regular scoring to 15, win by 1 (switch ends when the first team scores 8). 2 timeouts/team/game.
+        Visitors pick Side/Serve/Receive/Defer in Games 1 and 3. No video recording unless agreed. No coaching other than
+        timeouts or between games (off court only). USA Pickleball rules apply and only legal equipment may be used.
+      </div>
+
+      <div class="copyright">
+        &copy; ${escapeHtml(COPYRIGHT_YEAR)} Lakewood Ranch Pickleball Club. All rights reserved. Version ${escapeHtml(APP_VERSION)}.
+      </div>
+    </div>
+  `;
+}
+
+function scoreSheetLineupsForTeam(lineups, teamId) {
+  return (lineups || []).reduce((byLine, lineup) => {
+    if (String(lineup.team_id) === String(teamId)) {
+      byLine[Number(lineup.line_number || 0)] = lineup;
+    }
+
+    return byLine;
+  }, {});
+}
+
+function scoreSheetPlayerName(member) {
+  return member?.id ? formatMemberName(member) : "";
+}
+
+function scoreSheetPlayerLine(member, match, ratingForMember) {
+  const name = scoreSheetPlayerName(member);
+  const rating = scoreSheetPlayerRating(member, match, ratingForMember);
+
+  if (!name) return "";
+  return `${escapeHtml(name)}${rating ? ` <span class="rating">(${escapeHtml(rating)})</span>` : ""}`;
+}
+
+function scoreSheetPlayerRating(member, match, ratingForMember) {
+  if (!member?.id) return "";
+  return ratingForMember(member.id, match.leagues?.season_id, match.divisions?.rating_type, member);
+}
+
+function scoreSheetTeamRating(players, match, ratingForMember) {
+  const ratings = (players || [])
+    .map((player) => Number(scoreSheetPlayerRating(player, match, ratingForMember)))
+    .filter((rating) => !Number.isNaN(rating));
+
+  if (ratings.length === 0) return "NR";
+  return ratings.reduce((sum, rating) => sum + rating, 0).toFixed(2);
+}
+
+function printableHtmlDocument(document) {
+  return `<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>${escapeHtml(document.title)}</title>
+    <style>
+      @page { size: letter portrait; margin: 0.45in; }
+      body { margin: 0; background: white; }
+      @media screen {
+        body { background: #e5e7eb; padding: 24px; }
+        .sheet-page { margin: 0 auto; max-width: 8.5in; min-height: 11in; background: white; padding: 0.35in; box-shadow: 0 16px 40px rgba(15, 23, 42, 0.22); }
+      }
+      @media print {
+        body { background: white; padding: 0; }
+        .sheet-page { box-shadow: none; padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sheet-page">${document.html}</div>
+  </body>
+</html>`;
+}
+
+function slugifyFileName(value) {
+  return String(value || "score-sheet")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "score-sheet";
 }
 
 function escapeHtml(value) {
