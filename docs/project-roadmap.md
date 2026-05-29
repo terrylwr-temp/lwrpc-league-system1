@@ -89,6 +89,8 @@ Scoring reminders use the existing notification route and SendGrid/Twilio helper
 
 Print workflows should use the generic `/print` page so print previews open on an app URL and include the LWRPC copyright/page footer inside the document. Browser print dialogs may still show their own headers/footers unless disabled by the user.
 
+Captain Dashboard's generated match score sheet currently lives in `lwrpc-admin/app/captain-dashboard/page.js` as printable HTML. The bottom rules/instructions block is styled through `.score-sheet .notes`. Its current match grid is hardcoded for three doubles lines and three fixed rounds; future Division-specific score sheet formats should be driven from Division/Division Line configuration instead of hardcoded per-division branches.
+
 Divisions now support `team_dupr_max`, a combined doubles-team rating cap based on the division rating type. This is not a full roster cap; captains are blocked from saving match setup lineups over the cap, duplicate players are blocked within a match setup, and saved lineups are checked when used in score entry.
 
 Scoring operations can export verified scores for DUPR using the club DUPR CSV format. Verified, not-yet-exported matches are selected by default; already exported verified matches can be manually reselected for override re-export. Export tracking uses `matches.score_exported_at`.

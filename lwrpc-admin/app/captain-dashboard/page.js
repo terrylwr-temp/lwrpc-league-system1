@@ -3248,7 +3248,8 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       }
       .score-sheet .notes {
         margin-top: 10px;
-        font-size: 10px;
+        font-size: 12px;
+        font-weight: 800;
         line-height: 1.25;
       }
       .score-sheet .copyright {
