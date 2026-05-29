@@ -1140,7 +1140,7 @@ export default function PlayerDashboardPage() {
             <div className="p-4 md:hidden">
               {selectedDivisionPlayoffTeamCount > 0 && (
                 <div className="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-950">
-                  Top {selectedDivisionPlayoffTeamCount} teams highlighted for Playoffs/Championship Day.
+                  Top {selectedDivisionPlayoffTeamCount} teams highlighted for Playoffs/Championship Day. Click on Team Name to see detailed schedule/matches.
                 </div>
               )}
               <div className="space-y-3">
@@ -1186,7 +1186,7 @@ export default function PlayerDashboardPage() {
             <div className="hidden overflow-x-auto md:block">
               {selectedDivisionPlayoffTeamCount > 0 && (
                 <div className="border-b border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-950">
-                  Top {selectedDivisionPlayoffTeamCount} teams highlighted for Playoffs/Championship Day.
+                  Top {selectedDivisionPlayoffTeamCount} teams highlighted for Playoffs/Championship Day. Click on Team Name to see detailed schedule/matches.
                 </div>
               )}
               <table className="w-full border-collapse text-sm">

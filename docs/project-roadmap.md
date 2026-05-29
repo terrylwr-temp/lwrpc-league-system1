@@ -107,7 +107,7 @@ Player Dashboard uses inline panels for play history, division standings, and up
 Player Dashboard and Captain Dashboard My Teams show browser-style team tabs when more than one team is visible, with only one full team card expanded at a time. Player Dashboard My Teams cards mirror the Captain Dashboard team card rank/stat treatment: Rank is a raised blue action that opens League Standings for the team's league/division, and the header shows Players, Season Points, and W-L-T summary stats.
 
 League Standings team names open the shared Division Team Schedules/Standings modal used by captain workflows, showing all teams in the selected division, division schedule/byes, standings summaries, and verified match details.
-League Standings includes a prominent role-aware Back to Dashboard action above the standings filters, plus a header action, returning players to Player Dashboard, captains/club pros to Captain Dashboard, and league managers/commissioners to Admin Dashboard.
+League Standings includes a prominent role-aware Back to Dashboard action above the standings filters, returning players to Player Dashboard, captains/club pros to Captain Dashboard, and league managers/commissioners to Admin Dashboard.
 
 Phone numbers entered or imported through member workflows are normalized to `(999) 999-9999` formatting when enough digits are present, with extensions preserved as `x123`.
 

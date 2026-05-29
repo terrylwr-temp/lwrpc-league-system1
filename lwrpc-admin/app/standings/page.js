@@ -340,15 +340,6 @@ if (loading) {
         <AppHeader
           title="League Standings"
           subtitle="Advanced rankings, streaks, tiebreakers, and league standings."
-          actions={
-            <button
-              type="button"
-              onClick={() => router.push(dashboardPath)}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
-            >
-              {dashboardLabel}
-            </button>
-          }
         />
 
         <div className="mb-4 flex">
@@ -435,7 +426,7 @@ if (loading) {
         <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
           {playoffTeamCount > 0 && (
             <div className="border-b border-emerald-200 bg-emerald-50 px-5 py-3 text-sm font-bold text-emerald-950">
-              Top {playoffTeamCount} teams highlighted for Playoffs/Championship Day.
+              Top {playoffTeamCount} teams highlighted for Playoffs/Championship Day. Click on Team Name to see detailed schedule/matches.
             </div>
           )}
 
