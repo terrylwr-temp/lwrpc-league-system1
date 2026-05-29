@@ -29,6 +29,10 @@ function twilioAuthHeader() {
   ).toString("base64")}`;
 }
 
+function twilioFromPhoneNumber() {
+  return normalizePhoneNumber(process.env.TWILIO_FROM_PHONE_NUMBER);
+}
+
 export async function sendSmsMessages({ phones, body }) {
   const recipients = cleanList(phones).map(normalizePhoneNumber).filter(Boolean);
 
@@ -49,7 +53,9 @@ export async function sendSmsMessages({ phones, body }) {
     };
   }
 
-  if (!process.env.TWILIO_FROM_PHONE_NUMBER && !process.env.TWILIO_MESSAGING_SERVICE_SID) {
+  const fromPhoneNumber = twilioFromPhoneNumber();
+
+  if (!fromPhoneNumber && !process.env.TWILIO_MESSAGING_SERVICE_SID) {
     return {
       skipped: true,
       reason: "Missing TWILIO_FROM_PHONE_NUMBER or TWILIO_MESSAGING_SERVICE_SID",
@@ -70,7 +76,7 @@ export async function sendSmsMessages({ phones, body }) {
       if (process.env.TWILIO_MESSAGING_SERVICE_SID) {
         payload.set("MessagingServiceSid", process.env.TWILIO_MESSAGING_SERVICE_SID);
       } else {
-        payload.set("From", process.env.TWILIO_FROM_PHONE_NUMBER);
+        payload.set("From", fromPhoneNumber);
       }
 
       const response = await fetch(url, {
@@ -134,7 +140,7 @@ export async function sendEmailMessages({ emails, subject, text, html }) {
       ],
       from: {
         email: process.env.SENDGRID_FROM_EMAIL,
-        name: process.env.SENDGRID_FROM_NAME || "LWRPC League Management",
+        name: process.env.SENDGRID_FROM_NAME || "Lakewood Ranch Pickleball Club",
       },
       subject,
       content: [
