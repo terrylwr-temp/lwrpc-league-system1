@@ -7,6 +7,7 @@ import TeamScheduleModal from "../components/TeamScheduleModal";
 import { requireRole, supabase } from "../lib/auth";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
 import { sortStandingsByDivisionRules } from "../lib/standingsSort";
+import { defaultDashboardForRole } from "../lib/permissions";
 import { useRouter } from "next/navigation";
 
 export default function StandingsPage() {
@@ -324,6 +325,14 @@ export default function StandingsPage() {
 if (loading) {
   return <LoadingScreen subtitle="Loading Standings Engine..." />;
 }
+  const dashboardPath = defaultDashboardForRole(currentUserRole);
+  const dashboardLabel =
+    dashboardPath === "/captain-dashboard"
+      ? "Back to Captain Dashboard"
+      : dashboardPath === "/"
+        ? "Back to Admin Dashboard"
+        : "Back to Player Dashboard";
+
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-7xl">
@@ -331,7 +340,26 @@ if (loading) {
         <AppHeader
           title="League Standings"
           subtitle="Advanced rankings, streaks, tiebreakers, and league standings."
+          actions={
+            <button
+              type="button"
+              onClick={() => router.push(dashboardPath)}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+            >
+              {dashboardLabel}
+            </button>
+          }
         />
+
+        <div className="mb-4 flex">
+          <button
+            type="button"
+            onClick={() => router.push(dashboardPath)}
+            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow hover:bg-slate-800"
+          >
+            {dashboardLabel}
+          </button>
+        </div>
 
         <div className="rounded-2xl bg-white p-6 shadow">
 

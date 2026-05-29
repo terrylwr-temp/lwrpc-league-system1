@@ -1823,8 +1823,17 @@ export default function CaptainDashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 md:p-6">
-            {visibleTeams.map((team) => {
+          <div className="space-y-4 p-4 md:p-6">
+            {visibleTeams.length > 1 && (
+              <DashboardTeamSelector
+                teams={visibleTeams}
+                teamStats={teamStats}
+                selectedTeamId={selectedTeamId}
+                onSelect={setSelectedCaptainTeamId}
+              />
+            )}
+
+            {selectedCaptainTeam ? [selectedCaptainTeam].map((team) => {
               const stats = teamStats[team.id] || {};
               const standing = stats.standing;
               const selected = String(team.id) === String(selectedTeamId);
@@ -1957,7 +1966,7 @@ export default function CaptainDashboardPage() {
                 </div>
               </div>
               );
-            })}
+            }) : null}
 
             {visibleTeams.length === 0 && (
               <div className="rounded-xl bg-slate-50 p-6 text-slate-500">
@@ -3686,6 +3695,39 @@ function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) 
         </div>
       </div>
     </button>
+  );
+}
+
+function DashboardTeamSelector({ teams, teamStats, selectedTeamId, onSelect }) {
+  return (
+    <div className="-mb-4 overflow-x-auto px-2 pt-1" role="tablist" aria-label="Select team">
+      <div className="flex min-w-max items-end gap-1">
+        {teams.map((team) => {
+          const selected = String(team.id) === String(selectedTeamId);
+          const standing = teamStats?.[team.id]?.standing || null;
+
+          return (
+            <button
+              key={team.id}
+              type="button"
+              role="tab"
+              aria-selected={selected}
+              onClick={() => onSelect(team.id)}
+              className={`relative shrink-0 rounded-t-2xl border px-4 text-left shadow-sm transition ${
+                selected
+                  ? "z-10 border-emerald-500 border-b-emerald-800 bg-gradient-to-r from-emerald-800 to-blue-800 py-3 text-white shadow-md"
+                  : "border-slate-200 bg-slate-100 py-2 text-slate-700 hover:border-blue-200 hover:bg-blue-50"
+              }`}
+            >
+              <div className="max-w-52 truncate text-sm font-black">{team.name}</div>
+              <div className={`mt-0.5 text-xs font-bold ${selected ? "text-blue-100" : "text-slate-500"}`}>
+                Rank #{standing?.rank || "N/A"}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
