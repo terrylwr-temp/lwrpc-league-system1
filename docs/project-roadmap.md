@@ -109,6 +109,7 @@ Standings points are calculated from configured game-line scoring rules rather t
 
 Player Dashboard uses inline panels for play history, division standings, and upcoming matches. Team summaries appear above the dashboard action buttons and include captain/co-captain contact details. Play history includes top-level games/wins/losses totals plus individual game scores when entered.
 Player Dashboard and Captain Dashboard My Teams show browser-style team tabs when more than one team is visible, with only one full team card expanded at a time. Player Dashboard My Teams cards mirror the Captain Dashboard team card rank/stat treatment: Rank is a raised blue action that opens League Standings for the team's league/division, and the header shows Players, Season Points, and W-L-T summary stats.
+The Player and Captain My Teams browser-style tabs use a small hover lift and shadow so tabs feel clickable without changing selection until clicked.
 
 League Standings team names open the shared Division Team Schedules/Standings modal used by captain workflows, showing all teams in the selected division, division schedule/byes, standings summaries, and verified match details.
 League Standings includes a prominent role-aware Back to Dashboard action above the standings filters, returning players to Player Dashboard, captains/club pros to Captain Dashboard, and league managers/commissioners to Admin Dashboard.

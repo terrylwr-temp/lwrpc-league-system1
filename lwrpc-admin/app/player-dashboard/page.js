@@ -1461,7 +1461,7 @@ function DashboardTeamSelector({ teams, selectedTeamId, onSelect }) {
               role="tab"
               aria-selected={selected}
               onClick={() => onSelect(team.id)}
-              className={`relative shrink-0 rounded-t-2xl border px-4 text-left shadow-sm transition ${
+              className={`relative shrink-0 rounded-t-2xl border px-4 text-left shadow-sm transition-transform duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-0 ${
                 selected
                   ? "z-10 border-emerald-500 border-b-emerald-800 bg-gradient-to-r from-emerald-800 to-blue-800 py-3 text-white shadow-md"
                   : "border-slate-200 bg-slate-100 py-2 text-slate-700 hover:border-blue-200 hover:bg-blue-50"
