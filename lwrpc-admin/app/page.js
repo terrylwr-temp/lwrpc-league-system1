@@ -64,6 +64,14 @@ export default function DashboardPage() {
   const [loadingGuideFiles, setLoadingGuideFiles] = useState(false);
   const [savingGuideKey, setSavingGuideKey] = useState("");
   const adminGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "admin_guide_pdf");
+  const [testNotification, setTestNotification] = useState({
+    email: "",
+    phone: "",
+    subject: "LWRPC Test Notification",
+    message: "This is a test notification from the LWRPC League Management System.",
+  });
+  const [sendingTestNotification, setSendingTestNotification] = useState(false);
+  const [testNotificationResult, setTestNotificationResult] = useState(null);
 
   const loadDashboardCounts = useCallback(async function loadDashboardCounts() {
     setDashboardCounts(null);
@@ -439,6 +447,71 @@ export default function DashboardPage() {
     alert(`${guideType.label} saved.`);
   }
 
+  function updateTestNotification(field, value) {
+    setTestNotification((current) => ({
+      ...current,
+      [field]: value,
+    }));
+    setTestNotificationResult(null);
+  }
+
+  async function sendTestNotification() {
+    const email = testNotification.email.trim();
+    const phone = testNotification.phone.trim();
+    const subject = testNotification.subject.trim();
+    const message = testNotification.message.trim();
+
+    if (!email && !phone) {
+      setTestNotificationResult({
+        ok: false,
+        message: "Enter an email address, a mobile number, or both.",
+      });
+      return;
+    }
+
+    if (!subject || !message) {
+      setTestNotificationResult({
+        ok: false,
+        message: "Enter both a subject and a message before sending a test.",
+      });
+      return;
+    }
+
+    setSendingTestNotification(true);
+    setTestNotificationResult(null);
+
+    const response = await fetch("/api/notifications", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        emails: email ? [email] : [],
+        phones: phone ? [phone] : [],
+        subject,
+        text: message,
+        smsBody: message,
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setSendingTestNotification(false);
+
+    if (!response.ok || !result.success) {
+      setTestNotificationResult({
+        ok: false,
+        message: result.error || "The test notification could not be sent.",
+      });
+      return;
+    }
+
+    setTestNotificationResult({
+      ok: true,
+      message: "Test notification request completed.",
+      email: result.email,
+      sms: result.sms,
+    });
+  }
+
   async function runMasterResetAll() {
     const firstOk = confirm([
       "Master Reset All will permanently remove generated league operations data.",
@@ -720,6 +793,93 @@ export default function DashboardPage() {
             </section>
           ))}
         </div>
+
+        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          <div className="border-b border-slate-200 px-4 py-5 md:px-6">
+            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="text-xl font-black text-slate-950">Notification Test</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-600">
+                  Send a test email or text using the same SendGrid and Twilio settings used by the app.
+                </p>
+              </div>
+              <div className="text-xs font-black uppercase tracking-wide text-slate-400">
+                Email / SMS
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 md:p-6">
+            <GuideField label="Test Email To">
+              <input
+                type="email"
+                value={testNotification.email}
+                onChange={(event) => updateTestNotification("email", event.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+                placeholder="name@example.com"
+              />
+            </GuideField>
+
+            <GuideField label="Test Text To">
+              <input
+                type="tel"
+                value={testNotification.phone}
+                onChange={(event) => updateTestNotification("phone", event.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+                placeholder="941-555-1212"
+              />
+            </GuideField>
+
+            <GuideField label="Subject">
+              <input
+                type="text"
+                value={testNotification.subject}
+                onChange={(event) => updateTestNotification("subject", event.target.value)}
+                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+              />
+            </GuideField>
+
+            <div className="md:row-span-2">
+              <GuideField label="Message">
+                <textarea
+                  value={testNotification.message}
+                  onChange={(event) => updateTestNotification("message", event.target.value)}
+                  rows={5}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
+                />
+              </GuideField>
+            </div>
+
+            <div className="flex flex-col justify-end gap-3">
+              <button
+                type="button"
+                onClick={sendTestNotification}
+                disabled={sendingTestNotification}
+                className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-black uppercase tracking-wide text-white hover:bg-blue-800 disabled:opacity-50"
+              >
+                {sendingTestNotification ? "Sending Test..." : "Send Test Notification"}
+              </button>
+
+              {testNotificationResult && (
+                <div
+                  className={`rounded-xl border px-4 py-3 text-sm font-semibold ${
+                    testNotificationResult.ok
+                      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+                      : "border-red-200 bg-red-50 text-red-900"
+                  }`}
+                >
+                  <div className="font-black">{testNotificationResult.message}</div>
+                  {testNotificationResult.ok && (
+                    <div className="mt-2 space-y-1 text-xs leading-5">
+                      <div>{notificationChannelSummary("Email", testNotificationResult.email)}</div>
+                      <div>{notificationChannelSummary("Text", testNotificationResult.sms)}</div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
 
         <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
           <div className="border-b border-slate-200 px-4 py-5 md:px-6">
@@ -1256,6 +1416,20 @@ function templateLabel(templateKey) {
 
 function templateDefaultSubject(templateKey) {
   return templateConfig(templateKey)?.defaultSubject || "Dashboard Message";
+}
+
+function notificationChannelSummary(label, result) {
+  if (!result) return `${label}: no response.`;
+  if (result.skipped) return `${label}: skipped - ${result.reason || "not requested"}.`;
+
+  const sent = Number(result.sent || 0);
+  const failed = (result.results || []).filter((item) => item && item.ok === false);
+  if (failed.length > 0) {
+    const firstError = failed.map((item) => item.error).filter(Boolean)[0];
+    return `${label}: ${sent} sent, ${failed.length} failed${firstError ? ` - ${firstError}` : ""}.`;
+  }
+
+  return `${label}: ${sent} sent.`;
 }
 
 function currentWeekDateRange() {
