@@ -3,6 +3,7 @@
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
+import TeamScheduleModal from "../components/TeamScheduleModal";
 import { requireRole, supabase } from "../lib/auth";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
 import { sortStandingsByDivisionRules } from "../lib/standingsSort";
@@ -19,6 +20,12 @@ export default function StandingsPage() {
   const [selectedDivision, setSelectedDivision] = useState("");
   const [currentUserRole, setCurrentUserRole] = useState("player");
   const [rebuilding, setRebuilding] = useState(false);
+  const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
+  const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
+  const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
+  const [divisionScheduleByes, setDivisionScheduleByes] = useState([]);
+  const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
+  const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "player");
@@ -34,7 +41,7 @@ export default function StandingsPage() {
 
     const { data: divisionData } = await supabase
       .from("divisions")
-      .select("*")
+      .select("*, leagues(id, name, season_id)")
       .order("name", { ascending: true });
 
     const { data: standingsData } = await supabase
@@ -157,6 +164,161 @@ export default function StandingsPage() {
 
     await loadData();
     alert(`League statistics rebuilt for ${result.teams} teams from ${result.matches} verified matches.`);
+  }
+
+  async function openDivisionSchedule(standingRow) {
+    const team = {
+      ...(standingRow.teams || {}),
+      division_id: standingRow.division_id,
+      divisions: selectedDivisionRow,
+      standing: standingRow,
+    };
+
+    if (!team.id || !team.division_id) {
+      alert("This team is not assigned to a division.");
+      return;
+    }
+
+    setDivisionScheduleTeam(team);
+    setDivisionScheduleTeams([]);
+    setDivisionScheduleMatches([]);
+    setDivisionScheduleByes([]);
+    setDivisionScheduleRatings([]);
+    setDivisionScheduleLoading(true);
+
+    const seasonId = selectedDivisionRow?.leagues?.season_id;
+    const [
+      { data: divisionTeams, error: teamsError },
+      { data: divisionMatches, error: matchesError },
+      { data: divisionByes, error: byesError },
+      { data: divisionStandings, error: standingsError },
+      { data: divisionRatings, error: ratingsError },
+    ] = await Promise.all([
+      supabase
+        .from("teams")
+        .select("id, name, division_id, locations(id, name)")
+        .eq("division_id", team.division_id)
+        .order("name", { ascending: true }),
+      supabase
+        .from("matches")
+        .select(`
+          id,
+          league_id,
+          division_id,
+          home_team_id,
+          away_team_id,
+          location_id,
+          scheduled_date,
+          scheduled_time,
+          week_number,
+          status,
+          score_status,
+          score_entered_at,
+          score_verified_at,
+          home_score,
+          away_score,
+          winning_team_id,
+          is_published,
+          locations (
+            id,
+            name
+          ),
+          home_team:teams!matches_home_team_id_fkey (
+            id,
+            name
+          ),
+          away_team:teams!matches_away_team_id_fkey (
+            id,
+            name
+          ),
+          match_lines (
+            id,
+            line_number,
+            home_team_games_won,
+            away_team_games_won,
+            division_lines (
+              line_name
+            ),
+            home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
+            home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
+            away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, self_rating),
+            away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, self_rating),
+            line_games (
+              id,
+              game_number,
+              home_score,
+              away_score,
+              game_status
+            )
+          )
+        `)
+        .eq("division_id", team.division_id)
+        .eq("is_published", true)
+        .order("scheduled_date", { ascending: true })
+        .order("scheduled_time", { ascending: true }),
+      supabase
+        .from("team_byes")
+        .select(`
+          *,
+          teams (
+            id,
+            name
+          ),
+          divisions (
+            id,
+            name
+          )
+        `)
+        .eq("division_id", team.division_id)
+        .order("bye_date", { ascending: true }),
+      supabase
+        .from("team_standings")
+        .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
+        .eq("division_id", team.division_id),
+      seasonId
+        ? supabase
+            .from("member_season_ratings")
+            .select("member_id, season_dupr_rating, season_primetime_rating")
+            .eq("season_id", seasonId)
+        : Promise.resolve({ data: [], error: null }),
+    ]);
+
+    setDivisionScheduleLoading(false);
+
+    if (teamsError) {
+      alert(teamsError.message);
+      return;
+    }
+    if (matchesError) {
+      alert(matchesError.message);
+      return;
+    }
+    if (byesError) {
+      alert(byesError.message);
+      return;
+    }
+    if (standingsError) {
+      alert(standingsError.message);
+      return;
+    }
+    if (ratingsError) {
+      alert(ratingsError.message);
+      return;
+    }
+
+    const standingsByTeamId = Object.fromEntries(
+      (divisionStandings || []).map((standing) => [String(standing.team_id), standing])
+    );
+
+    setDivisionScheduleTeams(
+      (divisionTeams || []).map((divisionTeam) => ({
+        ...divisionTeam,
+        standing: standingsByTeamId[String(divisionTeam.id)] || null,
+      })).sort(compareDivisionScheduleTeams)
+    );
+    setDivisionScheduleMatches(divisionMatches || []);
+    setDivisionScheduleByes(filterByesForPublishedSchedule(divisionByes || [], divisionMatches || []));
+    setDivisionScheduleRatings(divisionRatings || []);
   }
 
 if (loading) {
@@ -333,7 +495,13 @@ if (loading) {
                   </td>
 
                   <td className="p-3 font-semibold">
-                    {team.teams?.name}
+                    <button
+                      type="button"
+                      onClick={() => openDivisionSchedule(team)}
+                      className="font-bold text-blue-800 underline-offset-2 hover:underline"
+                    >
+                      {team.teams?.name}
+                    </button>
                   </td>
 
                   <td className="p-3">
@@ -397,7 +565,69 @@ if (loading) {
         </div>
         )}
 
+        {divisionScheduleTeam && (
+          <TeamScheduleModal
+            title="Division Team Schedules/Standings"
+            subtitle={`${selectedDivisionRow?.leagues?.name || "League"} · ${selectedDivisionRow?.name || "Division"}`}
+            teams={divisionScheduleTeams}
+            selectedTeamId={divisionScheduleTeam.id}
+            onSelectTeam={(team) => {
+              setDivisionScheduleTeam({
+                ...team,
+                divisions: selectedDivisionRow,
+              });
+            }}
+            matches={divisionScheduleMatches}
+            byes={divisionScheduleByes}
+            ratings={divisionScheduleRatings}
+            ratingType={selectedDivisionRow?.rating_type || "dupr"}
+            loading={divisionScheduleLoading}
+            compact
+            onClose={() => {
+              setDivisionScheduleTeam(null);
+              setDivisionScheduleTeams([]);
+              setDivisionScheduleMatches([]);
+              setDivisionScheduleByes([]);
+              setDivisionScheduleRatings([]);
+            }}
+          />
+        )}
+
       </div>
     </main>
   );
+}
+
+function scheduleWeekKey(divisionId, weekNumber, date) {
+  return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
+}
+
+function filterByesForPublishedSchedule(byes, matches) {
+  const publishedScheduleKeys = new Set(
+    matches.map((match) =>
+      scheduleWeekKey(match.division_id, match.week_number, match.scheduled_date)
+    )
+  );
+
+  return byes.filter((bye) =>
+    publishedScheduleKeys.has(scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date))
+  );
+}
+
+function compareDivisionScheduleTeams(a, b) {
+  const aStanding = a.standing || {};
+  const bStanding = b.standing || {};
+  const aRank = Number(aStanding.rank || 0);
+  const bRank = Number(bStanding.rank || 0);
+
+  if (aRank && bRank && aRank !== bRank) return aRank - bRank;
+  if (aRank && !bRank) return -1;
+  if (!aRank && bRank) return 1;
+
+  const pointsDifference =
+    Number(bStanding.standings_points || 0) - Number(aStanding.standings_points || 0);
+
+  if (pointsDifference !== 0) return pointsDifference;
+
+  return String(a.name || "").localeCompare(String(b.name || ""));
 }

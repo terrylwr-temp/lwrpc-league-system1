@@ -62,6 +62,7 @@ export default function AppHeader({
         { label: "Seasons", path: "/seasons", role: "league_manager", icon: "\u{1F4C6}" },
         { label: "Leagues", path: "/leagues", role: "league_manager", icon: "\u{1F3DF}\u{FE0F}" },
         { label: "Divisions", path: "/divisions", role: "league_manager", icon: "\u{1F4CA}" },
+        { label: "Score Sheets", path: "/score-sheets", role: "league_manager", icon: "\u{1F4DD}" },
         { label: "Locations", path: "/locations", role: "league_manager", icon: "\u{1F4CD}" },
       ]
     }

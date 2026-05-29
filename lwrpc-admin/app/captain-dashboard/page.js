@@ -17,7 +17,11 @@ import {
 } from "../lib/leagueDocuments";
 import { GUIDE_DOCUMENT_TYPES, guidePdfDocument } from "../lib/dashboardGuides";
 import { specialGameStatus } from "../lib/playHistory";
-import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
+import {
+  DEFAULT_SCORE_SHEET_RULES,
+  DEFAULT_SCORE_SHEET_TEMPLATE_HTML,
+  DEFAULT_SCORE_SHEET_TEMPLATE_NAME,
+} from "../lib/scoreSheetTemplates";
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
@@ -147,8 +151,34 @@ export default function CaptainDashboardPage() {
           id,
           name,
           number_of_lines,
+          games_per_line,
+          points_to_win,
+          win_by,
+          default_game_format,
           rating_type,
           team_dupr_max,
+          score_sheet_template_id,
+          score_sheet_templates (
+            id,
+            name,
+            sheet_title,
+            template_html,
+            rules_text,
+            is_active,
+            is_default
+          ),
+          division_lines (
+            line_number,
+            line_name,
+            line_type,
+            game_format,
+            games_per_line,
+            points_to_win,
+            win_by,
+            team_win_points,
+            standings_points_mode,
+            sort_order
+          ),
           leagues (
             id,
             name,
@@ -231,8 +261,34 @@ export default function CaptainDashboardPage() {
           id,
           name,
           number_of_lines,
+          games_per_line,
+          points_to_win,
+          win_by,
+          default_game_format,
           rating_type,
-          team_dupr_max
+          team_dupr_max,
+          score_sheet_template_id,
+          score_sheet_templates (
+            id,
+            name,
+            sheet_title,
+            template_html,
+            rules_text,
+            is_active,
+            is_default
+          ),
+          division_lines (
+            line_number,
+            line_name,
+            line_type,
+            game_format,
+            games_per_line,
+            points_to_win,
+            win_by,
+            team_win_points,
+            standings_points_mode,
+            sort_order
+          )
         ),
         locations (
           id,
@@ -938,7 +994,8 @@ export default function CaptainDashboardPage() {
   }
 
   async function openMatchScoreSheet(match) {
-    const { data, error } = await supabase
+    const [{ data, error }, { data: defaultTemplateData, error: defaultTemplateError }] = await Promise.all([
+      supabase
       .from("match_lineups")
       .select(`
         match_id,
@@ -950,17 +1007,40 @@ export default function CaptainDashboardPage() {
         player_2:members!match_lineups_player_2_member_id_fkey(id, first_name, last_name, email, self_rating)
       `)
       .eq("match_id", match.id)
-      .order("line_number", { ascending: true });
+      .order("line_number", { ascending: true }),
+      match.divisions?.score_sheet_templates
+        ? Promise.resolve({ data: [], error: null })
+        : supabase
+          .from("score_sheet_templates")
+          .select("id, name, sheet_title, template_html, rules_text, is_active, is_default")
+          .eq("is_default", true)
+          .eq("is_active", true)
+          .limit(1),
+    ]);
 
     if (error) {
       alert("Unable to load saved match setup teams. Run the match_lineups schema update if needed, then try again.");
       return;
     }
 
+    if (defaultTemplateError) {
+      alert(`Unable to load the default Score Sheet template. Run the score sheet schema update if needed: ${defaultTemplateError.message}`);
+      return;
+    }
+
+    const defaultTemplate = defaultTemplateData?.[0] || null;
+    const scoreSheetMatch = {
+      ...match,
+      divisions: {
+        ...(match.divisions || {}),
+        score_sheet_templates: match.divisions?.score_sheet_templates || defaultTemplate,
+      },
+    };
+
     setScoreSheetPreview({
       title: `${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"} Score Sheet`,
       subtitle: `${formatDate(match.scheduled_date)} / ${match.divisions?.name || "Division"}`,
-      html: matchScoreSheetPrintHtml(match, data || [], ratingForMember),
+      html: matchScoreSheetPrintHtml(scoreSheetMatch, data || [], ratingForMember),
     });
   }
 
@@ -3124,7 +3204,8 @@ function matchScoreDetailsPrintHtml(match, lines) {
 function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
   const homeLineups = scoreSheetLineupsForTeam(lineups, match.home_team_id);
   const awayLineups = scoreSheetLineupsForTeam(lineups, match.away_team_id);
-  const rows = Array.from({ length: 3 }, (_, index) => {
+  const lineCount = Number(match.divisions?.number_of_lines || 3);
+  const rows = Array.from({ length: lineCount }, (_, index) => {
     const lineNumber = index + 1;
     const homeLineup = homeLineups[lineNumber] || {};
     const awayLineup = awayLineups[lineNumber] || {};
@@ -3148,6 +3229,16 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       </tr>
     `;
   }).join("");
+  const template = match.divisions?.score_sheet_templates;
+  const bodyHtml = renderScoreSheetTemplate(match, {
+    template,
+    lineupRows: rows,
+    roundRows: scoreSheetRoundRows(lineCount),
+    configuredGameLinesRows: scoreSheetConfiguredGameLinesRows(match),
+    configuredGameLinesTable: scoreSheetConfiguredGameLinesTable(match),
+    scoreEntryRows: scoreSheetEntryRows(match),
+    scoreEntryTable: scoreSheetEntryTable(match),
+  });
 
   return `
     <style>
@@ -3195,7 +3286,7 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       .score-sheet td {
         border: 1px solid #111827;
         padding: 7px;
-        vertical-align: top;
+        vertical-align: middle;
       }
       .score-sheet th {
         background: #e5e7eb;
@@ -3236,9 +3327,23 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       .score-sheet .rounds {
         margin-top: 10px;
       }
+      .score-sheet .configured-lines,
+      .score-sheet .score-entries {
+        margin-top: 10px;
+      }
       .score-sheet .rounds td {
         height: 34px;
         vertical-align: middle;
+      }
+      .score-sheet .configured-lines th,
+      .score-sheet .configured-lines td,
+      .score-sheet .score-entries th,
+      .score-sheet .score-entries td {
+        font-size: 10px;
+        padding: 5px;
+      }
+      .score-sheet .score-entries td {
+        height: 28px;
       }
       .score-sheet .rounds td:first-child {
         font-weight: 900;
@@ -3249,16 +3354,9 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       .score-sheet .notes {
         margin-top: 10px;
         font-size: 12px;
-        font-weight: 800;
+        font-weight: 400;
+        text-align: justify;
         line-height: 1.25;
-      }
-      .score-sheet .copyright {
-        margin-top: 10px;
-        border-top: 1px solid #cbd5e1;
-        padding-top: 6px;
-        text-align: center;
-        font-size: 9px;
-        color: #475569;
       }
       .score-sheet .signatures {
         margin-top: 8px;
@@ -3272,56 +3370,7 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       }
     </style>
     <div class="score-sheet">
-      <h1>Lakewood Ranch Pickleball Club<br />Weekday DUPR League Score Sheet</h1>
-
-      <div class="meta">
-        <div class="box"><span class="label">Date</span><span class="value">${escapeHtml(formatDate(match.scheduled_date))}</span></div>
-        <div class="box"><span class="label">Away Team</span><span class="value">${escapeHtml(match.away_team?.name || "Away Team")}</span></div>
-        <div class="box"><span class="label">Home Team</span><span class="value">${escapeHtml(match.home_team?.name || "Home Team")}</span></div>
-        <div class="box"><span class="label">Level</span><span class="value">${escapeHtml(match.divisions?.name || "Division")}</span></div>
-      </div>
-
-      <div class="signatures">
-        <div>Captain Signature (Away)<div class="signature-line"></div></div>
-        <div>Captain Signature (Home)<div class="signature-line"></div></div>
-      </div>
-
-      <table class="lineups">
-        <thead>
-          <tr>
-            <th>AWAY Teams <span class="header-score">Score: ______</span></th>
-            <th>HOME Teams <span class="header-score">Score: ______</span></th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-
-      <table class="rounds">
-        <tbody>
-          <tr><th colspan="3">Round 1 (Circle Winning Team)</th></tr>
-          <tr><td>Away 1 vs. Home 1</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-          <tr><td>Away 2 vs. Home 2</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-          <tr><td>Away 3 vs. Home 3</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-          <tr><th colspan="3">Round 2</th></tr>
-          <tr><td>Away 1 vs. Home 2</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-          <tr><td>Away 2 vs. Home 3</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-          <tr><td>Away 3 vs. Home 1</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-          <tr><th colspan="3">Round 3</th></tr>
-          <tr><td>Away 1 vs. Home 3</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-          <tr><td>Away 2 vs. Home 1</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-          <tr><td>Away 3 vs. Home 2</td><td>Away Score ______</td><td>Home Score ______</td></tr>
-        </tbody>
-      </table>
-
-      <div class="notes">
-        Game format is regular scoring to 15, win by 1 (switch ends when the first team scores 8). 2 timeouts/team/game.
-        Visitors pick Side/Serve/Receive/Defer in Games 1 and 3. No video recording unless agreed. No coaching other than
-        timeouts or between games (off court only). USA Pickleball rules apply and only legal equipment may be used.
-      </div>
-
-      <div class="copyright">
-        &copy; ${escapeHtml(COPYRIGHT_YEAR)} Lakewood Ranch Pickleball Club. All rights reserved. Version ${escapeHtml(APP_VERSION)}.
-      </div>
+      ${bodyHtml}
     </div>
   `;
 }
@@ -3334,6 +3383,184 @@ function scoreSheetLineupsForTeam(lineups, teamId) {
 
     return byLine;
   }, {});
+}
+
+function renderScoreSheetTemplate(match, {
+  template,
+  lineupRows,
+  roundRows,
+  configuredGameLinesRows,
+  configuredGameLinesTable,
+  scoreEntryRows,
+  scoreEntryTable,
+}) {
+  const activeTemplate = template?.is_active === false ? null : template;
+  const templateHtml = activeTemplate?.template_html || DEFAULT_SCORE_SHEET_TEMPLATE_HTML;
+  const rulesText = activeTemplate?.rules_text || DEFAULT_SCORE_SHEET_RULES;
+  const sheetTitle = activeTemplate?.sheet_title || activeTemplate?.name || DEFAULT_SCORE_SHEET_TEMPLATE_NAME;
+  const captainSignatureRows = `
+    <div class="signatures">
+      <div>Captain Signature (Away)<div class="signature-line"></div></div>
+      <div>Captain Signature (Home)<div class="signature-line"></div></div>
+    </div>
+  `;
+  const replacements = {
+    "{{club_name}}": "Lakewood Ranch Pickleball Club",
+    "{{sheet_title}}": sheetTitle,
+    "{{match_date}}": formatDate(match.scheduled_date),
+    "{{match_time}}": formatDisplayTime(match.scheduled_time, "Time TBD"),
+    "{{location_name}}": match.locations?.name || "Home Location TBD",
+    "{{division_name}}": match.divisions?.name || "Division",
+    "{{league_name}}": match.leagues?.name || "League",
+    "{{home_team}}": match.home_team?.name || "Home Team",
+    "{{away_team}}": match.away_team?.name || "Away Team",
+    "{{lineup_rows}}": lineupRows,
+    "{{round_rows}}": roundRows,
+    "{{configured_game_lines_rows}}": configuredGameLinesRows,
+    "{{configured_game_lines_table}}": configuredGameLinesTable,
+    "{{score_entry_rows}}": scoreEntryRows,
+    "{{score_entry_table}}": scoreEntryTable,
+    "{{rules_text}}": rulesText,
+    "{{captain_signature_rows}}": captainSignatureRows,
+  };
+
+  return Object.entries(replacements).reduce((html, [token, value]) => {
+    const htmlTokens = [
+      "{{lineup_rows}}",
+      "{{round_rows}}",
+      "{{configured_game_lines_rows}}",
+      "{{configured_game_lines_table}}",
+      "{{score_entry_rows}}",
+      "{{score_entry_table}}",
+      "{{captain_signature_rows}}",
+    ];
+    const escapedValue = htmlTokens.includes(token)
+      ? value
+      : escapeHtml(value);
+    return html.replaceAll(token, escapedValue);
+  }, templateHtml);
+}
+
+function scoreSheetConfiguredLines(match) {
+  const lines = [...(match.divisions?.division_lines || [])]
+    .sort((a, b) => (
+      Number(a.sort_order ?? a.line_number ?? 0) - Number(b.sort_order ?? b.line_number ?? 0) ||
+      Number(a.line_number ?? 0) - Number(b.line_number ?? 0)
+    ));
+
+  if (lines.length > 0) return lines;
+
+  const lineCount = Math.max(1, Number(match.divisions?.number_of_lines || 3));
+  return Array.from({ length: lineCount }, (_, index) => ({
+    line_number: index + 1,
+    line_name: `Line ${index + 1}`,
+    line_type: "doubles",
+    game_format: match.divisions?.default_game_format || "regular",
+    games_per_line: match.divisions?.games_per_line || 3,
+    points_to_win: match.divisions?.points_to_win || 11,
+    win_by: match.divisions?.win_by || 2,
+    team_win_points: 1,
+    standings_points_mode: "line_result",
+  }));
+}
+
+function scoreSheetConfiguredGameLinesRows(match) {
+  return scoreSheetConfiguredLines(match).map((line) => `
+    <tr>
+      <td>${escapeHtml(scoreSheetGameLineLabel(line))}</td>
+      <td>${escapeHtml(scoreSheetLineTypeLabel(line.line_type))}</td>
+      <td>${escapeHtml(scoreSheetFormatLabel(line.game_format))}</td>
+      <td>${escapeHtml(line.team_win_points ?? "-")}</td>
+    </tr>
+  `).join("");
+}
+
+function scoreSheetConfiguredGameLinesTable(match) {
+  return `
+    <table class="configured-lines">
+      <thead>
+        <tr>
+          <th>Game</th>
+          <th>Line Type</th>
+          <th>Game Format</th>
+          <th>Team Pts</th>
+        </tr>
+      </thead>
+      <tbody>${scoreSheetConfiguredGameLinesRows(match)}</tbody>
+    </table>
+  `;
+}
+
+function scoreSheetEntryRows(match) {
+  return scoreSheetConfiguredLines(match).flatMap((line) => {
+    const gamesPerLine = Math.max(1, Number(line.games_per_line ?? match.divisions?.games_per_line ?? 1));
+
+    return Array.from({ length: gamesPerLine }, () => `
+      <tr>
+        <td>${escapeHtml(scoreSheetGameLineLabel(line))}</td>
+        <td>${escapeHtml(scoreSheetLineTypeLabel(line.line_type))}</td>
+        <td>${escapeHtml(scoreSheetFormatLabel(line.game_format))}</td>
+        <td>Away Score:</td>
+        <td>Home Score:</td>
+      </tr>
+    `);
+  }).join("");
+}
+
+function scoreSheetEntryTable(match) {
+  return `
+    <table class="score-entries">
+      <thead>
+        <tr>
+          <th>Game</th>
+          <th>Line Type</th>
+          <th>Game Format</th>
+          <th>Away</th>
+          <th>Home</th>
+        </tr>
+      </thead>
+      <tbody>${scoreSheetEntryRows(match)}</tbody>
+    </table>
+  `;
+}
+
+function scoreSheetGameLineLabel(line) {
+  return `Game ${line.line_number || "-"}: ${line.line_name || `Line ${line.line_number || ""}`}`;
+}
+
+function scoreSheetLineTypeLabel(value) {
+  const labels = {
+    doubles: "Doubles",
+    singles: "Singles",
+    mixed: "Mixed",
+    picklebreaker: "Picklebreaker",
+  };
+
+  return labels[value] || value || "-";
+}
+
+function scoreSheetFormatLabel(value) {
+  if (!value) return "-";
+  return String(value)
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function scoreSheetRoundRows(lineCount) {
+  const count = Math.max(1, Number(lineCount || 3));
+
+  return Array.from({ length: count }, (_, roundIndex) => {
+    const roundNumber = roundIndex + 1;
+    const roundTitle = roundNumber === 1 ? "Round 1 (Circle Winning Team)" : `Round ${roundNumber}`;
+    const matches = Array.from({ length: count }, (_, awayIndex) => {
+      const awayNumber = awayIndex + 1;
+      const homeNumber = ((awayIndex + roundIndex) % count) + 1;
+
+      return `<tr><td>Away ${awayNumber} vs. Home ${homeNumber}</td><td>Away Score:</td><td>Home Score:</td></tr>`;
+    }).join("");
+
+    return `<tr><th colspan="3">${escapeHtml(roundTitle)}</th></tr>${matches}`;
+  }).join("");
 }
 
 function scoreSheetPlayerName(member) {

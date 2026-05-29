@@ -11,6 +11,7 @@ export default function DivisionsPage() {
 
   const [leagues, setLeagues] = useState([]);
   const [divisions, setDivisions] = useState([]);
+  const [scoreSheetTemplates, setScoreSheetTemplates] = useState([]);
   const [leagueFilter, setLeagueFilter] = useState("");
   const [divisionSearch, setDivisionSearch] = useState("");
   const [openLeagueName, setOpenLeagueName] = useState("");
@@ -40,6 +41,7 @@ export default function DivisionsPage() {
   const [picklebreakerWinPoints, setPicklebreakerWinPoints] = useState("1");
   const [picklebreakerLossPoints, setPicklebreakerLossPoints] = useState("0");
   const [lineNotes, setLineNotes] = useState("");
+  const [scoreSheetTemplateId, setScoreSheetTemplateId] = useState("");
 
   const [standingsWinPoints, setStandingsWinPoints] = useState("2");
   const [standingsTiePoints, setStandingsTiePoints] = useState("1");
@@ -94,6 +96,17 @@ export default function DivisionsPage() {
       return;
     }
 
+    const { data: templateData, error: templateError } = await supabase
+      .from("score_sheet_templates")
+      .select("id, name, is_active, is_default")
+      .order("is_default", { ascending: false })
+      .order("name", { ascending: true });
+
+    if (templateError) {
+      alert(`Score Sheet selection requires the Supabase score sheet schema update: ${templateError.message}`);
+      return;
+    }
+
     const { data: lineCountData, error: lineCountError } = await supabase
       .from("division_lines")
       .select("division_id, line_number");
@@ -111,6 +124,7 @@ export default function DivisionsPage() {
     }, {});
 
     setLeagues(leagueData || []);
+    setScoreSheetTemplates(templateData || []);
     setDivisions(
       (divisionData || []).map((division) => ({
         ...division,
@@ -156,6 +170,7 @@ export default function DivisionsPage() {
       standings_tiebreak_3: tiebreak3,
 
       line_notes: lineNotes || null,
+      score_sheet_template_id: scoreSheetTemplateId || null,
       updated_at: new Date().toISOString(),
     };
 
@@ -366,6 +381,7 @@ export default function DivisionsPage() {
     setTiebreak3(division.standings_tiebreak_3 || "point_differential");
 
     setLineNotes(division.line_notes || "");
+    setScoreSheetTemplateId(division.score_sheet_template_id || "");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -403,6 +419,7 @@ export default function DivisionsPage() {
     setTiebreak3("point_differential");
 
     setLineNotes("");
+    setScoreSheetTemplateId("");
   }
 
   useEffect(() => {
@@ -465,6 +482,11 @@ export default function DivisionsPage() {
     };
 
     return labels[value] || value || "—";
+  }
+
+  function scoreSheetTemplateName(templateId) {
+    if (!templateId) return "Default Score Sheet";
+    return scoreSheetTemplates.find((template) => String(template.id) === String(templateId))?.name || "Saved Score Sheet";
   }
 
   return (
@@ -641,6 +663,27 @@ export default function DivisionsPage() {
                 />
               </Field>
 
+              <Field label="Score Sheet Format">
+                <select
+                  value={scoreSheetTemplateId}
+                  onChange={(event) => setScoreSheetTemplateId(event.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                >
+                  <option value="">Default Score Sheet</option>
+                  {scoreSheetTemplates
+                    .filter((template) => template.is_active !== false || String(template.id) === String(scoreSheetTemplateId))
+                    .map((template) => (
+                      <option key={template.id} value={template.id}>
+                        {template.name}{template.is_default ? " (Default)" : ""}
+                        {template.is_active === false ? " (Inactive)" : ""}
+                      </option>
+                    ))}
+                </select>
+                <p className="mt-2 text-xs text-slate-500">
+                  Controls the printed Match Score Sheet on the Captain Dashboard.
+                </p>
+              </Field>
+
               <div className="flex gap-3">
                 <button
                   type="submit"
@@ -786,6 +829,10 @@ export default function DivisionsPage() {
 
                             <div className="mt-1 text-sm text-slate-600">
                               Number of Teams: {division.number_of_lines ?? 3}
+                            </div>
+
+                            <div className="mt-1 text-sm text-slate-600">
+                              Score Sheet: {scoreSheetTemplateName(division.score_sheet_template_id)}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">

@@ -1050,6 +1050,9 @@ export default function PlayerDashboardPage() {
                 }
                 onOpenDocument={openLeagueDocument}
                 onOpenRoster={setRosterTeam}
+                onOpenStandings={(team) =>
+                  router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`)
+                }
               />
             ))}
 
@@ -1458,9 +1461,11 @@ function TeamCard({
   onToggleDocuments,
   onOpenDocument,
   onOpenRoster,
+  onOpenStandings,
 }) {
   const standing = team.standing;
   const captainContacts = teamCaptainContacts(team);
+  const playerCount = team.roster?.length || 0;
 
   return (
     <div
@@ -1469,42 +1474,69 @@ function TeamCard({
         selected ? "border-4 border-emerald-500 bg-blue-50" : "border-slate-200 bg-white"
       }`}
     >
-      <div className={`px-4 py-4 ${selected ? "bg-gradient-to-r from-emerald-800 to-blue-800 text-white" : "bg-white text-slate-950"}`}>
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className={`p-4 ${selected ? "bg-gradient-to-r from-emerald-800 to-blue-800 text-white" : "bg-white text-slate-950"}`}>
+        <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
-            <div className="font-black">{team.name}</div>
-            <div className={`mt-1 text-xs font-bold uppercase tracking-wide ${selected ? "text-blue-100" : "text-slate-500"}`}>
-              {team.locations?.name || "No Home Location"}
+            <div className="text-lg font-black">{team.name}</div>
+            <div className={`mt-1 text-sm font-semibold ${selected ? "text-blue-100" : "text-slate-600"}`}>
+              {team.divisions?.leagues?.name || "League"} / {team.divisions?.name || "Division"}
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 sm:justify-end">
-            <div className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide ${selected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-800"}`}>
-              Rank #{standing?.rank || "N/A"}
-            </div>
-            <div className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide ${selected ? "bg-white/15 text-white" : "bg-slate-100 text-slate-800"}`}>
-              {formatStandingRecord(standing)}
-            </div>
+          <div className="flex flex-wrap gap-2">
             <button
               type="button"
               onClick={(event) => {
                 event.stopPropagation();
-                onOpenRoster(team);
+                onOpenStandings(team);
               }}
-              className={`rounded-xl px-3 py-2 text-left text-xs font-black uppercase tracking-wide ${
-                selected ? "bg-white/15 text-white hover:bg-white/25" : "bg-slate-100 text-slate-800 hover:bg-slate-200"
-              }`}
+              className="rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
             >
-              Roster ({team.roster?.length || 0})
+              Rank #{standing?.rank || "N/A"}
             </button>
           </div>
         </div>
-      </div>
-      <div className={`${selected ? "bg-blue-50" : "bg-white"} px-4 py-3`}>
-        <div className="rounded-xl bg-white px-4 py-3 font-bold text-blue-950 shadow-sm">
-          {team.divisions?.leagues?.name || ""} / {team.divisions?.name || ""}
+
+        <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-bold text-slate-700">
+          <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
+            <span className="block text-[10px] uppercase tracking-wide text-slate-500">Players</span>
+            {playerCount}
+          </span>
+          <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
+            <span className="block text-[10px] uppercase tracking-wide text-slate-500">Season Points</span>
+            {standing?.standings_points ?? 0}
+          </span>
+          <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
+            <span className="block text-[10px] uppercase tracking-wide text-slate-500">W-L-T</span>
+            {standing?.match_wins ?? 0}-{standing?.match_losses ?? 0}-{standing?.match_ties ?? 0}
+          </span>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenRoster(team);
+          }}
+          className="rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
+        >
+          Team Roster
+        </button>
+
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenStandings(team);
+          }}
+          className="rounded-xl bg-indigo-100 px-3 py-3 text-sm font-bold text-indigo-900 shadow-sm hover:bg-indigo-200"
+        >
+          Division Standings
+        </button>
+      </div>
+
       {captainContacts.length > 0 && (
         <div className={`grid grid-cols-1 gap-2 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3 ${selected ? "bg-blue-50" : "bg-white"}`}>
           {captainContacts.map((contact) => (
