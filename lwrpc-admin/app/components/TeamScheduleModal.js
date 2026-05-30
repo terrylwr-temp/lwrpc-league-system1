@@ -254,15 +254,25 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
           {match.match_lines
             .slice()
             .sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0))
-            .map((line) => (
+            .map((line) => {
+              const winnerName = formatLineWinnerName(match, line);
+
+              return (
               <div key={line.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm text-white">
                   <span className="font-black">
                     Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
                   </span>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-900">
-                    {line.home_team_games_won ?? 0}-{line.away_team_games_won ?? 0}
-                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-900">
+                      {line.home_team_games_won ?? 0}-{line.away_team_games_won ?? 0}
+                    </span>
+                    {winnerName && (
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-950">
+                        Winner: {winnerName}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="mt-2 grid grid-cols-1 gap-2 text-xs md:grid-cols-2">
                   <TeamPlayers
@@ -280,7 +290,8 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
                 </div>
                 <GameScoreRows line={line} />
               </div>
-            ))}
+              );
+            })}
         </div>
       )}
       {showMatchDetails && expanded && !match.match_lines?.length && (
@@ -318,13 +329,8 @@ function GameScoreRows({ line }) {
           key={game.id}
           className="rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm"
         >
-          <div className="flex items-center justify-between gap-2">
-            <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
-              Game {game.game_number || "-"}
-            </div>
-            <div className="rounded-full bg-white px-2 py-1 text-[10px] font-black uppercase text-slate-600">
-              {formatGameStatus(game.game_status)}
-            </div>
+          <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
+            Game {game.game_number || "-"}
           </div>
           <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
             <div className="rounded-lg bg-white px-2 py-2 text-center font-black text-slate-800">
@@ -408,8 +414,24 @@ function formatTeamName(team, fallback) {
   return team?.name || fallback;
 }
 
-function formatGameStatus(status) {
-  return status ? status.replaceAll("_", " ") : "scheduled";
+function formatLineWinnerName(match, line) {
+  if (line?.winning_team_id) {
+    if (String(line.winning_team_id) === String(match?.home_team_id)) {
+      return formatTeamName(match?.home_team, "Home");
+    }
+
+    if (String(line.winning_team_id) === String(match?.away_team_id)) {
+      return formatTeamName(match?.away_team, "Away");
+    }
+  }
+
+  const homeWins = Number(line?.home_team_games_won || 0);
+  const awayWins = Number(line?.away_team_games_won || 0);
+
+  if (homeWins > awayWins) return formatTeamName(match?.home_team, "Home");
+  if (awayWins > homeWins) return formatTeamName(match?.away_team, "Away");
+
+  return "";
 }
 
 function formatScoreStatus(match) {

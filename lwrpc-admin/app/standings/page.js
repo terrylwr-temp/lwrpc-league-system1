@@ -237,6 +237,7 @@ export default function StandingsPage() {
             line_number,
             home_team_games_won,
             away_team_games_won,
+            winning_team_id,
             division_lines (
               line_name
             ),
