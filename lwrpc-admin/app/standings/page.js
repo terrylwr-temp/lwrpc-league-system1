@@ -334,8 +334,8 @@ if (loading) {
         : "Back to Player Dashboard";
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-7xl">
+    <main className="min-h-screen bg-slate-100 px-3 py-4 sm:p-6">
+      <div className="mx-auto w-full max-w-7xl">
 
         <AppHeader
           title="League Standings"
@@ -346,15 +346,15 @@ if (loading) {
           <button
             type="button"
             onClick={() => router.push(dashboardPath)}
-            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow hover:bg-slate-800"
+            className="w-full rounded-xl bg-slate-900 px-5 py-3 text-sm font-black text-white shadow hover:bg-slate-800 sm:w-auto"
           >
             {dashboardLabel}
           </button>
         </div>
 
-        <div className="rounded-2xl bg-white p-6 shadow">
+        <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-4 md:gap-4">
 
             <select
               value={selectedLeague}
@@ -362,7 +362,7 @@ if (loading) {
                 setSelectedLeague(e.target.value);
                 setSelectedDivision("");
               }}
-              className="rounded-xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
             >
               <option value="">
                 Select League
@@ -385,7 +385,7 @@ if (loading) {
                   e.target.value
                 )
               }
-              className="rounded-xl border border-slate-300 px-4 py-3"
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
             >
               <option value="">
                 Select Division
@@ -408,7 +408,7 @@ if (loading) {
                 type="button"
                 onClick={rebuildLeagueStatistics}
                 disabled={!selectedDivision || rebuilding}
-                className="rounded-xl bg-slate-900 px-4 py-3 font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className="w-full rounded-xl bg-slate-900 px-4 py-3 font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300 md:col-span-2"
               >
                 {rebuilding ? "Rebuilding..." : "Rebuild League Statistics"}
               </button>
@@ -430,7 +430,63 @@ if (loading) {
             </div>
           )}
 
-          <table className="w-full border-collapse">
+          <div className="space-y-3 p-3 md:hidden">
+            {filteredStandings.map((team, index) => {
+              const displayRank = index + 1;
+
+              return (
+                <div
+                  key={team.id}
+                  className={`rounded-2xl border p-4 shadow-sm ${
+                    isPlayoffTeam(team)
+                      ? "border-emerald-200 bg-emerald-50"
+                      : "border-slate-200 bg-white"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                        Rank #{displayRank}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => openDivisionSchedule(team)}
+                        className="mt-1 text-left text-lg font-black text-blue-800 underline-offset-2 hover:underline"
+                      >
+                        {team.teams?.name}
+                      </button>
+                    </div>
+                    <div className="rounded-xl bg-blue-700 px-3 py-2 text-center text-white">
+                      <div className="text-[10px] font-black uppercase tracking-wide text-blue-100">
+                        Pts
+                      </div>
+                      <div className="text-xl font-black">
+                        {team.standings_points}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <StandingStat label="W-L-T" value={`${team.match_wins}-${team.match_losses}-${team.match_ties}`} />
+                    <StandingStat label="Teams" value={`${team.line_wins}-${team.line_losses}`} />
+                    <StandingStat label="Games" value={`${team.game_wins}-${team.game_losses}`} />
+                    <StandingStat label="Home" value={`${team.home_wins}-${team.home_losses}`} />
+                    <StandingStat label="Away" value={`${team.away_wins}-${team.away_losses}`} />
+                    <StandingStat label="Diff" value={team.point_differential} />
+                  </div>
+
+                  <div className="mt-3 grid grid-cols-2 gap-2">
+                    <StandingStat label="PF" value={team.points_for} />
+                    <StandingStat label="PA" value={team.points_against} />
+                    <StandingStat label="Form" value={team.recent_form || "-"} mono />
+                    <StandingStat label="Streak" value={team.current_streak || "-"} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <table className="hidden w-full border-collapse md:table">
 
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
 
@@ -614,6 +670,19 @@ if (loading) {
 
       </div>
     </main>
+  );
+}
+
+function StandingStat({ label, value, mono = false }) {
+  return (
+    <div className="rounded-xl bg-slate-50 px-3 py-2">
+      <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
+        {label}
+      </div>
+      <div className={`mt-1 font-black text-slate-900 ${mono ? "font-mono" : ""}`}>
+        {value}
+      </div>
+    </div>
   );
 }
 

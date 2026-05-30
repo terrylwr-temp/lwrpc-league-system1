@@ -831,16 +831,25 @@ export default function CaptainDashboardPage() {
                   </div>
 
                   <div className="flex flex-wrap gap-2">
-                    {setupTeams.map((team) => (
-                      <button
-                        key={team.id}
-                        type="button"
-                        onClick={() => openMatchSetup(match, team)}
-                        className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800"
-                      >
-                        Match Setup
-                      </button>
-                    ))}
+                    {setupTeams.map((team) => {
+                      const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
+                      const setupComplete = setupStatus?.complete === true;
+
+                      return (
+                        <button
+                          key={team.id}
+                          type="button"
+                          onClick={() => openMatchSetup(match, team)}
+                          className={`rounded-lg px-3 py-2 text-sm font-bold text-white ${
+                            setupComplete
+                              ? "bg-blue-700 hover:bg-blue-800"
+                              : "bg-red-700 hover:bg-red-800"
+                          }`}
+                        >
+                          Match Setup
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               </div>

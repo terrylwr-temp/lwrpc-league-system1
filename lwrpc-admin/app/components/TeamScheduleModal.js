@@ -250,17 +250,17 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
       </div>
 
       {showMatchDetails && expanded && match.match_lines?.length > 0 && (
-        <div className="mx-4 mb-4 overflow-hidden rounded-lg border border-slate-100">
+        <div className="mx-3 mb-4 space-y-3 rounded-2xl border border-blue-100 bg-blue-50/60 p-3 sm:mx-4">
           {match.match_lines
             .slice()
             .sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0))
             .map((line) => (
-              <div key={line.id} className="border-b border-slate-100 px-3 py-2 last:border-b-0">
-                <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                  <span className="font-semibold text-slate-800">
+              <div key={line.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-slate-900 px-3 py-2 text-sm text-white">
+                  <span className="font-black">
                     Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
                   </span>
-                  <span className="font-bold text-slate-900">
+                  <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-900">
                     {line.home_team_games_won ?? 0}-{line.away_team_games_won ?? 0}
                   </span>
                 </div>
@@ -312,23 +312,30 @@ function GameScoreRows({ line }) {
   }
 
   return (
-    <div className="mt-3 overflow-hidden rounded-lg border border-slate-100 text-xs">
+    <div className="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 xl:grid-cols-3">
       {games.map((game) => (
         <div
           key={game.id}
-          className="grid grid-cols-1 gap-2 border-b border-slate-100 bg-white px-3 py-2 last:border-b-0 md:grid-cols-[minmax(0,1fr)_96px_minmax(0,1fr)] md:items-center"
+          className="rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm"
         >
-          <div className="font-semibold text-slate-700">
-            Home
+          <div className="flex items-center justify-between gap-2">
+            <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
+              Game {game.game_number || "-"}
+            </div>
+            <div className="rounded-full bg-white px-2 py-1 text-[10px] font-black uppercase text-slate-600">
+              {formatGameStatus(game.game_status)}
+            </div>
           </div>
-          <div className="rounded-lg bg-slate-950 px-3 py-2 text-center font-black text-white">
-            Game {game.game_number || "-"}: {game.home_score ?? "-"}-{game.away_score ?? "-"}
-          </div>
-          <div className="font-semibold text-slate-700 md:text-right">
-            Away
-          </div>
-          <div className="text-slate-600 md:col-span-3">
-            Result: {formatGameStatus(game.game_status)}
+          <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+            <div className="rounded-lg bg-white px-2 py-2 text-center font-black text-slate-800">
+              <div className="text-[10px] uppercase tracking-wide text-slate-500">Home</div>
+              <div className="text-2xl text-slate-950">{game.home_score ?? "-"}</div>
+            </div>
+            <div className="text-sm font-black text-slate-400">-</div>
+            <div className="rounded-lg bg-white px-2 py-2 text-center font-black text-slate-800">
+              <div className="text-[10px] uppercase tracking-wide text-slate-500">Away</div>
+              <div className="text-2xl text-slate-950">{game.away_score ?? "-"}</div>
+            </div>
           </div>
         </div>
       ))}

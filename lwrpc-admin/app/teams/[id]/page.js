@@ -775,8 +775,8 @@ function getAverageTeamRating() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-6xl">
+    <main className="min-h-screen bg-slate-100 px-3 py-4 sm:p-6">
+      <div className="mx-auto w-full max-w-6xl">
 
         <AppHeader
           title="Team Roster Management"
@@ -793,7 +793,7 @@ function getAverageTeamRating() {
                 router.back();
               }
             }}
-            className="rounded-xl bg-slate-200 px-4 py-2 font-semibold hover:bg-slate-300"
+            className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 sm:w-auto sm:py-2"
           >
             {isCaptainOnly ? "Back to Dashboard" : "Back"}
           </button>
@@ -816,7 +816,7 @@ function getAverageTeamRating() {
 
             </div>
 
-            <div className="rounded-xl bg-slate-900 p-4 text-white shadow-lg">
+            <div className="w-full rounded-xl bg-slate-900 p-4 text-white shadow-lg sm:w-auto sm:min-w-40">
 
               <div className="text-xs uppercase tracking-wide text-slate-300">
                 Active Players
@@ -869,17 +869,17 @@ function getAverageTeamRating() {
 
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
 
-          <div className="rounded-2xl bg-white p-6 shadow">
+          <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
 
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
               <h2 className="text-xl font-bold text-slate-900">
                 Add Player
               </h2>
 
-              <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
+              <div className="w-fit rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
                 {availableMembers.length} Available
               </div>
 
@@ -974,15 +974,15 @@ function getAverageTeamRating() {
 
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
+          <div className="rounded-2xl bg-white p-4 shadow sm:p-6 lg:col-span-2">
 
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
               <h2 className="text-xl font-bold text-slate-900">
                 Team Roster
               </h2>
 
-              <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
+              <div className="w-full rounded-xl bg-slate-900 px-5 py-3 text-white sm:w-auto">
                 <div className="text-xs uppercase tracking-wide text-slate-300">
                   Players
                 </div>
@@ -1019,13 +1019,13 @@ function getAverageTeamRating() {
                     className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50"
                   >
 
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
                       <div className="min-w-0 flex-1">
 
                         <div className="flex flex-wrap items-center gap-2">
 
-                          <div className="truncate text-base font-bold text-slate-900">
+                          <div className="min-w-0 break-words text-base font-bold text-slate-900 sm:truncate">
                             {member?.last_name}, {member?.first_name}
                           </div>
 
@@ -1049,7 +1049,7 @@ function getAverageTeamRating() {
 
                         </div>
 
-                        <div className="mt-2 space-y-1 text-sm text-slate-600">
+                        <div className="mt-2 space-y-2 break-words text-sm text-slate-600">
 
                           <div>
                             Games:{" "}
@@ -1086,7 +1086,7 @@ function getAverageTeamRating() {
 
                       </div>
 
-                      <div className="flex shrink-0 flex-wrap gap-2">
+                      <div className="grid shrink-0 grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
                         <button
                           type="button"
                           onClick={() =>
