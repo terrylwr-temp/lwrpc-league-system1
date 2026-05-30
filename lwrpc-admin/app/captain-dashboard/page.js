@@ -1855,8 +1855,7 @@ export default function CaptainDashboardPage() {
               return (
               <div
                 key={team.id}
-                onClick={() => setSelectedCaptainTeamId(team.id)}
-                className={`cursor-pointer overflow-hidden rounded-2xl border shadow-md transition hover:shadow-lg ${
+                className={`overflow-hidden rounded-2xl border shadow-md ${
                   selected ? "border-4 border-emerald-500 bg-blue-50 shadow-lg" : "border-slate-200 bg-white"
                 }`}
               >
@@ -1876,7 +1875,7 @@ export default function CaptainDashboardPage() {
                         event.stopPropagation();
                         router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`);
                       }}
-                      className="rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
+                      className="cursor-pointer rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
                     >
                       Rank {standing?.rank ? `#${standing.rank}` : "N/A"}
                     </button>
@@ -1906,7 +1905,7 @@ export default function CaptainDashboardPage() {
                       event.stopPropagation();
                       router.push(`/teams/${team.id}`);
                     }}
-                    className="rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
+                    className="cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
                   >
                     Manage Roster
                   </button>
@@ -1917,7 +1916,7 @@ export default function CaptainDashboardPage() {
                       event.stopPropagation();
                       openDivisionSchedule(team);
                     }}
-                    className="rounded-xl bg-indigo-100 px-3 py-3 text-sm font-bold text-indigo-900 shadow-sm hover:bg-indigo-200"
+                    className="cursor-pointer rounded-xl bg-indigo-100 px-3 py-3 text-sm font-bold text-indigo-900 shadow-sm hover:bg-indigo-200"
                   >
                     Schedules/Standings
                   </button>
@@ -1928,7 +1927,7 @@ export default function CaptainDashboardPage() {
                       event.stopPropagation();
                       displayDivisionCaptains(team);
                     }}
-                    className="rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
+                    className="cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
                   >
                     Division Captains
                   </button>
@@ -3801,7 +3800,7 @@ function DashboardTeamSelector({ teams, teamStats, selectedTeamId, onSelect }) {
               role="tab"
               aria-selected={selected}
               onClick={() => onSelect(team.id)}
-              className={`relative shrink-0 rounded-t-2xl border px-4 text-left shadow-sm transition-transform duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-0 ${
+              className={`relative shrink-0 cursor-pointer rounded-t-2xl border px-4 text-left shadow-sm transition-transform duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-0 ${
                 selected
                   ? "z-10 border-emerald-500 border-b-emerald-800 bg-gradient-to-r from-emerald-800 to-blue-800 py-3 text-white shadow-md"
                   : "border-slate-200 bg-slate-100 py-2 text-slate-700 hover:border-blue-200 hover:bg-blue-50"

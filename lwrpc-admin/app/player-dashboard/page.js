@@ -1055,7 +1055,6 @@ export default function PlayerDashboardPage() {
                 team={selectedVisibleTeam}
                 selected={String(selectedVisibleTeam.id) === String(selectedPlayerTeamId)}
                 documentsOpen={openLeagueDocuments[selectedVisibleTeam.id] === true}
-                onSelect={() => setSelectedPlayerTeamId(selectedVisibleTeam.id)}
                 onToggleDocuments={() =>
                   setOpenLeagueDocuments((current) => ({
                     ...current,
@@ -1463,7 +1462,7 @@ function DashboardTeamSelector({ teams, selectedTeamId, onSelect }) {
               role="tab"
               aria-selected={selected}
               onClick={() => onSelect(team.id)}
-              className={`relative shrink-0 rounded-t-2xl border px-4 text-left shadow-sm transition-transform duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-0 ${
+              className={`relative shrink-0 cursor-pointer rounded-t-2xl border px-4 text-left shadow-sm transition-transform duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-0 ${
                 selected
                   ? "z-10 border-emerald-500 border-b-emerald-800 bg-gradient-to-r from-emerald-800 to-blue-800 py-3 text-white shadow-md"
                   : "border-slate-200 bg-slate-100 py-2 text-slate-700 hover:border-blue-200 hover:bg-blue-50"
@@ -1504,7 +1503,6 @@ function TeamCard({
   team,
   selected,
   documentsOpen,
-  onSelect,
   onToggleDocuments,
   onOpenDocument,
   onOpenRoster,
@@ -1516,8 +1514,7 @@ function TeamCard({
 
   return (
     <div
-      onClick={onSelect}
-      className={`cursor-pointer overflow-hidden rounded-2xl border text-sm shadow-md transition hover:shadow-lg ${
+      className={`overflow-hidden rounded-2xl border text-sm shadow-md ${
         selected ? "border-4 border-emerald-500 bg-blue-50" : "border-slate-200 bg-white"
       }`}
     >
@@ -1537,7 +1534,7 @@ function TeamCard({
                 event.stopPropagation();
                 onOpenStandings(team);
               }}
-              className="rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
+              className="cursor-pointer rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
             >
               Rank #{standing?.rank || "N/A"}
             </button>
@@ -1567,7 +1564,7 @@ function TeamCard({
             event.stopPropagation();
             onOpenRoster(team);
           }}
-          className="w-full rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
+          className="w-full cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
         >
           Team Roster
         </button>
