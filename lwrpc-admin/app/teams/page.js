@@ -663,7 +663,7 @@ export default function TeamsPage() {
     ] = await Promise.all([
       supabase
         .from("teams")
-        .select("id, name, division_id, is_active")
+        .select("id, name, division_id, is_active, locations(id, name)")
         .eq("division_id", team.division_id)
         .neq("is_active", false)
         .order("name", { ascending: true }),

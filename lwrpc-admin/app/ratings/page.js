@@ -38,6 +38,10 @@ export default function RatingsPage() {
   const [showNrAgeOnly, setShowNrAgeOnly] = useState(false);
   const [showInvalidDuprIdsOnly, setShowInvalidDuprIdsOnly] = useState(false);
   const [showRatingImportTools, setShowRatingImportTools] = useState(false);
+  const [memberSort, setMemberSort] = useState({
+    field: "name",
+    direction: "asc",
+  });
   const [page, setPage] = useState(1);
 
   const checkAuth = useCallback(async function checkAuth() {
@@ -86,7 +90,7 @@ export default function RatingsPage() {
 
     const { data: memberData, error: memberError } = await supabase
       .from("members")
-      .select("id, first_name, last_name, email, club_location, dupr_id, is_active_member")
+      .select("id, first_name, last_name, email, club_location, dupr_id, created_at, is_active_member")
       .or("is_active_member.eq.true,is_active_member.is.null")
       .order("last_name", { ascending: true });
 
@@ -208,6 +212,29 @@ export default function RatingsPage() {
     return row?.[field] ?? "";
   }
 
+  async function updateMemberDuprId(memberId, value) {
+    const cleanValue = String(value || "").trim() || null;
+
+    const { error } = await supabase
+      .from("members")
+      .update({
+        dupr_id: cleanValue,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", memberId);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setMembers((current) =>
+      current.map((member) =>
+        member.id === memberId ? { ...member, dupr_id: cleanValue } : member
+      )
+    );
+  }
+
   function normalizeRatingInput(field, value) {
     if (value === "") return null;
 
@@ -258,30 +285,30 @@ export default function RatingsPage() {
     return selectedSeason ? seasonLabel(selectedSeason) : "No season selected";
   }
 
-  function seasonSortValue(seasonId) {
-    const season = seasons.find((item) => item.id === seasonId);
-    const dateValue = season?.start_date || season?.created_at || season?.name || "";
-    return new Date(dateValue).getTime() || 0;
+  function formatMemberCreatedAt(value) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    return date.toLocaleDateString();
   }
 
-  function getRatingHistory(memberId) {
-    return allRatings
-      .filter((rating) => rating.member_id === memberId)
-      .sort((a, b) => seasonSortValue(b.season_id) - seasonSortValue(a.season_id));
+  function compareMemberName(a, b) {
+    const last = String(a.last_name || "").localeCompare(String(b.last_name || ""));
+    if (last !== 0) return last;
+    return String(a.first_name || "").localeCompare(String(b.first_name || ""));
   }
 
-  function formatRating(value) {
-    if (value === null || value === undefined || value === "") return "NR";
-    const numberValue = Number(value);
-    return Number.isNaN(numberValue) ? "NR" : numberValue.toFixed(2);
+  function toggleMemberSort(field) {
+    setMemberSort((current) => ({
+      field,
+      direction:
+        current.field === field && current.direction === "desc" ? "asc" : "desc",
+    }));
   }
 
-  function formatDuprDoublesRating(value) {
-    if (value === null || value === undefined || value === "") return "NR";
-    const text = String(value).trim();
-    if (text.toUpperCase() === "NR") return "NR";
-    const numberValue = Number(text);
-    return Number.isNaN(numberValue) ? "NR" : numberValue.toFixed(3);
+  function sortIndicator(field) {
+    if (memberSort.field !== field) return "";
+    return memberSort.direction === "desc" ? " ↓" : " ↑";
   }
 
   async function deleteRatingsForSelectedSeason() {
@@ -831,9 +858,8 @@ export default function RatingsPage() {
       nextMembers = nextMembers.filter((member) => String(member.dupr_id || "").trim().length !== 6);
     }
 
-    if (!q) return nextMembers;
-
-    return nextMembers.filter((member) => {
+    if (q) {
+      nextMembers = nextMembers.filter((member) => {
       const fullName = `${member.first_name || ""} ${member.last_name || ""}`;
       const reverseName = `${member.last_name || ""} ${member.first_name || ""}`;
 
@@ -843,8 +869,21 @@ export default function RatingsPage() {
         (member.club_location || "").toLowerCase().includes(q) ||
         (member.dupr_id || "").toLowerCase().includes(q)
       );
+      });
+    }
+
+    return [...nextMembers].sort((a, b) => {
+      let result = compareMemberName(a, b);
+
+      if (memberSort.field === "created_at") {
+        const aTime = new Date(a.created_at || 0).getTime() || 0;
+        const bTime = new Date(b.created_at || 0).getTime() || 0;
+        result = aTime - bTime || compareMemberName(a, b);
+      }
+
+      return memberSort.direction === "desc" ? -result : result;
     });
-  }, [currentRosterMemberIds, hasDoublesRating, hasNumericRating, members, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly]);
+  }, [currentRosterMemberIds, hasDoublesRating, hasNumericRating, memberSort, members, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
@@ -1247,8 +1286,26 @@ function goToPage(value) {
           <table className="min-w-full">
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
-                <th className="px-4 py-4 text-left">Player</th>
+                <th className="px-4 py-4 text-left">
+                  <button
+                    type="button"
+                    onClick={() => toggleMemberSort("name")}
+                    className="font-semibold uppercase tracking-wide"
+                  >
+                    Player{sortIndicator("name")}
+                  </button>
+                </th>
                 <th className="px-4 py-4 text-left">Location</th>
+                <th className="px-4 py-4 text-left">DUPR ID</th>
+                <th className="px-4 py-4 text-left">
+                  <button
+                    type="button"
+                    onClick={() => toggleMemberSort("created_at")}
+                    className="font-semibold uppercase tracking-wide"
+                  >
+                    Added{sortIndicator("created_at")}
+                  </button>
+                </th>
                 <th className="px-4 py-4 text-left">Season</th>
                 <th className="px-4 py-4 text-left">DUPR Doubles Rating</th>
                 <th className="px-4 py-4 text-left">Season DUPR Rating</th>
@@ -1258,7 +1315,6 @@ function goToPage(value) {
 
             <tbody>
               {pagedMembers.map((member) => {
-                const history = getRatingHistory(member.id);
                 const missingDoublesRating = !hasDoublesRating(member.id);
 
                 return (
@@ -1271,64 +1327,50 @@ function goToPage(value) {
                     }`}
                   >
                     <td className="px-4 py-4">
-                      <div className="font-semibold text-slate-900">
-                        {member.last_name}, {member.first_name}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="font-semibold text-slate-900">
+                          {member.last_name}, {member.first_name}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => copyMemberName(member)}
+                          className="shrink-0 rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200"
+                        >
+                          Copy Name
+                        </button>
                       </div>
-
-                      <button
-                        type="button"
-                        onClick={() => copyMemberName(member)}
-                        className="mt-2 rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200"
-                      >
-                        Copy Name
-                      </button>
 
                       <button
                         type="button"
                         onClick={() => router.push(`/members/${member.id}`)}
-                        className="ml-2 mt-2 rounded-lg bg-blue-100 px-2 py-1 text-xs font-bold text-blue-800 hover:bg-blue-200"
+                        className="mt-2 rounded-lg bg-blue-100 px-2 py-1 text-xs font-bold text-blue-800 hover:bg-blue-200"
                       >
                         Edit Member
                       </button>
 
-                      <div className="text-xs text-slate-500">
-                        DUPR ID: {member.dupr_id || ""}
-                      </div>
-
-                      {missingDoublesRating && (
-                        <div className="mt-2 inline-flex rounded-full bg-amber-200 px-2 py-1 text-xs font-bold text-amber-950">
-                          Missing DUPR Doubles Rating
-                        </div>
-                      )}
-
-                      {history.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {history.slice(0, 4).map((rating) => (
-                            <span
-                              key={rating.id}
-                              className={`rounded-full px-2 py-1 text-xs font-semibold ${
-                                rating.season_id === selectedSeason
-                                  ? "bg-blue-100 text-blue-900"
-                                  : "bg-slate-100 text-slate-700"
-                              }`}
-                            >
-                              {seasonLabel(rating.season_id)}: DUPR{" "}
-                              {formatDuprDoublesRating(rating.dupr_doubles_rating)} / Season{" "}
-                              {formatRating(rating.season_dupr_rating)} / A{" "}
-                              {formatRating(rating.season_primetime_rating)}
-                            </span>
-                          ))}
-                          {history.length > 4 && (
-                            <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-600">
-                              +{history.length - 4} more
-                            </span>
-                          )}
-                        </div>
-                      )}
                     </td>
 
                     <td className="px-4 py-4 text-sm text-slate-700">
                       {member.club_location || ""}
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <input
+                        key={`${member.id}-dupr-id`}
+                        type="text"
+                        defaultValue={member.dupr_id || ""}
+                        onBlur={(e) => {
+                          const cleanValue = e.target.value.trim();
+                          e.target.value = cleanValue;
+                          updateMemberDuprId(member.id, cleanValue);
+                        }}
+                        className="w-28 rounded-xl border border-slate-300 px-3 py-2"
+                        placeholder="DUPR ID"
+                      />
+                    </td>
+
+                    <td className="px-4 py-4 text-sm text-slate-700">
+                      {formatMemberCreatedAt(member.created_at)}
                     </td>
 
                     <td className="px-4 py-4">
@@ -1405,7 +1447,7 @@ function goToPage(value) {
               {pagedMembers.length === 0 && (
                 <tr>
                   <td
-                    colSpan="6"
+                    colSpan="8"
                     className="px-4 py-10 text-center text-slate-500"
                   >
                     No players found.

@@ -825,7 +825,7 @@ export default function PlayerDashboardPage() {
     ] = await Promise.all([
       supabase
         .from("teams")
-        .select("id, name, division_id")
+        .select("id, name, division_id, locations(id, name)")
         .eq("division_id", divisionId)
         .order("name", { ascending: true }),
       supabase
@@ -1268,7 +1268,7 @@ export default function PlayerDashboardPage() {
                   onClick={() => setShowAllTeamMatches((value) => !value)}
                   className="rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-900 hover:bg-slate-100"
                 >
-                  {showAllTeamMatches ? "Upcoming Only" : "Show All Matches"}
+                  {showAllTeamMatches ? "Upcoming Only" : "Show Completed Matches"}
                 </button>
                 <div className="rounded-xl bg-white/15 px-4 py-2 text-center text-sm font-bold text-white">
                   {selectedTeamScheduleItems.length}
@@ -1560,27 +1560,16 @@ function TeamCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-2">
+      <div className="border-t border-slate-100 p-4">
         <button
           type="button"
           onClick={(event) => {
             event.stopPropagation();
             onOpenRoster(team);
           }}
-          className="rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
+          className="w-full rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
         >
           Team Roster
-        </button>
-
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            onOpenStandings(team);
-          }}
-          className="rounded-xl bg-indigo-100 px-3 py-3 text-sm font-bold text-indigo-900 shadow-sm hover:bg-indigo-200"
-        >
-          Division Standings
         </button>
       </div>
 
@@ -2102,6 +2091,16 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
                 <div className="mt-1 text-sm font-semibold text-slate-600">
                   {formatLocationAddress(location)}
                 </div>
+                {mapUrl && (
+                  <a
+                    href={mapUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="mt-3 inline-flex rounded-xl bg-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
+                  >
+                    Open Home Team Address Map
+                  </a>
+                )}
               </div>
             )}
 
@@ -2122,29 +2121,6 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
                   </div>
                 )}
               </>
-            )}
-
-            {!isVerifiedCompleted && (
-              <div className="flex flex-wrap gap-2">
-                {mapUrl && (
-                  <a
-                    href={mapUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-xl bg-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
-                  >
-                    Open Home Team Address Map
-                  </a>
-                )}
-
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300"
-                >
-                  Done
-                </button>
-              </div>
             )}
           </div>
         </div>
