@@ -8,7 +8,7 @@ import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 
 const PAGE_SIZE = 100;
-const RATING_SELECT = "id, member_id, season_id, dupr_doubles_rating, season_dupr_rating, season_primetime_rating";
+const RATING_SELECT = "id, member_id, season_id, dupr_doubles_rating, season_dupr_rating, season_primetime_rating, notes";
 
 export default function RatingsPage() {
   const router = useRouter();
@@ -185,6 +185,7 @@ export default function RatingsPage() {
         dupr_doubles_rating: null,
         season_dupr_rating: null,
         season_primetime_rating: null,
+        notes: null,
         [field]: cleanValue,
       };
 
@@ -237,6 +238,10 @@ export default function RatingsPage() {
 
   function normalizeRatingInput(field, value) {
     if (value === "") return null;
+
+    if (field === "notes") {
+      return String(value || "").trim() || null;
+    }
 
     if (field === "dupr_doubles_rating") {
       const text = String(value || "").trim();
@@ -1295,7 +1300,6 @@ function goToPage(value) {
                     Player{sortIndicator("name")}
                   </button>
                 </th>
-                <th className="px-4 py-4 text-left">Location</th>
                 <th className="px-4 py-4 text-left">DUPR ID</th>
                 <th className="px-4 py-4 text-left">
                   <button
@@ -1306,10 +1310,10 @@ function goToPage(value) {
                     Added{sortIndicator("created_at")}
                   </button>
                 </th>
-                <th className="px-4 py-4 text-left">Season</th>
-                <th className="px-4 py-4 text-left">DUPR Doubles Rating</th>
-                <th className="px-4 py-4 text-left">Season DUPR Rating</th>
-                <th className="px-4 py-4 text-left">Age-Based Rating</th>
+                <th className="px-4 py-4 text-left">DUPR Doubles ({selectedSeasonLabel()})</th>
+                <th className="px-4 py-4 text-left">DUPR Notes ({selectedSeasonLabel()})</th>
+                <th className="px-4 py-4 text-left">Season DUPR ({selectedSeasonLabel()})</th>
+                <th className="px-4 py-4 text-left">Age-Based ({selectedSeasonLabel()})</th>
               </tr>
             </thead>
 
@@ -1350,10 +1354,6 @@ function goToPage(value) {
 
                     </td>
 
-                    <td className="px-4 py-4 text-sm text-slate-700">
-                      {member.club_location || ""}
-                    </td>
-
                     <td className="px-4 py-4">
                       <input
                         key={`${member.id}-dupr-id`}
@@ -1374,15 +1374,6 @@ function goToPage(value) {
                     </td>
 
                     <td className="px-4 py-4">
-                      <div className="font-semibold text-slate-900">
-                        {selectedSeasonLabel()}
-                      </div>
-                      <div className="mt-1 text-xs text-slate-500">
-                        Edits apply to this season only.
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-4">
                       <input
                         key={`${member.id}-${selectedSeason}-dupr-doubles`}
                         type="text"
@@ -1398,6 +1389,22 @@ function goToPage(value) {
                         }}
                         className="w-32 rounded-xl border border-slate-300 px-3 py-2"
                         placeholder="3.999 or NR"
+                      />
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <textarea
+                        key={`${member.id}-${selectedSeason}-dupr-notes`}
+                        defaultValue={getRating(member.id, "notes")}
+                        onBlur={(e) =>
+                          updateRating(
+                            member.id,
+                            "notes",
+                            e.target.value
+                          )
+                        }
+                        className="min-h-16 w-48 resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm"
+                        placeholder="DUPR notes"
                       />
                     </td>
 
@@ -1447,7 +1454,7 @@ function goToPage(value) {
               {pagedMembers.length === 0 && (
                 <tr>
                   <td
-                    colSpan="8"
+                    colSpan="7"
                     className="px-4 py-10 text-center text-slate-500"
                   >
                     No players found.
