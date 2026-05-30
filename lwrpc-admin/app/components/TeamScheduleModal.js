@@ -265,7 +265,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
                   </span>
                   <div className="flex flex-wrap gap-2">
                     <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-900">
-                      {line.home_team_games_won ?? 0}-{line.away_team_games_won ?? 0}
+                      Team Points: {formatLineTeamPoints(line)}
                     </span>
                     {winnerName && (
                       <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black text-emerald-950">
@@ -288,7 +288,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
                     ratingType={ratingType}
                   />
                 </div>
-                <GameScoreRows line={line} />
+                <GameScoreRows line={line} match={match} />
               </div>
               );
             })}
@@ -309,7 +309,7 @@ function compareScheduleItems(a, b) {
   return aDate - bDate;
 }
 
-function GameScoreRows({ line }) {
+function GameScoreRows({ line, match }) {
   const games = (line.line_games || [])
     .slice()
     .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
@@ -325,39 +325,51 @@ function GameScoreRows({ line }) {
   return (
     <div className="mt-3 grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 xl:grid-cols-3">
       {games.map((game) => (
-        <div
-          key={game.id}
-          className="rounded-xl border border-slate-200 bg-slate-50 p-3 shadow-sm"
-        >
-          <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
-            Game {game.game_number || "-"}
-          </div>
-          <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
-            <div className="rounded-lg bg-white px-2 py-2 text-center font-black text-slate-800">
-              <div className="text-[10px] uppercase tracking-wide text-slate-500">Home</div>
-              <div className="text-2xl text-slate-950">{game.home_score ?? "-"}</div>
-            </div>
-            <div className="text-sm font-black text-slate-400">-</div>
-            <div className="rounded-lg bg-white px-2 py-2 text-center font-black text-slate-800">
-              <div className="text-[10px] uppercase tracking-wide text-slate-500">Away</div>
-              <div className="text-2xl text-slate-950">{game.away_score ?? "-"}</div>
-            </div>
-          </div>
-        </div>
+        <GameScoreCard key={game.id} game={game} match={match} />
       ))}
     </div>
   );
 }
 
+function GameScoreCard({ game, match }) {
+  const specialLabel = specialGameStatusLabel(game.game_status, match);
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 text-center shadow-sm">
+      <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">
+        Game {game.game_number || "-"}
+      </div>
+      <div className="mt-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+        <div className="rounded-lg bg-white px-2 py-2 font-black text-slate-800">
+          <div className="text-[10px] uppercase tracking-wide text-slate-500">Home</div>
+          <div className="text-2xl text-slate-950">{game.home_score ?? "-"}</div>
+        </div>
+        <div className="text-sm font-black text-slate-400">-</div>
+        <div className="rounded-lg bg-white px-2 py-2 font-black text-slate-800">
+          <div className="text-[10px] uppercase tracking-wide text-slate-500">Away</div>
+          <div className="text-2xl text-slate-950">{game.away_score ?? "-"}</div>
+        </div>
+      </div>
+      {specialLabel && (
+        <div className="mt-2 rounded-lg bg-amber-100 px-2 py-1.5 text-xs font-black text-amber-950">
+          {specialLabel}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function TeamPlayers({ label, players, ratingByMemberId, ratingType }) {
+  const enteredPlayers = players.filter(Boolean);
+
   return (
     <div className="rounded-lg bg-slate-50 px-3 py-2">
       <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">{label}</div>
       <div className="mt-1 space-y-1 font-semibold text-slate-800">
-        {players.filter(Boolean).length === 0 ? (
+        {enteredPlayers.length === 0 ? (
           <div className="text-slate-500">Players not entered</div>
         ) : (
-          players.filter(Boolean).map((player) => (
+          enteredPlayers.map((player) => (
             <div key={player.id} className="flex items-center justify-between gap-2">
               <span>{formatMemberName(player)}</span>
               <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-black text-slate-700">
@@ -365,6 +377,11 @@ function TeamPlayers({ label, players, ratingByMemberId, ratingType }) {
               </span>
             </div>
           ))
+        )}
+        {enteredPlayers.length > 0 && (
+          <div className="pt-1 text-xs font-black uppercase tracking-wide text-slate-600">
+            Team Rating: {formatTeamLineRating(enteredPlayers, ratingByMemberId, ratingType)}
+          </div>
         )}
       </div>
     </div>
@@ -410,8 +427,22 @@ function formatHomeLocation(team) {
   return team?.locations?.name || "No Home Location";
 }
 
+function formatLineTeamPoints(line) {
+  const points = Number(line?.division_lines?.team_win_points ?? 1);
+
+  return Number.isNaN(points) ? "-" : points;
+}
+
 function formatTeamName(team, fallback) {
   return team?.name || fallback;
+}
+
+function specialGameStatusLabel(status, match) {
+  if (status === "forfeit_home") return `Forfeited to ${formatTeamName(match?.home_team, "Home")}`;
+  if (status === "forfeit_away") return `Forfeited to ${formatTeamName(match?.away_team, "Away")}`;
+  if (status === "retired_home") return `Retired to ${formatTeamName(match?.home_team, "Home")}`;
+  if (status === "retired_away") return `Retired to ${formatTeamName(match?.away_team, "Away")}`;
+  return "";
 }
 
 function formatLineWinnerName(match, line) {
@@ -472,4 +503,14 @@ function formatPlayerRating(player, ratingByMemberId, ratingType) {
 
   const number = Number(rating);
   return Number.isNaN(number) ? "NR" : number.toFixed(2);
+}
+
+function formatTeamLineRating(players, ratingByMemberId, ratingType) {
+  const ratings = players
+    .map((player) => Number(formatPlayerRating(player, ratingByMemberId, ratingType)))
+    .filter((rating) => !Number.isNaN(rating));
+
+  if (!ratings.length) return "NR";
+
+  return ratings.reduce((sum, rating) => sum + rating, 0).toFixed(2);
 }

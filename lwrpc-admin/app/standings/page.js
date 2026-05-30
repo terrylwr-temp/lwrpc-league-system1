@@ -239,7 +239,9 @@ export default function StandingsPage() {
             away_team_games_won,
             winning_team_id,
             division_lines (
-              line_name
+              line_name,
+              line_type,
+              team_win_points
             ),
             home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
             home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),

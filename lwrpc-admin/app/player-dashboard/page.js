@@ -7,7 +7,7 @@ import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import TeamScheduleModal from "../components/TeamScheduleModal";
 import { requireRole, supabase } from "../lib/auth";
-import { formatDisplayTime } from "../lib/dateTime";
+import { formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import {
   filterHistoryRows,
   formatDate,
@@ -229,7 +229,8 @@ export default function PlayerDashboardPage() {
               division_lines (
                 id,
                 line_name,
-                line_type
+                line_type,
+                team_win_points
               ),
               home_player_1:members!match_lines_home_player_1_id_fkey (
                 id,
@@ -856,7 +857,7 @@ export default function PlayerDashboardPage() {
             home_team_games_won,
             away_team_games_won,
             winning_team_id,
-            division_lines ( line_name ),
+            division_lines ( line_name, line_type, team_win_points ),
             home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
             home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
             away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, self_rating),
@@ -2011,25 +2012,20 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
       <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-800 to-zinc-800 px-4 py-4 text-white md:flex-row md:items-start md:justify-between">
-          <div>
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-800 to-zinc-800 px-3 py-4 text-white sm:px-4 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
             <div className="text-xs font-black uppercase tracking-wide text-slate-200">
               Week {match.week_number || "-"} {isVerifiedCompleted ? "Match Results" : "Match Details"}
             </div>
-            <h2 className="mt-1 text-xl font-black sm:text-2xl">
+            <h2 className="mt-1 break-words text-xl font-black sm:text-2xl">
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-200">
               <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
-              {homeScore !== null && awayScore !== null && (
-                <span className="rounded-full bg-white/15 px-4 py-1.5 text-lg font-black text-white">
-                  Match Score: {homeScore}-{awayScore}
-                </span>
-              )}
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:justify-end">
             <button
               type="button"
               onClick={printMatchResults}
@@ -2065,6 +2061,35 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
             />
           </div>
 
+          {isVerifiedCompleted && (
+            <div className="border-y border-slate-200 bg-slate-50 px-3 pb-3 sm:px-5 sm:pb-5">
+              <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  {formatMatchScoreStatus(match)}
+                </div>
+                <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+                  <MatchScoreSummaryRow
+                    label="Home"
+                    name={match.home_team?.name || "Home"}
+                    score={homeScore}
+                    won={String(match.winning_team_id || "") === String(match.home_team_id || "")}
+                    tone="home"
+                  />
+                  <div className="text-lg font-black text-slate-400">
+                    -
+                  </div>
+                  <MatchScoreSummaryRow
+                    label="Away"
+                    name={match.away_team?.name || "Away"}
+                    score={awayScore}
+                    won={String(match.winning_team_id || "") === String(match.away_team_id || "")}
+                    tone="away"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3 p-3 sm:p-5">
             {!isVerifiedCompleted && (
               <div className="rounded-2xl border border-slate-200 bg-white p-4">
@@ -2081,27 +2106,22 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
             )}
 
             {isVerifiedCompleted && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                  Games
-                </div>
-                <div className="mt-3 space-y-3">
-                  {lines.map((line) => (
-                      <MatchLineResult
-                        key={line.id}
-                        line={line}
-                        match={match}
-                        ratingForMember={ratingForMember}
-                      />
-                    ))}
+              <>
+                {lines.map((line) => (
+                  <MatchLineResult
+                    key={line.id}
+                    line={line}
+                    match={match}
+                    ratingForMember={ratingForMember}
+                  />
+                ))}
 
-                  {!match.match_lines?.length && (
-                    <div className="rounded-xl bg-slate-50 p-4 text-center text-sm font-semibold text-slate-500">
-                      No game results have been entered for this match.
-                    </div>
-                  )}
-                </div>
-              </div>
+                {!match.match_lines?.length && (
+                  <div className="rounded-xl bg-slate-50 p-4 text-center text-sm font-semibold text-slate-500">
+                    No game results have been entered for this match.
+                  </div>
+                )}
+              </>
             )}
 
             {!isVerifiedCompleted && (
@@ -2136,6 +2156,7 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
 function MatchLineResult({ line, match, ratingForMember }) {
   const winnerName = matchLineWinnerName(line, match);
   const winnerSide = matchLineWinnerSide(line, match);
+  const teamPointsText = lineTeamPointsText(line);
   const winnerClass =
     winnerSide === "home"
       ? "bg-emerald-50 text-emerald-950"
@@ -2145,30 +2166,35 @@ function MatchLineResult({ line, match, ratingForMember }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-        <div>
+      <div className="flex flex-col gap-3 border-b border-slate-100 px-3 py-3 sm:px-4 md:flex-row md:items-center md:justify-between">
+        <div className="min-w-0">
           <div className="text-base font-black text-slate-950">
             Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
           </div>
           <div className="mt-0.5 text-xs font-semibold text-slate-600">
-            {line.division_lines?.line_type || "Line"}
+            {capitalizeLabel(line.division_lines?.line_type || "Line")}
           </div>
         </div>
-        <div className={`rounded-full px-4 py-2 text-sm font-black ${winnerClass}`}>
-          {winnerName}
+        <div className="flex flex-wrap gap-2 md:justify-end">
+          <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-950">
+            Team Points: {teamPointsText}
+          </div>
+          <div className={`rounded-full px-4 py-2 text-sm font-black ${winnerClass}`}>
+            {winnerName}
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 p-3 sm:p-4 md:grid-cols-2">
         <ResultTeamPlayers
-          label={match.home_team?.name || "Home"}
+          label={`Home: ${match.home_team?.name || "Home"}`}
           players={[line.home_player_1, line.home_player_2]}
           match={match}
           tone="home"
           ratingForMember={ratingForMember}
         />
         <ResultTeamPlayers
-          label={match.away_team?.name || "Away"}
+          label={`Away: ${match.away_team?.name || "Away"}`}
           players={[line.away_player_1, line.away_player_2]}
           match={match}
           tone="away"
@@ -2176,22 +2202,71 @@ function MatchLineResult({ line, match, ratingForMember }) {
         />
       </div>
 
-      <div className="border-t border-slate-100 px-4 py-3">
-        <div className="flex flex-wrap gap-2">
+      <div className="border-t border-slate-100 px-3 py-3 sm:px-4">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
           {[...(line.line_games || [])]
             .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
             .map((game) => (
-              <span key={game.id} className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-black text-slate-950">
-                {gameScoreText(game)}
-              </span>
+              <GameScoreCard key={game.id} game={game} match={match} />
             ))}
           {!line.line_games?.length && (
-            <span className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-500">
+            <span className="rounded-xl bg-slate-100 px-4 py-2 text-center text-sm font-bold text-slate-500 sm:col-span-3">
               No game scores entered.
             </span>
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+function MatchScoreSummaryRow({ label, name, score, won, tone }) {
+  const toneClass =
+    tone === "home"
+      ? "bg-emerald-100 text-emerald-950"
+      : "bg-indigo-50 text-indigo-950";
+
+  return (
+    <div className={`flex min-w-0 items-center justify-between gap-2 rounded-lg px-2.5 py-2 sm:px-3 ${won ? toneClass : "bg-slate-50 text-slate-900"}`}>
+      <div className="min-w-0">
+        <div className="text-[10px] font-black uppercase tracking-wide opacity-70">
+          {label}{won ? " Winner" : ""}
+        </div>
+        <div className="truncate text-xs font-black sm:text-sm">
+          {name}
+        </div>
+      </div>
+      <div className="shrink-0 text-2xl font-black">
+        {score ?? "-"}
+      </div>
+    </div>
+  );
+}
+
+function GameScoreCard({ game, match }) {
+  const specialLabel = specialGameStatusLabel(game, match);
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-center shadow-sm">
+      <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+        Game {game.game_number || "-"}
+      </div>
+      <div className="mt-1 flex items-center justify-center gap-3">
+        <div>
+          <div className="text-[10px] font-black uppercase tracking-wide text-emerald-700">Home</div>
+          <div className="text-2xl font-black text-emerald-950">{game.home_score ?? "-"}</div>
+        </div>
+        <div className="text-lg font-black text-slate-400">-</div>
+        <div>
+          <div className="text-[10px] font-black uppercase tracking-wide text-indigo-700">Away</div>
+          <div className="text-2xl font-black text-indigo-950">{game.away_score ?? "-"}</div>
+        </div>
+      </div>
+      {specialLabel && (
+        <div className="mt-2 rounded-lg bg-amber-100 px-2 py-1.5 text-xs font-black text-amber-950">
+          {specialLabel}
+        </div>
+      )}
     </div>
   );
 }
@@ -2341,6 +2416,54 @@ function teamLineRating(players, match, ratingForMember) {
 
   if (!ratings.length) return "NR";
   return ratings.reduce((sum, rating) => sum + rating, 0).toFixed(2);
+}
+
+function lineTeamPointsText(line) {
+  const configuredPoints = Number(line.division_lines?.team_win_points ?? 1);
+
+  return Number.isNaN(configuredPoints) ? "-" : configuredPoints;
+}
+
+function specialGameStatusLabel(game, match) {
+  if (game.game_status === "forfeit_home") {
+    return `Forfeited to ${match.home_team?.name || "Home"}`;
+  }
+
+  if (game.game_status === "forfeit_away") {
+    return `Forfeited to ${match.away_team?.name || "Away"}`;
+  }
+
+  if (game.game_status === "retired_home") {
+    return `Retired to ${match.home_team?.name || "Home"}`;
+  }
+
+  if (game.game_status === "retired_away") {
+    return `Retired to ${match.away_team?.name || "Away"}`;
+  }
+
+  return "";
+}
+
+function capitalizeLabel(value) {
+  return String(value || "")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function formatMatchScoreStatus(match) {
+  const status = match?.score_status || "not_entered";
+
+  if (status === "not_entered") return "NOT ENTERED";
+
+  const timestamp =
+    status === "verified"
+      ? match?.score_verified_at
+      : match?.score_entered_at;
+  const label = status.replaceAll("_", " ").toUpperCase();
+
+  return timestamp
+    ? `${label} - ${formatDisplayTimestampShort(timestamp)}`
+    : label;
 }
 
 function compareDivisionScheduleTeams(a, b) {
