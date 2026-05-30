@@ -107,15 +107,19 @@ if (roleError) {
   return;
 }
 
-const { data: locationData } = await supabase
-  .from("members")
-  .select("club_location, location_id")
-  .not("club_location", "is", null)
-  .order("club_location", { ascending: true });
+const { data: locationData, error: locationError } = await supabase
+  .from("locations")
+  .select("id, name")
+  .order("name", { ascending: true });
 
-const uniqueLocations = uniqueMemberLocations(locationData || []);
+if (locationError) {
+  alert(locationError.message);
+  return;
+}
 
-setLocations(uniqueLocations);
+const locationOptions = locationOptionsWithCurrentValue(locationData || [], memberData);
+
+setLocations(locationOptions);
 setRoleRow(roleData || null);
 setUserRole(roleData?.role || "player");
 
@@ -849,25 +853,6 @@ async function updateMemberActiveStatus(nextIsActive) {
   );
 }
 
-function uniqueMemberLocations(rows) {
-  const byName = new Map();
-
-  rows.forEach((row) => {
-    if (!row.club_location) return;
-    const key = normalizeLocationName(row.club_location);
-    const existing = byName.get(key);
-
-    if (!existing || (!existing.id && row.location_id)) {
-      byName.set(key, {
-        id: row.location_id || null,
-        name: row.club_location,
-      });
-    }
-  });
-
-  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
-}
-
 function locationIdForName(locations, name) {
   const normalizedName = normalizeLocationName(name);
   const location = (locations || []).find(
@@ -879,5 +864,22 @@ function locationIdForName(locations, name) {
 
 function normalizeLocationName(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function locationOptionsWithCurrentValue(locations, member) {
+  const options = [...(locations || [])];
+  const currentName = member?.club_location || "";
+  const currentExists = options.some(
+    (location) => normalizeLocationName(location.name) === normalizeLocationName(currentName)
+  );
+
+  if (currentName && !currentExists) {
+    options.push({
+      id: member?.location_id || null,
+      name: currentName,
+    });
+  }
+
+  return options.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
 }
 

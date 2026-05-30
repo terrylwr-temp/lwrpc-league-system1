@@ -3387,13 +3387,13 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       .score-sheet th {
         background: #e5e7eb;
         text-align: center;
-        font-size: 13px;
+        font-size: 14px;
         font-weight: 900;
       }
       .score-sheet .header-score {
         display: inline-block;
-        margin-left: 16px;
-        font-size: 12px;
+        margin-left: 18px;
+        font-size: 13px;
         font-weight: 900;
       }
       .score-sheet .lineups {
@@ -3440,6 +3440,56 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       }
       .score-sheet .score-entries td {
         height: 28px;
+      }
+      .score-sheet .score-entries th {
+        font-size: 12px;
+      }
+      .score-sheet .score-entries .game-col {
+        width: 42%;
+      }
+      .score-sheet .score-entries .line-type-col {
+        width: 10%;
+      }
+      .score-sheet .score-entries .game-format-col {
+        width: 18%;
+      }
+      .score-sheet .score-entries .score-col {
+        width: 15%;
+      }
+      .score-sheet .score-entries .compact-game-col {
+        width: 70%;
+      }
+      .score-sheet .score-entries td:first-child {
+        font-size: 12px;
+        font-weight: 900;
+      }
+      .score-sheet .score-entries.compact td:first-child {
+        font-size: 13px;
+      }
+      .score-sheet .score-entry-details {
+        margin-top: 10px;
+        border: 1px solid #111827;
+        background: #f9fafb;
+        padding: 6px;
+        font-size: 13px;
+        font-weight: 900;
+        text-align: center;
+      }
+      .score-sheet .score-entry-details span {
+        display: inline-block;
+        margin: 0 10px;
+      }
+      .score-sheet .score-entries .grouped-score-row td:first-child {
+        border-left-width: 2px;
+      }
+      .score-sheet .score-entries .grouped-score-row td:last-child {
+        border-right-width: 2px;
+      }
+      .score-sheet .score-entries .group-start td {
+        border-top-width: 2px;
+      }
+      .score-sheet .score-entries .group-end td {
+        border-bottom-width: 2px;
       }
       .score-sheet .rounds td:first-child {
         font-weight: 900;
@@ -3491,7 +3541,7 @@ function renderScoreSheetTemplate(match, {
   scoreEntryTable,
 }) {
   const activeTemplate = template?.is_active === false ? null : template;
-  const templateHtml = activeTemplate?.template_html || DEFAULT_SCORE_SHEET_TEMPLATE_HTML;
+  const templateHtml = normalizeScoreSheetTemplateHtml(activeTemplate?.template_html || DEFAULT_SCORE_SHEET_TEMPLATE_HTML);
   const rulesText = activeTemplate?.rules_text || DEFAULT_SCORE_SHEET_RULES;
   const sheetTitle = activeTemplate?.sheet_title || activeTemplate?.name || DEFAULT_SCORE_SHEET_TEMPLATE_NAME;
   const captainSignatureRows = `
@@ -3535,6 +3585,18 @@ function renderScoreSheetTemplate(match, {
       : escapeHtml(value);
     return html.replaceAll(token, escapedValue);
   }, templateHtml);
+}
+
+function normalizeScoreSheetTemplateHtml(html) {
+  return String(html || "")
+    .replaceAll(
+      'AWAY Teams <span class="header-score">Score: ______</span>',
+      'Away Teams <span class="header-score">Total Team Score: ________</span>'
+    )
+    .replaceAll(
+      'HOME Teams <span class="header-score">Score: ______</span>',
+      'Home Teams <span class="header-score">Total Team Score: ________</span>'
+    );
 }
 
 function scoreSheetConfiguredLines(match) {
@@ -3587,41 +3649,92 @@ function scoreSheetConfiguredGameLinesTable(match) {
   `;
 }
 
-function scoreSheetEntryRows(match) {
-  return scoreSheetConfiguredLines(match).flatMap((line) => {
-    const gamesPerLine = Math.max(1, Number(line.games_per_line ?? match.divisions?.games_per_line ?? 1));
+function scoreSheetEntryRows(match, options = {}) {
+  const lines = options.lines || scoreSheetConfiguredLines(match);
+  const hideRepeatedDetails = options.hideRepeatedDetails === true;
 
-    return Array.from({ length: gamesPerLine }, () => `
-      <tr>
+  return lines.flatMap((line) => {
+    const gamesPerLine = Math.max(1, Number(line.games_per_line ?? match.divisions?.games_per_line ?? 1));
+    const isGrouped = gamesPerLine > 1;
+
+    return Array.from({ length: gamesPerLine }, (_, gameIndex) => `
+      <tr class="${scoreSheetEntryRowClass(isGrouped, gameIndex, gamesPerLine)}">
         <td>${escapeHtml(scoreSheetGameLineLabel(line))}</td>
+        ${hideRepeatedDetails ? "" : `
         <td>${escapeHtml(scoreSheetLineTypeLabel(line.line_type))}</td>
         <td>${escapeHtml(scoreSheetFormatLabel(line.game_format))}</td>
-        <td>Away Score:</td>
-        <td>Home Score:</td>
+        `}
+        <td></td>
+        <td></td>
       </tr>
     `);
   }).join("");
 }
 
 function scoreSheetEntryTable(match) {
+  const lines = scoreSheetConfiguredLines(match);
+  const sharedDetails = sharedScoreSheetEntryDetails(lines);
+  const hideRepeatedDetails = Boolean(sharedDetails);
+
   return `
-    <table class="score-entries">
+    ${sharedDetails ? `
+      <div class="score-entry-details">
+        <span>Line Type: ${escapeHtml(sharedDetails.lineType)}</span>
+        <span>Game Format: ${escapeHtml(sharedDetails.gameFormat)}</span>
+      </div>
+    ` : ""}
+    <table class="score-entries${hideRepeatedDetails ? " compact" : ""}">
+      <colgroup>
+        <col class="${hideRepeatedDetails ? "compact-game-col" : "game-col"}" />
+        ${hideRepeatedDetails ? "" : `
+        <col class="line-type-col" />
+        <col class="game-format-col" />
+        `}
+        <col class="score-col" />
+        <col class="score-col" />
+      </colgroup>
       <thead>
         <tr>
           <th>Game</th>
+          ${hideRepeatedDetails ? "" : `
           <th>Line Type</th>
           <th>Game Format</th>
+          `}
           <th>Away</th>
           <th>Home</th>
         </tr>
       </thead>
-      <tbody>${scoreSheetEntryRows(match)}</tbody>
+      <tbody>${scoreSheetEntryRows(match, { lines, hideRepeatedDetails })}</tbody>
     </table>
   `;
 }
 
+function sharedScoreSheetEntryDetails(lines) {
+  if (!lines?.length) return null;
+
+  const firstLineType = scoreSheetLineTypeLabel(lines[0].line_type);
+  const firstGameFormat = scoreSheetFormatLabel(lines[0].game_format);
+  const allSame = lines.every(
+    (line) =>
+      scoreSheetLineTypeLabel(line.line_type) === firstLineType &&
+      scoreSheetFormatLabel(line.game_format) === firstGameFormat
+  );
+
+  return allSame ? { lineType: firstLineType, gameFormat: firstGameFormat } : null;
+}
+
+function scoreSheetEntryRowClass(isGrouped, gameIndex, gamesPerLine) {
+  if (!isGrouped) return "";
+
+  return [
+    "grouped-score-row",
+    gameIndex === 0 ? "group-start" : "",
+    gameIndex === gamesPerLine - 1 ? "group-end" : "",
+  ].filter(Boolean).join(" ");
+}
+
 function scoreSheetGameLineLabel(line) {
-  return `Game ${line.line_number || "-"}: ${line.line_name || `Line ${line.line_number || ""}`}`;
+  return `Game ${line.line_number || "-"}) ${line.line_name || `Line ${line.line_number || ""}`}`;
 }
 
 function scoreSheetLineTypeLabel(value) {
@@ -3652,7 +3765,7 @@ function scoreSheetRoundRows(lineCount) {
       const awayNumber = awayIndex + 1;
       const homeNumber = ((awayIndex + roundIndex) % count) + 1;
 
-      return `<tr><td>Away ${awayNumber} vs. Home ${homeNumber}</td><td>Away Score:</td><td>Home Score:</td></tr>`;
+      return `<tr><td>Away ${awayNumber} vs. Home ${homeNumber}</td><td></td><td></td></tr>`;
     }).join("");
 
     return `<tr><th colspan="3">${escapeHtml(roundTitle)}</th></tr>${matches}`;

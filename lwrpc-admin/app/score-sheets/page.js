@@ -477,15 +477,29 @@ function previewScoreSheetDocument({ templateHtml, sheetTitle, rulesText }) {
       .score-sheet .value { display: block; margin-top: 3px; font-size: 13px; font-weight: 800; }
       .score-sheet table { width: 100%; border-collapse: collapse; }
       .score-sheet th, .score-sheet td { border: 1px solid #111827; padding: 7px; vertical-align: middle; }
-      .score-sheet th { background: #e5e7eb; text-align: center; font-size: 13px; font-weight: 900; }
-      .score-sheet .header-score { display: inline-block; margin-left: 16px; font-size: 12px; font-weight: 900; }
+      .score-sheet th { background: #e5e7eb; text-align: center; font-size: 14px; font-weight: 900; }
+      .score-sheet .header-score { display: inline-block; margin-left: 18px; font-size: 13px; font-weight: 900; }
       .score-sheet .lineups, .score-sheet .configured-lines, .score-sheet .score-entries, .score-sheet .rounds { margin-top: 10px; }
       .score-sheet .line-cell { width: 50%; min-height: 68px; font-size: 13px; font-weight: 800; }
       .score-sheet .line-number { float: left; margin-right: 7px; font-size: 18px; font-weight: 900; }
       .score-sheet .rating { font-size: 11px; font-weight: 700; }
       .score-sheet .team-rating { margin-top: 4px; font-size: 11px; font-weight: 900; }
       .score-sheet .configured-lines th, .score-sheet .configured-lines td, .score-sheet .score-entries th, .score-sheet .score-entries td { font-size: 10px; padding: 5px; }
+      .score-sheet .score-entries th { font-size: 12px; }
       .score-sheet .score-entries td { height: 28px; }
+      .score-sheet .score-entries .game-col { width: 42%; }
+      .score-sheet .score-entries .line-type-col { width: 10%; }
+      .score-sheet .score-entries .game-format-col { width: 18%; }
+      .score-sheet .score-entries .score-col { width: 15%; }
+      .score-sheet .score-entries .compact-game-col { width: 70%; }
+      .score-sheet .score-entries td:first-child { font-size: 12px; font-weight: 900; }
+      .score-sheet .score-entries.compact td:first-child { font-size: 13px; }
+      .score-sheet .score-entry-details { margin-top: 10px; border: 1px solid #111827; background: #f9fafb; padding: 6px; font-size: 13px; font-weight: 900; text-align: center; }
+      .score-sheet .score-entry-details span { display: inline-block; margin: 0 10px; }
+      .score-sheet .score-entries .grouped-score-row td:first-child { border-left-width: 2px; }
+      .score-sheet .score-entries .grouped-score-row td:last-child { border-right-width: 2px; }
+      .score-sheet .score-entries .group-start td { border-top-width: 2px; }
+      .score-sheet .score-entries .group-end td { border-bottom-width: 2px; }
       .score-sheet .notes { margin-top: 10px; font-size: 12px; font-weight: 400; text-align: justify; line-height: 1.25; }
       .score-sheet .signatures { margin-top: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
       .score-sheet .signature-line { border-bottom: 1px solid #111827; height: 26px; }
@@ -513,8 +527,8 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
     </tr>
   `;
   const configuredRows = `
-    <tr><td>Game 1: Home 1 vs Visitor 1</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
-    <tr><td>Game 2: Home 2 vs Visitor 2</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
+    <tr><td>Game 1) Home 1 vs Visitor 1</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
+    <tr><td>Game 2) Home 2 vs Visitor 2</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
   `;
   const configuredTable = `
     <table class="configured-lines">
@@ -523,16 +537,25 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
     </table>
   `;
   const scoreRows = `
-    <tr><td>Game 1: Home 1 vs Visitor 1</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>Away Score:</td><td>Home Score:</td></tr>
-    <tr><td>Game 1: Home 1 vs Visitor 1</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>Away Score:</td><td>Home Score:</td></tr>
-    <tr><td>Game 1: Home 1 vs Visitor 1</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>Away Score:</td><td>Home Score:</td></tr>
-    <tr><td>Game 2: Home 2 vs Visitor 2</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>Away Score:</td><td>Home Score:</td></tr>
-    <tr><td>Game 2: Home 2 vs Visitor 2</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>Away Score:</td><td>Home Score:</td></tr>
-    <tr><td>Game 2: Home 2 vs Visitor 2</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>Away Score:</td><td>Home Score:</td></tr>
+    <tr class="grouped-score-row group-start"><td>Game 1) Home 1 vs Visitor 1</td><td></td><td></td></tr>
+    <tr class="grouped-score-row"><td>Game 1) Home 1 vs Visitor 1</td><td></td><td></td></tr>
+    <tr class="grouped-score-row group-end"><td>Game 1) Home 1 vs Visitor 1</td><td></td><td></td></tr>
+    <tr class="grouped-score-row group-start"><td>Game 2) Home 2 vs Visitor 2</td><td></td><td></td></tr>
+    <tr class="grouped-score-row"><td>Game 2) Home 2 vs Visitor 2</td><td></td><td></td></tr>
+    <tr class="grouped-score-row group-end"><td>Game 2) Home 2 vs Visitor 2</td><td></td><td></td></tr>
   `;
   const scoreTable = `
-    <table class="score-entries">
-      <thead><tr><th>Game</th><th>Line Type</th><th>Game Format</th><th>Away</th><th>Home</th></tr></thead>
+    <div class="score-entry-details">
+      <span>Line Type: Doubles</span>
+      <span>Game Format: Regular to 15, win by 1</span>
+    </div>
+    <table class="score-entries compact">
+      <colgroup>
+        <col class="compact-game-col" />
+        <col class="score-col" />
+        <col class="score-col" />
+      </colgroup>
+      <thead><tr><th>Game</th><th>Away</th><th>Home</th></tr></thead>
       <tbody>${scoreRows}</tbody>
     </table>
   `;
@@ -553,7 +576,7 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
     "{{home_team}}": "Home Sample Team",
     "{{away_team}}": "Away Sample Team",
     "{{lineup_rows}}": lineupRows,
-    "{{round_rows}}": "<tr><th colspan=\"3\">Round 1</th></tr><tr><td>Away 1 vs. Home 1</td><td>Away Score:</td><td>Home Score:</td></tr>",
+    "{{round_rows}}": "<tr><th colspan=\"3\">Round 1</th></tr><tr><td>Away 1 vs. Home 1</td><td></td><td></td></tr>",
     "{{configured_game_lines_rows}}": configuredRows,
     "{{configured_game_lines_table}}": configuredTable,
     "{{score_entry_rows}}": scoreRows,
@@ -573,7 +596,19 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
 
   return Object.entries(replacements).reduce((html, [token, value]) => (
     html.replaceAll(token, htmlTokens.includes(token) ? value : escapeHtml(value))
-  ), templateHtml || DEFAULT_SCORE_SHEET_TEMPLATE_HTML);
+  ), normalizeScoreSheetTemplateHtml(templateHtml || DEFAULT_SCORE_SHEET_TEMPLATE_HTML));
+}
+
+function normalizeScoreSheetTemplateHtml(html) {
+  return String(html || "")
+    .replaceAll(
+      'AWAY Teams <span class="header-score">Score: ______</span>',
+      'Away Teams <span class="header-score">Total Team Score: ________</span>'
+    )
+    .replaceAll(
+      'HOME Teams <span class="header-score">Score: ______</span>',
+      'Home Teams <span class="header-score">Total Team Score: ________</span>'
+    );
 }
 
 function slugifyFileName(value) {

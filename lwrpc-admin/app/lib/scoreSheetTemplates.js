@@ -21,8 +21,8 @@ export const DEFAULT_SCORE_SHEET_TEMPLATE_HTML = `
 <table class="lineups">
   <thead>
     <tr>
-      <th>AWAY Teams <span class="header-score">Score: ______</span></th>
-      <th>HOME Teams <span class="header-score">Score: ______</span></th>
+      <th>Away Teams <span class="header-score">Total Team Score: ________</span></th>
+      <th>Home Teams <span class="header-score">Total Team Score: ________</span></th>
     </tr>
   </thead>
   <tbody>{{lineup_rows}}</tbody>
