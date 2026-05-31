@@ -6,6 +6,7 @@ import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestamp } from "../lib/dateTime";
 import { confirmDeleteAction } from "../lib/confirmDelete";
+import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 export default function SchedulingPage() {
   const router = useRouter();
@@ -51,6 +52,38 @@ export default function SchedulingPage() {
   const [blackoutDivision, setBlackoutDivision] = useState("");
   const [blackoutDate, setBlackoutDate] = useState("");
   const [blackoutReason, setBlackoutReason] = useState("");
+
+  useUnsavedChangesWarning(
+    Boolean(
+      editingSettingId ||
+      editingAvailabilityId ||
+      editingLeagueBlackoutId ||
+      selectedLeague ||
+      selectedDivision ||
+      settingName.trim() ||
+      seasonStart ||
+      seasonEnd ||
+      defaultMatchDay ||
+      defaultMatchTime ||
+      courtsNeededPerMatch !== "4" ||
+      actualScheduleWeeks ||
+      everyOtherWeek ||
+      !allowByes ||
+      notes.trim() ||
+      availabilityLocation ||
+      dayOfWeek ||
+      specificDate ||
+      startTime ||
+      endTime ||
+      courtsUnavailable !== "0" ||
+      availabilityNotes.trim() ||
+      blackoutLeague ||
+      blackoutDivision ||
+      blackoutDate ||
+      blackoutReason.trim()
+    ),
+    "schedule setup"
+  );
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
+import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 export default function LocationsPage() {
   const router = useRouter();
@@ -27,6 +28,11 @@ export default function LocationsPage() {
   const [numberOfCourts, setNumberOfCourts] = useState("");
   const [clubProMemberId, setClubProMemberId] = useState("");
   const [courtNotes, setCourtNotes] = useState("");
+
+  useUnsavedChangesWarning(
+    Boolean(editingId || name.trim() || address.trim() || city.trim() || stateValue !== "FL" || zipCode.trim() || numberOfCourts || clubProMemberId || courtNotes.trim()),
+    "location"
+  );
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");

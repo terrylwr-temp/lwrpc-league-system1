@@ -9,6 +9,7 @@ import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../lib/notificationPreferences";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 const PAGE_SIZE = 100;
 const CLEAN_MEMBERS_BATCH_SIZE = 25;
@@ -45,6 +46,21 @@ export default function MembersPage() {
   const [teamsMember, setTeamsMember] = useState(null);
   const [savingNewMember, setSavingNewMember] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState(initialMemberForm());
+
+  useUnsavedChangesWarning(
+    Boolean(showAddMember && (
+      newMemberForm.first_name.trim() ||
+      newMemberForm.last_name.trim() ||
+      newMemberForm.email.trim() ||
+      newMemberForm.phone.trim() ||
+      newMemberForm.club_location.trim() ||
+      newMemberForm.dupr_id.trim() ||
+      newMemberForm.renewal_date ||
+      newMemberForm.notification_preference !== NOTIFICATION_EMAIL ||
+      newMemberForm.role !== "player"
+    )),
+    "member"
+  );
 
   const loadMembers = useCallback(async function loadMembers() {
     setLoading(true);
@@ -263,6 +279,8 @@ export default function MembersPage() {
 
   function closeAddMember() {
     if (savingNewMember) return;
+    if (!confirmUnsavedChanges()) return;
+
     setShowAddMember(false);
     setNewMemberForm(initialMemberForm());
   }
@@ -329,7 +347,7 @@ export default function MembersPage() {
   }
 
   function openMember(memberId) {
-    router.push(`/members/${memberId}`);
+    if (confirmUnsavedChanges()) router.push(`/members/${memberId}`);
   }
 
   function openMemberTeams(member) {

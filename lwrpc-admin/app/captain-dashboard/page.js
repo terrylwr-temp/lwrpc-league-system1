@@ -22,6 +22,7 @@ import {
   DEFAULT_SCORE_SHEET_TEMPLATE_HTML,
   DEFAULT_SCORE_SHEET_TEMPLATE_NAME,
 } from "../lib/scoreSheetTemplates";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
@@ -46,6 +47,7 @@ export default function CaptainDashboardPage() {
   const [setupRoster, setSetupRoster] = useState([]);
   const [setupLineups, setSetupLineups] = useState([]);
   const [setupRatings, setSetupRatings] = useState([]);
+  const [setupDirty, setSetupDirty] = useState(false);
   const [savingSetup, setSavingSetup] = useState(false);
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
@@ -59,6 +61,8 @@ export default function CaptainDashboardPage() {
   const [scoreDetailsMatch, setScoreDetailsMatch] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
   const [rosterTeam, setRosterTeam] = useState(null);
+
+  useUnsavedChangesWarning(Boolean(setupMatch && setupDirty), "match setup");
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -899,7 +903,7 @@ export default function CaptainDashboardPage() {
                     scoreButtonAction(match);
                     return;
                   }
-                  if (canEnterScores) router.push(`/matches/${match.id}`);
+                  if (canEnterScores && confirmUnsavedChanges()) router.push(`/matches/${match.id}`);
                 }}
                 className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 title={canEnterScores ? scoreButtonTitle : "Scores unlock on the scheduled match date"}
@@ -935,6 +939,7 @@ export default function CaptainDashboardPage() {
   async function openMatchSetup(match, team) {
     setSetupMatch(match);
     setSetupTeam(team);
+    setSetupDirty(false);
 
     const [{ data: rosterData, error: rosterError }, { data: lineupData, error: lineupError }] =
       await Promise.all([
@@ -1165,6 +1170,7 @@ export default function CaptainDashboardPage() {
   }
 
   function updateSetupLineup(lineNumber, field, value) {
+    setSetupDirty(true);
     setSetupLineups((current) =>
       current.map((lineup) =>
         lineup.line_number === lineNumber ? { ...lineup, [field]: value } : lineup
@@ -1236,6 +1242,7 @@ export default function CaptainDashboardPage() {
     setSetupRoster([]);
     setSetupLineups([]);
     setSetupRatings([]);
+    setSetupDirty(false);
       alert(notificationSent ? "Match setup saved and opponent captain notification sent." : "Match setup saved, but the opponent notification could not be sent.");
   }
 
@@ -1660,7 +1667,9 @@ export default function CaptainDashboardPage() {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
               <button
                 type="button"
-                onClick={() => router.push("/reset-password")}
+                onClick={() => {
+                  if (confirmUnsavedChanges()) router.push("/reset-password");
+                }}
                 className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-500"
               >
                 Change Password
@@ -1746,10 +1755,13 @@ export default function CaptainDashboardPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    if (!confirmUnsavedChanges()) return;
+
                     setSetupMatch(null);
                     setSetupTeam(null);
                     setSetupRoster([]);
                     setSetupLineups([]);
+                    setSetupDirty(false);
                   }}
                   className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-300 sm:py-2"
                 >
@@ -1873,7 +1885,9 @@ export default function CaptainDashboardPage() {
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
-                        router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`);
+                        if (confirmUnsavedChanges()) {
+                          router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`);
+                        }
                       }}
                       className="cursor-pointer rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
                     >
@@ -1903,7 +1917,7 @@ export default function CaptainDashboardPage() {
                     type="button"
                     onClick={(event) => {
                       event.stopPropagation();
-                      router.push(`/teams/${team.id}`);
+                      if (confirmUnsavedChanges()) router.push(`/teams/${team.id}`);
                     }}
                     className="cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
                   >

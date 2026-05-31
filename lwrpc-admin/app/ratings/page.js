@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 const PAGE_SIZE = 100;
 const RATING_SELECT = "id, member_id, season_id, dupr_doubles_rating, season_dupr_rating, season_primetime_rating, notes";
@@ -29,6 +30,8 @@ export default function RatingsPage() {
   const [copyTargetSeason, setCopyTargetSeason] = useState("");
   const [isCopyingRatings, setIsCopyingRatings] = useState(false);
   const [isCleaningRatings, setIsCleaningRatings] = useState(false);
+
+  useUnsavedChangesWarning(Boolean(copySourceSeason || copyTargetSeason), "ratings copy setup");
 
   const [selectedSeason, setSelectedSeason] = useState("");
   const [search, setSearch] = useState("");
@@ -681,6 +684,8 @@ export default function RatingsPage() {
     }
 
     setRatingImportStatus(`Copied ${sourceRows.length} rating record(s) from ${sourceName} to ${targetName}.`);
+    setCopySourceSeason("");
+    setCopyTargetSeason("");
     setIsCopyingRatings(false);
   }
 
@@ -1346,7 +1351,9 @@ function goToPage(value) {
 
                       <button
                         type="button"
-                        onClick={() => router.push(`/members/${member.id}`)}
+                        onClick={() => {
+                          if (confirmUnsavedChanges()) router.push(`/members/${member.id}`);
+                        }}
                         className="mt-2 rounded-lg bg-blue-100 px-2 py-1 text-xs font-bold text-blue-800 hover:bg-blue-200"
                       >
                         Edit Member

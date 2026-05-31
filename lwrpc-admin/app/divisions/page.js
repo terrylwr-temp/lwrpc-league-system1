@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 export default function DivisionsPage() {
   const router = useRouter();
@@ -50,6 +51,38 @@ export default function DivisionsPage() {
   const [tiebreak1, setTiebreak1] = useState("standings_points");
   const [tiebreak2, setTiebreak2] = useState("line_wins");
   const [tiebreak3, setTiebreak3] = useState("point_differential");
+
+  useUnsavedChangesWarning(
+    Boolean(
+      editingId ||
+      selectedLeague ||
+      name.trim() ||
+      ratingType !== "dupr" ||
+      minDupr ||
+      maxDupr ||
+      teamDuprMax ||
+      sortOrder ||
+      playoffTeamCount ||
+      numberOfTeams !== "3" ||
+      defaultGameFormat ||
+      gamesPerTeam !== "3" ||
+      pointsToWin !== "11" ||
+      winBy !== "2" ||
+      picklebreakerEnabled ||
+      picklebreakerPoints !== "25" ||
+      picklebreakerWinPoints !== "1" ||
+      picklebreakerLossPoints !== "0" ||
+      lineNotes ||
+      scoreSheetTemplateId ||
+      standingsWinPoints !== "2" ||
+      standingsTiePoints !== "1" ||
+      standingsLossPoints !== "0" ||
+      tiebreak1 !== "standings_points" ||
+      tiebreak2 !== "line_wins" ||
+      tiebreak3 !== "point_differential"
+    ),
+    "division"
+  );
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -909,7 +942,9 @@ export default function DivisionsPage() {
                             <div className="flex flex-wrap justify-end gap-2">
                               <button
                                 type="button"
-                                onClick={() => router.push(`/divisions/${division.id}`)}
+                                onClick={() => {
+                                  if (confirmUnsavedChanges()) router.push(`/divisions/${division.id}`);
+                                }}
                                 className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
                               >
                                 Configure Game Lines ({division.configured_line_count || 0})

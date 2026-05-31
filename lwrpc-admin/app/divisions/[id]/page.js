@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { supabase } from "../../lib/auth";
 import { confirmDeleteAction } from "../../lib/confirmDelete";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 
 const GLOBAL_DEFAULT_LINES_KEY = "lwrpc-default-lines-config";
 
@@ -27,6 +28,24 @@ export default function DivisionDetailPage() {
   const [teamWinPoints, setTeamWinPoints] = useState("1");
   const [standingsPointsMode, setStandingsPointsMode] = useState("line_result");
   const [editingId, setEditingId] = useState(null);
+
+  useUnsavedChangesWarning(
+    Boolean(
+      editingId ||
+      teamNumber !== "1" ||
+      teamName.trim() ||
+      !postedToDupr ||
+      !usesSavedMatchLineups ||
+      teamType !== "doubles" ||
+      gameFormat ||
+      gamesPerTeam !== "3" ||
+      pointsToWin !== "11" ||
+      winBy !== "2" ||
+      teamWinPoints !== "1" ||
+      standingsPointsMode !== "line_result"
+    ),
+    "game line"
+  );
 
   const normalizeDefaultLinesConfig = useCallback(function normalizeDefaultLinesConfig(value) {
     if (!value) return [];
@@ -669,7 +688,9 @@ export default function DivisionDetailPage() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => router.push("/divisions")}
+            onClick={() => {
+              if (confirmUnsavedChanges()) router.push("/divisions");
+            }}
             className="rounded-xl bg-slate-200 px-4 py-2 font-semibold hover:bg-slate-300"
           >
             ← Back to Divisions

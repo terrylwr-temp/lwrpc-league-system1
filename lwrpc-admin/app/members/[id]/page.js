@@ -12,6 +12,7 @@ import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
 import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
 import { hasAnotherCommissioner } from "../../lib/roleGuards";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
@@ -30,6 +31,8 @@ export default function MemberDetailPage() {
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
+
+  useUnsavedChangesWarning(editMode, "member");
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -393,7 +396,9 @@ async function updateMemberActiveStatus(nextIsActive) {
 
         <div className="mb-6 flex flex-wrap gap-3">
           <button
-            onClick={() => router.back()}
+            onClick={() => {
+              if (confirmUnsavedChanges()) router.back();
+            }}
             className="rounded-xl bg-slate-200 px-4 py-2 font-semibold hover:bg-slate-300"
           >
             ← Members

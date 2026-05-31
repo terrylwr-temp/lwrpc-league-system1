@@ -13,6 +13,7 @@ import {
   initialLeagueDocuments,
   leagueDocumentPayload,
 } from "../lib/leagueDocuments";
+import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 export default function LeaguesPage() {
   const router = useRouter();
@@ -31,6 +32,11 @@ export default function LeaguesPage() {
   const [loadingDocumentFiles, setLoadingDocumentFiles] = useState(false);
   const [editingLeagueId, setEditingLeagueId] = useState(null);
   const [hydrated, setHydrated] = useState(false);
+
+  useUnsavedChangesWarning(
+    Boolean(editingLeagueId || leagueName.trim() || selectedSeason || rostersLocked || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean)),
+    "league"
+  );
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");

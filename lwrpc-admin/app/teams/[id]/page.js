@@ -6,6 +6,7 @@ import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
 import { hasRole } from "../../lib/permissions";
 import { confirmDeleteAction } from "../../lib/confirmDelete";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 import {
   filterHistoryRows,
   formatDate,
@@ -30,6 +31,8 @@ export default function TeamRosterPage() {
 
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState(null);
+
+  useUnsavedChangesWarning(Boolean(selectedMemberId), "roster selection");
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -787,6 +790,8 @@ function getAverageTeamRating() {
 
           <button
             onClick={() => {
+              if (!confirmUnsavedChanges()) return;
+
               if (isCaptainOnly) {
                 router.push("/captain-dashboard");
               } else {

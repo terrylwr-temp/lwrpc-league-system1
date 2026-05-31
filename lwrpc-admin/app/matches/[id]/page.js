@@ -9,6 +9,7 @@ import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } fro
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
 import { rebuildDivisionStandingsForDivision } from "../../lib/standingsRebuild";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 
 export default function MatchDetailPage() {
   const { id } = useParams();
@@ -24,7 +25,10 @@ export default function MatchDetailPage() {
   const [currentUserMember, setCurrentUserMember] = useState(null);
   const [currentUserRole, setCurrentUserRole] = useState("player");
   const [matchLineups, setMatchLineups] = useState([]);
+  const [scoreDirty, setScoreDirty] = useState(false);
   const pendingGameUpdatesRef = useRef(new Map());
+
+  useUnsavedChangesWarning(scoreDirty, "match scores");
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -561,6 +565,8 @@ export default function MatchDetailPage() {
 
     if (!selectedLine) return;
 
+    setScoreDirty(true);
+
     const selectedSlot = teamSlotNumber(selectedLine);
     const selectedDivisionLineId = selectedLine.division_line_id;
 
@@ -619,6 +625,8 @@ export default function MatchDetailPage() {
 
     const lineup = matchLineups.find((item) => item.id === lineupId);
     if (!lineup) return;
+
+    setScoreDirty(true);
 
     const player1Field = side === "home" ? "home_player_1_id" : "away_player_1_id";
     const player2Field = side === "home" ? "home_player_2_id" : "away_player_2_id";
@@ -709,6 +717,8 @@ export default function MatchDetailPage() {
 
     const normalizedValue =
       field === "game_status" ? value || "completed" : value === "" ? null : Number(value);
+
+    setScoreDirty(true);
 
     setGames((currentGames) =>
       currentGames.map((game) =>
@@ -1030,6 +1040,7 @@ export default function MatchDetailPage() {
 
     alert("Scores submitted for verification and opposing captains notified.");
 
+    setScoreDirty(false);
     router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
   }
 
@@ -1070,6 +1081,7 @@ export default function MatchDetailPage() {
 
     alert("Scores verified and standings updated.");
 
+    setScoreDirty(false);
     router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
   }
 
@@ -1259,7 +1271,7 @@ export default function MatchDetailPage() {
   const scoreEntryEditable = canEditScoreEntry();
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-6">
+    <main className="min-h-screen bg-slate-100 p-4 pb-28 md:p-6">
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="Enter Match Scores"
@@ -1269,7 +1281,11 @@ export default function MatchDetailPage() {
         <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:gap-3">
           <button
             type="button"
-            onClick={() => router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor")}
+            onClick={() => {
+              if (confirmUnsavedChanges()) {
+                router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
+              }
+            }}
             className="rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 lg:py-2"
           >
             Back to {isCaptainView() ? "Captain Dashboard" : "Schedule Editor"}
@@ -1493,6 +1509,7 @@ export default function MatchDetailPage() {
                             {match.home_team?.name || "Home"}
                             <input
                               type="number"
+                              inputMode="numeric"
                               value={game.home_score ?? ""}
                               onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
                               disabled={!scoreEntryEditable || scoresBlockedForLine}
@@ -1504,6 +1521,7 @@ export default function MatchDetailPage() {
                             {match.away_team?.name || "Away"}
                             <input
                               type="number"
+                              inputMode="numeric"
                               value={game.away_score ?? ""}
                               onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
                               disabled={!scoreEntryEditable || scoresBlockedForLine}
@@ -1560,6 +1578,7 @@ export default function MatchDetailPage() {
                             <td className="p-1.5">
                               <input
                                 type="number"
+                                inputMode="numeric"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
                                 disabled={!scoreEntryEditable || scoresBlockedForLine}
@@ -1570,6 +1589,7 @@ export default function MatchDetailPage() {
                             <td className="p-1.5">
                               <input
                                 type="number"
+                                inputMode="numeric"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
                                 disabled={!scoreEntryEditable || scoresBlockedForLine}
@@ -1617,6 +1637,42 @@ export default function MatchDetailPage() {
             </div>
           )}
         </div>
+
+        {(scoreEntryEditable || (match.score_status !== "verified" && scoreReviewAllowed)) && (
+          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
+            <div className="mx-auto grid max-w-7xl grid-cols-1 gap-2">
+              {scoreEntryEditable && (
+                <button
+                  type="button"
+                  onClick={completeMatch}
+                  className="rounded-xl bg-green-700 px-4 py-3 text-base font-bold text-white shadow hover:bg-green-800"
+                >
+                  Submit Scores
+                </button>
+              )}
+
+              {match.score_status !== "verified" && scoreReviewAllowed && (
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={verifyScores}
+                    className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white shadow hover:bg-emerald-800"
+                  >
+                    Validate
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={disputeScores}
+                    className="rounded-xl bg-red-700 px-4 py-3 text-sm font-bold text-white shadow hover:bg-red-800"
+                  >
+                    Dispute
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );

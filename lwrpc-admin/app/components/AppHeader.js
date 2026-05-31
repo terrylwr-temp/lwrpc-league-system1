@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
+import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function AppHeader({
@@ -101,6 +102,8 @@ export default function AppHeader({
   }
 
   async function logout() {
+    if (!confirmUnsavedChanges()) return;
+
     await supabase.auth.signOut();
     router.push("/login");
   }
@@ -166,6 +169,8 @@ export default function AppHeader({
         key={link.path}
         title={collapsed && !mobile ? link.label : ""}
         onClick={() => {
+          if (!confirmUnsavedChanges()) return;
+
           router.push(link.path);
           setMenuOpen(false);
         }}

@@ -6,6 +6,7 @@ import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import { formatDisplayDate } from "../lib/dateTime";
+import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 export default function SeasonsPage() {
   const router = useRouter();
@@ -14,6 +15,11 @@ export default function SeasonsPage() {
   const [seasonStart, setSeasonStart] = useState("");
   const [seasonEnd, setSeasonEnd] = useState("");
   const [editingSeasonId, setEditingSeasonId] = useState(null);
+
+  useUnsavedChangesWarning(
+    Boolean(editingSeasonId || seasonName.trim() || seasonStart || seasonEnd),
+    "season"
+  );
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");

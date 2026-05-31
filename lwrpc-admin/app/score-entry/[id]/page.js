@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 
 export default function MobileScoreEntryPage() {
   const { id } = useParams();
@@ -14,7 +15,10 @@ export default function MobileScoreEntryPage() {
   const [lines, setLines] = useState([]);
   const [games, setGames] = useState([]);
   const [currentUserMember, setCurrentUserMember] = useState(null);
+  const [scoreDirty, setScoreDirty] = useState(false);
   const pendingGameUpdatesRef = useRef(new Map());
+
+  useUnsavedChangesWarning(scoreDirty, "match scores");
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -152,6 +156,8 @@ export default function MobileScoreEntryPage() {
 
   async function updateGame(gameId, field, value) {
     const normalizedValue = value === "" ? null : Number(value);
+
+    setScoreDirty(true);
 
     setGames((currentGames) =>
       currentGames.map((game) =>
@@ -307,6 +313,7 @@ export default function MobileScoreEntryPage() {
 
     alert("Scores submitted for verification and opposing captains notified.");
 
+    setScoreDirty(false);
     router.push(`/matches/${id}`);
   }
 
@@ -563,7 +570,9 @@ export default function MobileScoreEntryPage() {
           </button>
 
           <button
-            onClick={() => router.push(`/matches/${id}`)}
+            onClick={() => {
+              if (confirmUnsavedChanges()) router.push(`/matches/${id}`);
+            }}
             className="mt-3 w-full rounded-2xl bg-slate-200 px-5 py-3 font-semibold text-slate-900"
           >
             Full Match View

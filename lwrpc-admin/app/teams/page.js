@@ -7,6 +7,7 @@ import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import TeamScheduleModal from "../components/TeamScheduleModal";
+import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 export default function TeamsPage() {
   const router = useRouter();
@@ -47,6 +48,11 @@ export default function TeamsPage() {
   const [teamActive, setTeamActive] = useState(true);
   const [showAllCaptainCommunities, setShowAllCaptainCommunities] = useState(false);
   const [notes, setNotes] = useState("");
+
+  useUnsavedChangesWarning(
+    Boolean(editingTeamId || teamName.trim() || abbreviation.trim() || selectedLeague || selectedDivision || selectedLocation || captainId || coCaptain1Id || coCaptain2Id || clubProId || !teamActive || showAllCaptainCommunities || notes.trim()),
+    "team"
+  );
 
   const activeLeagues = useMemo(() => {
     return leagues.filter((league) => league.is_active !== false && league.seasons?.is_active !== false);
@@ -1227,7 +1233,9 @@ if (loading) {
                           </button>
 
                           <button
-                            onClick={() => router.push(`/teams/${team.id}`)}
+                            onClick={() => {
+                              if (confirmUnsavedChanges()) router.push(`/teams/${team.id}`);
+                            }}
                             className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
                           >
                             Roster ({team.roster_count || 0})

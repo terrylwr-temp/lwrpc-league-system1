@@ -11,6 +11,7 @@ import {
   SCORE_SHEET_PLACEHOLDERS,
   defaultScoreSheetTemplatePayload,
 } from "../lib/scoreSheetTemplates";
+import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { useRouter } from "next/navigation";
 
 export default function ScoreSheetsPage() {
@@ -26,6 +27,11 @@ export default function ScoreSheetsPage() {
   const [isActive, setIsActive] = useState(true);
   const [isDefault, setIsDefault] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  useUnsavedChangesWarning(
+    Boolean(editingId || name !== DEFAULT_SCORE_SHEET_TEMPLATE_NAME || description.trim() || sheetTitle !== DEFAULT_SCORE_SHEET_TEMPLATE_NAME || templateHtml !== DEFAULT_SCORE_SHEET_TEMPLATE_HTML || rulesText !== DEFAULT_SCORE_SHEET_RULES || !isActive || isDefault),
+    "score sheet"
+  );
 
   const loadTemplates = useCallback(async function loadTemplates() {
     const { data, error } = await supabase
