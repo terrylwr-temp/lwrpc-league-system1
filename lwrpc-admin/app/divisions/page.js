@@ -801,7 +801,7 @@ export default function DivisionsPage() {
                         className="rounded-xl border border-slate-200 p-4"
                       >
                         <div className="flex items-start justify-between gap-4">
-                          <div>
+                          <div className="min-w-0 flex-1">
                             <div className="text-lg font-bold text-slate-900">
                               {division.name}
                             </div>
@@ -815,41 +815,48 @@ export default function DivisionsPage() {
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
-                              Rating Type: {ratingTypeLabel(division.rating_type)}
+                              <span className="font-semibold text-slate-700">Rating Type:</span>{" "}
+                              {ratingTypeLabel(division.rating_type)}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
-                              Rating Range: {division.min_dupr ?? "—"} to{" "}
+                              <span className="font-semibold text-slate-700">Rating Range:</span>{" "}
+                              {division.min_dupr ?? "—"} to{" "}
                               {division.max_dupr ?? "—"}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
-                              Doubles Team DUPR Maximum: {division.team_dupr_max ?? "—"}
+                              <span className="font-semibold text-slate-700">Doubles Team DUPR Maximum:</span>{" "}
+                              {division.team_dupr_max ?? "—"}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
-                              Number of Teams: {division.number_of_lines ?? 3}
+                              <span className="font-semibold text-slate-700">Number of Teams:</span>{" "}
+                              {division.number_of_lines ?? 3}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
-                              Score Sheet: {scoreSheetTemplateName(division.score_sheet_template_id)}
+                              <span className="font-semibold text-slate-700">Score Sheet:</span>{" "}
+                              {scoreSheetTemplateName(division.score_sheet_template_id)}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
-                              Playoffs/Championship Teams: {division.playoff_team_count ?? "—"}
+                              <span className="font-semibold text-slate-700">Playoffs/Championship Teams:</span>{" "}
+                              {division.playoff_team_count ?? "—"}
                             </div>
 
                             {false && (
                               <>
                             <div className="mt-1 text-sm text-slate-600">
-                              Picklebreaker:{" "}
+                              <span className="font-semibold text-slate-700">Picklebreaker:</span>{" "}
                               {division.picklebreaker_enabled
                                 ? `Yes (${division.picklebreaker_points}) · W=${division.picklebreaker_win_points ?? 1} / L=${division.picklebreaker_loss_points ?? 0}`
                                 : "No"}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
-                              Standings Points: W={division.standings_win_points ?? 2} / T=
+                              <span className="font-semibold text-slate-700">Standings Points:</span>{" "}
+                              W={division.standings_win_points ?? 2} / T=
                               {division.standings_tie_points ?? 1} / L=
                               {division.standings_loss_points ?? 0}
                             </div>
@@ -857,7 +864,8 @@ export default function DivisionsPage() {
                             )}
 
                             <div className="mt-1 text-sm text-slate-600">
-                              Tiebreaks: {tiebreakLabel(division.standings_tiebreak_1)}
+                              <span className="font-semibold text-slate-700">Tiebreaks:</span>{" "}
+                              {tiebreakLabel(division.standings_tiebreak_1)}
                               {" → "}
                               {tiebreakLabel(division.standings_tiebreak_2)}
                               {" → "}
@@ -871,50 +879,54 @@ export default function DivisionsPage() {
                             )}
                           </div>
 
-                          <div className="flex gap-2">
-                            <button
-                              type="button"
-                              onClick={() => toggleDivisionActive(division)}
-                              className={`rounded-lg px-3 py-1 text-sm font-semibold ${
-                                division.is_active === false
-                                  ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
-                                  : "bg-amber-100 text-amber-900 hover:bg-amber-200"
-                              }`}
-                            >
-                              {division.is_active === false ? "Activate" : "Inactivate"}
-                            </button>
+                          <div className="flex shrink-0 flex-col items-end gap-2">
+                            <div className="flex flex-wrap justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => editDivision(division)}
+                                className="rounded-lg bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800 hover:bg-blue-200"
+                              >
+                                Edit
+                              </button>
 
-                            <button
-                              type="button"
-                              onClick={() => router.push(`/divisions/${division.id}`)}
-                              className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
-                            >
-                              Configure Game Lines ({division.configured_line_count || 0})
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() => openCopyDivision(division)}
+                                className="rounded-lg bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 hover:bg-emerald-200"
+                              >
+                                Copy
+                              </button>
 
-                            <button
-                              type="button"
-                              onClick={() => editDivision(division)}
-                              className="rounded-lg bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800 hover:bg-blue-200"
-                            >
-                              Edit
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteDivision(division.id)}
+                                className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
+                              >
+                                Delete
+                              </button>
+                            </div>
 
-                            <button
-                              type="button"
-                              onClick={() => openCopyDivision(division)}
-                              className="rounded-lg bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 hover:bg-emerald-200"
-                            >
-                              Copy
-                            </button>
+                            <div className="flex flex-wrap justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => router.push(`/divisions/${division.id}`)}
+                                className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
+                              >
+                                Configure Game Lines ({division.configured_line_count || 0})
+                              </button>
 
-                            <button
-                              type="button"
-                              onClick={() => deleteDivision(division.id)}
-                              className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
-                            >
-                              Delete
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() => toggleDivisionActive(division)}
+                                className={`rounded-lg px-3 py-1 text-sm font-semibold ${
+                                  division.is_active === false
+                                    ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                    : "bg-amber-100 text-amber-900 hover:bg-amber-200"
+                                }`}
+                              >
+                                {division.is_active === false ? "Activate" : "Inactivate"}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
