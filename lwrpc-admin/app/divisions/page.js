@@ -15,11 +15,16 @@ export default function DivisionsPage() {
   const [scoreSheetTemplates, setScoreSheetTemplates] = useState([]);
   const [leagueFilter, setLeagueFilter] = useState("");
   const [divisionSearch, setDivisionSearch] = useState("");
+  const [showInactiveDivisions, setShowInactiveDivisions] = useState(false);
   const [openLeagueName, setOpenLeagueName] = useState("");
   const [copyDivision, setCopyDivision] = useState(null);
   const [copyTargetLeague, setCopyTargetLeague] = useState("");
   const [copyName, setCopyName] = useState("");
   const [copyingDivision, setCopyingDivision] = useState(false);
+  const [copyLeagueDivisionsOpen, setCopyLeagueDivisionsOpen] = useState(false);
+  const [copySourceLeague, setCopySourceLeague] = useState("");
+  const [copyLeagueTargetLeague, setCopyLeagueTargetLeague] = useState("");
+  const [copyingLeagueDivisions, setCopyingLeagueDivisions] = useState(false);
 
   const [editingId, setEditingId] = useState(null);
 
@@ -275,6 +280,112 @@ export default function DivisionsPage() {
     setCopyingDivision(false);
   }
 
+  function openCopyLeagueDivisions() {
+    setCopyLeagueDivisionsOpen(true);
+    setCopySourceLeague(leagueFilter || "");
+    setCopyLeagueTargetLeague("");
+  }
+
+  function closeCopyLeagueDivisions() {
+    if (copyingLeagueDivisions) return;
+    setCopyLeagueDivisionsOpen(false);
+    setCopySourceLeague("");
+    setCopyLeagueTargetLeague("");
+  }
+
+  async function copyAllDivisionsForLeague() {
+    if (!copySourceLeague || !copyLeagueTargetLeague) {
+      alert("Choose a source league and target league.");
+      return;
+    }
+
+    if (String(copySourceLeague) === String(copyLeagueTargetLeague)) {
+      alert("Choose a different target league.");
+      return;
+    }
+
+    const sourceLeague = leagues.find((league) => String(league.id) === String(copySourceLeague));
+    const targetLeague = leagues.find((league) => String(league.id) === String(copyLeagueTargetLeague));
+    const sourceDivisions = divisions.filter((division) => String(division.league_id) === String(copySourceLeague));
+
+    if (sourceDivisions.length === 0) {
+      alert("No divisions were found for the selected source league.");
+      return;
+    }
+
+    const ok = confirm(
+      [
+        `Copy ${sourceDivisions.length} division${sourceDivisions.length === 1 ? "" : "s"} from "${sourceLeague?.name || "source league"}" to "${targetLeague?.name || "target league"}"?`,
+        "",
+        "This creates new divisions and copies their configured game lines.",
+        "It does not copy teams, schedules, matches, scores, or standings.",
+      ].join("\n")
+    );
+
+    if (!ok) return;
+
+    setCopyingLeagueDivisions(true);
+
+    const { data: createdDivisions, error: divisionError } = await supabase
+      .from("divisions")
+      .insert(
+        sourceDivisions.map((division) =>
+          copyDivisionPayload(division, copyLeagueTargetLeague, division.name)
+        )
+      )
+      .select("id, name");
+
+    if (divisionError) {
+      setCopyingLeagueDivisions(false);
+      alert(divisionError.message);
+      return;
+    }
+
+    const createdBySourceId = new Map(
+      sourceDivisions.map((division, index) => [
+        String(division.id),
+        createdDivisions?.[index]?.id,
+      ])
+    );
+
+    const sourceDivisionIds = sourceDivisions.map((division) => division.id).filter(Boolean);
+    const { data: lineRows, error: lineError } = await supabase
+      .from("division_lines")
+      .select("*")
+      .in("division_id", sourceDivisionIds)
+      .order("sort_order", { ascending: true })
+      .order("line_number", { ascending: true });
+
+    if (lineError) {
+      setCopyingLeagueDivisions(false);
+      alert(lineError.message);
+      return;
+    }
+
+    const linePayload = (lineRows || [])
+      .map((line) => {
+        const newDivisionId = createdBySourceId.get(String(line.division_id));
+        return newDivisionId ? copyDivisionLinePayload(line, newDivisionId) : null;
+      })
+      .filter(Boolean);
+
+    if (linePayload.length > 0) {
+      const { error: lineInsertError } = await supabase
+        .from("division_lines")
+        .insert(linePayload);
+
+      if (lineInsertError) {
+        setCopyingLeagueDivisions(false);
+        alert(lineInsertError.message);
+        return;
+      }
+    }
+
+    setCopyingLeagueDivisions(false);
+    closeCopyLeagueDivisions();
+    await loadData();
+  }
+
   async function copyDivisionWithLines() {
     if (!copyDivision || !copyTargetLeague || !copyName.trim()) {
       alert("Choose a target league and division name.");
@@ -474,22 +585,31 @@ export default function DivisionsPage() {
       const matchesLeague = !leagueFilter || division.league_id === leagueFilter;
       const matchesName =
         !search || (division.name || "").toLowerCase().includes(search);
+      const matchesActiveScope =
+        showInactiveDivisions ||
+        (
+          division.is_active !== false &&
+          division.leagues?.is_active !== false &&
+          division.leagues?.seasons?.is_active !== false
+        );
 
-      return matchesLeague && matchesName;
+      return matchesActiveScope && matchesLeague && matchesName;
     });
-  }, [divisions, divisionSearch, leagueFilter]);
+  }, [divisions, divisionSearch, leagueFilter, showInactiveDivisions]);
 
   const groupedDivisions = useMemo(() => {
     const groups = {};
 
     filteredDivisions.forEach((division) => {
       const leagueName = division.leagues?.name || "No League";
+      const seasonName = division.leagues?.seasons?.name || "No Season";
+      const groupName = `${leagueName} (${seasonName})`;
 
-      if (!groups[leagueName]) {
-        groups[leagueName] = [];
+      if (!groups[groupName]) {
+        groups[groupName] = [];
       }
 
-      groups[leagueName].push(division);
+      groups[groupName].push(division);
     });
 
     return groups;
@@ -498,6 +618,8 @@ export default function DivisionsPage() {
   const activeLeagues = useMemo(() => {
     return leagues.filter((league) => league.is_active !== false && league.seasons?.is_active !== false);
   }, [leagues]);
+
+  const leagueFilterOptions = showInactiveDivisions ? leagues : activeLeagues;
 
   function ratingTypeLabel(type) {
     if (type === "primetime") return "Season PrimeTime";
@@ -739,18 +861,40 @@ export default function DivisionsPage() {
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <h2 className="text-xl font-bold text-slate-900">
                 Current Divisions
               </h2>
 
-              <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-                <div className="text-xs uppercase tracking-wide text-slate-300">
-                  Showing
-                </div>
+              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowInactiveDivisions((value) => !value)}
+                  className={`rounded-xl px-4 py-2 text-sm font-bold ${
+                    showInactiveDivisions
+                      ? "bg-slate-200 text-slate-900 hover:bg-slate-300"
+                      : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                  }`}
+                >
+                  {showInactiveDivisions ? "Hide Inactive Divisions" : "Include Inactive Divisions"}
+                </button>
 
-                <div className="text-2xl font-bold">
-                  {filteredDivisions.length} / {divisions.length}
+                <button
+                  type="button"
+                  onClick={openCopyLeagueDivisions}
+                  className="rounded-xl bg-emerald-100 px-4 py-2 text-sm font-bold text-emerald-800 hover:bg-emerald-200"
+                >
+                  Copy League Divisions
+                </button>
+
+                <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
+                  <div className="text-xs uppercase tracking-wide text-slate-300">
+                    Showing
+                  </div>
+
+                  <div className="text-2xl font-bold">
+                    {filteredDivisions.length} / {divisions.length}
+                  </div>
                 </div>
               </div>
             </div>
@@ -766,10 +910,12 @@ export default function DivisionsPage() {
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
                 >
                   <option value="">All Leagues</option>
-                  {activeLeagues.map((league) => (
+                  {leagueFilterOptions.map((league) => (
                     <option key={league.id} value={league.id}>
                       {league.name}
                       {league.seasons?.name ? ` (${league.seasons.name})` : ""}
+                      {league.is_active === false ? " - Inactive League" : ""}
+                      {league.seasons?.is_active === false ? " - Inactive Season" : ""}
                     </option>
                   ))}
                 </select>
@@ -837,6 +983,16 @@ export default function DivisionsPage() {
                           <div className="min-w-0 flex-1">
                             <div className="text-lg font-bold text-slate-900">
                               {division.name}
+                            </div>
+
+                            <div className="mt-1 text-sm text-slate-600">
+                              <span className="font-semibold text-slate-700">Season:</span>{" "}
+                              {division.leagues?.seasons?.name || "—"}
+                            </div>
+
+                            <div className="mt-1 text-sm text-slate-600">
+                              <span className="font-semibold text-slate-700">League:</span>{" "}
+                              {division.leagues?.name || "No League"}
                             </div>
 
                             <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
@@ -1042,6 +1198,77 @@ export default function DivisionsPage() {
                     className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
                   >
                     {copyingDivision ? "Copying..." : "Copy Division"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {copyLeagueDivisionsOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+            <div className="w-full max-w-xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="bg-slate-950 px-5 py-4 text-white">
+                <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+                  Copy League Divisions
+                </div>
+                <h2 className="mt-1 text-xl font-black">
+                  Copy all divisions from one league
+                </h2>
+              </div>
+
+              <div className="space-y-4 p-5">
+                <Field label="Source League">
+                  <select
+                    value={copySourceLeague}
+                    onChange={(event) => setCopySourceLeague(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  >
+                    <option value="">Select Source League</option>
+                    {leagues.map((league) => (
+                      <option key={league.id} value={league.id}>
+                        {league.name}{league.seasons?.name ? ` (${league.seasons.name})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <Field label="Copy To League">
+                  <select
+                    value={copyLeagueTargetLeague}
+                    onChange={(event) => setCopyLeagueTargetLeague(event.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  >
+                    <option value="">Select Target League</option>
+                    {activeLeagues.map((league) => (
+                      <option key={league.id} value={league.id}>
+                        {league.name}{league.seasons?.name ? ` (${league.seasons.name})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+
+                <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-950">
+                  This copies division settings and configured game lines only. Teams, schedules,
+                  matches, scores, and standings are not copied.
+                </div>
+
+                <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={closeCopyLeagueDivisions}
+                    disabled={copyingLeagueDivisions}
+                    className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={copyAllDivisionsForLeague}
+                    disabled={copyingLeagueDivisions}
+                    className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+                  >
+                    {copyingLeagueDivisions ? "Copying..." : "Copy Divisions"}
                   </button>
                 </div>
               </div>

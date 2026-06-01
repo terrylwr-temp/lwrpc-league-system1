@@ -25,6 +25,7 @@ import {
 import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
+import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
 
@@ -118,17 +119,19 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    const { data: memberData, error: memberError } = await supabase
-      .from("members")
-      .select("*")
-      .eq("email", user.email)
-      .maybeSingle();
+    const { data: memberRows, error: memberError } = await findMembersByEmail(
+      supabase,
+      user.email,
+      "*"
+    );
 
     if (memberError) {
       alert(memberError.message);
       setLoading(false);
       return;
     }
+
+    const { selectedMember: memberData } = memberEmailResolution(memberRows);
 
     if (!memberData) {
       setCurrentMember(null);
@@ -201,6 +204,7 @@ export default function CaptainDashboardPage() {
             id,
             name,
             season_id,
+            rosters_locked,
             league_document_bucket,
             code_of_conduct_pdf_path,
             captains_guide_pdf_path,
@@ -249,6 +253,7 @@ export default function CaptainDashboardPage() {
       setMatches([]);
       setByeWeeks([]);
       setTeamStats({});
+      router.push("/standings");
       finishLoading(startedAt, setLoading);
       return;
     }
@@ -281,7 +286,8 @@ export default function CaptainDashboardPage() {
         leagues (
           id,
           name,
-          season_id
+          season_id,
+          rosters_locked
         ),
         divisions (
           id,
@@ -553,7 +559,7 @@ export default function CaptainDashboardPage() {
       )
     );
     finishLoading(startedAt, setLoading);
-  }, [loadMatchSetupStatus]);
+  }, [loadMatchSetupStatus, router]);
 
   useEffect(() => {
     async function run() {
@@ -613,6 +619,15 @@ export default function CaptainDashboardPage() {
       currentMember?.id,
       teamId
     );
+  }
+
+  function openRosterModal(team) {
+    if (team?.divisions?.leagues?.rosters_locked === true) {
+      alert(rosterLockedMessage());
+      return;
+    }
+
+    setRosterTeam(team);
   }
 
   const selectedUpcomingMatches = useMemo(() => {
@@ -1992,6 +2007,11 @@ export default function CaptainDashboardPage() {
                     type="button"
                     onClick={(event) => {
                       event.stopPropagation();
+                      if (team.divisions?.leagues?.rosters_locked === true) {
+                        alert(rosterLockedMessage());
+                        return;
+                      }
+
                       if (confirmUnsavedChanges()) router.push(`/teams/${team.id}`);
                     }}
                     className="cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
@@ -2199,7 +2219,7 @@ export default function CaptainDashboardPage() {
             match={scoreDetailsMatch}
             ratingForMember={ratingForMember}
             teamWithRoster={teamWithRoster}
-            onOpenRoster={setRosterTeam}
+            onOpenRoster={openRosterModal}
             clubName={systemSettings.club_name}
             onClose={() => setScoreDetailsMatch(null)}
           />
@@ -2210,7 +2230,7 @@ export default function CaptainDashboardPage() {
             match={matchDetails}
             ratingForMember={ratingForMember}
             teamWithRoster={teamWithRoster}
-            onOpenRoster={setRosterTeam}
+            onOpenRoster={openRosterModal}
             onClose={() => setMatchDetails(null)}
           />
         )}
@@ -2235,6 +2255,15 @@ function finishLoading(startedAt, setLoading) {
   setTimeout(() => {
     setLoading(false);
   }, remaining);
+}
+
+function rosterLockedMessage() {
+  return [
+    "Team rosters are locked for this league.",
+    "",
+    "Captains and co-captains cannot view or modify rosters while the league is locked.",
+    "Please contact a League Manager or Commissioner for roster changes.",
+  ].join("\n");
 }
 
 function PdfViewerModal({ document, onClose }) {

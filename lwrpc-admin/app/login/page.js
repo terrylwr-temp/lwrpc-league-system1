@@ -5,9 +5,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
-import { ROLE_LEVELS, defaultDashboardForRole } from "../lib/permissions";
+import { defaultDashboardForRole } from "../lib/permissions";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
+import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -60,22 +61,19 @@ export default function LoginPage() {
       return;
     }
 
-    const { data: memberRows } = await supabase
-      .from("members")
-      .select("id, is_active_member, user_roles(role)")
-      .eq("email", user.email)
-      .order("created_at", { ascending: true });
+    const { data: memberRows } = await findMembersByEmail(
+      supabase,
+      user.email,
+      "id, is_active_member, user_roles(role)"
+    );
+    const { activeMembers, selectedMember } = memberEmailResolution(memberRows);
 
-    const members = memberRows || [];
-    const activeMembers = members.filter((member) => member.is_active_member !== false);
-    const member = activeMembers[0] || members[0] || null;
-
-    if (!member?.id) {
+    if (!selectedMember?.id) {
       router.push("/");
       return;
     }
 
-    const role = highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [member]);
+    const role = highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [selectedMember]);
 
     router.push(defaultDashboardForRole(role));
   }
@@ -393,17 +391,4 @@ export default function LoginPage() {
 
     </main>
   );
-}
-
-function highestRoleForMembers(members) {
-  return (members || []).reduce((highestRole, member) => {
-    const memberRoles = member.user_roles || [];
-
-    return memberRoles.reduce((currentHighest, roleRow) => {
-      const role = roleRow?.role || "player";
-      return (ROLE_LEVELS[role] || 0) > (ROLE_LEVELS[currentHighest] || 0)
-        ? role
-        : currentHighest;
-    }, highestRole);
-  }, "player");
 }

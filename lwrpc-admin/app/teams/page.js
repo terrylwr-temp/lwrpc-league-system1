@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { hasRole } from "../lib/permissions";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import TeamScheduleModal from "../components/TeamScheduleModal";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
@@ -12,6 +13,7 @@ import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsav
 export default function TeamsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const [leagues, setLeagues] = useState([]);
   const [divisions, setDivisions] = useState([]);
@@ -32,6 +34,12 @@ export default function TeamsPage() {
   const [copyTargetDivision, setCopyTargetDivision] = useState("");
   const [copyRoster, setCopyRoster] = useState(true);
   const [copyingTeam, setCopyingTeam] = useState(false);
+  const [copyDivisionTeamsOpen, setCopyDivisionTeamsOpen] = useState(false);
+  const [copySourceDivision, setCopySourceDivision] = useState("");
+  const [copyDivisionTargetLeague, setCopyDivisionTargetLeague] = useState("");
+  const [copyDivisionTargetDivision, setCopyDivisionTargetDivision] = useState("");
+  const [copyDivisionRoster, setCopyDivisionRoster] = useState(true);
+  const [copyingDivisionTeams, setCopyingDivisionTeams] = useState(false);
 
   const [editingTeamId, setEditingTeamId] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -73,6 +81,25 @@ export default function TeamsPage() {
     if (!activeLeagueIds.has(String(copyTargetLeague))) return [];
     return divisions.filter((division) => division.league_id === copyTargetLeague && division.is_active !== false);
   }, [activeLeagueIds, copyTargetLeague, divisions]);
+
+  const copyDivisionTargetDivisions = useMemo(() => {
+    if (!copyDivisionTargetLeague) return [];
+    if (!activeLeagueIds.has(String(copyDivisionTargetLeague))) return [];
+    return divisions.filter((division) => division.league_id === copyDivisionTargetLeague && division.is_active !== false);
+  }, [activeLeagueIds, copyDivisionTargetLeague, divisions]);
+
+  const divisionCopyOptions = useMemo(() => {
+    return divisions
+      .map((division) => {
+        const league = leagues.find((item) => String(item.id) === String(division.league_id));
+        return {
+          ...division,
+          league,
+          label: `${league?.name || "No League"}${league?.seasons?.name ? ` (${league.seasons.name})` : ""} / ${division.name}`,
+        };
+      })
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [divisions, leagues]);
 
   const captainMemberChoices = useMemo(() => {
     const selectedCaptainIds = [captainId, coCaptain1Id, coCaptain2Id, clubProId]
@@ -155,6 +182,7 @@ export default function TeamsPage() {
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
+    setCurrentUser(user);
     return !!user;
   }, [router]);
 
@@ -219,7 +247,8 @@ export default function TeamsPage() {
           leagues (
             id,
             name,
-            season_id
+            season_id,
+            rosters_locked
           )
         ),
         locations (
@@ -585,6 +614,123 @@ export default function TeamsPage() {
     setCopyRoster(true);
   }
 
+  function openCopyDivisionTeams() {
+    setCopyDivisionTeamsOpen(true);
+    setCopySourceDivision("");
+    setCopyDivisionTargetLeague("");
+    setCopyDivisionTargetDivision("");
+    setCopyDivisionRoster(true);
+  }
+
+  function closeCopyDivisionTeams() {
+    if (copyingDivisionTeams) return;
+    setCopyDivisionTeamsOpen(false);
+    setCopySourceDivision("");
+    setCopyDivisionTargetLeague("");
+    setCopyDivisionTargetDivision("");
+    setCopyDivisionRoster(true);
+  }
+
+  async function copyTeamsForDivision() {
+    if (!copySourceDivision || !copyDivisionTargetLeague || !copyDivisionTargetDivision) {
+      alert("Source division, target league, and target division are required.");
+      return;
+    }
+
+    if (String(copySourceDivision) === String(copyDivisionTargetDivision)) {
+      alert("Choose a different target division.");
+      return;
+    }
+
+    const sourceDivision = divisionCopyOptions.find((division) => String(division.id) === String(copySourceDivision));
+    const targetDivision = divisionCopyOptions.find((division) => String(division.id) === String(copyDivisionTargetDivision));
+    const sourceTeams = teams.filter((team) => String(team.division_id) === String(copySourceDivision));
+
+    if (sourceTeams.length === 0) {
+      alert("No teams were found for the selected source division.");
+      return;
+    }
+
+    const ok = confirm(
+      [
+        `Copy ${sourceTeams.length} team${sourceTeams.length === 1 ? "" : "s"} from "${sourceDivision?.label || "source division"}" to "${targetDivision?.label || "target division"}"?`,
+        "",
+        copyDivisionRoster
+          ? "Team settings, captains, club pro, and roster players will be copied."
+          : "Team settings, captains, and club pro will be copied. Rosters will be empty.",
+        "Schedules, matches, scores, byes, and standings are not copied.",
+      ].join("\n")
+    );
+
+    if (!ok) return;
+
+    setCopyingDivisionTeams(true);
+
+    const { data: createdTeams, error: teamError } = await supabase
+      .from("teams")
+      .insert(
+        sourceTeams.map((team) => copyTeamPayload(team, team.name, copyDivisionTargetDivision))
+      )
+      .select("id");
+
+    if (teamError) {
+      setCopyingDivisionTeams(false);
+      alert(teamError.message);
+      return;
+    }
+
+    const createdBySourceId = new Map(
+      sourceTeams.map((team, index) => [
+        String(team.id),
+        createdTeams?.[index]?.id,
+      ])
+    );
+
+    if (copyDivisionRoster) {
+      const sourceTeamIds = sourceTeams.map((team) => team.id).filter(Boolean);
+      const { data: rosterRows, error: rosterLoadError } = await supabase
+        .from("team_members")
+        .select("*")
+        .in("team_id", sourceTeamIds);
+
+      if (rosterLoadError) {
+        setCopyingDivisionTeams(false);
+        alert(rosterLoadError.message);
+        return;
+      }
+
+      const rosterPayload = (rosterRows || [])
+        .map((row) => {
+          const newTeamId = createdBySourceId.get(String(row.team_id));
+          return newTeamId ? copyRosterPayload(row, newTeamId) : null;
+        })
+        .filter(Boolean);
+
+      if (rosterPayload.length > 0) {
+        const { error: rosterCopyError } = await supabase
+          .from("team_members")
+          .insert(rosterPayload);
+
+        if (rosterCopyError) {
+          setCopyingDivisionTeams(false);
+          alert(rosterCopyError.message);
+          return;
+        }
+      }
+    }
+
+    for (const team of sourceTeams) {
+      await upgradeMemberToCaptain(team.captain_member_id);
+      await upgradeMemberToCaptain(team.co_captain_member_id);
+      await upgradeMemberToCaptain(team.co_captain_2_member_id);
+      await upgradeMemberToClubPro(team.club_pro_member_id);
+    }
+
+    setCopyingDivisionTeams(false);
+    closeCopyDivisionTeams();
+    await loadData();
+  }
+
   async function copyTeamToDivision() {
     if (!copyTeam) return;
 
@@ -827,6 +973,18 @@ export default function TeamsPage() {
 
   function collapseAllGroups() {
     setExpandedGroupKeys([]);
+  }
+
+  function openRoster(team) {
+    if (
+      team.divisions?.leagues?.rosters_locked === true &&
+      !hasRole(currentUser?.role, "league_manager")
+    ) {
+      alert(rosterLockedMessage());
+      return;
+    }
+
+    if (confirmUnsavedChanges()) router.push(`/teams/${team.id}`);
   }
 
 if (loading) {
@@ -1117,6 +1275,14 @@ if (loading) {
                   Collapse All
                 </button>
 
+                <button
+                  type="button"
+                  onClick={openCopyDivisionTeams}
+                  className="rounded-xl bg-emerald-100 px-4 py-3 font-semibold text-emerald-900 hover:bg-emerald-200"
+                >
+                  Copy Division Teams
+                </button>
+
                 <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
                   <div className="text-xs uppercase tracking-wide text-slate-300">
                     Teams
@@ -1209,8 +1375,15 @@ if (loading) {
                           </button>
 
                           <button
+                            onClick={() => openRoster(team)}
+                            className="rounded-lg bg-indigo-100 px-3 py-1.5 text-xs font-semibold text-indigo-900 hover:bg-indigo-200"
+                          >
+                            Roster ({team.roster_count || 0})
+                          </button>
+
+                          <button
                             onClick={() => editTeam(team)}
-                            className="rounded-lg bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-800"
+                            className="rounded-lg bg-emerald-100 px-3 py-1.5 text-xs font-semibold text-emerald-900 hover:bg-emerald-200"
                           >
                             Edit
                           </button>
@@ -1231,15 +1404,6 @@ if (loading) {
                             }`}
                           >
                             {team.is_active === false ? "Activate" : "Inactivate"}
-                          </button>
-
-                          <button
-                            onClick={() => {
-                              if (confirmUnsavedChanges()) router.push(`/teams/${team.id}`);
-                            }}
-                            className="rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
-                          >
-                            Roster ({team.roster_count || 0})
                           </button>
 
                           <button
@@ -1313,6 +1477,27 @@ if (loading) {
             onCopyRosterChange={setCopyRoster}
             onClose={closeCopyTeam}
             onCopy={copyTeamToDivision}
+          />
+        )}
+        {copyDivisionTeamsOpen && (
+          <CopyDivisionTeamsModal
+            divisions={divisionCopyOptions}
+            leagues={activeLeagues}
+            targetDivisions={copyDivisionTargetDivisions}
+            sourceDivision={copySourceDivision}
+            targetLeague={copyDivisionTargetLeague}
+            targetDivision={copyDivisionTargetDivision}
+            copyRoster={copyDivisionRoster}
+            copying={copyingDivisionTeams}
+            onSourceDivisionChange={setCopySourceDivision}
+            onLeagueChange={(leagueId) => {
+              setCopyDivisionTargetLeague(leagueId);
+              setCopyDivisionTargetDivision("");
+            }}
+            onDivisionChange={setCopyDivisionTargetDivision}
+            onCopyRosterChange={setCopyDivisionRoster}
+            onClose={closeCopyDivisionTeams}
+            onCopy={copyTeamsForDivision}
           />
         )}
       </div>
@@ -1446,6 +1631,130 @@ function CopyTeamModal({
   );
 }
 
+function CopyDivisionTeamsModal({
+  divisions,
+  leagues,
+  targetDivisions,
+  sourceDivision,
+  targetLeague,
+  targetDivision,
+  copyRoster,
+  copying,
+  onSourceDivisionChange,
+  onLeagueChange,
+  onDivisionChange,
+  onCopyRosterChange,
+  onClose,
+  onCopy,
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+      <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="bg-slate-950 px-5 py-4 text-white">
+          <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+            Copy Division Teams
+          </div>
+          <h2 className="mt-1 text-xl font-black">
+            Copy all teams from one division
+          </h2>
+        </div>
+
+        <div className="space-y-4 overflow-y-auto p-5">
+          <Field
+            label="Source Division"
+            hint="All teams in this division will be copied."
+          >
+            <select
+              value={sourceDivision}
+              onChange={(event) => onSourceDivisionChange(event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+            >
+              <option value="">Select Source Division</option>
+              {divisions.map((division) => (
+                <option key={division.id} value={division.id}>
+                  {division.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Target League">
+            <select
+              value={targetLeague}
+              onChange={(event) => onLeagueChange(event.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3"
+            >
+              <option value="">Select Target League</option>
+              {leagues.map((league) => (
+                <option key={league.id} value={league.id}>
+                  {league.name}
+                  {league.seasons?.name ? ` (${league.seasons.name})` : ""}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Target Division">
+            <select
+              value={targetDivision}
+              onChange={(event) => onDivisionChange(event.target.value)}
+              disabled={!targetLeague}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 disabled:bg-slate-100"
+            >
+              <option value="">
+                {targetLeague ? "Select Target Division" : "Select Target League First"}
+              </option>
+              {targetDivisions.map((division) => (
+                <option key={division.id} value={division.id}>
+                  {division.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <label className="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <input
+              type="checkbox"
+              checked={copyRoster}
+              onChange={(event) => onCopyRosterChange(event.target.checked)}
+              className="mt-1"
+            />
+            <span>
+              <span className="font-semibold text-slate-900">Copy roster players</span>
+              <span className="block text-xs text-slate-500">
+                Captains, club pro, and team settings are copied either way. Turn this off to create each copied team with an empty roster.
+              </span>
+            </span>
+          </label>
+
+          <div className="rounded-xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-950">
+            Schedules, matches, scores, byes, and standings are not copied.
+          </div>
+        </div>
+
+        <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={copying}
+            className="rounded-xl bg-slate-200 px-5 py-3 font-bold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onCopy}
+            disabled={copying}
+            className="rounded-xl bg-emerald-700 px-5 py-3 font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+          >
+            {copying ? "Copying..." : "Copy Division Teams"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 async function loadAllRosterRows() {
   const pageSize = 1000;
   let from = 0;
@@ -1499,6 +1808,15 @@ function copyRosterPayload(row, teamId) {
     team_id: teamId,
     updated_at: new Date().toISOString(),
   };
+}
+
+function rosterLockedMessage() {
+  return [
+    "Team rosters are locked for this league.",
+    "",
+    "Captains and co-captains cannot view or modify rosters while the league is locked.",
+    "Please contact a League Manager or Commissioner for roster changes.",
+  ].join("\n");
 }
 
 function Field({ label, hint, children }) {

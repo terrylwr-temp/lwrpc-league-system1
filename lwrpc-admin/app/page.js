@@ -60,6 +60,11 @@ export default function DashboardPage() {
   const [savingMessageKey, setSavingMessageKey] = useState("");
   const [deletingHistoryId, setDeletingHistoryId] = useState("");
   const [masterResetting, setMasterResetting] = useState(false);
+  const [seasonResetOptions, setSeasonResetOptions] = useState([]);
+  const [seasonResetSeasonId, setSeasonResetSeasonId] = useState("");
+  const [seasonResetAcknowledged, setSeasonResetAcknowledged] = useState(false);
+  const [seasonResetting, setSeasonResetting] = useState(false);
+  const [seasonResetHelpOpen, setSeasonResetHelpOpen] = useState(false);
   const [guideDocuments, setGuideDocuments] = useState(initialGuideDocuments());
   const [guideBucket, setGuideBucket] = useState(DEFAULT_GUIDE_BUCKET);
   const [guidePrefix, setGuidePrefix] = useState(DEFAULT_GUIDE_PREFIX);
@@ -245,6 +250,20 @@ export default function DashboardPage() {
     setSetupReminderPreview(result);
   }, []);
 
+  const loadSeasonResetOptions = useCallback(async function loadSeasonResetOptions() {
+    const { data, error } = await supabase
+      .from("seasons")
+      .select("id, name, is_active, start_date, end_date")
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("Unable to load season reset options", error);
+      return;
+    }
+
+    setSeasonResetOptions(data || []);
+  }, []);
+
   useEffect(() => {
     async function run() {
       const user = await requireRole(router, "league_manager");
@@ -256,12 +275,13 @@ export default function DashboardPage() {
         loadLoginMessages();
         loadMessageHistory();
         loadGuideDocuments();
+        loadSeasonResetOptions();
         checkMatchSetupReminderPrompt();
       }
     }
 
     run();
-  }, [checkMatchSetupReminderPrompt, loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, loadMessageHistory, router]);
+  }, [checkMatchSetupReminderPrompt, loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, loadMessageHistory, loadSeasonResetOptions, router]);
 
   function closeSetupReminderPrompt() {
     if (hideSetupRemindersToday) {
@@ -578,6 +598,72 @@ export default function DashboardPage() {
     loadDashboardCounts();
   }
 
+  async function runSeasonReset() {
+    const season = seasonResetOptions.find((row) => String(row.id) === String(seasonResetSeasonId));
+
+    if (!seasonResetSeasonId) {
+      alert("Select a season to reset.");
+      return;
+    }
+
+    if (!seasonResetAcknowledged) {
+      alert("Confirm that you understand Season Reset preserves historical match results and player history.");
+      return;
+    }
+
+    const firstOk = confirm([
+      `Season Reset will inactivate the leagues, divisions, and teams for "${season?.name || "the selected season"}".`,
+      "",
+      "It will reset affected team standings rows to zero.",
+      "It will clear Season DUPR Doubles, Season DUPR, and Season PrimeTime/Age-based ratings for that season.",
+      "It will reset saved schedule settings for that season's leagues and delete dated Court Availability and League Blackout records within the selected season's date window.",
+      "",
+      "This does not delete historical match results or player history.",
+      "",
+      "Continue?",
+    ].join("\n"));
+
+    if (!firstOk) return;
+
+    const typed = prompt('Final confirmation: type RESET SEASON to continue.');
+    if (String(typed || "").trim() !== "RESET SEASON") return;
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before running Season Reset.");
+      return;
+    }
+
+    setSeasonResetting(true);
+
+    const response = await fetch("/api/season-reset", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        seasonId: seasonResetSeasonId,
+        confirmation: "RESET SEASON",
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setSeasonResetting(false);
+
+    if (!response.ok || !result.success) {
+      alert(result.error || "Season Reset failed.");
+      return;
+    }
+
+    alert(`Season Reset complete for ${result.season?.name || season?.name || "the selected season"}.`);
+    setSeasonResetAcknowledged(false);
+    loadDashboardCounts();
+    loadDashboardFilterOptions();
+    loadSeasonResetOptions();
+  }
+
   if (!ready) {
     return (
       <main className="min-h-screen bg-slate-100 p-6">
@@ -811,19 +897,19 @@ export default function DashboardPage() {
         )}
 
         <section className="overflow-hidden rounded-2xl bg-white shadow">
-          <div className="border-b border-slate-200 px-4 py-5 md:px-6">
+          <div className="border-b border-blue-900/30 bg-gradient-to-r from-slate-950 to-blue-950 px-4 py-5 text-white md:px-6">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                <div className="text-xs font-black uppercase tracking-wide text-blue-200">
                   System Snapshot
                 </div>
-                <h2 className="mt-1 text-xl font-black text-slate-950">
+                <h2 className="mt-1 text-xl font-black text-white">
                   Club Operational Overview
                 </h2>
               </div>
               <div className="flex flex-col gap-3 lg:items-end">
                 <label className="w-full md:w-96">
-                  <span className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
+                  <span className="mb-1 block text-xs font-black uppercase tracking-wide text-blue-200">
                     Dashboard Scope
                   </span>
                   <select
@@ -857,14 +943,14 @@ export default function DashboardPage() {
                   </select>
                 </label>
 
-                <div className="flex rounded-2xl bg-slate-100 p-1">
+                <div className="flex rounded-2xl bg-white/10 p-1 ring-1 ring-white/15">
                   <button
                     type="button"
                     onClick={() => setDashboardScope("active")}
                     className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
                       dashboardScope === "active"
-                        ? "bg-slate-950 text-white"
-                        : "text-slate-600 hover:bg-white"
+                        ? "bg-white text-slate-950"
+                        : "text-blue-100 hover:bg-white/10"
                     }`}
                   >
                     Active Season
@@ -874,15 +960,15 @@ export default function DashboardPage() {
                     onClick={() => setDashboardScope("current")}
                     className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
                       dashboardScope === "current"
-                        ? "bg-slate-950 text-white"
-                        : "text-slate-600 hover:bg-white"
+                        ? "bg-white text-slate-950"
+                        : "text-blue-100 hover:bg-white/10"
                     }`}
                   >
                     Not Active (Current Entries)
                   </button>
                 </div>
                 {dashboardFilter !== "scope" && (
-                  <div className="max-w-sm text-right text-[11px] font-bold text-slate-500">
+                  <div className="max-w-sm text-right text-[11px] font-bold text-blue-100">
                     Active / Current only applies when the dashboard scope uses the toggle.
                   </div>
                 )}
@@ -1163,22 +1249,143 @@ export default function DashboardPage() {
 
         <section className="mt-6 overflow-hidden rounded-2xl border border-red-200 bg-white shadow">
           <div className="border-b border-red-100 bg-red-50 px-4 py-5 md:px-6">
-            <h2 className="text-xl font-black text-red-950">Master Reset</h2>
+            <h2 className="text-xl font-black text-red-950">Reset Options</h2>
             <p className="mt-1 text-sm font-semibold text-red-800">
-              Deletes generated schedules, matches, scores, standings, byes, rosters, and captain assignments. Saved Schedule Settings are preserved.
+              Master Reset removes generated operations data. Season Reset preserves historical match results and player history while preparing the selected season&apos;s setup records for rollover.
             </p>
           </div>
-          <div className="p-4 md:p-6">
-            <button
-              type="button"
-              onClick={runMasterResetAll}
-              disabled={masterResetting}
-              className="rounded-xl bg-red-700 px-5 py-3 text-sm font-black uppercase tracking-wide text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-            >
-              {masterResetting ? "Resetting..." : "Master Reset All"}
-            </button>
+          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] md:p-6">
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="text-lg font-black text-amber-950">Season Reset</h3>
+                <button
+                  type="button"
+                  onClick={() => setSeasonResetHelpOpen(true)}
+                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-200 text-sm font-black text-amber-950 hover:bg-amber-300"
+                  title="Season Reset help"
+                  aria-label="Season Reset help"
+                >
+                  ?
+                </button>
+              </div>
+              <p className="mt-1 text-sm font-semibold leading-6 text-amber-900">
+                Inactivates the selected season&apos;s teams, leagues, and divisions, resets affected standings to zero, clears that season&apos;s rating values, resets saved schedule settings, and removes dated court availability and blackout records in that season window. This does not delete historical match results or player history.
+              </p>
+
+              <div className="mt-4 grid gap-3">
+                <select
+                  value={seasonResetSeasonId}
+                  onChange={(event) => {
+                    setSeasonResetSeasonId(event.target.value);
+                    setSeasonResetAcknowledged(false);
+                  }}
+                  className="w-full rounded-xl border border-amber-300 bg-white px-4 py-3 text-sm font-bold text-slate-950"
+                >
+                  <option value="">Select Season to Reset</option>
+                  {seasonResetOptions.map((season) => (
+                    <option key={season.id} value={season.id}>
+                      {season.name}{season.is_active === false ? " (Inactive)" : ""}
+                    </option>
+                  ))}
+                </select>
+
+                <label className="flex items-start gap-3 rounded-xl bg-white/80 p-3 text-sm font-semibold text-amber-950">
+                  <input
+                    type="checkbox"
+                    checked={seasonResetAcknowledged}
+                    onChange={(event) => setSeasonResetAcknowledged(event.target.checked)}
+                    className="mt-1"
+                  />
+                  <span>
+                    I understand this does not delete historical match results or player history.
+                  </span>
+                </label>
+
+                <button
+                  type="button"
+                  onClick={runSeasonReset}
+                  disabled={seasonResetting || !seasonResetSeasonId || !seasonResetAcknowledged}
+                  className="w-fit rounded-xl bg-amber-600 px-5 py-3 text-sm font-black uppercase tracking-wide text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {seasonResetting ? "Resetting..." : "Season Reset"}
+                </button>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
+              <h3 className="text-lg font-black text-red-950">Master Reset All</h3>
+              <p className="mt-1 text-sm font-semibold leading-6 text-red-800">
+                Removes generated league operations data across the whole system. Use only when starting from a clean operations slate.
+              </p>
+              <button
+                type="button"
+                onClick={runMasterResetAll}
+                disabled={masterResetting}
+                className="mt-4 rounded-xl bg-red-700 px-5 py-3 text-sm font-black uppercase tracking-wide text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+              >
+                {masterResetting ? "Resetting..." : "Master Reset All"}
+              </button>
+            </div>
           </div>
         </section>
+
+        {seasonResetHelpOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+            <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="bg-slate-950 px-5 py-4 text-white">
+                <div className="text-xs font-black uppercase tracking-wide text-amber-200">
+                  Season Reset Help
+                </div>
+                <h2 className="mt-1 text-xl font-black">
+                  Recommended Season Rollover Steps
+                </h2>
+              </div>
+
+              <div className="space-y-5 p-5 text-sm font-semibold leading-6 text-slate-700">
+                <div>
+                  <h3 className="font-black text-slate-950">Before Season Reset</h3>
+                  <ol className="mt-2 list-decimal space-y-1 pl-5">
+                    <li>Create the new Season.</li>
+                    <li>Copy or create the new Leagues for that Season.</li>
+                    <li>Use Copy League Divisions to copy old divisions into the new league structure.</li>
+                    <li>Use Copy Division Teams to copy teams into the new divisions, choosing whether to copy roster players.</li>
+                    <li>Review copied teams, captains, roster lock settings, division lines, and score sheet formats.</li>
+                    <li>Review any Court Availability and League Blackout Dates that should carry into the new season.</li>
+                  </ol>
+                </div>
+
+                <div>
+                  <h3 className="font-black text-slate-950">Run Season Reset</h3>
+                  <p className="mt-2">
+                    Select the old season and confirm the reset. Saved Schedule Settings for that season&apos;s leagues are cleared back to draft/unassigned so they no longer show old Generated match counts. Dated Court Availability records and League Blackout Dates inside the selected season&apos;s date window are deleted. This does not delete historical match results or player history.
+                  </p>
+                </div>
+
+                <div>
+                  <h3 className="font-black text-slate-950">After Season Reset</h3>
+                  <ol className="mt-2 list-decimal space-y-1 pl-5">
+                    <li>Confirm old season leagues, divisions, and teams are inactive.</li>
+                    <li>Import or enter the new season ratings.</li>
+                    <li>Edit each Schedule Setting to select the current League and Division, then update the correct dates, weeks, match day, time, courts, and byes.</li>
+                    <li>Recreate Court Availability and League Blackout Dates for the new season as needed.</li>
+                    <li>Generate or adjust schedules for the new season.</li>
+                    <li>Review standings and dashboard scopes using active/current filters.</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div className="flex justify-end border-t border-slate-200 bg-slate-50 px-5 py-4">
+                <button
+                  type="button"
+                  onClick={() => setSeasonResetHelpOpen(false)}
+                  className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-bold text-white hover:bg-slate-800"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </main>

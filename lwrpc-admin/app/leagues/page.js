@@ -31,6 +31,7 @@ export default function LeaguesPage() {
   const [documentFilesStatus, setDocumentFilesStatus] = useState("");
   const [loadingDocumentFiles, setLoadingDocumentFiles] = useState(false);
   const [editingLeagueId, setEditingLeagueId] = useState(null);
+  const [showInactiveLeagues, setShowInactiveLeagues] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useUnsavedChangesWarning(
@@ -165,6 +166,24 @@ export default function LeaguesPage() {
     );
   }
 
+  function copyLeague(league) {
+    setEditingLeagueId(null);
+    setLeagueName(league.name || "");
+    setSelectedSeason("");
+    setRostersLocked(league.rosters_locked === true);
+    setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
+    setDocumentBucket(league.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET);
+    setLeagueDocuments(
+      Object.fromEntries(
+        LEAGUE_DOCUMENT_TYPES.map((documentType) => [
+          documentType.column,
+          league[documentType.column] || "",
+        ])
+      )
+    );
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function clearLeagueForm() {
     setEditingLeagueId(null);
     setLeagueName("");
@@ -240,6 +259,10 @@ export default function LeaguesPage() {
     return <LoadingScreen subtitle="Loading League Administration..." />;
   }
 
+  const visibleLeagues = showInactiveLeagues
+    ? leagues
+    : leagues.filter((league) => league.is_active !== false && league.seasons?.is_active !== false);
+
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-7xl">
@@ -294,7 +317,7 @@ export default function LeaguesPage() {
                 <span>
                   Lock team rosters
                   <span className="mt-1 block text-xs font-normal text-slate-500">
-                    Captains can only add eligible rated players while locked. League Managers and Commissioners can still override all ratings.
+                    When locked, captains and co-captains cannot open or modify team rosters. League Managers and Commissioners can still manage rosters. When unlocked, roster adds still require eligible season ratings.
                   </span>
                 </span>
               </label>
@@ -399,13 +422,26 @@ export default function LeaguesPage() {
               <h2 className="text-xl font-bold text-slate-900">
                 Current Leagues
               </h2>
-              <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
-                {leagues.length}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowInactiveLeagues((value) => !value)}
+                  className={`rounded-xl px-4 py-2 text-sm font-bold ${
+                    showInactiveLeagues
+                      ? "bg-slate-200 text-slate-900 hover:bg-slate-300"
+                      : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                  }`}
+                >
+                  {showInactiveLeagues ? "Hide Inactive Leagues" : "Include Inactive Leagues"}
+                </button>
+                <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
+                  {visibleLeagues.length} / {leagues.length}
+                </div>
               </div>
             </div>
 
             <div className="space-y-3">
-              {leagues.map((league) => (
+              {visibleLeagues.map((league) => (
                 <div key={league.id} className="rounded-xl border border-slate-200 p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -471,6 +507,13 @@ export default function LeaguesPage() {
                       </button>
                       <button
                         type="button"
+                        onClick={() => copyLeague(league)}
+                        className="rounded-lg bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 hover:bg-emerald-200"
+                      >
+                        Copy
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => deleteLeague(league.id)}
                         className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
                       >
@@ -483,6 +526,12 @@ export default function LeaguesPage() {
 
               {leagues.length === 0 && (
                 <div className="text-slate-500">No leagues created yet.</div>
+              )}
+
+              {leagues.length > 0 && visibleLeagues.length === 0 && (
+                <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+                  No active leagues found. Use Include Inactive Leagues to view inactive records.
+                </div>
               )}
             </div>
           </section>

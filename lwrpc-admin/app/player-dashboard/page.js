@@ -25,6 +25,7 @@ import {
   leagueDocumentPath,
 } from "../lib/leagueDocuments";
 import { GUIDE_DOCUMENT_TYPES, guidePdfDocument } from "../lib/dashboardGuides";
+import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
 
 const PLAYER_DOCUMENT_KEYS = new Set([
   "code_of_conduct",
@@ -55,7 +56,7 @@ export default function PlayerDashboardPage() {
   const [showPreviousSeasonTeams, setShowPreviousSeasonTeams] = useState(false);
   const [showAllTeamMatches, setShowAllTeamMatches] = useState(false);
   const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
-  const [historyFilter, setHistoryFilter] = useState("");
+  const [historyFilter, setHistoryFilter] = useState("all");
   const [pdfDocument, setPdfDocument] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
   const [rosterTeam, setRosterTeam] = useState(null);
@@ -76,17 +77,19 @@ export default function PlayerDashboardPage() {
       return;
     }
 
-    const { data: memberData, error: memberError } = await supabase
-      .from("members")
-      .select("id, first_name, last_name, email")
-      .eq("email", user.email)
-      .maybeSingle();
+    const { data: memberRows, error: memberError } = await findMembersByEmail(
+      supabase,
+      user.email,
+      "id, first_name, last_name, email, is_active_member"
+    );
 
     if (memberError) {
       alert(memberError.message);
       setLoading(false);
       return;
     }
+
+    const { selectedMember: memberData } = memberEmailResolution(memberRows);
 
     setMember(memberData || null);
 
@@ -174,6 +177,7 @@ export default function PlayerDashboardPage() {
       .map((row) => row.teams)
       .filter(Boolean);
     const teamIds = playerTeams.map((team) => team.id);
+
     let matchData = [];
     let byeData = [];
     let standingsData = [];
@@ -672,8 +676,8 @@ export default function PlayerDashboardPage() {
   }, [playHistory]);
 
   const playHistoryOptions = useMemo(() => {
-    return historyFilterOptions(sortedPlayHistory);
-  }, [sortedPlayHistory]);
+    return historyFilterOptions(sortedPlayHistory, teams, member?.id);
+  }, [member, sortedPlayHistory, teams]);
 
   const filteredPlayHistory = useMemo(() => {
     return filterHistoryRows(sortedPlayHistory, historyFilter);
@@ -1111,11 +1115,18 @@ export default function PlayerDashboardPage() {
               onClick={() => selectPanel("history")}
             />
             <DashboardOption
-              active={activePanel === "standings"}
-              label="Division Standings"
-              value={selectedDivisionStandings.length}
+              active={visibleTeams.length > 0 && activePanel === "standings"}
+              label={visibleTeams.length === 0 ? "Current Division Standings" : "Division Standings"}
+              value={visibleTeams.length === 0 ? "View" : selectedDivisionStandings.length}
               tone="emerald"
-              onClick={() => selectPanel("standings")}
+              onClick={() => {
+                if (visibleTeams.length === 0) {
+                  router.push("/standings");
+                  return;
+                }
+
+                selectPanel("standings");
+              }}
             />
             <DashboardOption
               active={activePanel === "upcoming"}
@@ -1331,19 +1342,55 @@ export default function PlayerDashboardPage() {
               <h2 className="mt-1 text-xl font-black">My Play History</h2>
             </div>
 
-            <select
-              value={historyFilter}
-              onChange={(e) => setHistoryFilter(e.target.value)}
-              className="rounded-xl border border-white/40 bg-white px-3 py-2 text-sm font-semibold text-slate-800"
-              aria-label="Filter play history by league and season"
-            >
-              <option value="">All Leagues / Seasons</option>
-              {playHistoryOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <label className="w-full md:w-96">
+              <span className="mb-1 block text-xs font-black uppercase tracking-wide text-blue-100">
+                Play History Scope
+              </span>
+              <select
+                value={historyFilter}
+                onChange={(e) => setHistoryFilter(e.target.value)}
+                className="w-full rounded-xl border border-white/40 bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm"
+                aria-label="Filter play history by dashboard scope"
+              >
+                <option value="all">All Seasons/All Teams</option>
+                {playHistoryOptions.seasons.length > 0 && (
+                  <optgroup label="Seasons">
+                    {playHistoryOptions.seasons.map((season) => (
+                      <option key={season.id} value={`season:${season.id}`}>
+                        {season.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {playHistoryOptions.leagues.length > 0 && (
+                  <optgroup label="Leagues">
+                    {playHistoryOptions.leagues.map((league) => (
+                      <option key={league.id} value={`league:${league.id}`}>
+                        {league.name}{league.seasonName ? ` / ${league.seasonName}` : ""}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {playHistoryOptions.divisions.length > 0 && (
+                  <optgroup label="Divisions">
+                    {playHistoryOptions.divisions.map((division) => (
+                      <option key={division.id} value={`division:${division.id}`}>
+                        {division.name}{division.leagueName ? ` / ${division.leagueName}` : ""}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+                {playHistoryOptions.teams.length > 0 && (
+                  <optgroup label="Teams">
+                    {playHistoryOptions.teams.map((team) => (
+                      <option key={team.id} value={`team:${team.id}`}>
+                        {team.name}{team.divisionName ? ` / ${team.divisionName}` : ""}
+                      </option>
+                    ))}
+                  </optgroup>
+                )}
+              </select>
+            </label>
           </div>
 
           <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 md:grid-cols-4 md:p-5">

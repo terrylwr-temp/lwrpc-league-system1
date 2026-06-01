@@ -208,7 +208,7 @@ export default function ScheduleEditorPage() {
 
   function isLeagueBlackoutDate(match) {
     return leagueBlackouts.some((blackout) => {
-      const sameLeague = blackout.league_id === match.league_id;
+      const sameLeague = !blackout.league_id || blackout.league_id === match.league_id;
       const sameDivision = !blackout.division_id || blackout.division_id === match.division_id;
       return sameLeague && sameDivision && blackout.blackout_date === match.scheduled_date;
     });

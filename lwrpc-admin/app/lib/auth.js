@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
-import { ROLE_LEVELS, defaultDashboardForRole, hasRole } from "./permissions";
+import { defaultDashboardForRole, hasRole } from "./permissions";
+import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "./memberLookup";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -27,49 +28,35 @@ export async function getCurrentUserRole() {
   const userId = user.id;
 
   if (user.email) {
-    const { data: memberRows } = await supabase
-      .from("members")
-      .select("id, is_active_member, user_roles(role)")
-      .eq("email", user.email)
-      .order("created_at", { ascending: true });
+    const { data: memberRows } = await findMembersByEmail(
+      supabase,
+      user.email,
+      "id, is_active_member, user_roles(role)"
+    );
+    const { activeMembers, selectedMember } = memberEmailResolution(memberRows);
 
-    const members = memberRows || [];
-    const activeMembers = members.filter((member) => member.is_active_member !== false);
-    const memberData = activeMembers[0] || members[0] || null;
-
-    if (memberData?.id) {
+    if (selectedMember?.id) {
       return {
         session: sessionData.session,
-        role: highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [memberData]),
-        memberId: memberData.id
+        role: highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [selectedMember]),
+        memberId: selectedMember.id
       };
     }
   }
 
-  const { data: roleData } = await supabase
+  const { data: roleRows } = await supabase
     .from("user_roles")
     .select("role, member_id")
     .eq("user_id", userId)
-    .maybeSingle();
+    .limit(1);
+
+  const roleData = roleRows?.[0] || null;
 
   return {
     session: sessionData.session,
     role: roleData?.role || "player",
     memberId: roleData?.member_id || null
   };
-}
-
-function highestRoleForMembers(members) {
-  return (members || []).reduce((highestRole, member) => {
-    const memberRoles = member.user_roles || [];
-
-    return memberRoles.reduce((currentHighest, roleRow) => {
-      const role = roleRow?.role || "player";
-      return (ROLE_LEVELS[role] || 0) > (ROLE_LEVELS[currentHighest] || 0)
-        ? role
-        : currentHighest;
-    }, highestRole);
-  }, "player");
 }
 
 export async function requireRole(router, requiredRole) {

@@ -182,7 +182,7 @@ export default function SchedulingPage() {
   }, [divisions, selectedLeague]);
 
   const filteredBlackoutDivisions = useMemo(() => {
-    if (!blackoutLeague) return [];
+    if (!blackoutLeague || blackoutLeague === "all") return [];
     return divisions.filter((division) => division.league_id === blackoutLeague);
   }, [divisions, blackoutLeague]);
 
@@ -285,13 +285,13 @@ export default function SchedulingPage() {
   async function saveLeagueBlackout(e) {
     e.preventDefault();
 
-    if (!blackoutLeague || !blackoutDate) {
-      alert("League and blackout date are required");
+    if (!blackoutDate) {
+      alert("Blackout date is required");
       return;
     }
 
     const payload = {
-      league_id: blackoutLeague,
+      league_id: blackoutLeague && blackoutLeague !== "all" ? blackoutLeague : null,
       division_id: blackoutDivision || null,
       blackout_date: blackoutDate,
       reason: blackoutReason || null,
@@ -374,7 +374,7 @@ export default function SchedulingPage() {
   function editLeagueBlackout(row) {
     setEditingLeagueBlackoutId(row.id);
     setActiveSection("blackouts");
-    setBlackoutLeague(row.league_id || "");
+    setBlackoutLeague(row.league_id || "all");
     setBlackoutDivision(row.division_id || "");
     setBlackoutDate(row.blackout_date || "");
     setBlackoutReason(row.reason || "");
@@ -580,7 +580,7 @@ export default function SchedulingPage() {
 
   function isLeagueBlackoutDate(setting, matchDate) {
     return leagueBlackouts.some((blackout) => {
-      const sameLeague = blackout.league_id === setting.league_id;
+      const sameLeague = !blackout.league_id || blackout.league_id === setting.league_id;
       const sameDivision = !blackout.division_id || blackout.division_id === setting.division_id;
       return sameLeague && sameDivision && blackout.blackout_date === matchDate;
     });
@@ -1247,18 +1247,22 @@ export default function SchedulingPage() {
 
         {activeSection === "blackouts" && (
           <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr]">
-            <FormCard title={editingLeagueBlackoutId ? "Edit League Blackout" : "Add League Blackout"} subtitle="Block league play for holidays or club-wide no-play dates.">
+            <FormCard title={editingLeagueBlackoutId ? "Edit League Blackout" : "Add League Blackout"} subtitle="Block league play for holidays or club-wide no-play dates. These dates are skipped when schedules are generated.">
               <form onSubmit={saveLeagueBlackout} className="space-y-4">
                 <div>
                   <FieldLabel label="League" />
                   <select value={blackoutLeague} onChange={(e) => { setBlackoutLeague(e.target.value); setBlackoutDivision(""); }} className="w-full rounded-xl border border-slate-300 px-4 py-3">
                     <option value="">Select League</option>
+                    <option value="all">All Leagues</option>
                     {leagues.map((league) => <option key={league.id} value={league.id}>{league.name}</option>)}
                   </select>
+                  <p className="mt-2 text-xs text-slate-500">
+                    All Leagues blackout dates are considered for every generated schedule.
+                  </p>
                 </div>
                 <div>
                   <FieldLabel label="Division Optional" />
-                  <select value={blackoutDivision} onChange={(e) => setBlackoutDivision(e.target.value)} disabled={!blackoutLeague} className="w-full rounded-xl border border-slate-300 px-4 py-3">
+                  <select value={blackoutDivision} onChange={(e) => setBlackoutDivision(e.target.value)} disabled={!blackoutLeague || blackoutLeague === "all"} className="w-full rounded-xl border border-slate-300 px-4 py-3">
                     <option value="">All Divisions In League</option>
                     {filteredBlackoutDivisions.map((division) => <option key={division.id} value={division.id}>{division.name}</option>)}
                   </select>
@@ -1275,11 +1279,11 @@ export default function SchedulingPage() {
               </form>
             </FormCard>
 
-            <ListCard title="Saved League Blackout Dates" subtitle="These dates are skipped during schedule generation." count={leagueBlackouts.length} emptyText="No league blackout dates saved yet.">
+            <ListCard title="Saved League Blackout Dates" subtitle="These dates are skipped during schedule generation. All Leagues applies to every league schedule." count={leagueBlackouts.length} emptyText="No league blackout dates saved yet.">
               {leagueBlackouts.map((row) => (
                 <RecordCard key={row.id} title={`${formatDisplayDate(row.blackout_date, "")}${dayOfWeekForDate(row.blackout_date) ? ` - ${dayOfWeekForDate(row.blackout_date)}` : ""}`}>
                   <DetailGrid>
-                    <Detail label="League" value={row.leagues?.name || ""} />
+                    <Detail label="League" value={row.leagues?.name || "All Leagues"} />
                     <Detail label="Division" value={row.divisions?.name || "All Divisions"} />
                     <Detail label="Reason" value={row.reason || ""} />
                   </DetailGrid>

@@ -8,6 +8,7 @@ import { hasRole, roleLabel } from "../lib/permissions";
 import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
+import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 
 export default function AppHeader({
   title = "LWR PC League Management System",
@@ -25,6 +26,7 @@ export default function AppHeader({
   const [sidebarReady, setSidebarReady] = useState(false);
   const [openGroups, setOpenGroups] = useState({});
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const [memberEmailIssue, setMemberEmailIssue] = useState(null);
 
   const primaryLinks = useMemo(() => [
     { label: "Player Dashboard", path: "/player-dashboard", role: "player", icon: "\u{1F3E0}" },
@@ -80,28 +82,34 @@ export default function AppHeader({
 
     if (!user?.email) return;
 
-    const { data: member } = await supabase
-      .from("members")
-      .select("id, first_name, last_name, email")
-      .eq("email", user.email)
-      .maybeSingle();
+    const { data: memberRows } = await findMembersByEmail(
+      supabase,
+      user.email,
+      "id, first_name, last_name, email, is_active_member, user_roles(role)"
+    );
+    const { activeMembers, duplicateCount, hasDuplicateMemberships, selectedMember: member } =
+      memberEmailResolution(memberRows);
 
     if (member) {
       setMemberName(
         `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
           member.email
       );
-
-      const { data: userRole } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("member_id", member.id)
-        .maybeSingle();
-
-      setRole(userRole?.role || "player");
+      setRole(highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [member]));
+      setMemberEmailIssue(
+        hasDuplicateMemberships
+          ? {
+              count: duplicateCount,
+              selectedName:
+                `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+                member.email,
+            }
+          : null
+      );
     } else {
       setMemberName(user.email);
       setRole("player");
+      setMemberEmailIssue(null);
     }
   }
 
@@ -406,6 +414,12 @@ export default function AppHeader({
           </div>
         </div>
       </div>
+
+      {memberEmailIssue && (
+        <div className="mb-6 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-950 shadow-sm">
+          This login email is linked to {memberEmailIssue.count} member records. Showing data for {memberEmailIssue.selectedName || "the first active member record"}. Contact league support if this does not look right.
+        </div>
+      )}
 
       {menuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">

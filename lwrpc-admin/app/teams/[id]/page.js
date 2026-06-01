@@ -27,6 +27,7 @@ export default function TeamRosterPage() {
   const [locations, setLocations] = useState([]);
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [playHistory, setPlayHistory] = useState([]);
+  const [playerTeamsByMemberId, setPlayerTeamsByMemberId] = useState({});
   const [expandedHistoryMemberId, setExpandedHistoryMemberId] = useState("");
   const [historyFilters, setHistoryFilters] = useState({});
 
@@ -185,8 +186,40 @@ export default function TeamRosterPage() {
       .map((row) => row.member_id)
       .filter(Boolean);
     let historyData = [];
+    let playerTeamRows = [];
 
     if (rosterMemberIds.length > 0) {
+      const { data: teamRows, error: teamRowsError } = await supabase
+        .from("team_members")
+        .select(`
+          member_id,
+          teams (
+            id,
+            name,
+            divisions (
+              id,
+              name,
+              leagues (
+                id,
+                name,
+                season_id,
+                seasons (
+                  id,
+                  name
+                )
+              )
+            )
+          )
+        `)
+        .in("member_id", rosterMemberIds);
+
+      if (teamRowsError) {
+        alert(teamRowsError.message);
+        return;
+      }
+
+      playerTeamRows = teamRows || [];
+
       const playerFilter = [
         `home_player_1_id.in.(${rosterMemberIds.join(",")})`,
         `home_player_2_id.in.(${rosterMemberIds.join(",")})`,
@@ -256,6 +289,7 @@ export default function TeamRosterPage() {
     setLocations(locationData || []);
     setSeasonRatings(ratingData);
     setPlayHistory(historyData);
+    setPlayerTeamsByMemberId(groupPlayerTeamsByMemberId(playerTeamRows));
 
     if (selectedLocationId === null && teamData.home_location_id) {
       setSelectedLocationId(teamData.home_location_id);
@@ -447,6 +481,15 @@ export default function TeamRosterPage() {
     ].some((captainId) => String(captainId || "") === memberId);
   }
 
+  function rosterLockedMessage() {
+    return [
+      "Team rosters are locked for this league.",
+      "",
+      "Captains and co-captains cannot view or modify rosters while the league is locked.",
+      "Please contact a League Manager or Commissioner for roster changes.",
+    ].join("\n");
+  }
+
   function captainChangeRequestHref() {
     const subject = "Captain Change Request";
     const body = [
@@ -570,8 +613,12 @@ function getAverageTeamRating() {
     );
   }
 
+  function playerTeamsForMember(memberId) {
+    return playerTeamsByMemberId[String(memberId || "")] || [];
+  }
+
   function playerRosterRecord(memberId) {
-    const rows = historyRowsForMember(memberId);
+    const rows = filterHistoryRows(historyRowsForMember(memberId), `team:${team?.id}`, memberId);
 
     return rows.reduce(
       (record, row) => {
@@ -612,7 +659,8 @@ function getAverageTeamRating() {
   }, [getRosterRank, roster]);
 
   const rostersLocked = team?.divisions?.leagues?.rosters_locked === true;
-  const canModifyRoster = hasRole(currentUser?.role, "captain");
+  const canAdministerLockedRoster = hasRole(currentUser?.role, "league_manager");
+  const canModifyRoster = hasRole(currentUser?.role, "captain") && (!rostersLocked || canAdministerLockedRoster);
   const isCaptainOnly = currentUser?.role === "captain";
   const canRequestCaptainChange = isCurrentTeamCaptainOrCoCaptain();
 
@@ -669,20 +717,12 @@ function getAverageTeamRating() {
     }
 
     if (missingRating) {
-      if (rostersLocked) {
-        await sendRatingCheckAlert(member, `Blocked roster add while rosters are locked; no ${getRatingLabel()} entered`).catch((alertError) => {
-          console.warn("Roster rating check alert failed.", alertError);
-          alert("This player cannot be added while rosters are locked, and the rating check email could not be sent. Please notify the league manually.");
-        });
-        alert(`${member.first_name} ${member.last_name} does not have a ${getRatingLabel()} entered for this season and cannot be added while rosters are locked.`);
-        return;
-      }
-
-      const ok = confirm(
-        `${member.first_name} ${member.last_name} does not have a ${getRatingLabel()} entered for this season.\n\nContinue anyway?`
-      );
-
-      if (!ok) return;
+      await sendRatingCheckAlert(member, `Blocked roster add; no ${getRatingLabel()} entered`).catch((alertError) => {
+        console.warn("Roster rating check alert failed.", alertError);
+        alert("This player cannot be added because their rating is missing, and the rating check email could not be sent. Please notify the league manually.");
+      });
+      alert(`${member.first_name} ${member.last_name} does not have a ${getRatingLabel()} entered for this season and cannot be added to this roster.`);
+      return;
     }
 
     const alreadyOnRoster = roster.find(
@@ -758,6 +798,13 @@ function getAverageTeamRating() {
 
     run();
   }, [checkAuth, id, loadData]);
+
+  useEffect(() => {
+    if (!team || !currentUser || !rostersLocked || canAdministerLockedRoster) return;
+
+    alert(rosterLockedMessage());
+    router.push(isCaptainOnly ? "/captain-dashboard" : "/teams");
+  }, [canAdministerLockedRoster, currentUser, isCaptainOnly, rostersLocked, router, team]);
 
   const availableMembers = useMemo(() => {
     const selectedLocation = locations.find(
@@ -927,7 +974,7 @@ function getAverageTeamRating() {
 
               {!canModifyRoster && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
-                  Rosters are locked for this league. Contact a League Manager or Commissioner for roster changes.
+                  Team rosters are locked for this league. Only League Managers and Commissioners can view and modify rosters while locked.
                 </div>
               )}
 
@@ -1090,11 +1137,11 @@ function getAverageTeamRating() {
                         <div className="mt-2 space-y-2 break-words text-sm text-slate-600">
 
                           <div>
-                            Games:{" "}
+                            Team Games:{" "}
                             <span className="font-semibold">
                               {playerRosterRecord(member?.id).games}
                             </span>{" "}
-                            Record:{" "}
+                            Team Record:{" "}
                             <span className="font-semibold">
                               {playerRosterRecord(member?.id).record}
                             </span>
@@ -1152,7 +1199,8 @@ function getAverageTeamRating() {
                       <PlayerHistoryPanel
                         memberId={member.id}
                         historyRows={historyRowsForMember(member.id)}
-                        selectedFilter={historyFilters[member.id] || ""}
+                        playerTeams={playerTeamsForMember(member.id)}
+                        selectedFilter={historyFilters[member.id] || `team:${team.id}`}
                         onFilterChange={(value) =>
                           setHistoryFilters((current) => ({
                             ...current,
@@ -1186,31 +1234,69 @@ function getAverageTeamRating() {
 function PlayerHistoryPanel({
   memberId,
   historyRows,
+  playerTeams,
   selectedFilter,
   onFilterChange,
 }) {
-  const options = historyFilterOptions(historyRows);
-  const filteredRows = filterHistoryRows(historyRows, selectedFilter);
+  const options = historyFilterOptions(historyRows, playerTeams, memberId);
+  const filteredRows = filterHistoryRows(historyRows, selectedFilter, memberId);
+  const filteredRecord = playerHistoryRecord(filteredRows, memberId);
 
   return (
     <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
       <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-        <div className="font-bold text-slate-900">
-          Game Play History
+        <div>
+          <div className="font-bold text-slate-900">
+            Game Play History
+          </div>
+          <div className="mt-1 text-sm font-semibold text-slate-600">
+            Games: {filteredRecord.games} · Record: {filteredRecord.record}
+          </div>
         </div>
 
         <select
-          value={selectedFilter}
+          value={selectedFilter || "all"}
           onChange={(e) => onFilterChange(e.target.value)}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800"
           aria-label="Filter player history by league and season"
         >
-          <option value="">All Leagues / Seasons</option>
-          {options.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
+          <option value="all">All Seasons/All Teams</option>
+          {options.seasons.length > 0 && (
+            <optgroup label="Seasons">
+              {options.seasons.map((season) => (
+                <option key={season.id} value={`season:${season.id}`}>
+                  {season.name}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          {options.leagues.length > 0 && (
+            <optgroup label="Leagues">
+              {options.leagues.map((league) => (
+                <option key={league.id} value={`league:${league.id}`}>
+                  {league.name}{league.seasonName ? ` / ${league.seasonName}` : ""}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          {options.divisions.length > 0 && (
+            <optgroup label="Divisions">
+              {options.divisions.map((division) => (
+                <option key={division.id} value={`division:${division.id}`}>
+                  {division.name}{division.leagueName ? ` / ${division.leagueName}` : ""}
+                </option>
+              ))}
+            </optgroup>
+          )}
+          {options.teams.length > 0 && (
+            <optgroup label="Teams">
+              {options.teams.map((team) => (
+                <option key={team.id} value={`team:${team.id}`}>
+                  {team.name}{team.divisionName ? ` / ${team.divisionName}` : ""}
+                </option>
+              ))}
+            </optgroup>
+          )}
         </select>
       </div>
 
@@ -1264,6 +1350,21 @@ function PlayerHistoryPanel({
   );
 }
 
+function playerHistoryRecord(rows, memberId) {
+  return (rows || []).reduce(
+    (record, row) => {
+      const details = playerLineDetails(row, memberId);
+      record.games += 1;
+      if (details.result === "W") record.wins += 1;
+      if (details.result === "L") record.losses += 1;
+      if (details.result !== "W" && details.result !== "L") record.other += 1;
+      record.record = `${record.wins}-${record.losses}-${record.other}`;
+      return record;
+    },
+    { games: 0, wins: 0, losses: 0, other: 0, record: "0-0-0" }
+  );
+}
+
 function Info({ label, value }) {
   return (
     <div className="rounded-xl bg-slate-50 p-4">
@@ -1276,6 +1377,18 @@ function Info({ label, value }) {
       </div>
     </div>
   );
+}
+
+function groupPlayerTeamsByMemberId(rows) {
+  return (rows || []).reduce((byMemberId, row) => {
+    const key = String(row.member_id || "");
+    if (!key || !row.teams) return byMemberId;
+
+    if (!byMemberId[key]) byMemberId[key] = [];
+    byMemberId[key].push(row.teams);
+
+    return byMemberId;
+  }, {});
 }
 
 function membershipInfoLabel(member) {
