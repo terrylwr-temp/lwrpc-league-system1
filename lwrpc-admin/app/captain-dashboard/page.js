@@ -1328,20 +1328,37 @@ export default function CaptainDashboardPage() {
       updated_at: new Date().toISOString(),
     }));
 
-    const { error } = await supabase
-      .from("match_lineups")
-      .upsert(rows, {
-        onConflict: "match_id,team_id,line_number",
-      });
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
 
-    setSavingSetup(false);
-
-    if (error) {
-      alert(error.message);
+    if (!accessToken) {
+      setSavingSetup(false);
+      alert("Your session expired. Please log in again before saving match setup.");
       return;
     }
 
-    const nextStatusRows = rows.map((row) => ({
+    const response = await fetch("/api/match-lineups", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        matchId: setupMatch.id,
+        teamId: setupTeam.id,
+        lineups: rows,
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+
+    setSavingSetup(false);
+
+    if (!response.ok || !result.success) {
+      alert(result.error || "Match setup could not be saved.");
+      return;
+    }
+
+    const nextStatusRows = (result.lineups || rows).map((row) => ({
       ...row,
       match_id: setupMatch.id,
       team_id: setupTeam.id,
