@@ -144,7 +144,7 @@ export function renderEmailTemplate(template, values = {}) {
     ...values,
   };
   const subject = renderTemplateText(template?.subject || config.defaultSubject || "", mergedValues);
-  const html = constrainTemplateLogoImages(
+  const html = prepareEmailHtml(
     renderTemplateText(template?.body || config.defaultBody || "", mergedValues)
   );
   const text = htmlToText(html);
@@ -199,6 +199,28 @@ function constrainTemplateLogoImages(html) {
     output = upsertHtmlAttribute(output, "style", mergeInlineStyle(getHtmlAttribute(output, "style"), logoStyle));
 
     return output;
+  });
+}
+
+function prepareEmailHtml(html) {
+  return compactTemplateSpacing(constrainTemplateLogoImages(html));
+}
+
+function compactTemplateSpacing(html) {
+  const tagStyles = {
+    h1: "margin: 0 0 8px; line-height: 1.2;",
+    h2: "margin: 0 0 8px; line-height: 1.25;",
+    h3: "margin: 0 0 8px; line-height: 1.25;",
+    p: "margin: 0 0 8px; line-height: 1.35;",
+    ul: "margin: 4px 0 8px 20px; padding: 0; line-height: 1.35;",
+    ol: "margin: 4px 0 8px 20px; padding: 0; line-height: 1.35;",
+    li: "margin: 0 0 4px; line-height: 1.35;",
+    hr: "margin: 10px 0; border: 0; border-top: 1px solid #cbd5e1;",
+  };
+
+  return String(html || "").replace(/<(h1|h2|h3|p|ul|ol|li|hr)\b[^>]*>/gi, (tag, tagName) => {
+    const requiredStyle = tagStyles[String(tagName).toLowerCase()];
+    return upsertHtmlAttribute(tag, "style", mergeInlineStyle(getHtmlAttribute(tag, "style"), requiredStyle));
   });
 }
 
