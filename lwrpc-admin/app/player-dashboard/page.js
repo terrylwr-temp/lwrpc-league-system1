@@ -1726,6 +1726,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
   const roster = team.roster || [];
   const seasonId = team.divisions?.leagues?.season_id;
   const ratingType = team.divisions?.rating_type || "dupr";
+  const ratingLabel = rosterRatingLabel(ratingType);
   const hidePlayerContacts = team.hidePlayerContacts === true;
 
   return (
@@ -1757,7 +1758,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
               <div key={player.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="font-black text-slate-950">{formatMemberName(player)}</div>
                 <div className="mt-1 text-sm font-bold text-blue-900">
-                  Rating: {ratingForMember(player.id, seasonId, ratingType, player)}
+                  {ratingLabel}: {ratingForMember(player.id, seasonId, ratingType, player)}
                 </div>
                 <div className="mt-1 text-sm font-semibold text-slate-700">
                   Record: {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
@@ -1781,7 +1782,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
             <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
               <tr>
                 <th className="p-3 text-left">Player</th>
-                <th className="p-3 text-left">Rating</th>
+                <th className="p-3 text-left">{ratingLabel}</th>
                 <th className="p-3 text-left">Season Record</th>
                 {!hidePlayerContacts && (
                   <>
@@ -1827,6 +1828,11 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
       </div>
     </div>
   );
+}
+
+function rosterRatingLabel(ratingType) {
+  if (ratingType === "primetime") return "Age-Based Rating";
+  return "Season DUPR Rating";
 }
 
 function PdfViewerModal({ document, onClose }) {
@@ -2834,10 +2840,14 @@ function PlayerHistoryRowWithScores({ row, memberId, ratingForMember }) {
               </div>
               <div className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-700">
                 <div>
-                  <span className="font-black text-slate-950">{game.playerTeamName}:</span> {game.players}
+                  <span className="font-black text-slate-950">{game.playerTeamName}:</span> {game.players}{" "}
+                  <span className="font-black text-slate-950">Team Rating:</span>{" "}
+                  <span className="font-semibold">{game.playerTeamRating}</span>
                 </div>
                 <div>
-                  <span className="font-black text-slate-950">{game.opponentTeamName}:</span> {game.opponentPlayers}
+                  <span className="font-black text-slate-950">{game.opponentTeamName}:</span> {game.opponentPlayers}{" "}
+                  <span className="font-black text-slate-950">Team Rating:</span>{" "}
+                  <span className="font-semibold">{game.opponentTeamRating}</span>
                 </div>
                 {game.specialLabel && (
                   <div className="font-black text-amber-800">{game.specialLabel}</div>
@@ -2856,6 +2866,8 @@ function formatGameScores(row, sideLabel, ratingForMember) {
   const players = linePlayerNames(row, sideLabel, ratingForMember);
   const opponentSideLabel = sideLabel === "Home" ? "Away" : "Home";
   const opponentPlayers = linePlayerNames(row, opponentSideLabel, ratingForMember);
+  const playerTeamRating = lineTeamRating(row, sideLabel, ratingForMember);
+  const opponentTeamRating = lineTeamRating(row, opponentSideLabel, ratingForMember);
   const match = row.matches;
   const playerTeamName = sideLabel === "Home" ? match?.home_team?.name || "Home" : match?.away_team?.name || "Away";
   const opponentTeamName = sideLabel === "Home" ? match?.away_team?.name || "Away" : match?.home_team?.name || "Home";
@@ -2877,8 +2889,10 @@ function formatGameScores(row, sideLabel, ratingForMember) {
         label: `Game ${game.game_number || ""}`.trim(),
         playerTeamName,
         players,
+        playerTeamRating,
         opponentTeamName,
         opponentPlayers,
+        opponentTeamRating,
         score: special
           ? `${playerScore ?? "-"}-${opponentScore ?? "-"}`
           : `${playerScore}-${opponentScore}`,
@@ -2906,4 +2920,13 @@ function linePlayerNames(row, sideLabel, ratingForMember) {
     })
     .filter(Boolean)
     .join(" / ") || "Players TBD";
+}
+
+function lineTeamRating(row, sideLabel, ratingForMember) {
+  const players =
+    sideLabel === "Home"
+      ? [row.home_player_1, row.home_player_2]
+      : [row.away_player_1, row.away_player_2];
+
+  return teamLineRating(players, row.matches, ratingForMember);
 }

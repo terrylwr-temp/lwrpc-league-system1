@@ -343,7 +343,6 @@ export default function MembersPage() {
     setShowAddMember(false);
     setNewMemberForm(initialMemberForm());
     await loadMembers();
-    router.push(`/members/${data.id}?edit=1`);
   }
 
   function openMember(memberId) {
