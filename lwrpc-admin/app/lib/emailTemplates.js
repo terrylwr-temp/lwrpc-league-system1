@@ -144,7 +144,9 @@ export function renderEmailTemplate(template, values = {}) {
     ...values,
   };
   const subject = renderTemplateText(template?.subject || config.defaultSubject || "", mergedValues);
-  const html = renderTemplateText(template?.body || config.defaultBody || "", mergedValues);
+  const html = constrainTemplateLogoImages(
+    renderTemplateText(template?.body || config.defaultBody || "", mergedValues)
+  );
   const text = htmlToText(html);
 
   return { subject, html, text };
@@ -185,6 +187,52 @@ export function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function constrainTemplateLogoImages(html) {
+  return String(html || "").replace(/<img\b[^>]*>/gi, (tag) => {
+    if (!isClubLogoImage(tag)) return tag;
+
+    let output = tag;
+    const logoStyle = "width: 84px; max-width: 84px; height: auto; object-fit: contain;";
+
+    output = upsertHtmlAttribute(output, "width", "84");
+    output = upsertHtmlAttribute(output, "height", "84");
+    output = upsertHtmlAttribute(output, "style", mergeInlineStyle(getHtmlAttribute(output, "style"), logoStyle));
+
+    return output;
+  });
+}
+
+function isClubLogoImage(tag) {
+  const src = getHtmlAttribute(tag, "src").toLowerCase();
+  const alt = getHtmlAttribute(tag, "alt").toLowerCase();
+
+  return src.includes("lwrpc-logo") || alt.includes("lakewood ranch pickleball club");
+}
+
+function getHtmlAttribute(tag, attributeName) {
+  const pattern = new RegExp(`\\s${attributeName}\\s*=\\s*(["'])(.*?)\\1`, "i");
+  return tag.match(pattern)?.[2] || "";
+}
+
+function upsertHtmlAttribute(tag, attributeName, value) {
+  const pattern = new RegExp(`\\s${attributeName}\\s*=\\s*(["']).*?\\1`, "i");
+  const attribute = ` ${attributeName}="${escapeHtml(value)}"`;
+
+  if (pattern.test(tag)) {
+    return tag.replace(pattern, attribute);
+  }
+
+  return tag.replace(/\s*\/?>$/, (ending) => `${attribute}${ending}`);
+}
+
+function mergeInlineStyle(currentStyle, requiredStyle) {
+  return [currentStyle, requiredStyle]
+    .filter(Boolean)
+    .join("; ")
+    .replace(/;{2,}/g, ";")
+    .trim();
+}
+
 export function sampleTemplateValues() {
   return {
     ...commonTemplateValues(new Date("2026-05-31T17:45:00")),
@@ -194,7 +242,7 @@ export function sampleTemplateValues() {
     division: "3.5 Mixed",
     home_team: "Lakewood Ranch Dinkers",
     league: "Spring League",
-    lineup_list: "<li><strong>Team 1:</strong> Alex Player / Morgan Player</li><li><strong>Team 2:</strong> Casey Player / Taylor Player</li>",
+    lineup_list: "<li><strong>Team 1:</strong> Alex Player (DUPR: 3.72) / Morgan Player (DUPR: 3.51) <strong>Team Rating:</strong> 7.23</li><li><strong>Team 2:</strong> Casey Player (DUPR: 3.44) / Taylor Player (DUPR: 3.33) <strong>Team Rating:</strong> 6.77</li>",
     location: "Lakewood Ranch Country Club",
     match_count: "1",
     match_date: "06/04/2026",

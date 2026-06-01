@@ -1210,6 +1210,16 @@ export default function CaptainDashboardPage() {
     return ratings.reduce((sum, rating) => sum + rating, 0);
   }
 
+  function setupEmailPlayerLabel(member) {
+    const rating = setupMemberRating(member);
+    const ratingText =
+      rating === null || rating === undefined || rating === ""
+        ? "NR"
+        : Number(rating).toFixed(2);
+
+    return `${escapeHtml(formatMemberName(member))} (${escapeHtml(setupRatingLabel())}: ${escapeHtml(ratingText)})`;
+  }
+
   function setupLineWarning(lineup) {
     const maxRating = setupTeam?.divisions?.team_dupr_max;
     const rating = setupTeamRating(lineup);
@@ -1417,8 +1427,14 @@ export default function CaptainDashboardPage() {
       .map((lineup) => {
         const player1 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_1_member_id))?.members;
         const player2 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_2_member_id))?.members;
+        const teamRating = setupTeamRating(lineup);
 
-        return `<li><strong>Team ${lineup.line_number}:</strong> ${escapeHtml(formatMemberName(player1))} / ${escapeHtml(formatMemberName(player2))}</li>`;
+        return [
+          `<li><strong>Team ${lineup.line_number}:</strong>`,
+          `${setupEmailPlayerLabel(player1)} / ${setupEmailPlayerLabel(player2)}`,
+          `<strong>Team Rating:</strong> ${teamRating === null ? "NR" : escapeHtml(teamRating.toFixed(2))}`,
+          "</li>",
+        ].join(" ");
       })
       .join("");
     const template = await loadClientEmailTemplate(EMAIL_TEMPLATE_KEYS.matchSetupSaved);
