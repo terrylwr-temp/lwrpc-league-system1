@@ -8,21 +8,21 @@ export const DEFAULT_SCORE_SHEET_TEMPLATE_HTML = `
 
 <div class="meta">
   <div class="box"><span class="label">Date</span><span class="value">{{match_date}}</span></div>
-  <div class="box"><span class="label">Away Team</span><span class="value">{{away_team}}</span></div>
   <div class="box"><span class="label">Home Team</span><span class="value">{{home_team}}</span></div>
+  <div class="box"><span class="label">Away Team</span><span class="value">{{away_team}}</span></div>
   <div class="box"><span class="label">Level</span><span class="value">{{division_name}}</span></div>
 </div>
 
 <div class="signatures">
-  <div>Captain Signature (Away)<div class="signature-line"></div></div>
   <div>Captain Signature (Home)<div class="signature-line"></div></div>
+  <div>Captain Signature (Away)<div class="signature-line"></div></div>
 </div>
 
 <table class="lineups">
   <thead>
     <tr>
-      <th>Away Teams <span class="header-score">Total Team Score: ________</span></th>
       <th>Home Teams <span class="header-score">Total Team Score: ________</span></th>
+      <th>Away Teams <span class="header-score">Total Team Score: ________</span></th>
     </tr>
   </thead>
   <tbody>{{lineup_rows}}</tbody>
@@ -34,7 +34,7 @@ export const DEFAULT_SCORE_SHEET_TEMPLATE_HTML = `
 `.trim();
 
 export const SCORE_SHEET_PLACEHOLDERS = [
-  ["{{club_name}}", "Lakewood Ranch Pickleball Club"],
+  ["{{club_name}}", "Club name from System Setup"],
   ["{{sheet_title}}", "Score sheet title"],
   ["{{match_date}}", "Scheduled match date"],
   ["{{match_time}}", "Scheduled match time"],
@@ -43,12 +43,12 @@ export const SCORE_SHEET_PLACEHOLDERS = [
   ["{{league_name}}", "League name"],
   ["{{home_team}}", "Home team name"],
   ["{{away_team}}", "Away team name"],
-  ["{{lineup_rows}}", "Generated away/home lineup table rows"],
+  ["{{lineup_rows}}", "Generated home/away lineup table rows"],
   ["{{round_rows}}", "Generated round score rows"],
   ["{{configured_game_lines_table}}", "Generated table of Division configured game lines"],
   ["{{configured_game_lines_rows}}", "Generated rows for Game, Line Type, Game Format, Team Win Points"],
   ["{{score_entry_table}}", "Generated writable score rows based on configured Games / Line"],
-  ["{{score_entry_rows}}", "Generated writable rows for Game, Line Type, Game Format, Away Score, Home Score"],
+  ["{{score_entry_rows}}", "Generated writable rows for Game, Line Type, Game Format, Home Score, Away Score"],
   ["{{rules_text}}", "Rules and score sheet instructions"],
   ["{{captain_signature_rows}}", "Generated captain signature block"],
 ];

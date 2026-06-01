@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
+import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
 
-const TEMPLATE_KEY = "score_reminder";
+const TEMPLATE_KEY = EMAIL_TEMPLATE_KEYS.scoreReminder;
 const DUPR_EXPORT_HEADERS = [
   "matchType",
   "scoreType",
@@ -34,17 +35,7 @@ const DUPR_EXPORT_HEADERS = [
 ];
 const DUPR_EXPORT_EVENT = "LWR Pickleball Club DUPR League";
 
-const DEFAULT_SUBJECT = "Score entry reminder";
-
-const DEFAULT_TEMPLATE = `<div style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a;">
-  <img src="https://lwrpickleballclub.com/lwrpc-logo.png" alt="Lakewood Ranch Pickleball Club" style="width: 84px; height: 84px; object-fit: contain;" />
-  <h2 style="margin: 16px 0 8px;">Score Entry Reminder</h2>
-  <p>Captains,</p>
-  <p>The following match score(s) are due for entry and verification:</p>
-  <div>{{matches}}</div>
-  <p>Please log into the <strong>LWRPC League Management System</strong> and enter or verify the scores as soon as possible.</p>
-  <p>Thank you,<br /><strong>LWRPC League Management</strong></p>
-</div>`;
+const SCORE_REMINDER_TEMPLATE = getEmailTemplateConfig(TEMPLATE_KEY);
 
 export default function ScoringPage() {
   const router = useRouter();
@@ -52,13 +43,11 @@ export default function ScoringPage() {
   const [matches, setMatches] = useState([]);
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [showUnverifiedOnly, setShowUnverifiedOnly] = useState(false);
-  const [emailSubject, setEmailSubject] = useState(DEFAULT_SUBJECT);
-  const [emailTemplate, setEmailTemplate] = useState(DEFAULT_TEMPLATE);
+  const [emailSubject, setEmailSubject] = useState(SCORE_REMINDER_TEMPLATE.defaultSubject);
+  const [emailTemplate, setEmailTemplate] = useState(SCORE_REMINDER_TEMPLATE.defaultBody);
   const [sending, setSending] = useState(false);
-  const [savingTemplate, setSavingTemplate] = useState(false);
   const [lastSendResult, setLastSendResult] = useState("");
   const [today, setToday] = useState("");
-  const [templateOpen, setTemplateOpen] = useState(false);
   const [exportingScores, setExportingScores] = useState(false);
   const [includeAlreadyExported, setIncludeAlreadyExported] = useState(false);
   const [scoreMembersById, setScoreMembersById] = useState({});
@@ -69,19 +58,13 @@ export default function ScoringPage() {
   }, [router]);
 
   const loadTemplate = useCallback(async function loadTemplate() {
-    const localSubject = window.localStorage.getItem("lwrpc-score-reminder-subject");
-    const localBody = window.localStorage.getItem("lwrpc-score-reminder-template");
-
-    if (localSubject) setEmailSubject(localSubject);
-    if (localBody) setEmailTemplate(localBody);
-
     const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(TEMPLATE_KEY)}`);
     const result = await response.json().catch(() => null);
     const data = result?.template;
 
     if (data) {
-      setEmailSubject(data.subject || DEFAULT_SUBJECT);
-      setEmailTemplate(data.body || DEFAULT_TEMPLATE);
+      setEmailSubject(data.subject || SCORE_REMINDER_TEMPLATE.defaultSubject);
+      setEmailTemplate(data.body || SCORE_REMINDER_TEMPLATE.defaultBody);
     }
   }, []);
 
@@ -281,90 +264,81 @@ export default function ScoringPage() {
     setShowUnverifiedOnly(true);
   }
 
-  async function saveTemplate() {
-    window.localStorage.setItem("lwrpc-score-reminder-subject", emailSubject);
-    window.localStorage.setItem("lwrpc-score-reminder-template", emailTemplate);
-
-    const { data: sessionData } = await supabase.auth.getSession();
-    const accessToken = sessionData?.session?.access_token;
-
-    if (!accessToken) {
-      alert("Your session expired. Please log in again before saving the score reminder template.");
-      return;
-    }
-
-    setSavingTemplate(true);
-    const response = await fetch("/api/notification-templates", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${accessToken}`,
-      },
-      body: JSON.stringify({
-        template_key: TEMPLATE_KEY,
-        subject: emailSubject,
-        body: emailTemplate,
-      }),
-    });
-    const result = await response.json().catch(() => null);
-
-    setSavingTemplate(false);
-
-    if (!response.ok || !result?.success) {
-      alert(result?.error || "Template saved in this browser, but could not be saved for all managers.");
-      return;
-    }
-
-    alert("Score reminder template saved for all managers.");
-  }
-
   async function sendReminders() {
     if (selectedMatches.length === 0) {
       alert("Select one or more matches first.");
       return;
     }
 
-    const { emails, phones } = splitNotificationRecipients(
-      selectedMatches.flatMap((match) => captainContacts(match))
-    );
+    const reminderJobs = selectedMatches
+      .filter((match) => match.score_status !== "verified")
+      .map((match) => ({
+        match,
+        ...splitNotificationRecipients(scoreReminderContacts(match)),
+      }))
+      .filter((job) => job.emails.length > 0 || job.phones.length > 0);
 
-    if (emails.length === 0 && phones.length === 0) {
-      alert("No captain email addresses or text phone numbers were found for the selected matches based on member notification preferences.");
+    if (reminderJobs.length === 0) {
+      alert("No eligible unverified matches with captain email addresses or text phone numbers were found for the selected matches based on member notification preferences.");
       return;
     }
 
-    const ok = confirm(`Send score reminder to ${emails.length} email recipient${emails.length === 1 ? "" : "s"} and ${phones.length} text recipient${phones.length === 1 ? "" : "s"}?`);
+    const emailCount = reminderJobs.reduce((total, job) => total + job.emails.length, 0);
+    const phoneCount = reminderJobs.reduce((total, job) => total + job.phones.length, 0);
+    const skippedCount = selectedMatches.length - reminderJobs.length;
+    const ok = confirm(
+      `Send ${reminderJobs.length} separate score reminder email${reminderJobs.length === 1 ? "" : "s"} for ${reminderJobs.length} match${reminderJobs.length === 1 ? "" : "es"}?\n\nRecipients across all reminders: ${emailCount} email recipient${emailCount === 1 ? "" : "s"} and ${phoneCount} text recipient${phoneCount === 1 ? "" : "s"}.${skippedCount > 0 ? `\n\nSkipped ${skippedCount} selected match${skippedCount === 1 ? "" : "es"} because it is verified or has no reminder recipients.` : ""}`
+    );
     if (!ok) return;
 
     setSending(true);
     setLastSendResult("");
 
-    const html = renderHtmlTemplate(emailTemplate, selectedMatches);
-    const text = htmlToText(html);
-    const response = await fetch("/api/notifications", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        emails,
-        phones,
-        subject: emailSubject,
-        text,
-        html,
-        smsBody: text,
-      }),
-    });
+    const results = await Promise.all(
+      reminderJobs.map(async (job) => {
+        const rendered = renderEmailTemplate(
+          {
+            template_key: TEMPLATE_KEY,
+            subject: emailSubject,
+            body: emailTemplate,
+          },
+          scoreReminderValues([job.match])
+        );
+        const response = await fetch("/api/notifications", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            emails: job.emails,
+            phones: job.phones,
+            subject: rendered.subject,
+            text: rendered.text,
+            html: rendered.html,
+            smsBody: rendered.text,
+          }),
+        });
 
-    const result = await response.json().catch(() => ({}));
+        const result = await response.json().catch(() => ({}));
+
+        return {
+          ok: response.ok && result.success !== false,
+          error: result.error || "Email send failed.",
+          emails: job.emails.length,
+          phones: job.phones.length,
+        };
+      })
+    );
     setSending(false);
 
-    if (!response.ok || result.success === false) {
-      alert(result.error || "Email send failed.");
+    const failed = results.filter((result) => !result.ok);
+
+    if (failed.length > 0) {
+      alert(failed[0].error || "One or more score reminders failed.");
       return;
     }
 
-    setLastSendResult(`Reminder sent to ${emails.length} email recipient${emails.length === 1 ? "" : "s"} and ${phones.length} text recipient${phones.length === 1 ? "" : "s"}.`);
+    setLastSendResult(`Sent ${results.length} separate score reminder${results.length === 1 ? "" : "s"} to ${emailCount} email recipient${emailCount === 1 ? "" : "s"} and ${phoneCount} text recipient${phoneCount === 1 ? "" : "s"}.`);
   }
 
   async function exportForDupr() {
@@ -471,72 +445,6 @@ export default function ScoringPage() {
           <SummaryCard label="Verified" value={matches.filter((match) => match.score_status === "verified").length} />
           <SummaryCard label="Selected" value={selectedMatchIds.length} />
         </div>
-
-        <section className="mt-6 rounded-2xl bg-white p-6 shadow">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">Score Reminder Template</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Edit the reminder email visually. Available placeholders: {"{{matches}}"}, {"{{match_count}}"}, {"{{date}}"}.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => setTemplateOpen((value) => !value)}
-                className="rounded-xl bg-blue-100 px-5 py-3 font-semibold text-blue-900 hover:bg-blue-200"
-              >
-                {templateOpen ? "Close Template" : "Edit Template"}
-              </button>
-
-              {templateOpen && (
-                <button
-                  type="button"
-                  onClick={saveTemplate}
-                  disabled={savingTemplate}
-                  className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
-                >
-                  {savingTemplate ? "Saving..." : "Save Template"}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {templateOpen && (
-          <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
-            <div className="space-y-4">
-            <div>
-              <FieldLabel label="Subject" />
-              <input
-                value={emailSubject}
-                onChange={(e) => setEmailSubject(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
-              />
-            </div>
-
-            <div>
-              <FieldLabel label="Email Body" />
-              <RichEmailEditor
-                value={emailTemplate}
-                onChange={setEmailTemplate}
-              />
-              <p className="mt-2 text-xs text-slate-500">
-                The editor saves email-ready HTML behind the scenes.
-              </p>
-            </div>
-            </div>
-
-            <div>
-              <FieldLabel label="Preview" />
-              <div
-                className="min-h-80 overflow-auto rounded-xl border border-slate-300 bg-white p-4"
-                dangerouslySetInnerHTML={{ __html: renderHtmlTemplate(emailTemplate, []) }}
-              />
-            </div>
-          </div>
-          )}
-        </section>
 
         <section className="mt-6 rounded-2xl bg-white p-6 shadow">
           <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -799,29 +707,97 @@ function captainContacts(match) {
     );
 }
 
-function renderHtmlTemplate(template, matches) {
-  const matchLines = matches.length > 0
-    ? `<ul>${matches.map((match) => {
-      return `<li><strong>${escapeHtml(formatDate(match.scheduled_date))}</strong>: ${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")} (${escapeHtml(match.divisions?.name || "No Division")}, score status: ${escapeHtml(match.score_status || "not_entered")})</li>`;
-    }).join("")}</ul>`
-    : "<p><em>Selected matches will appear here when reminders are sent.</em></p>";
+function scoreReminderContacts(match) {
+  if (match.score_status === "not_entered" || !match.score_status) {
+    return [
+      ...teamCaptainContacts(match.home_team),
+      ...teamCaptainContacts(match.away_team),
+    ];
+  }
 
-  return template
-    .replaceAll("{{matches}}", matchLines)
-    .replaceAll("{{match_count}}", String(matches.length))
-    .replaceAll("{{date}}", formatDate(localDateString()));
+  if (match.score_status === "pending_verification") {
+    const submitterSide = scoreSubmitterSide(match);
+
+    if (submitterSide === "home") return teamCaptainContacts(match.away_team);
+    if (submitterSide === "away") return teamCaptainContacts(match.home_team);
+
+    return [
+      ...teamCaptainContacts(match.home_team),
+      ...teamCaptainContacts(match.away_team),
+    ];
+  }
+
+  return [
+    ...teamCaptainContacts(match.home_team),
+    ...teamCaptainContacts(match.away_team),
+  ];
 }
 
-function htmlToText(value) {
-  return String(value || "")
-    .replace(/<style[\s\S]*?<\/style>/gi, "")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n\n")
-    .replace(/<li>/gi, "- ")
-    .replace(/<\/li>/gi, "\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+function teamCaptainContacts(team) {
+  return [
+    team?.captain,
+    team?.co_captain_1,
+    team?.co_captain_2,
+  ]
+    .filter(Boolean)
+    .map((member) => ({
+      id: member.id,
+      name: formatMemberName(member),
+      email: member.email || "",
+      phone: member.phone || "",
+      notification_preference: member.notification_preference || "email",
+    }))
+    .filter((contact, index, all) =>
+      contact.id && all.findIndex((item) => item.id === contact.id) === index
+    );
+}
+
+function scoreSubmitterSide(match) {
+  const submitterId = String(match?.score_entered_by_member_id || "");
+
+  if (!submitterId) return "";
+
+  const homeCaptainIds = teamCaptainContacts(match.home_team).map((contact) => String(contact.id));
+  const awayCaptainIds = teamCaptainContacts(match.away_team).map((contact) => String(contact.id));
+
+  if (homeCaptainIds.includes(submitterId)) return "home";
+  if (awayCaptainIds.includes(submitterId)) return "away";
+
+  return "";
+}
+
+function scoreReminderValues(matches) {
+  const matchLines = matches.length > 0
+    ? `<ul>${matches.map((match) => {
+      return `<li><strong>${escapeHtml(formatDate(match.scheduled_date))} at ${escapeHtml(formatDisplayTime(match.scheduled_time, "TBD"))}</strong>: ${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")} (${escapeHtml(match.divisions?.name || "No Division")}, score status: ${escapeHtml(scoreStatusLabel(match.score_status))})</li>`;
+    }).join("")}</ul>`
+    : "<p><em>Selected matches will appear here when reminders are sent.</em></p>";
+  const firstMatch = matches[0] || {};
+
+  return {
+    home_team: firstMatch.home_team?.name || "Home",
+    away_team: firstMatch.away_team?.name || "Away",
+    match_date: firstMatch.scheduled_date ? formatDate(firstMatch.scheduled_date) : "TBD",
+    match_time: formatDisplayTime(firstMatch.scheduled_time, "TBD"),
+    division: firstMatch.divisions?.name || "No Division",
+    score_status: scoreStatusLabel(firstMatch.score_status),
+    reminder_action: scoreReminderAction(firstMatch),
+    matches: matchLines,
+    match_count: String(matches.length),
+    date: formatDate(localDateString()),
+  };
+}
+
+function scoreReminderAction(match) {
+  if (match?.score_status === "pending_verification") {
+    return "Validate or dispute the submitted scores for this match.";
+  }
+
+  return "Enter the scores for this match.";
+}
+
+function scoreStatusLabel(value) {
+  return String(value || "not_entered").replaceAll("_", " ");
 }
 
 function escapeHtml(value) {
@@ -877,120 +853,6 @@ function downloadCsv(csv, filename) {
   URL.revokeObjectURL(url);
 }
 
-function RichEmailEditor({ value, onChange }) {
-  const editorRef = useRef(null);
-  const initializedRef = useRef(false);
-  const lastHtmlRef = useRef(value || "");
-
-  useEffect(() => {
-    if (!editorRef.current) return;
-    const nextValue = value || "";
-
-    if (!initializedRef.current) {
-      editorRef.current.innerHTML = nextValue;
-      lastHtmlRef.current = nextValue;
-      initializedRef.current = true;
-      return;
-    }
-
-    if (document.activeElement === editorRef.current) return;
-    if (nextValue === lastHtmlRef.current) return;
-
-    editorRef.current.innerHTML = nextValue;
-    lastHtmlRef.current = nextValue;
-  }, [value]);
-
-  function syncValue() {
-    const html = editorRef.current?.innerHTML || "";
-    lastHtmlRef.current = html;
-    onChange(html);
-  }
-
-  function focusEditor() {
-    editorRef.current?.focus();
-  }
-
-  function runCommand(command, commandValue = null) {
-    focusEditor();
-    document.execCommand(command, false, commandValue);
-    syncValue();
-  }
-
-  function insertHtml(html) {
-    focusEditor();
-    document.execCommand("insertHTML", false, html);
-    syncValue();
-  }
-
-  function addLink() {
-    const url = prompt("Enter the link URL");
-    if (!url) return;
-    runCommand("createLink", url);
-  }
-
-  return (
-    <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
-      <div className="flex flex-wrap gap-1 border-b border-slate-200 bg-slate-50 p-2">
-        <EditorButton label="B" title="Bold" onClick={() => runCommand("bold")} />
-        <EditorButton label="I" title="Italic" onClick={() => runCommand("italic")} />
-        <EditorButton label="U" title="Underline" onClick={() => runCommand("underline")} />
-        <EditorButton label="H2" title="Heading" onClick={() => runCommand("formatBlock", "h2")} />
-        <EditorButton label="P" title="Paragraph" onClick={() => runCommand("formatBlock", "p")} />
-        <EditorButton label="Bullets" title="Bullet list" onClick={() => runCommand("insertUnorderedList")} />
-        <EditorButton label="Numbers" title="Numbered list" onClick={() => runCommand("insertOrderedList")} />
-        <EditorButton label="Link" title="Add link" onClick={addLink} />
-        <EditorButton
-          label="Logo"
-          title="Insert club logo"
-          onClick={() =>
-            insertHtml(
-              '<p><img src="https://lwrpickleballclub.com/lwrpc-logo.png" alt="Lakewood Ranch Pickleball Club" style="width: 84px; height: 84px; object-fit: contain;" /></p>'
-            )
-          }
-        />
-        <EditorButton
-          label="Matches"
-          title="Insert match list placeholder"
-          onClick={() => insertHtml("<p>{{matches}}</p>")}
-        />
-        <EditorButton
-          label="Date"
-          title="Insert date placeholder"
-          onClick={() => insertHtml("{{date}}")}
-        />
-        <EditorButton
-          label="Clear"
-          title="Clear formatting"
-          onClick={() => runCommand("removeFormat")}
-        />
-      </div>
-
-      <div
-        ref={editorRef}
-        contentEditable
-        suppressContentEditableWarning
-        onInput={syncValue}
-        onBlur={syncValue}
-        className="min-h-72 overflow-auto px-4 py-3 text-sm leading-6 text-slate-900 outline-none focus:ring-2 focus:ring-blue-200"
-      />
-    </div>
-  );
-}
-
-function EditorButton({ label, title, onClick }) {
-  return (
-    <button
-      type="button"
-      title={title}
-      onMouseDown={(event) => event.preventDefault()}
-      onClick={onClick}
-      className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-800 shadow-sm hover:bg-blue-50 hover:text-blue-900"
-    >
-      {label}
-    </button>
-  );
-}
-
 function SummaryCard({ label, value }) {
   return (
     <div className="rounded-2xl bg-white p-5 shadow">
@@ -1000,13 +862,5 @@ function SummaryCard({ label, value }) {
 
       <div className="mt-2 text-3xl font-bold text-slate-900">{value}</div>
     </div>
-  );
-}
-
-function FieldLabel({ label }) {
-  return (
-    <label className="mb-1 block text-sm font-semibold text-slate-700">
-      {label}
-    </label>
   );
 }

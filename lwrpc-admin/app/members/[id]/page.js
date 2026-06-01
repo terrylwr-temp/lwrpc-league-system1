@@ -671,6 +671,15 @@ async function updateMemberActiveStatus(nextIsActive) {
                           <div className="text-sm font-bold text-red-950">
                             Member Status
                           </div>
+                          <div className="mt-2">
+                            <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                              memberIsActive
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}>
+                              Current status: {memberIsActive ? "Active" : "Inactive"}
+                            </span>
+                          </div>
                           <div className="mt-1 text-sm text-red-800">
                             {memberIsActive
                               ? "Deactivate this member to hide them from normal member, roster, and rating workflows."

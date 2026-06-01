@@ -14,7 +14,7 @@ export const ROLE_CAPABILITIES = [
     roles: ["league_manager", "commissioner"],
   },
   {
-    label: "User role management",
+    label: "User role management, System Setup",
     roles: ["commissioner"],
   },
 ];
@@ -30,7 +30,7 @@ export default function RoleCapabilityModal({ onClose }) {
             </div>
             <h2 className="mt-1 text-2xl font-black">Role Capability Matrix</h2>
             <p className="mt-1 text-sm font-semibold text-slate-300">
-              Higher roles include the capabilities of lower roles. Commissioners are the only users who can manage user roles.
+              Higher roles include the capabilities of lower roles. Commissioners are the only users who can manage user roles and System Setup.
             </p>
           </div>
 

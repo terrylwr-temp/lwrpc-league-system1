@@ -264,6 +264,9 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
                   <span className="font-black">
                     Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
                   </span>
+                  <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black text-white">
+                    {capitalizeLabel(line.division_lines?.line_type || "Line")} · {duprPostedLabel(line)}
+                  </span>
                   <div className="flex flex-wrap gap-2">
                     <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-900">
                       Team Points: {formatLineTeamPoints(line)}
@@ -432,6 +435,17 @@ function formatLineTeamPoints(line) {
   const points = Number(line?.division_lines?.team_win_points ?? 1);
 
   return Number.isNaN(points) ? "-" : points;
+}
+
+function duprPostedLabel(line) {
+  const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
+  return posted ? "Posted to DUPR" : "Not Posted to DUPR";
+}
+
+function capitalizeLabel(value) {
+  return String(value || "")
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
 function formatTeamName(team, fallback) {

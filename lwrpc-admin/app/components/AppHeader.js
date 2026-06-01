@@ -7,6 +7,7 @@ import { supabase } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
 import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
+import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
 
 export default function AppHeader({
   title = "LWR PC League Management System",
@@ -23,6 +24,7 @@ export default function AppHeader({
   const [collapsed, setCollapsed] = useState(false);
   const [sidebarReady, setSidebarReady] = useState(false);
   const [openGroups, setOpenGroups] = useState({});
+  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
   const primaryLinks = useMemo(() => [
     { label: "Player Dashboard", path: "/player-dashboard", role: "player", icon: "\u{1F3E0}" },
@@ -63,8 +65,10 @@ export default function AppHeader({
         { label: "Seasons", path: "/seasons", role: "league_manager", icon: "\u{1F4C6}" },
         { label: "Leagues", path: "/leagues", role: "league_manager", icon: "\u{1F3DF}\u{FE0F}" },
         { label: "Divisions", path: "/divisions", role: "league_manager", icon: "\u{1F4CA}" },
-        { label: "Score Sheets", path: "/score-sheets", role: "league_manager", icon: "\u{1F4DD}" },
         { label: "Locations", path: "/locations", role: "league_manager", icon: "\u{1F4CD}" },
+        { label: "Email Options", path: "/email-options", role: "league_manager", icon: "\u{2709}\u{FE0F}" },
+        { label: "Score Sheets", path: "/score-sheets", role: "league_manager", icon: "\u{1F4DD}" },
+        { label: "System Setup", path: "/system-setup", role: "commissioner", icon: "\u{1F3F7}\u{FE0F}" },
       ]
     }
   ], []);
@@ -108,12 +112,22 @@ export default function AppHeader({
     router.push("/login");
   }
 
+  async function loadSystemSettings() {
+    const response = await fetch("/api/system-settings");
+    const result = await response.json().catch(() => ({}));
+
+    if (result.settings) {
+      setSystemSettings(mergeSystemSettings(result.settings));
+    }
+  }
+
   const isActive = useCallback(function isActive(path) {
     return pathname === path || (path !== "/" && pathname.startsWith(path));
   }, [pathname]);
 
   useEffect(() => {
     loadUser();
+    loadSystemSettings();
 
     const savedCollapsed = window.localStorage.getItem("lwrpc-sidebar-collapsed");
     if (savedCollapsed !== null) {
@@ -233,6 +247,11 @@ export default function AppHeader({
     );
   }
 
+  const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
+  const systemName = systemSettings.system_name || DEFAULT_SYSTEM_SETTINGS.system_name;
+  const logoUrl = systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
+  const clubWebsite = systemSettings.club_website || DEFAULT_SYSTEM_SETTINGS.club_website;
+
   return (
     <>
       <aside
@@ -242,26 +261,31 @@ export default function AppHeader({
       >
         <div className="flex h-full flex-col overflow-y-auto p-4">
           <div className="flex items-center gap-4 border-b border-white/10 pb-5">
-            <Image
-              src="https://lwrpickleballclub.com/lwrpc-logo.png"
-              alt="Lakewood Ranch Pickleball Club"
-              width={56}
-              height={56}
-              className="h-14 w-14 rounded-full bg-white object-contain p-1"
-            />
+            <a
+              href={clubWebsite}
+              target="_blank"
+              rel="noreferrer"
+              title={`Open ${clubName} website`}
+              className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-300"
+            >
+              <Image
+                src={logoUrl}
+                alt={clubName}
+                width={56}
+                height={56}
+                className="h-14 w-14 rounded-full bg-white object-contain p-1"
+                unoptimized
+              />
+            </a>
 
             {!collapsed && (
-              <div>
+              <div className="min-w-0">
                 <div className="text-sm font-black leading-tight">
-                  LAKEWOOD RANCH
-                </div>
-
-                <div className="text-sm font-black leading-tight">
-                  PICKLEBALL CLUB
+                  {clubName}
                 </div>
 
                 <div className="mt-1 text-xs font-bold uppercase tracking-wide text-yellow-300">
-                  League Management
+                  {systemName}
                 </div>
               </div>
             )}
@@ -300,7 +324,7 @@ export default function AppHeader({
                 </button>
 
                 <div className="mt-5 text-center text-[11px] leading-relaxed text-slate-400">
-                  {"\u{00A9}"} {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club
+                  {"\u{00A9}"} {COPYRIGHT_YEAR} {clubName}
                   <br />
                   All rights reserved.
                   <br />
@@ -332,16 +356,17 @@ export default function AppHeader({
             </button>
 
             <Image
-              src="https://lwrpickleballclub.com/lwrpc-logo.png"
-              alt="Lakewood Ranch Pickleball Club"
+              src={logoUrl}
+              alt={clubName}
               width={56}
               height={56}
               className="h-14 w-14 rounded-full object-contain lg:hidden"
+              unoptimized
             />
 
             <div>
               <div className="text-xs font-bold uppercase tracking-wide text-sky-200">
-                LWR PC League Management
+                {systemName}
               </div>
 
               <h1 className="mt-1 text-2xl font-black text-white md:text-3xl">
@@ -391,13 +416,22 @@ export default function AppHeader({
 
           <div className="relative h-full w-80 max-w-[85vw] overflow-y-auto bg-slate-950 p-5 text-white shadow-2xl">
             <div className="flex items-center justify-between">
-              <Image
-                src="https://lwrpickleballclub.com/lwrpc-logo.png"
-                alt="Lakewood Ranch Pickleball Club"
-                width={64}
-                height={64}
-                className="h-16 w-16 rounded-full bg-white object-contain p-1"
-              />
+              <a
+                href={clubWebsite}
+                target="_blank"
+                rel="noreferrer"
+                title={`Open ${clubName} website`}
+                className="rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-300"
+              >
+                <Image
+                  src={logoUrl}
+                  alt={clubName}
+                  width={64}
+                  height={64}
+                  className="h-16 w-16 rounded-full bg-white object-contain p-1"
+                  unoptimized
+                />
+              </a>
 
               <button
                 onClick={() => setMenuOpen(false)}
@@ -408,11 +442,11 @@ export default function AppHeader({
             </div>
 
             <div className="mt-4 text-lg font-black">
-              Lakewood Ranch Pickleball Club
+              {clubName}
             </div>
 
             <div className="text-sm font-bold uppercase tracking-wide text-yellow-300">
-              League Management
+              {systemName}
             </div>
 
             <NavGroups mobile />
@@ -425,7 +459,7 @@ export default function AppHeader({
             </button>
 
             <div className="mt-6 text-center text-[11px] leading-relaxed text-slate-400">
-              {"\u{00A9}"} {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club
+              {"\u{00A9}"} {COPYRIGHT_YEAR} {clubName}
               <br />
               All rights reserved.
               <br />

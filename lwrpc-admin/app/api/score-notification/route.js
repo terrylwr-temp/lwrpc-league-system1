@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { sendEmailMessages, sendSmsMessages } from "../../lib/notifications";
+import { EMAIL_TEMPLATE_KEYS, renderEmailTemplate } from "../../lib/emailTemplates";
+import { loadEmailTemplate } from "../../lib/serverEmailTemplates";
 
 export const runtime = "nodejs";
 
@@ -26,48 +28,16 @@ export async function POST(req) {
     }
 
     const isVerified = notificationType === "verified";
-    const subject = isVerified
-      ? `Scores Validated: ${homeTeam} vs ${awayTeam}`
-      : `Score Verification Required: ${homeTeam} vs ${awayTeam}`;
-    const heading = isVerified ? "Match Scores Validated" : "Match Scores Submitted";
-    const actionText = isVerified
-      ? "Scores have been validated for this match."
-      : "Scores have been entered for this match.";
-    const footerText = isVerified
-      ? "The match result is now finalized in the league system."
-      : "Please log into the league system to verify or dispute the scores.";
-    const submittedByLabel = isVerified ? "Validated By" : "Submitted By";
-    const text = `${actionText} ${homeTeam} vs ${awayTeam}.
-
-Match Date: ${matchDate || "N/A"}
-Current Match Score: ${score}
-${submittedByLabel}: ${enteredBy || "Unknown"}
-
-${footerText}`;
-
-    const html = `
-        <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-          <h2>${heading}</h2>
-
-          <p>${actionText}</p>
-
-          <p><strong>${homeTeam} vs ${awayTeam}</strong></p>
-
-          <p>Match Date: ${matchDate || "N/A"}</p>
-
-          <p>Current Match Score: <strong>${score}</strong></p>
-
-          <p>${submittedByLabel}: <strong>${enteredBy || "Unknown"}</strong></p>
-
-          <p>${footerText}</p>
-
-          <hr />
-
-          <p style="font-size: 12px; color: #666;">
-            LWRPC League Management System
-          </p>
-        </div>
-      `;
+    const template = await loadEmailTemplate(
+      isVerified ? EMAIL_TEMPLATE_KEYS.scoreValidated : EMAIL_TEMPLATE_KEYS.scoreSubmitted
+    );
+    const rendered = renderEmailTemplate(template, {
+      home_team: homeTeam || "Home",
+      away_team: awayTeam || "Away",
+      match_date: matchDate || "N/A",
+      score: score || "N/A",
+      actor_name: enteredBy || "Unknown",
+    });
 
     const smsBody = isVerified
       ? `LWRPC scores validated: ${homeTeam} vs ${awayTeam}, ${score}.`
@@ -76,9 +46,9 @@ ${footerText}`;
     const [emailResult, smsResult] = await Promise.all([
       sendEmailMessages({
         emails,
-        subject,
-        text,
-        html,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
       }),
       sendSmsMessages({
         phones,

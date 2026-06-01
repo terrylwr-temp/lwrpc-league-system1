@@ -2,13 +2,30 @@
 
 import { useEffect, useState } from "react";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
+import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
 
 const PRINT_PAYLOAD_KEY = "lwrpc-print-payload";
 
 export default function PrintPage() {
   const [payload, setPayload] = useState(null);
+  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const clubName = payload?.clubName || systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
+  const printTitle = systemSettings.club_short_name
+    ? `${systemSettings.club_short_name} Printout`
+    : "Printout";
 
   useEffect(() => {
+    async function loadSystemSettings() {
+      const response = await fetch("/api/system-settings");
+      const result = await response.json().catch(() => ({}));
+
+      if (result.settings) {
+        setSystemSettings(mergeSystemSettings(result.settings));
+      }
+    }
+
+    loadSystemSettings();
+
     const raw = window.localStorage.getItem(PRINT_PAYLOAD_KEY);
 
     if (raw) {
@@ -23,10 +40,10 @@ export default function PrintPage() {
   useEffect(() => {
     if (!payload) return;
 
-    document.title = payload.title || "LWRPC Printout";
+    document.title = payload.title || printTitle;
     const timer = window.setTimeout(() => window.print(), 300);
     return () => window.clearTimeout(timer);
-  }, [payload]);
+  }, [payload, printTitle]);
 
   if (!payload) {
     return (
@@ -42,7 +59,7 @@ export default function PrintPage() {
         @page {
           margin: 0.65in 0.55in 0.85in;
           @bottom-left {
-            content: "© ${COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club. All rights reserved. Version ${APP_VERSION}.";
+            content: "© ${COPYRIGHT_YEAR} ${clubName}. All rights reserved. Version ${APP_VERSION}.";
             font-family: Arial, sans-serif;
             font-size: 9px;
             color: #475569;
@@ -90,7 +107,7 @@ export default function PrintPage() {
       <div dangerouslySetInnerHTML={{ __html: payload.body || "" }} />
 
       <footer className="print-footer">
-        <span>© {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club. All rights reserved. Version {APP_VERSION}.</span>
+        <span>© {COPYRIGHT_YEAR} {clubName}. All rights reserved. Version {APP_VERSION}.</span>
         <span>Page <span className="page-number" /></span>
       </footer>
     </main>

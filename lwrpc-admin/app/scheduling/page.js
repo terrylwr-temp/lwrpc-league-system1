@@ -165,6 +165,7 @@ export default function SchedulingPage() {
         const text = [
           row.locations?.name,
           row.specific_date,
+          formatDisplayDate(row.specific_date, ""),
           dayName(row.day_of_week),
           row.start_time,
           row.end_time,
@@ -1222,7 +1223,7 @@ export default function SchedulingPage() {
                 type="search"
                 value={availabilitySearch}
                 onChange={(e) => setAvailabilitySearch(e.target.value)}
-                placeholder="Search court unavailability"
+                placeholder="Search location, date, day, time, or notes"
                 className="mb-4 w-full rounded-xl border border-slate-300 px-4 py-3"
               />
               {filteredAvailability.map((row) => (

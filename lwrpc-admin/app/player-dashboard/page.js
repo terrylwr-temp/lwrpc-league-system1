@@ -36,6 +36,8 @@ const PLAYER_LEAGUE_DOCUMENT_TYPES = LEAGUE_DOCUMENT_TYPES.filter((documentType)
   PLAYER_DOCUMENT_KEYS.has(documentType.key)
 );
 
+const PLAYER_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-player-dashboard-selected-team";
+
 export default function PlayerDashboardPage() {
   const router = useRouter();
   const playerGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "player_guide_pdf");
@@ -366,6 +368,7 @@ export default function PlayerDashboardPage() {
       .select(`
         id,
         line_number,
+        posted_to_dupr,
         home_player_1_id,
         home_player_2_id,
         away_player_1_id,
@@ -411,7 +414,8 @@ export default function PlayerDashboardPage() {
         division_lines (
           id,
           line_name,
-          line_type
+          line_type,
+          posted_to_dupr
         ),
         matches (
           id,
@@ -496,9 +500,18 @@ export default function PlayerDashboardPage() {
         ])
       )
     );
+    const savedTeamId = readDashboardTeamSelection(
+      PLAYER_SELECTED_TEAM_STORAGE_PREFIX,
+      memberData.id
+    );
+
     setSelectedPlayerTeamId((current) => {
       if (current && playerTeams.some((team) => String(team.id) === String(current))) {
         return current;
+      }
+
+      if (savedTeamId && playerTeams.some((team) => String(team.id) === String(savedTeamId))) {
+        return savedTeamId;
       }
 
       const firstActiveTeam = playerTeams.find((team) => team.is_active !== false);
@@ -619,6 +632,15 @@ export default function PlayerDashboardPage() {
   const selectedVisibleTeam = useMemo(() => {
     return visibleTeams.find((team) => String(team.id) === String(selectedPlayerTeamId)) || visibleTeams[0] || null;
   }, [selectedPlayerTeamId, visibleTeams]);
+
+  function selectPlayerTeam(teamId) {
+    setSelectedPlayerTeamId(teamId);
+    writeDashboardTeamSelection(
+      PLAYER_SELECTED_TEAM_STORAGE_PREFIX,
+      member?.id,
+      teamId
+    );
+  }
 
   const selectedDivisionStandings = useMemo(() => {
     if (!selectedStandingsTeam) return [];
@@ -854,10 +876,11 @@ export default function PlayerDashboardPage() {
           match_lines (
             id,
             line_number,
+            posted_to_dupr,
             home_team_games_won,
             away_team_games_won,
             winning_team_id,
-            division_lines ( line_name, line_type, team_win_points ),
+            division_lines ( line_name, line_type, posted_to_dupr, team_win_points ),
             home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
             home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
             away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, self_rating),
@@ -1045,7 +1068,7 @@ export default function PlayerDashboardPage() {
               <DashboardTeamSelector
                 teams={visibleTeams}
                 selectedTeamId={selectedPlayerTeamId}
-                onSelect={setSelectedPlayerTeamId}
+                onSelect={selectPlayerTeam}
               />
             )}
 
@@ -1478,6 +1501,25 @@ function DashboardTeamSelector({ teams, selectedTeamId, onSelect }) {
       </div>
     </div>
   );
+}
+
+function dashboardTeamSelectionKey(prefix, memberId) {
+  return `${prefix}:${memberId || "unknown"}`;
+}
+
+function readDashboardTeamSelection(prefix, memberId) {
+  if (!memberId || typeof window === "undefined") return "";
+  return window.localStorage.getItem(dashboardTeamSelectionKey(prefix, memberId)) || "";
+}
+
+function writeDashboardTeamSelection(prefix, memberId, teamId) {
+  if (!memberId || typeof window === "undefined") return;
+
+  if (teamId) {
+    window.localStorage.setItem(dashboardTeamSelectionKey(prefix, memberId), teamId);
+  } else {
+    window.localStorage.removeItem(dashboardTeamSelectionKey(prefix, memberId));
+  }
 }
 
 function HistoryStat({ label, value, tone = "slate" }) {
@@ -2145,7 +2187,7 @@ function MatchLineResult({ line, match, ratingForMember }) {
             Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
           </div>
           <div className="mt-0.5 text-xs font-semibold text-slate-600">
-            {capitalizeLabel(line.division_lines?.line_type || "Line")}
+            {capitalizeLabel(line.division_lines?.line_type || "Line")} · {duprPostedLabel(line)}
           </div>
         </div>
         <div className="flex flex-wrap gap-2 md:justify-end">
@@ -2421,6 +2463,11 @@ function capitalizeLabel(value) {
   return String(value || "")
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function duprPostedLabel(line) {
+  const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
+  return posted ? "Posted to DUPR" : "Not Posted to DUPR";
 }
 
 function formatMatchScoreStatus(match) {

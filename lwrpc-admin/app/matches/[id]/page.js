@@ -320,11 +320,17 @@ export default function MatchDetailPage() {
     const divisionLine = line.division_lines;
     const pieces = [
       capitalizeFirst(divisionLine?.line_type),
+      duprPostedLabel(line),
       capitalizeFirst(divisionLine?.game_format),
       `${lineGames.length || divisionLine?.games_per_line || 1} game(s)`,
     ].filter(Boolean);
 
     return pieces.join(" - ");
+  }
+
+  function duprPostedLabel(line) {
+    const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
+    return posted ? "Posted to DUPR" : "Not Posted to DUPR";
   }
 
   const getDisplayedLines = useCallback(function getDisplayedLines(allLines) {
@@ -1269,6 +1275,8 @@ export default function MatchDetailPage() {
 
   const scoreReviewAllowed = canReviewSubmittedScores();
   const scoreEntryEditable = canEditScoreEntry();
+  const scoreReviewActionsVisible =
+    match.score_status === "pending_verification" && scoreReviewAllowed;
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 pb-28 md:p-6">
@@ -1301,7 +1309,7 @@ export default function MatchDetailPage() {
             </button>
           )}
 
-          {match.score_status !== "verified" && scoreReviewAllowed && (
+          {scoreReviewActionsVisible && (
             <>
               <button
                 type="button"
@@ -1426,11 +1434,11 @@ export default function MatchDetailPage() {
             return (
               <div
                 key={line.id}
-                className={`rounded-2xl p-4 shadow transition-all ${
-                  hasDuplicate ? "border border-red-200 bg-red-50" : "bg-white"
+                className={`overflow-hidden rounded-2xl border-2 shadow-lg transition-all ${
+                  hasDuplicate ? "border-red-300 bg-red-50" : "border-blue-200 bg-blue-50/70"
                 }`}
               >
-                <div className="flex flex-col gap-1">
+                <div className="border-b border-blue-200 bg-white/85 p-4">
                   <div>
                     <h2 className="text-xl font-bold text-slate-900">
                       {teamSlotLabel(line)}
@@ -1441,9 +1449,6 @@ export default function MatchDetailPage() {
                         <span>{formatLineInfo(line, lineGames)}</span>
                         <span className="font-semibold text-slate-800">
                         Team Points: {formatLineTeamPoints(linePoints)}
-                      </span>
-                      <span>
-                        Points: {lineSummary.homePoints} - {lineSummary.awayPoints}
                       </span>
                     </div>
 
@@ -1457,7 +1462,7 @@ export default function MatchDetailPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
                   <TeamPlayers
                     title={match.home_team?.name || "Home Team"}
                     teamRating={teamDuprRating(line.home_player_1, line.home_player_2)}
@@ -1491,20 +1496,20 @@ export default function MatchDetailPage() {
                   />
                 </div>
 
-                <div className="mt-4 space-y-3 md:hidden">
+                <div className="space-y-3 p-4 pt-0 md:hidden">
                   {lineGames.map((game) => {
                     const gameWinner = gameWinnerName(game);
 
                     return (
-                      <div key={game.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                        <div className="mb-3 flex items-center justify-between gap-2">
-                          <div className="font-black text-slate-900">Game {game.game_number}</div>
+                      <div key={game.id} className="overflow-hidden rounded-2xl border-2 border-blue-300 bg-white shadow-md">
+                        <div className="flex items-center justify-between gap-2 border-b border-blue-200 bg-blue-100 px-4 py-3">
+                          <div className="font-black uppercase tracking-wide text-blue-950">Game {game.game_number}</div>
                           <div className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700">
                             Winner: {gameWinner}
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
                           <label className="text-xs font-bold uppercase tracking-wide text-slate-600">
                             {match.home_team?.name || "Home"}
                             <input
@@ -1513,7 +1518,7 @@ export default function MatchDetailPage() {
                               value={game.home_score ?? ""}
                               onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
                               disabled={!scoreEntryEditable || scoresBlockedForLine}
-                              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-3 text-center text-base font-bold"
+                              className="mt-1 w-full rounded-2xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                             />
                           </label>
 
@@ -1525,7 +1530,7 @@ export default function MatchDetailPage() {
                               value={game.away_score ?? ""}
                               onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
                               disabled={!scoreEntryEditable || scoresBlockedForLine}
-                              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-3 text-center text-base font-bold"
+                              className="mt-1 w-full rounded-2xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                             />
                           </label>
                         </div>
@@ -1534,7 +1539,7 @@ export default function MatchDetailPage() {
                           value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                           onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
                           disabled={!scoreEntryEditable}
-                          className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-3 text-sm"
+                          className="mx-4 mb-4 w-[calc(100%-2rem)] rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold"
                         >
                           {gameStatusOptions().map((option) => (
                             <option key={option.value} value={option.value}>
@@ -1553,8 +1558,8 @@ export default function MatchDetailPage() {
                   )}
                 </div>
 
-                <div className="mt-4 hidden overflow-x-auto md:block">
-                  <table className="w-full border-collapse text-xs md:text-sm">
+                <div className="hidden overflow-x-auto border-t border-blue-200 bg-white/60 p-4 md:block">
+                  <table className="w-full border-separate border-spacing-y-2 text-xs md:text-sm">
                     <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
                       <tr>
                         <th className="p-1.5 text-left">Game</th>
@@ -1570,39 +1575,39 @@ export default function MatchDetailPage() {
                         const gameWinner = gameWinnerName(game);
 
                         return (
-                          <tr key={game.id} className="border-b border-slate-100">
-                            <td className="p-1.5 font-semibold text-slate-900">
-                              Game {game.game_number}
+                          <tr key={game.id} className="rounded-xl bg-white shadow-sm ring-2 ring-blue-100">
+                            <td className="rounded-l-xl border-y-2 border-l-2 border-blue-100 p-3 font-black text-slate-900">
+                              {game.game_number}
                             </td>
 
-                            <td className="p-1.5">
+                            <td className="border-y-2 border-blue-100 p-3">
                               <input
                                 type="number"
                                 inputMode="numeric"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
                                 disabled={!scoreEntryEditable || scoresBlockedForLine}
-                                className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-center font-bold"
+                                className="w-20 rounded-xl border-2 border-slate-300 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                               />
                             </td>
 
-                            <td className="p-1.5">
+                            <td className="border-y-2 border-blue-100 p-3">
                               <input
                                 type="number"
                                 inputMode="numeric"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
                                 disabled={!scoreEntryEditable || scoresBlockedForLine}
-                                className="w-16 rounded-lg border border-slate-300 px-2 py-1.5 text-center font-bold"
+                                className="w-20 rounded-xl border-2 border-slate-300 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                               />
                             </td>
 
-                            <td className="p-1.5">
+                            <td className="border-y-2 border-blue-100 p-3">
                               <select
                                 value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                                 onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
                                 disabled={!scoreEntryEditable}
-                                className="w-full min-w-40 rounded-lg border border-slate-300 px-2 py-1.5 text-xs"
+                                className="w-full min-w-40 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold"
                               >
                                 {gameStatusOptions().map((option) => (
                                   <option key={option.value} value={option.value}>
@@ -1612,7 +1617,7 @@ export default function MatchDetailPage() {
                               </select>
                             </td>
 
-                            <td className="p-1.5 font-semibold text-slate-700">{gameWinner}</td>
+                            <td className="rounded-r-xl border-y-2 border-r-2 border-blue-100 p-3 font-semibold text-slate-700">{gameWinner}</td>
                           </tr>
                         );
                       })}
@@ -1638,7 +1643,7 @@ export default function MatchDetailPage() {
           )}
         </div>
 
-        {(scoreEntryEditable || (match.score_status !== "verified" && scoreReviewAllowed)) && (
+        {(scoreEntryEditable || scoreReviewActionsVisible) && (
           <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-2">
               {scoreEntryEditable && (
@@ -1651,7 +1656,7 @@ export default function MatchDetailPage() {
                 </button>
               )}
 
-              {match.score_status !== "verified" && scoreReviewAllowed && (
+              {scoreReviewActionsVisible && (
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"

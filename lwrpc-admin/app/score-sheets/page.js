@@ -13,6 +13,7 @@ import {
 } from "../lib/scoreSheetTemplates";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { useRouter } from "next/navigation";
+import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
 
 export default function ScoreSheetsPage() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function ScoreSheetsPage() {
   const [isActive, setIsActive] = useState(true);
   const [isDefault, setIsDefault] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
   useUnsavedChangesWarning(
     Boolean(editingId || name !== DEFAULT_SCORE_SHEET_TEMPLATE_NAME || description.trim() || sheetTitle !== DEFAULT_SCORE_SHEET_TEMPLATE_NAME || templateHtml !== DEFAULT_SCORE_SHEET_TEMPLATE_HTML || rulesText !== DEFAULT_SCORE_SHEET_RULES || !isActive || isDefault),
@@ -48,14 +50,23 @@ export default function ScoreSheetsPage() {
     setTemplates(data || []);
   }, []);
 
+  const loadSystemSettings = useCallback(async function loadSystemSettings() {
+    const response = await fetch("/api/system-settings");
+    const result = await response.json().catch(() => ({}));
+
+    if (result.settings) {
+      setSystemSettings(mergeSystemSettings(result.settings));
+    }
+  }, []);
+
   useEffect(() => {
     async function run() {
       const ok = await requireRole(router, "league_manager");
-      if (ok) loadTemplates();
+      if (ok) await Promise.all([loadTemplates(), loadSystemSettings()]);
     }
 
     run();
-  }, [loadTemplates, router]);
+  }, [loadTemplates, loadSystemSettings, router]);
 
   const activeTemplates = useMemo(() => {
     return templates.filter((template) => template.is_active !== false);
@@ -65,8 +76,9 @@ export default function ScoreSheetsPage() {
       templateHtml,
       sheetTitle,
       rulesText,
+      clubName: systemSettings.club_name,
     });
-  }, [templateHtml, sheetTitle, rulesText]);
+  }, [rulesText, sheetTitle, systemSettings.club_name, templateHtml]);
 
   function clearForm() {
     setEditingId(null);
@@ -465,8 +477,8 @@ function extractBodyHtml(value) {
   return (bodyMatch?.[1] || text).trim();
 }
 
-function previewScoreSheetDocument({ templateHtml, sheetTitle, rulesText }) {
-  const body = renderPreviewBody({ templateHtml, sheetTitle, rulesText });
+function previewScoreSheetDocument({ templateHtml, sheetTitle, rulesText, clubName }) {
+  const body = renderPreviewBody({ templateHtml, sheetTitle, rulesText, clubName });
 
   return `<!doctype html>
 <html>
@@ -521,20 +533,20 @@ function previewScoreSheetDocument({ templateHtml, sheetTitle, rulesText }) {
 </html>`;
 }
 
-function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
+function renderPreviewBody({ templateHtml, sheetTitle, rulesText, clubName }) {
   const lineupRows = `
     <tr>
-      <td class="line-cell"><div class="line-number">1</div><div>Away Player One <span class="rating">(3.65)</span></div><div>Away Player Two <span class="rating">(3.58)</span></div><div class="team-rating">Team Rating: 7.23</div></td>
       <td class="line-cell"><div class="line-number">1</div><div>Home Player One <span class="rating">(3.72)</span></div><div>Home Player Two <span class="rating">(3.51)</span></div><div class="team-rating">Team Rating: 7.23</div></td>
+      <td class="line-cell"><div class="line-number">1</div><div>Away Player One <span class="rating">(3.65)</span></div><div>Away Player Two <span class="rating">(3.58)</span></div><div class="team-rating">Team Rating: 7.23</div></td>
     </tr>
     <tr>
-      <td class="line-cell"><div class="line-number">2</div><div>Away Player Three <span class="rating">(3.42)</span></div><div>Away Player Four <span class="rating">(3.39)</span></div><div class="team-rating">Team Rating: 6.81</div></td>
       <td class="line-cell"><div class="line-number">2</div><div>Home Player Three <span class="rating">(3.44)</span></div><div>Home Player Four <span class="rating">(3.33)</span></div><div class="team-rating">Team Rating: 6.77</div></td>
+      <td class="line-cell"><div class="line-number">2</div><div>Away Player Three <span class="rating">(3.42)</span></div><div>Away Player Four <span class="rating">(3.39)</span></div><div class="team-rating">Team Rating: 6.81</div></td>
     </tr>
   `;
   const configuredRows = `
-    <tr><td>Game 1) Home 1 vs Visitor 1</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
-    <tr><td>Game 2) Home 2 vs Visitor 2</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
+    <tr><td>Game 1) Home 1 vs Away 1</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
+    <tr><td>Game 2) Home 2 vs Away 2</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
   `;
   const configuredTable = `
     <table class="configured-lines">
@@ -543,12 +555,12 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
     </table>
   `;
   const scoreRows = `
-    <tr class="grouped-score-row group-start"><td>Game 1) Home 1 vs Visitor 1</td><td></td><td></td></tr>
-    <tr class="grouped-score-row"><td>Game 1) Home 1 vs Visitor 1</td><td></td><td></td></tr>
-    <tr class="grouped-score-row group-end"><td>Game 1) Home 1 vs Visitor 1</td><td></td><td></td></tr>
-    <tr class="grouped-score-row group-start"><td>Game 2) Home 2 vs Visitor 2</td><td></td><td></td></tr>
-    <tr class="grouped-score-row"><td>Game 2) Home 2 vs Visitor 2</td><td></td><td></td></tr>
-    <tr class="grouped-score-row group-end"><td>Game 2) Home 2 vs Visitor 2</td><td></td><td></td></tr>
+    <tr class="grouped-score-row group-start"><td>Game 1) Home 1 vs Away 1</td><td></td><td></td></tr>
+    <tr class="grouped-score-row"><td>Game 1) Home 1 vs Away 1</td><td></td><td></td></tr>
+    <tr class="grouped-score-row group-end"><td>Game 1) Home 1 vs Away 1</td><td></td><td></td></tr>
+    <tr class="grouped-score-row group-start"><td>Game 2) Home 2 vs Away 2</td><td></td><td></td></tr>
+    <tr class="grouped-score-row"><td>Game 2) Home 2 vs Away 2</td><td></td><td></td></tr>
+    <tr class="grouped-score-row group-end"><td>Game 2) Home 2 vs Away 2</td><td></td><td></td></tr>
   `;
   const scoreTable = `
     <div class="score-entry-details">
@@ -561,18 +573,18 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
         <col class="score-col" />
         <col class="score-col" />
       </colgroup>
-      <thead><tr><th>Game</th><th>Away</th><th>Home</th></tr></thead>
+      <thead><tr><th>Game</th><th>Home</th><th>Away</th></tr></thead>
       <tbody>${scoreRows}</tbody>
     </table>
   `;
   const captainSignatureRows = `
     <div class="signatures">
-      <div>Captain Signature (Away)<div class="signature-line"></div></div>
       <div>Captain Signature (Home)<div class="signature-line"></div></div>
+      <div>Captain Signature (Away)<div class="signature-line"></div></div>
     </div>
   `;
   const replacements = {
-    "{{club_name}}": "Lakewood Ranch Pickleball Club",
+    "{{club_name}}": clubName || DEFAULT_SYSTEM_SETTINGS.club_name,
     "{{sheet_title}}": sheetTitle || DEFAULT_SCORE_SHEET_TEMPLATE_NAME,
     "{{match_date}}": "06/01/2026",
     "{{match_time}}": "10:00 AM",
@@ -582,7 +594,7 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
     "{{home_team}}": "Home Sample Team",
     "{{away_team}}": "Away Sample Team",
     "{{lineup_rows}}": lineupRows,
-    "{{round_rows}}": "<tr><th colspan=\"3\">Round 1</th></tr><tr><td>Away 1 vs. Home 1</td><td></td><td></td></tr>",
+    "{{round_rows}}": "<tr><th colspan=\"3\">Round 1</th></tr><tr><td>Home 1 vs. Away 1</td><td></td><td></td></tr>",
     "{{configured_game_lines_rows}}": configuredRows,
     "{{configured_game_lines_table}}": configuredTable,
     "{{score_entry_rows}}": scoreRows,
@@ -607,6 +619,27 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText }) {
 
 function normalizeScoreSheetTemplateHtml(html) {
   return String(html || "")
+    .replaceAll(
+      '<div class="box"><span class="label">Away Team</span><span class="value">{{away_team}}</span></div>\n  <div class="box"><span class="label">Home Team</span><span class="value">{{home_team}}</span></div>',
+      '<div class="box"><span class="label">Home Team</span><span class="value">{{home_team}}</span></div>\n  <div class="box"><span class="label">Away Team</span><span class="value">{{away_team}}</span></div>'
+    )
+    .replaceAll(
+      '<div>Captain Signature (Away)<div class="signature-line"></div></div>\n  <div>Captain Signature (Home)<div class="signature-line"></div></div>',
+      '<div>Captain Signature (Home)<div class="signature-line"></div></div>\n  <div>Captain Signature (Away)<div class="signature-line"></div></div>'
+    )
+    .replaceAll(
+      '<th>Away Teams <span class="header-score">Total Team Score: ________</span></th>\n      <th>Home Teams <span class="header-score">Total Team Score: ________</span></th>',
+      '<th>Home Teams <span class="header-score">Total Team Score: ________</span></th>\n      <th>Away Teams <span class="header-score">Total Team Score: ________</span></th>'
+    )
+    .replaceAll(
+      '<th>AWAY Teams <span class="header-score">Score: ______</span></th>\n      <th>HOME Teams <span class="header-score">Score: ______</span></th>',
+      '<th>Home Teams <span class="header-score">Total Team Score: ________</span></th>\n      <th>Away Teams <span class="header-score">Total Team Score: ________</span></th>'
+    )
+    .replaceAll(
+      '<th>Away</th>\n          <th>Home</th>',
+      '<th>Home</th>\n          <th>Away</th>'
+    )
+    .replaceAll("<th>Away</th><th>Home</th>", "<th>Home</th><th>Away</th>")
     .replaceAll(
       'AWAY Teams <span class="header-score">Score: ______</span>',
       'Away Teams <span class="header-score">Total Team Score: ________</span>'

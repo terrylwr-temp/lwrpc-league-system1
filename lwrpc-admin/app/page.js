@@ -28,13 +28,17 @@ const LOGIN_MESSAGE_TEMPLATES = [
   },
 ];
 
+const SETUP_REMINDER_HIDE_DATE_KEY = "lwrpc-match-setup-reminder-hide-date";
+
 export default function DashboardPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const [currentUserRole, setCurrentUserRole] = useState("");
   const [dashboardCounts, setDashboardCounts] = useState(null);
   const [dashboardScope, setDashboardScope] = useState("active");
   const [dashboardFilter, setDashboardFilter] = useState("scope");
   const [dashboardRosterCountMode, setDashboardRosterCountMode] = useState("assignments");
+  const [dashboardGamesPlayedMode, setDashboardGamesPlayedMode] = useState("games");
   const [dashboardFilterOptions, setDashboardFilterOptions] = useState({
     seasons: [],
     leagues: [],
@@ -64,15 +68,10 @@ export default function DashboardPage() {
   const [loadingGuideFiles, setLoadingGuideFiles] = useState(false);
   const [savingGuideKey, setSavingGuideKey] = useState("");
   const adminGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "admin_guide_pdf");
-  const [testNotification, setTestNotification] = useState({
-    email: "",
-    phone: "",
-    subject: "LWRPC Test Notification",
-    message: "This is a test notification from the LWRPC League Management System.",
-  });
-  const [sendingTestNotification, setSendingTestNotification] = useState(false);
-  const [testNotificationResult, setTestNotificationResult] = useState(null);
-
+  const [setupReminderPreview, setSetupReminderPreview] = useState(null);
+  const [checkingSetupReminders, setCheckingSetupReminders] = useState(false);
+  const [sendingSetupReminders, setSendingSetupReminders] = useState(false);
+  const [hideSetupRemindersToday, setHideSetupRemindersToday] = useState(false);
   const loadDashboardCounts = useCallback(async function loadDashboardCounts() {
     setDashboardCounts(null);
 
@@ -105,6 +104,8 @@ export default function DashboardPage() {
       scopedRosterData,
       scopedRatingData,
       pendingVerificationCount,
+      gamesPlayedCount,
+      matchesPlayedCount,
     ] = await Promise.all([
       countScopedMatches(leagueData, (query) =>
         query
@@ -115,6 +116,10 @@ export default function DashboardPage() {
       loadScopedRatingData(scopedSeasonIds),
       countScopedMatches(leagueData, (query) =>
         query.eq("score_status", "pending_verification")
+      ),
+      countScopedPlayedGames(leagueData),
+      countScopedMatches(leagueData, (query) =>
+        query.eq("score_status", "verified")
       ),
     ]);
 
@@ -129,6 +134,8 @@ export default function DashboardPage() {
       teams: teamsCount,
       matchesThisWeek: matchesThisWeekCount,
       pendingVerification: pendingVerificationCount,
+      gamesPlayed: gamesPlayedCount,
+      matchesPlayed: matchesPlayedCount,
       averageRosterCount: averageRosterCount(scopedTeams, scopedRosterData),
       averageTeamDupr: averageTeamDupr(scopedTeams, scopedRosterData, scopedRatingData),
     });
@@ -208,21 +215,94 @@ export default function DashboardPage() {
     if (firstConfigured?.bucket) setGuideBucket(firstConfigured.bucket);
   }, []);
 
+  const checkMatchSetupReminderPrompt = useCallback(async function checkMatchSetupReminderPrompt() {
+    const today = localDateValue(new Date());
+
+    if (window.localStorage.getItem(SETUP_REMINDER_HIDE_DATE_KEY) === today) return;
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) return;
+
+    setCheckingSetupReminders(true);
+    const response = await fetch("/api/match-setup-reminders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ dryRun: true }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setCheckingSetupReminders(false);
+
+    if (!response.ok || !result.success || Number(result.pending || 0) === 0) {
+      return;
+    }
+
+    setHideSetupRemindersToday(false);
+    setSetupReminderPreview(result);
+  }, []);
+
   useEffect(() => {
     async function run() {
       const user = await requireRole(router, "league_manager");
       if (user) {
+        setCurrentUserRole(user.role || "");
         setReady(true);
         loadDashboardCounts();
         loadDashboardFilterOptions();
         loadLoginMessages();
         loadMessageHistory();
         loadGuideDocuments();
+        checkMatchSetupReminderPrompt();
       }
     }
 
     run();
-  }, [loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, loadMessageHistory, router]);
+  }, [checkMatchSetupReminderPrompt, loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, loadMessageHistory, router]);
+
+  function closeSetupReminderPrompt() {
+    if (hideSetupRemindersToday) {
+      window.localStorage.setItem(SETUP_REMINDER_HIDE_DATE_KEY, localDateValue(new Date()));
+    }
+
+    setSetupReminderPreview(null);
+    setHideSetupRemindersToday(false);
+  }
+
+  async function sendSetupRemindersNow() {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before sending match setup reminders.");
+      return;
+    }
+
+    setSendingSetupReminders(true);
+    const response = await fetch("/api/match-setup-reminders", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ dryRun: false }),
+    });
+    const result = await response.json().catch(() => ({}));
+    setSendingSetupReminders(false);
+
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to send match setup reminders.");
+      return;
+    }
+
+    alert(`Match setup reminders sent for ${result.sent || 0} team setup${Number(result.sent || 0) === 1 ? "" : "s"}.`);
+    window.localStorage.setItem(SETUP_REMINDER_HIDE_DATE_KEY, localDateValue(new Date()));
+    setSetupReminderPreview(null);
+    setHideSetupRemindersToday(false);
+  }
 
   function updateLoginMessage(templateKey, field, value) {
     setLoginMessages((current) => ({
@@ -447,71 +527,6 @@ export default function DashboardPage() {
     alert(`${guideType.label} saved.`);
   }
 
-  function updateTestNotification(field, value) {
-    setTestNotification((current) => ({
-      ...current,
-      [field]: value,
-    }));
-    setTestNotificationResult(null);
-  }
-
-  async function sendTestNotification() {
-    const email = testNotification.email.trim();
-    const phone = testNotification.phone.trim();
-    const subject = testNotification.subject.trim();
-    const message = testNotification.message.trim();
-
-    if (!email && !phone) {
-      setTestNotificationResult({
-        ok: false,
-        message: "Enter an email address, a mobile number, or both.",
-      });
-      return;
-    }
-
-    if (!subject || !message) {
-      setTestNotificationResult({
-        ok: false,
-        message: "Enter both a subject and a message before sending a test.",
-      });
-      return;
-    }
-
-    setSendingTestNotification(true);
-    setTestNotificationResult(null);
-
-    const response = await fetch("/api/notifications", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        emails: email ? [email] : [],
-        phones: phone ? [phone] : [],
-        subject,
-        text: message,
-        smsBody: message,
-      }),
-    });
-    const result = await response.json().catch(() => ({}));
-    setSendingTestNotification(false);
-
-    if (!response.ok || !result.success) {
-      setTestNotificationResult({
-        ok: false,
-        message: result.error || "The test notification could not be sent.",
-      });
-      return;
-    }
-
-    setTestNotificationResult({
-      ok: true,
-      message: "Test notification request completed.",
-      email: result.email,
-      sms: result.sms,
-    });
-  }
-
   async function runMasterResetAll() {
     const firstOk = confirm([
       "Master Reset All will permanently remove generated league operations data.",
@@ -621,9 +636,47 @@ export default function DashboardPage() {
   ];
 
   const statusCards = [
-    { label: "Average Team Roster Count", value: formatDecimal(dashboardCounts?.averageRosterCount, 1), helper: `Players per ${scopeHelper.toLowerCase()} team` },
-    { label: "Pending Verification", value: formatCount(dashboardCounts?.pendingVerification), helper: "Matches awaiting score review" },
-    { label: "Average Team DUPR Rating", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Average roster DUPR by ${scopeHelper.toLowerCase()} team` },
+    { label: "Average Team Roster Count", value: formatDecimal(dashboardCounts?.averageRosterCount, 1), helper: `Players per ${scopeHelper.toLowerCase()} team`, tone: "slate" },
+    {
+      label: dashboardGamesPlayedMode === "matches" ? "Matches Played" : "Games Played",
+      value: formatCount(
+        dashboardGamesPlayedMode === "matches"
+          ? dashboardCounts?.matchesPlayed
+          : dashboardCounts?.gamesPlayed
+      ),
+      helper: dashboardGamesPlayedMode === "matches"
+        ? `${scopeHelper} verified match days`
+        : `${scopeHelper} verified game scores`,
+      tone: "blue",
+      action: (
+        <div className="mt-3 grid grid-cols-2 rounded-xl bg-white/15 p-1 text-[10px] font-black uppercase tracking-wide">
+          <button
+            type="button"
+            onClick={() => setDashboardGamesPlayedMode("games")}
+            className={`rounded-lg px-2 py-1.5 transition ${
+              dashboardGamesPlayedMode === "games"
+                ? "bg-white text-blue-900 shadow-sm"
+                : "text-white hover:bg-white/10"
+            }`}
+          >
+            Games
+          </button>
+          <button
+            type="button"
+            onClick={() => setDashboardGamesPlayedMode("matches")}
+            className={`rounded-lg px-2 py-1.5 transition ${
+              dashboardGamesPlayedMode === "matches"
+                ? "bg-white text-blue-900 shadow-sm"
+                : "text-white hover:bg-white/10"
+            }`}
+          >
+            Matches
+          </button>
+        </div>
+      ),
+    },
+    { label: "Average Team DUPR Rating", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Average roster DUPR by ${scopeHelper.toLowerCase()} team`, tone: "emerald" },
+    { label: "Pending Verification", value: formatCount(dashboardCounts?.pendingVerification), helper: "Matches awaiting score review", tone: "amber" },
   ];
 
   const sections = [
@@ -655,6 +708,10 @@ export default function DashboardPage() {
         { title: "Leagues", desc: "Manage leagues and roster locking.", path: "/leagues", code: "LG", tone: "blue" },
         { title: "Divisions", desc: "Manage division rules, DUPR limits, and game lines.", path: "/divisions", code: "DV", tone: "emerald" },
         { title: "Locations", desc: "Maintain clubs, courts, and court availability.", path: "/locations", code: "LC", tone: "slate" },
+        { title: "Email Options", desc: "Edit automated email templates and send test notifications.", path: "/email-options", code: "EO", tone: "blue" },
+        ...(currentUserRole === "commissioner"
+          ? [{ title: "System Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "SS", tone: "amber" }]
+          : []),
       ],
     },
   ];
@@ -676,29 +733,103 @@ export default function DashboardPage() {
           }
         />
 
-        <section className="overflow-hidden rounded-2xl bg-white shadow">
-          <div className="bg-slate-950 px-4 py-6 text-white md:px-6">
-            <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        {checkingSetupReminders && (
+          <div className="mb-4 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-950">
+            Checking for match setup reminders...
+          </div>
+        )}
+
+        {setupReminderPreview && (
+          <section className="mb-6 overflow-hidden rounded-2xl border-2 border-amber-300 bg-white shadow-lg">
+            <div className="bg-amber-100 px-5 py-4">
+              <h2 className="text-xl font-black text-amber-950">
+                Match Setup Reminders Ready
+              </h2>
+              <p className="mt-1 text-sm font-semibold text-amber-900">
+                The system found {setupReminderPreview.pending || 0} incomplete team setup{Number(setupReminderPreview.pending || 0) === 1 ? "" : "s"}.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
               <div>
-                <div className="text-xs font-black uppercase tracking-wide text-blue-200">
-                  Operations Command Center
+                <div className="flex flex-wrap gap-2">
+                  <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-blue-900">
+                    {setupReminderPreview.emails || 0} email{Number(setupReminderPreview.emails || 0) === 1 ? "" : "s"}
+                  </span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-slate-700">
+                    {setupReminderPreview.texts || 0} text{Number(setupReminderPreview.texts || 0) === 1 ? "" : "s"}
+                  </span>
                 </div>
-                <h2 className="mt-2 text-2xl font-black md:text-3xl">
-                  Run the league from one place
-                </h2>
-                <p className="mt-2 max-w-3xl text-sm font-semibold text-slate-300">
-                  Jump into the administrative workflows used most often during setup, scheduling, match play, and scoring.
-                </p>
+
+                <div className="mt-3 max-h-48 space-y-2 overflow-auto pr-1">
+                  {(setupReminderPreview.results || []).slice(0, 8).map((item) => (
+                    <div key={`${item.matchId}:${item.team}`} className="rounded-xl bg-slate-50 px-3 py-2 text-sm text-slate-700">
+                      <span className="font-bold text-slate-950">{item.team}</span>
+                      {" - "}
+                      {item.match}
+                      {item.matchDate ? ` on ${item.matchDate}` : ""}
+                    </div>
+                  ))}
+                  {(setupReminderPreview.results || []).length > 8 && (
+                    <div className="text-xs font-bold text-slate-500">
+                      Plus {(setupReminderPreview.results || []).length - 8} more.
+                    </div>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-col gap-3 md:items-end">
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center lg:flex-col lg:items-stretch">
+                <label className="flex max-w-64 items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-950">
+                  <input
+                    type="checkbox"
+                    checked={hideSetupRemindersToday}
+                    onChange={(event) => setHideSetupRemindersToday(event.target.checked)}
+                    disabled={sendingSetupReminders}
+                    className="mt-1 h-4 w-4 rounded border-amber-300 text-green-700 focus:ring-green-700"
+                  />
+                  <span>Don&apos;t show again today</span>
+                </label>
+                <button
+                  type="button"
+                  onClick={sendSetupRemindersNow}
+                  disabled={sendingSetupReminders}
+                  className="rounded-xl bg-green-700 px-5 py-3 text-sm font-black uppercase tracking-wide text-white hover:bg-green-800 disabled:opacity-50"
+                >
+                  {sendingSetupReminders ? "Sending..." : "Send Reminders"}
+                </button>
+                <button
+                  type="button"
+                  onClick={closeSetupReminderPrompt}
+                  disabled={sendingSetupReminders}
+                  className="rounded-xl bg-slate-200 px-5 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+                >
+                  Not Now
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <section className="overflow-hidden rounded-2xl bg-white shadow">
+          <div className="border-b border-slate-200 px-4 py-5 md:px-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                  System Snapshot
+                </div>
+                <h2 className="mt-1 text-xl font-black text-slate-950">
+                  Club Operational Overview
+                </h2>
+              </div>
+              <div className="flex flex-col gap-3 lg:items-end">
                 <label className="w-full md:w-96">
-                  <span className="mb-1 block text-xs font-black uppercase tracking-wide text-blue-200">
+                  <span className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
                     Dashboard Scope
                   </span>
                   <select
                     value={dashboardFilter}
                     onChange={(event) => setDashboardFilter(event.target.value)}
-                    className="w-full rounded-xl border border-white/20 bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm"
                   >
                     <option value="scope">Use Active / Current Toggle</option>
                     <option value="all">All Seasons</option>
@@ -726,14 +857,14 @@ export default function DashboardPage() {
                   </select>
                 </label>
 
-                <div className="flex rounded-2xl bg-white/10 p-1">
+                <div className="flex rounded-2xl bg-slate-100 p-1">
                   <button
                     type="button"
                     onClick={() => setDashboardScope("active")}
                     className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
                       dashboardScope === "active"
-                        ? "bg-white text-slate-950"
-                        : "text-slate-200 hover:bg-white/10"
+                        ? "bg-slate-950 text-white"
+                        : "text-slate-600 hover:bg-white"
                     }`}
                   >
                     Active Season
@@ -743,15 +874,15 @@ export default function DashboardPage() {
                     onClick={() => setDashboardScope("current")}
                     className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
                       dashboardScope === "current"
-                        ? "bg-white text-slate-950"
-                        : "text-slate-200 hover:bg-white/10"
+                        ? "bg-slate-950 text-white"
+                        : "text-slate-600 hover:bg-white"
                     }`}
                   >
                     Not Active (Current Entries)
                   </button>
                 </div>
                 {dashboardFilter !== "scope" && (
-                  <div className="max-w-sm text-right text-[11px] font-bold text-slate-300">
+                  <div className="max-w-sm text-right text-[11px] font-bold text-slate-500">
                     Active / Current only applies when the dashboard scope uses the toggle.
                   </div>
                 )}
@@ -762,6 +893,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-2 gap-3 p-4 md:grid-cols-4 md:p-6">
             {metricCards.map((card) => (
               <MetricCard key={card.label} {...card} />
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 border-t border-slate-200 p-4 md:grid-cols-4 md:p-6">
+            {statusCards.map((card) => (
+              <Status key={card.label} {...card} />
             ))}
           </div>
         </section>
@@ -793,93 +930,6 @@ export default function DashboardPage() {
             </section>
           ))}
         </div>
-
-        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
-          <div className="border-b border-slate-200 px-4 py-5 md:px-6">
-            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h2 className="text-xl font-black text-slate-950">Notification Test</h2>
-                <p className="mt-1 text-sm font-semibold text-slate-600">
-                  Send a test email or text using the same SendGrid and Twilio settings used by the app.
-                </p>
-              </div>
-              <div className="text-xs font-black uppercase tracking-wide text-slate-400">
-                Email / SMS
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 md:p-6">
-            <GuideField label="Test Email To">
-              <input
-                type="email"
-                value={testNotification.email}
-                onChange={(event) => updateTestNotification("email", event.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
-                placeholder="name@example.com"
-              />
-            </GuideField>
-
-            <GuideField label="Test Text To">
-              <input
-                type="tel"
-                value={testNotification.phone}
-                onChange={(event) => updateTestNotification("phone", event.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
-                placeholder="941-555-1212"
-              />
-            </GuideField>
-
-            <GuideField label="Subject">
-              <input
-                type="text"
-                value={testNotification.subject}
-                onChange={(event) => updateTestNotification("subject", event.target.value)}
-                className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
-              />
-            </GuideField>
-
-            <div className="md:row-span-2">
-              <GuideField label="Message">
-                <textarea
-                  value={testNotification.message}
-                  onChange={(event) => updateTestNotification("message", event.target.value)}
-                  rows={5}
-                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
-                />
-              </GuideField>
-            </div>
-
-            <div className="flex flex-col justify-end gap-3">
-              <button
-                type="button"
-                onClick={sendTestNotification}
-                disabled={sendingTestNotification}
-                className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-black uppercase tracking-wide text-white hover:bg-blue-800 disabled:opacity-50"
-              >
-                {sendingTestNotification ? "Sending Test..." : "Send Test Notification"}
-              </button>
-
-              {testNotificationResult && (
-                <div
-                  className={`rounded-xl border px-4 py-3 text-sm font-semibold ${
-                    testNotificationResult.ok
-                      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                      : "border-red-200 bg-red-50 text-red-900"
-                  }`}
-                >
-                  <div className="font-black">{testNotificationResult.message}</div>
-                  {testNotificationResult.ok && (
-                    <div className="mt-2 space-y-1 text-xs leading-5">
-                      <div>{notificationChannelSummary("Email", testNotificationResult.email)}</div>
-                      <div>{notificationChannelSummary("Text", testNotificationResult.sms)}</div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
 
         <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
           <div className="border-b border-slate-200 px-4 py-5 md:px-6">
@@ -1130,24 +1180,6 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <div className="mt-6 rounded-2xl bg-white p-4 shadow md:p-6">
-          <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-            <div>
-              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                System Snapshot
-              </div>
-              <h2 className="mt-1 text-xl font-black text-slate-950">
-                Operational Counts
-              </h2>
-            </div>
-          </div>
-
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
-            {statusCards.map((card) => (
-              <Status key={card.label} {...card} />
-            ))}
-          </div>
-        </div>
       </div>
     </main>
   );
@@ -1314,6 +1346,39 @@ async function countScopedMatches(scopeData, applyFilters) {
   });
 }
 
+async function countScopedPlayedGames(scopeData) {
+  if (!scopeData.leagueIds.length) return 0;
+
+  let query = supabase
+    .from("line_games")
+    .select(`
+      id,
+      match_lines!inner(
+        matches!inner(
+          league_id,
+          division_id,
+          score_status
+        )
+      )
+    `, { count: "exact", head: true })
+    .in("match_lines.matches.league_id", scopeData.leagueIds)
+    .eq("match_lines.matches.score_status", "verified")
+    .or("home_score.not.is.null,away_score.not.is.null,game_status.not.is.null");
+
+  if (scopeData.divisionIds.length > 0) {
+    query = query.in("match_lines.matches.division_id", scopeData.divisionIds);
+  }
+
+  const { count, error } = await query;
+
+  if (error) {
+    console.error("Unable to count dashboard games played", error);
+    return 0;
+  }
+
+  return count || 0;
+}
+
 async function loadScopedRosterData(teamIds) {
   if (!teamIds.length) return [];
 
@@ -1416,20 +1481,6 @@ function templateLabel(templateKey) {
 
 function templateDefaultSubject(templateKey) {
   return templateConfig(templateKey)?.defaultSubject || "Dashboard Message";
-}
-
-function notificationChannelSummary(label, result) {
-  if (!result) return `${label}: no response.`;
-  if (result.skipped) return `${label}: skipped - ${result.reason || "not requested"}.`;
-
-  const sent = Number(result.sent || 0);
-  const failed = (result.results || []).filter((item) => item && item.ok === false);
-  if (failed.length > 0) {
-    const firstError = failed.map((item) => item.error).filter(Boolean)[0];
-    return `${label}: ${sent} sent, ${failed.length} failed${firstError ? ` - ${firstError}` : ""}.`;
-  }
-
-  return `${label}: ${sent} sent.`;
 }
 
 function currentWeekDateRange() {
@@ -1557,22 +1608,30 @@ async function listPdfFiles(bucket, prefix = "", depth = 0) {
   return { files, error: null };
 }
 
-function Status({ label, value, helper }) {
+function Status({ label, value, helper, action, tone }) {
+  const tones = {
+    slate: "bg-slate-900 text-white",
+    blue: "bg-blue-700 text-white",
+    emerald: "bg-emerald-600 text-white",
+    amber: "bg-amber-400 text-slate-950",
+  };
+
   return (
-    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-      <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+    <div className={`rounded-2xl p-4 shadow-sm ${tones[tone] || tones.slate}`}>
+      <div className="text-xs font-black uppercase tracking-wide opacity-75">
         {label}
       </div>
 
-      <div className="mt-2 text-lg font-black text-slate-950">
+      <div className="mt-2 text-lg font-black">
         {value}
       </div>
 
       {helper && (
-        <div className="mt-1 text-xs font-bold text-slate-500">
+        <div className="mt-1 text-xs font-bold opacity-80">
           {helper}
         </div>
       )}
+      {action}
     </div>
   );
 }

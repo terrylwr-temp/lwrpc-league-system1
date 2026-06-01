@@ -22,7 +22,11 @@ import {
   DEFAULT_SCORE_SHEET_TEMPLATE_HTML,
   DEFAULT_SCORE_SHEET_TEMPLATE_NAME,
 } from "../lib/scoreSheetTemplates";
+import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
+import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
+
+const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
@@ -61,6 +65,7 @@ export default function CaptainDashboardPage() {
   const [scoreDetailsMatch, setScoreDetailsMatch] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
   const [rosterTeam, setRosterTeam] = useState(null);
+  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
   useUnsavedChangesWarning(Boolean(setupMatch && setupDirty), "match setup");
 
@@ -68,6 +73,15 @@ export default function CaptainDashboardPage() {
     const user = await requireRole(router, "captain");
     return !!user;
   }, [router]);
+
+  const loadSystemSettings = useCallback(async function loadSystemSettings() {
+    const response = await fetch("/api/system-settings");
+    const result = await response.json().catch(() => ({}));
+
+    if (result.settings) {
+      setSystemSettings(mergeSystemSettings(result.settings));
+    }
+  }, []);
 
   const loadMatchSetupStatus = useCallback(async function loadMatchSetupStatus(matchRows) {
     const matchIds = matchRows.map((match) => match.id).filter(Boolean);
@@ -211,11 +225,19 @@ export default function CaptainDashboardPage() {
 
     const captainTeams = teamData || [];
     const activeTeams = captainTeams.filter((team) => team.is_active !== false);
+    const savedTeamId = readDashboardTeamSelection(
+      CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX,
+      memberData.id
+    );
 
     setTeams(captainTeams);
     setSelectedCaptainTeamId((current) => {
       if (current && captainTeams.some((team) => String(team.id) === String(current))) {
         return current;
+      }
+
+      if (savedTeamId && captainTeams.some((team) => String(team.id) === String(savedTeamId))) {
+        return savedTeamId;
       }
 
       return activeTeams?.[0]?.id || captainTeams?.[0]?.id || "";
@@ -381,12 +403,14 @@ export default function CaptainDashboardPage() {
         match_lines (
           id,
           line_number,
+          posted_to_dupr,
           home_team_games_won,
           away_team_games_won,
           winning_team_id,
           division_lines (
             line_name,
-            line_type
+            line_type,
+            posted_to_dupr
           ),
           home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, email, self_rating),
           home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, email, self_rating),
@@ -536,12 +560,12 @@ export default function CaptainDashboardPage() {
       const ok = await checkAuth();
 
       if (ok) {
-        loadData();
+        await Promise.all([loadData(), loadSystemSettings()]);
       }
     }
 
     run();
-  }, [checkAuth, loadData]);
+  }, [checkAuth, loadData, loadSystemSettings]);
 
   const currentMemberId = currentMember?.id || "";
 
@@ -581,6 +605,15 @@ export default function CaptainDashboardPage() {
   }, [selectedCaptainTeamId, visibleTeams]);
 
   const selectedTeamId = selectedCaptainTeam?.id || "";
+
+  function selectCaptainTeam(teamId) {
+    setSelectedCaptainTeamId(teamId);
+    writeDashboardTeamSelection(
+      CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX,
+      currentMember?.id,
+      teamId
+    );
+  }
 
   const selectedUpcomingMatches = useMemo(() => {
     if (!selectedTeamId) return upcomingMatches;
@@ -772,6 +805,7 @@ export default function CaptainDashboardPage() {
       match.scheduled_date <= localDateString();
 
     const setupTeams = showSetup ? getCaptainTeamsForMatch(match) : [];
+    const opposingEmails = showSetup ? opposingCaptainEmailsForMatch(match) : [];
     const selectedResult = selectedTeamMatchResult(match);
     const headingClass =
       selectedResult === "win"
@@ -895,6 +929,18 @@ export default function CaptainDashboardPage() {
                 </button>
               )}
 
+              {showSetup && (
+                <button
+                  type="button"
+                  onClick={() => emailOpposingCaptains(match)}
+                  disabled={opposingEmails.length === 0}
+                  className="rounded-lg bg-sky-700 px-3 py-2 text-sm font-bold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  title={opposingEmails.length > 0 ? `Email ${opposingEmails.length} opposing captain contact${opposingEmails.length === 1 ? "" : "s"}` : "No opposing captain email addresses found"}
+                >
+                  Email Opposing Captains
+                </button>
+              )}
+
               <button
                 type="button"
                 disabled={!canEnterScores}
@@ -933,6 +979,55 @@ export default function CaptainDashboardPage() {
     return teams.filter((team) =>
       String(team.id) === String(match.home_team_id) ||
       String(team.id) === String(match.away_team_id)
+    );
+  }
+
+  function opposingCaptainEmailsForMatch(match) {
+    const captainTeamIds = new Set(getCaptainTeamsForMatch(match).map((team) => String(team.id)));
+    const opposingTeams = [];
+
+    if (captainTeamIds.has(String(match.home_team_id))) {
+      opposingTeams.push(match.away_team);
+    }
+
+    if (captainTeamIds.has(String(match.away_team_id))) {
+      opposingTeams.push(match.home_team);
+    }
+
+    return [
+      ...new Set(
+        opposingTeams
+          .flatMap((team) => [
+            team?.captain?.email,
+            team?.co_captain_1?.email,
+            team?.co_captain_2?.email,
+          ])
+          .map((email) => String(email || "").trim())
+          .filter(Boolean)
+      ),
+    ];
+  }
+
+  function emailOpposingCaptains(match) {
+    const emails = opposingCaptainEmailsForMatch(match);
+
+    if (emails.length === 0) {
+      alert("No opposing captain email addresses were found for this match.");
+      return;
+    }
+
+    const subject = `LWRPC Match: ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"} on ${formatDate(match.scheduled_date)}`;
+    const body = [
+      "",
+      "",
+      `Match: ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`,
+      `Date: ${formatDate(match.scheduled_date)} at ${formatDisplayTime(match.scheduled_time, "Time TBD")}`,
+      `Location: ${match.locations?.name || "No Location"}`,
+    ].join("\n");
+
+    window.open(
+      `mailto:${emails.join(",")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+      "_self"
     );
   }
 
@@ -1054,7 +1149,8 @@ export default function CaptainDashboardPage() {
     setScoreSheetPreview({
       title: `${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"} Score Sheet`,
       subtitle: `${formatDate(match.scheduled_date)} / ${match.divisions?.name || "Division"}`,
-      html: matchScoreSheetPrintHtml(scoreSheetMatch, data || [], ratingForMember),
+      clubName: systemSettings.club_name,
+      html: matchScoreSheetPrintHtml(scoreSheetMatch, data || [], ratingForMember, systemSettings.club_name),
     });
   }
 
@@ -1267,7 +1363,7 @@ export default function CaptainDashboardPage() {
           away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, email, self_rating),
           away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, email, self_rating),
           line_games(id, game_number, home_score, away_score, game_status),
-          division_lines(line_name, line_type, team_win_points, standings_points_mode)
+          division_lines(line_name, line_type, posted_to_dupr, team_win_points, standings_points_mode)
         )
       `)
       .eq("id", match.id)
@@ -1302,28 +1398,6 @@ export default function CaptainDashboardPage() {
             : setupMatch.home_team_id
         )
       ];
-    const lineupText = setupLineups
-      .map((lineup) => {
-        const player1 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_1_member_id))?.members;
-        const player2 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_2_member_id))?.members;
-
-        return `Team ${lineup.line_number}: ${formatMemberName(player1)} / ${formatMemberName(player2)}`;
-      })
-      .join("\n");
-    const subject = `Match Setup Entered: ${setupTeam.name} vs ${opponentTeam?.name || "Opponent"}`;
-    const text = [
-      `${setupTeam.name} has entered its match setup.`,
-      "",
-      `Match: ${setupMatch.home_team?.name || "Home"} vs ${setupMatch.away_team?.name || "Away"}`,
-      `Date: ${formatDate(setupMatch.scheduled_date)} at ${formatDisplayTime(setupMatch.scheduled_time, "Time TBD")}`,
-      `Division: ${setupTeam.divisions?.name || setupMatch.divisions?.name || "Division"}`,
-      "",
-      lineupText,
-      "",
-      opponentStatus?.complete
-        ? "Your match setup is already marked complete."
-        : "Please log into the Captain Dashboard and enter your match setup if you have not already done so.",
-    ].join("\n");
     const htmlLineups = setupLineups
       .map((lineup) => {
         const player1 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_1_member_id))?.members;
@@ -1332,21 +1406,20 @@ export default function CaptainDashboardPage() {
         return `<li><strong>Team ${lineup.line_number}:</strong> ${escapeHtml(formatMemberName(player1))} / ${escapeHtml(formatMemberName(player2))}</li>`;
       })
       .join("");
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Match Setup Entered</h2>
-        <p><strong>${escapeHtml(setupTeam.name)}</strong> has entered its match setup.</p>
-        <p>
-          <strong>Match:</strong> ${escapeHtml(setupMatch.home_team?.name || "Home")} vs ${escapeHtml(setupMatch.away_team?.name || "Away")}<br />
-          <strong>Date:</strong> ${escapeHtml(formatDate(setupMatch.scheduled_date))} at ${escapeHtml(formatDisplayTime(setupMatch.scheduled_time, "Time TBD"))}<br />
-          <strong>Division:</strong> ${escapeHtml(setupTeam.divisions?.name || setupMatch.divisions?.name || "Division")}
-        </p>
-        <ul>${htmlLineups}</ul>
-        <p>${opponentStatus?.complete ? "Your match setup is already marked complete." : "Please log into the Captain Dashboard and enter your match setup if you have not already done so."}</p>
-        <hr />
-        <p style="font-size: 12px; color: #666;">LWRPC League Management System</p>
-      </div>
-    `;
+    const template = await loadClientEmailTemplate(EMAIL_TEMPLATE_KEYS.matchSetupSaved);
+    const rendered = renderEmailTemplate(template, {
+      setup_team: setupTeam.name || "Team",
+      opponent_team: opponentTeam?.name || "Opponent",
+      home_team: setupMatch.home_team?.name || "Home",
+      away_team: setupMatch.away_team?.name || "Away",
+      match_date: formatDate(setupMatch.scheduled_date),
+      match_time: formatDisplayTime(setupMatch.scheduled_time, "Time TBD"),
+      division: setupTeam.divisions?.name || setupMatch.divisions?.name || "Division",
+      lineup_list: htmlLineups,
+      opponent_setup_status: opponentStatus?.complete
+        ? "Your match setup is already marked complete."
+        : "Please log into the Captain Dashboard and enter your match setup if you have not already done so.",
+    });
 
     const response = await fetch("/api/notifications", {
       method: "POST",
@@ -1354,10 +1427,10 @@ export default function CaptainDashboardPage() {
       body: JSON.stringify({
         emails,
         phones,
-        subject,
-        text,
-        html,
-        smsBody: text,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
+        smsBody: rendered.text,
       }),
     });
 
@@ -1493,12 +1566,14 @@ export default function CaptainDashboardPage() {
               match_lines (
               id,
               line_number,
+              posted_to_dupr,
               home_team_games_won,
               away_team_games_won,
               winning_team_id,
               division_lines (
                 line_name,
                 line_type,
+                posted_to_dupr,
                 team_win_points
               ),
               home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
@@ -1854,7 +1929,7 @@ export default function CaptainDashboardPage() {
                 teams={visibleTeams}
                 teamStats={teamStats}
                 selectedTeamId={selectedTeamId}
-                onSelect={setSelectedCaptainTeamId}
+                onSelect={selectCaptainTeam}
               />
             )}
 
@@ -2125,6 +2200,7 @@ export default function CaptainDashboardPage() {
             ratingForMember={ratingForMember}
             teamWithRoster={teamWithRoster}
             onOpenRoster={setRosterTeam}
+            clubName={systemSettings.club_name}
             onClose={() => setScoreDetailsMatch(null)}
           />
         )}
@@ -2247,6 +2323,7 @@ function PrintableDocumentModal({ document, onClose }) {
       "lwrpc-print-payload",
       JSON.stringify({
         title: document.title,
+        clubName: document.clubName,
         body: document.html,
       })
     );
@@ -2645,7 +2722,7 @@ function MatchLineResult({ line, match, ratingForMember }) {
             Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
           </div>
           <div className="mt-0.5 text-xs font-semibold text-slate-600">
-            {capitalizeLabel(line.division_lines?.line_type || "Line")}
+            {capitalizeLabel(line.division_lines?.line_type || "Line")} · {duprPostedLabel(line)}
           </div>
         </div>
         <div className="flex flex-wrap gap-2 md:justify-end">
@@ -2768,7 +2845,7 @@ function GameScoreCard({ game, match }) {
   );
 }
 
-function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpenRoster, onClose }) {
+function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpenRoster, clubName, onClose }) {
   const lines = [...(match.match_lines || [])].sort(
     (a, b) => Number(a.line_number || 0) - Number(b.line_number || 0)
   );
@@ -2780,7 +2857,8 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
       "lwrpc-print-payload",
       JSON.stringify({
         title: `${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"} Score Details`,
-        body: matchScoreDetailsPrintHtml(match, lines),
+        clubName,
+        body: matchScoreDetailsPrintHtml(match, lines, clubName),
       })
     );
 
@@ -2992,6 +3070,11 @@ function capitalizeLabel(value) {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
+function duprPostedLabel(line) {
+  const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
+  return posted ? "Posted to DUPR" : "Not Posted to DUPR";
+}
+
 function formatDate(value) {
   return formatDisplayDate(value, "-");
 }
@@ -3037,6 +3120,19 @@ function buildMatchSetupStatus(matches, lineups) {
   });
 
   return status;
+}
+
+async function loadClientEmailTemplate(templateKey) {
+  const fallback = getEmailTemplateConfig(templateKey);
+  const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(templateKey)}`);
+  const result = await response.json().catch(() => null);
+  const template = result?.template;
+
+  return {
+    template_key: templateKey,
+    subject: template?.subject || fallback?.defaultSubject || "",
+    body: template?.body || fallback?.defaultBody || "",
+  };
 }
 
 function scheduleWeekKey(divisionId, weekNumber, date) {
@@ -3259,7 +3355,7 @@ function divisionCaptainsPrintHtml({ leagueName, divisionName, teams }) {
   `;
 }
 
-function matchScoreDetailsPrintHtml(match, lines) {
+function matchScoreDetailsPrintHtml(match, lines, clubName = DEFAULT_SYSTEM_SETTINGS.club_name) {
   const rows = lines.map((line) => {
     const games = [...(line.line_games || [])]
       .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
@@ -3274,7 +3370,6 @@ function matchScoreDetailsPrintHtml(match, lines) {
         <td>${escapeHtml(line.division_lines?.line_name || "")}</td>
         <td>${escapeHtml(formatMemberName(line.home_player_1))} / ${escapeHtml(formatMemberName(line.home_player_2))}</td>
         <td>${escapeHtml(formatMemberName(line.away_player_1))} / ${escapeHtml(formatMemberName(line.away_player_2))}</td>
-        <td>${escapeHtml(line.home_team_games_won ?? 0)}-${escapeHtml(line.away_team_games_won ?? 0)}</td>
         <td>${games || "No game scores"}</td>
       </tr>
     `;
@@ -3288,8 +3383,10 @@ function matchScoreDetailsPrintHtml(match, lines) {
       th { background: #0f172a; color: white; text-align: left; }
       th, td { border: 1px solid #cbd5e1; padding: 9px; font-size: 12px; vertical-align: top; }
       tr:nth-child(even) td { background: #f8fafc; }
+      .club-name { margin: 0 0 6px; color: #0f172a; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; }
       .score { margin: 12px 0 18px; font-size: 16px; font-weight: 700; }
     </style>
+    <div class="club-name">${escapeHtml(clubName)}</div>
     <h1>${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")}</h1>
     <h2>${escapeHtml(formatDate(match.scheduled_date))} / ${escapeHtml(match.locations?.name || "Home Location TBD")}</h2>
     <div class="score">Match Score: ${escapeHtml(match.home_score ?? 0)}-${escapeHtml(match.away_score ?? 0)}</div>
@@ -3300,18 +3397,17 @@ function matchScoreDetailsPrintHtml(match, lines) {
           <th>Line</th>
           <th>Home Players</th>
           <th>Away Players</th>
-          <th>Line Score</th>
           <th>Game Scores</th>
         </tr>
       </thead>
       <tbody>
-        ${rows || `<tr><td colspan="6">No game details found.</td></tr>`}
+        ${rows || `<tr><td colspan="5">No game details found.</td></tr>`}
       </tbody>
     </table>
   `;
 }
 
-function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
+function matchScoreSheetPrintHtml(match, lineups, ratingForMember, clubName = DEFAULT_SYSTEM_SETTINGS.club_name) {
   const homeLineups = scoreSheetLineupsForTeam(lineups, match.home_team_id);
   const awayLineups = scoreSheetLineupsForTeam(lineups, match.away_team_id);
   const lineCount = Number(match.divisions?.number_of_lines || 3);
@@ -3326,15 +3422,15 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
       <tr>
         <td class="line-cell">
           <div class="line-number">${lineNumber}</div>
-          <div>${scoreSheetPlayerLine(awayPlayers[0], match, ratingForMember)}</div>
-          <div>${scoreSheetPlayerLine(awayPlayers[1], match, ratingForMember)}</div>
-          <div class="team-rating">Team Rating: ${escapeHtml(scoreSheetTeamRating(awayPlayers, match, ratingForMember))}</div>
-        </td>
-        <td class="line-cell">
-          <div class="line-number">${lineNumber}</div>
           <div>${scoreSheetPlayerLine(homePlayers[0], match, ratingForMember)}</div>
           <div>${scoreSheetPlayerLine(homePlayers[1], match, ratingForMember)}</div>
           <div class="team-rating">Team Rating: ${escapeHtml(scoreSheetTeamRating(homePlayers, match, ratingForMember))}</div>
+        </td>
+        <td class="line-cell">
+          <div class="line-number">${lineNumber}</div>
+          <div>${scoreSheetPlayerLine(awayPlayers[0], match, ratingForMember)}</div>
+          <div>${scoreSheetPlayerLine(awayPlayers[1], match, ratingForMember)}</div>
+          <div class="team-rating">Team Rating: ${escapeHtml(scoreSheetTeamRating(awayPlayers, match, ratingForMember))}</div>
         </td>
       </tr>
     `;
@@ -3348,6 +3444,7 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember) {
     configuredGameLinesTable: scoreSheetConfiguredGameLinesTable(match),
     scoreEntryRows: scoreSheetEntryRows(match),
     scoreEntryTable: scoreSheetEntryTable(match),
+    clubName,
   });
 
   return `
@@ -3553,6 +3650,7 @@ function renderScoreSheetTemplate(match, {
   configuredGameLinesTable,
   scoreEntryRows,
   scoreEntryTable,
+  clubName,
 }) {
   const activeTemplate = template?.is_active === false ? null : template;
   const templateHtml = normalizeScoreSheetTemplateHtml(activeTemplate?.template_html || DEFAULT_SCORE_SHEET_TEMPLATE_HTML);
@@ -3560,12 +3658,12 @@ function renderScoreSheetTemplate(match, {
   const sheetTitle = activeTemplate?.sheet_title || activeTemplate?.name || DEFAULT_SCORE_SHEET_TEMPLATE_NAME;
   const captainSignatureRows = `
     <div class="signatures">
-      <div>Captain Signature (Away)<div class="signature-line"></div></div>
       <div>Captain Signature (Home)<div class="signature-line"></div></div>
+      <div>Captain Signature (Away)<div class="signature-line"></div></div>
     </div>
   `;
   const replacements = {
-    "{{club_name}}": "Lakewood Ranch Pickleball Club",
+    "{{club_name}}": clubName || DEFAULT_SYSTEM_SETTINGS.club_name,
     "{{sheet_title}}": sheetTitle,
     "{{match_date}}": formatDate(match.scheduled_date),
     "{{match_time}}": formatDisplayTime(match.scheduled_time, "Time TBD"),
@@ -3603,6 +3701,27 @@ function renderScoreSheetTemplate(match, {
 
 function normalizeScoreSheetTemplateHtml(html) {
   return String(html || "")
+    .replaceAll(
+      '<div class="box"><span class="label">Away Team</span><span class="value">{{away_team}}</span></div>\n  <div class="box"><span class="label">Home Team</span><span class="value">{{home_team}}</span></div>',
+      '<div class="box"><span class="label">Home Team</span><span class="value">{{home_team}}</span></div>\n  <div class="box"><span class="label">Away Team</span><span class="value">{{away_team}}</span></div>'
+    )
+    .replaceAll(
+      '<div>Captain Signature (Away)<div class="signature-line"></div></div>\n  <div>Captain Signature (Home)<div class="signature-line"></div></div>',
+      '<div>Captain Signature (Home)<div class="signature-line"></div></div>\n  <div>Captain Signature (Away)<div class="signature-line"></div></div>'
+    )
+    .replaceAll(
+      '<th>Away Teams <span class="header-score">Total Team Score: ________</span></th>\n      <th>Home Teams <span class="header-score">Total Team Score: ________</span></th>',
+      '<th>Home Teams <span class="header-score">Total Team Score: ________</span></th>\n      <th>Away Teams <span class="header-score">Total Team Score: ________</span></th>'
+    )
+    .replaceAll(
+      '<th>AWAY Teams <span class="header-score">Score: ______</span></th>\n      <th>HOME Teams <span class="header-score">Score: ______</span></th>',
+      '<th>Home Teams <span class="header-score">Total Team Score: ________</span></th>\n      <th>Away Teams <span class="header-score">Total Team Score: ________</span></th>'
+    )
+    .replaceAll(
+      '<th>Away</th>\n          <th>Home</th>',
+      '<th>Home</th>\n          <th>Away</th>'
+    )
+    .replaceAll("<th>Away</th><th>Home</th>", "<th>Home</th><th>Away</th>")
     .replaceAll(
       'AWAY Teams <span class="header-score">Score: ______</span>',
       'Away Teams <span class="header-score">Total Team Score: ________</span>'
@@ -3714,8 +3833,8 @@ function scoreSheetEntryTable(match) {
           <th>Line Type</th>
           <th>Game Format</th>
           `}
-          <th>Away</th>
           <th>Home</th>
+          <th>Away</th>
         </tr>
       </thead>
       <tbody>${scoreSheetEntryRows(match, { lines, hideRepeatedDetails })}</tbody>
@@ -3779,7 +3898,7 @@ function scoreSheetRoundRows(lineCount) {
       const awayNumber = awayIndex + 1;
       const homeNumber = ((awayIndex + roundIndex) % count) + 1;
 
-      return `<tr><td>Away ${awayNumber} vs. Home ${homeNumber}</td><td></td><td></td></tr>`;
+      return `<tr><td>Home ${homeNumber} vs. Away ${awayNumber}</td><td></td><td></td></tr>`;
     }).join("");
 
     return `<tr><th colspan="3">${escapeHtml(roundTitle)}</th></tr>${matches}`;
@@ -3945,6 +4064,25 @@ function DashboardTeamSelector({ teams, teamStats, selectedTeamId, onSelect }) {
   );
 }
 
+function dashboardTeamSelectionKey(prefix, memberId) {
+  return `${prefix}:${memberId || "unknown"}`;
+}
+
+function readDashboardTeamSelection(prefix, memberId) {
+  if (!memberId || typeof window === "undefined") return "";
+  return window.localStorage.getItem(dashboardTeamSelectionKey(prefix, memberId)) || "";
+}
+
+function writeDashboardTeamSelection(prefix, memberId, teamId) {
+  if (!memberId || typeof window === "undefined") return;
+
+  if (teamId) {
+    window.localStorage.setItem(dashboardTeamSelectionKey(prefix, memberId), teamId);
+  } else {
+    window.localStorage.removeItem(dashboardTeamSelectionKey(prefix, memberId));
+  }
+}
+
 function Section({ title, count, actions, children }) {
   return (
     <div className="mt-6 rounded-2xl bg-white p-4 shadow md:p-6">
@@ -3955,7 +4093,7 @@ function Section({ title, count, actions, children }) {
           {actions}
 
           <div className="rounded-xl bg-slate-900 px-4 py-2 text-center text-sm font-bold text-white">
-            {count}
+            Matches: {count}
           </div>
         </div>
       </div>

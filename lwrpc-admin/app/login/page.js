@@ -7,6 +7,7 @@ import { supabase } from "../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { ROLE_LEVELS, defaultDashboardForRole } from "../lib/permissions";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
+import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -17,9 +18,20 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
   useEffect(() => {
+    async function loadSystemSettings() {
+      const response = await fetch("/api/system-settings");
+      const result = await response.json().catch(() => ({}));
+
+      if (result.settings) {
+        setSystemSettings(mergeSystemSettings(result.settings));
+      }
+    }
+
     setMounted(true);
+    loadSystemSettings();
   }, []);
 
   async function login(e) {
@@ -144,6 +156,10 @@ export default function LoginPage() {
     messageText.includes("checking");
   const isErrorMessage =
     Boolean(message) && !isSuccessMessage && !isPendingMessage;
+  const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
+  const systemName = systemSettings.system_name || DEFAULT_SYSTEM_SETTINGS.system_name;
+  const logoUrl = systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
+  const clubWebsite = systemSettings.club_website || DEFAULT_SYSTEM_SETTINGS.club_website;
 
   if (!mounted) {
     return (
@@ -164,20 +180,26 @@ export default function LoginPage() {
 
           <div className="text-center">
 
-            <Image
-              src="https://lwrpickleballclub.com/lwrpc-logo.png"
-              alt="Lakewood Ranch Pickleball Club"
-              width={112}
-              height={112}
-              className="mx-auto h-20 w-20 rounded-full bg-white object-contain sm:h-24 sm:w-24"
-            />
+            <a
+              href={clubWebsite}
+              target="_blank"
+              rel="noreferrer"
+              title={`Open ${clubName} website`}
+              className="inline-flex rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <Image
+                src={logoUrl}
+                alt={clubName}
+                width={112}
+                height={112}
+                className="mx-auto h-20 w-20 rounded-full bg-white object-contain sm:h-24 sm:w-24"
+                unoptimized
+              />
+            </a>
 
             <h1 className="mt-4 text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
-              Lakewood Ranch
-              <br />
-              Pickleball Club
-              <br />
-              <span className="mt-1 block text-xl text-blue-700 sm:text-2xl">League Management System</span>
+              {clubName}
+              <span className="mt-1 block text-xl text-blue-700 sm:text-2xl">{systemName}</span>
             </h1>
           </div>
 
@@ -360,7 +382,7 @@ export default function LoginPage() {
         )}
 
         <div className="mt-6 text-center text-xs leading-relaxed text-slate-500">
-          © {COPYRIGHT_YEAR} Lakewood Ranch Pickleball Club.
+          © {COPYRIGHT_YEAR} {clubName}.
           <br />
           All rights reserved.
           <br />

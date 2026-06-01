@@ -7,6 +7,7 @@ import { requireRole, supabase } from "../../lib/auth";
 import { hasRole } from "../../lib/permissions";
 import { confirmDeleteAction } from "../../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
+import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../../lib/emailTemplates";
 import {
   filterHistoryRows,
   formatDate,
@@ -434,23 +435,43 @@ export default function TeamRosterPage() {
       .join("\n") || "No captain listed";
   }
 
+  function isCurrentTeamCaptainOrCoCaptain() {
+    const memberId = String(currentUser?.memberId || "");
+
+    if (!memberId || !team) return false;
+
+    return [
+      team.captain_member_id,
+      team.co_captain_member_id,
+      team.co_captain_2_member_id,
+    ].some((captainId) => String(captainId || "") === memberId);
+  }
+
+  function captainChangeRequestHref() {
+    const subject = "Captain Change Request";
+    const body = [
+      `Team: ${team?.name || "Unknown Team"}`,
+      `Division: ${team?.divisions?.name || "Unknown Division"}`,
+      `League: ${team?.divisions?.leagues?.name || "Unknown League"}`,
+      "",
+      "Requested change:",
+      "",
+    ].join("\n");
+
+    return `mailto:info@lwrpickleballclub.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  }
+
   async function sendRatingCheckAlert(member, reason) {
     const playerName = formatMemberName(member) || "Unknown player";
-    const subject = `Roster rating check needed: ${playerName}`;
-    const text = [
-      "A player was added to a team roster and needs a rating check.",
-      "",
-      `Player: ${playerName}`,
-      `Team: ${team?.name || "Unknown team"}`,
-      `Reason: ${reason}`,
-      `Rating Type: ${getRatingLabel()}`,
-      `Team Rating Range: ${ratingRangeLabel()}`,
-      "",
-      "Captain Contacts:",
-      captainAlertDetails(),
-      "",
-      "Please check this player and update their rating if needed.",
-    ].join("\n");
+    const template = await loadClientEmailTemplate(EMAIL_TEMPLATE_KEYS.ratingCheckAlert);
+    const rendered = renderEmailTemplate(template, {
+      player_name: playerName,
+      team: team?.name || "Unknown team",
+      reason,
+      rating_type: getRatingLabel(),
+      rating_range: ratingRangeLabel(),
+      captain_contacts: captainAlertDetails().replaceAll("\n", "<br />"),
+    });
 
     const response = await fetch("/api/notifications", {
       method: "POST",
@@ -460,8 +481,9 @@ export default function TeamRosterPage() {
       body: JSON.stringify({
         emails: ["info@lwrpickleballclub.com"],
         phones: [],
-        subject,
-        text,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
       }),
     });
 
@@ -592,6 +614,7 @@ function getAverageTeamRating() {
   const rostersLocked = team?.divisions?.leagues?.rosters_locked === true;
   const canModifyRoster = hasRole(currentUser?.role, "captain");
   const isCaptainOnly = currentUser?.role === "captain";
+  const canRequestCaptainChange = isCurrentTeamCaptainOrCoCaptain();
 
   async function addPlayer() {
     if (!selectedMemberId) {
@@ -647,6 +670,10 @@ function getAverageTeamRating() {
 
     if (missingRating) {
       if (rostersLocked) {
+        await sendRatingCheckAlert(member, `Blocked roster add while rosters are locked; no ${getRatingLabel()} entered`).catch((alertError) => {
+          console.warn("Roster rating check alert failed.", alertError);
+          alert("This player cannot be added while rosters are locked, and the rating check email could not be sent. Please notify the league manually.");
+        });
         alert(`${member.first_name} ${member.last_name} does not have a ${getRatingLabel()} entered for this season and cannot be added while rosters are locked.`);
         return;
       }
@@ -809,11 +836,22 @@ function getAverageTeamRating() {
 
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
 
-            <div>
+            <div className="min-w-0">
 
-              <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
-                {team.name}
-              </h1>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
+                  {team.name}
+                </h1>
+
+                {canRequestCaptainChange && (
+                  <a
+                    href={captainChangeRequestHref()}
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800 sm:w-auto"
+                  >
+                    Change Captain/Co-Captain
+                  </a>
+                )}
+              </div>
 
               <div className="mt-2 text-slate-600">
                 {getCaptainSummary()}
@@ -863,11 +901,6 @@ function getAverageTeamRating() {
             <Info
               label="Home Location"
               value={team.locations?.name || "—"}
-            />
-
-            <Info
-              label="Roster Status"
-              value={rostersLocked ? "Locked" : "Open"}
             />
 
           </div>
@@ -1282,5 +1315,18 @@ function dateOnly(value) {
 
 function normalizeLocationName(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+async function loadClientEmailTemplate(templateKey) {
+  const fallback = getEmailTemplateConfig(templateKey);
+  const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(templateKey)}`);
+  const result = await response.json().catch(() => null);
+  const template = result?.template;
+
+  return {
+    template_key: templateKey,
+    subject: template?.subject || fallback?.defaultSubject || "",
+    body: template?.body || fallback?.defaultBody || "",
+  };
 }
 

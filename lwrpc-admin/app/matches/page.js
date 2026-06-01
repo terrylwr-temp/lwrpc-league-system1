@@ -308,6 +308,7 @@ export default function MatchesPage() {
         match.divisions?.name,
         match.locations?.name,
         match.scheduled_date,
+        ...dateSearchValues(match.scheduled_date),
         match.scheduled_time,
         match.week_number,
         match.status,
@@ -514,6 +515,9 @@ export default function MatchesPage() {
                     placeholder="Teams, division, date, location..."
                     className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold"
                   />
+                  <div className="mt-1 text-xs font-semibold text-slate-500">
+                    Dates work as MM/DD/YYYY, M/D/YYYY, or YYYY-MM-DD.
+                  </div>
                 </div>
 
                 <button
@@ -628,4 +632,22 @@ function FieldLabel({ label }) {
 
 function isMatchLocked(match) {
   return match?.status === "completed" && match?.score_status === "verified";
+}
+
+function dateSearchValues(value) {
+  const text = String(value || "");
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (!match) return [formatDisplayDate(value, "")];
+
+  const [, year, month, day] = match;
+  const shortMonth = String(Number(month));
+  const shortDay = String(Number(day));
+
+  return [
+    `${month}/${day}/${year}`,
+    `${shortMonth}/${shortDay}/${year}`,
+    `${month}-${day}-${year}`,
+    `${shortMonth}-${shortDay}-${year}`,
+  ];
 }

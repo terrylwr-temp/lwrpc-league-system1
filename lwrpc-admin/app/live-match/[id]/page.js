@@ -43,6 +43,7 @@ export default function LiveMatchPage() {
           line_name,
           line_number,
           line_type,
+          posted_to_dupr,
           games_per_line
         ),
         home_player_1:members!match_lines_home_player_1_id_fkey(first_name, last_name),
@@ -327,6 +328,8 @@ export default function LiveMatchPage() {
                     </h2>
 
                     <div className="mt-2 text-sm text-slate-500">
+                      {duprPostedLabel(line)}
+                      {" - "}
                       {summary.completedGames}
                       {" / "}
                       {summary.lineGames.length}
@@ -440,6 +443,11 @@ function gameResultLabel(game, match) {
   }
 
   return "Tied";
+}
+
+function duprPostedLabel(line) {
+  const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
+  return posted ? "Posted to DUPR" : "Not Posted to DUPR";
 }
 
 function TeamPanel({ team, players, gameWins, points }) {

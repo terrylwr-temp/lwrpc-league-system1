@@ -776,6 +776,7 @@ export default function ScheduleEditorPage() {
           match.divisions?.name,
           match.locations?.name,
           match.scheduled_date,
+          formatDate(match.scheduled_date),
           match.week_number,
           match.status,
           match.score_status,
@@ -1252,13 +1253,21 @@ export default function ScheduleEditorPage() {
               className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
             />
 
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={e => setDateFilter(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
-              aria-label="Specific match date"
-            />
+            <label className="md:col-span-3">
+              <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                Match Date
+              </span>
+              <input
+                type="date"
+                value={dateFilter}
+                onChange={e => setDateFilter(e.target.value)}
+                className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                aria-label="Specific match date"
+              />
+              <span className="mt-1 block text-xs font-semibold text-slate-500">
+                Use the picker or enter MM/DD/YYYY.
+              </span>
+            </label>
 
             <select
               value={sortBy}

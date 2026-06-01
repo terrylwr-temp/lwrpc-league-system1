@@ -46,6 +46,11 @@ The app currently includes pages for:
 - Captain dashboard
 - Player dashboard
 - Scoring operations for league managers to review due matches, filter unverified scores, edit reminder email copy, and send score-entry reminders to captains
+- System Setup for deployment-level club branding and contact defaults, intended to make separate club deployments easier to configure
+
+## Multi-Club Deployment Direction
+
+For future clubs, prefer a separate Vercel deployment, Supabase project, and GitHub repo/branch per club instead of putting all clubs in one shared database. This keeps data isolation simple, reduces operational risk, and avoids every query needing club-level tenancy filters. The System Setup page stores club-specific defaults such as club name, logo URL, website, main league email, support email, league site URL, and timezone.
 
 ## Data Source
 

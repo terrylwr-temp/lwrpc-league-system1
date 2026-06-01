@@ -79,6 +79,7 @@ export default function MobileScoreEntryPage() {
           line_name,
           line_number,
           line_type,
+          posted_to_dupr,
           games_per_line,
           team_win_points,
           standings_points_mode
@@ -480,7 +481,7 @@ export default function MobileScoreEntryPage() {
                     </h2>
 
                     <div className="mt-1 text-sm text-slate-600">
-                      {line.division_lines?.line_name || line.division_lines?.line_type || "Team"}
+                      {line.division_lines?.line_name || line.division_lines?.line_type || "Team"} · {duprPostedLabel(line)}
                     </div>
                   </div>
 
@@ -499,15 +500,15 @@ export default function MobileScoreEntryPage() {
                   {lineGames.map(game => (
                     <div
                       key={game.id}
-                      className="rounded-xl border border-slate-200 p-3"
+                      className="overflow-hidden rounded-2xl border-2 border-blue-200 bg-blue-50/70 shadow-md ring-1 ring-white"
                     >
-                      <div className="mb-2 text-sm font-bold text-slate-700">
-                        Game {game.game_number}
+                      <div className="border-b border-blue-200 bg-white/80 px-4 py-3 text-sm font-black uppercase tracking-wide text-blue-950">
+                        Game {game.game_number} Scores
                       </div>
 
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
                         <div>
-                          <label className="mb-1 block text-xs font-semibold text-slate-500">
+                          <label className="mb-1 block min-h-8 text-xs font-black uppercase tracking-wide text-slate-700">
                             {match.home_team?.name}
                           </label>
 
@@ -522,12 +523,12 @@ export default function MobileScoreEntryPage() {
                                 e.target.value
                               )
                             }
-                            className="w-full rounded-xl border border-slate-300 px-4 py-4 text-center text-2xl font-bold"
+                            className="w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                           />
                         </div>
 
                         <div>
-                          <label className="mb-1 block text-xs font-semibold text-slate-500">
+                          <label className="mb-1 block min-h-8 text-xs font-black uppercase tracking-wide text-slate-700">
                             {match.away_team?.name}
                           </label>
 
@@ -542,7 +543,7 @@ export default function MobileScoreEntryPage() {
                                 e.target.value
                               )
                             }
-                            className="w-full rounded-xl border border-slate-300 px-4 py-4 text-center text-2xl font-bold"
+                            className="w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
                           />
                         </div>
                       </div>
@@ -582,6 +583,11 @@ export default function MobileScoreEntryPage() {
       </div>
     </main>
   );
+}
+
+function duprPostedLabel(line) {
+  const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
+  return posted ? "Posted to DUPR" : "Not Posted to DUPR";
 }
 
 
