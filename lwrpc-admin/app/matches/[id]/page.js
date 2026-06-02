@@ -358,10 +358,12 @@ export default function MatchDetailPage() {
 
   function canEditScoreEntry() {
     if (!canManageScores()) return false;
-    if (isManagerOverride()) return true;
     if (match?.score_status === "verified") return false;
+    if (match?.score_status === "pending_verification") {
+      return currentUserSubmittedScores();
+    }
 
-    return match?.score_status !== "pending_verification" || currentUserSubmittedScores();
+    return true;
   }
 
   const getLineSummary = useCallback(function getLineSummary(line) {
@@ -859,6 +861,8 @@ export default function MatchDetailPage() {
   function canReviewSubmittedScores() {
     return (
       canManageScores() &&
+      match?.score_status === "pending_verification" &&
+      !currentUserSubmittedScores() &&
       (isManagerOverride() ||
         !isMatchCaptainMember(match?.score_entered_by_member_id) ||
         isOpposingCaptainForSubmittedScores())
@@ -1032,8 +1036,8 @@ export default function MatchDetailPage() {
   }
 
   async function completeMatch() {
-    if (!canManageScores()) {
-      alert("Only captains for this match can enter scores.");
+    if (!canEditScoreEntry()) {
+      alert("Only the captain or co-captain who submitted these pending scores can make corrections and resubmit.");
       return;
     }
 
@@ -1383,7 +1387,9 @@ export default function MatchDetailPage() {
             <div className="mt-1 text-sm">
               {currentUserSubmittedScores() && !isManagerOverride()
                 ? "You submitted these scores, so you may still correct and resubmit them here until the opposing captain validates or disputes them."
-                : "Captains may still correct scores until they are validated. Use Validate Scores when the final review is complete."}
+                : currentUserSubmittedScores()
+                  ? "You submitted these scores, so you may still correct and resubmit them here until they are validated or disputed."
+                  : "Review these submitted scores without making changes. Use Validate Scores when they are correct, or Dispute Scores if they need correction."}
             </div>
           </div>
         )}

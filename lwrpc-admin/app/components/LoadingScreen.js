@@ -1,30 +1,15 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
+import { DEFAULT_SYSTEM_SETTINGS } from "../lib/systemSettings";
 
 export default function LoadingScreen({
   title = "",
   subtitle = "Loading..."
 }) {
-  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
-  const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
-  const systemName = title || systemSettings.system_name || DEFAULT_SYSTEM_SETTINGS.system_name;
-  const logoUrl = systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
-
-  useEffect(() => {
-    async function loadSystemSettings() {
-      const response = await fetch("/api/system-settings");
-      const result = await response.json().catch(() => ({}));
-
-      if (result.settings) {
-        setSystemSettings(mergeSystemSettings(result.settings));
-      }
-    }
-
-    loadSystemSettings();
-  }, []);
+  const clubName = DEFAULT_SYSTEM_SETTINGS.club_name;
+  const systemName = title || DEFAULT_SYSTEM_SETTINGS.system_name;
+  const logoUrl = DEFAULT_SYSTEM_SETTINGS.logo_url;
 
   return (
     <main className="full-screen-main flex min-h-screen items-center justify-center bg-slate-100 p-6">
