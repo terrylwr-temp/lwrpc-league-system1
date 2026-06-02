@@ -814,6 +814,7 @@ export default function CaptainDashboardPage() {
       scoreButtonLabel = "Enter Match Scores",
       scoreButtonTitle = "Enter match scores",
       scoreButtonAction = null,
+      scoreButtonTone = "slate",
     } = options;
     const canEnterScores =
       match.scheduled_date &&
@@ -828,6 +829,10 @@ export default function CaptainDashboardPage() {
         : selectedResult === "loss"
           ? "bg-gradient-to-r from-rose-700 to-red-700"
           : "bg-gradient-to-r from-blue-800 to-indigo-800";
+    const scoreButtonClass =
+      scoreButtonTone === "red"
+        ? "bg-red-700 hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+        : "bg-slate-900 hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300";
 
     return (
       <div
@@ -966,7 +971,7 @@ export default function CaptainDashboardPage() {
                   }
                   if (canEnterScores && confirmUnsavedChanges()) router.push(`/matches/${match.id}`);
                 }}
-                className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                className={`rounded-lg px-3 py-2 text-sm font-bold text-white ${scoreButtonClass}`}
                 title={canEnterScores ? scoreButtonTitle : "Scores unlock on the scheduled match date"}
               >
                 {scoreButtonLabel}
@@ -2165,6 +2170,7 @@ export default function CaptainDashboardPage() {
                 showSetup: false,
                 scoreButtonLabel: "Review / Validate Scores",
                 scoreButtonTitle: "Open score review, then validate or dispute",
+                scoreButtonTone: "red",
               })
             )}
             {pendingVerification.length === 0 && <Empty message="No scores currently need verification." />}
