@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { sendEmailMessages, sendSmsMessages } from "../../lib/notifications";
 import { EMAIL_TEMPLATE_KEYS, renderEmailTemplate } from "../../lib/emailTemplates";
-import { loadEmailTemplate } from "../../lib/serverEmailTemplates";
+import { loadEmailTemplate, loadServerSystemSettings } from "../../lib/serverEmailTemplates";
 
 export const runtime = "nodejs";
 
@@ -31,12 +31,15 @@ export async function POST(req) {
     const template = await loadEmailTemplate(
       isVerified ? EMAIL_TEMPLATE_KEYS.scoreValidated : EMAIL_TEMPLATE_KEYS.scoreSubmitted
     );
+    const systemSettings = await loadServerSystemSettings();
     const rendered = renderEmailTemplate(template, {
       home_team: homeTeam || "Home",
       away_team: awayTeam || "Away",
       match_date: matchDate || "N/A",
       score: score || "N/A",
       actor_name: enteredBy || "Unknown",
+      league_site_url: systemSettings.league_site_url,
+      main_email: systemSettings.main_email,
     });
 
     const smsBody = isVerified

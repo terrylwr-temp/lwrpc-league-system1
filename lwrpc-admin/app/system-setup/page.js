@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { DEFAULT_SYSTEM_SETTINGS, SYSTEM_SETTING_FIELDS, mergeSystemSettings } from "../lib/systemSettings";
+import { DEFAULT_SYSTEM_SETTINGS, SYSTEM_SETTING_FIELDS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +26,7 @@ export default function SystemSetupPage() {
 
     setSettings(nextSettings);
     setSavedSettings(nextSettings);
+    cacheSystemSettings(nextSettings);
     setSchemaWarning(result.warning || (result.schemaMissing ? "Run supabase-system-settings.sql before saving custom system settings." : ""));
     setLoading(false);
   }, []);
@@ -84,6 +85,7 @@ export default function SystemSetupPage() {
     }
 
     setSavedSettings(settings);
+    cacheSystemSettings(settings);
     setSchemaWarning("");
     alert("System setup saved.");
   }

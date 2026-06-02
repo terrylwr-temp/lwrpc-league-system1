@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { sendEmailMessages, sendSmsMessages } from "../../lib/notifications";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { EMAIL_TEMPLATE_KEYS, renderEmailTemplate } from "../../lib/emailTemplates";
-import { loadEmailTemplate } from "../../lib/serverEmailTemplates";
+import { loadEmailTemplate, loadServerSystemSettings } from "../../lib/serverEmailTemplates";
 import { hasRole } from "../../lib/permissions";
 
 export const runtime = "nodejs";
@@ -139,6 +139,7 @@ export async function POST(req) {
     const results = [];
     let emailCount = 0;
     let textCount = 0;
+    const systemSettings = await loadServerSystemSettings();
 
     for (const league of leagues || []) {
       const targetDate = localDateString(addDays(today, league.match_setup_reminder_days_before));
@@ -231,6 +232,8 @@ export async function POST(req) {
             match_time: match.scheduled_time || "Time TBD",
             division: match.divisions?.name || "Division",
             location: match.locations?.name || "Location TBD",
+            league_site_url: systemSettings.league_site_url,
+            main_email: systemSettings.main_email,
           });
 
           const [emailResult, smsResult] = await Promise.all([

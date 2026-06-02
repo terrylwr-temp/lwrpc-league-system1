@@ -74,6 +74,8 @@ export const SYSTEM_SETTING_FIELDS = [
   },
 ];
 
+const SYSTEM_SETTINGS_CACHE_KEY = "lwrpc-system-settings";
+
 export function mergeSystemSettings(settings = {}) {
   return {
     ...DEFAULT_SYSTEM_SETTINGS,
@@ -81,4 +83,29 @@ export function mergeSystemSettings(settings = {}) {
       Object.entries(settings || {}).filter(([, value]) => value !== null && value !== undefined && value !== "")
     ),
   };
+}
+
+export function cachedSystemSettings() {
+  if (typeof window === "undefined") return DEFAULT_SYSTEM_SETTINGS;
+
+  try {
+    return mergeSystemSettings(
+      JSON.parse(window.localStorage.getItem(SYSTEM_SETTINGS_CACHE_KEY) || "{}")
+    );
+  } catch {
+    return DEFAULT_SYSTEM_SETTINGS;
+  }
+}
+
+export function cacheSystemSettings(settings = {}) {
+  if (typeof window === "undefined") return;
+
+  try {
+    window.localStorage.setItem(
+      SYSTEM_SETTINGS_CACHE_KEY,
+      JSON.stringify(mergeSystemSettings(settings))
+    );
+  } catch {
+    // Local storage can be unavailable in private or restricted browser contexts.
+  }
 }

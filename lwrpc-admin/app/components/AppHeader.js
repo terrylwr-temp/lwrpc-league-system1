@@ -7,7 +7,7 @@ import { supabase } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
 import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
-import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
+import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 
 export default function AppHeader({
@@ -125,7 +125,9 @@ export default function AppHeader({
     const result = await response.json().catch(() => ({}));
 
     if (result.settings) {
-      setSystemSettings(mergeSystemSettings(result.settings));
+      const nextSettings = mergeSystemSettings(result.settings);
+      cacheSystemSettings(nextSettings);
+      setSystemSettings(nextSettings);
     }
   }
 

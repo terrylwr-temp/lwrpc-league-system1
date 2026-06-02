@@ -1,5 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 import { getEmailTemplateConfig } from "./emailTemplates";
+import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "./systemSettings";
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -50,4 +51,20 @@ export async function loadEmailTemplate(templateKey) {
     subject: data.subject || fallback?.defaultSubject || "",
     body: data.body || fallback?.defaultBody || "",
   };
+}
+
+export async function loadServerSystemSettings() {
+  const supabase = adminClient();
+
+  if (!supabase) return DEFAULT_SYSTEM_SETTINGS;
+
+  const { data, error } = await supabase
+    .from("system_settings")
+    .select("setting_key, setting_value");
+
+  if (error) return DEFAULT_SYSTEM_SETTINGS;
+
+  return mergeSystemSettings(
+    Object.fromEntries((data || []).map((row) => [row.setting_key, row.setting_value]))
+  );
 }

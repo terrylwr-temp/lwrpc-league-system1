@@ -1472,6 +1472,8 @@ export default function CaptainDashboardPage() {
       opponent_setup_status: opponentStatus?.complete
         ? "Your match setup is already marked complete."
         : "Please log into the Captain Dashboard and enter your match setup if you have not already done so.",
+      league_site_url: systemSettings.league_site_url,
+      main_email: systemSettings.main_email,
     });
 
     const response = await fetch("/api/notifications", {

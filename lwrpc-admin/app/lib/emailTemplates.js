@@ -1,3 +1,5 @@
+import { DEFAULT_SYSTEM_SETTINGS, cachedSystemSettings } from "./systemSettings";
+
 export const EMAIL_TEMPLATE_KEYS = {
   scoreReminder: "score_reminder",
   matchSetupSaved: "match_setup_saved",
@@ -7,7 +9,7 @@ export const EMAIL_TEMPLATE_KEYS = {
   ratingCheckAlert: "rating_check_alert",
 };
 
-const COMMON_TEMPLATE_PLACEHOLDERS = ["{{date}}", "{{time}}"];
+const COMMON_TEMPLATE_PLACEHOLDERS = ["{{date}}", "{{time}}", "{{league_site_url}}", "{{main_email}}"];
 
 function withCommonPlaceholders(placeholders) {
   return [
@@ -285,9 +287,13 @@ export function sampleTemplateValues() {
 }
 
 function commonTemplateValues(date = new Date()) {
+  const systemSettings = cachedSystemSettings();
+
   return {
     date: formatTemplateDate(date),
     time: formatTemplateTime(date),
+    league_site_url: systemSettings.league_site_url || DEFAULT_SYSTEM_SETTINGS.league_site_url,
+    main_email: systemSettings.main_email || DEFAULT_SYSTEM_SETTINGS.main_email,
   };
 }
 

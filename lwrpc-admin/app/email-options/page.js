@@ -478,6 +478,14 @@ function RichEmailEditor({ value, onChange }) {
     runCommand("createLink", url);
   }
 
+  function addLeagueSiteLink() {
+    insertHtml('<a href="{{league_site_url}}">League Site</a>');
+  }
+
+  function addMainEmailLink() {
+    insertHtml('<a href="mailto:{{main_email}}">{{main_email}}</a>');
+  }
+
   return (
     <div className="overflow-hidden rounded-xl border border-slate-300 bg-white">
       <div className="flex flex-wrap gap-1 border-b border-slate-200 bg-slate-50 p-2">
@@ -489,6 +497,8 @@ function RichEmailEditor({ value, onChange }) {
         <EditorButton label="Bullets" title="Bullet list" onClick={() => runCommand("insertUnorderedList")} />
         <EditorButton label="Numbers" title="Numbered list" onClick={() => runCommand("insertOrderedList")} />
         <EditorButton label="Link" title="Add link" onClick={addLink} />
+        <EditorButton label="League Site" title="Insert League Site URL link" onClick={addLeagueSiteLink} />
+        <EditorButton label="Main Email" title="Insert Main League Email link" onClick={addMainEmailLink} />
         <EditorButton
           label="Logo"
           title="Insert club logo"
