@@ -26,6 +26,7 @@ export default function MatchDetailPage() {
   const [currentUserRole, setCurrentUserRole] = useState("player");
   const [matchLineups, setMatchLineups] = useState([]);
   const [scoreDirty, setScoreDirty] = useState(false);
+  const [scoreValidationIssueList, setScoreValidationIssueList] = useState([]);
   const pendingGameUpdatesRef = useRef(new Map());
 
   useUnsavedChangesWarning(scoreDirty, "match scores");
@@ -252,6 +253,7 @@ export default function MatchDetailPage() {
     setSeasonRatings(ratingData);
     setMatchLineups(lineupData || []);
     setGames(gameData);
+    setScoreValidationIssueList([]);
     setLoading(false);
   }, [id]);
 
@@ -528,6 +530,20 @@ export default function MatchDetailPage() {
     return warnings;
   }
 
+  function clearScoreValidationIssuesForLineIds(lineIds) {
+    const lineIdSet = new Set(lineIds.map((lineId) => String(lineId)));
+
+    setScoreValidationIssueList((current) =>
+      current.filter((issue) => !lineIdSet.has(String(issue.lineId)))
+    );
+  }
+
+  function clearScoreValidationIssuesForGame(gameId) {
+    setScoreValidationIssueList((current) =>
+      current.filter((issue) => String(issue.gameId || "") !== String(gameId))
+    );
+  }
+
   const matchSummary = useMemo(() => {
     let homeWins = 0;
     let awayWins = 0;
@@ -572,6 +588,7 @@ export default function MatchDetailPage() {
     if (!selectedLine) return;
 
     setScoreDirty(true);
+    clearScoreValidationIssuesForLineIds([lineId]);
 
     const selectedSlot = teamSlotNumber(selectedLine);
     const selectedDivisionLineId = selectedLine.division_line_id;
@@ -590,6 +607,8 @@ export default function MatchDetailPage() {
     if (!lineIdsToUpdate.includes(lineId)) {
       lineIdsToUpdate.push(lineId);
     }
+
+    clearScoreValidationIssuesForLineIds(lineIdsToUpdate);
 
     const { error } = await supabase
       .from("match_lines")
@@ -633,6 +652,7 @@ export default function MatchDetailPage() {
     if (!lineup) return;
 
     setScoreDirty(true);
+    clearScoreValidationIssuesForLineIds([line.id]);
 
     const player1Field = side === "home" ? "home_player_1_id" : "away_player_1_id";
     const player2Field = side === "home" ? "home_player_2_id" : "away_player_2_id";
@@ -725,6 +745,7 @@ export default function MatchDetailPage() {
       field === "game_status" ? value || "completed" : value === "" ? null : Number(value);
 
     setScoreDirty(true);
+    clearScoreValidationIssuesForGame(gameId);
 
     setGames((currentGames) =>
       currentGames.map((game) =>
@@ -880,23 +901,34 @@ export default function MatchDetailPage() {
     const winBy = Number(line.division_lines?.win_by || 0);
 
     if (lineWarnings(line).length > 0) {
-      issues.push(...lineWarnings(line));
+      issues.push(
+        ...lineWarnings(line).map((message) => ({
+          lineId: line.id,
+          gameId: null,
+          message,
+        }))
+      );
     }
 
     lineGames.forEach((game) => {
       const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
       const gameLabel = `${teamSlotLabel(line)} Game ${game.game_number || ""}`.trim();
+      const gameIssue = (message) => ({
+        lineId: line.id,
+        gameId: game.id,
+        message: `${gameLabel}: ${message}`,
+      });
 
       if (isForfeitStatus(status)) return;
 
       const hasAllPlayers = linePlayerIds(line).every(Boolean);
 
       if (!hasAllPlayers) {
-        issues.push(`${gameLabel}: all players are required unless the result is a forfeit.`);
+        issues.push(gameIssue("all players are required unless the result is a forfeit."));
       }
 
       if (game.home_score === null || game.home_score === undefined || game.away_score === null || game.away_score === undefined) {
-        issues.push(`${gameLabel}: both scores are required unless the result is a forfeit.`);
+        issues.push(gameIssue("both scores are required unless the result is a forfeit."));
         return;
       }
 
@@ -907,18 +939,18 @@ export default function MatchDetailPage() {
 
         if (winBy === 1) {
           if (highScore > pointsToWin) {
-            issues.push(`${gameLabel}: Win By 1 games cannot have a score higher than ${pointsToWin}.`);
+            issues.push(gameIssue(`Win By 1 games cannot have a score higher than ${pointsToWin}.`));
           }
 
           if (homeScore !== pointsToWin && awayScore !== pointsToWin) {
-            issues.push(`${gameLabel}: Win By 1 games must have one team score exactly ${pointsToWin}.`);
+            issues.push(gameIssue(`Win By 1 games must have one team score exactly ${pointsToWin}.`));
           }
 
           return;
         }
 
         if (highScore < pointsToWin) {
-          issues.push(`${gameLabel}: at least one score must be ${pointsToWin} or higher for a completed game.`);
+          issues.push(gameIssue(`at least one score must be ${pointsToWin} or higher for a completed game.`));
         }
       }
     });
@@ -946,9 +978,12 @@ export default function MatchDetailPage() {
     const issues = scoreValidationIssues();
 
     if (issues.length > 0) {
-      alert(["Scores cannot be saved yet.", "", ...issues.map((issue) => `- ${issue}`)].join("\n"));
+      setScoreValidationIssueList(issues);
+      alert(["Scores cannot be saved yet.", "", ...issues.map((issue) => `- ${issue.message}`)].join("\n"));
       return false;
     }
+
+    setScoreValidationIssueList([]);
 
     for (const line of displayedLines) {
       const summary = getLineSummary(line);
@@ -1010,9 +1045,12 @@ export default function MatchDetailPage() {
 
     const issues = scoreValidationIssues();
     if (issues.length > 0) {
-      alert(["Scores cannot be submitted yet.", "", ...issues.map((issue) => `- ${issue}`)].join("\n"));
+      setScoreValidationIssueList(issues);
+      alert(["Scores cannot be submitted yet.", "", ...issues.map((issue) => `- ${issue.message}`)].join("\n"));
       return;
     }
+
+    setScoreValidationIssueList([]);
 
     const saved = await saveCalculatedWinners(false);
 
@@ -1277,6 +1315,15 @@ export default function MatchDetailPage() {
   const scoreEntryEditable = canEditScoreEntry();
   const scoreReviewActionsVisible =
     match.score_status === "pending_verification" && scoreReviewAllowed;
+  const scoreValidationIssuesByGameId = scoreValidationIssueList.reduce((grouped, issue) => {
+    if (!issue.gameId) return grouped;
+
+    const key = String(issue.gameId);
+    return {
+      ...grouped,
+      [key]: [...(grouped[key] || []), issue.message],
+    };
+  }, {});
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 pb-28 md:p-6">
@@ -1499,11 +1546,22 @@ export default function MatchDetailPage() {
                 <div className="space-y-3 p-4 pt-0 md:hidden">
                   {lineGames.map((game) => {
                     const gameWinner = gameWinnerName(game);
+                    const gameIssues = scoreValidationIssuesByGameId[String(game.id)] || [];
+                    const hasGameIssues = gameIssues.length > 0;
 
                     return (
-                      <div key={game.id} className="overflow-hidden rounded-2xl border-2 border-blue-300 bg-white shadow-md">
-                        <div className="flex items-center justify-between gap-2 border-b border-blue-200 bg-blue-100 px-4 py-3">
-                          <div className="font-black uppercase tracking-wide text-blue-950">Game {game.game_number}</div>
+                      <div
+                        key={game.id}
+                        className={`overflow-hidden rounded-2xl border-2 shadow-md ${
+                          hasGameIssues ? "border-red-500 bg-red-50 ring-4 ring-red-100" : "border-blue-300 bg-white"
+                        }`}
+                      >
+                        <div className={`flex items-center justify-between gap-2 border-b px-4 py-3 ${
+                          hasGameIssues ? "border-red-300 bg-red-100" : "border-blue-200 bg-blue-100"
+                        }`}>
+                          <div className={`font-black uppercase tracking-wide ${
+                            hasGameIssues ? "text-red-950" : "text-blue-950"
+                          }`}>Game {game.game_number}</div>
                           <div className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700">
                             Winner: {gameWinner}
                           </div>
@@ -1547,6 +1605,14 @@ export default function MatchDetailPage() {
                             </option>
                           ))}
                         </select>
+
+                        {hasGameIssues && (
+                          <div className="mx-4 mb-4 rounded-xl border border-red-300 bg-white px-3 py-2 text-sm font-bold text-red-800">
+                            {gameIssues.map((issue) => (
+                              <div key={issue}>{issue}</div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
@@ -1573,41 +1639,56 @@ export default function MatchDetailPage() {
                     <tbody>
                       {lineGames.map((game) => {
                         const gameWinner = gameWinnerName(game);
+                        const gameIssues = scoreValidationIssuesByGameId[String(game.id)] || [];
+                        const hasGameIssues = gameIssues.length > 0;
 
-                        return (
-                          <tr key={game.id} className="rounded-xl bg-white shadow-sm ring-2 ring-blue-100">
-                            <td className="rounded-l-xl border-y-2 border-l-2 border-blue-100 p-3 font-black text-slate-900">
+                        return [
+                          <tr
+                            key={game.id}
+                            className={`rounded-xl shadow-sm ring-2 ${
+                              hasGameIssues ? "bg-red-50 ring-red-300" : "bg-white ring-blue-100"
+                            }`}
+                          >
+                            <td className={`rounded-l-xl border-y-2 border-l-2 p-3 font-black ${
+                              hasGameIssues ? "border-red-300 text-red-950" : "border-blue-100 text-slate-900"
+                            }`}>
                               {game.game_number}
                             </td>
 
-                            <td className="border-y-2 border-blue-100 p-3">
+                            <td className={`border-y-2 p-3 ${hasGameIssues ? "border-red-300" : "border-blue-100"}`}>
                               <input
                                 type="number"
                                 inputMode="numeric"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
                                 disabled={!scoreEntryEditable || scoresBlockedForLine}
-                                className="w-20 rounded-xl border-2 border-slate-300 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                                className={`w-20 rounded-xl border-2 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:ring-4 ${
+                                  hasGameIssues ? "border-red-400 focus:border-red-600 focus:ring-red-100" : "border-slate-300 focus:border-blue-600 focus:ring-blue-100"
+                                }`}
                               />
                             </td>
 
-                            <td className="border-y-2 border-blue-100 p-3">
+                            <td className={`border-y-2 p-3 ${hasGameIssues ? "border-red-300" : "border-blue-100"}`}>
                               <input
                                 type="number"
                                 inputMode="numeric"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
                                 disabled={!scoreEntryEditable || scoresBlockedForLine}
-                                className="w-20 rounded-xl border-2 border-slate-300 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                                className={`w-20 rounded-xl border-2 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:ring-4 ${
+                                  hasGameIssues ? "border-red-400 focus:border-red-600 focus:ring-red-100" : "border-slate-300 focus:border-blue-600 focus:ring-blue-100"
+                                }`}
                               />
                             </td>
 
-                            <td className="border-y-2 border-blue-100 p-3">
+                            <td className={`border-y-2 p-3 ${hasGameIssues ? "border-red-300" : "border-blue-100"}`}>
                               <select
                                 value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                                 onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
                                 disabled={!scoreEntryEditable}
-                                className="w-full min-w-40 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-semibold"
+                                className={`w-full min-w-40 rounded-xl border bg-white px-3 py-2 text-xs font-semibold ${
+                                  hasGameIssues ? "border-red-400" : "border-slate-300"
+                                }`}
                               >
                                 {gameStatusOptions().map((option) => (
                                   <option key={option.value} value={option.value}>
@@ -1617,9 +1698,20 @@ export default function MatchDetailPage() {
                               </select>
                             </td>
 
-                            <td className="rounded-r-xl border-y-2 border-r-2 border-blue-100 p-3 font-semibold text-slate-700">{gameWinner}</td>
-                          </tr>
-                        );
+                            <td className={`rounded-r-xl border-y-2 border-r-2 p-3 font-semibold ${
+                              hasGameIssues ? "border-red-300 text-red-950" : "border-blue-100 text-slate-700"
+                            }`}>{gameWinner}</td>
+                          </tr>,
+                          hasGameIssues ? (
+                            <tr key={`${game.id}-issues`}>
+                              <td colSpan="5" className="rounded-xl border-2 border-red-300 bg-red-50 p-3 text-sm font-bold text-red-800">
+                                {gameIssues.map((issue) => (
+                                  <div key={issue}>{issue}</div>
+                                ))}
+                              </td>
+                            </tr>
+                          ) : null,
+                        ];
                       })}
 
                       {lineGames.length === 0 && (
