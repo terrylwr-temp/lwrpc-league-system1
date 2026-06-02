@@ -156,7 +156,8 @@ export default function MobileScoreEntryPage() {
   }
 
   async function updateGame(gameId, field, value) {
-    const normalizedValue = value === "" ? null : Number(value);
+    const numericValue = String(value).replace(/\D/g, "");
+    const normalizedValue = numericValue === "" ? null : Number(numericValue);
 
     setScoreDirty(true);
 
@@ -513,8 +514,9 @@ export default function MobileScoreEntryPage() {
                           </label>
 
                           <input
-                            type="number"
+                            type="text"
                             inputMode="numeric"
+                            pattern="[0-9]*"
                             value={game.home_score ?? ""}
                             onChange={e =>
                               updateGame(
@@ -533,8 +535,9 @@ export default function MobileScoreEntryPage() {
                           </label>
 
                           <input
-                            type="number"
+                            type="text"
                             inputMode="numeric"
+                            pattern="[0-9]*"
                             value={game.away_score ?? ""}
                             onChange={e =>
                               updateGame(

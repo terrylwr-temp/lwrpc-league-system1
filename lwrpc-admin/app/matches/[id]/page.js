@@ -743,8 +743,9 @@ export default function MatchDetailPage() {
       return;
     }
 
+    const numericValue = String(value).replace(/\D/g, "");
     const normalizedValue =
-      field === "game_status" ? value || "completed" : value === "" ? null : Number(value);
+      field === "game_status" ? value || "completed" : numericValue === "" ? null : Number(numericValue);
 
     setScoreDirty(true);
     clearScoreValidationIssuesForGame(gameId);
@@ -1577,8 +1578,9 @@ export default function MatchDetailPage() {
                           <label className="text-xs font-bold uppercase tracking-wide text-slate-600">
                             {match.home_team?.name || "Home"}
                             <input
-                              type="number"
+                              type="text"
                               inputMode="numeric"
+                              pattern="[0-9]*"
                               value={game.home_score ?? ""}
                               onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
                               disabled={!scoreEntryEditable || scoresBlockedForLine}
@@ -1589,8 +1591,9 @@ export default function MatchDetailPage() {
                           <label className="text-xs font-bold uppercase tracking-wide text-slate-600">
                             {match.away_team?.name || "Away"}
                             <input
-                              type="number"
+                              type="text"
                               inputMode="numeric"
+                              pattern="[0-9]*"
                               value={game.away_score ?? ""}
                               onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
                               disabled={!scoreEntryEditable || scoresBlockedForLine}
@@ -1663,8 +1666,9 @@ export default function MatchDetailPage() {
 
                             <td className={`border-y-2 p-3 ${hasGameIssues ? "border-red-300" : "border-blue-100"}`}>
                               <input
-                                type="number"
+                                type="text"
                                 inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
                                 disabled={!scoreEntryEditable || scoresBlockedForLine}
@@ -1676,8 +1680,9 @@ export default function MatchDetailPage() {
 
                             <td className={`border-y-2 p-3 ${hasGameIssues ? "border-red-300" : "border-blue-100"}`}>
                               <input
-                                type="number"
+                                type="text"
                                 inputMode="numeric"
+                                pattern="[0-9]*"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
                                 disabled={!scoreEntryEditable || scoresBlockedForLine}
