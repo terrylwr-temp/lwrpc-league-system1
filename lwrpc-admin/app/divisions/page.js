@@ -652,8 +652,8 @@ export default function DivisionsPage() {
           subtitle="Manage division rules, rating systems, match formats, standings rules, and line/game configurations."
         />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(420px,0.95fr)_minmax(0,1.55fr)] xl:grid-cols-[minmax(480px,0.9fr)_minmax(0,1.6fr)]">
+          <div className="rounded-2xl bg-white p-6 shadow">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-xl font-bold text-slate-900">
                 {editingId ? "Edit Division" : "Create Division"}
@@ -860,7 +860,7 @@ export default function DivisionsPage() {
             </form>
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
+          <div className="rounded-2xl bg-white p-6 shadow">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <h2 className="text-xl font-bold text-slate-900">
                 Current Divisions

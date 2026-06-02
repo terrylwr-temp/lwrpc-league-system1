@@ -9,6 +9,7 @@ export default function LoadingScreen({
   subtitle = "Loading..."
 }) {
   const [cachedSettings, setCachedSettings] = useState(() => cachedSystemSettings());
+  const clubName = cachedSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
   const systemName = title || cachedSettings.system_name || DEFAULT_SYSTEM_SETTINGS.system_name;
   const logoUrl = cachedSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
 
@@ -28,8 +29,9 @@ export default function LoadingScreen({
           unoptimized
         />
 
-        <h1 className="mt-6 text-3xl font-black text-slate-900">
-          {systemName}
+        <h1 className="mt-6 text-3xl font-black leading-tight text-slate-900">
+          {clubName}
+          <span className="mt-1 block text-2xl text-blue-700">{systemName}</span>
         </h1>
 
         <p className="mt-2 text-sm font-medium text-slate-500">

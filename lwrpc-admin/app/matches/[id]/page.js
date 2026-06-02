@@ -27,7 +27,9 @@ export default function MatchDetailPage() {
   const [matchLineups, setMatchLineups] = useState([]);
   const [scoreDirty, setScoreDirty] = useState(false);
   const [scoreValidationIssueList, setScoreValidationIssueList] = useState([]);
+  const [scoreValidationSubmitting, setScoreValidationSubmitting] = useState(false);
   const pendingGameUpdatesRef = useRef(new Map());
+  const scoreValidationSubmittingRef = useRef(false);
 
   useUnsavedChangesWarning(scoreDirty, "match scores");
 
@@ -1094,6 +1096,8 @@ export default function MatchDetailPage() {
   }
 
   async function verifyScores() {
+    if (scoreValidationSubmittingRef.current) return;
+
     if (!canManageScores()) {
       alert("Only captains for this match can verify scores.");
       return;
@@ -1109,6 +1113,9 @@ export default function MatchDetailPage() {
       return;
     }
 
+    scoreValidationSubmittingRef.current = true;
+    setScoreValidationSubmitting(true);
+
     const { error } = await supabase
       .from("matches")
       .update({
@@ -1121,6 +1128,8 @@ export default function MatchDetailPage() {
       .eq("id", id);
 
     if (error) {
+      scoreValidationSubmittingRef.current = false;
+      setScoreValidationSubmitting(false);
       alert(error.message);
       return;
     }
@@ -1366,9 +1375,10 @@ export default function MatchDetailPage() {
               <button
                 type="button"
                 onClick={verifyScores}
-                className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 lg:py-2"
+                disabled={scoreValidationSubmitting}
+                className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
               >
-                Validate Scores
+                {scoreValidationSubmitting ? "Validating..." : "Validate Scores"}
               </button>
 
               <button
@@ -1764,9 +1774,10 @@ export default function MatchDetailPage() {
                   <button
                     type="button"
                     onClick={verifyScores}
-                    className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white shadow hover:bg-emerald-800"
+                    disabled={scoreValidationSubmitting}
+                    className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white shadow hover:bg-emerald-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                   >
-                    Validate
+                    {scoreValidationSubmitting ? "Validating..." : "Validate"}
                   </button>
 
                   <button

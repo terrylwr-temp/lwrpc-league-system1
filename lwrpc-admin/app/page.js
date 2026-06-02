@@ -60,6 +60,7 @@ export default function DashboardPage() {
   const [savingMessageKey, setSavingMessageKey] = useState("");
   const [deletingHistoryId, setDeletingHistoryId] = useState("");
   const [masterResetting, setMasterResetting] = useState(false);
+  const [masterResetAcknowledged, setMasterResetAcknowledged] = useState(false);
   const [seasonResetOptions, setSeasonResetOptions] = useState([]);
   const [seasonResetSeasonId, setSeasonResetSeasonId] = useState("");
   const [seasonResetAcknowledged, setSeasonResetAcknowledged] = useState(false);
@@ -548,6 +549,11 @@ export default function DashboardPage() {
   }
 
   async function runMasterResetAll() {
+    if (!masterResetAcknowledged) {
+      alert("Confirm that you understand Master Reset All permanently removes generated league operations data.");
+      return;
+    }
+
     const firstOk = confirm([
       "Master Reset All will permanently remove generated league operations data.",
       "",
@@ -595,6 +601,7 @@ export default function DashboardPage() {
     }
 
     alert("Master Reset All complete.");
+    setMasterResetAcknowledged(false);
     loadDashboardCounts();
   }
 
@@ -1317,10 +1324,21 @@ export default function DashboardPage() {
               <p className="mt-1 text-sm font-semibold leading-6 text-red-800">
                 Removes generated league operations data across the whole system. Use only when starting from a clean operations slate.
               </p>
+              <label className="mt-4 flex items-start gap-3 rounded-xl bg-white/80 p-3 text-sm font-semibold text-red-950">
+                <input
+                  type="checkbox"
+                  checked={masterResetAcknowledged}
+                  onChange={(event) => setMasterResetAcknowledged(event.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  I understand this permanently deletes matches, match lines, game scores, saved match setup lineups, byes, standings, and team roster rows; clears team captains and co-captains; inactivates teams; and changes Captain users back to Player.
+                </span>
+              </label>
               <button
                 type="button"
                 onClick={runMasterResetAll}
-                disabled={masterResetting}
+                disabled={masterResetting || !masterResetAcknowledged}
                 className="mt-4 rounded-xl bg-red-700 px-5 py-3 text-sm font-black uppercase tracking-wide text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
                 {masterResetting ? "Resetting..." : "Master Reset All"}
