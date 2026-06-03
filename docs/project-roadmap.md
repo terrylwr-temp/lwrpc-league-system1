@@ -47,6 +47,7 @@ The app currently includes pages for:
 - Player dashboard
 - Scoring operations for league managers to review due matches, filter unverified scores, edit reminder email copy, and send score-entry reminders to captains
 - System Setup for deployment-level club branding and contact defaults, intended to make separate club deployments easier to configure
+- Tournament public display rotation across court detail, court-only, and current standings views, with tournament team check-in/edit workflows and regular-season standing tie-break support
 
 ## Multi-Club Deployment Direction
 

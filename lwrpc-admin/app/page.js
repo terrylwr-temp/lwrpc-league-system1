@@ -808,6 +808,13 @@ export default function DashboardPage() {
       ],
     },
   ];
+  const moduleSection = {
+    title: "Modules",
+    desc: "Standalone tools that share club data with the main league system.",
+    cards: [
+      { title: "Tournaments", desc: "Open public tournament displays and event-code tournament operations.", path: "/tourney/tpro", code: "TN", tone: "emerald" },
+    ],
+  };
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
@@ -1251,6 +1258,30 @@ export default function DashboardPage() {
                 </div>
               )}
             </div>
+          </div>
+        </section>
+
+        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          <div className="border-b border-slate-200 px-4 py-5 md:px-6">
+            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="text-xl font-black text-slate-950">{moduleSection.title}</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-600">{moduleSection.desc}</p>
+              </div>
+              <div className="text-xs font-black uppercase tracking-wide text-slate-400">
+                {moduleSection.cards.length} tool
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 p-4 md:grid-cols-2 lg:grid-cols-4 md:p-6">
+            {moduleSection.cards.map((card) => (
+              <AdminActionCard
+                key={card.path}
+                card={card}
+                onClick={() => router.push(card.path)}
+              />
+            ))}
           </div>
         </section>
 

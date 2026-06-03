@@ -1,4 +1,5 @@
 import "./globals.css";
+import SystemFooter from "./components/SystemFooter";
 
 export const metadata = {
   title: "LWR PC League Management",
@@ -18,6 +19,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         {children}
+        <SystemFooter />
       </body>
     </html>
   );
