@@ -69,6 +69,16 @@ export default function TournamentAdminPage() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!notice) return undefined;
+
+    const timeout = window.setTimeout(() => {
+      setNotice("");
+    }, 30000);
+
+    return () => window.clearTimeout(timeout);
+  }, [notice]);
+
   async function unlock(code = eventCode) {
     const cleanCode = String(code || "").trim();
 
@@ -135,10 +145,10 @@ export default function TournamentAdminPage() {
     if (!options.skipRefresh) {
       await unlock(refreshCode);
     }
-    if (action === "autoAssign") setNotice(`Assigned ${result.assigned || 0} open court${Number(result.assigned || 0) === 1 ? "" : "s"}.`);
+    if (action === "autoAssign") setNotice(`Assigned ${result.assigned || 0} open court${Number(result.assigned || 0) === 1 ? "" : "s"}. Court texts sent: ${result.sms?.sent || 0}.`);
     if (action === "returnToQueue") setNotice("Match returned to the queue.");
-    if (action === "swapToCourt") setNotice("Queued match moved to the selected court.");
-    if (action === "completeMatch") setNotice("Result saved and court opened.");
+    if (action === "swapToCourt") setNotice(`Queued match moved to the selected court. Court texts sent: ${result.sms?.sent || 0}.`);
+    if (action === "completeMatch") setNotice(`Result saved and court opened. Result texts sent: ${result.sms?.sent || 0}.`);
     if (action === "sendCourtText") setNotice(`Court text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`);
     if (action === "syncLeagueDivisions") setNotice(`Synced ${result.synced || 0} main-system division${Number(result.synced || 0) === 1 ? "" : "s"}.`);
     if (action === "updateDivisionStatus") setNotice("Division status updated.");
@@ -166,7 +176,7 @@ export default function TournamentAdminPage() {
 
   if (!state) {
     return (
-      <main className="min-h-screen bg-slate-100 p-6">
+      <main className="full-screen-main min-h-screen bg-slate-100 p-4 sm:p-6">
         <div className="mx-auto max-w-md rounded-2xl bg-white p-6 shadow">
           <div className="text-xs font-black uppercase tracking-wide text-blue-700">Tournament Main System</div>
           <h1 className="mt-1 text-2xl font-black text-slate-950">Enter Event Code</h1>
@@ -210,8 +220,8 @@ export default function TournamentAdminPage() {
   const tournamentKey = state.tournament.slug || id;
 
   return (
-    <main className="min-h-screen bg-[#07111f] text-white">
-      <div className="mx-auto max-w-[1440px] p-3 sm:p-5">
+    <main className="full-screen-main min-h-screen bg-[#07111f] text-white">
+      <div className="mx-auto w-full max-w-[1800px] p-2 sm:p-4 xl:p-5">
         <DirectorHeader
           state={state}
           systemSettings={systemSettings}
@@ -221,13 +231,13 @@ export default function TournamentAdminPage() {
           tournamentKey={tournamentKey}
         />
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="sticky top-0 z-30 mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-blue-300/20 bg-[#07111f]/95 p-2 shadow-xl backdrop-blur sm:flex sm:flex-wrap">
           {TABS.map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`rounded-xl border px-4 py-3 text-sm font-black shadow-sm transition ${
+              className={`rounded-xl border px-3 py-3 text-sm font-black shadow-sm transition sm:px-4 ${
                 activeTab === tab
                   ? "border-cyan-300 bg-cyan-500 text-white"
                   : "border-blue-400/40 bg-blue-950/70 text-white hover:bg-blue-900"
@@ -283,6 +293,7 @@ export default function TournamentAdminPage() {
       {resultMatch && (
         <ResultModal
           match={resultMatch}
+          smsEnabled={smsEnabled}
           onClose={() => setResultMatch(null)}
           onSave={async (payload) => {
             const saved = await runAction("completeMatch", payload);
@@ -342,12 +353,22 @@ function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPending
   const busyTeamIds = useMemo(() => busyTeams(state.matches), [state.matches]);
   const pendingMatches = useMemo(() => availablePendingMatches(state.matches, busyTeamIds), [busyTeamIds, state.matches]);
   const playingByCourt = useMemo(() => matchesByCourt(state.matches), [state.matches]);
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     if (selectedPendingId && !pendingMatches.some((match) => String(match.id) === String(selectedPendingId))) {
       setSelectedPendingId("");
     }
   }, [pendingMatches, selectedPendingId, setSelectedPendingId]);
+
+  useEffect(() => {
+    setNow(Date.now());
+    const interval = window.setInterval(() => {
+      setNow(Date.now());
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+  }, []);
 
   return (
     <section className="mt-5 space-y-4">
@@ -356,7 +377,7 @@ function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPending
           <h2 className="text-2xl font-black">Court Dashboard</h2>
           <button
             type="button"
-            onClick={() => runAction("autoAssign")}
+            onClick={() => runAction("autoAssign", { smsEnabled })}
             disabled={actionLoading === "autoAssign"}
             className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-3 text-sm font-black text-white shadow hover:from-cyan-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -398,6 +419,7 @@ function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPending
             runAction={runAction}
             setResultMatch={setResultMatch}
             smsEnabled={smsEnabled}
+            now={now}
           />
         ))}
       </div>
@@ -405,7 +427,7 @@ function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPending
   );
 }
 
-function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, setResultMatch, smsEnabled }) {
+function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, setResultMatch, smsEnabled, now }) {
   const colors = match ? tournamentDivisionColors(match.division?.name) : null;
   const busy = Boolean(actionLoading);
 
@@ -424,7 +446,9 @@ function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, 
             <div className={`text-sm ${colors.accent}`}>vs</div>
             <div>{match.away_team?.name || "Away"}</div>
           </div>
-          <div className="mt-3 text-sm font-semibold text-blue-100">Assigned: {formatTime(match.assigned_at)}</div>
+          <div className="mt-3 text-sm font-semibold text-blue-100">
+            Assigned: {formatTime(match.assigned_at)} <span className="text-blue-300">|</span> Play Time: {playTime(match.assigned_at, now)}
+          </div>
           <div className="mt-5 flex flex-col gap-2">
             <button type="button" onClick={() => setResultMatch(match)} className="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400">
               Enter Result / Score
@@ -448,7 +472,7 @@ function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, 
             {selectedPendingId && (
               <button
                 type="button"
-                onClick={() => runAction("swapToCourt", { matchId: selectedPendingId, courtId: court.id })}
+                onClick={() => runAction("swapToCourt", { matchId: selectedPendingId, courtId: court.id, smsEnabled })}
                 disabled={busy}
                 className="rounded-xl border border-emerald-300/60 bg-emerald-800 px-4 py-3 text-sm font-black text-white hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -464,7 +488,7 @@ function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, 
           {selectedPendingId && (
             <button
               type="button"
-              onClick={() => runAction("swapToCourt", { matchId: selectedPendingId, courtId: court.id })}
+              onClick={() => runAction("swapToCourt", { matchId: selectedPendingId, courtId: court.id, smsEnabled })}
               disabled={busy}
               className="mt-5 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -518,17 +542,21 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
           Based on current completed match pace, average match length is about {insights.averageMatchMinutes} minutes. Queue priority favors division and line groups with lower completion progress, available teams, and stronger rest balance.
         </p>
         <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
-          {insights.groups.map((group) => (
-            <div key={group.name} className={`rounded-xl border p-4 ${group.panelClass}`}>
+          {insights.groups.map((group) => {
+            const colors = tournamentDivisionColors(group.name);
+
+            return (
+            <div key={group.name} className={`rounded-xl border border-blue-300/20 border-l-4 ${colors.border} ${colors.panel} p-4`}>
               <div className="flex items-center justify-between gap-3">
                 <h3 className="text-lg font-black">{group.name}</h3>
-                <span className="rounded-full bg-blue-400/20 px-3 py-1 text-xs font-black text-blue-100">{group.pending} pending</span>
+                <span className={`rounded-full px-3 py-1 text-xs font-black ${colors.badge}`}>{group.pending} pending</span>
               </div>
               <div className="mt-4 text-3xl font-black">{group.completionPercent}%</div>
               <div className="text-sm font-semibold text-blue-100">{group.heat}</div>
-              <div className="mt-1 text-sm font-semibold text-blue-200">Progress: {group.progressPercent}% - Avg Rest: {group.averageRestMinutes} min</div>
+              <div className={`mt-1 text-sm font-semibold ${colors.accent}`}>Progress: {group.progressPercent}% - Avg Rest: {group.averageRestMinutes} min</div>
             </div>
-          ))}
+            );
+          })}
           {insights.groups.length === 0 && <div className="text-sm font-semibold text-blue-100">Scheduling insights will appear once matches are loaded.</div>}
         </div>
       </div>
@@ -538,23 +566,24 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
         <div className="mt-4 space-y-3">
           {queueRows.map((row, index) => {
             const match = row.match;
+            const colors = tournamentDivisionColors(match.division?.name);
             return (
               <div
                 key={match.id}
-                className={`rounded-2xl border bg-blue-950/70 p-4 ${
+                className={`rounded-2xl border border-l-4 ${colors.border} ${colors.panel} p-4 ${
                   index === 0 && !row.blocked ? "border-amber-300" : "border-blue-300/20"
                 }`}
               >
                 <div className="flex flex-wrap items-center gap-2 text-xs font-black">
                   {index === 0 && !row.blocked && <span className="rounded-full bg-amber-400/25 px-3 py-1 text-amber-100">Likely Next</span>}
-                  <span className="rounded-full bg-blue-400/20 px-3 py-1 text-blue-100">{match.division?.name || "Division"}</span>
+                  <span className={`rounded-full px-3 py-1 ${colors.badge}`}>{match.division?.name || "Division"}</span>
                   <span className="rounded-full bg-blue-400/20 px-3 py-1 text-blue-100">Line {match.line_number || 1}</span>
                   <span className={`rounded-full px-3 py-1 ${row.blocked ? "bg-rose-400/20 text-rose-100" : "bg-emerald-400/20 text-emerald-100"}`}>
                     {row.blocked ? "Blocked" : "Ready"}
                   </span>
                 </div>
                 <div className="mt-4 text-lg font-black">{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</div>
-                <div className="mt-3 text-sm font-semibold text-blue-200">
+                <div className={`mt-3 text-sm font-semibold ${colors.accent}`}>
                   Wait: {row.waitMinutes} min - Rest: {row.restMinutes} min - Group progress: {row.groupProgress}% - Avg group rest: {row.averageGroupRestMinutes} min - {row.blocked ? "Team on court" : "Ready"}
                 </div>
                 <button
@@ -600,8 +629,11 @@ function StandingsTab({ state, runAction, setResultMatch, actionLoading }) {
         </p>
       </div>
 
-      {divisions.map(([division, rows]) => (
-        <div key={division} className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
+      {divisions.map(([division, rows]) => {
+        const colors = tournamentDivisionColors(division);
+
+        return (
+        <div key={division} className={`rounded-2xl border border-blue-300/20 border-l-4 ${colors.border} ${colors.panel} p-4`}>
           <h3 className="text-xl font-black">{division}</h3>
           <div className="mt-4 overflow-x-auto rounded-xl bg-slate-950/35">
             <table className="min-w-full text-left text-sm">
@@ -640,7 +672,8 @@ function StandingsTab({ state, runAction, setResultMatch, actionLoading }) {
             </table>
           </div>
         </div>
-      ))}
+        );
+      })}
       {divisions.length === 0 && <EmptyPanel title="Standings" message="No completed matches are available for standings yet." />}
       {selectedTeam && (
         <StandingTeamModal
@@ -769,9 +802,10 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
   }
 
   async function deleteTeam(team) {
-    if (!window.confirm(`Delete ${team.name || "this team"} from the tournament?`)) return;
+    if (!confirmTypedAction(`Delete ${team.name || "this team"} from the tournament?`, "DELETE")) return;
     setEditingTeam(null);
-    await runAction("deleteTournamentTeam", { teamId: team.id });
+    const completed = await runAction("deleteTournamentTeam", { teamId: team.id });
+    window.alert(completed ? "Delete completed." : "Delete was not completed.");
   }
 
   return (
@@ -796,9 +830,12 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
         </div>
       </div>
 
-      {divisionEntries.map(([division, teams]) => (
-        <details key={division} className="rounded-2xl border border-blue-300/20 bg-slate-950/70 p-4">
-          <summary className="cursor-pointer text-xl font-black">{division} <span className="ml-2 rounded-full bg-blue-400/20 px-3 py-1 text-xs text-blue-100">{teams.length} shown</span></summary>
+      {divisionEntries.map(([division, teams]) => {
+        const colors = tournamentDivisionColors(division);
+
+        return (
+        <details key={division} className={`rounded-2xl border border-blue-300/20 border-l-4 ${colors.border} ${colors.panel} p-4`}>
+          <summary className="cursor-pointer text-xl font-black">{division} <span className={`ml-2 rounded-full px-3 py-1 text-xs ${colors.badge}`}>{teams.length} shown</span></summary>
           <div className="mt-4 space-y-2">
             {teams
               .sort((a, b) =>
@@ -861,7 +898,8 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
             {teams.length === 0 && <div className="rounded-xl border border-blue-300/20 bg-blue-950/60 p-4 text-sm font-semibold text-blue-100">No teams match this filter.</div>}
           </div>
         </details>
-      ))}
+        );
+      })}
       {divisionEntries.length === 0 && <EmptyPanel title="Teams" message="No teams match this filter." />}
       {editingTeam && (
         <TeamEditModal
@@ -1040,8 +1078,11 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
   const activeDivisions = useMemo(() => state.divisions.filter((division) => division.is_active), [state.divisions]);
   const teamCounts = useMemo(() => teamCountsByDivision(state.teams), [state.teams]);
   const [selectedDivisionIds, setSelectedDivisionIds] = useState(() => activeDivisions.map((division) => division.id));
+  const [showInactiveDivisions, setShowInactiveDivisions] = useState(false);
   const [tournamentName, setTournamentName] = useState(state.tournament.name || "");
   const [eventEntryCode, setEventEntryCode] = useState("");
+  const [eventEntryCodeConfirm, setEventEntryCodeConfirm] = useState("");
+  const [eventEntryCodeApproval, setEventEntryCodeApproval] = useState("");
   const [matchFormat, setMatchFormat] = useState(state.tournament.settings?.matchFormat || "Single Game");
   const [standingsRules, setStandingsRules] = useState(() => standingsRulesState(state.tournament.settings?.standingsRules));
   const [courtLabels, setCourtLabels] = useState(() => courtLabelsFromCourts(state.courts));
@@ -1055,6 +1096,8 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
   useEffect(() => {
     setTournamentName(state.tournament.name || "");
     setEventEntryCode("");
+    setEventEntryCodeConfirm("");
+    setEventEntryCodeApproval("");
     setMatchFormat(state.tournament.settings?.matchFormat || "Single Game");
     setStandingsRules(standingsRulesState(state.tournament.settings?.standingsRules));
     setCourtLabels(courtLabelsFromCourts(state.courts));
@@ -1089,7 +1132,48 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
     setStandingsRules((current) => current.map((rule, ruleIndex) => ruleIndex === index ? value : rule));
   }
 
+  async function saveEventEntryCode() {
+    if (!eventEntryCode.trim()) return;
+    if (eventEntryCode !== eventEntryCodeConfirm) {
+      window.alert("Enter the same new event entry code in both boxes.");
+      return;
+    }
+    if (eventEntryCodeApproval.trim().toUpperCase() !== "CHANGE CODE") {
+      window.alert("Type CHANGE CODE to confirm this event entry code change.");
+      return;
+    }
+    if (!confirmTypedAction("Change the event entry code for this tournament? The current admin session will immediately switch to the new code.", "CHANGE CODE")) return;
+
+    const saved = await runAction("updateTournamentSettings", {
+      name: tournamentName,
+      matchFormat,
+      standingsRules,
+      adminCode: eventEntryCode,
+      adminCodeConfirm: eventEntryCodeConfirm,
+      adminCodeConfirmation: eventEntryCodeApproval,
+    });
+    if (saved) {
+      setEventEntryCode("");
+      setEventEntryCodeConfirm("");
+      setEventEntryCodeApproval("");
+    }
+    window.alert(saved ? "Event entry code change completed." : "Event entry code change was not completed.");
+  }
+
   const savedCourtNames = courtLabels.map((label, index) => label.trim() || `Court ${index + 1}`).join(",");
+  const visibleDivisions = showInactiveDivisions ? state.divisions : state.divisions.filter((division) => division.is_active);
+  const hiddenInactiveDivisionCount = state.divisions.filter((division) => !division.is_active).length;
+  const selectedDivisionNames = activeDivisions
+    .filter((division) => selectedDivisionIds.includes(division.id))
+    .map((division) => division.name)
+    .join(", ");
+  const canSaveEventEntryCode = Boolean(
+    !actionLoading &&
+    tournamentName.trim() &&
+    eventEntryCode.trim() &&
+    eventEntryCode === eventEntryCodeConfirm &&
+    eventEntryCodeApproval.trim().toUpperCase() === "CHANGE CODE"
+  );
 
   return (
     <section className="mt-5 space-y-4">
@@ -1112,57 +1196,79 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => runAction("syncLeagueDivisions")}
+              onClick={() => {
+                if (confirmTypedAction("Refresh tournament divisions and teams from the main system? This may add or update tournament setup data.", "REFRESH")) {
+                  runAction("syncLeagueDivisions").then((completed) => {
+                    window.alert(completed ? "Refresh completed." : "Refresh was not completed.");
+                  });
+                }
+              }}
               disabled={Boolean(actionLoading)}
               className="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
             >
               Refresh From Main System
             </button>
+            <button
+              type="button"
+              onClick={() => setShowInactiveDivisions((value) => !value)}
+              className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-3 text-sm font-black text-white hover:bg-blue-900"
+            >
+              {showInactiveDivisions ? "Hide Deactivated Divisions" : `Show Deactivated Divisions${hiddenInactiveDivisionCount ? ` (${hiddenInactiveDivisionCount})` : ""}`}
+            </button>
           </div>
-          <div className="mt-4 divide-y divide-blue-300/10">
-            {state.divisions.map((division) => {
+          <details className="mt-4 rounded-2xl border border-blue-300/20 bg-slate-950/60 p-4">
+            <summary className="cursor-pointer text-xl font-black">
+              Divisions <span className="ml-2 rounded-full bg-blue-400/20 px-3 py-1 text-xs text-blue-100">{visibleDivisions.length} shown</span>
+            </summary>
+            <div className="mt-4 space-y-3">
+            {visibleDivisions.map((division) => {
               const active = Boolean(division.is_active);
               const teamCount = teamCounts[String(division.id)] || 0;
+              const colors = tournamentDivisionColors(division.name);
               return (
-                <div key={division.id} className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <div className="text-lg font-black">{division.name}</div>
-                      <span className={`rounded-full px-3 py-1 text-xs font-black ${active ? "bg-emerald-400/25 text-emerald-100" : "bg-rose-400/25 text-rose-100"}`}>
-                        {active ? "Active" : "Inactive"}
-                      </span>
-                    </div>
-                    <div className="mt-1 text-sm font-semibold text-blue-200">{teamCount} teams</div>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => runAction("updateDivisionStatus", { divisionId: division.id, isActive: !active })}
-                      disabled={Boolean(actionLoading)}
-                      className={`w-fit rounded-xl px-5 py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-50 ${
-                        active
-                          ? "bg-cyan-500 text-white hover:bg-cyan-400"
-                          : "border border-blue-300/40 bg-blue-950 text-white hover:bg-blue-900"
-                      }`}
-                    >
-                      {active ? "Set Inactive" : "Set Active"}
-                    </button>
-                    {teamCount === 0 && (
+                <div key={division.id} className={`rounded-2xl border border-blue-300/20 border-l-4 ${colors.border} ${colors.panel} p-4`}>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <div className="text-lg font-black">{division.name}</div>
+                        <span className={`rounded-full px-3 py-1 text-xs font-black ${colors.badge}`}>{teamCount} teams</span>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => runAction("updateDivisionStatus", { divisionId: division.id, isActive: !active })}
+                          disabled={Boolean(actionLoading)}
+                          className={`w-fit rounded-xl px-5 py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-50 ${
+                            active
+                              ? "bg-emerald-600 text-white hover:bg-emerald-500"
+                              : "bg-rose-700 text-white hover:bg-rose-600"
+                          }`}
+                        >
+                          {active ? "Active" : "Inactive"}
+                        </button>
                       <button
                         type="button"
-                        onClick={() => runAction("deleteDivision", { divisionId: division.id })}
-                        disabled={Boolean(actionLoading)}
+                        onClick={() => {
+                          if (confirmTypedAction(`Delete the ${division.name} division from this tournament? This cannot be undone.`, "DELETE")) {
+                            runAction("deleteDivision", { divisionId: division.id }).then((completed) => {
+                              window.alert(completed ? "Delete completed." : "Delete was not completed.");
+                            });
+                          }
+                        }}
+                        disabled={Boolean(actionLoading) || teamCount > 0}
+                        title={teamCount > 0 ? "Delete is available after all teams are removed from this division." : "Delete division"}
                         className="w-fit rounded-xl bg-rose-700 px-5 py-3 text-sm font-black text-white hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Delete Division
                       </button>
-                    )}
+                      </div>
                   </div>
                 </div>
               );
             })}
             {state.divisions.length === 0 && <div className="py-4 text-sm font-semibold text-blue-100">No tournament divisions have been synced yet.</div>}
-          </div>
+            {state.divisions.length > 0 && visibleDivisions.length === 0 && <div className="py-4 text-sm font-semibold text-blue-100">No active divisions are shown. Use Show Deactivated Divisions to view inactive divisions.</div>}
+            </div>
+          </details>
         </div>
       </div>
 
@@ -1172,8 +1278,11 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           Select which active divisions to generate. Inactive divisions are hidden from standings and not shown here.
         </p>
         <div className="mt-5 flex flex-wrap gap-4">
-          {activeDivisions.map((division) => (
-            <label key={division.id} className="flex items-center gap-2 text-sm font-semibold text-blue-100">
+          {activeDivisions.map((division) => {
+            const colors = tournamentDivisionColors(division.name);
+
+            return (
+            <label key={division.id} className={`flex items-center gap-2 rounded-full px-3 py-2 text-sm font-black ${colors.badge}`}>
               <input
                 type="checkbox"
                 checked={selectedDivisionIds.includes(division.id)}
@@ -1182,13 +1291,20 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
               />
               {division.name}
             </label>
-          ))}
+            );
+          })}
           {activeDivisions.length === 0 && <div className="text-sm font-semibold text-blue-100">No active divisions are available.</div>}
         </div>
         <div className="mt-8 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => runAction("generateRoundRobin", { divisionIds: selectedDivisionIds })}
+            onClick={() => {
+              if (confirmTypedAction(`Generate round robin matches for ${selectedDivisionNames || "the selected divisions"}? This can add new tournament matches.`, "GENERATE")) {
+                runAction("generateRoundRobin", { divisionIds: selectedDivisionIds }).then((completed) => {
+                  window.alert(completed ? "Round robin generation completed." : "Round robin generation was not completed.");
+                });
+              }
+            }}
             disabled={Boolean(actionLoading) || selectedDivisionIds.length === 0}
             className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -1196,7 +1312,13 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           </button>
           <button
             type="button"
-            onClick={() => runAction("resetMatches")}
+            onClick={() => {
+              if (confirmTypedAction("Reset all tournament matches? This removes generated matches and clears court assignments.", "RESET")) {
+                runAction("resetMatches").then((completed) => {
+                  window.alert(completed ? "Reset completed." : "Reset was not completed.");
+                });
+              }
+            }}
             disabled={Boolean(actionLoading)}
             className="rounded-xl bg-rose-700 px-4 py-3 text-sm font-black text-white hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -1204,7 +1326,13 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           </button>
           <button
             type="button"
-            onClick={() => runAction("startTournament")}
+            onClick={() => {
+              if (confirmTypedAction("Start the tournament and reset wait-time tracking for active matches?", "START")) {
+                runAction("startTournament").then((completed) => {
+                  window.alert(completed ? "Start tournament completed." : "Start tournament was not completed.");
+                });
+              }
+            }}
             disabled={Boolean(actionLoading)}
             className="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -1241,21 +1369,39 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
 
       <div className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
         <h3 className="text-xl font-black">Event Entry Code</h3>
+        <p className="mt-3 text-sm font-semibold text-blue-100">
+          This is the code used on the Enter Event Code screen to unlock the tournament Main System. To change it, enter the new code twice, type CHANGE CODE in the confirmation box, then save.
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <input
+            type="password"
+            value={eventEntryCode}
+            onChange={(event) => setEventEntryCode(event.target.value)}
+            className="w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
+            placeholder="New entry code"
+          />
+          <input
+            type="password"
+            value={eventEntryCodeConfirm}
+            onChange={(event) => setEventEntryCodeConfirm(event.target.value)}
+            className="w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
+            placeholder="Confirm new entry code"
+          />
+        </div>
         <input
-          type="password"
-          value={eventEntryCode}
-          onChange={(event) => setEventEntryCode(event.target.value)}
-          className="mt-4 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
-          placeholder="New entry code"
+          type="text"
+          value={eventEntryCodeApproval}
+          onChange={(event) => setEventEntryCodeApproval(event.target.value)}
+          className="mt-3 w-full rounded-xl border border-amber-300/50 bg-slate-950 px-4 py-3 font-black uppercase tracking-wide text-white"
+          placeholder="Type CHANGE CODE"
         />
-        <p className="mt-3 text-sm font-semibold text-blue-100">Used to unlock this tournament admin area.</p>
+        <p className="mt-3 rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-100">
+          After saving, this browser session switches to the new code automatically. If the saved code is ever lost, an administrator can set the server-only TOURNAMENT_ADMIN_OVERRIDE_CODE value and use that to get back in.
+        </p>
         <button
           type="button"
-          onClick={async () => {
-            const saved = await runAction("updateTournamentSettings", { name: tournamentName, matchFormat, standingsRules, adminCode: eventEntryCode });
-            if (saved) setEventEntryCode("");
-          }}
-          disabled={Boolean(actionLoading) || !tournamentName.trim() || !eventEntryCode.trim()}
+          onClick={saveEventEntryCode}
+          disabled={!canSaveEventEntryCode}
           className="mt-4 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Save Entry Code
@@ -1321,20 +1467,22 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           <label className="block text-sm font-black text-blue-200">
             Courts Available
             <input
-              type="number"
-              min="1"
-              max="64"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={courtCount}
-              onChange={(event) => changeCourtCount(event.target.value)}
+              onChange={(event) => changeCourtCount(onlyDigits(event.target.value))}
               className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
             />
           </label>
           <label className="block text-sm font-black text-blue-200">
             Quick Fill Starting Court Number
             <input
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={startCourtNumber}
-              onChange={(event) => setStartCourtNumber(event.target.value)}
+              onChange={(event) => setStartCourtNumber(onlyDigits(event.target.value))}
               placeholder="Example: 5"
               className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
             />
@@ -1528,7 +1676,7 @@ function LogTab({ state }) {
   );
 }
 
-function ResultModal({ match, onClose, onSave, saving }) {
+function ResultModal({ match, smsEnabled, onClose, onSave, saving }) {
   const [homeScore, setHomeScore] = useState(match.home_score ?? "");
   const [awayScore, setAwayScore] = useState(match.away_score ?? "");
   const [resultType, setResultType] = useState(match.result_type || "completed");
@@ -1562,20 +1710,22 @@ function ResultModal({ match, onClose, onSave, saving }) {
           <label className="text-sm font-black text-blue-200">
             {match.home_team?.name || "Home"}
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={homeScore}
-              onChange={(event) => setHomeScore(event.target.value)}
+              onChange={(event) => setHomeScore(onlyDigits(event.target.value))}
               className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-2xl font-black text-white"
             />
           </label>
           <label className="text-sm font-black text-blue-200">
             {match.away_team?.name || "Away"}
             <input
-              type="number"
-              min="0"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={awayScore}
-              onChange={(event) => setAwayScore(event.target.value)}
+              onChange={(event) => setAwayScore(onlyDigits(event.target.value))}
               className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-2xl font-black text-white"
             />
           </label>
@@ -1610,6 +1760,7 @@ function ResultModal({ match, onClose, onSave, saving }) {
             homeScore,
             awayScore,
             winnerTeamId,
+            smsEnabled,
             scoreText: resultType === "not_played" ? "Not played" : `${homeScore || 0}-${awayScore || 0}`,
           })}
           className="mt-5 w-full rounded-xl bg-cyan-500 px-5 py-3 font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
@@ -2103,7 +2254,6 @@ function divisionInsightGroups(matches) {
         progressPercent,
         averageRestMinutes,
         heat,
-        panelClass: insightPanelClass(group.name),
       };
     })
     .sort((a, b) =>
@@ -2228,17 +2378,22 @@ function matchSummary(match) {
   return `${match.division?.name || "Division"} Line ${match.line_number || 1} - ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`;
 }
 
-function insightPanelClass(value) {
-  const classes = [
-    "border-blue-400/40 bg-blue-950/70",
-    "border-emerald-400/40 bg-emerald-950/70",
-    "border-rose-400/40 bg-rose-950/60",
-    "border-cyan-400/40 bg-slate-900/80",
-    "border-amber-400/40 bg-stone-950/70",
-  ];
-  const text = String(value || "");
-  const index = Math.abs([...text].reduce((sum, char) => sum + char.charCodeAt(0), 0)) % classes.length;
-  return classes[index];
+function confirmTypedAction(message, requiredWord) {
+  const word = String(requiredWord || "").trim().toUpperCase();
+  if (!window.confirm(`${message}\n\nYou will be asked to type ${word} to continue.`)) {
+    window.alert("Action was not completed.");
+    return false;
+  }
+  const typed = window.prompt(`Type ${word} to continue.`);
+  if (String(typed || "").trim().toUpperCase() !== word) {
+    window.alert(`Action was not completed. You must type ${word} exactly.`);
+    return false;
+  }
+  return true;
+}
+
+function onlyDigits(value) {
+  return String(value || "").replace(/\D/g, "");
 }
 
 function formatTime(value) {
@@ -2246,6 +2401,19 @@ function formatTime(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Not assigned";
   return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+}
+
+function playTime(value, now) {
+  if (!value) return "0 min";
+  const assignedAt = new Date(value).getTime();
+  if (Number.isNaN(assignedAt)) return "0 min";
+  if (!now) return "0 min";
+  const elapsedMs = Math.max(0, Number(now) - assignedAt);
+  const totalMinutes = Math.floor(elapsedMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes} min`;
 }
 
 function groupBy(items, key) {

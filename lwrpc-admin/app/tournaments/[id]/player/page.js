@@ -74,11 +74,11 @@ export default function TournamentPlayerPage() {
 
   return (
     <Shell title={tournamentDisplayName(state.tournament)} systemSettings={systemSettings}>
-      <div className="mb-4 flex flex-wrap gap-2">
-        <Link className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white" href={`/tourney/${tournamentKey}/display`}>
+      <div className="sticky top-0 z-30 mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-slate-100/95 p-2 shadow-lg backdrop-blur sm:flex sm:flex-wrap">
+        <Link className="rounded-xl bg-blue-700 px-4 py-3 text-center text-sm font-bold text-white sm:py-2" href={`/tourney/${tournamentKey}/display`}>
           Display
         </Link>
-        <Link className="rounded-xl bg-emerald-700 px-4 py-2 text-sm font-bold text-white" href={`/tourney/${tournamentKey}/standings`}>
+        <Link className="rounded-xl bg-emerald-700 px-4 py-3 text-center text-sm font-bold text-white sm:py-2" href={`/tourney/${tournamentKey}/standings`}>
           Standings
         </Link>
       </div>
@@ -223,10 +223,10 @@ function Shell({ title, error = "", children, systemSettings = DEFAULT_SYSTEM_SE
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-5 rounded-2xl bg-slate-900 p-5 text-white shadow">
-          <div className="flex items-center gap-4">
+    <main className="full-screen-main min-h-screen bg-slate-100 p-3 sm:p-6">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="mb-5 rounded-2xl bg-slate-900 p-4 text-white shadow sm:p-5">
+          <div className="flex min-w-0 items-center gap-3 sm:gap-4">
             <Image
               src={logoUrl}
               alt={`${clubName} logo`}
@@ -235,9 +235,9 @@ function Shell({ title, error = "", children, systemSettings = DEFAULT_SYSTEM_SE
               unoptimized
               className="size-14 shrink-0 rounded-full bg-white object-contain p-1"
             />
-            <div>
+            <div className="min-w-0">
               <div className="text-xs font-black uppercase tracking-wide text-amber-200">Player View</div>
-              <h1 className="mt-1 text-3xl font-black">{title}</h1>
+              <h1 className="mt-1 break-words text-2xl font-black leading-tight sm:text-3xl">{title}</h1>
             </div>
           </div>
         </div>

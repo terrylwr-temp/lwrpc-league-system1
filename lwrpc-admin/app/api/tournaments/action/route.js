@@ -38,7 +38,7 @@ export async function POST(req) {
     const action = String(body.action || "");
 
     if (action === "autoAssign") {
-      const result = await autoAssignOpenCourts(supabase, tournament);
+      const result = await autoAssignOpenCourts(supabase, tournament, body.smsEnabled);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -48,7 +48,7 @@ export async function POST(req) {
     }
 
     if (action === "swapToCourt") {
-      const result = await swapToCourt(supabase, tournament, body.matchId, body.courtId);
+      const result = await swapToCourt(supabase, tournament, body.matchId, body.courtId, body.smsEnabled);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -156,7 +156,7 @@ async function validateTournamentCode(supabase, identifier, eventCode) {
 
   if (error) throw error;
 
-  if (String(data.admin_code || "") !== cleanCode) {
+  if (!isValidTournamentAdminCode(data, cleanCode)) {
     const codeError = new Error("Incorrect event code.");
     codeError.status = 401;
     throw codeError;
@@ -165,10 +165,11 @@ async function validateTournamentCode(supabase, identifier, eventCode) {
   return data;
 }
 
-async function autoAssignOpenCourts(supabase, tournament) {
+async function autoAssignOpenCourts(supabase, tournament, smsEnabled = false) {
   const state = await loadActionState(supabase, tournament.id);
   const now = new Date().toISOString();
   const localBusy = new Set();
+  const localDivisionLoad = {};
   const assignments = [];
 
   state.matches
@@ -176,6 +177,8 @@ async function autoAssignOpenCourts(supabase, tournament) {
     .forEach((match) => {
       localBusy.add(teamKey(match.home_team_id));
       localBusy.add(teamKey(match.away_team_id));
+      const divisionKey = teamKey(match.division_id);
+      localDivisionLoad[divisionKey] = (localDivisionLoad[divisionKey] || 0) + 1;
     });
 
   for (const court of state.courts) {
@@ -185,7 +188,7 @@ async function autoAssignOpenCourts(supabase, tournament) {
 
     if (already) continue;
 
-    const chosen = chooseNextMatch(state.matches, localBusy, tournament);
+    const chosen = chooseNextMatch(state.matches, localBusy, localDivisionLoad, tournament);
     if (!chosen) continue;
 
     assignments.push({ match: chosen, court });
@@ -194,10 +197,13 @@ async function autoAssignOpenCourts(supabase, tournament) {
     chosen.assigned_at = now;
     localBusy.add(teamKey(chosen.home_team_id));
     localBusy.add(teamKey(chosen.away_team_id));
+    const divisionKey = teamKey(chosen.division_id);
+    localDivisionLoad[divisionKey] = (localDivisionLoad[divisionKey] || 0) + 1;
   }
 
   for (const assignment of assignments) {
     await assignMatchToCourt(supabase, tournament.id, assignment.match.id, assignment.court.id, now);
+    assignment.match.court = assignment.court;
     await addLog(
       supabase,
       tournament.id,
@@ -206,7 +212,11 @@ async function autoAssignOpenCourts(supabase, tournament) {
     );
   }
 
-  return { assigned: assignments.length };
+  const sms = smsEnabled
+    ? await sendCourtReadyTextsForAssignments(supabase, tournament, state.contactsByTeam, assignments)
+    : { sent: 0, skipped: true, reason: "SMS disabled", results: [] };
+
+  return { assigned: assignments.length, sms };
 }
 
 async function returnToQueue(supabase, tournament, matchId) {
@@ -243,7 +253,7 @@ async function returnToQueue(supabase, tournament, matchId) {
   return { returned: true };
 }
 
-async function swapToCourt(supabase, tournament, matchId, courtId) {
+async function swapToCourt(supabase, tournament, matchId, courtId, smsEnabled = false) {
   if (!matchId || !courtId) throw new Error("Match and court are required.");
 
   const state = await loadActionState(supabase, tournament.id);
@@ -271,6 +281,7 @@ async function swapToCourt(supabase, tournament, matchId, courtId) {
   }
 
   await assignMatchToCourt(supabase, tournament.id, pending.id, court.id, now);
+  pending.court = court;
   await addLog(
     supabase,
     tournament.id,
@@ -278,7 +289,11 @@ async function swapToCourt(supabase, tournament, matchId, courtId) {
     `Override Court ${court.name}: ${matchLabel(pending)}${current ? ` replaced ${matchLabel(current)}` : ""}`
   );
 
-  return { swapped: true };
+  const sms = smsEnabled
+    ? await sendCourtReadyText(supabase, tournament, state.contactsByTeam, pending)
+    : { sent: 0, skipped: true, reason: "SMS disabled", results: [] };
+
+  return { swapped: true, sms };
 }
 
 async function completeMatch(supabase, tournament, body) {
@@ -324,7 +339,20 @@ async function completeMatch(supabase, tournament, body) {
     `Result: ${matchLabel(match)} - ${resultType}${homeScore !== null ? ` (${homeScore}-${awayScore})` : ""}`
   );
 
-  return { completed: true };
+  const completedMatch = {
+    ...match,
+    status: resultType === "not_played" ? "not_played" : "done",
+    result_type: resultType,
+    winner_team_id: winnerTeamId,
+    home_score: homeScore,
+    away_score: awayScore,
+    score_text: body.scoreText || null,
+  };
+  const sms = body.smsEnabled
+    ? await sendResultText(supabase, tournament, state.contactsByTeam, completedMatch)
+    : { sent: 0, skipped: true, reason: "SMS disabled", results: [] };
+
+  return { completed: true, sms };
 }
 
 async function sendCourtText(supabase, tournament, matchId) {
@@ -332,7 +360,26 @@ async function sendCourtText(supabase, tournament, matchId) {
   const match = state.matches.find((item) => String(item.id) === String(matchId));
   if (!match) throw new Error("Match not found.");
 
-  const phones = phonesForMatch(state.contactsByTeam, match);
+  const sms = await sendCourtReadyText(supabase, tournament, state.contactsByTeam, match);
+
+  return { sms };
+}
+
+async function sendCourtReadyTextsForAssignments(supabase, tournament, contactsByTeam, assignments) {
+  const results = [];
+
+  for (const assignment of assignments) {
+    results.push(await sendCourtReadyText(supabase, tournament, contactsByTeam, assignment.match));
+  }
+
+  return {
+    sent: results.reduce((sum, result) => sum + Number(result.sent || 0), 0),
+    results,
+  };
+}
+
+async function sendCourtReadyText(supabase, tournament, contactsByTeam, match) {
+  const phones = phonesForMatch(contactsByTeam, match);
   const templates = smsTemplates(tournament);
   const message = renderSmsTemplate(templates.courtReady, templateValues(tournament, match));
   const sms = await sendSmsMessages({ phones, body: message });
@@ -344,7 +391,23 @@ async function sendCourtText(supabase, tournament, matchId) {
     `Court text sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"}: ${matchLabel(match)}`
   );
 
-  return { sms };
+  return sms;
+}
+
+async function sendResultText(supabase, tournament, contactsByTeam, match) {
+  const phones = phonesForMatch(contactsByTeam, match);
+  const templates = smsTemplates(tournament);
+  const message = renderSmsTemplate(templates.result, templateValues(tournament, match));
+  const sms = await sendSmsMessages({ phones, body: message });
+
+  await addLog(
+    supabase,
+    tournament.id,
+    "sms",
+    `Result text sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"}: ${matchLabel(match)}`
+  );
+
+  return sms;
 }
 
 async function updateSmsTemplates(supabase, tournament, templates) {
@@ -501,6 +564,13 @@ async function updateTournamentSettings(supabase, tournament, body) {
   const standingsRules = standingsRulesValue(body.standingsRules || tournament.settings?.standingsRules);
   const adminCode = String(body.adminCode || "").trim();
   if (!name) throw new Error("Tournament name is required.");
+  if (adminCode) {
+    const adminCodeConfirm = String(body.adminCodeConfirm || "").trim();
+    const adminCodeConfirmation = String(body.adminCodeConfirmation || "").trim().toUpperCase();
+    if (adminCode !== adminCodeConfirm || adminCodeConfirmation !== "CHANGE CODE") {
+      throw new Error("Event entry code changes require matching entries and CHANGE CODE confirmation.");
+    }
+  }
 
   const settings = {
     ...(tournament.settings || {}),
@@ -523,6 +593,12 @@ async function updateTournamentSettings(supabase, tournament, body) {
   if (error) throw error;
   await addLog(supabase, tournament.id, "setup", adminCode ? "Tournament event entry code updated." : "Tournament settings updated.");
   return { updated: true };
+}
+
+function isValidTournamentAdminCode(tournament, eventCode) {
+  const cleanCode = String(eventCode || "").trim();
+  const overrideCode = String(process.env.TOURNAMENT_ADMIN_OVERRIDE_CODE || process.env.TOURNAMENT_EVENT_OVERRIDE_CODE || "").trim();
+  return String(tournament.admin_code || "") === cleanCode || (overrideCode && overrideCode === cleanCode);
 }
 
 async function updateTournamentTeam(supabase, tournament, body) {
@@ -788,13 +864,19 @@ async function generateRoundRobin(supabase, tournament, divisionIds) {
       }, {});
 
     for (const [line, teams] of Object.entries(teamsByLine)) {
+      const homeAwayCounts = {};
+
       for (let homeIndex = 0; homeIndex < teams.length; homeIndex += 1) {
         for (let awayIndex = homeIndex + 1; awayIndex < teams.length; awayIndex += 1) {
+          const pair = balancedHomeAwayPair(teams[homeIndex], teams[awayIndex], homeAwayCounts, order);
+          homeAwayCounts[pair.home.id].home += 1;
+          homeAwayCounts[pair.away.id].away += 1;
+
           rows.push({
             tournament_id: tournament.id,
             division_id: division.id,
-            home_team_id: teams[homeIndex].id,
-            away_team_id: teams[awayIndex].id,
+            home_team_id: pair.home.id,
+            away_team_id: pair.away.id,
             line_number: Number(line),
             status: "pending",
             result_type: "completed",
@@ -816,6 +898,26 @@ async function generateRoundRobin(supabase, tournament, divisionIds) {
 
   await addLog(supabase, tournament.id, "setup", `Generated ${rows.length} round robin match${rows.length === 1 ? "" : "es"}.`);
   return { generated: rows.length };
+}
+
+function balancedHomeAwayPair(teamA, teamB, counts, order) {
+  counts[teamA.id] ||= { home: 0, away: 0 };
+  counts[teamB.id] ||= { home: 0, away: 0 };
+
+  const aHomeScore = homeAwayImbalance(counts[teamA.id].home + 1, counts[teamA.id].away) +
+    homeAwayImbalance(counts[teamB.id].home, counts[teamB.id].away + 1);
+  const bHomeScore = homeAwayImbalance(counts[teamB.id].home + 1, counts[teamB.id].away) +
+    homeAwayImbalance(counts[teamA.id].home, counts[teamA.id].away + 1);
+
+  if (aHomeScore < bHomeScore) return { home: teamA, away: teamB };
+  if (bHomeScore < aHomeScore) return { home: teamB, away: teamA };
+  return Number(order || 0) % 2 === 0
+    ? { home: teamB, away: teamA }
+    : { home: teamA, away: teamB };
+}
+
+function homeAwayImbalance(home, away) {
+  return Math.abs(Number(home || 0) - Number(away || 0));
 }
 
 async function loadActionState(supabase, tournamentId) {
@@ -870,7 +972,7 @@ async function loadActionState(supabase, tournamentId) {
   };
 }
 
-function chooseNextMatch(matches, localBusy, tournament) {
+function chooseNextMatch(matches, localBusy, localDivisionLoad, tournament) {
   const now = Date.now();
   const minimumRest = Number(tournament.settings?.minimumRestMinutes || 0) * 60000;
   const lastPlayed = lastPlayedByTeam(matches);
@@ -910,6 +1012,7 @@ function chooseNextMatch(matches, localBusy, tournament) {
         _minRest: minRest,
         _progress: progress,
         _divisionPending: divisionPending,
+        _divisionCourtLoad: localDivisionLoad[teamKey(match.division_id)] || 0,
         _teamPending: teamPending,
         _divLineLoad: divLineUse[divisionLineKey(match)] || 0,
         _wait: now - new Date(match.queue_entered_at || match.created_at || now).getTime(),
@@ -921,11 +1024,12 @@ function chooseNextMatch(matches, localBusy, tournament) {
     : candidates;
 
   pool.sort((a, b) =>
+    a._divisionCourtLoad - b._divisionCourtLoad ||
+    a._progress - b._progress ||
+    a._divLineLoad - b._divLineLoad ||
     b._minRest - a._minRest ||
     b._divisionPending - a._divisionPending ||
     b._teamPending - a._teamPending ||
-    a._progress - b._progress ||
-    a._divLineLoad - b._divLineLoad ||
     b._wait - a._wait ||
     String(a.division?.name || "").localeCompare(String(b.division?.name || "")) ||
     Number(a.line_number || 1) - Number(b.line_number || 1) ||

@@ -87,36 +87,36 @@ export default function TournamentDisplayPage() {
 
   return (
     <PublicShell title={tournamentDisplayName(state.tournament)} adminHref={`/tourney/${tournamentKey}/admin`} systemSettings={systemSettings}>
-      <div className="mb-5 flex flex-wrap gap-2">
+      <div className="sticky top-0 z-30 mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-xl backdrop-blur sm:flex sm:flex-wrap">
         <button
           type="button"
           onClick={() => setRotating((value) => !value)}
-          className={`rounded-xl px-4 py-2 text-sm font-black ${rotating ? "bg-rose-600 text-white" : "bg-emerald-500 text-white"}`}
+          className={`rounded-xl px-3 py-3 text-sm font-black sm:px-4 sm:py-2 ${rotating ? "bg-rose-600 text-white" : "bg-emerald-500 text-white"}`}
         >
           {rotating ? "Stop Rotations" : "Start Rotations"}
         </button>
         <button
           type="button"
           onClick={() => setView("courtsDetail")}
-          className={`rounded-xl px-4 py-2 text-sm font-black ${view === "courtsDetail" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+          className={`rounded-xl px-3 py-3 text-sm font-black sm:px-4 sm:py-2 ${view === "courtsDetail" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
         >
           Court Detail
         </button>
         <button
           type="button"
           onClick={() => setView("courtsSimple")}
-          className={`rounded-xl px-4 py-2 text-sm font-black ${view === "courtsSimple" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+          className={`rounded-xl px-3 py-3 text-sm font-black sm:px-4 sm:py-2 ${view === "courtsSimple" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
         >
           Courts Only
         </button>
         <button
           type="button"
           onClick={() => setView("standings")}
-          className={`rounded-xl px-4 py-2 text-sm font-black ${view === "standings" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+          className={`rounded-xl px-3 py-3 text-sm font-black sm:px-4 sm:py-2 ${view === "standings" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
         >
           Current Standings
         </button>
-        <Link className="rounded-xl bg-amber-400 px-4 py-2 text-sm font-black text-slate-950" href={`/tourney/${tournamentKey}/player`}>
+        <Link className="rounded-xl bg-amber-400 px-3 py-3 text-center text-sm font-black text-slate-950 sm:px-4 sm:py-2" href={`/tourney/${tournamentKey}/player`}>
           Player View
         </Link>
       </div>
@@ -128,20 +128,20 @@ export default function TournamentDisplayPage() {
           onSelectTeam={(team) => setSelectedStandingTeam(team)}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {state.courts.map((court) => {
             const match = playingMatchesByCourtId[String(court.id)];
             const colors = match ? tournamentDivisionColors(match.division?.name) : null;
 
             return (
-              <div key={court.id} className={`rounded-2xl border-l-8 p-5 shadow ${match ? `${colors.border} bg-white` : "border-l-slate-400 bg-slate-50"}`}>
+              <div key={court.id} className={`rounded-2xl border-l-8 p-4 shadow sm:p-5 ${match ? `${colors.border} bg-white` : "border-l-slate-400 bg-slate-50"}`}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <div className="text-xs font-black uppercase tracking-wide text-slate-500">Court</div>
-                    <div className="text-6xl font-black leading-none text-slate-950 md:text-7xl">{courtName(court)}</div>
+                    <div className="text-5xl font-black leading-none text-slate-950 sm:text-6xl md:text-7xl">{courtName(court)}</div>
                   </div>
                   {match && (
-                    <div className="flex max-w-[55%] flex-wrap justify-end gap-2 text-xs font-bold uppercase tracking-wide">
+                    <div className="flex max-w-[58%] flex-wrap justify-end gap-1.5 text-[11px] font-bold uppercase tracking-wide sm:gap-2 sm:text-xs">
                       <span className={`rounded-full px-3 py-1 ${colors.publicBadge}`}>{match.division?.name || "Division"}</span>
                       <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">Line {match.line_number || 1}</span>
                     </div>
@@ -149,7 +149,7 @@ export default function TournamentDisplayPage() {
                 </div>
                 {match ? (
                   <>
-                    <h2 className="mt-2 text-2xl font-black text-slate-950">
+                    <h2 className="mt-2 text-xl font-black leading-tight text-slate-950 sm:text-2xl">
                       {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
                     </h2>
                     {view === "courtsDetail" && (
@@ -183,11 +183,11 @@ function PublicShell({ title, error = "", children, adminHref = "", systemSettin
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
 
   return (
-    <main className="full-screen-main min-h-screen bg-slate-950 p-2 text-white md:p-3">
+    <main className="full-screen-main min-h-screen bg-slate-950 p-2 text-white sm:p-3">
       <div className="w-full">
-        <div className="mb-5 rounded-2xl border border-white/10 bg-white/10 p-5 shadow">
+        <div className="mb-4 rounded-2xl border border-white/10 bg-white/10 p-4 shadow sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Image
                 src={logoUrl}
                 alt={`${clubName} logo`}
@@ -196,13 +196,13 @@ function PublicShell({ title, error = "", children, adminHref = "", systemSettin
                 unoptimized
                 className="size-14 shrink-0 rounded-full bg-white object-contain p-1"
               />
-              <div>
+              <div className="min-w-0">
                 <div className="text-xs font-black uppercase tracking-wide text-blue-200">Tournament Display</div>
-                <h1 className="mt-1 text-3xl font-black md:text-4xl">{title}</h1>
+                <h1 className="mt-1 break-words text-2xl font-black leading-tight sm:text-3xl md:text-4xl">{title}</h1>
               </div>
             </div>
             {adminHref && (
-              <Link href={adminHref} className="w-fit rounded-xl bg-amber-400 px-4 py-2 text-sm font-black text-slate-950 hover:bg-amber-300">
+              <Link href={adminHref} className="w-full rounded-xl bg-amber-400 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-amber-300 sm:w-fit sm:py-2">
                 Main System
               </Link>
             )}

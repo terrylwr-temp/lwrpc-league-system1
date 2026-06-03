@@ -31,7 +31,7 @@ export default function TournamentLandingPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-950 p-4 text-white">
+    <main className="full-screen-main flex min-h-screen items-center justify-center bg-slate-950 p-4 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(20,184,166,0.18),transparent_32%),radial-gradient(circle_at_top_right,rgba(37,99,235,0.2),transparent_34%)]" />
       <div className="relative w-full max-w-xl">
         <div className="rounded-2xl border border-white/10 bg-slate-900/90 p-6 text-center shadow-2xl sm:p-8">

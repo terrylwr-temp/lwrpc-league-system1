@@ -48,7 +48,7 @@ export async function POST(req) {
       );
     }
 
-    if (String(tournament.admin_code || "") !== eventCode) {
+    if (!isValidTournamentAdminCode(tournament, eventCode)) {
       return NextResponse.json(
         { success: false, error: "Incorrect event code." },
         { status: 401 }
@@ -208,6 +208,12 @@ function sanitizeTournament(tournament) {
   const safeTournament = { ...tournament };
   delete safeTournament.admin_code;
   return safeTournament;
+}
+
+function isValidTournamentAdminCode(tournament, eventCode) {
+  const cleanCode = String(eventCode || "").trim();
+  const overrideCode = String(process.env.TOURNAMENT_ADMIN_OVERRIDE_CODE || process.env.TOURNAMENT_EVENT_OVERRIDE_CODE || "").trim();
+  return String(tournament.admin_code || "") === cleanCode || (overrideCode && overrideCode === cleanCode);
 }
 
 function isUuid(value) {

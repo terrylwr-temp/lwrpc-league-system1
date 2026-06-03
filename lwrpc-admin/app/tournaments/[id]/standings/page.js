@@ -31,11 +31,11 @@ export default function TournamentStandingsPage() {
 
   return (
     <Shell title={`${tournamentDisplayName(state.tournament)} Standings`}>
-      <div className="mb-4 flex flex-wrap gap-2">
-        <Link className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white" href={`/tourney/${tournamentKey}/display`}>
+      <div className="sticky top-0 z-30 mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-slate-200 bg-slate-100/95 p-2 shadow-lg backdrop-blur sm:flex sm:flex-wrap">
+        <Link className="rounded-xl bg-blue-700 px-4 py-3 text-center text-sm font-bold text-white sm:py-2" href={`/tourney/${tournamentKey}/display`}>
           Display
         </Link>
-        <Link className="rounded-xl bg-amber-400 px-4 py-2 text-sm font-bold text-slate-950" href={`/tourney/${tournamentKey}/player`}>
+        <Link className="rounded-xl bg-amber-400 px-4 py-3 text-center text-sm font-bold text-slate-950 sm:py-2" href={`/tourney/${tournamentKey}/player`}>
           Player View
         </Link>
       </div>
@@ -85,11 +85,11 @@ export default function TournamentStandingsPage() {
 
 function Shell({ title, error = "", children }) {
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
-      <div className="mx-auto max-w-7xl">
-        <div className="mb-5 rounded-2xl bg-slate-900 p-5 text-white shadow">
+    <main className="full-screen-main min-h-screen bg-slate-100 p-3 sm:p-6">
+      <div className="mx-auto w-full max-w-[1600px]">
+        <div className="mb-5 rounded-2xl bg-slate-900 p-4 text-white shadow sm:p-5">
           <div className="text-xs font-black uppercase tracking-wide text-blue-200">Current Standings</div>
-          <h1 className="mt-1 text-3xl font-black">{title}</h1>
+          <h1 className="mt-1 break-words text-2xl font-black leading-tight sm:text-3xl">{title}</h1>
         </div>
         {error ? <div className="rounded-xl bg-red-50 p-4 font-bold text-red-800">{error}</div> : children}
       </div>
