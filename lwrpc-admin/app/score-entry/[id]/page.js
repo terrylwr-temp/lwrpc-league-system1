@@ -81,6 +81,8 @@ export default function MobileScoreEntryPage() {
           line_type,
           posted_to_dupr,
           games_per_line,
+          points_to_win,
+          win_by,
           team_win_points,
           standings_points_mode
         )
@@ -176,9 +178,9 @@ export default function MobileScoreEntryPage() {
   }
 
   function getLineSummary(line) {
-    const lineGames = games.filter(
+    const lineGames = requiredLineGames(games.filter(
       game => game.match_line_id === line.id
-    );
+    ));
 
     let homeGameWins = 0;
     let awayGameWins = 0;
@@ -233,9 +235,120 @@ export default function MobileScoreEntryPage() {
     };
   }
 
+  function isForfeitStatus(status) {
+    return status === "forfeit_home" || status === "forfeit_away";
+  }
+
+  function isRetiredStatus(status) {
+    return status === "retired_home" || status === "retired_away";
+  }
+
+  function gameWinnerSide(game) {
+    if (game.game_status === "forfeit_home" || game.game_status === "retired_home") return "home";
+    if (game.game_status === "forfeit_away" || game.game_status === "retired_away") return "away";
+    if (game.home_score !== null && game.home_score !== undefined && game.away_score !== null && game.away_score !== undefined) {
+      if (Number(game.home_score) > Number(game.away_score)) return "home";
+      if (Number(game.away_score) > Number(game.home_score)) return "away";
+    }
+    return "";
+  }
+
+  function lineGamesNeededToWin(lineGames) {
+    const gameCount = lineGames.length;
+    return gameCount > 1 && gameCount % 2 === 1 ? Math.floor(gameCount / 2) + 1 : gameCount;
+  }
+
+  function requiredLineGameIds(lineGames) {
+    const sortedGames = [...lineGames].sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
+    const neededToWin = lineGamesNeededToWin(sortedGames);
+    const requiredIds = new Set();
+    let homeWins = 0;
+    let awayWins = 0;
+
+    sortedGames.forEach((game) => {
+      if (neededToWin > 0 && (homeWins >= neededToWin || awayWins >= neededToWin)) return;
+      requiredIds.add(String(game.id));
+
+      const winner = gameWinnerSide(game);
+      if (winner === "home") homeWins += 1;
+      if (winner === "away") awayWins += 1;
+    });
+
+    return requiredIds;
+  }
+
+  function requiredLineGames(lineGames) {
+    const requiredIds = requiredLineGameIds(lineGames);
+    return lineGames.filter((game) => requiredIds.has(String(game.id)));
+  }
+
+  function lineScoreValidationIssues(line) {
+    const pointsToWin = Number(line.division_lines?.points_to_win || 0);
+    const winBy = Number(line.division_lines?.win_by || 0);
+    const lineGames = games.filter((game) => game.match_line_id === line.id);
+    const lineLabel = line.division_lines?.line_name || `Line ${line.line_number}`;
+    const issues = [];
+    const requiredGameIds = requiredLineGameIds(lineGames);
+
+    lineGames.forEach((game) => {
+      if (!requiredGameIds.has(String(game.id))) return;
+
+      const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
+      const gameLabel = `${lineLabel} Game ${game.game_number || ""}`.trim();
+      const addIssue = (message) => issues.push(`${gameLabel}: ${message}`);
+
+      if (isForfeitStatus(status)) return;
+
+      if (game.home_score === null || game.home_score === undefined || game.away_score === null || game.away_score === undefined) {
+        addIssue("both scores are required unless the result is a forfeit.");
+        return;
+      }
+
+      if (isRetiredStatus(status) || pointsToWin <= 0) return;
+
+      const homeScore = Number(game.home_score || 0);
+      const awayScore = Number(game.away_score || 0);
+      const highScore = Math.max(homeScore, awayScore);
+      const lowScore = Math.min(homeScore, awayScore);
+
+      if (winBy === 1) {
+        if (highScore > pointsToWin) {
+          addIssue(`Win By 1 games cannot have a score higher than ${pointsToWin}.`);
+        }
+
+        if (homeScore !== pointsToWin && awayScore !== pointsToWin) {
+          addIssue(`Win By 1 games must have one team score exactly ${pointsToWin}.`);
+        }
+
+        return;
+      }
+
+      if (highScore < pointsToWin) {
+        addIssue(`at least one score must be ${pointsToWin} or higher for a completed game.`);
+      }
+
+      if (winBy > 0 && highScore - lowScore < winBy) {
+        addIssue(`winning margin must be at least ${winBy}.`);
+      }
+    });
+
+    return issues;
+  }
+
+  function scoreValidationIssues() {
+    return lines.flatMap((line) => lineScoreValidationIssues(line));
+  }
+
 
   async function submitScores() {
     await flushPendingGameUpdates();
+
+    const validationIssues = scoreValidationIssues();
+
+    if (validationIssues.length > 0) {
+      alert(`Fix these scores before submitting:\n\n${validationIssues.join("\n")}`);
+      return;
+    }
 
     for (const line of lines) {
       const summary = getLineSummary(line);
@@ -467,6 +580,7 @@ export default function MobileScoreEntryPage() {
             const lineGames = games.filter(
               game => game.match_line_id === line.id
             );
+            const requiredGameIdsForLine = requiredLineGameIds(lineGames);
 
             const summary = getLineSummary(line);
 
@@ -498,13 +612,21 @@ export default function MobileScoreEntryPage() {
                 )}
 
                 <div className="mt-4 space-y-3">
-                  {lineGames.map(game => (
+                  {lineGames.map(game => {
+                    const gameNeeded = requiredGameIdsForLine.has(String(game.id));
+
+                    return (
                     <div
                       key={game.id}
-                      className="overflow-hidden rounded-2xl border-2 border-blue-200 bg-blue-50/70 shadow-md ring-1 ring-white"
+                      className={`overflow-hidden rounded-2xl border-2 shadow-md ring-1 ring-white ${
+                        gameNeeded ? "border-blue-200 bg-blue-50/70" : "border-slate-300 bg-slate-100"
+                      }`}
                     >
-                      <div className="border-b border-blue-200 bg-white/80 px-4 py-3 text-sm font-black uppercase tracking-wide text-blue-950">
-                        Game {game.game_number} Scores
+                      <div className={`flex items-center justify-between gap-2 border-b px-4 py-3 text-sm font-black uppercase tracking-wide ${
+                        gameNeeded ? "border-blue-200 bg-white/80 text-blue-950" : "border-slate-300 bg-slate-200 text-slate-700"
+                      }`}>
+                        <span>Game {game.game_number} Scores</span>
+                        {!gameNeeded && <span className="rounded-full bg-white px-3 py-1 text-xs text-slate-700">Not needed</span>}
                       </div>
 
                       <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
@@ -518,6 +640,7 @@ export default function MobileScoreEntryPage() {
                             inputMode="numeric"
                             pattern="[0-9]*"
                             value={game.home_score ?? ""}
+                            disabled={!gameNeeded}
                             onChange={e =>
                               updateGame(
                                 game.id,
@@ -525,7 +648,7 @@ export default function MobileScoreEntryPage() {
                                 e.target.value
                               )
                             }
-                            className="w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                            className="w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
                           />
                         </div>
 
@@ -539,6 +662,7 @@ export default function MobileScoreEntryPage() {
                             inputMode="numeric"
                             pattern="[0-9]*"
                             value={game.away_score ?? ""}
+                            disabled={!gameNeeded}
                             onChange={e =>
                               updateGame(
                                 game.id,
@@ -546,12 +670,13 @@ export default function MobileScoreEntryPage() {
                                 e.target.value
                               )
                             }
-                            className="w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                            className="w-full rounded-2xl border-2 border-slate-300 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
                           />
                         </div>
                       </div>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="mt-4 rounded-xl bg-slate-50 p-3 text-sm text-slate-700">

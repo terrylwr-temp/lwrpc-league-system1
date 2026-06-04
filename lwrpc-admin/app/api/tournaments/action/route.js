@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendSmsMessages } from "../../../lib/notifications";
+import { formatPhoneNumberForStorage } from "../../../lib/phone";
 
 export const runtime = "nodejs";
 
@@ -68,12 +69,17 @@ export async function POST(req) {
     }
 
     if (action === "sendBroadcastText") {
-      const result = await sendBroadcastText(supabase, tournament);
+      const result = await sendBroadcastText(supabase, tournament, body);
       return NextResponse.json({ success: true, ...result });
     }
 
     if (action === "sendTestText") {
       const result = await sendTestText(supabase, tournament, body.phone);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "updatePlayerPhone") {
+      const result = await updatePlayerPhone(supabase, tournament, body);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -102,6 +108,11 @@ export async function POST(req) {
       return NextResponse.json({ success: true, ...result });
     }
 
+    if (action === "createTournamentTeam") {
+      const result = await createTournamentTeam(supabase, tournament, body);
+      return NextResponse.json({ success: true, ...result });
+    }
+
     if (action === "deleteTournamentTeam") {
       const result = await deleteTournamentTeam(supabase, tournament, body.teamId);
       return NextResponse.json({ success: true, ...result });
@@ -114,6 +125,11 @@ export async function POST(req) {
 
     if (action === "resetMatches") {
       const result = await resetTournamentMatches(supabase, tournament);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "clearLog") {
+      const result = await clearTournamentLog(supabase, tournament);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -307,10 +323,20 @@ async function completeMatch(supabase, tournament, body) {
   const resultType = body.resultType || "completed";
   const homeScore = numberOrNull(body.homeScore);
   const awayScore = numberOrNull(body.awayScore);
+  const gameScores = Array.isArray(body.gameScores) ? body.gameScores : [];
+  const matchScoreSummary = resultType === "completed"
+    ? validateTournamentMatchScore(gameScores, tournament.settings)
+    : null;
+  const finalHomeScore = matchScoreSummary ? matchScoreSummary.homePoints : homeScore;
+  const finalAwayScore = matchScoreSummary ? matchScoreSummary.awayPoints : awayScore;
   const winnerTeamId =
     resultType === "not_played"
       ? null
-      : body.winnerTeamId || (Number(homeScore || 0) > Number(awayScore || 0) ? match.home_team_id : match.away_team_id);
+      : matchScoreSummary?.winner === "home"
+        ? match.home_team_id
+        : matchScoreSummary?.winner === "away"
+          ? match.away_team_id
+          : body.winnerTeamId || (Number(finalHomeScore || 0) > Number(finalAwayScore || 0) ? match.home_team_id : match.away_team_id);
   const now = new Date().toISOString();
 
   const { error } = await supabase
@@ -319,10 +345,10 @@ async function completeMatch(supabase, tournament, body) {
       status: resultType === "not_played" ? "not_played" : "done",
       result_type: resultType,
       winner_team_id: winnerTeamId,
-      home_score: homeScore,
-      away_score: awayScore,
+      home_score: finalHomeScore,
+      away_score: finalAwayScore,
       score_text: body.scoreText || null,
-      game_scores: Array.isArray(body.gameScores) ? body.gameScores : null,
+      game_scores: matchScoreSummary ? matchScoreSummary.gameScores : gameScores.length > 0 ? gameScores : null,
       court_id: null,
       completed_at: now,
       updated_at: now,
@@ -336,7 +362,7 @@ async function completeMatch(supabase, tournament, body) {
     supabase,
     tournament.id,
     "match",
-    `Result: ${matchLabel(match)} - ${resultType}${homeScore !== null ? ` (${homeScore}-${awayScore})` : ""}`
+    `Result: ${matchLabel(match)} - ${resultType}${finalHomeScore !== null ? ` (${finalHomeScore}-${finalAwayScore})` : ""}`
   );
 
   const completedMatch = {
@@ -344,9 +370,10 @@ async function completeMatch(supabase, tournament, body) {
     status: resultType === "not_played" ? "not_played" : "done",
     result_type: resultType,
     winner_team_id: winnerTeamId,
-    home_score: homeScore,
-    away_score: awayScore,
+    home_score: finalHomeScore,
+    away_score: finalAwayScore,
     score_text: body.scoreText || null,
+    game_scores: matchScoreSummary ? matchScoreSummary.gameScores : gameScores.length > 0 ? gameScores : null,
   };
   const sms = body.smsEnabled
     ? await sendResultText(supabase, tournament, state.contactsByTeam, completedMatch)
@@ -428,11 +455,26 @@ async function updateSmsTemplates(supabase, tournament, templates) {
   return { updated: true };
 }
 
-async function sendBroadcastText(supabase, tournament) {
+async function sendBroadcastText(supabase, tournament, body = {}) {
   const state = await loadActionState(supabase, tournament.id);
-  const phones = uniquePhones(Object.values(state.contactsByTeam).flat());
+  const divisionIds = Array.isArray(body.divisionIds) ? body.divisionIds.map((divisionId) => String(divisionId)) : [];
+  const selectedDivisionSet = new Set(divisionIds);
+  const teamsById = (state.teams || []).reduce((map, team) => {
+    map[String(team.id)] = team;
+    return map;
+  }, {});
+  const selectedContacts = Object.entries(state.contactsByTeam)
+    .filter(([teamId]) => {
+      if (selectedDivisionSet.size === 0) return false;
+      return selectedDivisionSet.has(String(teamsById[String(teamId)]?.division_id || ""));
+    })
+    .flatMap(([, contacts]) => contacts);
+  const phones = uniquePhones(selectedContacts);
   const templates = smsTemplates(tournament);
-  const message = renderSmsTemplate(templates.broadcast, {
+  const template = String(body.message || templates.broadcast || "").trim();
+  if (!template) throw new Error("Enter the broadcast message.");
+
+  const message = renderSmsTemplate(template, {
     tournament: tournament.name,
     status: tournamentStatusText(state.matches),
   });
@@ -442,7 +484,8 @@ async function sendBroadcastText(supabase, tournament) {
     supabase,
     tournament.id,
     "sms",
-    `Tournament broadcast sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"}.`
+    `Tournament broadcast sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"}.`,
+    { divisionIds, requestedRecipients: phones.length }
   );
 
   return { sms };
@@ -461,6 +504,82 @@ async function sendTestText(supabase, tournament, phone) {
 
   await addLog(supabase, tournament.id, "sms", `Test SMS sent to ${cleanPhone}.`);
   return { sms };
+}
+
+async function updatePlayerPhone(supabase, tournament, body) {
+  const teamId = String(body.teamId || "").trim();
+  const slot = Number(body.slot || 0);
+  const cleanPhone = formatPhoneNumberForStorage(body.phone);
+
+  if (!teamId || ![1, 2].includes(slot)) throw new Error("Team and player are required.");
+  if (!cleanPhone) throw new Error("Enter the phone number.");
+
+  const { data: team, error: teamError } = await supabase
+    .from("tournament_teams")
+    .select("id, name, player_1_name, player_2_name")
+    .eq("id", teamId)
+    .eq("tournament_id", tournament.id)
+    .single();
+  if (teamError) throw teamError;
+
+  const { data: contact, error: contactError } = await supabase
+    .from("tournament_team_contacts")
+    .select("id, member_id, display_name, phone")
+    .eq("tournament_team_id", teamId)
+    .eq("player_slot", slot)
+    .maybeSingle();
+  if (contactError) throw contactError;
+
+  const fallbackPlayerName = slot === 1 ? team.player_1_name : team.player_2_name;
+  const resolvedMember = await resolveTournamentPlayerMember(supabase, {
+    memberId: contact?.member_id || body.memberId,
+    playerName: contact?.display_name || fallbackPlayerName,
+  });
+  const memberId = resolvedMember?.id || null;
+  const oldPhone = String(contact?.phone || resolvedMember?.phone || "").trim();
+  const playerName = contact?.display_name || fallbackPlayerName || memberDisplayName(resolvedMember);
+  const now = new Date().toISOString();
+
+  if (memberId) {
+    const { error: memberUpdateError } = await supabase
+      .from("members")
+      .update({ phone: cleanPhone, updated_at: now })
+      .eq("id", memberId);
+    if (memberUpdateError) throw memberUpdateError;
+  }
+
+  const { error: contactUpdateError } = await supabase
+    .from("tournament_team_contacts")
+    .upsert({
+      tournament_team_id: teamId,
+      player_slot: slot,
+      member_id: memberId,
+      display_name: playerName || null,
+      phone: cleanPhone,
+      updated_at: now,
+    }, { onConflict: "tournament_team_id,player_slot" });
+  if (contactUpdateError) throw contactUpdateError;
+
+  const metadata = {
+    playerName,
+    memberId,
+    teamId,
+    teamName: team.name || "",
+    playerSlot: slot,
+    oldPhone,
+    newPhone: cleanPhone,
+    coreMemberUpdated: Boolean(memberId),
+  };
+
+  await addLog(
+    supabase,
+    tournament.id,
+    "phone_change",
+    `${playerName} phone changed from ${oldPhone || "blank"} to ${cleanPhone}.`,
+    metadata
+  );
+
+  return { updated: true, oldPhone, newPhone: cleanPhone, playerName, memberId, coreMemberUpdated: Boolean(memberId), logMetadata: metadata };
 }
 
 async function syncLeagueDivisions(supabase, tournament) {
@@ -560,7 +679,13 @@ async function deleteTournamentDivision(supabase, tournament, divisionId) {
 
 async function updateTournamentSettings(supabase, tournament, body) {
   const name = String(body.name || tournament.name || "").trim();
-  const matchFormat = String(body.matchFormat || tournament.settings?.matchFormat || "Single Game").trim();
+  const scoreSettings = tournamentScoreSettings({
+    ...(tournament.settings || {}),
+    numberOfGames: body.numberOfGames,
+    gamesPlayedTo: body.gamesPlayedTo,
+    winBy: body.winBy,
+    rallyScoring: body.rallyScoring,
+  });
   const standingsRules = standingsRulesValue(body.standingsRules || tournament.settings?.standingsRules);
   const adminCode = String(body.adminCode || "").trim();
   if (!name) throw new Error("Tournament name is required.");
@@ -574,7 +699,11 @@ async function updateTournamentSettings(supabase, tournament, body) {
 
   const settings = {
     ...(tournament.settings || {}),
-    matchFormat,
+    numberOfGames: scoreSettings.numberOfGames,
+    matchFormat: scoreSettings.numberOfGames === 1 ? "Single Game" : `Best ${scoreSettings.gamesNeededToWin} of ${scoreSettings.numberOfGames}`,
+    gamesPlayedTo: scoreSettings.gamesPlayedTo,
+    winBy: scoreSettings.winBy,
+    rallyScoring: scoreSettings.rallyScoring,
     standingsRules,
   };
   const now = new Date().toISOString();
@@ -660,10 +789,26 @@ async function updateTournamentTeam(supabase, tournament, body) {
   if (error) throw error;
 
   if (hasTeamFields) {
+    await updateMemberPhoneFromTournamentEdit(supabase, tournament, {
+      teamId,
+      teamName: payload.name || existing.name,
+      slot: 1,
+      memberId: body.player1MemberId,
+      playerName: body.player1Name,
+      newPhone: body.player1Phone,
+    });
     await upsertTournamentContact(supabase, teamId, 1, {
       memberId: body.player1MemberId,
       displayName: body.player1Name,
       phone: body.player1Phone,
+    });
+    await updateMemberPhoneFromTournamentEdit(supabase, tournament, {
+      teamId,
+      teamName: payload.name || existing.name,
+      slot: 2,
+      memberId: body.player2MemberId,
+      playerName: body.player2Name,
+      newPhone: body.player2Phone,
     });
     await upsertTournamentContact(supabase, teamId, 2, {
       memberId: body.player2MemberId,
@@ -674,6 +819,189 @@ async function updateTournamentTeam(supabase, tournament, body) {
 
   await addLog(supabase, tournament.id, "team", `${payload.name || existing.name} updated.`);
   return { updated: true };
+}
+
+async function createTournamentTeam(supabase, tournament, body) {
+  const sourceTeamId = String(body.sourceTeamId || "").trim();
+  if (!sourceTeamId) throw new Error("Select the Main System Team.");
+
+  const { data: sourceTeam, error: sourceTeamError } = await supabase
+    .from("teams")
+    .select(`
+      id,
+      name,
+      divisions (
+        id,
+        name,
+        team_dupr_max
+      )
+    `)
+    .eq("id", sourceTeamId)
+    .single();
+  if (sourceTeamError) throw sourceTeamError;
+
+  const sourceDivisionName = sourceTeam.divisions?.name || "";
+  const { data: divisions, error: divisionsError } = await supabase
+    .from("tournament_divisions")
+    .select("id, name, is_active")
+    .eq("tournament_id", tournament.id);
+  if (divisionsError) throw divisionsError;
+
+  const division = (divisions || []).find((item) =>
+    item.is_active !== false && normalizeName(item.name) === normalizeName(sourceDivisionName)
+  );
+  if (!division) throw new Error(`No active tournament division matches ${sourceDivisionName || "that team division"}.`);
+
+  const name = String(body.name || sourceTeam.name || "").trim();
+  const lineNumber = Number(body.lineNumber);
+  const regularSeasonStanding = Number(body.regularSeasonStanding);
+  const player1MemberId = String(body.player1MemberId || "").trim();
+  const player2MemberId = String(body.player2MemberId || "").trim();
+  if (!name) throw new Error("Team name is required.");
+  if (!String(body.lineNumber || "").trim() || !Number.isFinite(lineNumber) || lineNumber < 1) throw new Error("Line number is required.");
+  if (!String(body.regularSeasonStanding || "").trim() || !Number.isFinite(regularSeasonStanding) || regularSeasonStanding < 1) {
+    throw new Error("Regular Season Standing is required.");
+  }
+  if (!player1MemberId || !player2MemberId) throw new Error("Both players must be selected.");
+  if (player1MemberId === player2MemberId) throw new Error("The same player cannot be entered twice on the same team.");
+
+  const { data: sameLineTeams, error: duplicateError } = await supabase
+    .from("tournament_teams")
+    .select("id, name")
+    .eq("tournament_id", tournament.id)
+    .eq("line_number", lineNumber);
+  if (duplicateError) throw duplicateError;
+
+  const duplicate = (sameLineTeams || []).some((team) =>
+    normalizeName(team.name) === normalizeName(name) ||
+    normalizeName(team.name) === normalizeName(sourceTeam.name)
+  );
+  if (duplicate) {
+    const error = new Error("That Main System Team already has a tournament team with this Line #.");
+    error.status = 400;
+    throw error;
+  }
+
+  const maxRating = Number(sourceTeam.divisions?.team_dupr_max);
+  const player1Rating = Number(body.player1Rating || 0);
+  const player2Rating = Number(body.player2Rating || 0);
+  const teamTotalRating = [player1Rating, player2Rating].reduce((sum, rating) => Number.isFinite(rating) ? sum + rating : sum, 0);
+  if (Number.isFinite(maxRating) && maxRating > 0 && teamTotalRating > maxRating) {
+    throw new Error("The players' total rating must be at or below the Division Team Max.");
+  }
+
+  const { data: tournamentTeams, error: teamsError } = await supabase
+    .from("tournament_teams")
+    .select("id, name")
+    .eq("tournament_id", tournament.id);
+  if (teamsError) throw teamsError;
+
+  const tournamentTeamIds = (tournamentTeams || []).map((team) => team.id);
+  if (tournamentTeamIds.length > 0) {
+    const { data: usedContacts, error: usedContactsError } = await supabase
+      .from("tournament_team_contacts")
+      .select("member_id, display_name, tournament_team_id")
+      .in("tournament_team_id", tournamentTeamIds)
+      .in("member_id", [player1MemberId, player2MemberId]);
+    if (usedContactsError) throw usedContactsError;
+
+    const usedContact = (usedContacts || []).find((contact) => contact.member_id);
+    if (usedContact) {
+      const usedTeam = (tournamentTeams || []).find((team) => String(team.id) === String(usedContact.tournament_team_id));
+      throw new Error(`${usedContact.display_name || "A selected player"} is already on ${usedTeam?.name || "another tournament team"}.`);
+    }
+  }
+
+  const now = new Date().toISOString();
+  const { data: createdTeam, error: insertError } = await supabase
+    .from("tournament_teams")
+    .insert({
+      tournament_id: tournament.id,
+      division_id: division.id,
+      name,
+      line_number: lineNumber,
+      seed: String(regularSeasonStanding),
+      player_1_name: String(body.player1Name || "").trim() || null,
+      player_2_name: String(body.player2Name || "").trim() || null,
+      player_1_checked_in: false,
+      player_2_checked_in: false,
+      checked_in: false,
+      created_at: now,
+      updated_at: now,
+    })
+    .select("*")
+    .single();
+  if (insertError) throw insertError;
+
+  await upsertTournamentContact(supabase, createdTeam.id, 1, {
+    memberId: player1MemberId,
+    displayName: body.player1Name,
+    phone: body.player1Phone,
+  });
+  await upsertTournamentContact(supabase, createdTeam.id, 2, {
+    memberId: player2MemberId,
+    displayName: body.player2Name,
+    phone: body.player2Phone,
+  });
+
+  await addLog(supabase, tournament.id, "team", `${name} added to ${division.name}.`);
+  return { created: true, teamId: createdTeam.id };
+}
+
+async function updateMemberPhoneFromTournamentEdit(supabase, tournament, details) {
+  const memberId = details.memberId || null;
+  const cleanPhone = formatPhoneNumberForStorage(details.newPhone);
+  if (!memberId || !cleanPhone) return { logged: false };
+
+  const { data: member, error: memberError } = await supabase
+    .from("members")
+    .select("id, full_name, first_name, last_name, email, phone")
+    .eq("id", memberId)
+    .single();
+  if (memberError) throw memberError;
+
+  const oldPhone = String(member.phone || "").trim();
+  if (oldPhone === cleanPhone) return { logged: false };
+
+  const playerName = String(details.playerName || "").trim() || memberDisplayName(member);
+  const now = new Date().toISOString();
+  const { error: updateError } = await supabase
+    .from("members")
+    .update({ phone: cleanPhone, updated_at: now })
+    .eq("id", memberId);
+  if (updateError) throw updateError;
+
+  await addLog(
+    supabase,
+    tournament.id,
+    "phone_change",
+    `${playerName} phone changed from ${oldPhone || "blank"} to ${cleanPhone}.`,
+    {
+      playerName,
+      memberId,
+      teamId: details.teamId,
+      teamName: details.teamName || "",
+      playerSlot: details.slot,
+      oldPhone,
+      newPhone: cleanPhone,
+    }
+  );
+
+  return { logged: true };
+}
+
+async function resolveTournamentPlayerMember(supabase, details) {
+  const memberId = details.memberId || null;
+  if (memberId) {
+    const { data, error } = await supabase
+      .from("members")
+      .select("id, full_name, first_name, last_name, email, phone")
+      .eq("id", memberId)
+      .maybeSingle();
+    if (error) throw error;
+    if (data) return data;
+  }
+  return null;
 }
 
 async function deleteTournamentTeam(supabase, tournament, teamId) {
@@ -700,7 +1028,7 @@ async function deleteTournamentTeam(supabase, tournament, teamId) {
 
 async function upsertTournamentContact(supabase, teamId, slot, contact) {
   const displayName = String(contact.displayName || "").trim();
-  const phone = String(contact.phone || "").trim();
+  const phone = formatPhoneNumberForStorage(contact.phone);
   const memberId = contact.memberId || null;
   const now = new Date().toISOString();
 
@@ -789,8 +1117,17 @@ async function resetTournamentMatches(supabase, tournament) {
     .eq("tournament_id", tournament.id);
   if (courtError) throw courtError;
 
-  await addLog(supabase, tournament.id, "setup", "Tournament matches reset.");
+  await clearTournamentLog(supabase, tournament);
   return { reset: true };
+}
+
+async function clearTournamentLog(supabase, tournament) {
+  const { error } = await supabase
+    .from("tournament_activity_log")
+    .delete()
+    .eq("tournament_id", tournament.id);
+  if (error) throw error;
+  return { cleared: true };
 }
 
 async function startTournament(supabase, tournament) {
@@ -942,7 +1279,7 @@ async function loadActionState(supabase, tournamentId) {
       .order("created_order", { ascending: true }),
     supabase
       .from("tournament_teams")
-      .select("id")
+      .select("id, division_id")
       .eq("tournament_id", tournamentId),
     Promise.resolve({ data: [], error: null }),
   ]);
@@ -968,6 +1305,7 @@ async function loadActionState(supabase, tournamentId) {
   return {
     courts: courts.data || [],
     matches: matches.data || [],
+    teams: teams.data || [],
     contactsByTeam,
   };
 }
@@ -1189,6 +1527,10 @@ function matchLabel(match) {
   return `${match.division?.name || "Division"} Line ${match.line_number || 1} - ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`;
 }
 
+function memberDisplayName(member = {}) {
+  return member.full_name || [member.first_name, member.last_name].filter(Boolean).join(" ") || member.email || "Member";
+}
+
 function divisionLineKey(match) {
   return `${match.division_id || ""}|${Number(match.line_number || 1)}`;
 }
@@ -1201,6 +1543,90 @@ function numberOrNull(value) {
   if (value === null || value === undefined || value === "") return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
+}
+
+function positiveIntegerOrDefault(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? Math.floor(number) : fallback;
+}
+
+function tournamentScoreSettings(settings = {}) {
+  const numberOfGames = positiveIntegerOrDefault(settings.numberOfGames, legacyNumberOfGames(settings.matchFormat));
+  return {
+    numberOfGames,
+    gamesNeededToWin: Math.floor(numberOfGames / 2) + 1,
+    gamesPlayedTo: positiveIntegerOrDefault(settings.gamesPlayedTo, 11),
+    winBy: positiveIntegerOrDefault(settings.winBy, 2),
+    rallyScoring: settings.rallyScoring === true,
+  };
+}
+
+function legacyNumberOfGames(matchFormat) {
+  const value = String(matchFormat || "");
+  if (/best\s*2\s*(of|out of)\s*3/i.test(value)) return 3;
+  const numberMatch = value.match(/\d+/);
+  return numberMatch ? Number(numberMatch[0]) : 1;
+}
+
+function validateTournamentScore(homeScore, awayScore, settings = {}) {
+  if (homeScore === null || awayScore === null) throw new Error("Enter both team scores.");
+
+  const home = Number(homeScore);
+  const away = Number(awayScore);
+  if (!Number.isFinite(home) || !Number.isFinite(away)) throw new Error("Enter valid numeric scores.");
+  if (home < 0 || away < 0) throw new Error("Scores cannot be negative.");
+  if (home === away) throw new Error("Completed matches cannot end in a tie.");
+
+  const scoreSettings = tournamentScoreSettings(settings);
+  const winner = Math.max(home, away);
+  const loser = Math.min(home, away);
+  if (winner < scoreSettings.gamesPlayedTo) {
+    throw new Error(`Winning score must be at least ${scoreSettings.gamesPlayedTo}.`);
+  }
+  if (scoreSettings.winBy <= 1 && winner > scoreSettings.gamesPlayedTo) {
+    throw new Error(`Winning score cannot be more than ${scoreSettings.gamesPlayedTo} when Win By is 1.`);
+  }
+  if (winner - loser < scoreSettings.winBy) {
+    throw new Error(`Winning margin must be at least ${scoreSettings.winBy}.`);
+  }
+}
+
+function validateTournamentMatchScore(gameScores, settings = {}) {
+  const scoreSettings = tournamentScoreSettings(settings);
+  const sourceGames = Array.isArray(gameScores) ? gameScores : [];
+  let homeWins = 0;
+  let awayWins = 0;
+  let homePoints = 0;
+  let awayPoints = 0;
+  const completedGames = [];
+
+  for (let index = 0; index < scoreSettings.numberOfGames; index += 1) {
+    if (homeWins >= scoreSettings.gamesNeededToWin || awayWins >= scoreSettings.gamesNeededToWin) break;
+
+    const game = sourceGames[index] || {};
+    const homeScore = numberOrNull(game.home);
+    const awayScore = numberOrNull(game.away);
+    validateTournamentScore(homeScore, awayScore, scoreSettings);
+
+    homePoints += homeScore;
+    awayPoints += awayScore;
+    if (homeScore > awayScore) homeWins += 1;
+    if (awayScore > homeScore) awayWins += 1;
+    completedGames.push({ home: homeScore, away: awayScore });
+  }
+
+  if (homeWins < scoreSettings.gamesNeededToWin && awayWins < scoreSettings.gamesNeededToWin) {
+    throw new Error(`Enter enough game scores for one team to win ${scoreSettings.gamesNeededToWin} game${scoreSettings.gamesNeededToWin === 1 ? "" : "s"}.`);
+  }
+
+  return {
+    homeWins,
+    awayWins,
+    homePoints,
+    awayPoints,
+    winner: homeWins > awayWins ? "home" : "away",
+    gameScores: completedGames,
+  };
 }
 
 function booleanOrDefault(value, fallback) {

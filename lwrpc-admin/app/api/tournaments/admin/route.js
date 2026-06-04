@@ -63,7 +63,7 @@ export async function POST(req) {
         .in("tournament_team_id", teamIds)
       : Promise.resolve({ data: [], error: null });
 
-    const [divisions, leagueDivisions, teams, contacts, courts, matches, log, sourceTeams] = await Promise.all([
+    const [divisions, leagueDivisions, teams, contacts, courts, matches, log, phoneChangeLog, sourceTeams] = await Promise.all([
       supabase
         .from("tournament_divisions")
         .select("*")
@@ -105,6 +105,12 @@ export async function POST(req) {
         .order("created_at", { ascending: false })
         .limit(100),
       supabase
+        .from("tournament_activity_log")
+        .select("*")
+        .eq("tournament_id", tournament.id)
+        .eq("log_type", "phone_change")
+        .order("created_at", { ascending: false }),
+      supabase
         .from("teams")
         .select(`
           id,
@@ -126,7 +132,7 @@ export async function POST(req) {
         .order("name", { ascending: true }),
     ]);
 
-    const errors = [divisions.error, leagueDivisions.error, teams.error, contacts.error, courts.error, matches.error, log.error, sourceTeams.error].filter(Boolean);
+    const errors = [divisions.error, leagueDivisions.error, teams.error, contacts.error, courts.error, matches.error, log.error, phoneChangeLog.error, sourceTeams.error].filter(Boolean);
     if (errors.length > 0) throw errors[0];
 
     const sourceTeamIds = (sourceTeams.data || []).map((team) => team.id);
@@ -174,6 +180,7 @@ export async function POST(req) {
       courts: courts.data || [],
       matches: matches.data || [],
       log: log.data || [],
+      phoneChangeLog: phoneChangeLog.data || [],
       sourceTeams: sourceTeams.data || [],
       sourceRosters: sourceRosters.data || [],
       sourceRatings: sourceRatings.data || [],

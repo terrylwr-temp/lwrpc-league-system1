@@ -11,6 +11,45 @@ import { hasRole } from "../../lib/permissions";
 import { rebuildDivisionStandingsForDivision } from "../../lib/standingsRebuild";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 
+function lmsGameWinnerSide(game) {
+  if (game.game_status === "forfeit_home" || game.game_status === "retired_home") return "home";
+  if (game.game_status === "forfeit_away" || game.game_status === "retired_away") return "away";
+  if (game.home_score !== null && game.home_score !== undefined && game.away_score !== null && game.away_score !== undefined) {
+    if (Number(game.home_score) > Number(game.away_score)) return "home";
+    if (Number(game.away_score) > Number(game.home_score)) return "away";
+  }
+  return "";
+}
+
+function lmsLineGamesNeededToWin(lineGames) {
+  const gameCount = lineGames.length;
+  return gameCount > 1 && gameCount % 2 === 1 ? Math.floor(gameCount / 2) + 1 : gameCount;
+}
+
+function lmsRequiredLineGameIds(lineGames) {
+  const sortedGames = [...lineGames].sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
+  const neededToWin = lmsLineGamesNeededToWin(sortedGames);
+  const requiredIds = new Set();
+  let homeWins = 0;
+  let awayWins = 0;
+
+  sortedGames.forEach((game) => {
+    if (neededToWin > 0 && (homeWins >= neededToWin || awayWins >= neededToWin)) return;
+    requiredIds.add(String(game.id));
+
+    const winner = lmsGameWinnerSide(game);
+    if (winner === "home") homeWins += 1;
+    if (winner === "away") awayWins += 1;
+  });
+
+  return requiredIds;
+}
+
+function lmsRequiredLineGames(lineGames) {
+  const requiredIds = lmsRequiredLineGameIds(lineGames);
+  return lineGames.filter((game) => requiredIds.has(String(game.id)));
+}
+
 export default function MatchDetailPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -369,7 +408,7 @@ export default function MatchDetailPage() {
   }
 
   const getLineSummary = useCallback(function getLineSummary(line) {
-    const lineGames = games.filter((game) => game.match_line_id === line.id);
+    const lineGames = lmsRequiredLineGames(games.filter((game) => game.match_line_id === line.id));
 
     let homeGameWins = 0;
     let awayGameWins = 0;
@@ -777,6 +816,8 @@ export default function MatchDetailPage() {
   }
 
   function gameWinnerName(game) {
+    if (game?.notNeeded) return "Not needed";
+
     if (game.game_status === "forfeit_home" || game.game_status === "retired_home") {
       return match?.home_team?.name || "Home";
     }
@@ -906,6 +947,7 @@ export default function MatchDetailPage() {
     const issues = [];
     const pointsToWin = Number(line.division_lines?.points_to_win || 0);
     const winBy = Number(line.division_lines?.win_by || 0);
+    const requiredGameIds = lmsRequiredLineGameIds(lineGames);
 
     if (lineWarnings(line).length > 0) {
       issues.push(
@@ -918,6 +960,8 @@ export default function MatchDetailPage() {
     }
 
     lineGames.forEach((game) => {
+      if (!requiredGameIds.has(String(game.id))) return;
+
       const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
       const gameLabel = `${teamSlotLabel(line)} Game ${game.game_number || ""}`.trim();
       const gameIssue = (message) => ({
@@ -943,6 +987,7 @@ export default function MatchDetailPage() {
         const homeScore = Number(game.home_score || 0);
         const awayScore = Number(game.away_score || 0);
         const highScore = Math.max(homeScore, awayScore);
+        const lowScore = Math.min(homeScore, awayScore);
 
         if (winBy === 1) {
           if (highScore > pointsToWin) {
@@ -958,6 +1003,10 @@ export default function MatchDetailPage() {
 
         if (highScore < pointsToWin) {
           issues.push(gameIssue(`at least one score must be ${pointsToWin} or higher for a completed game.`));
+        }
+
+        if (winBy > 0 && highScore - lowScore < winBy) {
+          issues.push(gameIssue(`winning margin must be at least ${winBy}.`));
         }
       }
     });
@@ -1483,6 +1532,7 @@ export default function MatchDetailPage() {
           {displayedLines.map((line) => {
             const divisionLine = line.division_lines;
             const lineGames = games.filter((game) => game.match_line_id === line.id);
+            const requiredGameIdsForLine = lmsRequiredLineGameIds(lineGames);
             const lineSummary = getLineSummary(line);
             const linePoints = lineTeamWinPoints(line, lineSummary);
             const warnings = lineWarnings(line);
@@ -1562,7 +1612,8 @@ export default function MatchDetailPage() {
 
                 <div className="space-y-3 p-4 pt-0 md:hidden">
                   {lineGames.map((game) => {
-                    const gameWinner = gameWinnerName(game);
+                    const gameNeeded = requiredGameIdsForLine.has(String(game.id));
+                    const gameWinner = gameNeeded ? gameWinnerName(game) : "Not needed";
                     const gameIssues = scoreValidationIssuesByGameId[String(game.id)] || [];
                     const hasGameIssues = gameIssues.length > 0;
 
@@ -1570,11 +1621,15 @@ export default function MatchDetailPage() {
                       <div
                         key={game.id}
                         className={`overflow-hidden rounded-2xl border-2 shadow-md ${
-                          hasGameIssues ? "border-red-500 bg-red-50 ring-4 ring-red-100" : "border-blue-300 bg-white"
+                          hasGameIssues
+                            ? "border-red-500 bg-red-50 ring-4 ring-red-100"
+                            : gameNeeded
+                              ? "border-blue-300 bg-white"
+                              : "border-slate-300 bg-slate-100"
                         }`}
                       >
                         <div className={`flex items-center justify-between gap-2 border-b px-4 py-3 ${
-                          hasGameIssues ? "border-red-300 bg-red-100" : "border-blue-200 bg-blue-100"
+                          hasGameIssues ? "border-red-300 bg-red-100" : gameNeeded ? "border-blue-200 bg-blue-100" : "border-slate-300 bg-slate-200"
                         }`}>
                           <div className={`font-black uppercase tracking-wide ${
                             hasGameIssues ? "text-red-950" : "text-blue-950"
@@ -1593,8 +1648,8 @@ export default function MatchDetailPage() {
                               pattern="[0-9]*"
                               value={game.home_score ?? ""}
                               onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
-                              disabled={!scoreEntryEditable || scoresBlockedForLine}
-                              className="mt-1 w-full rounded-2xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                              disabled={!scoreEntryEditable || scoresBlockedForLine || !gameNeeded}
+                              className="mt-1 w-full rounded-2xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
                             />
                           </label>
 
@@ -1606,8 +1661,8 @@ export default function MatchDetailPage() {
                               pattern="[0-9]*"
                               value={game.away_score ?? ""}
                               onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
-                              disabled={!scoreEntryEditable || scoresBlockedForLine}
-                              className="mt-1 w-full rounded-2xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                              disabled={!scoreEntryEditable || scoresBlockedForLine || !gameNeeded}
+                              className="mt-1 w-full rounded-2xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
                             />
                           </label>
                         </div>
@@ -1615,8 +1670,8 @@ export default function MatchDetailPage() {
                         <select
                           value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                           onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
-                          disabled={!scoreEntryEditable}
-                          className="mx-4 mb-4 w-[calc(100%-2rem)] rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold"
+                          disabled={!scoreEntryEditable || !gameNeeded}
+                          className="mx-4 mb-4 w-[calc(100%-2rem)] rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {gameStatusOptions().map((option) => (
                             <option key={option.value} value={option.value}>
@@ -1657,7 +1712,8 @@ export default function MatchDetailPage() {
 
                     <tbody>
                       {lineGames.map((game) => {
-                        const gameWinner = gameWinnerName(game);
+                        const gameNeeded = requiredGameIdsForLine.has(String(game.id));
+                        const gameWinner = gameNeeded ? gameWinnerName(game) : "Not needed";
                         const gameIssues = scoreValidationIssuesByGameId[String(game.id)] || [];
                         const hasGameIssues = gameIssues.length > 0;
 
@@ -1665,7 +1721,7 @@ export default function MatchDetailPage() {
                           <tr
                             key={game.id}
                             className={`rounded-xl shadow-sm ring-2 ${
-                              hasGameIssues ? "bg-red-50 ring-red-300" : "bg-white ring-blue-100"
+                              hasGameIssues ? "bg-red-50 ring-red-300" : gameNeeded ? "bg-white ring-blue-100" : "bg-slate-100 ring-slate-300"
                             }`}
                           >
                             <td className={`rounded-l-xl border-y-2 border-l-2 p-3 font-black ${
@@ -1681,10 +1737,10 @@ export default function MatchDetailPage() {
                                 pattern="[0-9]*"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
-                                disabled={!scoreEntryEditable || scoresBlockedForLine}
+                                disabled={!scoreEntryEditable || scoresBlockedForLine || !gameNeeded}
                                 className={`w-20 rounded-xl border-2 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:ring-4 ${
                                   hasGameIssues ? "border-red-400 focus:border-red-600 focus:ring-red-100" : "border-slate-300 focus:border-blue-600 focus:ring-blue-100"
-                                }`}
+                                } disabled:cursor-not-allowed disabled:opacity-50`}
                               />
                             </td>
 
@@ -1695,10 +1751,10 @@ export default function MatchDetailPage() {
                                 pattern="[0-9]*"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
-                                disabled={!scoreEntryEditable || scoresBlockedForLine}
+                                disabled={!scoreEntryEditable || scoresBlockedForLine || !gameNeeded}
                                 className={`w-20 rounded-xl border-2 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:ring-4 ${
                                   hasGameIssues ? "border-red-400 focus:border-red-600 focus:ring-red-100" : "border-slate-300 focus:border-blue-600 focus:ring-blue-100"
-                                }`}
+                                } disabled:cursor-not-allowed disabled:opacity-50`}
                               />
                             </td>
 
@@ -1706,10 +1762,10 @@ export default function MatchDetailPage() {
                               <select
                                 value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                                 onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
-                                disabled={!scoreEntryEditable}
+                                disabled={!scoreEntryEditable || !gameNeeded}
                                 className={`w-full min-w-40 rounded-xl border bg-white px-3 py-2 text-xs font-semibold ${
                                   hasGameIssues ? "border-red-400" : "border-slate-300"
-                                }`}
+                                } disabled:cursor-not-allowed disabled:opacity-50`}
                               >
                                 {gameStatusOptions().map((option) => (
                                   <option key={option.value} value={option.value}>

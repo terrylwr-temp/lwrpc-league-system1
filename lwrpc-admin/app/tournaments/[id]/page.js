@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_SYSTEM_SETTINGS } from "../../lib/systemSettings";
 import { loadPublicTournament, tournamentDisplayName, tournamentPlayers } from "../../lib/tournaments";
+import { APP_VERSION, COPYRIGHT_YEAR } from "../../lib/version";
 
 export default function TournamentLandingPage() {
   const { id } = useParams();
@@ -110,6 +111,12 @@ export default function TournamentLandingPage() {
               </button>
             </div>
           )}
+
+          <div className="mt-6 border-t border-white/10 pt-4 text-center text-xs font-semibold leading-5 text-slate-400">
+            {"\u00A9"} {COPYRIGHT_YEAR} {DEFAULT_SYSTEM_SETTINGS.club_name}. All rights reserved.
+            <br />
+            Version {APP_VERSION}
+          </div>
         </div>
       </div>
     </main>

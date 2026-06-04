@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { scoreDisplay, tournamentDivisionColors, tournamentStandingLabel } from "../../../lib/tournaments";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
+import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../../lib/phone";
 
 const TABS = ["Courts", "Queue", "Standings", "Teams", "Admin Setup", "SMS", "Log"];
 const OPEN_STATUSES = new Set(["pending", "not_played"]);
@@ -26,6 +27,7 @@ const DEFAULT_STANDINGS_RULES = ["wins", "point_differential", "points_for", "re
 
 export default function TournamentAdminPage() {
   const { id } = useParams();
+  const router = useRouter();
   const storageKey = `lwrpc-tournament-event-code-${id}`;
   const [eventCode, setEventCode] = useState("");
   const [state, setState] = useState(null);
@@ -132,7 +134,7 @@ export default function TournamentAdminPage() {
 
     if (!response.ok || !result.success) {
       setError(result.error || "Unable to complete tournament action.");
-      return false;
+      return options.returnResult ? { success: false, error: result.error || "Unable to complete tournament action." } : false;
     }
 
     const replacementEventCode = action === "updateTournamentSettings" ? String(payload.adminCode || "").trim() : "";
@@ -155,63 +157,91 @@ export default function TournamentAdminPage() {
     if (action === "deleteDivision") setNotice("Tournament division deleted.");
     if (action === "updateTournamentSettings") setNotice("Tournament settings saved.");
     if (action === "updateTournamentTeam") setNotice(options.notice || "Tournament team saved.");
+    if (action === "createTournamentTeam") setNotice("Tournament team added.");
     if (action === "deleteTournamentTeam") setNotice("Tournament team deleted.");
     if (action === "saveCourts") setNotice(`Saved ${result.courts || 0} court${Number(result.courts || 0) === 1 ? "" : "s"}.`);
-    if (action === "resetMatches") setNotice("Tournament matches reset.");
+    if (action === "resetMatches") setNotice("Tournament matches, standings, and activity log reset.");
+    if (action === "clearLog") setNotice("Activity log cleared.");
     if (action === "startTournament") setNotice("Tournament started and wait times reset.");
     if (action === "generateRoundRobin") setNotice(`Generated ${result.generated || 0} round robin match${Number(result.generated || 0) === 1 ? "" : "es"}.`);
     if (action === "updateSmsTemplates") setNotice("SMS templates saved.");
     if (action === "sendBroadcastText") setNotice(`Broadcast text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`);
     if (action === "sendTestText") setNotice(`Test text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`);
-    return true;
+    if (action === "updatePlayerPhone") setNotice(`Phone number updated for ${result.playerName || "player"}.`);
+    return options.returnResult ? result : true;
   }
 
-  function lock() {
+  function exitToLms() {
+    if (!window.confirm("Exit the tournament Main System and return to the LMS Admin Dashboard?")) return;
+
     window.sessionStorage.removeItem(storageKey);
     setState(null);
     setEventCode("");
     setNotice("");
     setError("");
+    router.push("/");
   }
 
   if (!state) {
+    const logoUrl = systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
+    const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
+
     return (
-      <main className="full-screen-main min-h-screen bg-slate-100 p-4 sm:p-6">
-        <div className="mx-auto max-w-md rounded-2xl bg-white p-6 shadow">
-          <div className="text-xs font-black uppercase tracking-wide text-blue-700">Tournament Main System</div>
-          <h1 className="mt-1 text-2xl font-black text-slate-950">Enter Event Code</h1>
-          <p className="mt-2 text-sm font-semibold leading-6 text-slate-600">
-            Public display, standings, and player views do not require this code. Tournament setup and operations do.
-          </p>
+      <main className="full-screen-main flex min-h-screen items-center justify-center bg-[#07111f] p-4 sm:p-6">
+        <div className="w-full max-w-lg overflow-hidden rounded-3xl border border-blue-200/20 bg-slate-950 text-white shadow-2xl">
+          <div className="border-b border-blue-300/20 bg-blue-950/70 px-6 py-5">
+            <div className="flex items-center gap-4">
+              <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-white p-2 shadow-lg">
+                <Image
+                  src={logoUrl}
+                  alt={`${clubName} logo`}
+                  width={72}
+                  height={72}
+                  className="h-full w-full object-contain"
+                  unoptimized
+                />
+              </div>
+              <div>
+                <div className="text-xs font-black uppercase tracking-wide text-cyan-200">{clubName}</div>
+                <h1 className="mt-1 text-2xl font-black">Tournament Main System</h1>
+              </div>
+            </div>
+          </div>
+          <div className="p-6">
+            <h2 className="text-xl font-black">Enter Event Code</h2>
+            <p className="mt-2 text-sm font-semibold leading-6 text-blue-100">
+              Public display, standings, and player views do not require this code. Tournament setup and operations do.
+            </p>
 
-          <input
-            type="password"
-            value={eventCode}
-            onChange={(event) => {
-              setEventCode(event.target.value);
-              setError("");
-            }}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") unlock();
-            }}
-            className="mt-5 w-full rounded-xl border border-slate-300 px-4 py-3 text-center text-2xl font-black tracking-[0.4em]"
-            placeholder="Code"
-          />
+            <input
+              type="password"
+              value={eventCode}
+              onChange={(event) => {
+                setEventCode(event.target.value);
+                setError("");
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") unlock();
+              }}
+              className="mt-5 w-full rounded-2xl border border-blue-300/30 bg-slate-900 px-4 py-4 text-center text-2xl font-black tracking-[0.4em] text-white outline-none ring-cyan-400/40 focus:ring-4"
+              placeholder="Code"
+            />
 
-          {error && <div className="mt-3 rounded-xl bg-red-50 p-3 text-sm font-bold text-red-800">{error}</div>}
+            {error && <div className="mt-3 rounded-xl bg-red-950/70 p-3 text-sm font-bold text-red-100">{error}</div>}
 
-          <button
-            type="button"
-            onClick={() => unlock()}
-            disabled={loading || !eventCode.trim()}
-            className="mt-4 w-full rounded-xl bg-blue-700 px-5 py-3 font-black text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-          >
-            {loading ? "Unlocking..." : "Unlock Main System"}
-          </button>
+            <button
+              type="button"
+              onClick={() => unlock()}
+              disabled={loading || !eventCode.trim()}
+              className="mt-4 w-full rounded-2xl bg-cyan-500 px-5 py-4 font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-300"
+            >
+              {loading ? "Unlocking..." : "Unlock Main System"}
+            </button>
 
-          <Link className="mt-3 block text-center text-sm font-bold text-blue-700" href={`/tourney/${id}/display`}>
-            Back to public display
-          </Link>
+            <Link className="mt-4 block text-center text-sm font-bold text-cyan-200 hover:text-white" href={`/tourney/${id}/display`}>
+              Back to public display
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -226,8 +256,7 @@ export default function TournamentAdminPage() {
           state={state}
           systemSettings={systemSettings}
           smsEnabled={smsEnabled}
-          setSmsEnabled={setSmsEnabled}
-          lock={lock}
+          exitToLms={exitToLms}
           tournamentKey={tournamentKey}
         />
 
@@ -287,13 +316,14 @@ export default function TournamentAdminPage() {
             actionLoading={actionLoading}
           />
         )}
-        {activeTab === "Log" && <LogTab state={state} />}
+        {activeTab === "Log" && <LogTab state={state} runAction={runAction} actionLoading={actionLoading} />}
       </div>
 
       {resultMatch && (
         <ResultModal
           match={resultMatch}
           smsEnabled={smsEnabled}
+          settings={state.tournament.settings}
           onClose={() => setResultMatch(null)}
           onSave={async (payload) => {
             const saved = await runAction("completeMatch", payload);
@@ -306,7 +336,7 @@ export default function TournamentAdminPage() {
   );
 }
 
-function DirectorHeader({ state, systemSettings, smsEnabled, setSmsEnabled, lock, tournamentKey }) {
+function DirectorHeader({ state, systemSettings, smsEnabled, exitToLms, tournamentKey }) {
   const logoUrl = systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
 
@@ -333,15 +363,13 @@ function DirectorHeader({ state, systemSettings, smsEnabled, setSmsEnabled, lock
           <Link className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-2 text-sm font-black text-white hover:bg-blue-900" href={`/tourney/${tournamentKey}/display`}>
             Public Display
           </Link>
-          <button
-            type="button"
-            onClick={() => setSmsEnabled((value) => !value)}
+          <span
             className={`rounded-full px-4 py-2 text-sm font-black ${smsEnabled ? "bg-emerald-700 text-white" : "bg-rose-950 text-rose-100"}`}
           >
             SMS {smsEnabled ? "ON" : "OFF"}
-          </button>
-          <button type="button" onClick={lock} className="rounded-xl border border-blue-400/50 bg-blue-950 px-4 py-2 text-sm font-black text-white hover:bg-blue-900">
-            Lock
+          </span>
+          <button type="button" onClick={exitToLms} className="rounded-xl border border-blue-400/50 bg-blue-950 px-4 py-2 text-sm font-black text-white hover:bg-blue-900">
+            Exit to LMS
           </button>
         </div>
       </div>
@@ -765,6 +793,8 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
   const divisionOrder = useMemo(() => activeDivisions.map((division) => division.name), [activeDivisions]);
   const [teamFilter, setTeamFilter] = useState("all");
   const [editingTeam, setEditingTeam] = useState(null);
+  const [addingTeam, setAddingTeam] = useState(false);
+  const [checkInPrompt, setCheckInPrompt] = useState(null);
   const teamsByDivision = useMemo(() => {
     return state.teams
       .filter((team) => activeDivisionIds.has(String(team.division_id)))
@@ -784,9 +814,9 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
     });
   }, [divisionOrder, teamsByDivision]);
 
-  function togglePlayerCheck(team, slot) {
-    const nextP1 = slot === 1 ? !team.player_1_checked_in : Boolean(team.player_1_checked_in);
-    const nextP2 = slot === 2 ? !team.player_2_checked_in : Boolean(team.player_2_checked_in);
+  function togglePlayerCheck(team, slot, checkedIn = !Boolean(slot === 1 ? team.player_1_checked_in : team.player_2_checked_in)) {
+    const nextP1 = slot === 1 ? checkedIn : Boolean(team.player_1_checked_in);
+    const nextP2 = slot === 2 ? checkedIn : Boolean(team.player_2_checked_in);
     updateTournamentTeamState(setState, team.id, {
       player_1_checked_in: nextP1,
       player_2_checked_in: nextP2,
@@ -801,6 +831,61 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
     }, { skipRefresh: true, notice: "Check-in updated." });
   }
 
+  function openPlayerCheckIn(team, contacts, slot) {
+    const checkedIn = Boolean(slot === 1 ? team.player_1_checked_in : team.player_2_checked_in);
+    if (checkedIn) {
+      togglePlayerCheck(team, slot, false);
+      return;
+    }
+
+    setCheckInPrompt({
+      team,
+      slot,
+      playerName: playerDisplayName(team, contacts, slot),
+      phone: playerPhoneFromContacts(contacts, slot),
+      memberId: playerMemberIdFromContacts(contacts, slot),
+    });
+  }
+
+  async function confirmPlayerCheckIn() {
+    if (!checkInPrompt) return;
+    const completed = await togglePlayerCheck(checkInPrompt.team, checkInPrompt.slot, true);
+    if (completed) setCheckInPrompt(null);
+  }
+
+  async function savePlayerPhone(phone) {
+    if (!checkInPrompt) return { success: false, error: "No player is selected." };
+    const formattedPhone = formatPhoneNumberForStorage(phone);
+    const result = await runAction("updatePlayerPhone", {
+      teamId: checkInPrompt.team.id,
+      slot: checkInPrompt.slot,
+      memberId: checkInPrompt.memberId,
+      playerName: checkInPrompt.playerName,
+      phone: formattedPhone,
+    }, { skipRefresh: true, returnResult: true });
+    if (result?.success) {
+      updateTournamentContactPhoneState(setState, {
+        teamId: checkInPrompt.team.id,
+        slot: checkInPrompt.slot,
+        memberId: result.memberId || checkInPrompt.memberId,
+        displayName: checkInPrompt.playerName,
+        phone: result.newPhone || formattedPhone,
+      });
+      addLocalPhoneChangeLog(setState, result.logMetadata || {
+        playerName: result.playerName || checkInPrompt.playerName,
+        memberId: result.memberId || checkInPrompt.memberId,
+        teamId: checkInPrompt.team.id,
+        teamName: checkInPrompt.team.name || "",
+        playerSlot: checkInPrompt.slot,
+        oldPhone: result.oldPhone || "",
+        newPhone: result.newPhone || formattedPhone,
+        coreMemberUpdated: Boolean(result.coreMemberUpdated),
+      });
+      setCheckInPrompt((current) => current ? { ...current, phone: result.newPhone || formattedPhone, memberId: result.memberId || current.memberId } : current);
+    }
+    return result?.success ? { success: true } : { success: false, error: result?.error || "Phone number was not saved." };
+  }
+
   async function deleteTeam(team) {
     if (!confirmTypedAction(`Delete ${team.name || "this team"} from the tournament?`, "DELETE")) return;
     setEditingTeam(null);
@@ -813,6 +898,13 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-black">Team List</h2>
         <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setAddingTeam(true)}
+            className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white hover:bg-emerald-500"
+          >
+            Add Team
+          </button>
           <button
             type="button"
             onClick={() => setTeamFilter("all")}
@@ -869,19 +961,19 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={() => togglePlayerCheck(team, 1)}
+                          onClick={() => openPlayerCheckIn(team, contacts, 1)}
                           disabled={Boolean(actionLoading)}
                           className={`rounded-xl px-4 py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-50 ${team.player_1_checked_in ? "bg-emerald-600 text-white" : "bg-rose-700 text-white"}`}
                         >
-                          {team.player_1_checked_in ? "P1 In" : "P1 Out"}
+                          {playerDisplayName(team, contacts, 1)}
                         </button>
                         <button
                           type="button"
-                          onClick={() => togglePlayerCheck(team, 2)}
+                          onClick={() => openPlayerCheckIn(team, contacts, 2)}
                           disabled={Boolean(actionLoading)}
                           className={`rounded-xl px-4 py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-50 ${team.player_2_checked_in ? "bg-emerald-600 text-white" : "bg-rose-700 text-white"}`}
                         >
-                          {team.player_2_checked_in ? "P2 In" : "P2 Out"}
+                          {playerDisplayName(team, contacts, 2)}
                         </button>
                         <button
                           type="button"
@@ -918,15 +1010,140 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
           }}
         />
       )}
+      {addingTeam && (
+        <TeamEditModal
+          mode="add"
+          team={emptyTournamentTeam()}
+          state={state}
+          contacts={[]}
+          onClose={() => setAddingTeam(false)}
+          saving={actionLoading === "createTournamentTeam"}
+          sendingTestText={actionLoading === "sendTestText"}
+          onSendTestText={(phone) => runAction("sendTestText", { phone }, { skipRefresh: true })}
+          onSave={async (payload) => {
+            const completed = await runAction("createTournamentTeam", payload);
+            if (completed) setAddingTeam(false);
+          }}
+        />
+      )}
+      {checkInPrompt && (
+        <PlayerCheckInModal
+          prompt={checkInPrompt}
+          sendingTestText={actionLoading === "sendTestText"}
+          saving={actionLoading === "updateTournamentTeam" || actionLoading === "updatePlayerPhone"}
+          onClose={() => setCheckInPrompt(null)}
+          onConfirm={confirmPlayerCheckIn}
+          onSendTestText={(phone) => runAction("sendTestText", { phone }, { skipRefresh: true })}
+          onSavePhone={savePlayerPhone}
+        />
+      )}
     </section>
   );
 }
 
-function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSendTestText, saving, deleting, sendingTestText }) {
+function PlayerCheckInModal({ prompt, onClose, onConfirm, onSendTestText, onSavePhone, saving, sendingTestText }) {
+  const [editingPhone, setEditingPhone] = useState(false);
+  const [phoneInput, setPhoneInput] = useState(prompt.phone || "");
+  const [saveMessage, setSaveMessage] = useState("");
+  const phone = formatPhoneNumberForStorage(prompt.phone || "");
+  const cleanPhoneInput = formatPhoneNumberForStorage(phoneInput);
+
+  useEffect(() => {
+    setPhoneInput(prompt.phone || "");
+    setEditingPhone(false);
+    setSaveMessage("");
+  }, [prompt.phone]);
+
+  async function savePhone() {
+    setSaveMessage("");
+    const result = await onSavePhone(cleanPhoneInput);
+    setSaveMessage(result?.success ? "Phone number saved." : `Phone number was not saved. ${result?.error || "No reason was returned."}`);
+    if (result?.success) setEditingPhone(false);
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4">
+      <div className="w-full max-w-md rounded-2xl border border-blue-300/30 bg-slate-900 p-5 text-white shadow-2xl">
+        <h2 className="text-2xl font-black">Confirm Check-In</h2>
+        <p className="mt-2 text-sm font-semibold text-blue-100">
+          Is this phone number correct for {prompt.playerName}?
+        </p>
+        <div className="mt-4 rounded-xl border border-blue-300/20 bg-blue-950/70 px-4 py-3 text-xl font-black">
+          {phone || "No phone number entered"}
+        </div>
+        {editingPhone && (
+          <label className="mt-4 block text-sm font-black text-blue-200">
+            New Phone #
+            <input
+              type="tel"
+              value={phoneInput}
+              onChange={(event) => setPhoneInput(formatPhoneNumberInput(event.target.value))}
+              onBlur={(event) => setPhoneInput(formatPhoneNumberForStorage(event.target.value))}
+              className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-lg font-black text-white"
+              autoFocus
+            />
+          </label>
+        )}
+        {saveMessage && (
+          <div className={`mt-3 rounded-xl px-4 py-3 text-sm font-black ${saveMessage.includes("not") ? "bg-rose-950/70 text-rose-100" : "bg-emerald-950/70 text-emerald-100"}`}>
+            {saveMessage}
+          </div>
+        )}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {!editingPhone && (
+            <button
+              type="button"
+              onClick={() => setEditingPhone(true)}
+              className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-3 text-sm font-black text-white hover:bg-blue-900"
+            >
+              Change Phone #
+            </button>
+          )}
+          {editingPhone && (
+            <button
+              type="button"
+              onClick={savePhone}
+              disabled={saving || !cleanPhoneInput || cleanPhoneInput === phone}
+              className="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Phone #"}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => onSendTestText(phone)}
+            disabled={sendingTestText || !phone}
+            className="rounded-xl border border-amber-300/50 bg-amber-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {sendingTestText ? "Sending..." : "Send test SMS"}
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={saving}
+            className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Check In"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-3 text-sm font-black text-white hover:bg-blue-900"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSendTestText, saving, deleting, sendingTestText, mode = "edit" }) {
+  const isAddMode = mode === "add";
   const sourceTeams = useMemo(() => state.sourceTeams || [], [state.sourceTeams]);
   const sourceTeamOptions = useMemo(() => sortedSourceTeams(sourceTeams), [sourceTeams]);
   const sourceRosters = useMemo(() => state.sourceRosters || [], [state.sourceRosters]);
-  const [form, setForm] = useState(() => teamFormState(team, contacts, sourceTeamOptions));
+  const [form, setForm] = useState(() => isAddMode ? emptyTeamFormState() : teamFormState(team, contacts, sourceTeamOptions));
   const selectedSourceTeam = useMemo(() => sourceTeamOptions.find((sourceTeam) => String(sourceTeam.id) === String(form.sourceTeamId)), [form.sourceTeamId, sourceTeamOptions]);
   const selectedRoster = useMemo(() => {
     return sourceRosters
@@ -941,9 +1158,34 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
   const hasDivisionTeamMax = Number.isFinite(divisionTeamMax) && divisionTeamMax > 0;
   const exceedsDivisionTeamMax = hasDivisionTeamMax && teamTotal !== "" && Number(teamTotal) > divisionTeamMax;
   const duplicateTeamLine = duplicateTournamentTeamLine(state.teams, team.id, form.name, form.lineNumber);
+  const selectedTournamentDivision = useMemo(() => {
+    const sourceDivisionName = selectedSourceTeam?.divisions?.name || "";
+    return (state.divisions || []).find((division) =>
+      division.is_active !== false && normalizeName(division.name) === normalizeName(sourceDivisionName)
+    );
+  }, [selectedSourceTeam, state.divisions]);
+  const missingTournamentDivision = isAddMode && form.sourceTeamId && !selectedTournamentDivision;
+  const addValidationMessages = isAddMode ? addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, divisionTeamMax) : [];
 
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  function selectSourceTeam(sourceTeamId) {
+    const sourceTeam = sourceTeamOptions.find((item) => String(item.id) === String(sourceTeamId));
+    setForm((current) => ({
+      ...current,
+      sourceTeamId,
+      name: sourceTeam ? sourceTeam.name : current.name,
+      player1MemberId: "",
+      player1Name: "",
+      player1Phone: "",
+      player1Rating: "",
+      player2MemberId: "",
+      player2Name: "",
+      player2Phone: "",
+      player2Rating: "",
+    }));
   }
 
   function selectPlayer(slot, memberId) {
@@ -963,9 +1205,14 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
       <div className="mx-auto max-w-3xl rounded-2xl border border-blue-300/30 bg-slate-900 p-5 text-white shadow-2xl">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-2xl font-black">Edit Team</h2>
-            <p className="mt-1 text-sm font-semibold text-blue-200">{team.name}</p>
+            <h2 className="text-2xl font-black">{isAddMode ? "Add Team" : "Edit Team"}</h2>
+            <p className="mt-1 text-sm font-semibold text-blue-200">{isAddMode ? selectedTournamentDivision?.name || "Select Main System Team" : team.name}</p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs font-black">
+              {selectedTournamentDivision && (
+                <span className="rounded-full bg-cyan-400/20 px-3 py-1 text-cyan-100">
+                  {selectedTournamentDivision.name}
+                </span>
+              )}
               <span className="rounded-full bg-blue-400/20 px-3 py-1 text-blue-100">
                 Division Team Max {hasDivisionTeamMax ? divisionTeamMax.toFixed(2) : "Not set"}
               </span>
@@ -977,6 +1224,15 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <label className={`text-sm font-black text-blue-200 ${isAddMode ? "md:col-span-2" : ""}`}>
+            Main System Team
+            <select value={form.sourceTeamId} onChange={(event) => selectSourceTeam(event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
+              <option value="">Select team...</option>
+              {sourceTeamOptions.map((sourceTeam) => (
+                <option key={sourceTeam.id} value={sourceTeam.id}>{sourceTeam.divisions?.name || "Division"} - {sourceTeam.name}</option>
+              ))}
+            </select>
+          </label>
           <label className="text-sm font-black text-blue-200">
             Team Name
             <input value={form.name} onChange={(event) => updateForm("name", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
@@ -984,15 +1240,6 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
           <label className="text-sm font-black text-blue-200">
             Regular Season Standing
             <input type="number" min="1" value={form.regularSeasonStanding} onChange={(event) => updateForm("regularSeasonStanding", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
-          </label>
-          <label className="text-sm font-black text-blue-200">
-            Main System Team
-            <select value={form.sourceTeamId} onChange={(event) => updateForm("sourceTeamId", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
-              <option value="">Select team...</option>
-              {sourceTeamOptions.map((sourceTeam) => (
-                <option key={sourceTeam.id} value={sourceTeam.id}>{sourceTeam.divisions?.name || "Division"} - {sourceTeam.name}</option>
-              ))}
-            </select>
           </label>
           <label className="text-sm font-black text-blue-200">
             Line
@@ -1031,7 +1278,13 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
                 </label>
                 <div className="mt-3 grid grid-cols-1 gap-3">
                   <input value={form[`${prefix}Name`]} onChange={(event) => updateForm(`${prefix}Name`, event.target.value)} placeholder="Player name" className="rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
-                  <input value={form[`${prefix}Phone`]} onChange={(event) => updateForm(`${prefix}Phone`, event.target.value)} placeholder="Phone" className="rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
+                  <input
+                    value={form[`${prefix}Phone`]}
+                    onChange={(event) => updateForm(`${prefix}Phone`, formatPhoneNumberInput(event.target.value))}
+                    onBlur={(event) => updateForm(`${prefix}Phone`, formatPhoneNumberForStorage(event.target.value))}
+                    placeholder="Phone"
+                    className="rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
+                  />
                   <input value={form[`${prefix}Rating`]} onChange={(event) => updateForm(`${prefix}Rating`, event.target.value)} placeholder="Rating" className="rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
                 </div>
               </div>
@@ -1050,25 +1303,37 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
               A tournament team already exists with this Team Name and Line #.
             </div>
           )}
+          {missingTournamentDivision && (
+            <div className="w-full rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
+              This Main System Team does not match an active tournament division.
+            </div>
+          )}
+          {addValidationMessages.map((message) => (
+            <div key={message} className="w-full rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
+              {message}
+            </div>
+          ))}
           <button
             type="button"
-            disabled={saving || !form.name.trim() || exceedsDivisionTeamMax || duplicateTeamLine}
+            disabled={saving || !form.name.trim() || (isAddMode && !form.sourceTeamId) || exceedsDivisionTeamMax || duplicateTeamLine || missingTournamentDivision || addValidationMessages.length > 0}
             onClick={() => onSave(teamSavePayload(team, form))}
             className="rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save Team"}
+            {saving ? "Saving..." : isAddMode ? "Add Team" : "Save Team"}
           </button>
           <button type="button" onClick={onClose} className="rounded-xl border border-blue-300/40 bg-blue-950 px-5 py-3 text-sm font-black text-white hover:bg-blue-900">
             Cancel
           </button>
-          <button
-            type="button"
-            disabled={saving || deleting}
-            onClick={onDelete}
-            className="ml-auto rounded-xl bg-rose-700 px-5 py-3 text-sm font-black text-white hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {deleting ? "Deleting..." : "Delete Team"}
-          </button>
+          {!isAddMode && (
+            <button
+              type="button"
+              disabled={saving || deleting}
+              onClick={onDelete}
+              className="ml-auto rounded-xl bg-rose-700 px-5 py-3 text-sm font-black text-white hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {deleting ? "Deleting..." : "Delete Team"}
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -1083,7 +1348,10 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
   const [eventEntryCode, setEventEntryCode] = useState("");
   const [eventEntryCodeConfirm, setEventEntryCodeConfirm] = useState("");
   const [eventEntryCodeApproval, setEventEntryCodeApproval] = useState("");
-  const [matchFormat, setMatchFormat] = useState(state.tournament.settings?.matchFormat || "Single Game");
+  const [numberOfGames, setNumberOfGames] = useState(String(tournamentScoreSettings(state.tournament.settings).numberOfGames));
+  const [gamesPlayedTo, setGamesPlayedTo] = useState(String(tournamentScoreSettings(state.tournament.settings).gamesPlayedTo));
+  const [winBy, setWinBy] = useState(String(tournamentScoreSettings(state.tournament.settings).winBy));
+  const [rallyScoring, setRallyScoring] = useState(Boolean(tournamentScoreSettings(state.tournament.settings).rallyScoring));
   const [standingsRules, setStandingsRules] = useState(() => standingsRulesState(state.tournament.settings?.standingsRules));
   const [courtLabels, setCourtLabels] = useState(() => courtLabelsFromCourts(state.courts));
   const [courtCount, setCourtCount] = useState(Math.max(1, state.courts.length || 1));
@@ -1098,11 +1366,14 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
     setEventEntryCode("");
     setEventEntryCodeConfirm("");
     setEventEntryCodeApproval("");
-    setMatchFormat(state.tournament.settings?.matchFormat || "Single Game");
+    setNumberOfGames(String(tournamentScoreSettings(state.tournament.settings).numberOfGames));
+    setGamesPlayedTo(String(tournamentScoreSettings(state.tournament.settings).gamesPlayedTo));
+    setWinBy(String(tournamentScoreSettings(state.tournament.settings).winBy));
+    setRallyScoring(Boolean(tournamentScoreSettings(state.tournament.settings).rallyScoring));
     setStandingsRules(standingsRulesState(state.tournament.settings?.standingsRules));
     setCourtLabels(courtLabelsFromCourts(state.courts));
     setCourtCount(Math.max(1, state.courts.length || 1));
-  }, [state.courts, state.tournament.name, state.tournament.settings?.matchFormat, state.tournament.settings?.standingsRules]);
+  }, [state.courts, state.tournament.name, state.tournament.settings]);
 
   function toggleSelectedDivision(divisionId) {
     setSelectedDivisionIds((current) =>
@@ -1145,9 +1416,7 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
     if (!confirmTypedAction("Change the event entry code for this tournament? The current admin session will immediately switch to the new code.", "CHANGE CODE")) return;
 
     const saved = await runAction("updateTournamentSettings", {
-      name: tournamentName,
-      matchFormat,
-      standingsRules,
+      ...tournamentSettingsPayload,
       adminCode: eventEntryCode,
       adminCodeConfirm: eventEntryCodeConfirm,
       adminCodeConfirmation: eventEntryCodeApproval,
@@ -1174,6 +1443,14 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
     eventEntryCode === eventEntryCodeConfirm &&
     eventEntryCodeApproval.trim().toUpperCase() === "CHANGE CODE"
   );
+  const tournamentSettingsPayload = {
+    name: tournamentName,
+    numberOfGames: numberOfGames || String(tournamentScoreSettings(state.tournament.settings).numberOfGames),
+    gamesPlayedTo: gamesPlayedTo || String(tournamentScoreSettings(state.tournament.settings).gamesPlayedTo),
+    winBy: winBy || String(tournamentScoreSettings(state.tournament.settings).winBy),
+    rallyScoring,
+    standingsRules,
+  };
 
   return (
     <section className="mt-5 space-y-4">
@@ -1340,10 +1617,17 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           </button>
           <button
             type="button"
-            onClick={() => exportMatchesCsv(state)}
+            onClick={() => exportMatchesCsv(state, selectedDivisionIds)}
             className="rounded-xl bg-amber-500 px-4 py-3 text-sm font-black text-slate-950 hover:bg-amber-400"
           >
             Export Matches CSV
+          </button>
+          <button
+            type="button"
+            onClick={() => exportDuprCsv(state, selectedDivisionIds)}
+            className="rounded-xl border border-emerald-300/50 bg-emerald-700 px-4 py-3 text-sm font-black text-white hover:bg-emerald-600"
+          >
+            DUPR Export
           </button>
         </div>
       </div>
@@ -1359,7 +1643,7 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
         <p className="mt-3 text-sm font-semibold text-blue-100">Shown on the Main System and all public display screens.</p>
         <button
           type="button"
-          onClick={() => runAction("updateTournamentSettings", { name: tournamentName, matchFormat, standingsRules })}
+          onClick={() => runAction("updateTournamentSettings", tournamentSettingsPayload)}
           disabled={Boolean(actionLoading) || !tournamentName.trim()}
           className="mt-4 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -1368,63 +1652,56 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
       </div>
 
       <div className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
-        <h3 className="text-xl font-black">Event Entry Code</h3>
-        <p className="mt-3 text-sm font-semibold text-blue-100">
-          This is the code used on the Enter Event Code screen to unlock the tournament Main System. To change it, enter the new code twice, type CHANGE CODE in the confirmation box, then save.
-        </p>
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <input
-            type="password"
-            value={eventEntryCode}
-            onChange={(event) => setEventEntryCode(event.target.value)}
-            className="w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
-            placeholder="New entry code"
-          />
-          <input
-            type="password"
-            value={eventEntryCodeConfirm}
-            onChange={(event) => setEventEntryCodeConfirm(event.target.value)}
-            className="w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
-            placeholder="Confirm new entry code"
-          />
-        </div>
-        <input
-          type="text"
-          value={eventEntryCodeApproval}
-          onChange={(event) => setEventEntryCodeApproval(event.target.value)}
-          className="mt-3 w-full rounded-xl border border-amber-300/50 bg-slate-950 px-4 py-3 font-black uppercase tracking-wide text-white"
-          placeholder="Type CHANGE CODE"
-        />
-        <p className="mt-3 rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-100">
-          After saving, this browser session switches to the new code automatically. If the saved code is ever lost, an administrator can set the server-only TOURNAMENT_ADMIN_OVERRIDE_CODE value and use that to get back in.
-        </p>
-        <button
-          type="button"
-          onClick={saveEventEntryCode}
-          disabled={!canSaveEventEntryCode}
-          className="mt-4 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          Save Entry Code
-        </button>
-      </div>
-
-      <div className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
         <h3 className="text-xl font-black">Match Format</h3>
-        <select
-          value={matchFormat}
-          onChange={(event) => setMatchFormat(event.target.value)}
-          className="mt-4 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
-        >
-          <option value="Single Game">Single Game</option>
-          <option value="Best 2 of 3">Best 2 of 3</option>
-          <option value="Timed Match">Timed Match</option>
-          <option value="Custom">Custom</option>
-        </select>
-        <p className="mt-3 text-sm font-semibold text-blue-100">Controls how matches are presented throughout the system.</p>
+        <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-4">
+          <label className="text-sm font-black text-blue-200">
+            Number of Games
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={numberOfGames}
+              onChange={(event) => setNumberOfGames(onlyDigits(event.target.value))}
+              className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
+            />
+          </label>
+          <label className="text-sm font-black text-blue-200">
+            Games Played To
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={gamesPlayedTo}
+              onChange={(event) => setGamesPlayedTo(onlyDigits(event.target.value))}
+              className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
+            />
+          </label>
+          <label className="text-sm font-black text-blue-200">
+            Win By
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={winBy}
+              onChange={(event) => setWinBy(onlyDigits(event.target.value))}
+              className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
+            />
+          </label>
+          <label className="flex items-end gap-3 rounded-xl border border-blue-300/20 bg-slate-950/40 px-4 py-3 text-sm font-black text-blue-200">
+            <input
+              type="checkbox"
+              checked={rallyScoring}
+              onChange={(event) => setRallyScoring(event.target.checked)}
+              className="mb-1 size-4 accent-cyan-400"
+            />
+            Rally Scoring
+          </label>
+        </div>
+        <p className="mt-3 text-sm font-semibold text-blue-100">A 1-game match asks for one score. A 3-game match is best 2 of 3, so Game 3 is only needed if the teams split Games 1 and 2.</p>
         <button
           type="button"
-          onClick={() => runAction("updateTournamentSettings", { name: tournamentName, matchFormat, standingsRules })}
-          disabled={Boolean(actionLoading) || !tournamentName.trim()}
+          onClick={() => runAction("updateTournamentSettings", tournamentSettingsPayload)}
+          disabled={Boolean(actionLoading) || !tournamentName.trim() || !numberOfGames || !gamesPlayedTo || !winBy}
           className="mt-4 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Save Match Format
@@ -1450,7 +1727,7 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
         </div>
         <button
           type="button"
-          onClick={() => runAction("updateTournamentSettings", { name: tournamentName, matchFormat, standingsRules })}
+          onClick={() => runAction("updateTournamentSettings", tournamentSettingsPayload)}
           disabled={Boolean(actionLoading) || !tournamentName.trim()}
           className="mt-4 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -1523,13 +1800,57 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           <div className="mt-2 text-sm font-semibold text-blue-200">{courtNamesString(state.courts) || "No courts configured"}</div>
         </div>
       </div>
+
+      <div className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
+        <h3 className="text-xl font-black">Event Entry Code</h3>
+        <p className="mt-3 text-sm font-semibold text-blue-100">
+          This is the code used on the Enter Event Code screen to unlock the tournament Main System. To change it, enter the new code twice, type CHANGE CODE in the confirmation box, then save.
+        </p>
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+          <input
+            type="password"
+            value={eventEntryCode}
+            onChange={(event) => setEventEntryCode(event.target.value)}
+            className="w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
+            placeholder="New entry code"
+          />
+          <input
+            type="password"
+            value={eventEntryCodeConfirm}
+            onChange={(event) => setEventEntryCodeConfirm(event.target.value)}
+            className="w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white"
+            placeholder="Confirm new entry code"
+          />
+        </div>
+        <input
+          type="text"
+          value={eventEntryCodeApproval}
+          onChange={(event) => setEventEntryCodeApproval(event.target.value)}
+          className="mt-3 w-full rounded-xl border border-amber-300/50 bg-slate-950 px-4 py-3 font-black uppercase tracking-wide text-white"
+          placeholder="Type CHANGE CODE"
+        />
+        <p className="mt-3 rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-semibold text-amber-100">
+          After saving, this browser session switches to the new code automatically. If the saved code is ever lost, an administrator can set the server-only TOURNAMENT_ADMIN_OVERRIDE_CODE value and use that to get back in.
+        </p>
+        <button
+          type="button"
+          onClick={saveEventEntryCode}
+          disabled={!canSaveEventEntryCode}
+          className="mt-4 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Save Entry Code
+        </button>
+      </div>
     </section>
   );
 }
 function SmsTab({ state, smsEnabled, setSmsEnabled, runAction, actionLoading }) {
-  const phoneCount = new Set((state.contacts || []).map((contact) => contact.phone).filter(Boolean)).size;
+  const activeDivisions = useMemo(() => state.divisions.filter((division) => division.is_active), [state.divisions]);
+  const activeDivisionIds = useMemo(() => activeDivisions.map((division) => String(division.id)), [activeDivisions]);
+  const phoneCount = useMemo(() => broadcastPhoneCount(state, activeDivisionIds), [activeDivisionIds, state]);
   const [testPhone, setTestPhone] = useState("");
   const [showFields, setShowFields] = useState(false);
+  const [showBroadcastPrompt, setShowBroadcastPrompt] = useState(false);
   const [templates, setTemplates] = useState(() => smsTemplateState(state.tournament.settings?.smsTemplates));
 
   useEffect(() => {
@@ -1563,7 +1884,7 @@ function SmsTab({ state, smsEnabled, setSmsEnabled, runAction, actionLoading }) 
           <button
             type="button"
             disabled={!smsEnabled || Boolean(actionLoading) || phoneCount === 0}
-            onClick={() => runAction("sendBroadcastText")}
+            onClick={() => setShowBroadcastPrompt(true)}
             className="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Text All Participants
@@ -1638,7 +1959,86 @@ function SmsTab({ state, smsEnabled, setSmsEnabled, runAction, actionLoading }) 
           </button>
         </div>
       </div>
+      {showBroadcastPrompt && (
+        <BroadcastTextModal
+          state={state}
+          divisions={activeDivisions}
+          initialMessage={templates.broadcast}
+          sending={actionLoading === "sendBroadcastText"}
+          onClose={() => setShowBroadcastPrompt(false)}
+          onSend={async ({ message, divisionIds }) => {
+            const completed = await runAction("sendBroadcastText", { message, divisionIds });
+            if (completed) setShowBroadcastPrompt(false);
+          }}
+        />
+      )}
     </section>
+  );
+}
+
+function BroadcastTextModal({ state, divisions, initialMessage, onClose, onSend, sending }) {
+  const [message, setMessage] = useState(initialMessage || "");
+  const [selectedDivisionIds, setSelectedDivisionIds] = useState(() => divisions.map((division) => String(division.id)));
+  const recipientCount = useMemo(() => broadcastPhoneCount(state, selectedDivisionIds), [selectedDivisionIds, state]);
+
+  function toggleDivision(divisionId) {
+    const key = String(divisionId);
+    setSelectedDivisionIds((current) =>
+      current.includes(key) ? current.filter((id) => id !== key) : [...current, key]
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 p-4">
+      <div className="mx-auto max-w-2xl rounded-2xl border border-blue-300/30 bg-slate-900 p-5 text-white shadow-2xl">
+        <h2 className="text-2xl font-black">Tournament Broadcast</h2>
+        <div className="mt-3 rounded-xl border border-cyan-300/30 bg-cyan-400/15 px-4 py-3 text-lg font-black text-cyan-100">
+          Sending to {recipientCount} phone number{recipientCount === 1 ? "" : "s"}
+        </div>
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
+          {divisions.map((division) => {
+            const checked = selectedDivisionIds.includes(String(division.id));
+            return (
+              <label key={division.id} className={`flex items-center gap-3 rounded-xl border px-4 py-3 text-sm font-black ${checked ? "border-cyan-300/50 bg-blue-950 text-white" : "border-blue-300/20 bg-slate-950/60 text-blue-200"}`}>
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  onChange={() => toggleDivision(division.id)}
+                  className="size-4 accent-cyan-400"
+                />
+                {division.name}
+              </label>
+            );
+          })}
+        </div>
+        <label className="mt-4 block text-sm font-black text-blue-200">
+          Broadcast Text
+          <textarea
+            value={message}
+            onChange={(event) => setMessage(event.target.value)}
+            rows={8}
+            className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 font-mono text-sm text-white"
+          />
+        </label>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => onSend({ message, divisionIds: selectedDivisionIds })}
+            disabled={sending || recipientCount === 0 || !message.trim() || selectedDivisionIds.length === 0}
+            className="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {sending ? "Sending..." : "Send Broadcast"}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-3 text-sm font-black text-white hover:bg-blue-900"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -1656,46 +2056,100 @@ function SmsTemplateTextArea({ label, value, onChange }) {
   );
 }
 
-function LogTab({ state }) {
+function LogTab({ state, runAction, actionLoading }) {
+  const [showPhoneChanges, setShowPhoneChanges] = useState(false);
+  const phoneChanges = useMemo(() => state.phoneChangeLog || phoneChangeLogRows(state.log), [state.log, state.phoneChangeLog]);
+  const rows = showPhoneChanges ? phoneChanges : state.log;
+
   return (
     <section className="mt-5 rounded-2xl border border-blue-300/20 bg-slate-950/70 p-5">
-      <h2 className="text-2xl font-black">Activity Log</h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="text-2xl font-black">Activity Log</h2>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() => setShowPhoneChanges((value) => !value)}
+            disabled={phoneChanges.length === 0}
+            className={`w-fit rounded-xl px-4 py-3 text-sm font-black disabled:cursor-not-allowed disabled:opacity-50 ${showPhoneChanges ? "bg-cyan-500 text-white" : "border border-blue-300/40 bg-blue-950 text-white hover:bg-blue-900"}`}
+          >
+            {showPhoneChanges ? "Show Full Log" : "Show Phone # Changes"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (confirmTypedAction("Clear the tournament activity log? This cannot be undone.", "CLEAR")) {
+                runAction("clearLog");
+              }
+            }}
+            disabled={Boolean(actionLoading) || state.log.length === 0}
+            className="w-fit rounded-xl bg-rose-700 px-4 py-3 text-sm font-black text-white hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Clear Log
+          </button>
+        </div>
+      </div>
       <div className="mt-4 space-y-2">
-        {state.log.map((row) => (
+        {rows.map((row) => (
           <div key={row.id} className="rounded-xl border border-blue-300/20 bg-blue-950/70 px-4 py-3 text-sm font-semibold text-blue-100">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="font-black text-white">{row.log_type}</span>
+              <span className="font-black text-white">{showPhoneChanges ? phoneChangeLabel(row) : row.log_type}</span>
               <span>{formatTime(row.created_at)}</span>
             </div>
-            <div className="mt-1">{row.message}</div>
+            {showPhoneChanges ? (
+              <div className="mt-2 grid gap-2 sm:grid-cols-3">
+                <div><span className="text-blue-300">Name:</span> {phoneChangeMetadata(row).playerName || "Player"}</div>
+                <div><span className="text-blue-300">Old:</span> {phoneChangeMetadata(row).oldPhone || "blank"}</div>
+                <div><span className="text-blue-300">New:</span> {phoneChangeMetadata(row).newPhone || "blank"}</div>
+              </div>
+            ) : (
+              <div className="mt-1">{row.message}</div>
+            )}
           </div>
         ))}
-        {state.log.length === 0 && <div className="text-sm font-semibold text-blue-100">No activity yet.</div>}
+        {rows.length === 0 && <div className="text-sm font-semibold text-blue-100">{showPhoneChanges ? "No phone number changes yet." : "No activity yet."}</div>}
       </div>
     </section>
   );
 }
 
-function ResultModal({ match, smsEnabled, onClose, onSave, saving }) {
-  const [homeScore, setHomeScore] = useState(match.home_score ?? "");
-  const [awayScore, setAwayScore] = useState(match.away_score ?? "");
+function ResultModal({ match, smsEnabled, settings = {}, onClose, onSave, saving }) {
   const [resultType, setResultType] = useState(match.result_type || "completed");
-  const home = Number(homeScore || 0);
-  const away = Number(awayScore || 0);
-  const defaultWinner = home >= away ? match.home_team_id : match.away_team_id;
+  const scoreSettings = tournamentScoreSettings(settings);
+  const [gameScores, setGameScores] = useState(() => resultGameScoresForMatch(match, scoreSettings.numberOfGames));
+  const matchSummaryResult = tournamentMatchScoreSummary(gameScores, scoreSettings);
+  const scoreValidationMessage = resultType === "completed" ? tournamentMatchScoreValidationMessage(gameScores, scoreSettings) : "";
+  const defaultWinner =
+    matchSummaryResult.winner === "home"
+      ? match.home_team_id
+      : matchSummaryResult.winner === "away"
+        ? match.away_team_id
+        : match.home_team_id;
   const [winnerTeamId, setWinnerTeamId] = useState(match.winner_team_id || defaultWinner);
+  const requiredGameCount = requiredResultGameCount(gameScores, scoreSettings);
 
   useEffect(() => {
     if (resultType === "not_played") {
       setWinnerTeamId("");
-    } else if (Number(homeScore || 0) !== Number(awayScore || 0)) {
-      setWinnerTeamId(Number(homeScore || 0) > Number(awayScore || 0) ? match.home_team_id : match.away_team_id);
+    } else if (matchSummaryResult.winner === "home") {
+      setWinnerTeamId(match.home_team_id);
+    } else if (matchSummaryResult.winner === "away") {
+      setWinnerTeamId(match.away_team_id);
     }
-  }, [awayScore, homeScore, match.away_team_id, match.home_team_id, resultType]);
+  }, [match.away_team_id, match.home_team_id, matchSummaryResult.winner, resultType]);
+
+  function updateGameScore(index, side, value) {
+    setGameScores((current) =>
+      current.map((game, gameIndex) =>
+        gameIndex === index
+          ? { ...game, [side]: onlyDigits(value) }
+          : game
+      )
+    );
+  }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4">
-      <div className="w-full max-w-lg rounded-2xl border border-blue-300/30 bg-slate-900 p-5 text-white shadow-2xl">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 p-4">
+      <div className="mx-auto w-full max-w-2xl rounded-2xl border border-blue-300/30 bg-slate-900 p-5 text-white shadow-2xl">
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-2xl font-black">Enter Result / Score</h2>
@@ -1705,31 +2159,104 @@ function ResultModal({ match, smsEnabled, onClose, onSave, saving }) {
             Close
           </button>
         </div>
+        {resultType === "completed" && (
+          <div className="mt-3 rounded-xl border border-blue-300/20 bg-blue-950/60 px-4 py-3 text-sm font-black text-blue-100">
+            {scoreSettings.numberOfGames === 1 ? "1 game" : `Best ${scoreSettings.gamesNeededToWin} of ${scoreSettings.numberOfGames}`} | Played to {scoreSettings.gamesPlayedTo}, win by {scoreSettings.winBy}{scoreSettings.rallyScoring ? ", Rally Scoring" : ""}
+          </div>
+        )}
+        {scoreValidationMessage && (
+          <div className="mt-3 rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
+            {scoreValidationMessage}
+          </div>
+        )}
 
-        <div className="mt-5 grid grid-cols-2 gap-3">
-          <label className="text-sm font-black text-blue-200">
-            {match.home_team?.name || "Home"}
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={homeScore}
-              onChange={(event) => setHomeScore(onlyDigits(event.target.value))}
-              className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-2xl font-black text-white"
-            />
-          </label>
-          <label className="text-sm font-black text-blue-200">
-            {match.away_team?.name || "Away"}
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={awayScore}
-              onChange={(event) => setAwayScore(onlyDigits(event.target.value))}
-              className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-2xl font-black text-white"
-            />
-          </label>
-        </div>
+        {resultType === "completed" && (
+          <div className="mt-5 space-y-3">
+            {scoreSettings.numberOfGames > 1 ? (
+              <div className="overflow-hidden rounded-2xl border border-blue-300/25 bg-blue-950/50">
+                <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] gap-2 border-b border-blue-300/20 bg-slate-950/60 px-3 py-3 text-xs font-black uppercase text-blue-100 sm:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)]">
+                  <div>Game</div>
+                  <div className="truncate">{match.home_team?.name || "Home"}</div>
+                  <div className="truncate">{match.away_team?.name || "Away"}</div>
+                </div>
+                <div className="divide-y divide-blue-300/15">
+                  {gameScores.map((game, index) => {
+                    const needed = index < requiredGameCount;
+                    return (
+                      <div key={index} className={`grid grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 px-3 py-3 sm:grid-cols-[7rem_minmax(0,1fr)_minmax(0,1fr)] ${needed ? "" : "bg-slate-950/45"}`}>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm font-black uppercase text-blue-100">Game {index + 1}</span>
+                          {!needed && <span className="w-fit rounded-full bg-slate-700 px-2 py-0.5 text-[11px] font-black text-slate-200">Not needed</span>}
+                        </div>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          aria-label={`${match.home_team?.name || "Home"} Game ${index + 1} score`}
+                          value={game.home}
+                          disabled={!needed}
+                          onChange={(event) => updateGameScore(index, "home", event.target.value)}
+                          className="w-full rounded-xl border border-blue-300/30 bg-slate-950 px-3 py-3 text-center text-2xl font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                        />
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          aria-label={`${match.away_team?.name || "Away"} Game ${index + 1} score`}
+                          value={game.away}
+                          disabled={!needed}
+                          onChange={(event) => updateGameScore(index, "away", event.target.value)}
+                          className="w-full rounded-xl border border-blue-300/30 bg-slate-950 px-3 py-3 text-center text-2xl font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              gameScores.map((game, index) => {
+                const needed = index < requiredGameCount;
+                return (
+                  <div key={index} className={`rounded-2xl border ${needed ? "border-blue-300/25 bg-blue-950/50" : "border-slate-600/40 bg-slate-950/50"} p-4`}>
+                    <div className="mb-3 flex items-center justify-between gap-2">
+                      <h3 className="text-sm font-black uppercase text-blue-100">Game {index + 1}</h3>
+                      {!needed && <span className="rounded-full bg-slate-700 px-3 py-1 text-xs font-black text-slate-200">Not needed</span>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className="text-sm font-black text-blue-200">
+                        {match.home_team?.name || "Home"}
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          value={game.home}
+                          disabled={!needed}
+                          onChange={(event) => updateGameScore(index, "home", event.target.value)}
+                          className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-2xl font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                        />
+                      </label>
+                      <label className="text-sm font-black text-blue-200">
+                        {match.away_team?.name || "Away"}
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
+                          value={game.away}
+                          disabled={!needed}
+                          onChange={(event) => updateGameScore(index, "away", event.target.value)}
+                          className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-2xl font-black text-white disabled:cursor-not-allowed disabled:opacity-45"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+            <div className="rounded-xl bg-slate-950/70 px-4 py-3 text-sm font-black text-blue-100">
+              Game Wins: {match.home_team?.name || "Home"} {matchSummaryResult.homeWins} - {match.away_team?.name || "Away"} {matchSummaryResult.awayWins}
+            </div>
+          </div>
+        )}
 
         <label className="mt-4 block text-sm font-black text-blue-200">
           Result Type
@@ -1753,15 +2280,16 @@ function ResultModal({ match, smsEnabled, onClose, onSave, saving }) {
 
         <button
           type="button"
-          disabled={saving}
+          disabled={saving || Boolean(scoreValidationMessage)}
           onClick={() => onSave({
             matchId: match.id,
             resultType,
-            homeScore,
-            awayScore,
+            homeScore: matchSummaryResult.homePoints,
+            awayScore: matchSummaryResult.awayPoints,
+            gameScores: trimmedResultGameScores(gameScores, scoreSettings),
             winnerTeamId,
             smsEnabled,
-            scoreText: resultType === "not_played" ? "Not played" : `${homeScore || 0}-${awayScore || 0}`,
+            scoreText: resultType === "not_played" ? "Not played" : resultScoreText(gameScores, scoreSettings),
           })}
           className="mt-5 w-full rounded-xl bg-cyan-500 px-5 py-3 font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
@@ -1940,6 +2468,53 @@ function duplicateTournamentTeamLine(teams, teamId, teamName, lineNumber) {
   );
 }
 
+function addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, divisionTeamMax) {
+  const messages = [];
+  const player1Id = String(form.player1MemberId || "");
+  const player2Id = String(form.player2MemberId || "");
+  const lineNumber = Number(form.lineNumber);
+
+  if (!String(form.lineNumber || "").trim()) {
+    messages.push("Line is required.");
+  }
+
+  if (!String(form.regularSeasonStanding || "").trim()) {
+    messages.push("Regular Season Standing is required.");
+  }
+
+  if (!player1Id || !player2Id) {
+    messages.push("Both players must be selected.");
+  }
+
+  if (player1Id && player2Id && player1Id === player2Id) {
+    messages.push("The same player cannot be entered twice on the same team.");
+  }
+
+  const usedPlayer = (state.contacts || []).find((contact) =>
+    contact.member_id && [player1Id, player2Id].includes(String(contact.member_id))
+  );
+  if (usedPlayer) {
+    messages.push(`${usedPlayer.display_name || "A selected player"} is already on another tournament team.`);
+  }
+
+  const max = Number(divisionTeamMax);
+  if (Number.isFinite(max) && max > 0 && teamTotal !== "" && Number(teamTotal) > max) {
+    messages.push("The players' total rating must be at or below the Division Team Max.");
+  }
+
+  if (selectedSourceTeam && Number.isFinite(lineNumber)) {
+    const duplicateMainTeamLine = (state.teams || []).some((team) =>
+      normalizeName(team.name) === normalizeName(selectedSourceTeam.name) &&
+      Number(team.line_number || 1) === lineNumber
+    );
+    if (duplicateMainTeamLine) {
+      messages.push("That Main System Team already has a tournament team with this Line #.");
+    }
+  }
+
+  return [...new Set(messages)];
+}
+
 function updateTournamentTeamState(setState, teamId, updates) {
   setState((current) => {
     if (!current) return current;
@@ -1962,6 +2537,62 @@ function updateTournamentTeamState(setState, teamId, updates) {
   });
 }
 
+function updateTournamentContactPhoneState(setState, details) {
+  setState((current) => {
+    if (!current) return current;
+
+    const teamKey = String(details.teamId);
+    const slot = Number(details.slot);
+    let foundContact = false;
+    const contacts = (current.contacts || []).map((contact) => {
+      if (String(contact.tournament_team_id) !== teamKey || Number(contact.player_slot) !== slot) return contact;
+      foundContact = true;
+      return {
+        ...contact,
+        member_id: details.memberId || contact.member_id,
+        display_name: details.displayName || contact.display_name,
+        phone: details.phone,
+      };
+    });
+
+    if (!foundContact) {
+      contacts.push({
+        id: `local-${teamKey}-${slot}`,
+        tournament_team_id: details.teamId,
+        player_slot: slot,
+        member_id: details.memberId || null,
+        display_name: details.displayName || null,
+        phone: details.phone,
+      });
+    }
+
+    return { ...current, contacts };
+  });
+}
+
+function addLocalPhoneChangeLog(setState, metadata) {
+  setState((current) => {
+    if (!current) return current;
+
+    const now = new Date().toISOString();
+    const message = `${metadata.playerName || "Player"} phone changed from ${metadata.oldPhone || "blank"} to ${metadata.newPhone || "blank"}.`;
+    const row = {
+      id: `local-phone-change-${metadata.teamId}-${metadata.playerSlot}-${Date.now()}`,
+      tournament_id: current.tournament?.id || "",
+      log_type: "phone_change",
+      message,
+      metadata,
+      created_at: now,
+    };
+
+    return {
+      ...current,
+      log: [row, ...(current.log || [])],
+      phoneChangeLog: [row, ...(current.phoneChangeLog || [])],
+    };
+  });
+}
+
 function playerSummary(team, contacts, slot) {
   const contact = (contacts || []).find((row) => Number(row.player_slot) === slot);
   const name = slot === 1 ? team.player_1_name : team.player_2_name;
@@ -1970,6 +2601,90 @@ function playerSummary(team, contacts, slot) {
     name || `Player ${slot}`,
     phone ? `(${phone})` : "",
   ].filter(Boolean).join(" ");
+}
+
+function playerDisplayName(team, contacts, slot) {
+  const contact = (contacts || []).find((row) => Number(row.player_slot) === slot);
+  const name = slot === 1 ? team.player_1_name : team.player_2_name;
+  return contact?.display_name || name || `Player ${slot}`;
+}
+
+function playerPhoneFromContacts(contacts, slot) {
+  const contact = (contacts || []).find((row) => Number(row.player_slot) === slot);
+  return contact?.phone || "";
+}
+
+function playerMemberIdFromContacts(contacts, slot) {
+  const contact = (contacts || []).find((row) => Number(row.player_slot) === slot);
+  return contact?.member_id || "";
+}
+
+function broadcastPhoneCount(state, selectedDivisionIds = []) {
+  const selectedDivisionSet = new Set((selectedDivisionIds || []).map((divisionId) => String(divisionId)));
+  if (selectedDivisionSet.size === 0) return 0;
+  const teamsById = (state.teams || []).reduce((map, team) => {
+    map[String(team.id)] = team;
+    return map;
+  }, {});
+  const phones = new Set();
+
+  (state.contacts || []).forEach((contact) => {
+    const team = teamsById[String(contact.tournament_team_id)];
+    if (!team || !contact.phone) return;
+    if (selectedDivisionSet.size > 0 && !selectedDivisionSet.has(String(team.division_id || ""))) return;
+    phones.add(contact.phone);
+  });
+
+  return phones.size;
+}
+
+function phoneChangeLogRows(logRows = []) {
+  return (logRows || []).filter((row) => row.log_type === "phone_change");
+}
+
+function phoneChangeMetadata(row) {
+  if (!row?.metadata) return {};
+  if (typeof row.metadata === "string") {
+    try {
+      return JSON.parse(row.metadata);
+    } catch {
+      return {};
+    }
+  }
+  return row.metadata;
+}
+
+function phoneChangeLabel(row) {
+  const metadata = phoneChangeMetadata(row);
+  return metadata.teamName ? `Phone Change - ${metadata.teamName}` : "Phone Change";
+}
+
+function emptyTournamentTeam() {
+  return {
+    id: "",
+    name: "",
+    line_number: 1,
+    seed: "",
+    player_1_name: "",
+    player_2_name: "",
+  };
+}
+
+function emptyTeamFormState() {
+  return {
+    name: "",
+    lineNumber: 1,
+    sourceTeamId: "",
+    regularSeasonStanding: "",
+    player1MemberId: "",
+    player1Name: "",
+    player1Phone: "",
+    player1Rating: "",
+    player2MemberId: "",
+    player2Name: "",
+    player2Phone: "",
+    player2Rating: "",
+  };
 }
 
 function teamFormState(team, contacts, sourceTeams = []) {
@@ -2118,26 +2833,366 @@ function courtLabelsForCount(labels, count) {
   return Array.from({ length: count }, (_, index) => labels[index] || "");
 }
 
-function exportMatchesCsv(state) {
+function exportMatchesCsv(state, selectedDivisionIds = []) {
+  const contactsByTeam = contactsByTournamentTeam(state.contacts);
+  const teamsById = teamsByTournamentId(state.teams);
+  const selectedDivisionSet = selectedDivisionIdSet(selectedDivisionIds);
   const rows = [
-    ["Division", "Line", "Home Team", "Away Team", "Status", "Result", "Score", "Court", "Queued", "Assigned", "Completed"],
-    ...(state.matches || []).map((match) => [
-      match.division?.name || "",
-      match.line_number || "",
-      match.home_team?.name || "",
-      match.away_team?.name || "",
-      match.status || "",
-      matchResultText(match),
-      scoreDisplay(match),
-      match.court?.name || "",
-      match.queue_entered_at || "",
-      match.assigned_at || "",
-      match.completed_at || "",
-    ]),
+    [
+      "Match ID", "Division", "Line", "Status", "Court", "Result Type", "Winner",
+      "Home Team", "Home Line", "Home Seed", "Home Player 1", "Home Player 1 Phone", "Home Player 2", "Home Player 2 Phone",
+      "Away Team", "Away Line", "Away Seed", "Away Player 1", "Away Player 1 Phone", "Away Player 2", "Away Player 2 Phone",
+      "Game 1 Home", "Game 1 Away", "Game 2 Home", "Game 2 Away", "Game 3 Home", "Game 3 Away", "Game 4 Home", "Game 4 Away", "Game 5 Home", "Game 5 Away",
+      "Home Game Wins", "Away Game Wins", "Home Total Points", "Away Total Points", "Compact Score", "Assigned At", "Completed At",
+    ],
+    ...selectedTournamentMatches(state.matches, selectedDivisionSet).map((match) => {
+      const homeTeam = teamsById[String(match.home_team_id)] || match.home_team || {};
+      const awayTeam = teamsById[String(match.away_team_id)] || match.away_team || {};
+      const homeContacts = contactsByTeam[String(match.home_team_id)] || [];
+      const awayContacts = contactsByTeam[String(match.away_team_id)] || [];
+      const games = matchGames(match);
+      const totals = gameTotals(games);
+
+      return [
+        match.legacy_id || match.id,
+        match.division?.name || "",
+        `Line ${match.line_number || 1}`,
+        match.status || "",
+        match.court?.name || "",
+        match.result_type || "",
+        match.winner_team?.name || winnerNameFromMatch(match),
+        homeTeam.name || "",
+        homeTeam.line_number || match.line_number || "",
+        regularSeasonStandingValue(homeTeam) || "",
+        playerName(homeTeam, homeContacts, 1),
+        playerPhone(homeContacts, 1),
+        playerName(homeTeam, homeContacts, 2),
+        playerPhone(homeContacts, 2),
+        awayTeam.name || "",
+        awayTeam.line_number || match.line_number || "",
+        regularSeasonStandingValue(awayTeam) || "",
+        playerName(awayTeam, awayContacts, 1),
+        playerPhone(awayContacts, 1),
+        playerName(awayTeam, awayContacts, 2),
+        playerPhone(awayContacts, 2),
+        gameScore(games, 0, "home"),
+        gameScore(games, 0, "away"),
+        gameScore(games, 1, "home"),
+        gameScore(games, 1, "away"),
+        gameScore(games, 2, "home"),
+        gameScore(games, 2, "away"),
+        gameScore(games, 3, "home"),
+        gameScore(games, 3, "away"),
+        gameScore(games, 4, "home"),
+        gameScore(games, 4, "away"),
+        totals.homeWins,
+        totals.awayWins,
+        totals.homePoints,
+        totals.awayPoints,
+        scoreDisplay(match),
+        csvDateTime(match.assigned_at),
+        csvDateTime(match.completed_at),
+      ];
+    }),
   ];
   const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
-  const fileName = `${slugify(state.tournament.name || "tournament")}-matches.csv`;
+  const fileName = `${slugify(state.tournament.name || "tournament")}-matches-detailed.csv`;
   downloadCsv(csv, fileName);
+}
+
+function exportDuprCsv(state, selectedDivisionIds = []) {
+  const contactsByTeam = contactsByTournamentTeam(state.contacts);
+  const teamsById = teamsByTournamentId(state.teams);
+  const duprByMemberId = duprIdsByMemberId(state.sourceRosters);
+  const selectedDivisionSet = selectedDivisionIdSet(selectedDivisionIds);
+  const rows = [
+    [
+      "matchType", "scoreType", "event", "date",
+      "playerA1", "playerA1DuprId", "playerA2", "playerA2DuprId",
+      "playerB1", "playerB1DuprId", "playerB2", "playerB2DuprId",
+      "teamAGame1", "teamBGame1", "teamAGame2", "teamBGame2", "teamAGame3", "teamBGame3", "teamAGame4", "teamBGame4", "teamAGame5", "teamBGame5",
+    ],
+    ...selectedTournamentMatches(state.matches, selectedDivisionSet)
+      .filter((match) => match.status === "done" && match.result_type !== "not_played" && matchGames(match).length > 0)
+      .map((match) => {
+        const homeTeam = teamsById[String(match.home_team_id)] || match.home_team || {};
+        const awayTeam = teamsById[String(match.away_team_id)] || match.away_team || {};
+        const homeContacts = contactsByTeam[String(match.home_team_id)] || [];
+        const awayContacts = contactsByTeam[String(match.away_team_id)] || [];
+        const games = matchGames(match);
+
+        return [
+          "D",
+          "SIDEOUT",
+          state.tournament.name || "LWR Pickleball Club DUPR League",
+          csvDate(match.completed_at || match.assigned_at || match.updated_at),
+          playerName(homeTeam, homeContacts, 1),
+          playerDuprId(homeContacts, duprByMemberId, 1),
+          playerName(homeTeam, homeContacts, 2),
+          playerDuprId(homeContacts, duprByMemberId, 2),
+          playerName(awayTeam, awayContacts, 1),
+          playerDuprId(awayContacts, duprByMemberId, 1),
+          playerName(awayTeam, awayContacts, 2),
+          playerDuprId(awayContacts, duprByMemberId, 2),
+          gameScore(games, 0, "home"),
+          gameScore(games, 0, "away"),
+          gameScore(games, 1, "home"),
+          gameScore(games, 1, "away"),
+          gameScore(games, 2, "home"),
+          gameScore(games, 2, "away"),
+          gameScore(games, 3, "home"),
+          gameScore(games, 3, "away"),
+          gameScore(games, 4, "home"),
+          gameScore(games, 4, "away"),
+        ];
+      }),
+  ];
+  const csv = rows.map((row) => row.map(csvCell).join(",")).join("\n");
+  const fileName = `${slugify(state.tournament.name || "tournament")}-dupr-export.csv`;
+  downloadCsv(csv, fileName);
+}
+
+function selectedDivisionIdSet(selectedDivisionIds = []) {
+  return new Set((selectedDivisionIds || []).map((divisionId) => String(divisionId)));
+}
+
+function selectedTournamentMatches(matches = [], selectedDivisionSet) {
+  return (matches || []).filter((match) =>
+    selectedDivisionSet.size === 0 || selectedDivisionSet.has(String(match.division_id || ""))
+  );
+}
+
+function contactsByTournamentTeam(contacts = []) {
+  return (contacts || []).reduce((map, contact) => {
+    const key = String(contact.tournament_team_id || "");
+    map[key] = [...(map[key] || []), contact];
+    return map;
+  }, {});
+}
+
+function teamsByTournamentId(teams = []) {
+  return (teams || []).reduce((map, team) => {
+    map[String(team.id || "")] = team;
+    return map;
+  }, {});
+}
+
+function duprIdsByMemberId(sourceRosters = []) {
+  return (sourceRosters || []).reduce((map, row) => {
+    if (row.member_id) map[String(row.member_id)] = row.members?.dupr_id || "";
+    return map;
+  }, {});
+}
+
+function playerContact(contacts, slot) {
+  return (contacts || []).find((contact) => Number(contact.player_slot) === Number(slot)) || {};
+}
+
+function playerName(team, contacts, slot) {
+  const contact = playerContact(contacts, slot);
+  if (contact.display_name) return contact.display_name;
+  return slot === 1 ? team?.player_1_name || "" : team?.player_2_name || "";
+}
+
+function playerPhone(contacts, slot) {
+  return playerContact(contacts, slot).phone || "";
+}
+
+function playerDuprId(contacts, duprByMemberId, slot) {
+  const contact = playerContact(contacts, slot);
+  return duprByMemberId[String(contact.member_id || "")] || "";
+}
+
+function matchGames(match) {
+  if (Array.isArray(match?.game_scores) && match.game_scores.length > 0) {
+    return match.game_scores
+      .map((game) => ({ home: numberOrBlank(game.home), away: numberOrBlank(game.away) }))
+      .filter((game) => game.home !== "" || game.away !== "");
+  }
+
+  if (match?.home_score !== null && match?.home_score !== undefined) {
+    return [{ home: numberOrBlank(match.home_score), away: numberOrBlank(match.away_score) }];
+  }
+
+  return [];
+}
+
+function gameScore(games, index, side) {
+  return games[index]?.[side] ?? "";
+}
+
+function gameTotals(games) {
+  return (games || []).reduce((totals, game) => {
+    const home = Number(game.home);
+    const away = Number(game.away);
+    if (Number.isFinite(home)) totals.homePoints += home;
+    if (Number.isFinite(away)) totals.awayPoints += away;
+    if (Number.isFinite(home) && Number.isFinite(away)) {
+      if (home > away) totals.homeWins += 1;
+      if (away > home) totals.awayWins += 1;
+    }
+    return totals;
+  }, { homeWins: 0, awayWins: 0, homePoints: 0, awayPoints: 0 });
+}
+
+function winnerNameFromMatch(match) {
+  const home = Number(match.home_score);
+  const away = Number(match.away_score);
+  if (!Number.isFinite(home) || !Number.isFinite(away) || home === away) return "";
+  return home > away ? match.home_team?.name || "" : match.away_team?.name || "";
+}
+
+function numberOrBlank(value) {
+  if (value === null || value === undefined || value === "") return "";
+  const number = Number(value);
+  return Number.isFinite(number) ? number : "";
+}
+
+function positiveIntegerOrDefault(value, fallback) {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? Math.floor(number) : fallback;
+}
+
+function tournamentScoreSettings(settings = {}) {
+  const numberOfGames = positiveIntegerOrDefault(settings.numberOfGames, legacyNumberOfGames(settings.matchFormat));
+  return {
+    numberOfGames,
+    gamesNeededToWin: Math.floor(numberOfGames / 2) + 1,
+    gamesPlayedTo: positiveIntegerOrDefault(settings.gamesPlayedTo, 11),
+    winBy: positiveIntegerOrDefault(settings.winBy, 2),
+    rallyScoring: settings.rallyScoring === true,
+  };
+}
+
+function legacyNumberOfGames(matchFormat) {
+  const value = String(matchFormat || "");
+  if (/best\s*2\s*(of|out of)\s*3/i.test(value)) return 3;
+  const numberMatch = value.match(/\d+/);
+  return numberMatch ? Number(numberMatch[0]) : 1;
+}
+
+function tournamentScoreValidationMessage(homeScore, awayScore, settings = {}) {
+  if (homeScore === "" || awayScore === "") return "Enter both team scores.";
+
+  const home = Number(homeScore);
+  const away = Number(awayScore);
+  if (!Number.isFinite(home) || !Number.isFinite(away)) return "Enter valid numeric scores.";
+  if (home < 0 || away < 0) return "Scores cannot be negative.";
+  if (home === away) return "Completed matches cannot end in a tie.";
+
+  const winner = Math.max(home, away);
+  const loser = Math.min(home, away);
+  if (winner < settings.gamesPlayedTo) return `Winning score must be at least ${settings.gamesPlayedTo}.`;
+  if (settings.winBy <= 1 && winner > settings.gamesPlayedTo) {
+    return `Winning score cannot be more than ${settings.gamesPlayedTo} when Win By is 1.`;
+  }
+  if (winner - loser < settings.winBy) return `Winning margin must be at least ${settings.winBy}.`;
+  return "";
+}
+
+function resultGameScoresForMatch(match, numberOfGames) {
+  const existingGames = matchGames(match);
+  const sourceGames = existingGames.length > 0
+    ? existingGames
+    : match?.home_score !== null && match?.home_score !== undefined
+      ? [{ home: numberOrBlank(match.home_score), away: numberOrBlank(match.away_score) }]
+      : [];
+
+  return Array.from({ length: numberOfGames }, (_, index) => ({
+    home: sourceGames[index]?.home === undefined ? "" : String(sourceGames[index].home),
+    away: sourceGames[index]?.away === undefined ? "" : String(sourceGames[index].away),
+  }));
+}
+
+function requiredResultGameCount(gameScores, settings = {}) {
+  let homeWins = 0;
+  let awayWins = 0;
+
+  for (let index = 0; index < settings.numberOfGames; index += 1) {
+    if (index > 0 && (homeWins >= settings.gamesNeededToWin || awayWins >= settings.gamesNeededToWin)) {
+      return index;
+    }
+
+    const game = gameScores[index] || {};
+    if (game.home === "" || game.away === "") {
+      return Math.max(index + 1, settings.numberOfGames === 1 ? 1 : settings.gamesNeededToWin);
+    }
+
+    const home = Number(game.home);
+    const away = Number(game.away);
+    if (Number.isFinite(home) && Number.isFinite(away)) {
+      if (home > away) homeWins += 1;
+      if (away > home) awayWins += 1;
+    }
+  }
+
+  return settings.numberOfGames;
+}
+
+function trimmedResultGameScores(gameScores, settings = {}) {
+  return (gameScores || [])
+    .slice(0, requiredResultGameCount(gameScores, settings))
+    .map((game) => ({ home: numberOrBlank(game.home), away: numberOrBlank(game.away) }))
+    .filter((game) => game.home !== "" || game.away !== "");
+}
+
+function tournamentMatchScoreSummary(gameScores, settings = {}) {
+  return trimmedResultGameScores(gameScores, settings).reduce((summary, game) => {
+    const home = Number(game.home);
+    const away = Number(game.away);
+    if (!Number.isFinite(home) || !Number.isFinite(away)) return summary;
+
+    summary.homePoints += home;
+    summary.awayPoints += away;
+    if (home > away) summary.homeWins += 1;
+    if (away > home) summary.awayWins += 1;
+    summary.winner = summary.homeWins > summary.awayWins ? "home" : summary.awayWins > summary.homeWins ? "away" : "";
+    return summary;
+  }, { homeWins: 0, awayWins: 0, homePoints: 0, awayPoints: 0, winner: "" });
+}
+
+function tournamentMatchScoreValidationMessage(gameScores, settings = {}) {
+  const requiredCount = requiredResultGameCount(gameScores, settings);
+  let homeWins = 0;
+  let awayWins = 0;
+
+  for (let index = 0; index < requiredCount; index += 1) {
+    const game = gameScores[index] || {};
+    const gameMessage = tournamentScoreValidationMessage(game.home, game.away, settings);
+    if (gameMessage) return `Game ${index + 1}: ${gameMessage}`;
+
+    const home = Number(game.home);
+    const away = Number(game.away);
+    if (home > away) homeWins += 1;
+    if (away > home) awayWins += 1;
+  }
+
+  if (homeWins < settings.gamesNeededToWin && awayWins < settings.gamesNeededToWin) {
+    return `Enter enough game scores for one team to win ${settings.gamesNeededToWin} game${settings.gamesNeededToWin === 1 ? "" : "s"}.`;
+  }
+
+  return "";
+}
+
+function resultScoreText(gameScores, settings = {}) {
+  const games = trimmedResultGameScores(gameScores, settings);
+  if (games.length === 0) return "";
+  if (games.length === 1) return `${games[0].home || 0}-${games[0].away || 0}`;
+  return games.map((game, index) => `G${index + 1} ${game.home || 0}-${game.away || 0}`).join(" | ");
+}
+
+function csvDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString();
+}
+
+function csvDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toISOString().slice(0, 10);
 }
 
 function csvCell(value) {
