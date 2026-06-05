@@ -17,7 +17,7 @@ export default function SystemSetupPage() {
   const [schemaWarning, setSchemaWarning] = useState("");
 
   const dirty = JSON.stringify(settings) !== JSON.stringify(savedSettings);
-  useUnsavedChangesWarning(dirty, "system setup");
+  useUnsavedChangesWarning(dirty, "club setup");
 
   const loadSettings = useCallback(async function loadSettings() {
     const response = await fetch("/api/system-settings");
@@ -53,7 +53,7 @@ export default function SystemSetupPage() {
   }
 
   function resetDefaults() {
-    const ok = confirm("Reset System Setup fields to the Lakewood Ranch Pickleball Club defaults?");
+    const ok = confirm("Reset Club Setup fields to the Lakewood Ranch Pickleball Club defaults?");
     if (!ok) return;
     setSettings(DEFAULT_SYSTEM_SETTINGS);
   }
@@ -104,7 +104,7 @@ export default function SystemSetupPage() {
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
       <div className="mx-auto max-w-6xl">
         <AppHeader
-          title="System Setup"
+          title="Club Setup"
           subtitle="Configure club branding, contact details, and deployment-level defaults."
         />
 
@@ -138,7 +138,7 @@ export default function SystemSetupPage() {
                   disabled={saving || !dirty}
                   className="rounded-xl bg-green-700 px-4 py-2 text-sm font-bold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
-                  {saving ? "Saving..." : "Save System Setup"}
+                  {saving ? "Saving..." : "Save Club Setup"}
                 </button>
               </div>
             </div>

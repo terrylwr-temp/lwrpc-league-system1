@@ -1,6 +1,6 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-05-28
+Last updated: 2026-06-05
 
 ## Purpose
 
@@ -46,12 +46,16 @@ The app currently includes pages for:
 - Captain dashboard
 - Player dashboard
 - Scoring operations for league managers to review due matches, filter unverified scores, edit reminder email copy, and send score-entry reminders to captains
-- System Setup for deployment-level club branding and contact defaults, intended to make separate club deployments easier to configure
+- Club Setup for deployment-level club branding and contact defaults, intended to make separate club deployments easier to configure
 - Tournament public display rotation across court detail, court-only, and current standings views, with tournament team check-in/edit workflows and regular-season standing tie-break support
+
+Double-elimination tournament standings show generated championship/finals games even while one or both sides are still waiting on bracket advancement. Winners Bracket rounds stay labeled as `Round X`; the generated championship game between the Winners Bracket winner and Elimination Bracket winner is labeled `Finals`, with a reset game labeled `Finals If Necessary`.
+
+Tournament bracket home/away sides are balanced during bracket generation and as teams advance into later games. Championship reset logic uses bracket-loss history instead of assuming the Winners Bracket team is always the home team.
 
 ## Multi-Club Deployment Direction
 
-For future clubs, prefer a separate Vercel deployment, Supabase project, and GitHub repo/branch per club instead of putting all clubs in one shared database. This keeps data isolation simple, reduces operational risk, and avoids every query needing club-level tenancy filters. The System Setup page stores club-specific defaults such as club name, logo URL, website, main league email, support email, league site URL, and timezone.
+For future clubs, prefer a separate Vercel deployment, Supabase project, and GitHub repo/branch per club instead of putting all clubs in one shared database. This keeps data isolation simple, reduces operational risk, and avoids every query needing club-level tenancy filters. The Club Setup page stores club-specific defaults such as club name, logo URL, website, main league email, support email, league site URL, and timezone. Locations support two member-backed Club Pro assignments; either Club Pro is upgraded to the `club_pro` role and sees teams at that home location in Captain Dashboard.
 
 ## Data Source
 
@@ -103,7 +107,7 @@ Captain Dashboard's generated match score sheet lives in `lwrpc-admin/app/captai
 
 Divisions now support `team_dupr_max`, a combined doubles-team rating cap based on the division rating type. This is not a full roster cap; captains are blocked from saving match setup lineups over the cap, duplicate players are blocked within a match setup, and saved lineups are checked when used in score entry.
 
-Scoring operations can export verified scores for DUPR using the club DUPR CSV format. Verified, not-yet-exported matches are selected by default; already exported verified matches can be manually reselected for override re-export. Export tracking uses `matches.score_exported_at`.
+Scoring operations can export verified scores for DUPR using the club DUPR CSV format. Verified, not-yet-exported matches are selected by default; already exported verified matches can be manually reselected for override re-export. Export tracking uses `matches.score_exported_at`. When League Managers or Commissioners open a match from Scoring Operations, the match detail route receives `?from=scoring`; only that scoped path unlocks editing verified scores and uses Submit/Verify Scores to save, auto-verify, rebuild standings, and notify all match captains that scores changed. Captain Dashboard score-entry behavior remains separate.
 
 Captain Dashboard has a match setup workflow for upcoming matches. Captains can save doubles pairings per match line in `match_lineups`; completed setups show a status badge on match cards, opposing captains receive an email with the submitted lineup, and the match score-entry screen can then populate game players from those saved lineups.
 
@@ -133,7 +137,7 @@ Member Administration also has a Current Rosters Only filter. Team membership da
 
 The captain Division Team Schedules modal displays each division team's season match record from `team_standings` beside team names.
 
-Season setup now lives on its own `/seasons` page under the Setup sidebar. `/leagues` is focused on league information, roster lock status, and league document mappings, with create/edit on the left and the current league list on the right.
+Season setup now lives on its own `/seasons` page under the League Setup sidebar. Teams also lives under League Setup with Seasons, Leagues, and Divisions. Locations, Email Options, Score Sheets, and Club Setup live under the System Setup sidebar. `/leagues` is focused on league information, roster lock status, and league document mappings, with create/edit on the left and the current league list on the right.
 
 League setup supports five league-specific PDF document mappings stored on `leagues`: Code of Conduct, Captains Guide, League Rules, Score Sheet, and League Waiver. The app expects the columns from `lwrpc-admin/supabase-league-documents.sql`, uses `NEXT_PUBLIC_SUPABASE_LEAGUE_DOCUMENTS_BUCKET` or `league-documents` as the default bucket, and uses `NEXT_PUBLIC_SUPABASE_LEAGUE_DOCUMENTS_PREFIX` or `private` as the default Storage folder prefix for listing PDFs. Captain Dashboard team cards show configured league document buttons and open PDFs in an embedded viewer with download and print/open controls.
 Player Dashboard team cards show player-facing league document buttons for Code of Conduct, League Rules, and League Waiver using the same embedded PDF viewer. Captains still see all configured league documents, including Captains Guide and Score Sheet.

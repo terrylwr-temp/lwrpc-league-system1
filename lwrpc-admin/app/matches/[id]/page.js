@@ -2,7 +2,7 @@
 
 import LoadingScreen from "../../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import { requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../../lib/dateTime";
@@ -76,6 +76,7 @@ function lmsRequiredLineGames(lineGames, line = null) {
 export default function MatchDetailPage() {
   const { id } = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
 
   const [match, setMatch] = useState(null);
@@ -426,6 +427,7 @@ export default function MatchDetailPage() {
 
   function canEditScoreEntry() {
     if (!canManageScores()) return false;
+    if (isScoringOperationsOverride()) return true;
     if (match?.score_status === "verified") return false;
     if (match?.score_status === "pending_verification") {
       return currentUserSubmittedScores();
@@ -916,6 +918,20 @@ export default function MatchDetailPage() {
     return hasRole(currentUserRole, "league_manager");
   }
 
+  function isScoringOperationsOverride() {
+    return isManagerOverride() && searchParams.get("from") === "scoring";
+  }
+
+  function matchReturnPath() {
+    if (isScoringOperationsOverride()) return "/scoring";
+    return isCaptainView() ? "/captain-dashboard" : "/schedule-editor";
+  }
+
+  function matchReturnLabel() {
+    if (isScoringOperationsOverride()) return "Scoring Operations";
+    return isCaptainView() ? "Captain Dashboard" : "Schedule Editor";
+  }
+
   function currentUserSubmittedScores() {
     return (
       currentUserMember?.id &&
@@ -1111,11 +1127,13 @@ export default function MatchDetailPage() {
 
   async function completeMatch() {
     if (!canEditScoreEntry()) {
-      alert("Only the captain or co-captain who submitted these pending scores can make corrections and resubmit.");
+      alert("Only the captain or co-captain who submitted these pending scores, or Scoring Operations managers, can make corrections and resubmit.");
       return;
     }
 
-    if (match.score_status === "pending_verification") {
+    const scoringOperationsOverride = isScoringOperationsOverride();
+
+    if (match.score_status === "pending_verification" && !scoringOperationsOverride) {
       if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
     }
 
@@ -1135,22 +1153,40 @@ export default function MatchDetailPage() {
     if (!saved) return;
 
     const currentMemberId = currentUserMember?.id || null;
+    const now = new Date().toISOString();
+    const matchUpdate = scoringOperationsOverride
+      ? {
+          status: "completed",
+          score_status: "verified",
+          score_entered_by_member_id: currentMemberId,
+          score_entered_at: now,
+          score_verified_by_member_id: currentMemberId,
+          score_verified_at: now,
+          score_disputed: false,
+          score_dispute_notes: null,
+          finalized_at: now,
+          home_score: matchSummary.homeWins,
+          away_score: matchSummary.awayWins,
+          winning_team_id: matchSummary.winningTeamId,
+          updated_at: now,
+        }
+      : {
+          status: "completed",
+          score_status: "pending_verification",
+          score_entered_by_member_id: currentMemberId,
+          score_entered_at: now,
+          score_verified_by_member_id: null,
+          score_verified_at: null,
+          finalized_at: null,
+          home_score: matchSummary.homeWins,
+          away_score: matchSummary.awayWins,
+          winning_team_id: matchSummary.winningTeamId,
+          updated_at: now,
+        };
 
     const { error } = await supabase
       .from("matches")
-      .update({
-        status: "completed",
-        score_status: "pending_verification",
-        score_entered_by_member_id: currentMemberId,
-        score_entered_at: new Date().toISOString(),
-        score_verified_by_member_id: null,
-        score_verified_at: null,
-        finalized_at: null,
-        home_score: matchSummary.homeWins,
-        away_score: matchSummary.awayWins,
-        winning_team_id: matchSummary.winningTeamId,
-        updated_at: new Date().toISOString(),
-      })
+      .update(matchUpdate)
       .eq("id", id);
 
     if (error) {
@@ -1158,12 +1194,19 @@ export default function MatchDetailPage() {
       return;
     }
 
-    await sendScoreNotification("submitted");
+    if (scoringOperationsOverride) {
+      await rebuildDivisionStandings();
+      await sendScoreNotification("changed");
 
-    alert("Scores submitted for verification and opposing captains notified.");
+      alert("Scores submitted, verified, standings updated, and match captains notified.");
+    } else {
+      await sendScoreNotification("submitted");
+
+      alert("Scores submitted for verification and opposing captains notified.");
+    }
 
     setScoreDirty(false);
-    router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
+    router.push(matchReturnPath());
   }
 
   async function verifyScores() {
@@ -1211,7 +1254,7 @@ export default function MatchDetailPage() {
     alert("Scores verified and standings updated.");
 
     setScoreDirty(false);
-    router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
+    router.push(matchReturnPath());
   }
 
   async function disputeScores() {
@@ -1254,7 +1297,7 @@ export default function MatchDetailPage() {
 
   async function sendScoreNotification(notificationType) {
     try {
-      const teamIds = notificationTeamIdsForCurrentUser();
+      const teamIds = notificationTeamIdsForCurrentUser(notificationType === "changed");
 
       if (teamIds.length === 0) {
         console.log("No opposing captain team found for score notification.");
@@ -1342,7 +1385,7 @@ export default function MatchDetailPage() {
     }
   }
 
-  function notificationTeamIdsForCurrentUser() {
+  function notificationTeamIdsForCurrentUser(includeAllMatchCaptains = false) {
     const memberId = currentUserMember?.id;
     const homeCaptainIds = [
       match.home_team?.captain_member_id,
@@ -1356,6 +1399,10 @@ export default function MatchDetailPage() {
       match.away_team?.co_captain_2_member_id,
       match.away_team?.club_pro_member_id,
     ].filter(Boolean);
+
+    if (includeAllMatchCaptains) {
+      return [match.home_team_id, match.away_team_id].filter(Boolean);
+    }
 
     if (memberId && homeCaptainIds.some((captainId) => String(captainId) === String(memberId))) {
       return [match.away_team_id].filter(Boolean);
@@ -1399,7 +1446,7 @@ export default function MatchDetailPage() {
   const scoreReviewAllowed = canReviewSubmittedScores();
   const scoreEntryEditable = canEditScoreEntry();
   const scoreReviewActionsVisible =
-    match.score_status === "pending_verification" && scoreReviewAllowed;
+    !isScoringOperationsOverride() && match.score_status === "pending_verification" && scoreReviewAllowed;
   const scoreValidationIssuesByGameId = scoreValidationIssueList.reduce((grouped, issue) => {
     if (!issue.gameId) return grouped;
 
@@ -1423,12 +1470,12 @@ export default function MatchDetailPage() {
             type="button"
             onClick={() => {
               if (confirmUnsavedChanges()) {
-                router.push(isCaptainView() ? "/captain-dashboard" : "/schedule-editor");
+                router.push(matchReturnPath());
               }
             }}
             className="rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 lg:py-2"
           >
-            Back to {isCaptainView() ? "Captain Dashboard" : "Schedule Editor"}
+            Back to {matchReturnLabel()}
           </button>
 
           {scoreEntryEditable && (
@@ -1437,7 +1484,7 @@ export default function MatchDetailPage() {
               onClick={completeMatch}
               className="rounded-xl bg-green-700 px-4 py-3 font-semibold text-white hover:bg-green-800 lg:py-2"
             >
-              Submit Scores
+              {isScoringOperationsOverride() ? "Submit/Verify Scores" : "Submit Scores"}
             </button>
           )}
 
@@ -1843,7 +1890,7 @@ export default function MatchDetailPage() {
                   onClick={completeMatch}
                   className="rounded-xl bg-green-700 px-4 py-3 text-base font-bold text-white shadow hover:bg-green-800"
                 >
-                  Submit Scores
+                  {isScoringOperationsOverride() ? "Submit/Verify Scores" : "Submit Scores"}
                 </button>
               )}
 

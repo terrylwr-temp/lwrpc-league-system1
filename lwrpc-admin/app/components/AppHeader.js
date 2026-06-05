@@ -46,7 +46,6 @@ export default function AppHeader({
       links: [
         { label: "Members", path: "/members", role: "league_manager", icon: "\u{1F465}" },
         { label: "Ratings", path: "/ratings", role: "league_manager", icon: "\u{2B50}" },
-        { label: "Teams", path: "/teams", role: "captain", icon: "\u{1F3D3}" },
         { label: "Scoring", path: "/scoring", role: "league_manager", icon: "\u{2705}" },
         { label: "Standings", path: "/standings", role: "player", icon: "\u{1F3C6}" }
       ]
@@ -61,16 +60,23 @@ export default function AppHeader({
       ]
     },
     {
-      key: "setup",
-      label: "Setup",
+      key: "league-setup",
+      label: "League Setup",
       links: [
+        { label: "Teams", path: "/teams", role: "captain", icon: "\u{1F3D3}" },
         { label: "Seasons", path: "/seasons", role: "league_manager", icon: "\u{1F4C6}" },
         { label: "Leagues", path: "/leagues", role: "league_manager", icon: "\u{1F3DF}\u{FE0F}" },
         { label: "Divisions", path: "/divisions", role: "league_manager", icon: "\u{1F4CA}" },
+      ]
+    },
+    {
+      key: "system-setup",
+      label: "System Setup",
+      links: [
         { label: "Locations", path: "/locations", role: "league_manager", icon: "\u{1F4CD}" },
         { label: "Email Options", path: "/email-options", role: "league_manager", icon: "\u{2709}\u{FE0F}" },
         { label: "Score Sheets", path: "/score-sheets", role: "league_manager", icon: "\u{1F4DD}" },
-        { label: "System Setup", path: "/system-setup", role: "commissioner", icon: "\u{1F3F7}\u{FE0F}" },
+        { label: "Club Setup", path: "/system-setup", role: "commissioner", icon: "\u{1F3F7}\u{FE0F}" },
       ]
     }
   ], []);

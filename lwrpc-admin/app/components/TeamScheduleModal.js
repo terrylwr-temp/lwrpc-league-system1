@@ -194,6 +194,17 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
   const opponentScore = isHome ? match.away_score : match.home_score;
   const hasScore = selectedScore !== null && selectedScore !== undefined && opponentScore !== null && opponentScore !== undefined;
   const showMatchDetails = hasScore && match.score_status === "verified";
+  const verifiedCompleted = match.status === "completed" && match.score_status === "verified";
+  const selectedTeamWon =
+    verifiedCompleted &&
+    selectedTeamId &&
+    match.winning_team_id &&
+    String(match.winning_team_id) === String(selectedTeamId);
+  const selectedTeamLost =
+    verifiedCompleted &&
+    selectedTeamId &&
+    match.winning_team_id &&
+    String(match.winning_team_id) !== String(selectedTeamId);
   const homeScore = match.home_score;
   const awayScore = match.away_score;
   const homeWon =
@@ -202,7 +213,11 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
   const awayWon =
     String(match.winning_team_id || "") === String(match.away_team_id || "") ||
     (homeScore !== null && homeScore !== undefined && awayScore !== null && awayScore !== undefined && Number(awayScore) > Number(homeScore));
-  const matchAccentClass = hasScore ? "bg-emerald-500" : "bg-blue-500";
+  const matchAccentClass = selectedTeamWon
+    ? "bg-emerald-500"
+    : selectedTeamLost
+      ? "bg-red-500"
+      : "bg-blue-500";
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">

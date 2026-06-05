@@ -5,6 +5,7 @@ export const EMAIL_TEMPLATE_KEYS = {
   matchSetupSaved: "match_setup_saved",
   scoreSubmitted: "score_submitted",
   scoreValidated: "score_validated",
+  scoreChanged: "score_changed",
   matchSetupReminder: "match_setup_reminder",
   ratingCheckAlert: "rating_check_alert",
 };
@@ -88,6 +89,24 @@ export const EMAIL_TEMPLATES = [
   <p>Current Match Score: <strong>{{score}}</strong></p>
   <p>Validated By: <strong>{{actor_name}}</strong></p>
   <p>The match result is now finalized in the league system.</p>
+  <hr />
+  <p style="font-size: 12px; color: #666;">LWRPC League Management System</p>
+</div>`,
+  },
+  {
+    key: EMAIL_TEMPLATE_KEYS.scoreChanged,
+    label: "Scores Changed",
+    description: "Sent to match captains when Scoring Operations changes and verifies scores.",
+    placeholders: withCommonPlaceholders(["{{home_team}}", "{{away_team}}", "{{match_date}}", "{{score}}", "{{actor_name}}"]),
+    defaultSubject: "Scores Changed and Verified: {{home_team}} vs {{away_team}}",
+    defaultBody: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
+  <h2>Match Scores Changed</h2>
+  <p>Scores for this match were changed by Scoring Operations and automatically verified.</p>
+  <p><strong>{{home_team}} vs {{away_team}}</strong></p>
+  <p>Match Date: {{match_date}}</p>
+  <p>Updated Match Score: <strong>{{score}}</strong></p>
+  <p>Changed By: <strong>{{actor_name}}</strong></p>
+  <p>No captain validation is required.</p>
   <hr />
   <p style="font-size: 12px; color: #666;">LWRPC League Management System</p>
 </div>`,

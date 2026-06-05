@@ -34,7 +34,7 @@ export const DEFAULT_SCORE_SHEET_TEMPLATE_HTML = `
 `.trim();
 
 export const SCORE_SHEET_PLACEHOLDERS = [
-  ["{{club_name}}", "Club name from System Setup"],
+  ["{{club_name}}", "Club name from Club Setup"],
   ["{{sheet_title}}", "Score sheet title"],
   ["{{match_date}}", "Scheduled match date"],
   ["{{match_time}}", "Scheduled match time"],

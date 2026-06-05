@@ -1766,6 +1766,7 @@ function compareTop4SeedRows(a, b, rules = []) {
 function buildTop4PlayoffRows(tournamentId, divisionId, seeds, now, startOrder) {
   const rowsByKey = {};
   const rows = [];
+  const homeAwayCounts = {};
   let order = startOrder;
 
   for (let matchNumber = 1; matchNumber <= 2; matchNumber += 1) {
@@ -1794,10 +1795,8 @@ function buildTop4PlayoffRows(tournamentId, divisionId, seeds, now, startOrder) 
   rows.push(final);
   order += 1;
 
-  rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 1)].home_team_id = seeds[0]?.id || null;
-  rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 1)].away_team_id = seeds[3]?.id || null;
-  rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 2)].home_team_id = seeds[1]?.id || null;
-  rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 2)].away_team_id = seeds[2]?.id || null;
+  assignGeneratedMatchSides(rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 1)], seeds[0], seeds[3], homeAwayCounts);
+  assignGeneratedMatchSides(rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 2)], seeds[1], seeds[2], homeAwayCounts);
 
   return { rows, nextOrder: order };
 }
@@ -1875,12 +1874,12 @@ function seedWinnersBracketRows(rowsByKey, code, divisionId, teams, winnerRoundC
   const firstRoundCount = winnerRoundCounts[0] || 0;
   const mainSize = highestPowerOfTwoAtMost(teamCount);
   const preliminaryCount = Math.max(0, teamCount - mainSize);
+  const homeAwayCounts = {};
 
   if (preliminaryCount === 0) {
     for (let matchNumber = 1; matchNumber <= firstRoundCount; matchNumber += 1) {
       const row = rowsByKey[bracketLegacyId(code, divisionId, "W", 1, matchNumber)];
-      row.home_team_id = teams[matchNumber - 1]?.id || null;
-      row.away_team_id = teams[teamCount - matchNumber]?.id || null;
+      assignGeneratedMatchSides(row, teams[matchNumber - 1], teams[teamCount - matchNumber], homeAwayCounts);
     }
     return;
   }
@@ -1888,8 +1887,7 @@ function seedWinnersBracketRows(rowsByKey, code, divisionId, teams, winnerRoundC
   const byeCount = mainSize - preliminaryCount;
   for (let matchNumber = 1; matchNumber <= preliminaryCount; matchNumber += 1) {
     const row = rowsByKey[bracketLegacyId(code, divisionId, "W", 1, matchNumber)];
-    row.home_team_id = teams[byeCount + matchNumber - 1]?.id || null;
-    row.away_team_id = teams[teamCount - matchNumber]?.id || null;
+    assignGeneratedMatchSides(row, teams[byeCount + matchNumber - 1], teams[teamCount - matchNumber], homeAwayCounts);
   }
 
   const roundTwoCount = winnerRoundCounts[1] || 0;
@@ -1904,8 +1902,28 @@ function seedWinnersBracketRows(rowsByKey, code, divisionId, teams, winnerRoundC
   for (let index = 0; index < byeCount; index += 1) {
     const slot = byeSlots[index];
     const row = rowsByKey[bracketLegacyId(code, divisionId, "W", 2, slot.matchNumber)];
-    if (row) row[slot.slot] = teams[index]?.id || null;
+    assignGeneratedTeamSlot(row, slot.slot, teams[index], homeAwayCounts);
   }
+}
+
+function assignGeneratedMatchSides(row, teamA, teamB, counts) {
+  if (!row) return;
+  if (teamA && teamB) {
+    const pair = balancedHomeAwayPair(teamA, teamB, counts, row.created_order);
+    row.home_team_id = pair.home.id;
+    row.away_team_id = pair.away.id;
+    incrementHomeAwayCount(counts, pair.home.id, "home_team_id");
+    incrementHomeAwayCount(counts, pair.away.id, "away_team_id");
+    return;
+  }
+
+  assignGeneratedTeamSlot(row, "home_team_id", teamA || teamB, counts);
+}
+
+function assignGeneratedTeamSlot(row, slot, team, counts) {
+  if (!row || !slot || !team?.id) return;
+  row[slot] = team.id;
+  incrementHomeAwayCount(counts, team.id, slot);
 }
 
 function winnerRoundMatchCounts(teamCount) {
@@ -2028,17 +2046,17 @@ async function advanceBracketMatch(supabase, tournament, match) {
   if (meta.bracket === "W") {
     const advanced = await advanceTeamToNextBracketSlot(supabase, matches, meta, winnerTeamId, now);
     if (!advanced) {
-      await placeTeamInFinalSlot(supabase, matches, winnerTeamId, "home_team_id", now);
+      await placeTeamInFinalSlot(supabase, matches, winnerTeamId, now, "home_team_id");
     }
     if (loserTeamId) await placeTeamInNextOpenEliminationSlot(supabase, matches, meta, loserTeamId, now);
   } else if (meta.bracket === "L") {
     const advanced = await advanceTeamToNextBracketSlot(supabase, matches, meta, winnerTeamId, now);
     if (!advanced) {
-      await placeTeamInFinalSlot(supabase, matches, winnerTeamId, "away_team_id", now);
+      await placeTeamInFinalSlot(supabase, matches, winnerTeamId, now, "away_team_id");
     }
   } else if (meta.bracket === "F" && Number(meta.round || 0) === 1) {
-    if (String(winnerTeamId) === String(match.away_team_id || "")) {
-      await placeTeamsInFinalReset(supabase, tournament, matches, match, match.home_team_id, match.away_team_id, now);
+    if (bracketLossCountBeforeMatch(matches, match, winnerTeamId) > 0) {
+      await placeTeamsInFinalReset(supabase, tournament, matches, match, loserTeamId, winnerTeamId, now);
     }
   }
 }
@@ -2047,9 +2065,10 @@ async function advanceTeamToNextBracketSlot(supabase, matches, meta, teamId, now
   const nextRound = Number(meta.round || 0) + 1;
   const roundCounts = bracketRoundCounts(matches, meta.bracket);
   const compactPreliminary = meta.bracket === "W" && roundCounts[Number(meta.round || 0)] === roundCounts[nextRound];
+  const parallelLoserRound = meta.bracket === "L" && roundCounts[Number(meta.round || 0)] === roundCounts[nextRound];
   const preliminaryWithByes = meta.bracket === "W" && Number(meta.round || 0) === 1 && roundCounts[1] <= roundCounts[2];
   const preliminarySlot = preliminaryWithByes ? preliminaryWinnerSlot(Number(meta.match || 0), roundCounts[1], roundCounts[2]) : null;
-  const nextMatchNumber = preliminarySlot?.matchNumber || (compactPreliminary ? Number(meta.match || 0) : Math.ceil(Number(meta.match || 0) / 2));
+  const nextMatchNumber = preliminarySlot?.matchNumber || (compactPreliminary || parallelLoserRound ? Number(meta.match || 0) : Math.ceil(Number(meta.match || 0) / 2));
   const target = (matches || []).find((item) => {
     const itemMeta = parseBracketLegacyId(item.legacy_id);
     return itemMeta &&
@@ -2062,7 +2081,8 @@ async function advanceTeamToNextBracketSlot(supabase, matches, meta, teamId, now
   }
   if (!target) return false;
 
-  const slot = preliminarySlot?.slot || (compactPreliminary ? "away_team_id" : Number(meta.match || 0) % 2 === 1 ? "home_team_id" : "away_team_id");
+  const preferredSlot = preliminarySlot?.slot || (compactPreliminary ? "away_team_id" : parallelLoserRound ? "home_team_id" : Number(meta.match || 0) % 2 === 1 ? "home_team_id" : "away_team_id");
+  const slot = balancedOpenSlot(target, teamId, matches, preferredSlot);
   await placeTeamInMatchSlot(supabase, target, slot, teamId, now);
   return true;
 }
@@ -2078,13 +2098,33 @@ async function placeTeamInNextOpenLoserSlot(supabase, matches, minimumRound, tea
   });
   if (!target) return false;
 
-  const slot = target.home_team_id ? "away_team_id" : "home_team_id";
+  const preferredSlot = target.home_team_id ? "away_team_id" : "home_team_id";
+  const slot = balancedOpenSlot(target, teamId, matches, preferredSlot);
   await placeTeamInMatchSlot(supabase, target, slot, teamId, now);
   return true;
 }
 
 async function placeTeamInNextOpenEliminationSlot(supabase, matches, winnersMeta, teamId, now) {
   const preferredRound = loserRoundForWinnersLoser(matches, winnersMeta);
+  const preferredMatchNumber = loserMatchForWinnersLoser(matches, winnersMeta, preferredRound);
+  if (preferredMatchNumber) {
+    const preferredTarget = (matches || []).find((item) => {
+      const itemMeta = parseBracketLegacyId(item.legacy_id);
+      return itemMeta?.bracket === "L" &&
+        Number(itemMeta.round || 0) === preferredRound &&
+        Number(itemMeta.match || 0) === preferredMatchNumber &&
+        String(item.home_team_id || "") !== String(teamId) &&
+        String(item.away_team_id || "") !== String(teamId) &&
+        (!item.home_team_id || !item.away_team_id);
+    });
+    if (preferredTarget) {
+      const preferredSlot = preferredTarget.away_team_id ? "home_team_id" : "away_team_id";
+      const slot = balancedOpenSlot(preferredTarget, teamId, matches, preferredSlot);
+      await placeTeamInMatchSlot(supabase, preferredTarget, slot, teamId, now);
+      return true;
+    }
+  }
+
   const target = (matches || []).find((item) => {
     const itemMeta = parseBracketLegacyId(item.legacy_id);
     return itemMeta?.bracket === "L" &&
@@ -2095,9 +2135,25 @@ async function placeTeamInNextOpenEliminationSlot(supabase, matches, winnersMeta
   });
   if (!target) return false;
 
-  const slot = target.home_team_id ? "away_team_id" : "home_team_id";
+  const preferredSlot = target.home_team_id ? "away_team_id" : "home_team_id";
+  const slot = balancedOpenSlot(target, teamId, matches, preferredSlot);
   await placeTeamInMatchSlot(supabase, target, slot, teamId, now);
   return true;
+}
+
+function loserMatchForWinnersLoser(matches, winnersMeta, preferredRound) {
+  const loserCounts = bracketRoundCounts(matches, "L");
+  const winnerCounts = bracketRoundCounts(matches, "W");
+  const targetCount = Number(loserCounts[preferredRound] || 0);
+  const winnerRoundCount = Number(winnerCounts[Number(winnersMeta?.round || 0)] || 0);
+  const winnerMatchNumber = Number(winnersMeta?.match || 0);
+
+  if (targetCount <= 0 || winnerMatchNumber <= 0) return null;
+  if (targetCount === 1) return 1;
+  if (winnerRoundCount <= 1) return Math.min(targetCount, winnerMatchNumber);
+
+  const zeroBased = (winnerMatchNumber - 1) % targetCount;
+  return targetCount - zeroBased;
 }
 
 function loserRoundForWinnersLoser(matches, winnersMeta) {
@@ -2124,12 +2180,13 @@ function bracketRoundCounts(matches, bracket) {
   }, {});
 }
 
-async function placeTeamInFinalSlot(supabase, matches, teamId, slot, now) {
+async function placeTeamInFinalSlot(supabase, matches, teamId, now, preferredSlot) {
   const target = (matches || []).find((item) => {
     const meta = parseBracketLegacyId(item.legacy_id);
     return meta?.bracket === "F" && Number(meta.round || 0) === 1;
   });
   if (!target) return false;
+  const slot = balancedOpenSlot(target, teamId, matches, preferredSlot);
   await placeTeamInMatchSlot(supabase, target, slot, teamId, now);
   return true;
 }
@@ -2160,16 +2217,26 @@ async function placeTeamsInFinalReset(supabase, tournament, matches, firstFinal,
     target = data;
   }
 
+  const counts = homeAwayCountsForMatches(matches, target.id);
+  const pair = balancedHomeAwayPair(
+    { id: winnersBracketTeamId },
+    { id: eliminationBracketTeamId },
+    counts,
+    target.created_order
+  );
+  const payload = {
+    home_team_id: pair.home.id,
+    away_team_id: pair.away.id,
+    queue_entered_at: target.queue_entered_at || now,
+    updated_at: now,
+  };
+
   const { error } = await supabase
     .from("tournament_matches")
-    .update({
-      home_team_id: winnersBracketTeamId,
-      away_team_id: eliminationBracketTeamId,
-      queue_entered_at: target.queue_entered_at || now,
-      updated_at: now,
-    })
+    .update(payload)
     .eq("id", target.id);
   if (error) throw error;
+  Object.assign(target, payload);
   return true;
 }
 
@@ -2188,6 +2255,44 @@ async function placeTeamInMatchSlot(supabase, match, slot, teamId, now) {
     })
     .eq("id", match.id);
   if (error) throw error;
+  match[slot] = teamId;
+  match.queue_entered_at = match.queue_entered_at || now;
+  match.updated_at = now;
+}
+
+function balancedOpenSlot(match, teamId, matches, preferredSlot = "home_team_id") {
+  if (!match || !teamId) return preferredSlot;
+  const openSlots = ["home_team_id", "away_team_id"].filter((slot) =>
+    !match[slot] || String(match[slot]) === String(teamId)
+  );
+  if (openSlots.length === 0) return preferredSlot;
+  if (openSlots.length === 1) return openSlots[0];
+
+  const counts = homeAwayCountsForMatches(matches, match.id);
+  const current = counts[String(teamId)] || { home: 0, away: 0 };
+  const homeScore = homeAwayImbalance(Number(current.home || 0) + 1, current.away);
+  const awayScore = homeAwayImbalance(current.home, Number(current.away || 0) + 1);
+
+  if (homeScore < awayScore) return "home_team_id";
+  if (awayScore < homeScore) return "away_team_id";
+  return openSlots.includes(preferredSlot) ? preferredSlot : openSlots[0];
+}
+
+function homeAwayCountsForMatches(matches, excludeMatchId = "") {
+  return (matches || []).reduce((counts, match) => {
+    if (excludeMatchId && String(match.id) === String(excludeMatchId)) return counts;
+    incrementHomeAwayCount(counts, match.home_team_id, "home_team_id");
+    incrementHomeAwayCount(counts, match.away_team_id, "away_team_id");
+    return counts;
+  }, {});
+}
+
+function incrementHomeAwayCount(counts, teamId, slot) {
+  const key = String(teamId || "");
+  if (!key) return;
+  counts[key] ||= { home: 0, away: 0 };
+  if (slot === "home_team_id") counts[key].home += 1;
+  if (slot === "away_team_id") counts[key].away += 1;
 }
 
 function balancedHomeAwayPair(teamA, teamB, counts, order) {
@@ -2279,11 +2384,16 @@ function chooseNextMatch(matches, localBusy, localDivisionLoad, tournament) {
       const homeRest = lastPlayed[teamKey(match.home_team_id)] ? now - lastPlayed[teamKey(match.home_team_id)] : Number.MAX_SAFE_INTEGER;
       const awayRest = lastPlayed[teamKey(match.away_team_id)] ? now - lastPlayed[teamKey(match.away_team_id)] : Number.MAX_SAFE_INTEGER;
       const minRest = Math.min(homeRest, awayRest);
+      const neverPlayedCount = [match.home_team_id, match.away_team_id]
+        .filter(Boolean)
+        .filter((teamId) => !lastPlayed[teamKey(teamId)])
+        .length;
 
       return {
         ...match,
         _restOk: minRest >= minimumRest,
         _minRest: minRest,
+        _neverPlayedCount: neverPlayedCount,
         _wait: now - new Date(match.queue_entered_at || match.created_at || now).getTime(),
       };
     });
@@ -2367,13 +2477,14 @@ function chooseNextEliminationMatch(candidates, allMatches, localDivisionLoad) {
 
   pool.sort((a, b) =>
     a._divisionCourtLoad - b._divisionCourtLoad ||
-    String(a.division?.name || "").localeCompare(String(b.division?.name || "")) ||
+    b._neverPlayedCount - a._neverPlayedCount ||
     b._bracketRemainingPotential - a._bracketRemainingPotential ||
     a._bracketPriority - b._bracketPriority ||
-    a._bracketGameNumber - b._bracketGameNumber ||
+    b._minRest - a._minRest ||
+    String(a.division?.name || "").localeCompare(String(b.division?.name || "")) ||
     a._divisionProgress - b._divisionProgress ||
     b._divisionReadyPending - a._divisionReadyPending ||
-    b._minRest - a._minRest ||
+    a._bracketGameNumber - b._bracketGameNumber ||
     b._wait - a._wait ||
     Number(a._bracketMeta?.round || 0) - Number(b._bracketMeta?.round || 0) ||
     Number(a.created_order || 0) - Number(b.created_order || 0)
@@ -2753,6 +2864,21 @@ function loserTeamIdForMatch(match) {
   if (String(match.home_team_id || "") === winner) return String(match.away_team_id || "");
   if (String(match.away_team_id || "") === winner) return String(match.home_team_id || "");
   return "";
+}
+
+function bracketLossCountBeforeMatch(matches, currentMatch, teamId) {
+  const cleanTeamId = String(teamId || "");
+  if (!cleanTeamId) return 0;
+  const currentOrder = Number(currentMatch?.created_order || Number.MAX_SAFE_INTEGER);
+
+  return (matches || []).filter((match) => {
+    if (String(match.id) === String(currentMatch?.id || "")) return false;
+    if (!isBracketLegacyId(match.legacy_id)) return false;
+    if (match.status !== "done" || match.result_type === "not_played" || !match.winner_team_id) return false;
+    const order = Number(match.created_order || 0);
+    if (Number.isFinite(currentOrder) && order >= currentOrder) return false;
+    return String(loserTeamIdForMatch(match)) === cleanTeamId;
+  }).length;
 }
 
 function eliminationTeamName(player1Name, player2Name) {

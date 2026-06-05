@@ -27,10 +27,11 @@ export default function LocationsPage() {
   const [zipCode, setZipCode] = useState("");
   const [numberOfCourts, setNumberOfCourts] = useState("");
   const [clubProMemberId, setClubProMemberId] = useState("");
+  const [clubPro2MemberId, setClubPro2MemberId] = useState("");
   const [courtNotes, setCourtNotes] = useState("");
 
   useUnsavedChangesWarning(
-    Boolean(editingId || name.trim() || address.trim() || city.trim() || stateValue !== "FL" || zipCode.trim() || numberOfCourts || clubProMemberId || courtNotes.trim()),
+    Boolean(editingId || name.trim() || address.trim() || city.trim() || stateValue !== "FL" || zipCode.trim() || numberOfCourts || clubProMemberId || clubPro2MemberId || courtNotes.trim()),
     "location"
   );
 
@@ -45,6 +46,12 @@ export default function LocationsPage() {
       .select(`
         *,
         club_pro:members!locations_club_pro_member_id_fkey (
+          id,
+          first_name,
+          last_name,
+          email
+        ),
+        club_pro_2:members!locations_club_pro_2_member_id_fkey (
           id,
           first_name,
           last_name,
@@ -92,6 +99,7 @@ export default function LocationsPage() {
       zip_code: zipCode || null,
       number_of_courts: numberOfCourts ? Number(numberOfCourts) : 0,
       club_pro_member_id: clubProMemberId || null,
+      club_pro_2_member_id: clubPro2MemberId || null,
       court_notes: courtNotes || null,
       updated_at: new Date().toISOString(),
     };
@@ -106,6 +114,7 @@ export default function LocationsPage() {
     }
 
     await upgradeMemberToClubPro(clubProMemberId);
+    await upgradeMemberToClubPro(clubPro2MemberId);
 
     clearForm();
     await loadLocations();
@@ -286,6 +295,7 @@ export default function LocationsPage() {
         : String(location.number_of_courts)
     );
     setClubProMemberId(location.club_pro_member_id || "");
+    setClubPro2MemberId(location.club_pro_2_member_id || "");
     setCourtNotes(location.court_notes || "");
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -300,6 +310,7 @@ export default function LocationsPage() {
     setZipCode("");
     setNumberOfCourts("");
     setClubProMemberId("");
+    setClubPro2MemberId("");
     setCourtNotes("");
   }
 
@@ -334,6 +345,7 @@ export default function LocationsPage() {
         (location.name || "").toLowerCase().includes(search) ||
         address.toLowerCase().includes(search) ||
         formatMemberName(location.club_pro).toLowerCase().includes(search) ||
+        formatMemberName(location.club_pro_2).toLowerCase().includes(search) ||
         (location.court_notes || "").toLowerCase().includes(search)
       );
     });
@@ -441,6 +453,22 @@ export default function LocationsPage() {
                     onChange={(e) => setClubProMemberId(e.target.value)}
                   >
                     <option value="">Select Club Pro</option>
+                    {clubProMembers.map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {formatMemberNameLastFirst(member)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <FieldLabel label="Club Pro 2" />
+                  <select
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    value={clubPro2MemberId}
+                    onChange={(e) => setClubPro2MemberId(e.target.value)}
+                  >
+                    <option value="">Select Second Club Pro</option>
                     {clubProMembers.map((member) => (
                       <option key={member.id} value={member.id}>
                         {formatMemberNameLastFirst(member)}
@@ -633,7 +661,12 @@ export default function LocationsPage() {
                   </div>
 
                   <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                    <Info label="Club Pro" value={formatMemberName(location.club_pro)} />
+                    {formatMemberName(location.club_pro) && (
+                      <Info label="Club Pro" value={formatMemberName(location.club_pro)} />
+                    )}
+                    {formatMemberName(location.club_pro_2) && (
+                      <Info label="Second Club Pro" value={formatMemberName(location.club_pro_2)} />
+                    )}
                     <Info label="Court Notes" value={location.court_notes} />
                   </div>
                 </div>

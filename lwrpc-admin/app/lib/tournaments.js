@@ -484,6 +484,21 @@ function loserTeamId(match) {
   return "";
 }
 
+function bracketLossCountBeforeMatch(matches, currentMatch, teamId) {
+  const cleanTeamId = String(teamId || "");
+  if (!cleanTeamId) return 0;
+  const currentOrder = Number(currentMatch?.created_order || Number.MAX_SAFE_INTEGER);
+
+  return (matches || []).filter((match) => {
+    if (String(match.id) === String(currentMatch?.id || "")) return false;
+    if (!match.bracketMeta) return false;
+    if (match.status !== "done" || match.result_type === "not_played" || !match.winner_team_id) return false;
+    const order = Number(match.created_order || 0);
+    if (Number.isFinite(currentOrder) && order >= currentOrder) return false;
+    return String(loserTeamId(match)) === cleanTeamId;
+  }).length;
+}
+
 function bracketSourceLabel(matches, currentMatch, teamId) {
   const cleanTeamId = String(teamId || "");
   if (!cleanTeamId) return "";
@@ -539,7 +554,7 @@ function bracketSections(matches, format) {
 function displayBracketRounds(bracket, rounds, format) {
   let previousRoundCount = 0;
 
-  return Object.entries(rounds)
+  const displayRounds = Object.entries(rounds)
     .sort(([a], [b]) => Number(a) - Number(b))
     .map(([round, roundMatches]) => {
       const sortedMatches = [...roundMatches].sort((a, b) =>
@@ -557,13 +572,21 @@ function displayBracketRounds(bracket, rounds, format) {
 
       return {
         key: `${bracket}-${round}`,
-        title: roundTitle(bracket, Number(round), matches.length, format),
+        round: Number(round),
+        matchCount: matches.length,
         matches,
       };
-    });
+    })
+    .filter((round) => round.matches.length > 0);
+
+  return displayRounds.map((round, index) => ({
+    ...round,
+    title: roundTitle(bracket, round.round, format, index, displayRounds.length),
+  }));
 }
 
 function visibleBracketMatch(match) {
+  if (match?.bracketMeta?.bracket === "F") return true;
   if (match?.home_team_id || match?.away_team_id) return true;
   if (match?.status === "done" || match?.status === "playing") return true;
   return false;
@@ -582,7 +605,7 @@ function bracketChampion(matches, teamsById, format) {
     }
 
     if (!firstFinal || firstFinal.status !== "done" || !firstFinal.winner_team_id) return null;
-    if (String(firstFinal.winner_team_id || "") !== String(firstFinal.home_team_id || "")) return null;
+    if (bracketLossCountBeforeMatch(matches, firstFinal, firstFinal.winner_team_id) > 0) return null;
     return teamsById[String(firstFinal.winner_team_id)] || firstFinal.winner_team || null;
   }
 
@@ -616,10 +639,14 @@ function bracketTitle(bracket, format) {
   return "Bracket";
 }
 
-function roundTitle(bracket, round, matchCount, format) {
-  if (bracket === "F") return round > 1 ? "Championship If Necessary" : "Championship Match";
-  if (format === "single_elimination" && matchCount === 1 && round > 1) return "Final";
-  if (matchCount === 2) return "Semifinals";
+function roundTitle(bracket, round, format, roundIndex = 0, roundTotal = 0) {
+  if (bracket === "F") return round > 1 ? "Finals If Necessary" : "Finals";
+  if (format === "single_elimination" && roundTotal > 0 && roundIndex === roundTotal - 1) {
+    return "Finals";
+  }
+  if (format === "double_elimination" && bracket === "L" && roundTotal > 0 && roundIndex === roundTotal - 1) {
+    return "Semifinals";
+  }
   return `Round ${round}`;
 }
 

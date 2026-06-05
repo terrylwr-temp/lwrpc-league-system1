@@ -144,7 +144,7 @@ export default function CaptainDashboardPage() {
     const { data: clubProLocations, error: clubProLocationsError } = await supabase
       .from("locations")
       .select("id")
-      .eq("club_pro_member_id", memberData.id);
+      .or(`club_pro_member_id.eq.${memberData.id},club_pro_2_member_id.eq.${memberData.id}`);
 
     if (clubProLocationsError) {
       alert(clubProLocationsError.message);

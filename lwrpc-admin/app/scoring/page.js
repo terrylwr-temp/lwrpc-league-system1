@@ -519,7 +519,7 @@ export default function ScoringPage() {
                 selected={selectedMatchIds.includes(match.id)}
                 membersById={scoreMembersById}
                 onToggle={() => toggleMatch(match.id)}
-                onOpen={() => router.push(`/matches/${match.id}`)}
+                onOpen={() => router.push(`/matches/${match.id}?from=scoring`)}
               />
             ))}
 

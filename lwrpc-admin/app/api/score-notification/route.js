@@ -28,8 +28,13 @@ export async function POST(req) {
     }
 
     const isVerified = notificationType === "verified";
+    const isChanged = notificationType === "changed";
     const template = await loadEmailTemplate(
-      isVerified ? EMAIL_TEMPLATE_KEYS.scoreValidated : EMAIL_TEMPLATE_KEYS.scoreSubmitted
+      isChanged
+        ? EMAIL_TEMPLATE_KEYS.scoreChanged
+        : isVerified
+          ? EMAIL_TEMPLATE_KEYS.scoreValidated
+          : EMAIL_TEMPLATE_KEYS.scoreSubmitted
     );
     const systemSettings = await loadServerSystemSettings();
     const rendered = renderEmailTemplate(template, {
@@ -42,9 +47,11 @@ export async function POST(req) {
       main_email: systemSettings.main_email,
     });
 
-    const smsBody = isVerified
-      ? `LWRPC scores validated: ${homeTeam} vs ${awayTeam}, ${score}.`
-      : `LWRPC scores entered: ${homeTeam} vs ${awayTeam}, ${score}. Please log in to verify or dispute.`;
+    const smsBody = isChanged
+      ? `LWRPC scores changed and verified: ${homeTeam} vs ${awayTeam}, ${score}.`
+      : isVerified
+        ? `LWRPC scores validated: ${homeTeam} vs ${awayTeam}, ${score}.`
+        : `LWRPC scores entered: ${homeTeam} vs ${awayTeam}, ${score}. Please log in to verify or dispute.`;
 
     const [emailResult, smsResult] = await Promise.all([
       sendEmailMessages({

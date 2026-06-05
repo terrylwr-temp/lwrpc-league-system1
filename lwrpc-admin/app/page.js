@@ -803,7 +803,7 @@ export default function DashboardPage() {
         { title: "Locations", desc: "Maintain clubs, courts, and court availability.", path: "/locations", code: "LC", tone: "slate" },
         { title: "Email Options", desc: "Edit automated email templates and send test notifications.", path: "/email-options", code: "EO", tone: "blue" },
         ...(currentUserRole === "commissioner"
-          ? [{ title: "System Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "SS", tone: "amber" }]
+          ? [{ title: "Club Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "CS", tone: "amber" }]
           : []),
       ],
     },
