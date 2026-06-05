@@ -177,10 +177,17 @@ export default function MobileScoreEntryPage() {
     await queueGameUpdate(gameId, field, normalizedValue);
   }
 
+  function scoreRuleSettings(line) {
+    return {
+      pointsToWin: Number(line?.division_lines?.points_to_win || 0),
+      winBy: Number(line?.division_lines?.win_by || 0),
+    };
+  }
+
   function getLineSummary(line) {
     const lineGames = requiredLineGames(games.filter(
       game => game.match_line_id === line.id
-    ));
+    ), line);
 
     let homeGameWins = 0;
     let awayGameWins = 0;
@@ -188,16 +195,14 @@ export default function MobileScoreEntryPage() {
     let awayPoints = 0;
 
     lineGames.forEach(game => {
-      if (
-        game.home_score !== null &&
-        game.away_score !== null
-      ) {
+      if (game.home_score !== null && game.away_score !== null) {
         homePoints += Number(game.home_score || 0);
         awayPoints += Number(game.away_score || 0);
-
-        if (game.home_score > game.away_score) homeGameWins++;
-        if (game.away_score > game.home_score) awayGameWins++;
       }
+
+      const winnerSide = gameWinnerSide(game, line);
+      if (winnerSide === "home") homeGameWins++;
+      if (winnerSide === "away") awayGameWins++;
     });
 
     let winner = "—";
@@ -243,12 +248,28 @@ export default function MobileScoreEntryPage() {
     return status === "retired_home" || status === "retired_away";
   }
 
-  function gameWinnerSide(game) {
+  function gameWinnerSide(game, line = null) {
     if (game.game_status === "forfeit_home" || game.game_status === "retired_home") return "home";
     if (game.game_status === "forfeit_away" || game.game_status === "retired_away") return "away";
     if (game.home_score !== null && game.home_score !== undefined && game.away_score !== null && game.away_score !== undefined) {
-      if (Number(game.home_score) > Number(game.away_score)) return "home";
-      if (Number(game.away_score) > Number(game.home_score)) return "away";
+      const homeScore = Number(game.home_score);
+      const awayScore = Number(game.away_score);
+      const { pointsToWin, winBy } = scoreRuleSettings(line);
+
+      if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return "";
+      if (homeScore === awayScore) return "";
+
+      const highScore = Math.max(homeScore, awayScore);
+      const lowScore = Math.min(homeScore, awayScore);
+
+      if (pointsToWin > 0) {
+        if (winBy === 1 && highScore !== pointsToWin) return "";
+        if (winBy > 1 && highScore < pointsToWin) return "";
+        if (winBy > 0 && highScore - lowScore < winBy) return "";
+      }
+
+      if (homeScore > awayScore) return "home";
+      if (awayScore > homeScore) return "away";
     }
     return "";
   }
@@ -258,7 +279,7 @@ export default function MobileScoreEntryPage() {
     return gameCount > 1 && gameCount % 2 === 1 ? Math.floor(gameCount / 2) + 1 : gameCount;
   }
 
-  function requiredLineGameIds(lineGames) {
+  function requiredLineGameIds(lineGames, line = null) {
     const sortedGames = [...lineGames].sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
     const neededToWin = lineGamesNeededToWin(sortedGames);
     const requiredIds = new Set();
@@ -269,7 +290,7 @@ export default function MobileScoreEntryPage() {
       if (neededToWin > 0 && (homeWins >= neededToWin || awayWins >= neededToWin)) return;
       requiredIds.add(String(game.id));
 
-      const winner = gameWinnerSide(game);
+      const winner = gameWinnerSide(game, line);
       if (winner === "home") homeWins += 1;
       if (winner === "away") awayWins += 1;
     });
@@ -277,8 +298,8 @@ export default function MobileScoreEntryPage() {
     return requiredIds;
   }
 
-  function requiredLineGames(lineGames) {
-    const requiredIds = requiredLineGameIds(lineGames);
+  function requiredLineGames(lineGames, line = null) {
+    const requiredIds = requiredLineGameIds(lineGames, line);
     return lineGames.filter((game) => requiredIds.has(String(game.id)));
   }
 
@@ -288,7 +309,7 @@ export default function MobileScoreEntryPage() {
     const lineGames = games.filter((game) => game.match_line_id === line.id);
     const lineLabel = line.division_lines?.line_name || `Line ${line.line_number}`;
     const issues = [];
-    const requiredGameIds = requiredLineGameIds(lineGames);
+    const requiredGameIds = requiredLineGameIds(lineGames, line);
 
     lineGames.forEach((game) => {
       if (!requiredGameIds.has(String(game.id))) return;
@@ -580,7 +601,7 @@ export default function MobileScoreEntryPage() {
             const lineGames = games.filter(
               game => game.match_line_id === line.id
             );
-            const requiredGameIdsForLine = requiredLineGameIds(lineGames);
+            const requiredGameIdsForLine = requiredLineGameIds(lineGames, line);
 
             const summary = getLineSummary(line);
 

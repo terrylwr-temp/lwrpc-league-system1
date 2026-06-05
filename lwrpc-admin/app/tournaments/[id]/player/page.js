@@ -17,22 +17,26 @@ export default function TournamentPlayerPage() {
   const { id } = useParams();
   const searchParams = useSearchParams();
   const [state, setState] = useState(null);
-  const [selectedTeamId, setSelectedTeamId] = useState("");
+  const [selectedPlayerKey, setSelectedPlayerKey] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const [now, setNow] = useState(0);
 
   useEffect(() => {
     loadPublicTournament(id)
       .then((nextState) => {
         setState(nextState);
         const requestedTeam = searchParams.get("teamId");
+        const requestedPlayerKey = searchParams.get("playerKey");
         const requestedPlayer = searchParams.get("player");
         const players = tournamentPlayers(nextState?.teams || [], nextState?.divisions || []);
-        const requested = requestedTeam
+        const requested = requestedPlayerKey
+          ? players.find((player) => player.playerKey === requestedPlayerKey)
+          : requestedTeam
           ? players.find((player) => String(player.teamId) === String(requestedTeam))
           : players.find((player) => player.name.toLowerCase() === String(requestedPlayer || "").toLowerCase());
-        if (requested) setSelectedTeamId(requested.teamId);
+        if (requested) setSelectedPlayerKey(requested.playerKey);
       })
       .catch((loadError) => setError(loadError.message))
       .finally(() => setLoading(false));
@@ -59,9 +63,19 @@ export default function TournamentPlayerPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setNow(Date.now());
+    const interval = window.setInterval(() => {
+      setNow(Date.now());
+    }, 30000);
+
+    return () => window.clearInterval(interval);
+  }, []);
+
   const players = useMemo(() => tournamentPlayers(state?.teams || [], state?.divisions || []), [state]);
-  const selectedPlayer = players.find((player) => String(player.teamId) === String(selectedTeamId));
-  const playerMatches = useMemo(() => matchesForTeam(state?.matches || [], selectedTeamId), [state, selectedTeamId]);
+  const selectedPlayer = players.find((player) => player.playerKey === selectedPlayerKey);
+  const selectedTeamId = selectedPlayer?.teamId || "";
+  const playerMatches = useMemo(() => sortPlayerViewMatches(matchesForTeam(state?.matches || [], selectedTeamId)), [state, selectedTeamId]);
   const playerRecord = useMemo(() => tournamentTeamRecord(playerMatches, selectedTeamId), [playerMatches, selectedTeamId]);
   const playing = playerMatches.find((match) => match.status === "playing");
   const pending = playerMatches.find((match) => match.status === "pending");
@@ -86,13 +100,13 @@ export default function TournamentPlayerPage() {
       <div className="rounded-2xl bg-white p-5 shadow">
         <label className="text-sm font-black uppercase tracking-wide text-slate-500">Select Player</label>
         <select
-          value={selectedTeamId}
-          onChange={(event) => setSelectedTeamId(event.target.value)}
+          value={selectedPlayerKey}
+          onChange={(event) => setSelectedPlayerKey(event.target.value)}
           className="mt-2 w-full rounded-xl border border-slate-300 px-4 py-3 font-semibold"
         >
           <option value="">Choose a player...</option>
           {players.map((player) => (
-            <option key={`${player.teamId}-${player.name}`} value={player.teamId}>
+            <option key={player.playerKey} value={player.playerKey}>
               {player.name} - {player.team} ({player.division} Line {player.line})
             </option>
           ))}
@@ -120,10 +134,13 @@ export default function TournamentPlayerPage() {
               <div className="text-sm font-black uppercase tracking-wide text-emerald-100">Playing Now</div>
               <div className="mt-1 text-3xl font-black">Court {playing.court?.name || ""}</div>
               <div className="mt-2 text-xl font-bold">{playing.home_team?.name} vs {playing.away_team?.name}</div>
+              <div className="mt-4 border-t border-emerald-300/30 pt-3 text-xs font-bold text-emerald-50 sm:text-sm">
+                Assigned: {formatTime(playing.assigned_at)} <span className="text-emerald-200">|</span> Game Length: {playTime(playing.assigned_at, now)}
+              </div>
             </div>
           ) : pending ? (
             <div className="rounded-2xl bg-amber-100 p-5 text-amber-950 shadow">
-              <div className="text-sm font-black uppercase tracking-wide">On Deck</div>
+              <div className="text-sm font-black uppercase tracking-wide">On Deck - Tentative</div>
               <div className="mt-1 text-xl font-black">{pending.home_team?.name} vs {pending.away_team?.name}</div>
             </div>
           ) : (
@@ -171,6 +188,42 @@ function tournamentTeamRecord(matches, teamId) {
 
     return record;
   }, { w: 0, l: 0 });
+}
+
+function sortPlayerViewMatches(matches = []) {
+  return [...matches].sort((a, b) =>
+    playerMatchStatusRank(a.status) - playerMatchStatusRank(b.status) ||
+    Number(a.created_order || 0) - Number(b.created_order || 0) ||
+    String(a.id || "").localeCompare(String(b.id || ""))
+  );
+}
+
+function playerMatchStatusRank(status) {
+  if (status === "playing") return 0;
+  if (status === "pending") return 1;
+  if (status === "done") return 2;
+  return 3;
+}
+
+function formatTime(value) {
+  if (!value) return "Not assigned";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Not assigned";
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
+}
+
+function playTime(value, now) {
+  if (!value || !now) return "0 min";
+  const assignedAt = new Date(value).getTime();
+  if (Number.isNaN(assignedAt)) return "0 min";
+
+  const elapsedMs = Math.max(0, Number(now) - assignedAt);
+  const totalMinutes = Math.floor(elapsedMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes} min`;
 }
 
 function displayStatus(status) {

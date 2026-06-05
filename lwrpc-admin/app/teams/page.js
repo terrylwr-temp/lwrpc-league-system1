@@ -120,6 +120,9 @@ export default function TeamsPage() {
   const filteredTeams = useMemo(() => {
     const q = teamSearch.trim().toLowerCase();
     const sortedTeams = [...teams].sort((a, b) => {
+      const nameCompare = (a.name || "").localeCompare(b.name || "");
+      if (nameCompare !== 0) return nameCompare;
+
       const leagueCompare = (a.divisions?.leagues?.name || "").localeCompare(
         b.divisions?.leagues?.name || ""
       );
@@ -132,7 +135,7 @@ export default function TeamsPage() {
 
       if (divisionCompare !== 0) return divisionCompare;
 
-      return (a.name || "").localeCompare(b.name || "");
+      return String(a.id || "").localeCompare(String(b.id || ""));
     });
 
     if (!q) return sortedTeams;

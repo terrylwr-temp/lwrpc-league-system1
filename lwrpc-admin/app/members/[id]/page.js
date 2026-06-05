@@ -385,6 +385,9 @@ async function updateMemberActiveStatus(nextIsActive) {
   }
 
   const memberIsActive = member.is_active_member !== false;
+  const openMemberRatings = () => {
+    if (confirmUnsavedChanges()) router.push(`/ratings?member=${encodeURIComponent(id)}`);
+  };
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -405,12 +408,21 @@ async function updateMemberActiveStatus(nextIsActive) {
           </button>
 
           {!editMode ? (
-            <button
-              onClick={() => setEditMode(true)}
-              className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
-            >
-              Edit Member
-            </button>
+            <>
+              <button
+                onClick={() => setEditMode(true)}
+                className="rounded-xl bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700"
+              >
+                Edit Member
+              </button>
+
+              <button
+                onClick={openMemberRatings}
+                className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white hover:bg-emerald-800"
+              >
+                Edit Ratings
+              </button>
+            </>
           ) : (
             <>
               <button

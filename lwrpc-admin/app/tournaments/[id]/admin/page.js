@@ -4,14 +4,29 @@ import Link from "next/link";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { scoreDisplay, tournamentDivisionColors, tournamentStandingLabel } from "../../../lib/tournaments";
+import {
+  bracketByDivision,
+  bracketMatchesById,
+  bracketSingleGameScore,
+  bracketStatusLabel,
+  isBracketMatch,
+  isEliminationTournament,
+  isRoundRobinTop4Tournament,
+  scoreDisplay,
+  tournamentDivisionColors,
+  tournamentFormat,
+  tournamentFormatLabel,
+  tournamentStandingLabel,
+} from "../../../lib/tournaments";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../../lib/phone";
 
 const TABS = ["Courts", "Queue", "Standings", "Teams", "Admin Setup", "SMS", "Log"];
 const OPEN_STATUSES = new Set(["pending", "not_played"]);
 const DEFAULT_SMS_TEMPLATES = {
+  checkIn: "LWR PC Tournament Check-In\nHi {player}, please check in at the tournament desk for {team} in {division}.\n\n{tournament}",
   courtReady: "You're up! You are on Court {court}.\n\nPlease stop by the Desk to grab your basket and ball. Once you've finished your game, fill out the scoresheet and return the basket and ball.\nHave a great match!\n\n{division} {line}\n{home} vs {away}",
+  returnToQueue: "Tournament update: your game is not ready to play yet. Please do not go to Court {court}. We will text you again when your game is ready.\n\n{division} {line}\n{home} vs {away}",
   result: "{tournament} Result\n{division} {line}\n\n{home} vs {away}\n{result}\n\nPlease let us know right away if anything is incorrect.",
   broadcast: "LWR PC Tournament Update\nWelcome to the {tournament}!\n{status}",
 };
@@ -24,6 +39,12 @@ const STANDINGS_RULE_OPTIONS = [
   { value: "regular_season_standing", label: "Regular Season Standing" },
 ];
 const DEFAULT_STANDINGS_RULES = ["wins", "point_differential", "points_for", "regular_season_standing"];
+const TOURNAMENT_FORMAT_OPTIONS = [
+  { value: "round_robin", label: "Round Robin" },
+  { value: "round_robin_top4", label: "Round Robin + Top 4 Playoff" },
+  { value: "single_elimination", label: "Single Elimination" },
+  { value: "double_elimination", label: "Double Elimination" },
+];
 
 export default function TournamentAdminPage() {
   const { id } = useParams();
@@ -39,6 +60,7 @@ export default function TournamentAdminPage() {
   const [selectedPendingId, setSelectedPendingId] = useState("");
   const [smsEnabled, setSmsEnabled] = useState(false);
   const [resultMatch, setResultMatch] = useState(null);
+  const [autoAssignSummary, setAutoAssignSummary] = useState(null);
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
   useEffect(() => {
@@ -148,7 +170,7 @@ export default function TournamentAdminPage() {
       await unlock(refreshCode);
     }
     if (action === "autoAssign") setNotice(`Assigned ${result.assigned || 0} open court${Number(result.assigned || 0) === 1 ? "" : "s"}. Court texts sent: ${result.sms?.sent || 0}.`);
-    if (action === "returnToQueue") setNotice("Match returned to the queue.");
+    if (action === "returnToQueue") setNotice(`Match returned to the queue. Return texts sent: ${result.sms?.sent || 0}.`);
     if (action === "swapToCourt") setNotice(`Queued match moved to the selected court. Court texts sent: ${result.sms?.sent || 0}.`);
     if (action === "completeMatch") setNotice(`Result saved and court opened. Result texts sent: ${result.sms?.sent || 0}.`);
     if (action === "sendCourtText") setNotice(`Court text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`);
@@ -164,9 +186,12 @@ export default function TournamentAdminPage() {
     if (action === "clearLog") setNotice("Activity log cleared.");
     if (action === "startTournament") setNotice("Tournament started and wait times reset.");
     if (action === "generateRoundRobin") setNotice(`Generated ${result.generated || 0} round robin match${Number(result.generated || 0) === 1 ? "" : "es"}.`);
+    if (action === "generateEliminationBracket") setNotice(`Generated ${result.generated || 0} ${tournamentFormatLabel({ format: result.format })} bracket match${Number(result.generated || 0) === 1 ? "" : "es"}.`);
+    if (action === "generateTop4Playoff") setNotice(`Generated ${result.generated || 0} top 4 playoff match${Number(result.generated || 0) === 1 ? "" : "es"}.`);
     if (action === "updateSmsTemplates") setNotice("SMS templates saved.");
     if (action === "sendBroadcastText") setNotice(`Broadcast text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`);
     if (action === "sendTestText") setNotice(`Test text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`);
+    if (action === "sendCheckInText") setNotice(`Check-In text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`);
     if (action === "updatePlayerPhone") setNotice(`Phone number updated for ${result.playerName || "player"}.`);
     return options.returnResult ? result : true;
   }
@@ -215,6 +240,8 @@ export default function TournamentAdminPage() {
 
             <input
               type="password"
+              suppressHydrationWarning
+              autoComplete="one-time-code"
               value={eventCode}
               onChange={(event) => {
                 setEventCode(event.target.value);
@@ -293,6 +320,7 @@ export default function TournamentAdminPage() {
             setSelectedPendingId={setSelectedPendingId}
             runAction={runAction}
             setResultMatch={setResultMatch}
+            setAutoAssignSummary={setAutoAssignSummary}
             smsEnabled={smsEnabled}
           />
         )}
@@ -303,6 +331,7 @@ export default function TournamentAdminPage() {
             runAction={runAction}
             setResultMatch={setResultMatch}
             actionLoading={actionLoading}
+            smsEnabled={smsEnabled}
           />
         )}
         {activeTab === "Teams" && <TeamsTab state={state} setState={setState} runAction={runAction} actionLoading={actionLoading} />}
@@ -322,6 +351,7 @@ export default function TournamentAdminPage() {
       {resultMatch && (
         <ResultModal
           match={resultMatch}
+          matches={state.matches}
           smsEnabled={smsEnabled}
           settings={state.tournament.settings}
           onClose={() => setResultMatch(null)}
@@ -330,6 +360,13 @@ export default function TournamentAdminPage() {
             if (saved) setResultMatch(null);
           }}
           saving={actionLoading === "completeMatch"}
+        />
+      )}
+
+      {autoAssignSummary && (
+        <AutoAssignSummaryModal
+          summary={autoAssignSummary}
+          onClose={() => setAutoAssignSummary(null)}
         />
       )}
     </main>
@@ -377,10 +414,12 @@ function DirectorHeader({ state, systemSettings, smsEnabled, exitToLms, tourname
   );
 }
 
-function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPendingId, runAction, setResultMatch, smsEnabled }) {
-  const busyTeamIds = useMemo(() => busyTeams(state.matches), [state.matches]);
-  const pendingMatches = useMemo(() => availablePendingMatches(state.matches, busyTeamIds), [busyTeamIds, state.matches]);
-  const playingByCourt = useMemo(() => matchesByCourt(state.matches), [state.matches]);
+function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPendingId, runAction, setResultMatch, setAutoAssignSummary, smsEnabled }) {
+  const bracketDetails = useMemo(() => bracketMatchesById(state.matches, state.teams, state.divisions, state.tournament.settings), [state.divisions, state.matches, state.teams, state.tournament.settings]);
+  const matches = useMemo(() => applyBracketMatchDetails(state.matches, bracketDetails), [bracketDetails, state.matches]);
+  const busyTeamIds = useMemo(() => busyTeams(matches), [matches]);
+  const pendingMatches = useMemo(() => availablePendingMatches(matches, busyTeamIds), [busyTeamIds, matches]);
+  const playingByCourt = useMemo(() => matchesByCourt(matches), [matches]);
   const [now, setNow] = useState(0);
 
   useEffect(() => {
@@ -398,6 +437,16 @@ function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPending
     return () => window.clearInterval(interval);
   }, []);
 
+  async function handleAutoAssign() {
+    const result = await runAction("autoAssign", { smsEnabled }, { returnResult: true });
+    if (result?.success) {
+      setAutoAssignSummary({
+        assigned: result.assigned || 0,
+        assignments: result.assignments || [],
+      });
+    }
+  }
+
   return (
     <section className="mt-5 space-y-4">
       <div className="rounded-2xl border border-blue-300/20 bg-slate-950/70 p-5 shadow-lg">
@@ -405,7 +454,7 @@ function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPending
           <h2 className="text-2xl font-black">Court Dashboard</h2>
           <button
             type="button"
-            onClick={() => runAction("autoAssign", { smsEnabled })}
+            onClick={handleAutoAssign}
             disabled={actionLoading === "autoAssign"}
             className="rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 px-5 py-3 text-sm font-black text-white shadow hover:from-cyan-400 hover:to-blue-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -455,6 +504,63 @@ function CourtsTab({ state, actionLoading, selectedPendingId, setSelectedPending
   );
 }
 
+function AutoAssignSummaryModal({ summary, onClose }) {
+  const assignments = summary.assignments || [];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4">
+      <div className="w-full max-w-4xl rounded-2xl border border-blue-300/30 bg-slate-900 p-5 text-white shadow-2xl">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-black">Auto Assign Summary</h2>
+            <p className="mt-2 text-sm font-semibold text-blue-100">
+              Assigned {summary.assigned || 0} open court{Number(summary.assigned || 0) === 1 ? "" : "s"}.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-3 text-sm font-black text-white hover:bg-blue-900"
+          >
+            Close
+          </button>
+        </div>
+
+        {assignments.length > 0 ? (
+          <div className="mt-5 overflow-x-auto rounded-xl border border-blue-300/20">
+            <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+              <thead className="bg-blue-950/80 text-xs uppercase tracking-wide text-blue-100">
+                <tr>
+                  <th className="px-4 py-3">Court #</th>
+                  <th className="px-4 py-3">Home Team</th>
+                  <th className="px-4 py-3">Away Team</th>
+                  <th className="px-4 py-3">Division</th>
+                  <th className="px-4 py-3">Line</th>
+                </tr>
+              </thead>
+              <tbody>
+                {assignments.map((assignment, index) => (
+                  <tr key={`${assignment.court}-${assignment.homeTeam}-${assignment.awayTeam}-${index}`} className="border-t border-blue-300/10">
+                    <td className="px-4 py-3 font-black text-cyan-100">{assignment.court || "-"}</td>
+                    <td className="px-4 py-3 font-semibold">{assignment.homeTeam || "Home"}</td>
+                    <td className="px-4 py-3 font-semibold">{assignment.awayTeam || "Away"}</td>
+                    <td className="px-4 py-3 text-blue-100">{assignment.division || "Division"}</td>
+                    <td className="px-4 py-3 text-blue-100">{assignment.lineLabel || `Line ${assignment.line || 1}`}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="mt-5 rounded-xl border border-blue-300/20 bg-blue-950/70 p-4 text-sm font-bold text-blue-100">
+            No open courts were assigned.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, setResultMatch, smsEnabled, now }) {
   const colors = match ? tournamentDivisionColors(match.division?.name) : null;
   const busy = Boolean(actionLoading);
@@ -467,12 +573,12 @@ function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, 
         <>
           <div className="mt-4 flex flex-wrap gap-2 text-xs font-black">
             <span className={`rounded-full px-3 py-1 ${colors.badge}`}>{match.division?.name || "Division"}</span>
-            <span className="rounded-full bg-blue-500/25 px-3 py-1 text-blue-100">Line {match.line_number || 1}</span>
+            <span className="rounded-full bg-blue-500/25 px-3 py-1 text-blue-100">{matchLineLabel(match)}</span>
           </div>
           <div className="mt-4 text-xl font-black leading-7">
-            <div>{match.home_team?.name || "Home"}</div>
+            <div>{bracketTeamDisplayName(match, "home")}</div>
             <div className={`text-sm ${colors.accent}`}>vs</div>
-            <div>{match.away_team?.name || "Away"}</div>
+            <div>{bracketTeamDisplayName(match, "away")}</div>
           </div>
           <div className="mt-3 text-sm font-semibold text-blue-100">
             Assigned: {formatTime(match.assigned_at)} <span className="text-blue-300">|</span> Play Time: {playTime(match.assigned_at, now)}
@@ -491,7 +597,7 @@ function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, 
             </button>
             <button
               type="button"
-              onClick={() => runAction("returnToQueue", { matchId: match.id })}
+              onClick={() => runAction("returnToQueue", { matchId: match.id, smsEnabled })}
               disabled={busy}
               className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-3 text-sm font-black text-white hover:bg-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -530,11 +636,13 @@ function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, 
 }
 
 function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
-  const busyTeamIds = useMemo(() => busyTeams(state.matches), [state.matches]);
-  const pendingMatches = useMemo(() => sortedPendingMatches(state.matches), [state.matches]);
-  const queueStatus = useMemo(() => tournamentQueueStatus(state.matches, state.courts), [state.matches, state.courts]);
-  const insights = useMemo(() => schedulingInsights(state.matches, state.courts), [state.matches, state.courts]);
-  const queueRows = useMemo(() => matchQueueMetrics(pendingMatches, state.matches, busyTeamIds), [busyTeamIds, pendingMatches, state.matches]);
+  const bracketDetails = useMemo(() => bracketMatchesById(state.matches, state.teams, state.divisions, state.tournament.settings), [state.divisions, state.matches, state.teams, state.tournament.settings]);
+  const matches = useMemo(() => applyBracketMatchDetails(state.matches, bracketDetails), [bracketDetails, state.matches]);
+  const busyTeamIds = useMemo(() => busyTeams(matches), [matches]);
+  const pendingMatches = useMemo(() => sortedPendingMatches(matches), [matches]);
+  const queueStatus = useMemo(() => tournamentQueueStatus(matches, state.courts), [matches, state.courts]);
+  const insights = useMemo(() => schedulingInsights(matches, state.courts), [matches, state.courts]);
+  const queueRows = useMemo(() => matchQueueMetrics(pendingMatches, matches, busyTeamIds), [busyTeamIds, pendingMatches, matches]);
 
   return (
     <section className="mt-5 space-y-5">
@@ -564,7 +672,9 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
       <div className="rounded-2xl border border-cyan-300/20 bg-cyan-950/40 p-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-2xl font-black">AI Scheduling Insights</h2>
-          <span className="w-fit rounded-full bg-amber-400/25 px-4 py-2 text-sm font-black text-amber-100">Estimated Finish: {insights.finishTime}</span>
+          <span className="w-fit rounded-full bg-amber-400/25 px-4 py-2 text-sm font-black text-amber-100">
+            Estimated Finish: {insights.finishTime} | Avg Game Length: {formatDurationMinutes(insights.averageMatchMinutes)}
+          </span>
         </div>
         <p className="mt-3 text-sm font-semibold text-blue-100">
           Based on current completed match pace, average match length is about {insights.averageMatchMinutes} minutes. Queue priority favors division and line groups with lower completion progress, available teams, and stronger rest balance.
@@ -605,12 +715,12 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
                 <div className="flex flex-wrap items-center gap-2 text-xs font-black">
                   {index === 0 && !row.blocked && <span className="rounded-full bg-amber-400/25 px-3 py-1 text-amber-100">Likely Next</span>}
                   <span className={`rounded-full px-3 py-1 ${colors.badge}`}>{match.division?.name || "Division"}</span>
-                  <span className="rounded-full bg-blue-400/20 px-3 py-1 text-blue-100">Line {match.line_number || 1}</span>
+                  <span className="rounded-full bg-blue-400/20 px-3 py-1 text-blue-100">{matchLineLabel(match)}</span>
                   <span className={`rounded-full px-3 py-1 ${row.blocked ? "bg-rose-400/20 text-rose-100" : "bg-emerald-400/20 text-emerald-100"}`}>
                     {row.blocked ? "Blocked" : "Ready"}
                   </span>
                 </div>
-                <div className="mt-4 text-lg font-black">{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</div>
+                <div className="mt-4 text-lg font-black">{bracketTeamDisplayName(match, "home")} vs {bracketTeamDisplayName(match, "away")}</div>
                 <div className={`mt-3 text-sm font-semibold ${colors.accent}`}>
                   Wait: {row.waitMinutes} min - Rest: {row.restMinutes} min - Group progress: {row.groupProgress}% - Avg group rest: {row.averageGroupRestMinutes} min - {row.blocked ? "Team on court" : "Ready"}
                 </div>
@@ -643,10 +753,24 @@ function StatusMetric({ label, value }) {
   );
 }
 
-function StandingsTab({ state, runAction, setResultMatch, actionLoading }) {
+function StandingsTab({ state, runAction, setResultMatch, actionLoading, smsEnabled }) {
   const [selectedTeam, setSelectedTeam] = useState(null);
+  const isElimination = isEliminationTournament(state.tournament.settings);
+  const isTop4 = isRoundRobinTop4Tournament(state.tournament.settings);
   const standings = useMemo(() => groupedDivisionStandings(state.matches, state.teams, state.divisions, state.tournament.settings), [state.divisions, state.matches, state.teams, state.tournament.settings]);
   const divisions = Object.entries(standings);
+
+  if (isElimination) {
+    return (
+      <BracketStandingsTab
+        state={state}
+        runAction={runAction}
+        setResultMatch={setResultMatch}
+        actionLoading={actionLoading}
+        smsEnabled={smsEnabled}
+      />
+    );
+  }
 
   return (
     <section className="mt-5 space-y-4">
@@ -703,6 +827,15 @@ function StandingsTab({ state, runAction, setResultMatch, actionLoading }) {
         );
       })}
       {divisions.length === 0 && <EmptyPanel title="Standings" message="No completed matches are available for standings yet." />}
+      {isTop4 && (
+        <Top4PlayoffBracket
+          state={state}
+          runAction={runAction}
+          setResultMatch={setResultMatch}
+          actionLoading={actionLoading}
+          smsEnabled={smsEnabled}
+        />
+      )}
       {selectedTeam && (
         <StandingTeamModal
           team={selectedTeam}
@@ -711,13 +844,215 @@ function StandingsTab({ state, runAction, setResultMatch, actionLoading }) {
           setResultMatch={setResultMatch}
           runAction={runAction}
           actionLoading={actionLoading}
+          smsEnabled={smsEnabled}
         />
       )}
     </section>
   );
 }
 
-function StandingTeamModal({ team, matches, onClose, setResultMatch, runAction, actionLoading }) {
+function Top4PlayoffBracket({ state, runAction, setResultMatch, actionLoading, smsEnabled }) {
+  const bracketDivisions = useMemo(
+    () => bracketByDivision(state.matches, state.teams, state.divisions, state.tournament.settings),
+    [state.divisions, state.matches, state.teams, state.tournament.settings]
+  );
+
+  return (
+    <section className="mt-5 space-y-4">
+      <div>
+        <h2 className="text-2xl font-black">Top 4 Playoff</h2>
+        <p className="mt-3 text-sm font-semibold text-blue-100">
+          Generate this after the round robin is complete. Seeds are 1 vs 4 and 2 vs 3, with winners advancing to the final.
+        </p>
+      </div>
+      {bracketDivisions.length > 0 ? (
+        <BracketDivisionList
+          bracketDivisions={bracketDivisions}
+          runAction={runAction}
+          setResultMatch={setResultMatch}
+          actionLoading={actionLoading}
+          smsEnabled={smsEnabled}
+        />
+      ) : (
+        <EmptyPanel title="Top 4 Playoff" message="Generate the Top 4 Playoff from Admin Setup after all round robin matches are complete." />
+      )}
+    </section>
+  );
+}
+
+function BracketStandingsTab({ state, runAction, setResultMatch, actionLoading, smsEnabled }) {
+  const bracketDivisions = useMemo(
+    () => bracketByDivision(state.matches, state.teams, state.divisions, state.tournament.settings),
+    [state.divisions, state.matches, state.teams, state.tournament.settings]
+  );
+
+  return (
+    <section className="mt-5 space-y-4">
+      <div>
+        <h2 className="text-2xl font-black">{tournamentFormatLabel(state.tournament.settings)} Bracket</h2>
+        <p className="mt-3 text-sm font-semibold text-blue-100">
+          Brackets are grouped by division and update as results are entered.
+        </p>
+      </div>
+
+      <BracketDivisionList
+        bracketDivisions={bracketDivisions}
+        runAction={runAction}
+        setResultMatch={setResultMatch}
+        actionLoading={actionLoading}
+        smsEnabled={smsEnabled}
+      />
+
+      {bracketDivisions.length === 0 && <EmptyPanel title="Bracket" message="Generate an elimination bracket from Admin Setup to show standings here." />}
+    </section>
+  );
+}
+
+function BracketDivisionList({ bracketDivisions, runAction, setResultMatch, actionLoading, smsEnabled }) {
+  return (
+    <>
+      {bracketDivisions.map((divisionGroup) => {
+        const colors = tournamentDivisionColors(divisionGroup.division.name);
+
+        return (
+          <details key={divisionGroup.division.id} className={`rounded-2xl border border-blue-300/20 border-l-4 ${colors.border} ${colors.panel} p-4`}>
+            <summary className="cursor-pointer list-none">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="text-xl font-black">{divisionGroup.division.name}</h3>
+                  <p className="mt-1 text-sm font-semibold text-blue-100">Open to view this division bracket.</p>
+                </div>
+                {divisionGroup.champion && (
+                  <span className="w-fit rounded-full bg-amber-400 px-4 py-2 text-sm font-black text-slate-950">
+                    Champion: {divisionGroup.champion.name}
+                  </span>
+                )}
+                {!divisionGroup.champion && <span className="w-fit rounded-full bg-blue-400/20 px-4 py-2 text-sm font-black text-blue-100">Collapsed</span>}
+              </div>
+            </summary>
+            <BracketSections
+              sections={divisionGroup.sections}
+              colors={colors}
+              runAction={runAction}
+              setResultMatch={setResultMatch}
+              actionLoading={actionLoading}
+              smsEnabled={smsEnabled}
+            />
+          </details>
+        );
+      })}
+    </>
+  );
+}
+
+function BracketSections({ sections, colors, runAction, setResultMatch, actionLoading, smsEnabled }) {
+  return (
+    <div className="mt-5 space-y-5">
+      {sections.map((section) => (
+        <div key={section.key} className="rounded-2xl border border-blue-300/15 bg-slate-950/35 p-4">
+          <h4 className="text-lg font-black">{section.title}</h4>
+          <div className="mt-4 flex min-w-max gap-10 overflow-x-auto pb-4">
+            {section.rounds.map((round, roundIndex) => (
+              <div key={round.key} className="w-72 shrink-0">
+                <div className={`rounded-full px-3 py-2 text-center text-xs font-black ${colors.badge}`}>{round.title}</div>
+                <div className="mt-5 space-y-6">
+                  {round.matches.map((match, matchIndex) => (
+                    <BracketMatchCard
+                      key={match.id}
+                      match={match}
+                      isLastRound={roundIndex === section.rounds.length - 1}
+                      offsetLevel={roundIndex}
+                      matchIndex={matchIndex}
+                      setResultMatch={setResultMatch}
+                      runAction={runAction}
+                      actionLoading={actionLoading}
+                      smsEnabled={smsEnabled}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function BracketMatchCard({ match, offsetLevel, matchIndex, setResultMatch, runAction, actionLoading, smsEnabled }) {
+  const ready = Boolean(match.home_team_id && match.away_team_id);
+  const score = scoreDisplay(match);
+  const statusLabel = bracketStatusLabel(match);
+  const homeScore = bracketSingleGameScore(match, "home");
+  const awayScore = bracketSingleGameScore(match, "away");
+  const showScoreFooter = statusLabel !== "bye" && score && homeScore === "" && awayScore === "";
+  const topOffset = matchIndex === 0 ? 0 : Math.min(72, Number(offsetLevel || 0) * 18);
+
+  return (
+    <div className="relative" style={{ marginTop: `${topOffset}px` }}>
+      <div className="relative rounded-sm border border-blue-100/65 bg-slate-950/70 p-3 shadow-lg">
+        <div className="absolute -left-3 -top-3 flex size-8 items-center justify-center rounded-full border border-blue-100/70 bg-slate-950 text-xs font-black text-white shadow">
+          #{match.bracketMatchNumber || match.bracketMeta?.match || ""}
+        </div>
+        <div className="mb-2 flex items-center justify-end gap-2 text-xs font-black text-blue-200">
+          <span className="uppercase">{statusLabel}</span>
+        </div>
+        <BracketTeamLine
+          name={match.home_team?.name || "TBD"}
+          sourceLabel={match.homeSourceLabel}
+          score={homeScore}
+          eliminated={Boolean(match.homeEliminated)}
+          winner={String(match.winner_team_id || "") === String(match.home_team_id || "")}
+        />
+        <BracketTeamLine
+          name={match.away_team?.name || "TBD"}
+          sourceLabel={match.awaySourceLabel}
+          score={awayScore}
+          eliminated={Boolean(match.awayEliminated)}
+          winner={String(match.winner_team_id || "") === String(match.away_team_id || "")}
+        />
+        {showScoreFooter && <div className="mt-2 rounded-sm bg-slate-950/60 px-3 py-2 text-xs font-black text-blue-100">{score}</div>}
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={!ready}
+            onClick={() => setResultMatch(match)}
+            className="rounded-lg bg-cyan-500 px-3 py-2 text-xs font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Edit Result
+          </button>
+          {ready && match.status === "done" && (
+            <button
+              type="button"
+              disabled={actionLoading === "returnToQueue"}
+              onClick={() => runAction("returnToQueue", { matchId: match.id, smsEnabled })}
+              className="rounded-lg bg-rose-700 px-3 py-2 text-xs font-black text-white hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Reset
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BracketTeamLine({ name, sourceLabel = "", score = "", winner, eliminated = false }) {
+  return (
+    <div className={`mt-1 flex min-h-11 items-center justify-between rounded-sm border px-3 py-2 text-sm font-black ${
+      winner ? "border-emerald-300/70 bg-emerald-500/20 text-emerald-100" : "border-blue-100/45 bg-slate-950/45 text-white"
+    }`}>
+      <span className="min-w-0 flex-1 break-words pr-3">{sourceLabel ? `(${sourceLabel}) ` : ""}{name}</span>
+      <span className="ml-2 flex w-16 shrink-0 items-center justify-end gap-1">
+        {winner && <span className="rounded-full bg-emerald-400 px-2 py-1 text-[11px] font-black text-slate-950">W</span>}
+        {eliminated && <span className="rounded-full bg-rose-500 px-2 py-1 text-[11px] font-black text-white">D</span>}
+        {score !== "" && <span className="min-w-8 rounded-full bg-white/15 px-2 py-1 text-center text-xs text-white">{score}</span>}
+      </span>
+    </div>
+  );
+}
+
+function StandingTeamModal({ team, matches, onClose, setResultMatch, runAction, actionLoading, smsEnabled }) {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 p-4">
       <div className="mx-auto min-h-[85vh] max-w-6xl rounded-3xl border border-blue-300/20 bg-blue-950 p-5 text-white shadow-2xl">
@@ -767,7 +1102,7 @@ function StandingTeamModal({ team, matches, onClose, setResultMatch, runAction, 
                       <button
                         type="button"
                         disabled={actionLoading === "returnToQueue"}
-                        onClick={() => runAction("returnToQueue", { matchId: match.id })}
+                        onClick={() => runAction("returnToQueue", { matchId: match.id, smsEnabled })}
                         className="w-fit rounded-xl bg-rose-700 px-4 py-3 font-black text-white hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Reset to Queue
@@ -786,6 +1121,7 @@ function StandingTeamModal({ team, matches, onClose, setResultMatch, runAction, 
 }
 
 function TeamsTab({ state, setState, runAction, actionLoading }) {
+  const isElimination = isEliminationTournament(state.tournament.settings) || isRoundRobinTop4Tournament(state.tournament.settings);
   const contactsByTeam = useMemo(() => groupBy(state.contacts || [], "tournament_team_id"), [state.contacts]);
   const activeDivisions = useMemo(() => state.divisions.filter((division) => division.is_active), [state.divisions]);
   const activeDivisionIds = useMemo(() => new Set(activeDivisions.map((division) => String(division.id))), [activeDivisions]);
@@ -801,17 +1137,19 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
       .filter((team) => teamFilter === "all" || !teamReady(team))
       .reduce((map, team) => {
         const division = divisionsById[team.division_id]?.name || "Unassigned";
-      map[division] = [...(map[division] || []), team];
-      return map;
-    }, {});
+        map[division] = [...(map[division] || []), team];
+        return map;
+      }, {});
   }, [activeDivisionIds, state.teams, divisionsById, teamFilter]);
 
   const divisionEntries = useMemo(() => {
-    return Object.entries(teamsByDivision).sort(([a], [b]) => {
-      const aIndex = divisionOrder.indexOf(a);
-      const bIndex = divisionOrder.indexOf(b);
-      return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex) || a.localeCompare(b);
-    });
+    return Object.entries(teamsByDivision)
+      .map(([division, teams]) => [division, [...teams].sort(compareTournamentTeamsByName)])
+      .sort(([a], [b]) => {
+        const aIndex = divisionOrder.indexOf(a);
+        const bIndex = divisionOrder.indexOf(b);
+        return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex) || a.localeCompare(b);
+      });
   }, [divisionOrder, teamsByDivision]);
 
   function togglePlayerCheck(team, slot, checkedIn = !Boolean(slot === 1 ? team.player_1_checked_in : team.player_2_checked_in)) {
@@ -929,13 +1267,7 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
         <details key={division} className={`rounded-2xl border border-blue-300/20 border-l-4 ${colors.border} ${colors.panel} p-4`}>
           <summary className="cursor-pointer text-xl font-black">{division} <span className={`ml-2 rounded-full px-3 py-1 text-xs ${colors.badge}`}>{teams.length} shown</span></summary>
           <div className="mt-4 space-y-2">
-            {teams
-              .sort((a, b) =>
-                Number(regularSeasonStandingValue(a) || 999) - Number(regularSeasonStandingValue(b) || 999) ||
-                Number(a.line_number || 1) - Number(b.line_number || 1) ||
-                String(a.name || "").localeCompare(String(b.name || ""))
-              )
-              .map((team) => {
+            {teams.map((team) => {
                 const contacts = contactsByTeam[String(team.id)] || [];
                 const ready = teamReady(team);
                 const totalRating = teamTotalRating(team, contacts, state);
@@ -945,8 +1277,13 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
                     <div className="grid gap-3 lg:grid-cols-[1fr_auto] lg:items-center">
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <div className="text-lg font-black">{teamStandingLabel(team)}</div>
-                          <div className="rounded-full bg-cyan-400/20 px-3 py-1 text-xs font-black text-cyan-100">Line {team.line_number || 1}</div>
+                          <div className="text-lg font-black">{isElimination ? team.name || "Team" : teamStandingLabel(team)}</div>
+                          {isElimination && regularSeasonStandingValue(team) && (
+                            <div className="rounded-full bg-cyan-400/20 px-3 py-1 text-xs font-black text-cyan-100">
+                              Standings {regularSeasonStandingValue(team)}
+                            </div>
+                          )}
+                          {!isElimination && <div className="rounded-full bg-cyan-400/20 px-3 py-1 text-xs font-black text-cyan-100">Line {team.line_number || 1}</div>}
                           <div className={`rounded-full px-3 py-1 text-xs font-black ${ready ? "bg-emerald-400/25 text-emerald-100" : "bg-amber-400/25 text-amber-100"}`}>
                             {ready ? "Team Ready" : "Not Ready"}
                           </div>
@@ -1029,11 +1366,16 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
       {checkInPrompt && (
         <PlayerCheckInModal
           prompt={checkInPrompt}
-          sendingTestText={actionLoading === "sendTestText"}
+          sendingCheckInText={actionLoading === "sendCheckInText"}
           saving={actionLoading === "updateTournamentTeam" || actionLoading === "updatePlayerPhone"}
           onClose={() => setCheckInPrompt(null)}
           onConfirm={confirmPlayerCheckIn}
-          onSendTestText={(phone) => runAction("sendTestText", { phone }, { skipRefresh: true })}
+          onSendCheckInText={(phone) => runAction("sendCheckInText", {
+            phone,
+            teamId: checkInPrompt.team.id,
+            slot: checkInPrompt.slot,
+            playerName: checkInPrompt.playerName,
+          }, { skipRefresh: true })}
           onSavePhone={savePlayerPhone}
         />
       )}
@@ -1041,7 +1383,7 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
   );
 }
 
-function PlayerCheckInModal({ prompt, onClose, onConfirm, onSendTestText, onSavePhone, saving, sendingTestText }) {
+function PlayerCheckInModal({ prompt, onClose, onConfirm, onSendCheckInText, onSavePhone, saving, sendingCheckInText }) {
   const [editingPhone, setEditingPhone] = useState(false);
   const [phoneInput, setPhoneInput] = useState(prompt.phone || "");
   const [saveMessage, setSaveMessage] = useState("");
@@ -1111,11 +1453,11 @@ function PlayerCheckInModal({ prompt, onClose, onConfirm, onSendTestText, onSave
           )}
           <button
             type="button"
-            onClick={() => onSendTestText(phone)}
-            disabled={sendingTestText || !phone}
+            onClick={() => onSendCheckInText(phone)}
+            disabled={sendingCheckInText || !phone}
             className="rounded-xl border border-amber-300/50 bg-amber-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {sendingTestText ? "Sending..." : "Send test SMS"}
+            {sendingCheckInText ? "Sending..." : "Send Check-In SMS"}
           </button>
           <button
             type="button"
@@ -1140,32 +1482,49 @@ function PlayerCheckInModal({ prompt, onClose, onConfirm, onSendTestText, onSave
 
 function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSendTestText, saving, deleting, sendingTestText, mode = "edit" }) {
   const isAddMode = mode === "add";
+  const isElimination = isEliminationTournament(state.tournament.settings) || isRoundRobinTop4Tournament(state.tournament.settings);
+  const activeDivisions = useMemo(() => state.divisions.filter((division) => division.is_active !== false), [state.divisions]);
   const sourceTeams = useMemo(() => state.sourceTeams || [], [state.sourceTeams]);
   const sourceTeamOptions = useMemo(() => sortedSourceTeams(sourceTeams), [sourceTeams]);
   const sourceRosters = useMemo(() => state.sourceRosters || [], [state.sourceRosters]);
   const [form, setForm] = useState(() => isAddMode ? emptyTeamFormState() : teamFormState(team, contacts, sourceTeamOptions));
   const selectedSourceTeam = useMemo(() => sourceTeamOptions.find((sourceTeam) => String(sourceTeam.id) === String(form.sourceTeamId)), [form.sourceTeamId, sourceTeamOptions]);
+  const allRosterPlayers = useMemo(() => uniqueRosterPlayers(sourceRosters), [sourceRosters]);
   const selectedRoster = useMemo(() => {
+    if (isElimination) return allRosterPlayers;
+
     return sourceRosters
       .filter((row) => String(row.team_id) === String(form.sourceTeamId))
       .sort((a, b) =>
         String(a.members?.first_name || "").localeCompare(String(b.members?.first_name || "")) ||
         memberDisplayName(a.members).localeCompare(memberDisplayName(b.members))
       );
-  }, [form.sourceTeamId, sourceRosters]);
+  }, [allRosterPlayers, form.sourceTeamId, isElimination, sourceRosters]);
   const teamTotal = teamTotalFromForm(form);
-  const divisionTeamMax = Number(selectedSourceTeam?.divisions?.team_dupr_max);
+  const selectedLeagueDivision = useMemo(() => {
+    const selectedDivisionName = selectedTournamentDivisionName(state.divisions, form.divisionId);
+    return (state.leagueDivisions || []).find((division) =>
+      normalizeName(division.name) === normalizeName(selectedDivisionName)
+    );
+  }, [form.divisionId, state.divisions, state.leagueDivisions]);
+  const divisionTeamMax = Number(isElimination ? selectedLeagueDivision?.team_dupr_max : selectedSourceTeam?.divisions?.team_dupr_max);
   const hasDivisionTeamMax = Number.isFinite(divisionTeamMax) && divisionTeamMax > 0;
   const exceedsDivisionTeamMax = hasDivisionTeamMax && teamTotal !== "" && Number(teamTotal) > divisionTeamMax;
-  const duplicateTeamLine = duplicateTournamentTeamLine(state.teams, team.id, form.name, form.lineNumber);
+  const duplicateTeamLine = !isElimination && duplicateTournamentTeamLine(state.teams, team.id, form.name, form.lineNumber);
   const selectedTournamentDivision = useMemo(() => {
+    if (isElimination) {
+      return activeDivisions.find((division) => String(division.id) === String(form.divisionId));
+    }
+
     const sourceDivisionName = selectedSourceTeam?.divisions?.name || "";
     return (state.divisions || []).find((division) =>
       division.is_active !== false && normalizeName(division.name) === normalizeName(sourceDivisionName)
     );
-  }, [selectedSourceTeam, state.divisions]);
-  const missingTournamentDivision = isAddMode && form.sourceTeamId && !selectedTournamentDivision;
-  const addValidationMessages = isAddMode ? addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, divisionTeamMax) : [];
+  }, [activeDivisions, form.divisionId, isElimination, selectedSourceTeam, state.divisions]);
+  const missingTournamentDivision = isAddMode && !isElimination && form.sourceTeamId && !selectedTournamentDivision;
+  const addValidationMessages = isAddMode ? addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, divisionTeamMax, isElimination) : [];
+  const missingStanding = !String(form.regularSeasonStanding || "").trim();
+  const invalidStanding = !missingStanding && (!Number.isFinite(Number(form.regularSeasonStanding)) || Number(form.regularSeasonStanding) < 1);
 
   function updateForm(field, value) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -1191,13 +1550,20 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
   function selectPlayer(slot, memberId) {
     const row = selectedRoster.find((item) => String(item.member_id) === String(memberId));
     const prefix = slot === 1 ? "player1" : "player2";
-    setForm((current) => ({
-      ...current,
-      [`${prefix}MemberId`]: memberId,
-      [`${prefix}Name`]: row ? memberDisplayName(row.members) : "",
-      [`${prefix}Phone`]: row?.members?.phone || "",
-      [`${prefix}Rating`]: row ? playerRatingForSource(row, state.sourceRatings || [], sourceTeamOptions) : "",
-    }));
+    setForm((current) => {
+      const selectedName = row ? memberDisplayName(row.members) : "";
+      const next = {
+        ...current,
+        [`${prefix}MemberId`]: memberId,
+        [`${prefix}Name`]: selectedName,
+        [`${prefix}Phone`]: row?.members?.phone || "",
+        [`${prefix}Rating`]: row ? playerRatingForSource(row, state.sourceRatings || [], sourceTeamOptions) : "",
+      };
+      if (isElimination && shouldReplaceGeneratedTeamName(current.name, current.player1Name, current.player2Name)) {
+        next.name = eliminationTeamName(next.player1Name, next.player2Name);
+      }
+      return next;
+    });
   }
 
   return (
@@ -1206,7 +1572,7 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-2xl font-black">{isAddMode ? "Add Team" : "Edit Team"}</h2>
-            <p className="mt-1 text-sm font-semibold text-blue-200">{isAddMode ? selectedTournamentDivision?.name || "Select Main System Team" : team.name}</p>
+            <p className="mt-1 text-sm font-semibold text-blue-200">{isAddMode ? selectedTournamentDivision?.name || (isElimination ? "Select Division" : "Select Main System Team") : team.name}</p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs font-black">
               {selectedTournamentDivision && (
                 <span className="rounded-full bg-cyan-400/20 px-3 py-1 text-cyan-100">
@@ -1224,27 +1590,39 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
-          <label className={`text-sm font-black text-blue-200 ${isAddMode ? "md:col-span-2" : ""}`}>
-            Main System Team
-            <select value={form.sourceTeamId} onChange={(event) => selectSourceTeam(event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
-              <option value="">Select team...</option>
-              {sourceTeamOptions.map((sourceTeam) => (
-                <option key={sourceTeam.id} value={sourceTeam.id}>{sourceTeam.divisions?.name || "Division"} - {sourceTeam.name}</option>
-              ))}
-            </select>
-          </label>
+          {isElimination ? (
+            <label className="text-sm font-black text-blue-200 md:col-span-2">
+              Division
+              <select value={form.divisionId} onChange={(event) => updateForm("divisionId", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
+                <option value="">Select division...</option>
+                {activeDivisions.map((division) => (
+                  <option key={division.id} value={division.id}>{division.name}</option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <label className={`text-sm font-black text-blue-200 ${isAddMode ? "md:col-span-2" : ""}`}>
+              Main System Team
+              <select value={form.sourceTeamId} onChange={(event) => selectSourceTeam(event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
+                <option value="">Select team...</option>
+                {sourceTeamOptions.map((sourceTeam) => (
+                  <option key={sourceTeam.id} value={sourceTeam.id}>{sourceTeam.divisions?.name || "Division"} - {sourceTeam.name}</option>
+                ))}
+              </select>
+            </label>
+          )}
           <label className="text-sm font-black text-blue-200">
             Team Name
             <input value={form.name} onChange={(event) => updateForm("name", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
           </label>
           <label className="text-sm font-black text-blue-200">
-            Regular Season Standing
+            {isElimination ? "Standings" : "Regular Season Standing"}
             <input type="number" min="1" value={form.regularSeasonStanding} onChange={(event) => updateForm("regularSeasonStanding", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
           </label>
-          <label className="text-sm font-black text-blue-200">
+          {!isElimination && <label className="text-sm font-black text-blue-200">
             Line
             <input type="number" min="1" value={form.lineNumber} onChange={(event) => updateForm("lineNumber", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
-          </label>
+          </label>}
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -1308,6 +1686,11 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
               This Main System Team does not match an active tournament division.
             </div>
           )}
+          {(missingStanding || invalidStanding) && (
+            <div className="w-full rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
+              {isElimination ? "Standings is required." : "Regular Season Standing is required."}
+            </div>
+          )}
           {addValidationMessages.map((message) => (
             <div key={message} className="w-full rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
               {message}
@@ -1315,7 +1698,7 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
           ))}
           <button
             type="button"
-            disabled={saving || !form.name.trim() || (isAddMode && !form.sourceTeamId) || exceedsDivisionTeamMax || duplicateTeamLine || missingTournamentDivision || addValidationMessages.length > 0}
+            disabled={saving || !form.name.trim() || (isAddMode && (isElimination ? !form.divisionId : !form.sourceTeamId)) || missingStanding || invalidStanding || exceedsDivisionTeamMax || duplicateTeamLine || missingTournamentDivision || addValidationMessages.length > 0}
             onClick={() => onSave(teamSavePayload(team, form))}
             className="rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -1348,6 +1731,7 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
   const [eventEntryCode, setEventEntryCode] = useState("");
   const [eventEntryCodeConfirm, setEventEntryCodeConfirm] = useState("");
   const [eventEntryCodeApproval, setEventEntryCodeApproval] = useState("");
+  const [format, setFormat] = useState(tournamentFormat(state.tournament.settings));
   const [numberOfGames, setNumberOfGames] = useState(String(tournamentScoreSettings(state.tournament.settings).numberOfGames));
   const [gamesPlayedTo, setGamesPlayedTo] = useState(String(tournamentScoreSettings(state.tournament.settings).gamesPlayedTo));
   const [winBy, setWinBy] = useState(String(tournamentScoreSettings(state.tournament.settings).winBy));
@@ -1366,6 +1750,7 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
     setEventEntryCode("");
     setEventEntryCodeConfirm("");
     setEventEntryCodeApproval("");
+    setFormat(tournamentFormat(state.tournament.settings));
     setNumberOfGames(String(tournamentScoreSettings(state.tournament.settings).numberOfGames));
     setGamesPlayedTo(String(tournamentScoreSettings(state.tournament.settings).gamesPlayedTo));
     setWinBy(String(tournamentScoreSettings(state.tournament.settings).winBy));
@@ -1445,12 +1830,16 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
   );
   const tournamentSettingsPayload = {
     name: tournamentName,
+    format,
     numberOfGames: numberOfGames || String(tournamentScoreSettings(state.tournament.settings).numberOfGames),
     gamesPlayedTo: gamesPlayedTo || String(tournamentScoreSettings(state.tournament.settings).gamesPlayedTo),
     winBy: winBy || String(tournamentScoreSettings(state.tournament.settings).winBy),
     rallyScoring,
     standingsRules,
   };
+  const isEliminationFormat = format === "single_elimination" || format === "double_elimination";
+  const isTop4Format = format === "round_robin_top4";
+  const currentFormatLabel = tournamentFormatLabel({ format });
 
   return (
     <section className="mt-5 space-y-4">
@@ -1550,7 +1939,29 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
       </div>
 
       <div className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
-        <h3 className="text-xl font-black">Round Robin Divisions</h3>
+        <h3 className="text-xl font-black">Tournament Format</h3>
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-end">
+          <label className="text-sm font-black text-blue-200">
+            Format
+            <select value={format} onChange={(event) => setFormat(event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
+              {TOURNAMENT_FORMAT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={() => runAction("updateTournamentSettings", tournamentSettingsPayload)}
+            disabled={Boolean(actionLoading) || !tournamentName.trim()}
+            className="rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            Save Format
+          </button>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
+        <h3 className="text-xl font-black">{currentFormatLabel} Divisions</h3>
         <p className="mt-3 text-sm font-semibold text-blue-100">
           Select which active divisions to generate. Inactive divisions are hidden from standings and not shown here.
         </p>
@@ -1576,17 +1987,34 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           <button
             type="button"
             onClick={() => {
-              if (confirmTypedAction(`Generate round robin matches for ${selectedDivisionNames || "the selected divisions"}? This can add new tournament matches.`, "GENERATE")) {
-                runAction("generateRoundRobin", { divisionIds: selectedDivisionIds }).then((completed) => {
-                  window.alert(completed ? "Round robin generation completed." : "Round robin generation was not completed.");
+              const action = isEliminationFormat ? "generateEliminationBracket" : "generateRoundRobin";
+              if (confirmTypedAction(`Generate ${currentFormatLabel.toLowerCase()} matches for ${selectedDivisionNames || "the selected divisions"}? This replaces generated matches in those divisions.`, "GENERATE")) {
+                runAction(action, { divisionIds: selectedDivisionIds }).then((completed) => {
+                  window.alert(completed ? `${currentFormatLabel} generation completed.` : `${currentFormatLabel} generation was not completed.`);
                 });
               }
             }}
             disabled={Boolean(actionLoading) || selectedDivisionIds.length === 0}
             className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Generate Selected Round Robin
+            Generate Selected {isEliminationFormat ? "Bracket" : "Round Robin"}
           </button>
+          {isTop4Format && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirmTypedAction(`Generate top 4 playoff matches for ${selectedDivisionNames || "the selected divisions"}? This keeps completed round robin matches and replaces any existing playoff bracket in those divisions.`, "PLAYOFF")) {
+                  runAction("generateTop4Playoff", { divisionIds: selectedDivisionIds }).then((completed) => {
+                    window.alert(completed ? "Top 4 Playoff generation completed." : "Top 4 Playoff generation was not completed.");
+                  });
+                }
+              }}
+              disabled={Boolean(actionLoading) || selectedDivisionIds.length === 0}
+              className="rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black text-white hover:bg-emerald-400 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Generate Top 4 Playoff
+            </button>
+          )}
           <button
             type="button"
             onClick={() => {
@@ -1922,14 +2350,24 @@ function SmsTab({ state, smsEnabled, setSmsEnabled, runAction, actionLoading }) 
         </button>
         {showFields && (
           <div className="mt-3 rounded-xl border border-blue-300/20 bg-slate-950/50 p-4 text-sm font-semibold text-blue-100">
-            {"{tournament}"} tournament name, {"{court}"} court, {"{division}"} division, {"{line}"} line, {"{home}"} home team, {"{away}"} away team, {"{result}"} result, {"{status}"} tournament status.
+          {"{tournament}"} tournament name, {"{player}"} player, {"{team}"} team, {"{court}"} court, {"{division}"} division, {"{line}"} line, {"{home}"} home team, {"{away}"} away team, {"{result}"} result, {"{status}"} tournament status.
           </div>
         )}
 
         <SmsTemplateTextArea
+          label="Check-In Text"
+          value={templates.checkIn}
+          onChange={(value) => setTemplates((current) => ({ ...current, checkIn: value }))}
+        />
+        <SmsTemplateTextArea
           label="Court Ready Text"
           value={templates.courtReady}
           onChange={(value) => setTemplates((current) => ({ ...current, courtReady: value }))}
+        />
+        <SmsTemplateTextArea
+          label="Return to Queue Text"
+          value={templates.returnToQueue}
+          onChange={(value) => setTemplates((current) => ({ ...current, returnToQueue: value }))}
         />
         <SmsTemplateTextArea
           label="Result Text"
@@ -2112,7 +2550,7 @@ function LogTab({ state, runAction, actionLoading }) {
   );
 }
 
-function ResultModal({ match, smsEnabled, settings = {}, onClose, onSave, saving }) {
+function ResultModal({ match, matches = [], smsEnabled, settings = {}, onClose, onSave, saving }) {
   const [resultType, setResultType] = useState(match.result_type || "completed");
   const scoreSettings = tournamentScoreSettings(settings);
   const [gameScores, setGameScores] = useState(() => resultGameScoresForMatch(match, scoreSettings.numberOfGames));
@@ -2126,6 +2564,10 @@ function ResultModal({ match, smsEnabled, settings = {}, onClose, onSave, saving
         : match.home_team_id;
   const [winnerTeamId, setWinnerTeamId] = useState(match.winner_team_id || defaultWinner);
   const requiredGameCount = requiredResultGameCount(gameScores, scoreSettings);
+  const eliminationPreview = useMemo(
+    () => resultEliminationPreview(match, matches, settings, winnerTeamId, resultType),
+    [match, matches, resultType, settings, winnerTeamId]
+  );
 
   useEffect(() => {
     if (resultType === "not_played") {
@@ -2278,6 +2720,13 @@ function ResultModal({ match, smsEnabled, settings = {}, onClose, onSave, saving
           </label>
         )}
 
+        {eliminationPreview && (
+          <div className="mt-4 rounded-xl border border-rose-300/35 bg-rose-950/65 px-4 py-3 text-sm font-black text-rose-100">
+            <span className="mr-2 inline-flex rounded-full bg-rose-500 px-2 py-1 text-[11px] text-white">D</span>
+            {eliminationPreview.teamName} will be out if this result is saved.
+          </div>
+        )}
+
         <button
           type="button"
           disabled={saving || Boolean(scoreValidationMessage)}
@@ -2329,7 +2778,7 @@ function groupedDivisionStandings(matches, teams, divisions, settings = {}) {
   });
 
   (matches || [])
-    .filter((match) => activeDivisionIds.has(String(match.division_id)) && match.status === "done" && match.result_type !== "not_played")
+    .filter((match) => !isBracketMatch(match) && activeDivisionIds.has(String(match.division_id)) && match.status === "done" && match.result_type !== "not_played")
     .forEach((match) => {
       const divisionName = match.division?.name || "Unassigned";
       standings[divisionName] ||= {};
@@ -2456,6 +2905,13 @@ function teamReady(team) {
   return Boolean(team.player_1_checked_in && team.player_2_checked_in);
 }
 
+function compareTournamentTeamsByName(a, b) {
+  return String(a.name || "").localeCompare(String(b.name || ""), undefined, { numeric: true, sensitivity: "base" }) ||
+    Number(a.line_number || 1) - Number(b.line_number || 1) ||
+    Number(regularSeasonStandingValue(a) || 999) - Number(regularSeasonStandingValue(b) || 999) ||
+    String(a.id || "").localeCompare(String(b.id || ""));
+}
+
 function duplicateTournamentTeamLine(teams, teamId, teamName, lineNumber) {
   const cleanName = normalizeName(teamName);
   const cleanLine = Number(lineNumber || 1);
@@ -2468,18 +2924,30 @@ function duplicateTournamentTeamLine(teams, teamId, teamName, lineNumber) {
   );
 }
 
-function addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, divisionTeamMax) {
+function selectedTournamentDivisionName(divisions, divisionId) {
+  return (divisions || []).find((division) => String(division.id) === String(divisionId))?.name || "";
+}
+
+function addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, divisionTeamMax, isElimination = false) {
   const messages = [];
   const player1Id = String(form.player1MemberId || "");
   const player2Id = String(form.player2MemberId || "");
   const lineNumber = Number(form.lineNumber);
 
-  if (!String(form.lineNumber || "").trim()) {
+  if (isElimination && !String(form.divisionId || "").trim()) {
+    messages.push("Division is required.");
+  }
+
+  if (!isElimination && !String(form.lineNumber || "").trim()) {
     messages.push("Line is required.");
   }
 
-  if (!String(form.regularSeasonStanding || "").trim()) {
+  if (!isElimination && !String(form.regularSeasonStanding || "").trim()) {
     messages.push("Regular Season Standing is required.");
+  }
+
+  if (isElimination && !String(form.regularSeasonStanding || "").trim()) {
+    messages.push("Standings is required.");
   }
 
   if (!player1Id || !player2Id) {
@@ -2497,12 +2965,20 @@ function addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, d
     messages.push(`${usedPlayer.display_name || "A selected player"} is already on another tournament team.`);
   }
 
+  const duplicateTeamName = isElimination && (state.teams || []).some((team) =>
+    String(team.division_id || "") === String(form.divisionId || "") &&
+    normalizeName(team.name) === normalizeName(form.name)
+  );
+  if (duplicateTeamName) {
+    messages.push("A tournament team already exists with this Team Name in that Division.");
+  }
+
   const max = Number(divisionTeamMax);
   if (Number.isFinite(max) && max > 0 && teamTotal !== "" && Number(teamTotal) > max) {
     messages.push("The players' total rating must be at or below the Division Team Max.");
   }
 
-  if (selectedSourceTeam && Number.isFinite(lineNumber)) {
+  if (!isElimination && selectedSourceTeam && Number.isFinite(lineNumber)) {
     const duplicateMainTeamLine = (state.teams || []).some((team) =>
       normalizeName(team.name) === normalizeName(selectedSourceTeam.name) &&
       Number(team.line_number || 1) === lineNumber
@@ -2675,6 +3151,7 @@ function emptyTeamFormState() {
     name: "",
     lineNumber: 1,
     sourceTeamId: "",
+    divisionId: "",
     regularSeasonStanding: "",
     player1MemberId: "",
     player1Name: "",
@@ -2694,7 +3171,8 @@ function teamFormState(team, contacts, sourceTeams = []) {
   return {
     name: team.name || "",
     lineNumber: team.line_number || 1,
-    sourceTeamId: matchedSourceTeam?.id || "",
+    sourceTeamId: team.source_team_id || matchedSourceTeam?.id || "",
+    divisionId: team.division_id || "",
     regularSeasonStanding: regularSeasonStandingValue(team) || "",
     player1MemberId: p1.member_id || "",
     player1Name: team.player_1_name || p1.display_name || "",
@@ -2713,6 +3191,7 @@ function teamSavePayload(team, form) {
     name: form.name,
     lineNumber: form.lineNumber,
     sourceTeamId: form.sourceTeamId,
+    divisionId: form.divisionId,
     regularSeasonStanding: form.regularSeasonStanding,
     player1MemberId: form.player1MemberId,
     player1Name: form.player1Name,
@@ -2733,6 +3212,19 @@ function sortedSourceTeams(sourceTeams) {
   return [...(sourceTeams || [])].sort((a, b) =>
     String(a.divisions?.name || "").localeCompare(String(b.divisions?.name || "")) ||
     String(a.name || "").localeCompare(String(b.name || ""))
+  );
+}
+
+function uniqueRosterPlayers(sourceRosters) {
+  const byMember = new Map();
+  (sourceRosters || []).forEach((row) => {
+    if (!row.member_id || byMember.has(String(row.member_id))) return;
+    byMember.set(String(row.member_id), row);
+  });
+
+  return [...byMember.values()].sort((a, b) =>
+    String(a.members?.first_name || "").localeCompare(String(b.members?.first_name || "")) ||
+    memberDisplayName(a.members).localeCompare(memberDisplayName(b.members))
   );
 }
 
@@ -2760,6 +3252,22 @@ function teamTotalRating(team, contacts, state) {
   }, 0);
 
   return total > 0 ? total.toFixed(2) : "";
+}
+
+function shouldReplaceGeneratedTeamName(currentName, player1Name, player2Name) {
+  const clean = String(currentName || "").trim();
+  if (!clean) return true;
+  return normalizeName(clean) === normalizeName(eliminationTeamName(player1Name, player2Name));
+}
+
+function eliminationTeamName(player1Name, player2Name) {
+  return [player1Name, player2Name]
+    .map((name) => {
+      const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+      return parts[parts.length - 1];
+    })
+    .filter(Boolean)
+    .join(" / ");
 }
 
 function teamTotalFromForm(form) {
@@ -2843,7 +3351,7 @@ function exportMatchesCsv(state, selectedDivisionIds = []) {
       "Home Team", "Home Line", "Home Seed", "Home Player 1", "Home Player 1 Phone", "Home Player 2", "Home Player 2 Phone",
       "Away Team", "Away Line", "Away Seed", "Away Player 1", "Away Player 1 Phone", "Away Player 2", "Away Player 2 Phone",
       "Game 1 Home", "Game 1 Away", "Game 2 Home", "Game 2 Away", "Game 3 Home", "Game 3 Away", "Game 4 Home", "Game 4 Away", "Game 5 Home", "Game 5 Away",
-      "Home Game Wins", "Away Game Wins", "Home Total Points", "Away Total Points", "Compact Score", "Assigned At", "Completed At",
+      "Home Game Wins", "Away Game Wins", "Home Total Points", "Away Total Points", "Compact Score", "Assigned At", "Completed At", "Game Length",
     ],
     ...selectedTournamentMatches(state.matches, selectedDivisionSet).map((match) => {
       const homeTeam = teamsById[String(match.home_team_id)] || match.home_team || {};
@@ -2856,7 +3364,7 @@ function exportMatchesCsv(state, selectedDivisionIds = []) {
       return [
         match.legacy_id || match.id,
         match.division?.name || "",
-        `Line ${match.line_number || 1}`,
+        matchLineLabel(match),
         match.status || "",
         match.court?.name || "",
         match.result_type || "",
@@ -2892,6 +3400,7 @@ function exportMatchesCsv(state, selectedDivisionIds = []) {
         scoreDisplay(match),
         csvDateTime(match.assigned_at),
         csvDateTime(match.completed_at),
+        matchDurationText(match),
       ];
     }),
   ];
@@ -3080,13 +3589,14 @@ function tournamentScoreValidationMessage(homeScore, awayScore, settings = {}) {
   if (home < 0 || away < 0) return "Scores cannot be negative.";
   if (home === away) return "Completed matches cannot end in a tie.";
 
+  const scoreSettings = tournamentScoreSettings(settings);
   const winner = Math.max(home, away);
   const loser = Math.min(home, away);
-  if (winner < settings.gamesPlayedTo) return `Winning score must be at least ${settings.gamesPlayedTo}.`;
-  if (settings.winBy <= 1 && winner > settings.gamesPlayedTo) {
-    return `Winning score cannot be more than ${settings.gamesPlayedTo} when Win By is 1.`;
+  if (winner < scoreSettings.gamesPlayedTo) return `Winning score must be at least ${scoreSettings.gamesPlayedTo}.`;
+  if (scoreSettings.winBy <= 1 && winner > scoreSettings.gamesPlayedTo) {
+    return `Winning score cannot be more than ${scoreSettings.gamesPlayedTo} when Win By is 1.`;
   }
-  if (winner - loser < settings.winBy) return `Winning margin must be at least ${settings.winBy}.`;
+  if (winner - loser < scoreSettings.winBy) return `Winning margin must be at least ${scoreSettings.winBy}.`;
   return "";
 }
 
@@ -3174,6 +3684,46 @@ function tournamentMatchScoreValidationMessage(gameScores, settings = {}) {
   return "";
 }
 
+function resultEliminationPreview(match, matches, settings = {}, winnerTeamId, resultType) {
+  if (!match?.legacy_id?.startsWith("BR|")) return null;
+  if (resultType === "not_played") return null;
+  const format = tournamentFormat(settings);
+  if (!["single_elimination", "double_elimination"].includes(format)) return null;
+  const loserId = resultLoserTeamId(match, winnerTeamId);
+  if (!loserId) return null;
+
+  const priorLosses = bracketLossCountBeforeMatch(matches, match, loserId);
+  const maxLosses = format === "double_elimination" ? 2 : 1;
+  if (priorLosses + 1 < maxLosses) return null;
+
+  return {
+    teamId: loserId,
+    teamName: String(match.home_team_id || "") === String(loserId)
+      ? match.home_team?.name || "Home"
+      : match.away_team?.name || "Away",
+  };
+}
+
+function resultLoserTeamId(match, winnerTeamId) {
+  const winner = String(winnerTeamId || "");
+  if (!winner) return "";
+  if (String(match.home_team_id || "") === winner) return String(match.away_team_id || "");
+  if (String(match.away_team_id || "") === winner) return String(match.home_team_id || "");
+  return "";
+}
+
+function bracketLossCountBeforeMatch(matches, currentMatch, teamId) {
+  const currentOrder = Number(currentMatch?.created_order || Number.MAX_SAFE_INTEGER);
+  return (matches || []).filter((match) => {
+    if (String(match.id) === String(currentMatch.id)) return false;
+    if (!match.legacy_id?.startsWith("BR|")) return false;
+    if (match.status !== "done" || match.result_type === "not_played" || !match.winner_team_id) return false;
+    const order = Number(match.created_order || 0);
+    if (Number.isFinite(currentOrder) && order >= currentOrder) return false;
+    return String(resultLoserTeamId(match, match.winner_team_id)) === String(teamId || "");
+  }).length;
+}
+
 function resultScoreText(gameScores, settings = {}) {
   const games = trimmedResultGameScores(gameScores, settings);
   if (games.length === 0) return "";
@@ -3222,7 +3772,9 @@ function slugify(value) {
 
 function smsTemplateState(saved = {}) {
   return {
+    checkIn: saved.checkIn || DEFAULT_SMS_TEMPLATES.checkIn,
     courtReady: saved.courtReady || DEFAULT_SMS_TEMPLATES.courtReady,
+    returnToQueue: saved.returnToQueue || DEFAULT_SMS_TEMPLATES.returnToQueue,
     result: saved.result || DEFAULT_SMS_TEMPLATES.result,
     broadcast: saved.broadcast || DEFAULT_SMS_TEMPLATES.broadcast,
   };
@@ -3377,7 +3929,7 @@ function divisionLineStats(matches) {
 
 function sortedPendingMatches(matches) {
   return (matches || [])
-    .filter((match) => OPEN_STATUSES.has(match.status))
+    .filter((match) => OPEN_STATUSES.has(match.status) && match.home_team_id && match.away_team_id)
     .sort((a, b) =>
       String(a.division?.name || "").localeCompare(String(b.division?.name || "")) ||
       Number(a.line_number || 1) - Number(b.line_number || 1) ||
@@ -3429,8 +3981,26 @@ function matchesByCourt(matches) {
   );
 }
 
+function applyBracketMatchDetails(matches, bracketDetails) {
+  return (matches || []).map((match) => ({
+    ...match,
+    ...(bracketDetails[String(match.id)] || {}),
+  }));
+}
+
 function matchSummary(match) {
-  return `${match.division?.name || "Division"} Line ${match.line_number || 1} - ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`;
+  return `${match.division?.name || "Division"} ${matchLineLabel(match)} - ${bracketTeamDisplayName(match, "home")} vs ${bracketTeamDisplayName(match, "away")}`;
+}
+
+function matchLineLabel(match) {
+  return match.legacy_id?.startsWith("BR|") ? `Game #${match.bracketMatchNumber || match.bracketMeta?.match || ""}` : `Line ${match.line_number || 1}`;
+}
+
+function bracketTeamDisplayName(match, side) {
+  const isAway = side === "away";
+  const name = isAway ? match.away_team?.name || "Away" : match.home_team?.name || "Home";
+  const sourceLabel = isAway ? match.awaySourceLabel : match.homeSourceLabel;
+  return sourceLabel ? `(${sourceLabel}) ${name}` : name;
 }
 
 function confirmTypedAction(message, requiredWord) {
@@ -3467,6 +4037,29 @@ function playTime(value, now) {
   const totalMinutes = Math.floor(elapsedMs / 60000);
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes} min`;
+}
+
+function matchDurationText(match) {
+  const minutes = matchDurationMinutes(match);
+  return minutes === null ? "" : formatDurationMinutes(minutes);
+}
+
+function matchDurationMinutes(match) {
+  if (!match?.assigned_at || !match?.completed_at) return null;
+  const assignedAt = new Date(match.assigned_at).getTime();
+  const completedAt = new Date(match.completed_at).getTime();
+  if (Number.isNaN(assignedAt) || Number.isNaN(completedAt) || completedAt < assignedAt) return null;
+  return Math.round((completedAt - assignedAt) / 60000);
+}
+
+function formatDurationMinutes(value) {
+  const totalMinutes = Number(value);
+  if (!Number.isFinite(totalMinutes) || totalMinutes < 0) return "0 min";
+  const roundedMinutes = Math.round(totalMinutes);
+  const hours = Math.floor(roundedMinutes / 60);
+  const minutes = roundedMinutes % 60;
   if (hours > 0) return `${hours}h ${minutes}m`;
   return `${minutes} min`;
 }

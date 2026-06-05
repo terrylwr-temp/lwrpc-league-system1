@@ -11,12 +11,35 @@ import { hasRole } from "../../lib/permissions";
 import { rebuildDivisionStandingsForDivision } from "../../lib/standingsRebuild";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 
-function lmsGameWinnerSide(game) {
+function lmsScoreRuleSettings(line) {
+  return {
+    pointsToWin: Number(line?.division_lines?.points_to_win || 0),
+    winBy: Number(line?.division_lines?.win_by || 0),
+  };
+}
+
+function lmsGameWinnerSide(game, line = null) {
   if (game.game_status === "forfeit_home" || game.game_status === "retired_home") return "home";
   if (game.game_status === "forfeit_away" || game.game_status === "retired_away") return "away";
   if (game.home_score !== null && game.home_score !== undefined && game.away_score !== null && game.away_score !== undefined) {
-    if (Number(game.home_score) > Number(game.away_score)) return "home";
-    if (Number(game.away_score) > Number(game.home_score)) return "away";
+    const homeScore = Number(game.home_score);
+    const awayScore = Number(game.away_score);
+    const { pointsToWin, winBy } = lmsScoreRuleSettings(line);
+
+    if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return "";
+    if (homeScore === awayScore) return "";
+
+    const highScore = Math.max(homeScore, awayScore);
+    const lowScore = Math.min(homeScore, awayScore);
+
+    if (pointsToWin > 0) {
+      if (winBy === 1 && highScore !== pointsToWin) return "";
+      if (winBy > 1 && highScore < pointsToWin) return "";
+      if (winBy > 0 && highScore - lowScore < winBy) return "";
+    }
+
+    if (homeScore > awayScore) return "home";
+    if (awayScore > homeScore) return "away";
   }
   return "";
 }
@@ -26,7 +49,7 @@ function lmsLineGamesNeededToWin(lineGames) {
   return gameCount > 1 && gameCount % 2 === 1 ? Math.floor(gameCount / 2) + 1 : gameCount;
 }
 
-function lmsRequiredLineGameIds(lineGames) {
+function lmsRequiredLineGameIds(lineGames, line = null) {
   const sortedGames = [...lineGames].sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
   const neededToWin = lmsLineGamesNeededToWin(sortedGames);
   const requiredIds = new Set();
@@ -37,7 +60,7 @@ function lmsRequiredLineGameIds(lineGames) {
     if (neededToWin > 0 && (homeWins >= neededToWin || awayWins >= neededToWin)) return;
     requiredIds.add(String(game.id));
 
-    const winner = lmsGameWinnerSide(game);
+    const winner = lmsGameWinnerSide(game, line);
     if (winner === "home") homeWins += 1;
     if (winner === "away") awayWins += 1;
   });
@@ -45,8 +68,8 @@ function lmsRequiredLineGameIds(lineGames) {
   return requiredIds;
 }
 
-function lmsRequiredLineGames(lineGames) {
-  const requiredIds = lmsRequiredLineGameIds(lineGames);
+function lmsRequiredLineGames(lineGames, line = null) {
+  const requiredIds = lmsRequiredLineGameIds(lineGames, line);
   return lineGames.filter((game) => requiredIds.has(String(game.id)));
 }
 
@@ -354,6 +377,10 @@ export default function MatchDetailPage() {
     return Number(line.division_lines?.line_number || line.line_number || 0);
   }
 
+  function isPicklebreakerLine(line) {
+    return lineTypeKey(line?.division_lines?.line_type) === "picklebreaker";
+  }
+
   function teamSlotLabel(line) {
     const slot = teamSlotNumber(line);
     return `Game ${slot || "-"}`;
@@ -408,7 +435,7 @@ export default function MatchDetailPage() {
   }
 
   const getLineSummary = useCallback(function getLineSummary(line) {
-    const lineGames = lmsRequiredLineGames(games.filter((game) => game.match_line_id === line.id));
+    const lineGames = lmsRequiredLineGames(games.filter((game) => game.match_line_id === line.id), line);
 
     let homeGameWins = 0;
     let awayGameWins = 0;
@@ -416,23 +443,14 @@ export default function MatchDetailPage() {
     let awayPoints = 0;
 
     lineGames.forEach((game) => {
-      if (game.game_status === "forfeit_home" || game.game_status === "retired_home") {
-        homeGameWins++;
-        return;
-      }
-
-      if (game.game_status === "forfeit_away" || game.game_status === "retired_away") {
-        awayGameWins++;
-        return;
-      }
-
       if (game.home_score !== null && game.away_score !== null) {
         homePoints += Number(game.home_score || 0);
         awayPoints += Number(game.away_score || 0);
-
-        if (game.home_score > game.away_score) homeGameWins++;
-        if (game.away_score > game.home_score) awayGameWins++;
       }
+
+      const winnerSide = lmsGameWinnerSide(game, line);
+      if (winnerSide === "home") homeGameWins++;
+      if (winnerSide === "away") awayGameWins++;
     });
 
     let winningTeamId = null;
@@ -494,6 +512,8 @@ export default function MatchDetailPage() {
     const counts = {};
 
     displayedLines.forEach((line) => {
+      if (isPicklebreakerLine(line)) return;
+
       [
         line.home_player_1_id,
         line.home_player_2_id,
@@ -541,15 +561,17 @@ export default function MatchDetailPage() {
       warnings.push("A player is selected twice in this game.");
     }
 
-    const overLimitNames = [
-      line.home_player_1,
-      line.home_player_2,
-      line.away_player_1,
-      line.away_player_2,
-    ]
-      .filter((player) => overLineLimitPlayerIds.includes(player?.id))
-      .map((player) => `${player.first_name || ""} ${player.last_name || ""}`.trim())
-      .filter(Boolean);
+    const overLimitNames = isPicklebreakerLine(line)
+      ? []
+      : [
+          line.home_player_1,
+          line.home_player_2,
+          line.away_player_1,
+          line.away_player_2,
+        ]
+          .filter((player) => overLineLimitPlayerIds.includes(player?.id))
+          .map((player) => `${player.first_name || ""} ${player.last_name || ""}`.trim())
+          .filter(Boolean);
 
     if (overLimitNames.length > 0) {
       warnings.push(
@@ -947,7 +969,7 @@ export default function MatchDetailPage() {
     const issues = [];
     const pointsToWin = Number(line.division_lines?.points_to_win || 0);
     const winBy = Number(line.division_lines?.win_by || 0);
-    const requiredGameIds = lmsRequiredLineGameIds(lineGames);
+    const requiredGameIds = lmsRequiredLineGameIds(lineGames, line);
 
     if (lineWarnings(line).length > 0) {
       issues.push(
@@ -1532,7 +1554,7 @@ export default function MatchDetailPage() {
           {displayedLines.map((line) => {
             const divisionLine = line.division_lines;
             const lineGames = games.filter((game) => game.match_line_id === line.id);
-            const requiredGameIdsForLine = lmsRequiredLineGameIds(lineGames);
+            const requiredGameIdsForLine = lmsRequiredLineGameIds(lineGames, line);
             const lineSummary = getLineSummary(line);
             const linePoints = lineTeamWinPoints(line, lineSummary);
             const warnings = lineWarnings(line);
@@ -1980,6 +2002,13 @@ function capitalizeFirst(value) {
   const text = String(value).trim();
   if (!text) return "";
   return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function lineTypeKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 }
 
 function formatMatchScoreStatus(match) {

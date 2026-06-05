@@ -28,7 +28,10 @@ export default function TournamentLandingPage() {
 
   function openPlayerView() {
     if (!selectedPlayer) return;
-    router.push(`/tourney/${tournamentKey}/player?teamId=${encodeURIComponent(selectedPlayer)}`);
+    const player = players.find((option) => option.playerKey === selectedPlayer);
+    if (!player) return;
+
+    router.push(`/tourney/${tournamentKey}/player?teamId=${encodeURIComponent(player.teamId)}&playerKey=${encodeURIComponent(player.playerKey)}`);
   }
 
   return (
@@ -81,7 +84,7 @@ export default function TournamentLandingPage() {
                 >
                   <option value="">Select player...</option>
                   {players.map((player) => (
-                    <option key={`${player.teamId}-${player.name}`} value={player.teamId}>
+                    <option key={player.playerKey} value={player.playerKey}>
                       {player.name} - {player.team} ({player.division} Line {player.line})
                     </option>
                   ))}

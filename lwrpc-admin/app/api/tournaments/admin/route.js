@@ -72,7 +72,7 @@ export async function POST(req) {
         .order("name", { ascending: true }),
       supabase
         .from("divisions")
-        .select("id, name, sort_order, is_active")
+        .select("id, name, sort_order, is_active, team_dupr_max, rating_type")
         .order("sort_order", { ascending: true })
         .order("name", { ascending: true }),
       supabase

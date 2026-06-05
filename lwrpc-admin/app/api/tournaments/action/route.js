@@ -6,7 +6,9 @@ import { formatPhoneNumberForStorage } from "../../../lib/phone";
 export const runtime = "nodejs";
 
 const DEFAULT_SMS_TEMPLATES = {
+  checkIn: "LWR PC Tournament Check-In\nHi {player}, please check in at the tournament desk for {team} in {division}.\n\n{tournament}",
   courtReady: "You're up! You are on Court {court}.\n\nPlease stop by the Desk to grab your basket and ball. Once you've finished your game, fill out the scoresheet and return the basket and ball.\nHave a great match!\n\n{division} {line}\n{home} vs {away}",
+  returnToQueue: "Tournament update: your game is not ready to play yet. Please do not go to Court {court}. We will text you again when your game is ready.\n\n{division} {line}\n{home} vs {away}",
   result: "{tournament} Result\n{division} {line}\n\n{home} vs {away}\n{result}\n\nPlease let us know right away if anything is incorrect.",
   broadcast: "LWR PC Tournament Update\nWelcome to the {tournament}!\n{status}",
 };
@@ -44,7 +46,7 @@ export async function POST(req) {
     }
 
     if (action === "returnToQueue") {
-      const result = await returnToQueue(supabase, tournament, body.matchId);
+      const result = await returnToQueue(supabase, tournament, body.matchId, body.smsEnabled);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -75,6 +77,11 @@ export async function POST(req) {
 
     if (action === "sendTestText") {
       const result = await sendTestText(supabase, tournament, body.phone);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "sendCheckInText") {
+      const result = await sendCheckInText(supabase, tournament, body);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -140,6 +147,16 @@ export async function POST(req) {
 
     if (action === "generateRoundRobin") {
       const result = await generateRoundRobin(supabase, tournament, body.divisionIds);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "generateEliminationBracket") {
+      const result = await generateEliminationBracket(supabase, tournament, body.divisionIds);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "generateTop4Playoff") {
+      const result = await generateTop4Playoff(supabase, tournament, body.divisionIds);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -232,10 +249,23 @@ async function autoAssignOpenCourts(supabase, tournament, smsEnabled = false) {
     ? await sendCourtReadyTextsForAssignments(supabase, tournament, state.contactsByTeam, assignments)
     : { sent: 0, skipped: true, reason: "SMS disabled", results: [] };
 
-  return { assigned: assignments.length, sms };
+  const bracketGameNumbers = bracketDisplayNumbersById(state.matches);
+
+  return {
+    assigned: assignments.length,
+    assignments: assignments.map((assignment) => ({
+      court: assignment.court.name || "",
+      homeTeam: assignment.match.home_team?.name || "Home",
+      awayTeam: assignment.match.away_team?.name || "Away",
+      division: assignment.match.division?.name || "Division",
+      line: assignment.match.line_number || 1,
+      lineLabel: autoAssignLineLabel(assignment.match, bracketGameNumbers),
+    })),
+    sms,
+  };
 }
 
-async function returnToQueue(supabase, tournament, matchId) {
+async function returnToQueue(supabase, tournament, matchId, smsEnabled = false) {
   if (!matchId) throw new Error("Match is required.");
 
   const state = await loadActionState(supabase, tournament.id);
@@ -243,7 +273,11 @@ async function returnToQueue(supabase, tournament, matchId) {
   if (!match) throw new Error("Match not found.");
 
   const now = new Date().toISOString();
-  await supabase
+  const sms = smsEnabled
+    ? await sendReturnToQueueText(supabase, tournament, state.contactsByTeam, match)
+    : { sent: 0, skipped: true, reason: "SMS disabled", results: [] };
+
+  const { error } = await supabase
     .from("tournament_matches")
     .update({
       status: "pending",
@@ -260,13 +294,14 @@ async function returnToQueue(supabase, tournament, matchId) {
       updated_at: now,
     })
     .eq("id", match.id);
+  if (error) throw error;
 
   if (match.court_id) {
     await clearCourt(supabase, match.court_id);
   }
 
   await addLog(supabase, tournament.id, "match", `Returned to queue: ${matchLabel(match)}`);
-  return { returned: true };
+  return { returned: true, sms };
 }
 
 async function swapToCourt(supabase, tournament, matchId, courtId, smsEnabled = false) {
@@ -375,6 +410,9 @@ async function completeMatch(supabase, tournament, body) {
     score_text: body.scoreText || null,
     game_scores: matchScoreSummary ? matchScoreSummary.gameScores : gameScores.length > 0 ? gameScores : null,
   };
+  if (resultType !== "not_played" && winnerTeamId) {
+    await advanceBracketMatch(supabase, tournament, completedMatch);
+  }
   const sms = body.smsEnabled
     ? await sendResultText(supabase, tournament, state.contactsByTeam, completedMatch)
     : { sent: 0, skipped: true, reason: "SMS disabled", results: [] };
@@ -416,6 +454,22 @@ async function sendCourtReadyText(supabase, tournament, contactsByTeam, match) {
     tournament.id,
     "sms",
     `Court text sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"}: ${matchLabel(match)}`
+  );
+
+  return sms;
+}
+
+async function sendReturnToQueueText(supabase, tournament, contactsByTeam, match) {
+  const phones = phonesForMatch(contactsByTeam, match);
+  const templates = smsTemplates(tournament);
+  const message = renderSmsTemplate(templates.returnToQueue, templateValues(tournament, match));
+  const sms = await sendSmsMessages({ phones, body: message });
+
+  await addLog(
+    supabase,
+    tournament.id,
+    "sms",
+    `Return-to-queue text sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"}: ${matchLabel(match)}`
   );
 
   return sms;
@@ -506,6 +560,50 @@ async function sendTestText(supabase, tournament, phone) {
   return { sms };
 }
 
+async function sendCheckInText(supabase, tournament, body = {}) {
+  const cleanPhone = formatPhoneNumberForStorage(body.phone);
+  const teamId = String(body.teamId || "").trim();
+  const slot = Number(body.slot || 0);
+  if (!cleanPhone) throw new Error("Enter the player phone number.");
+  if (!teamId) throw new Error("Team is required.");
+
+  const { data: team, error: teamError } = await supabase
+    .from("tournament_teams")
+    .select(`
+      id,
+      name,
+      player_1_name,
+      player_2_name,
+      division:tournament_divisions(name)
+    `)
+    .eq("id", teamId)
+    .eq("tournament_id", tournament.id)
+    .single();
+  if (teamError) throw teamError;
+
+  const playerName = String(body.playerName || "").trim() ||
+    (slot === 2 ? team.player_2_name : team.player_1_name) ||
+    "Player";
+  const templates = smsTemplates(tournament);
+  const message = renderSmsTemplate(templates.checkIn, {
+    tournament: tournament.name || "Tournament",
+    player: playerName,
+    team: team.name || "Team",
+    division: team.division?.name || "Division",
+    status: tournamentStatusText([]),
+  });
+  const sms = await sendSmsMessages({ phones: [cleanPhone], body: message });
+
+  await addLog(
+    supabase,
+    tournament.id,
+    "sms",
+    `Check-In SMS sent to ${playerName} at ${cleanPhone}.`,
+    { teamId, playerSlot: slot || null, playerName, phone: cleanPhone }
+  );
+  return { sms, playerName };
+}
+
 async function updatePlayerPhone(supabase, tournament, body) {
   const teamId = String(body.teamId || "").trim();
   const slot = Number(body.slot || 0);
@@ -516,7 +614,13 @@ async function updatePlayerPhone(supabase, tournament, body) {
 
   const { data: team, error: teamError } = await supabase
     .from("tournament_teams")
-    .select("id, name, player_1_name, player_2_name")
+    .select(`
+      id,
+      name,
+      player_1_name,
+      player_2_name,
+      division:tournament_divisions(name)
+    `)
     .eq("id", teamId)
     .eq("tournament_id", tournament.id)
     .single();
@@ -534,6 +638,9 @@ async function updatePlayerPhone(supabase, tournament, body) {
   const resolvedMember = await resolveTournamentPlayerMember(supabase, {
     memberId: contact?.member_id || body.memberId,
     playerName: contact?.display_name || fallbackPlayerName,
+    sourceTeamId: "",
+    teamName: team.name,
+    divisionName: team.division?.name,
   });
   const memberId = resolvedMember?.id || null;
   const oldPhone = String(contact?.phone || resolvedMember?.phone || "").trim();
@@ -591,7 +698,7 @@ async function syncLeagueDivisions(supabase, tournament) {
       .order("name", { ascending: true }),
     supabase
       .from("tournament_divisions")
-      .select("id, name")
+      .select("id, name, seed")
       .eq("tournament_id", tournament.id),
   ]);
 
@@ -699,6 +806,7 @@ async function updateTournamentSettings(supabase, tournament, body) {
 
   const settings = {
     ...(tournament.settings || {}),
+    format: tournamentFormatValue(body.format || tournament.settings?.format),
     numberOfGames: scoreSettings.numberOfGames,
     matchFormat: scoreSettings.numberOfGames === 1 ? "Single Game" : `Best ${scoreSettings.gamesNeededToWin} of ${scoreSettings.numberOfGames}`,
     gamesPlayedTo: scoreSettings.gamesPlayedTo,
@@ -743,9 +851,11 @@ async function updateTournamentTeam(supabase, tournament, body) {
   if (existingError) throw existingError;
 
   const hasTeamFields = Object.prototype.hasOwnProperty.call(body, "name") ||
+    Object.prototype.hasOwnProperty.call(body, "divisionId") ||
     Object.prototype.hasOwnProperty.call(body, "regularSeasonStanding") ||
     Object.prototype.hasOwnProperty.call(body, "player1Name") ||
     Object.prototype.hasOwnProperty.call(body, "player2Name");
+  const isElimination = isBracketTeamTournament(tournament.settings);
   const nextP1Checked = booleanOrDefault(body.player1CheckedIn, existing.player_1_checked_in);
   const nextP2Checked = booleanOrDefault(body.player2CheckedIn, existing.player_2_checked_in);
   const now = new Date().toISOString();
@@ -757,9 +867,17 @@ async function updateTournamentTeam(supabase, tournament, body) {
   };
 
   if (hasTeamFields) {
+    const standing = Number(body.regularSeasonStanding);
+    if (!String(body.regularSeasonStanding || "").trim() || !Number.isFinite(standing) || standing < 1) {
+      throw new Error(isElimination ? "Standings is required." : "Regular Season Standing is required.");
+    }
+
     payload.name = String(body.name || existing.name || "").trim() || existing.name;
-    payload.line_number = Number(body.lineNumber || existing.line_number || 1);
-    payload.seed = body.regularSeasonStanding ? String(body.regularSeasonStanding) : null;
+    payload.division_id = isElimination
+      ? String(body.divisionId || existing.division_id || "").trim()
+      : existing.division_id;
+    payload.line_number = isElimination ? 1 : Number(body.lineNumber || existing.line_number || 1);
+    payload.seed = String(standing);
     payload.player_1_name = String(body.player1Name || "").trim() || null;
     payload.player_2_name = String(body.player2Name || "").trim() || null;
 
@@ -767,7 +885,7 @@ async function updateTournamentTeam(supabase, tournament, body) {
       .from("tournament_teams")
       .select("id, name")
       .eq("tournament_id", tournament.id)
-      .eq("line_number", payload.line_number);
+      .eq(isElimination ? "division_id" : "line_number", isElimination ? payload.division_id : payload.line_number);
     if (duplicateError) throw duplicateError;
 
     const duplicate = (sameLineTeams || []).some((team) =>
@@ -775,9 +893,13 @@ async function updateTournamentTeam(supabase, tournament, body) {
       normalizeName(team.name) === normalizeName(payload.name)
     );
     if (duplicate) {
-      const error = new Error("A tournament team already exists with this Team Name and Line #.");
+      const error = new Error(isElimination ? "A tournament team already exists with this Team Name in that Division." : "A tournament team already exists with this Team Name and Line #.");
       error.status = 400;
       throw error;
+    }
+
+    if (isElimination) {
+      await verifyTournamentDivisionTeamMax(supabase, tournament, payload.division_id, body.player1Rating, body.player2Rating);
     }
   }
 
@@ -822,6 +944,14 @@ async function updateTournamentTeam(supabase, tournament, body) {
 }
 
 async function createTournamentTeam(supabase, tournament, body) {
+  if (isBracketTeamTournament(tournament.settings)) {
+    return createEliminationTournamentTeam(supabase, tournament, body);
+  }
+
+  return createRoundRobinTournamentTeam(supabase, tournament, body);
+}
+
+async function createRoundRobinTournamentTeam(supabase, tournament, body) {
   const sourceTeamId = String(body.sourceTeamId || "").trim();
   if (!sourceTeamId) throw new Error("Select the Main System Team.");
 
@@ -948,6 +1078,130 @@ async function createTournamentTeam(supabase, tournament, body) {
   return { created: true, teamId: createdTeam.id };
 }
 
+async function createEliminationTournamentTeam(supabase, tournament, body) {
+  const divisionId = String(body.divisionId || "").trim();
+  const player1MemberId = String(body.player1MemberId || "").trim();
+  const player2MemberId = String(body.player2MemberId || "").trim();
+  const player1Name = String(body.player1Name || "").trim();
+  const player2Name = String(body.player2Name || "").trim();
+  const name = String(body.name || eliminationTeamName(player1Name, player2Name)).trim();
+  const standing = Number(body.regularSeasonStanding);
+
+  if (!divisionId) throw new Error("Select the tournament division.");
+  if (!name) throw new Error("Team name is required.");
+  if (!String(body.regularSeasonStanding || "").trim() || !Number.isFinite(standing) || standing < 1) throw new Error("Standings is required.");
+  if (!player1MemberId || !player2MemberId) throw new Error("Both players must be selected.");
+  if (player1MemberId === player2MemberId) throw new Error("The same player cannot be entered twice on the same team.");
+
+  const { data: division, error: divisionError } = await supabase
+    .from("tournament_divisions")
+    .select("id, name, is_active")
+    .eq("id", divisionId)
+    .eq("tournament_id", tournament.id)
+    .single();
+  if (divisionError) throw divisionError;
+  if (division.is_active === false) throw new Error("Select an active tournament division.");
+
+  await verifyTournamentDivisionTeamMax(supabase, tournament, division.id, body.player1Rating, body.player2Rating);
+
+  const { data: tournamentTeams, error: teamsError } = await supabase
+    .from("tournament_teams")
+    .select("id, name, division_id")
+    .eq("tournament_id", tournament.id);
+  if (teamsError) throw teamsError;
+
+  const duplicateName = (tournamentTeams || []).some((team) =>
+    String(team.division_id || "") === divisionId &&
+    normalizeName(team.name) === normalizeName(name)
+  );
+  if (duplicateName) {
+    const error = new Error("A tournament team already exists with this Team Name in that Division.");
+    error.status = 400;
+    throw error;
+  }
+
+  const tournamentTeamIds = (tournamentTeams || []).map((team) => team.id);
+  if (tournamentTeamIds.length > 0) {
+    const { data: usedContacts, error: usedContactsError } = await supabase
+      .from("tournament_team_contacts")
+      .select("member_id, display_name, tournament_team_id")
+      .in("tournament_team_id", tournamentTeamIds)
+      .in("member_id", [player1MemberId, player2MemberId]);
+    if (usedContactsError) throw usedContactsError;
+
+    const usedContact = (usedContacts || []).find((contact) => contact.member_id);
+    if (usedContact) {
+      const usedTeam = (tournamentTeams || []).find((team) => String(team.id) === String(usedContact.tournament_team_id));
+      throw new Error(`${usedContact.display_name || "A selected player"} is already on ${usedTeam?.name || "another tournament team"}.`);
+    }
+  }
+
+  const now = new Date().toISOString();
+  const { data: createdTeam, error: insertError } = await supabase
+    .from("tournament_teams")
+    .insert({
+      tournament_id: tournament.id,
+      division_id: division.id,
+      name,
+      line_number: 1,
+      seed: String(standing),
+      player_1_name: player1Name || null,
+      player_2_name: player2Name || null,
+      player_1_checked_in: false,
+      player_2_checked_in: false,
+      checked_in: false,
+      created_at: now,
+      updated_at: now,
+    })
+    .select("*")
+    .single();
+  if (insertError) throw insertError;
+
+  await upsertTournamentContact(supabase, createdTeam.id, 1, {
+    memberId: player1MemberId,
+    displayName: player1Name,
+    phone: body.player1Phone,
+  });
+  await upsertTournamentContact(supabase, createdTeam.id, 2, {
+    memberId: player2MemberId,
+    displayName: player2Name,
+    phone: body.player2Phone,
+  });
+
+  await addLog(supabase, tournament.id, "team", `${name} added to ${division.name}.`);
+  return { created: true, teamId: createdTeam.id };
+}
+
+async function verifyTournamentDivisionTeamMax(supabase, tournament, tournamentDivisionId, player1Rating, player2Rating) {
+  const divisionId = String(tournamentDivisionId || "").trim();
+  if (!divisionId) throw new Error("Select the tournament division.");
+
+  const { data: tournamentDivision, error: tournamentDivisionError } = await supabase
+    .from("tournament_divisions")
+    .select("id, name")
+    .eq("id", divisionId)
+    .eq("tournament_id", tournament.id)
+    .single();
+  if (tournamentDivisionError) throw tournamentDivisionError;
+
+  const { data: leagueDivisions, error: leagueDivisionError } = await supabase
+    .from("divisions")
+    .select("name, team_dupr_max");
+  if (leagueDivisionError) throw leagueDivisionError;
+
+  const leagueDivision = (leagueDivisions || []).find((division) =>
+    normalizeName(division.name) === normalizeName(tournamentDivision.name)
+  );
+  const maxRating = Number(leagueDivision?.team_dupr_max);
+  if (!Number.isFinite(maxRating) || maxRating <= 0) return;
+
+  const ratings = [Number(player1Rating), Number(player2Rating)].filter((rating) => Number.isFinite(rating));
+  const teamTotalRating = ratings.reduce((sum, rating) => sum + rating, 0);
+  if (ratings.length > 0 && teamTotalRating > maxRating) {
+    throw new Error("The players' total rating must be at or below the Division Team Max.");
+  }
+}
+
 async function updateMemberPhoneFromTournamentEdit(supabase, tournament, details) {
   const memberId = details.memberId || null;
   const cleanPhone = formatPhoneNumberForStorage(details.newPhone);
@@ -1001,7 +1255,67 @@ async function resolveTournamentPlayerMember(supabase, details) {
     if (error) throw error;
     if (data) return data;
   }
-  return null;
+
+  const playerName = normalizeName(details.playerName);
+  if (!playerName) return null;
+
+  const sourceTeamIds = await resolveTournamentSourceTeamIds(supabase, details);
+  if (sourceTeamIds.length === 0) return null;
+
+  const { data: rosterRows, error: rosterError } = await supabase
+    .from("team_members")
+    .select(`
+      member_id,
+      members (
+        id,
+        full_name,
+        first_name,
+        last_name,
+        email,
+        phone
+      )
+    `)
+    .in("team_id", sourceTeamIds);
+  if (rosterError) throw rosterError;
+
+  const matches = (rosterRows || [])
+    .map((row) => row.members)
+    .filter(Boolean)
+    .filter((member) => normalizeName(memberDisplayName(member)) === playerName);
+  const uniqueMatches = [...new Map(matches.map((member) => [String(member.id), member])).values()];
+
+  return uniqueMatches.length === 1 ? uniqueMatches[0] : null;
+}
+
+async function resolveTournamentSourceTeamIds(supabase, details) {
+  const explicitSourceTeamId = String(details.sourceTeamId || "").trim();
+  if (explicitSourceTeamId) return [explicitSourceTeamId];
+
+  const teamName = String(details.teamName || "").trim();
+  if (!teamName) return [];
+
+  const { data: teams, error } = await supabase
+    .from("teams")
+    .select(`
+      id,
+      name,
+      divisions (
+        name
+      )
+    `)
+    .ilike("name", teamName)
+    .or("is_active.eq.true,is_active.is.null");
+  if (error) throw error;
+
+  const normalizedTeamName = normalizeName(teamName);
+  const normalizedDivisionName = normalizeName(details.divisionName);
+  const exactTeams = (teams || []).filter((team) => normalizeName(team.name) === normalizedTeamName);
+  const divisionMatches = normalizedDivisionName
+    ? exactTeams.filter((team) => normalizeName(team.divisions?.name) === normalizedDivisionName)
+    : exactTeams;
+
+  const candidates = divisionMatches.length > 0 ? divisionMatches : exactTeams;
+  return candidates.length === 1 ? [candidates[0].id] : [];
 }
 
 async function deleteTournamentTeam(supabase, tournament, teamId) {
@@ -1237,6 +1551,645 @@ async function generateRoundRobin(supabase, tournament, divisionIds) {
   return { generated: rows.length };
 }
 
+async function generateEliminationBracket(supabase, tournament, divisionIds) {
+  const selectedIds = new Set((Array.isArray(divisionIds) ? divisionIds : []).map(String).filter(Boolean));
+  if (selectedIds.size === 0) throw new Error("Select at least one active division.");
+
+  const format = tournamentFormatValue(tournament.settings?.format);
+  if (format !== "single_elimination" && format !== "double_elimination") throw new Error("Set the Tournament Format to Single or Double Elimination first.");
+
+  const [divisionResult, teamResult] = await Promise.all([
+    supabase
+      .from("tournament_divisions")
+      .select("*")
+      .eq("tournament_id", tournament.id)
+      .eq("is_active", true),
+    supabase
+      .from("tournament_teams")
+      .select("*")
+      .eq("tournament_id", tournament.id)
+      .order("name", { ascending: true }),
+  ]);
+
+  if (divisionResult.error) throw divisionResult.error;
+  if (teamResult.error) throw teamResult.error;
+
+  const divisions = (divisionResult.data || []).filter((division) => selectedIds.has(String(division.id)));
+  if (divisions.length === 0) throw new Error("No active selected divisions were found.");
+
+  const invalidDivision = divisions.find((division) =>
+    (teamResult.data || []).filter((team) => String(team.division_id || "") === String(division.id)).length < 2
+  );
+  if (invalidDivision) throw new Error(`${invalidDivision.name} needs at least 2 teams for an elimination bracket.`);
+
+  const divisionIdList = divisions.map((division) => division.id);
+  const { error: deleteError } = await supabase
+    .from("tournament_matches")
+    .delete()
+    .eq("tournament_id", tournament.id)
+    .in("division_id", divisionIdList);
+  if (deleteError) throw deleteError;
+
+  const now = new Date().toISOString();
+  const rows = [];
+  let order = 1;
+
+  for (const division of divisions) {
+    const divisionTeams = (teamResult.data || [])
+      .filter((team) => String(team.division_id || "") === String(division.id))
+      .sort(compareBracketSeed);
+    const generated = buildEliminationBracketRows(tournament.id, division.id, divisionTeams, format, now, order);
+    rows.push(...generated.rows);
+    order = generated.nextOrder;
+  }
+
+  if (rows.length > 0) {
+    const { error: insertError } = await supabase.from("tournament_matches").insert(rows);
+    if (insertError) throw insertError;
+  }
+
+  await addLog(supabase, tournament.id, "setup", `Generated ${rows.length} ${tournamentFormatLabel(format).toLowerCase()} bracket match${rows.length === 1 ? "" : "es"}.`);
+  return { generated: rows.length, format };
+}
+
+async function generateTop4Playoff(supabase, tournament, divisionIds) {
+  const selectedIds = new Set((Array.isArray(divisionIds) ? divisionIds : []).map(String).filter(Boolean));
+  if (selectedIds.size === 0) throw new Error("Select at least one active division.");
+
+  const format = tournamentFormatValue(tournament.settings?.format);
+  if (format !== "round_robin_top4") throw new Error("Set the Tournament Format to Round Robin + Top 4 Playoff first.");
+
+  const [divisionResult, teamResult, matchResult] = await Promise.all([
+    supabase
+      .from("tournament_divisions")
+      .select("*")
+      .eq("tournament_id", tournament.id)
+      .eq("is_active", true),
+    supabase
+      .from("tournament_teams")
+      .select("*")
+      .eq("tournament_id", tournament.id)
+      .order("name", { ascending: true }),
+    supabase
+      .from("tournament_matches")
+      .select(`
+        *,
+        home_team:tournament_teams!tournament_matches_home_team_id_fkey(id, name, seed),
+        away_team:tournament_teams!tournament_matches_away_team_id_fkey(id, name, seed),
+        winner_team:tournament_teams!tournament_matches_winner_team_id_fkey(id, name)
+      `)
+      .eq("tournament_id", tournament.id)
+      .order("created_order", { ascending: true }),
+  ]);
+
+  if (divisionResult.error) throw divisionResult.error;
+  if (teamResult.error) throw teamResult.error;
+  if (matchResult.error) throw matchResult.error;
+
+  const divisions = (divisionResult.data || []).filter((division) => selectedIds.has(String(division.id)));
+  if (divisions.length === 0) throw new Error("No active selected divisions were found.");
+
+  const divisionIdList = divisions.map((division) => division.id);
+  const existingBracketIds = (matchResult.data || [])
+    .filter((match) => divisionIdList.map(String).includes(String(match.division_id)) && isBracketLegacyId(match.legacy_id))
+    .map((match) => match.id);
+
+  if (existingBracketIds.length > 0) {
+    const { error: deleteError } = await supabase
+      .from("tournament_matches")
+      .delete()
+      .in("id", existingBracketIds);
+    if (deleteError) throw deleteError;
+  }
+
+  const now = new Date().toISOString();
+  const rows = [];
+  let order = Math.max(...(matchResult.data || []).map((match) => Number(match.created_order || 0)), 0) + 1;
+
+  for (const division of divisions) {
+    const divisionTeams = (teamResult.data || [])
+      .filter((team) => String(team.division_id || "") === String(division.id));
+    if (divisionTeams.length < 4) throw new Error(`${division.name} needs at least 4 teams for the Top 4 Playoff.`);
+
+    const roundRobinMatches = (matchResult.data || [])
+      .filter((match) => String(match.division_id || "") === String(division.id))
+      .filter((match) => !isBracketLegacyId(match.legacy_id));
+    if (roundRobinMatches.length === 0) throw new Error(`${division.name} needs generated round robin matches before the Top 4 Playoff.`);
+    const unfinished = roundRobinMatches.filter((match) => match.status !== "done" && match.status !== "not_played");
+    if (unfinished.length > 0) throw new Error(`${division.name} still has ${unfinished.length} round robin match${unfinished.length === 1 ? "" : "es"} left to finish.`);
+
+    const seeds = top4PlayoffSeeds(roundRobinMatches, divisionTeams, tournament.settings);
+    if (seeds.length < 4) throw new Error(`${division.name} needs four ranked teams before generating the Top 4 Playoff.`);
+
+    const generated = buildTop4PlayoffRows(tournament.id, division.id, seeds, now, order);
+    rows.push(...generated.rows);
+    order = generated.nextOrder;
+  }
+
+  if (rows.length > 0) {
+    const { error: insertError } = await supabase.from("tournament_matches").insert(rows);
+    if (insertError) throw insertError;
+  }
+
+  await addLog(supabase, tournament.id, "setup", `Generated ${rows.length} top 4 playoff match${rows.length === 1 ? "" : "es"}.`);
+  return { generated: rows.length, format };
+}
+
+function top4PlayoffSeeds(matches, teams, settings = {}) {
+  const rows = Object.fromEntries((teams || []).map((team) => [String(team.id), {
+    team,
+    w: 0,
+    l: 0,
+    pf: 0,
+    pa: 0,
+    regularSeasonStanding: regularSeasonStandingValue(team),
+  }]));
+
+  (matches || [])
+    .filter((match) => match.status === "done" && match.result_type !== "not_played")
+    .forEach((match) => {
+      const homeId = String(match.home_team_id || "");
+      const awayId = String(match.away_team_id || "");
+      const home = rows[homeId];
+      const away = rows[awayId];
+      if (!home || !away) return;
+
+      const homeScore = Number(match.home_score || 0);
+      const awayScore = Number(match.away_score || 0);
+      home.pf += homeScore;
+      home.pa += awayScore;
+      away.pf += awayScore;
+      away.pa += homeScore;
+
+      const winnerId = String(match.winner_team_id || "");
+      if (winnerId === homeId || (!winnerId && homeScore > awayScore)) {
+        home.w += 1;
+        away.l += 1;
+      } else if (winnerId === awayId || (!winnerId && awayScore > homeScore)) {
+        away.w += 1;
+        home.l += 1;
+      }
+    });
+
+  return Object.values(rows)
+    .sort((a, b) => compareTop4SeedRows(a, b, settings?.standingsRules))
+    .slice(0, 4)
+    .map((row, index) => ({ ...row.team, playoffSeed: index + 1 }));
+}
+
+function compareTop4SeedRows(a, b, rules = []) {
+  const normalizedRules = standingsRulesValue(rules);
+
+  for (const rule of normalizedRules) {
+    if (rule === "regular_season_standing") {
+      const aStanding = Number(a.regularSeasonStanding || Number.MAX_SAFE_INTEGER);
+      const bStanding = Number(b.regularSeasonStanding || Number.MAX_SAFE_INTEGER);
+      if (aStanding !== bStanding) return aStanding - bStanding;
+    } else if (rule === "losses") {
+      if (Number(a.l || 0) !== Number(b.l || 0)) return Number(a.l || 0) - Number(b.l || 0);
+    } else if (rule === "point_differential") {
+      const aDiff = Number(a.pf || 0) - Number(a.pa || 0);
+      const bDiff = Number(b.pf || 0) - Number(b.pa || 0);
+      if (aDiff !== bDiff) return bDiff - aDiff;
+    } else if (rule === "points_for") {
+      if (Number(a.pf || 0) !== Number(b.pf || 0)) return Number(b.pf || 0) - Number(a.pf || 0);
+    } else if (rule === "points_against") {
+      if (Number(a.pa || 0) !== Number(b.pa || 0)) return Number(a.pa || 0) - Number(b.pa || 0);
+    } else if (Number(a.w || 0) !== Number(b.w || 0)) {
+      return Number(b.w || 0) - Number(a.w || 0);
+    }
+  }
+
+  return String(a.team?.name || "").localeCompare(String(b.team?.name || ""));
+}
+
+function buildTop4PlayoffRows(tournamentId, divisionId, seeds, now, startOrder) {
+  const rowsByKey = {};
+  const rows = [];
+  let order = startOrder;
+
+  for (let matchNumber = 1; matchNumber <= 2; matchNumber += 1) {
+    const row = bracketRow({
+      tournamentId,
+      divisionId,
+      legacyId: bracketLegacyId("T4", divisionId, "W", 1, matchNumber),
+      lineNumber: 1,
+      order,
+      now,
+    });
+    rowsByKey[row.legacy_id] = row;
+    rows.push(row);
+    order += 1;
+  }
+
+  const final = bracketRow({
+    tournamentId,
+    divisionId,
+    legacyId: bracketLegacyId("T4", divisionId, "W", 2, 1),
+    lineNumber: 1,
+    order,
+    now,
+  });
+  rowsByKey[final.legacy_id] = final;
+  rows.push(final);
+  order += 1;
+
+  rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 1)].home_team_id = seeds[0]?.id || null;
+  rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 1)].away_team_id = seeds[3]?.id || null;
+  rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 2)].home_team_id = seeds[1]?.id || null;
+  rowsByKey[bracketLegacyId("T4", divisionId, "W", 1, 2)].away_team_id = seeds[2]?.id || null;
+
+  return { rows, nextOrder: order };
+}
+
+function buildEliminationBracketRows(tournamentId, divisionId, teams, format, now, startOrder) {
+  const winnerRoundCounts = winnerRoundMatchCounts(teams.length);
+  const rounds = winnerRoundCounts.length;
+  const code = format === "double_elimination" ? "DE" : "SE";
+  const rowsByKey = {};
+  const rows = [];
+  let order = startOrder;
+
+  for (let round = 1; round <= rounds; round += 1) {
+    const matchCount = winnerRoundCounts[round - 1];
+    for (let matchNumber = 1; matchNumber <= matchCount; matchNumber += 1) {
+      const row = bracketRow({
+        tournamentId,
+        divisionId,
+        legacyId: bracketLegacyId(code, divisionId, "W", round, matchNumber),
+        lineNumber: 1,
+        order,
+        now,
+      });
+      rowsByKey[row.legacy_id] = row;
+      rows.push(row);
+      order += 1;
+    }
+  }
+
+  seedWinnersBracketRows(rowsByKey, code, divisionId, teams, winnerRoundCounts);
+
+  if (format === "double_elimination") {
+    const loserRoundCounts = loserRoundMatchCounts(teams.length);
+    for (let round = 1; round <= loserRoundCounts.length; round += 1) {
+      const matchCount = loserRoundCounts[round - 1];
+      for (let matchNumber = 1; matchNumber <= matchCount; matchNumber += 1) {
+        rows.push(bracketRow({
+          tournamentId,
+          divisionId,
+          legacyId: bracketLegacyId(code, divisionId, "L", round, matchNumber),
+          lineNumber: 1,
+          order,
+          now,
+        }));
+        order += 1;
+      }
+    }
+
+    rows.push(bracketRow({
+      tournamentId,
+      divisionId,
+      legacyId: bracketLegacyId(code, divisionId, "F", 1, 1),
+      lineNumber: 1,
+      order,
+      now,
+    }));
+    order += 1;
+
+    rows.push(bracketRow({
+      tournamentId,
+      divisionId,
+      legacyId: bracketLegacyId(code, divisionId, "F", 2, 1),
+      lineNumber: 1,
+      order,
+      now,
+    }));
+    order += 1;
+  }
+
+  return { rows, nextOrder: order };
+}
+
+function seedWinnersBracketRows(rowsByKey, code, divisionId, teams, winnerRoundCounts) {
+  const teamCount = teams.length;
+  const firstRoundCount = winnerRoundCounts[0] || 0;
+  const mainSize = highestPowerOfTwoAtMost(teamCount);
+  const preliminaryCount = Math.max(0, teamCount - mainSize);
+
+  if (preliminaryCount === 0) {
+    for (let matchNumber = 1; matchNumber <= firstRoundCount; matchNumber += 1) {
+      const row = rowsByKey[bracketLegacyId(code, divisionId, "W", 1, matchNumber)];
+      row.home_team_id = teams[matchNumber - 1]?.id || null;
+      row.away_team_id = teams[teamCount - matchNumber]?.id || null;
+    }
+    return;
+  }
+
+  const byeCount = mainSize - preliminaryCount;
+  for (let matchNumber = 1; matchNumber <= preliminaryCount; matchNumber += 1) {
+    const row = rowsByKey[bracketLegacyId(code, divisionId, "W", 1, matchNumber)];
+    row.home_team_id = teams[byeCount + matchNumber - 1]?.id || null;
+    row.away_team_id = teams[teamCount - matchNumber]?.id || null;
+  }
+
+  const roundTwoCount = winnerRoundCounts[1] || 0;
+  const roundTwoSlots = winnerRoundSlots(roundTwoCount);
+  const preliminarySlots = new Set(
+    Array.from({ length: preliminaryCount }, (_, index) =>
+      `${preliminaryWinnerSlot(index + 1, preliminaryCount, roundTwoCount).matchNumber}:${preliminaryWinnerSlot(index + 1, preliminaryCount, roundTwoCount).slot}`
+    )
+  );
+  const byeSlots = roundTwoSlots.filter((slot) => !preliminarySlots.has(`${slot.matchNumber}:${slot.slot}`));
+
+  for (let index = 0; index < byeCount; index += 1) {
+    const slot = byeSlots[index];
+    const row = rowsByKey[bracketLegacyId(code, divisionId, "W", 2, slot.matchNumber)];
+    if (row) row[slot.slot] = teams[index]?.id || null;
+  }
+}
+
+function winnerRoundMatchCounts(teamCount) {
+  const count = Math.max(2, Number(teamCount || 0));
+  const mainSize = highestPowerOfTwoAtMost(count);
+  const preliminaryCount = Math.max(0, count - mainSize);
+  const counts = [];
+
+  if (preliminaryCount > 0) counts.push(preliminaryCount);
+  for (let matchCount = mainSize / 2; matchCount >= 1; matchCount = Math.floor(matchCount / 2)) {
+    counts.push(matchCount);
+  }
+
+  return counts;
+}
+
+function loserRoundMatchCounts(teamCount) {
+  const winnerCounts = winnerRoundMatchCounts(teamCount);
+  if (winnerCounts.length <= 1) return [];
+
+  const counts = [];
+  const hasPreliminary = winnerCounts.length > 1 && winnerCounts[0] <= winnerCounts[1];
+  let winnerRoundIndex = 0;
+  let survivors = 0;
+
+  if (hasPreliminary) {
+    counts.push(Math.floor((winnerCounts[0] + winnerCounts[1]) / 2));
+    survivors = Math.ceil((winnerCounts[0] + winnerCounts[1]) / 2);
+    winnerRoundIndex = 2;
+  } else {
+    counts.push(Math.floor(winnerCounts[0] / 2));
+    survivors = Math.ceil(winnerCounts[0] / 2);
+    winnerRoundIndex = 1;
+  }
+
+  while (winnerRoundIndex < winnerCounts.length) {
+    if (hasPreliminary) {
+      const collapseMatches = Math.floor(survivors / 2);
+      if (collapseMatches > 0) counts.push(collapseMatches);
+      survivors = Math.ceil(survivors / 2);
+
+      const incomingLosers = winnerCounts[winnerRoundIndex];
+      const incomingMatches = Math.floor((survivors + incomingLosers) / 2);
+      if (incomingMatches > 0) counts.push(incomingMatches);
+      survivors = Math.ceil((survivors + incomingLosers) / 2);
+    } else {
+      const incomingLosers = winnerCounts[winnerRoundIndex];
+      const incomingMatches = Math.floor((survivors + incomingLosers) / 2);
+      if (incomingMatches > 0) counts.push(incomingMatches);
+      survivors = Math.ceil((survivors + incomingLosers) / 2);
+
+      if (winnerRoundIndex < winnerCounts.length - 1) {
+        const collapseMatches = Math.floor(survivors / 2);
+        if (collapseMatches > 0) counts.push(collapseMatches);
+        survivors = Math.ceil(survivors / 2);
+      }
+    }
+    winnerRoundIndex += 1;
+  }
+
+  return counts.filter((count) => count > 0);
+}
+
+function winnerRoundSlots(matchCount) {
+  const slots = [];
+  for (let matchNumber = 1; matchNumber <= Number(matchCount || 0); matchNumber += 1) {
+    slots.push({ matchNumber, slot: "home_team_id" }, { matchNumber, slot: "away_team_id" });
+  }
+  return slots;
+}
+
+function preliminaryWinnerSlot(matchNumber, preliminaryCount, roundTwoCount) {
+  const totalSlots = Number(roundTwoCount || 0) * 2;
+  const startIndex = Math.max(0, totalSlots - Number(preliminaryCount || 0) * 2);
+  const slotIndex = startIndex + (Number(matchNumber || 1) - 1) * 2 + 1;
+  return {
+    matchNumber: Math.floor(slotIndex / 2) + 1,
+    slot: slotIndex % 2 === 0 ? "home_team_id" : "away_team_id",
+  };
+}
+
+function bracketRow({ tournamentId, divisionId, legacyId, lineNumber, order, now }) {
+  return {
+    tournament_id: tournamentId,
+    division_id: divisionId,
+    legacy_id: legacyId,
+    home_team_id: null,
+    away_team_id: null,
+    line_number: lineNumber,
+    status: "pending",
+    result_type: "completed",
+    queue_entered_at: now,
+    created_order: order,
+    created_at: now,
+    updated_at: now,
+  };
+}
+
+async function advanceBracketMatch(supabase, tournament, match) {
+  const meta = parseBracketLegacyId(match.legacy_id);
+  if (!meta) return;
+
+  const { data: matches, error } = await supabase
+    .from("tournament_matches")
+    .select("*")
+    .eq("tournament_id", tournament.id)
+    .eq("division_id", match.division_id)
+    .order("created_order", { ascending: true });
+  if (error) throw error;
+
+  const winnerTeamId = String(match.winner_team_id || "");
+  const loserTeamId = loserTeamIdForMatch(match);
+  const now = new Date().toISOString();
+
+  if (meta.format === "single_elimination" || meta.format === "round_robin_top4") {
+    await advanceTeamToNextBracketSlot(supabase, matches, meta, winnerTeamId, now);
+    return;
+  }
+
+  if (meta.bracket === "W") {
+    const advanced = await advanceTeamToNextBracketSlot(supabase, matches, meta, winnerTeamId, now);
+    if (!advanced) {
+      await placeTeamInFinalSlot(supabase, matches, winnerTeamId, "home_team_id", now);
+    }
+    if (loserTeamId) await placeTeamInNextOpenEliminationSlot(supabase, matches, meta, loserTeamId, now);
+  } else if (meta.bracket === "L") {
+    const advanced = await advanceTeamToNextBracketSlot(supabase, matches, meta, winnerTeamId, now);
+    if (!advanced) {
+      await placeTeamInFinalSlot(supabase, matches, winnerTeamId, "away_team_id", now);
+    }
+  } else if (meta.bracket === "F" && Number(meta.round || 0) === 1) {
+    if (String(winnerTeamId) === String(match.away_team_id || "")) {
+      await placeTeamsInFinalReset(supabase, tournament, matches, match, match.home_team_id, match.away_team_id, now);
+    }
+  }
+}
+
+async function advanceTeamToNextBracketSlot(supabase, matches, meta, teamId, now) {
+  const nextRound = Number(meta.round || 0) + 1;
+  const roundCounts = bracketRoundCounts(matches, meta.bracket);
+  const compactPreliminary = meta.bracket === "W" && roundCounts[Number(meta.round || 0)] === roundCounts[nextRound];
+  const preliminaryWithByes = meta.bracket === "W" && Number(meta.round || 0) === 1 && roundCounts[1] <= roundCounts[2];
+  const preliminarySlot = preliminaryWithByes ? preliminaryWinnerSlot(Number(meta.match || 0), roundCounts[1], roundCounts[2]) : null;
+  const nextMatchNumber = preliminarySlot?.matchNumber || (compactPreliminary ? Number(meta.match || 0) : Math.ceil(Number(meta.match || 0) / 2));
+  const target = (matches || []).find((item) => {
+    const itemMeta = parseBracketLegacyId(item.legacy_id);
+    return itemMeta &&
+      itemMeta.bracket === meta.bracket &&
+      Number(itemMeta.round) === nextRound &&
+      Number(itemMeta.match) === nextMatchNumber;
+  });
+  if (!target && meta.bracket === "L") {
+    return placeTeamInNextOpenLoserSlot(supabase, matches, nextRound + 1, teamId, now);
+  }
+  if (!target) return false;
+
+  const slot = preliminarySlot?.slot || (compactPreliminary ? "away_team_id" : Number(meta.match || 0) % 2 === 1 ? "home_team_id" : "away_team_id");
+  await placeTeamInMatchSlot(supabase, target, slot, teamId, now);
+  return true;
+}
+
+async function placeTeamInNextOpenLoserSlot(supabase, matches, minimumRound, teamId, now) {
+  const target = (matches || []).find((item) => {
+    const itemMeta = parseBracketLegacyId(item.legacy_id);
+    return itemMeta?.bracket === "L" &&
+      Number(itemMeta.round || 0) >= Number(minimumRound || 1) &&
+      String(item.home_team_id || "") !== String(teamId) &&
+      String(item.away_team_id || "") !== String(teamId) &&
+      (!item.home_team_id || !item.away_team_id);
+  });
+  if (!target) return false;
+
+  const slot = target.home_team_id ? "away_team_id" : "home_team_id";
+  await placeTeamInMatchSlot(supabase, target, slot, teamId, now);
+  return true;
+}
+
+async function placeTeamInNextOpenEliminationSlot(supabase, matches, winnersMeta, teamId, now) {
+  const preferredRound = loserRoundForWinnersLoser(matches, winnersMeta);
+  const target = (matches || []).find((item) => {
+    const itemMeta = parseBracketLegacyId(item.legacy_id);
+    return itemMeta?.bracket === "L" &&
+      Number(itemMeta.round || 0) >= preferredRound &&
+      String(item.home_team_id || "") !== String(teamId) &&
+      String(item.away_team_id || "") !== String(teamId) &&
+      (!item.home_team_id || !item.away_team_id);
+  });
+  if (!target) return false;
+
+  const slot = target.home_team_id ? "away_team_id" : "home_team_id";
+  await placeTeamInMatchSlot(supabase, target, slot, teamId, now);
+  return true;
+}
+
+function loserRoundForWinnersLoser(matches, winnersMeta) {
+  const winnerCounts = bracketRoundCounts(matches, "W");
+  const round = Number(winnersMeta?.round || 1);
+  const hasPreliminary = Number(winnerCounts[1] || 0) > 0 && Number(winnerCounts[1] || 0) <= Number(winnerCounts[2] || 0);
+
+  if (hasPreliminary) {
+    if (round <= 2) return 1;
+    return (round - 2) * 2 + 1;
+  }
+
+  if (round <= 1) return 1;
+  return (round - 1) * 2;
+}
+
+function bracketRoundCounts(matches, bracket) {
+  return (matches || []).reduce((counts, match) => {
+    const meta = parseBracketLegacyId(match.legacy_id);
+    if (meta?.bracket !== bracket) return counts;
+    const round = Number(meta.round || 0);
+    counts[round] = (counts[round] || 0) + 1;
+    return counts;
+  }, {});
+}
+
+async function placeTeamInFinalSlot(supabase, matches, teamId, slot, now) {
+  const target = (matches || []).find((item) => {
+    const meta = parseBracketLegacyId(item.legacy_id);
+    return meta?.bracket === "F" && Number(meta.round || 0) === 1;
+  });
+  if (!target) return false;
+  await placeTeamInMatchSlot(supabase, target, slot, teamId, now);
+  return true;
+}
+
+async function placeTeamsInFinalReset(supabase, tournament, matches, firstFinal, winnersBracketTeamId, eliminationBracketTeamId, now) {
+  let target = (matches || []).find((item) => {
+    const meta = parseBracketLegacyId(item.legacy_id);
+    return meta?.bracket === "F" && Number(meta.round || 0) === 2;
+  });
+  if (!winnersBracketTeamId || !eliminationBracketTeamId) return false;
+
+  if (!target) {
+    const meta = parseBracketLegacyId(firstFinal?.legacy_id);
+    const createdOrder = Math.max(...(matches || []).map((match) => Number(match.created_order || 0)), 0) + 1;
+    const { data, error } = await supabase
+      .from("tournament_matches")
+      .insert(bracketRow({
+        tournamentId: tournament.id,
+        divisionId: firstFinal.division_id,
+        legacyId: bracketLegacyId(meta?.format === "double_elimination" ? "DE" : "SE", firstFinal.division_id, "F", 2, 1),
+        lineNumber: firstFinal.line_number || 1,
+        order: createdOrder,
+        now,
+      }))
+      .select("*")
+      .single();
+    if (error) throw error;
+    target = data;
+  }
+
+  const { error } = await supabase
+    .from("tournament_matches")
+    .update({
+      home_team_id: winnersBracketTeamId,
+      away_team_id: eliminationBracketTeamId,
+      queue_entered_at: target.queue_entered_at || now,
+      updated_at: now,
+    })
+    .eq("id", target.id);
+  if (error) throw error;
+  return true;
+}
+
+async function placeTeamInMatchSlot(supabase, match, slot, teamId, now) {
+  if (!match?.id || !slot || !teamId) return;
+  const existing = String(match[slot] || "");
+  if (existing === String(teamId)) return;
+  if (existing && existing !== String(teamId)) return;
+
+  const { error } = await supabase
+    .from("tournament_matches")
+    .update({
+      [slot]: teamId,
+      queue_entered_at: match.queue_entered_at || now,
+      updated_at: now,
+    })
+    .eq("id", match.id);
+  if (error) throw error;
+}
+
 function balancedHomeAwayPair(teamA, teamB, counts, order) {
   counts[teamA.id] ||= { home: 0, away: 0 };
   counts[teamB.id] ||= { home: 0, away: 0 };
@@ -1314,6 +2267,32 @@ function chooseNextMatch(matches, localBusy, localDivisionLoad, tournament) {
   const now = Date.now();
   const minimumRest = Number(tournament.settings?.minimumRestMinutes || 0) * 60000;
   const lastPlayed = lastPlayedByTeam(matches);
+  const candidates = matches
+    .filter((match) =>
+      match.status === "pending" &&
+      match.home_team_id &&
+      match.away_team_id &&
+      !localBusy.has(teamKey(match.home_team_id)) &&
+      !localBusy.has(teamKey(match.away_team_id))
+    )
+    .map((match) => {
+      const homeRest = lastPlayed[teamKey(match.home_team_id)] ? now - lastPlayed[teamKey(match.home_team_id)] : Number.MAX_SAFE_INTEGER;
+      const awayRest = lastPlayed[teamKey(match.away_team_id)] ? now - lastPlayed[teamKey(match.away_team_id)] : Number.MAX_SAFE_INTEGER;
+      const minRest = Math.min(homeRest, awayRest);
+
+      return {
+        ...match,
+        _restOk: minRest >= minimumRest,
+        _minRest: minRest,
+        _wait: now - new Date(match.queue_entered_at || match.created_at || now).getTime(),
+      };
+    });
+
+  const bracketCandidates = candidates.filter((match) => parseBracketLegacyId(match.legacy_id));
+  if (isEliminationTournament(tournament.settings) || (isRoundRobinTop4Tournament(tournament.settings) && bracketCandidates.length > 0)) {
+    return chooseNextEliminationMatch(bracketCandidates.length > 0 ? bracketCandidates : candidates, matches, localDivisionLoad);
+  }
+
   const fairness = divisionLineFairness(matches);
   const divisionBacklog = pendingCountBy(matches, (match) => match.division_id);
   const teamBacklog = teamPendingCounts(matches);
@@ -1326,40 +2305,27 @@ function chooseNextMatch(matches, localBusy, localDivisionLoad, tournament) {
       divLineUse[key] = (divLineUse[key] || 0) + 1;
     });
 
-  const candidates = matches
-    .filter((match) =>
-      match.status === "pending" &&
-      !localBusy.has(teamKey(match.home_team_id)) &&
-      !localBusy.has(teamKey(match.away_team_id))
-    )
-    .map((match) => {
-      const homeRest = lastPlayed[teamKey(match.home_team_id)] ? now - lastPlayed[teamKey(match.home_team_id)] : Number.MAX_SAFE_INTEGER;
-      const awayRest = lastPlayed[teamKey(match.away_team_id)] ? now - lastPlayed[teamKey(match.away_team_id)] : Number.MAX_SAFE_INTEGER;
-      const minRest = Math.min(homeRest, awayRest);
-      const group = fairness[divisionLineKey(match)] || { completed: 0, playing: 0, total: 1 };
-      const progress = (group.completed + group.playing) / Math.max(1, group.total);
-      const divisionPending = divisionBacklog[teamKey(match.division_id)] || 0;
-      const teamPending = Math.max(
-        teamBacklog[teamKey(match.home_team_id)] || 0,
-        teamBacklog[teamKey(match.away_team_id)] || 0
-      );
+  const roundRobinCandidates = candidates.map((match) => {
+    const group = fairness[divisionLineKey(match)] || { completed: 0, playing: 0, total: 1 };
+    const divisionPending = divisionBacklog[teamKey(match.division_id)] || 0;
+    const teamPending = Math.max(
+      teamBacklog[teamKey(match.home_team_id)] || 0,
+      teamBacklog[teamKey(match.away_team_id)] || 0
+    );
 
-      return {
-        ...match,
-        _restOk: minRest >= minimumRest,
-        _minRest: minRest,
-        _progress: progress,
-        _divisionPending: divisionPending,
-        _divisionCourtLoad: localDivisionLoad[teamKey(match.division_id)] || 0,
-        _teamPending: teamPending,
-        _divLineLoad: divLineUse[divisionLineKey(match)] || 0,
-        _wait: now - new Date(match.queue_entered_at || match.created_at || now).getTime(),
-      };
-    });
+    return {
+      ...match,
+      _progress: (group.completed + group.playing) / Math.max(1, group.total),
+      _divisionPending: divisionPending,
+      _divisionCourtLoad: localDivisionLoad[teamKey(match.division_id)] || 0,
+      _teamPending: teamPending,
+      _divLineLoad: divLineUse[divisionLineKey(match)] || 0,
+    };
+  });
 
-  const pool = candidates.some((match) => match._restOk)
-    ? candidates.filter((match) => match._restOk)
-    : candidates;
+  const pool = roundRobinCandidates.some((match) => match._restOk)
+    ? roundRobinCandidates.filter((match) => match._restOk)
+    : roundRobinCandidates;
 
   pool.sort((a, b) =>
     a._divisionCourtLoad - b._divisionCourtLoad ||
@@ -1375,6 +2341,143 @@ function chooseNextMatch(matches, localBusy, localDivisionLoad, tournament) {
   );
 
   return pool[0] || null;
+}
+
+function chooseNextEliminationMatch(candidates, allMatches, localDivisionLoad) {
+  const readyByDivision = pendingCountBy(allMatches.filter((match) => match.home_team_id && match.away_team_id), (match) => match.division_id);
+  const divisionProgress = divisionBracketProgress(allMatches);
+  const bracketGameNumbers = bracketDisplayNumbersById(allMatches);
+  const bracketRemaining = bracketRemainingPotentialByKey(allMatches);
+  const enriched = candidates.map((match) => {
+    const meta = parseBracketLegacyId(match.legacy_id);
+    const bracketKey = divisionBracketKey(match.division_id, meta?.bracket);
+    return {
+      ...match,
+      _bracketMeta: meta,
+      _bracketPriority: eliminationBracketPriority(meta),
+      _bracketGameNumber: bracketGameNumbers[String(match.id)] || Number.MAX_SAFE_INTEGER,
+      _bracketRemainingPotential: bracketRemaining[bracketKey]?.score || 0,
+      _divisionCourtLoad: localDivisionLoad[teamKey(match.division_id)] || 0,
+      _divisionReadyPending: readyByDivision[teamKey(match.division_id)] || 0,
+      _divisionProgress: divisionProgress[teamKey(match.division_id)] || 0,
+    };
+  });
+
+  const pool = enriched;
+
+  pool.sort((a, b) =>
+    a._divisionCourtLoad - b._divisionCourtLoad ||
+    String(a.division?.name || "").localeCompare(String(b.division?.name || "")) ||
+    b._bracketRemainingPotential - a._bracketRemainingPotential ||
+    a._bracketPriority - b._bracketPriority ||
+    a._bracketGameNumber - b._bracketGameNumber ||
+    a._divisionProgress - b._divisionProgress ||
+    b._divisionReadyPending - a._divisionReadyPending ||
+    b._minRest - a._minRest ||
+    b._wait - a._wait ||
+    Number(a._bracketMeta?.round || 0) - Number(b._bracketMeta?.round || 0) ||
+    Number(a.created_order || 0) - Number(b.created_order || 0)
+  );
+
+  return pool[0] || null;
+}
+
+function bracketRemainingPotentialByKey(matches) {
+  const groups = (matches || [])
+    .map((match) => ({ match, meta: parseBracketLegacyId(match.legacy_id) }))
+    .filter((item) => item.meta)
+    .reduce((map, item) => {
+      const key = divisionBracketKey(item.match.division_id, item.meta.bracket);
+      map[key] ||= { openMatches: 0, openRounds: new Set() };
+      if (item.match.status !== "done" && item.match.status !== "not_played") {
+        map[key].openMatches += 1;
+        map[key].openRounds.add(Number(item.meta.round || 0));
+      }
+      return map;
+    }, {});
+
+  return Object.fromEntries(
+    Object.entries(groups).map(([key, value]) => [
+      key,
+      {
+        openMatches: value.openMatches,
+        openRounds: value.openRounds.size,
+        score: value.openRounds.size * 100 + value.openMatches,
+      },
+    ])
+  );
+}
+
+function divisionBracketKey(divisionId, bracket) {
+  return `${teamKey(divisionId)}|${bracket || ""}`;
+}
+
+function bracketDisplayNumbersById(matches) {
+  const byDivision = (matches || [])
+    .map((match) => ({ match, meta: parseBracketLegacyId(match.legacy_id) }))
+    .filter((item) => item.meta)
+    .reduce((map, item) => {
+      const key = teamKey(item.match.division_id);
+      map[key] ||= [];
+      map[key].push(item);
+      return map;
+    }, {});
+
+  return Object.values(byDivision).reduce((numbers, items) => {
+    const format = items.find((item) => item.meta?.format)?.meta?.format || "single_elimination";
+    items
+      .sort((a, b) =>
+        bracketNumberSectionRoundForAssignment(a.meta, format) - bracketNumberSectionRoundForAssignment(b.meta, format) ||
+        bracketSectionOrderForAssignment(a.meta?.bracket, format) - bracketSectionOrderForAssignment(b.meta?.bracket, format) ||
+        Number(a.meta?.match || 0) - Number(b.meta?.match || 0) ||
+        Number(a.match.created_order || 0) - Number(b.match.created_order || 0)
+      )
+      .forEach((item, index) => {
+        numbers[String(item.match.id)] = index + 1;
+      });
+    return numbers;
+  }, {});
+}
+
+function bracketNumberSectionRoundForAssignment(meta, format) {
+  if (format !== "double_elimination") return Number(meta?.round || 0) * 10;
+  if (meta?.bracket === "F") return 999;
+  return Number(meta?.round || 0) * 10 + (meta?.bracket === "L" ? 1 : 0);
+}
+
+function bracketSectionOrderForAssignment(bracket, format) {
+  if (format === "double_elimination") {
+    if (bracket === "W") return 0;
+    if (bracket === "L") return 1;
+    if (bracket === "F") return 2;
+  }
+  return bracket === "W" ? 0 : 9;
+}
+
+function eliminationBracketPriority(meta) {
+  if (!meta) return 5;
+  if (meta.bracket === "L") return 0;
+  if (meta.bracket === "W") return 1;
+  if (meta.bracket === "F") return 2;
+  return 4;
+}
+
+function divisionBracketProgress(matches) {
+  const stats = (matches || []).reduce((map, match) => {
+    const key = teamKey(match.division_id);
+    map[key] ||= { total: 0, completed: 0, playing: 0 };
+    map[key].total += 1;
+    if (match.status === "done") map[key].completed += 1;
+    if (match.status === "playing") map[key].playing += 1;
+    return map;
+  }, {});
+
+  return Object.fromEntries(
+    Object.entries(stats).map(([key, value]) => [
+      key,
+      (value.completed + value.playing) / Math.max(1, value.total),
+    ])
+  );
 }
 
 function lastPlayedByTeam(matches) {
@@ -1490,7 +2593,9 @@ function uniquePhones(contacts) {
 function smsTemplates(tournament) {
   const saved = tournament.settings?.smsTemplates || {};
   return {
+    checkIn: saved.checkIn || DEFAULT_SMS_TEMPLATES.checkIn,
     courtReady: saved.courtReady || DEFAULT_SMS_TEMPLATES.courtReady,
+    returnToQueue: saved.returnToQueue || DEFAULT_SMS_TEMPLATES.returnToQueue,
     result: saved.result || DEFAULT_SMS_TEMPLATES.result,
     broadcast: saved.broadcast || DEFAULT_SMS_TEMPLATES.broadcast,
   };
@@ -1507,7 +2612,7 @@ function templateValues(tournament, match) {
     tournament: tournament.name || "Tournament",
     court: match.court?.name || "",
     division: match.division?.name || "Division",
-    line: `Line ${match.line_number || 1}`,
+    line: matchLineLabel(match),
     home: match.home_team?.name || "Home",
     away: match.away_team?.name || "Away",
     result: match.score_text || `${match.home_score ?? ""}-${match.away_score ?? ""}`,
@@ -1524,7 +2629,17 @@ function tournamentStatusText(matches) {
 }
 
 function matchLabel(match) {
-  return `${match.division?.name || "Division"} Line ${match.line_number || 1} - ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`;
+  return `${match.division?.name || "Division"} ${matchLineLabel(match)} - ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`;
+}
+
+function matchLineLabel(match) {
+  return match.legacy_id?.startsWith("BR|") ? "Bracket" : `Line ${match.line_number || 1}`;
+}
+
+function autoAssignLineLabel(match, bracketGameNumbers = {}) {
+  if (!match?.legacy_id?.startsWith("BR|")) return matchLineLabel(match);
+  const gameNumber = bracketGameNumbers[String(match.id)];
+  return gameNumber ? `Game #${gameNumber}` : "Game #";
 }
 
 function memberDisplayName(member = {}) {
@@ -1559,6 +2674,95 @@ function tournamentScoreSettings(settings = {}) {
     winBy: positiveIntegerOrDefault(settings.winBy, 2),
     rallyScoring: settings.rallyScoring === true,
   };
+}
+
+function tournamentFormatValue(value) {
+  const clean = String(value || "round_robin").trim().toLowerCase();
+  if (["round_robin_top4", "round-robin-top4", "round_robin_top_4", "round-robin-top-4", "rr_top4", "rr-top4"].includes(clean)) return "round_robin_top4";
+  if (["single", "single_elimination", "single-elimination"].includes(clean)) return "single_elimination";
+  if (["double", "double_elimination", "double-elimination"].includes(clean)) return "double_elimination";
+  return "round_robin";
+}
+
+function isEliminationTournament(settings = {}) {
+  const format = tournamentFormatValue(settings?.format);
+  return format === "single_elimination" || format === "double_elimination";
+}
+
+function isRoundRobinTop4Tournament(settings = {}) {
+  return tournamentFormatValue(settings?.format) === "round_robin_top4";
+}
+
+function isBracketTeamTournament(settings = {}) {
+  return isEliminationTournament(settings) || isRoundRobinTop4Tournament(settings);
+}
+
+function tournamentFormatLabel(formatOrSettings = {}) {
+  const format = typeof formatOrSettings === "string" ? tournamentFormatValue(formatOrSettings) : tournamentFormatValue(formatOrSettings?.format);
+  if (format === "single_elimination") return "Single Elimination";
+  if (format === "double_elimination") return "Double Elimination";
+  if (format === "round_robin_top4") return "Round Robin + Top 4 Playoff";
+  return "Round Robin";
+}
+
+function bracketLegacyId(code, divisionId, bracket, round, matchNumber) {
+  return ["BR", code, divisionId, bracket, round, matchNumber].join("|");
+}
+
+function isBracketLegacyId(legacyId) {
+  return String(legacyId || "").startsWith("BR|");
+}
+
+function parseBracketLegacyId(legacyId) {
+  const parts = String(legacyId || "").split("|");
+  if (parts[0] !== "BR" || parts.length < 6) return null;
+  const round = Number(parts[4]);
+  const match = Number(parts[5]);
+  if (!Number.isFinite(round) || !Number.isFinite(match)) return null;
+
+  return {
+    format: parts[1] === "DE" ? "double_elimination" : parts[1] === "T4" ? "round_robin_top4" : "single_elimination",
+    divisionId: parts[2],
+    bracket: parts[3],
+    round,
+    match,
+  };
+}
+
+function highestPowerOfTwoAtMost(value) {
+  let result = 1;
+  const number = Math.max(1, Number(value || 1));
+  while (result * 2 <= number) result *= 2;
+  return result;
+}
+
+function compareBracketSeed(a, b) {
+  const aSeed = Number(a.seed || Number.MAX_SAFE_INTEGER);
+  const bSeed = Number(b.seed || Number.MAX_SAFE_INTEGER);
+  return aSeed - bSeed || String(a.name || "").localeCompare(String(b.name || ""));
+}
+
+function regularSeasonStandingValue(team = {}) {
+  const value = team.seed;
+  return Number.isFinite(Number(value)) ? Number(value) : null;
+}
+
+function loserTeamIdForMatch(match) {
+  const winner = String(match.winner_team_id || "");
+  if (!winner) return "";
+  if (String(match.home_team_id || "") === winner) return String(match.away_team_id || "");
+  if (String(match.away_team_id || "") === winner) return String(match.home_team_id || "");
+  return "";
+}
+
+function eliminationTeamName(player1Name, player2Name) {
+  const lastNames = [player1Name, player2Name]
+    .map((name) => {
+      const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+      return parts[parts.length - 1];
+    })
+    .filter(Boolean);
+  return lastNames.join(" / ");
 }
 
 function legacyNumberOfGames(matchFormat) {

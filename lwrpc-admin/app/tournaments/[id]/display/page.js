@@ -6,10 +6,17 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
 import {
+  bracketByDivision,
+  bracketSingleGameScore,
+  bracketStatusLabel,
   courtName,
+  isEliminationTournament,
+  isRoundRobinTop4Tournament,
   loadPublicTournament,
+  scoreDisplay,
   standingsByDivision,
   tournamentDivisionColors,
+  tournamentFormatLabel,
   tournamentStandingLabel,
   tournamentDisplayName,
 } from "../../../lib/tournaments";
@@ -71,6 +78,10 @@ export default function TournamentDisplayPage() {
     () => standingsByDivision(state?.matches || [], state?.teams || [], state?.divisions || [], state?.tournament?.settings || {}),
     [state]
   );
+  const bracketDivisions = useMemo(
+    () => bracketByDivision(state?.matches || [], state?.teams || [], state?.divisions || [], state?.tournament?.settings || {}),
+    [state]
+  );
   const playingMatchesByCourtId = useMemo(() => {
     return Object.fromEntries(
       (state?.matches || [])
@@ -84,6 +95,7 @@ export default function TournamentDisplayPage() {
   if (!state) return <PublicShell title="Tournament Display" error="Tournament not found." />;
 
   const tournamentKey = state.tournament.slug || state.tournament.id;
+  const isTop4 = isRoundRobinTop4Tournament(state.tournament.settings);
 
   return (
     <PublicShell title={tournamentDisplayName(state.tournament)} adminHref={`/tourney/${tournamentKey}/admin`} systemSettings={systemSettings}>
@@ -122,11 +134,20 @@ export default function TournamentDisplayPage() {
       </div>
 
       {view === "standings" ? (
-        <StandingsGrid
-          standings={standings}
-          matches={state.matches}
-          onSelectTeam={(team) => setSelectedStandingTeam(team)}
-        />
+        isEliminationTournament(state.tournament.settings) ? (
+          <DisplayBracket bracketDivisions={bracketDivisions} settings={state.tournament.settings} />
+        ) : (
+          <div className="space-y-5">
+            <StandingsGrid
+              standings={standings}
+              matches={state.matches}
+              onSelectTeam={(team) => setSelectedStandingTeam(team)}
+            />
+            {isTop4 && bracketDivisions.length > 0 && (
+              <DisplayBracket bracketDivisions={bracketDivisions} settings={state.tournament.settings} />
+            )}
+          </div>
+        )
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
           {state.courts.map((court) => {
@@ -143,7 +164,7 @@ export default function TournamentDisplayPage() {
                   {match && (
                     <div className="flex max-w-[58%] flex-wrap justify-end gap-1.5 text-[11px] font-bold uppercase tracking-wide sm:gap-2 sm:text-xs">
                       <span className={`rounded-full px-3 py-1 ${colors.publicBadge}`}>{match.division?.name || "Division"}</span>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">Line {match.line_number || 1}</span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">{matchLineLabel(match)}</span>
                     </div>
                   )}
                 </div>
@@ -227,6 +248,10 @@ function TeamPlayers({ team }) {
   );
 }
 
+function matchLineLabel(match) {
+  return match.legacy_id?.startsWith("BR|") ? "Bracket" : `Line ${match.line_number || 1}`;
+}
+
 function StandingsGrid({ standings, matches, onSelectTeam }) {
   const entries = Object.entries(standings);
   const completedMatchesByDivision = completedMatchCounts(matches);
@@ -303,6 +328,115 @@ function StandingsGrid({ standings, matches, onSelectTeam }) {
   );
 }
 
+function DisplayBracket({ bracketDivisions, settings }) {
+  if (bracketDivisions.length === 0) {
+    return <div className="rounded-2xl bg-white p-8 text-center font-bold text-slate-500">Bracket has not been generated yet.</div>;
+  }
+
+  return (
+    <section className="space-y-5">
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-3xl font-black leading-tight text-white">{tournamentFormatLabel(settings)} Bracket</h2>
+        <span className="rounded-full bg-amber-400/25 px-4 py-2 text-sm font-black text-amber-100">{bracketDivisions.length} Active Divisions</span>
+      </div>
+      {bracketDivisions.map((divisionGroup) => {
+        const colors = tournamentDivisionColors(divisionGroup.division.name);
+
+        return (
+          <details key={divisionGroup.division.id} className={`rounded-2xl border p-4 shadow-xl ${colors.standingsPanel}`}>
+            <summary className="cursor-pointer list-none">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h3 className="text-2xl font-black text-white">{divisionGroup.division.name}</h3>
+                  <p className="mt-1 text-sm font-semibold text-blue-100">Open to view this division bracket.</p>
+                </div>
+              {divisionGroup.champion && (
+                <span className="rounded-full bg-amber-400 px-4 py-2 text-sm font-black text-slate-950">Champion: {divisionGroup.champion.name}</span>
+              )}
+              {!divisionGroup.champion && <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-black text-blue-100">Collapsed</span>}
+              </div>
+            </summary>
+            <div className="mt-4 flex min-w-max gap-10 overflow-x-auto pb-4">
+              {divisionGroup.sections.flatMap((section) =>
+                section.rounds.map((round, roundIndex) => (
+                  <div key={`${section.key}-${round.key}`} className="w-72 shrink-0">
+                    <div className={`rounded-full px-3 py-2 text-center text-xs font-black ${colors.badge}`}>
+                      {section.title === "Bracket" ? round.title : `${section.title}: ${round.title}`}
+                    </div>
+                    <div className="mt-5 space-y-6">
+                      {round.matches.map((match, matchIndex) => (
+                        <DisplayBracketMatch
+                          key={match.id}
+                          match={match}
+                          isLastRound={roundIndex === section.rounds.length - 1}
+                          offsetLevel={roundIndex}
+                          matchIndex={matchIndex}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </details>
+        );
+      })}
+    </section>
+  );
+}
+
+function DisplayBracketMatch({ match, offsetLevel, matchIndex }) {
+  const score = scoreDisplay(match);
+  const statusLabel = bracketStatusLabel(match);
+  const homeScore = bracketSingleGameScore(match, "home");
+  const awayScore = bracketSingleGameScore(match, "away");
+  const showScoreFooter = statusLabel !== "bye" && score && homeScore === "" && awayScore === "";
+  const topOffset = matchIndex === 0 ? 0 : Math.min(72, Number(offsetLevel || 0) * 18);
+
+  return (
+    <div className="relative" style={{ marginTop: `${topOffset}px` }}>
+      <div className="relative rounded-sm border border-white/70 bg-slate-950/60 p-3 shadow-lg">
+        <div className="absolute -left-3 -top-3 flex size-8 items-center justify-center rounded-full border border-white/70 bg-slate-950 text-xs font-black text-white shadow">
+          #{match.bracketMatchNumber || match.bracketMeta?.match || ""}
+        </div>
+        <div className="mb-2 flex items-center justify-end gap-2 text-xs font-black uppercase text-blue-200">
+          <span>{statusLabel}</span>
+        </div>
+        <DisplayBracketTeam
+          name={match.home_team?.name || "TBD"}
+          sourceLabel={match.homeSourceLabel}
+          score={homeScore}
+          eliminated={Boolean(match.homeEliminated)}
+          winner={String(match.winner_team_id || "") === String(match.home_team_id || "")}
+        />
+        <DisplayBracketTeam
+          name={match.away_team?.name || "TBD"}
+          sourceLabel={match.awaySourceLabel}
+          score={awayScore}
+          eliminated={Boolean(match.awayEliminated)}
+          winner={String(match.winner_team_id || "") === String(match.away_team_id || "")}
+        />
+        {showScoreFooter && <div className="mt-2 rounded-sm bg-white/10 px-3 py-2 text-xs font-black text-blue-100">{score}</div>}
+      </div>
+    </div>
+  );
+}
+
+function DisplayBracketTeam({ name, sourceLabel = "", score = "", winner, eliminated = false }) {
+  return (
+    <div className={`mt-1 flex min-h-11 items-center justify-between rounded-sm border px-3 py-2 text-sm font-black ${
+      winner ? "border-emerald-300/70 bg-emerald-500/20 text-emerald-100" : "border-white/45 bg-white/10 text-white"
+    }`}>
+      <span className="min-w-0 flex-1 break-words pr-3">{sourceLabel ? `(${sourceLabel}) ` : ""}{name}</span>
+      <span className="ml-2 flex w-16 shrink-0 items-center justify-end gap-1">
+        {winner && <span className="rounded-full bg-emerald-400 px-2 py-1 text-[11px] font-black text-slate-950">W</span>}
+        {eliminated && <span className="rounded-full bg-rose-500 px-2 py-1 text-[11px] font-black text-white">D</span>}
+        {score !== "" && <span className="min-w-8 rounded-full bg-white/15 px-2 py-1 text-center text-xs text-white">{score}</span>}
+      </span>
+    </div>
+  );
+}
+
 function StandingTeamDetailModal({ team, matches, onClose }) {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/80 p-4">
@@ -366,6 +500,7 @@ function matchesForStandingTeam(matches, team) {
 function completedMatchCounts(matches) {
   return (matches || []).reduce((counts, match) => {
     if (match.status !== "done" || match.result_type === "not_played") return counts;
+    if (String(match.legacy_id || "").startsWith("BR|")) return counts;
     const division = match.division?.name || "Unassigned";
     counts[division] = (counts[division] || 0) + 1;
     return counts;

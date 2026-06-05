@@ -61,6 +61,35 @@ export function tournamentDisplayName(tournament) {
   return tournament?.name || "Tournament";
 }
 
+export function tournamentFormat(settings = {}) {
+  const value = String(settings?.format || settings?.tournamentFormat || "round_robin").trim().toLowerCase();
+  if (["round_robin_top4", "round-robin-top4", "round_robin_top_4", "round-robin-top-4", "rr_top4", "rr-top4"].includes(value)) return "round_robin_top4";
+  if (["single", "single_elimination", "single-elimination"].includes(value)) return "single_elimination";
+  if (["double", "double_elimination", "double-elimination"].includes(value)) return "double_elimination";
+  return "round_robin";
+}
+
+export function isEliminationTournament(settings = {}) {
+  const format = tournamentFormat(settings);
+  return format === "single_elimination" || format === "double_elimination";
+}
+
+export function isRoundRobinTop4Tournament(settings = {}) {
+  return tournamentFormat(settings) === "round_robin_top4";
+}
+
+export function isBracketMatch(match = {}) {
+  return String(match.legacy_id || "").startsWith("BR|");
+}
+
+export function tournamentFormatLabel(settings = {}) {
+  const format = tournamentFormat(settings);
+  if (format === "single_elimination") return "Single Elimination";
+  if (format === "double_elimination") return "Double Elimination";
+  if (format === "round_robin_top4") return "Round Robin + Top 4 Playoff";
+  return "Round Robin";
+}
+
 export async function loadPublicTournaments() {
   const { data, error } = await supabase
     .from("tournaments")
@@ -197,7 +226,7 @@ export function standingsByDivision(matches, teams = [], divisions = [], setting
     });
 
   (matches || [])
-    .filter((match) => match.division?.is_active !== false && match.status === "done" && match.result_type !== "not_played")
+    .filter((match) => !isBracketMatch(match) && match.division?.is_active !== false && match.status === "done" && match.result_type !== "not_played")
     .forEach((match) => {
       const divisionName = match.division?.name || "Unassigned";
       const homeName = match.home_team?.name || "Home";
@@ -239,16 +268,76 @@ export function tournamentStandingLabel(row) {
   return row?.regularSeasonStanding ? `${row.team} (${row.regularSeasonStanding})` : row?.team || "Team";
 }
 
+export function bracketByDivision(matches = [], teams = [], divisions = [], settings = {}) {
+  const format = bracketDisplayFormat(settings);
+  const teamsById = Object.fromEntries((teams || []).map((team) => [String(team.id), team]));
+  const activeDivisions = (divisions || []).filter((division) => division.is_active !== false);
+  const fallbackDivisions = activeDivisions.length > 0 ? activeDivisions : divisions || [];
+
+  return fallbackDivisions.map((division) => {
+    const divisionMatches = withBracketEliminationMarkers(withBracketSlotSources(withBracketMatchNumbers((matches || [])
+      .filter((match) => String(match.division_id || "") === String(division.id))
+      .map((match) => bracketMatchRow(match, teamsById))
+      .filter((match) => match.bracketMeta)
+      .sort((a, b) =>
+        bracketSectionOrder(a.bracketMeta.bracket, format) - bracketSectionOrder(b.bracketMeta.bracket, format) ||
+        Number(a.bracketMeta.round || 0) - Number(b.bracketMeta.round || 0) ||
+        Number(a.bracketMeta.match || 0) - Number(b.bracketMeta.match || 0) ||
+        Number(a.created_order || 0) - Number(b.created_order || 0)
+      ), format)), format);
+
+    return {
+      division,
+      sections: bracketSections(divisionMatches, format),
+      champion: bracketChampion(divisionMatches, teamsById, format),
+    };
+  }).filter((division) => division.sections.length > 0);
+}
+
+function bracketDisplayFormat(settings = {}) {
+  const format = tournamentFormat(settings);
+  return format === "round_robin_top4" ? "single_elimination" : format;
+}
+
+export function bracketMatchesById(matches = [], teams = [], divisions = [], settings = {}) {
+  return Object.fromEntries(
+    bracketByDivision(matches, teams, divisions, settings)
+      .flatMap((division) => division.sections)
+      .flatMap((section) => section.rounds)
+      .flatMap((round) => round.matches)
+      .map((match) => [String(match.id), match])
+  );
+}
+
+export function parseBracketMatchId(legacyId) {
+  const parts = String(legacyId || "").split("|");
+  if (parts[0] !== "BR" || parts.length < 6) return null;
+
+  const formatCode = parts[1];
+  const bracket = parts[3];
+  const round = Number(parts[4]);
+  const match = Number(parts[5]);
+  if (!Number.isFinite(round) || !Number.isFinite(match)) return null;
+
+  return {
+    format: formatCode === "DE" ? "double_elimination" : "single_elimination",
+    divisionId: parts[2],
+    bracket,
+    round,
+    match,
+  };
+}
+
 export function tournamentPlayers(teams, divisions) {
   const divisionById = Object.fromEntries((divisions || []).map((division) => [division.id, division]));
 
   return (teams || [])
     .flatMap((team) => [
       team.player_1_name
-        ? playerRow(team.player_1_name, team, divisionById)
+        ? playerRow(team.player_1_name, team, divisionById, 1)
         : null,
       team.player_2_name
-        ? playerRow(team.player_2_name, team, divisionById)
+        ? playerRow(team.player_2_name, team, divisionById, 2)
         : null,
     ])
     .filter(Boolean)
@@ -278,20 +367,260 @@ export function scoreDisplay(match) {
   return "";
 }
 
+export function bracketSingleGameScore(match, side) {
+  const key = side === "away" ? "away" : "home";
+
+  if (Array.isArray(match?.game_scores)) {
+    const games = match.game_scores
+      .map((game) => ({ home: scoreValue(game?.home), away: scoreValue(game?.away) }))
+      .filter((game) => game.home !== "" || game.away !== "");
+    if (games.length === 1) return games[0][key];
+    return "";
+  }
+
+  const home = scoreValue(match?.home_score);
+  const away = scoreValue(match?.away_score);
+  if (home !== "" && away !== "") return key === "home" ? home : away;
+  return "";
+}
+
+export function bracketStatusLabel(match) {
+  if (match?.result_type === "bye" || String(match?.score_text || "").toLowerCase() === "bye") return "bye";
+  if (match?.status === "done") return "done";
+  if (match?.status === "playing") return "playing";
+  if (match?.home_team_id || match?.away_team_id) return match?.status || "pending";
+  return "waiting";
+}
+
 export function courtName(court) {
   return court?.name || "Court";
 }
 
-function playerRow(name, team, divisionById) {
+function playerRow(name, team, divisionById, slot) {
   const division = divisionById[team.division_id];
 
   return {
+    playerKey: `${team.id}:${slot}`,
+    slot,
     name,
     team: team.name,
     teamId: team.id,
     division: division?.name || "Unassigned",
     line: team.line_number || 1,
   };
+}
+
+function bracketMatchRow(match, teamsById) {
+  const bracketMeta = parseBracketMatchId(match.legacy_id);
+  const homeTeam = match.home_team || teamsById[String(match.home_team_id || "")] || null;
+  const awayTeam = match.away_team || teamsById[String(match.away_team_id || "")] || null;
+
+  return {
+    ...match,
+    bracketMeta,
+    home_team: homeTeam,
+    away_team: awayTeam,
+    homeName: homeTeam?.name || "TBD",
+    awayName: awayTeam?.name || "TBD",
+  };
+}
+
+function withBracketMatchNumbers(matches, format) {
+  const numbers = new Map(
+    [...(matches || [])]
+      .sort((a, b) =>
+        bracketNumberSectionRound(a, format) - bracketNumberSectionRound(b, format) ||
+        bracketSectionOrder(a.bracketMeta?.bracket, format) - bracketSectionOrder(b.bracketMeta?.bracket, format) ||
+        Number(a.bracketMeta?.match || 0) - Number(b.bracketMeta?.match || 0) ||
+        Number(a.created_order || 0) - Number(b.created_order || 0)
+      )
+      .map((match, index) => [String(match.id), index + 1])
+  );
+
+  return (matches || []).map((match) => ({
+    ...match,
+    bracketMatchNumber: numbers.get(String(match.id)) || match.bracketMeta?.match || "",
+  }));
+}
+
+function withBracketSlotSources(matches) {
+  return (matches || []).map((match) => ({
+    ...match,
+    homeSourceLabel: bracketSourceLabel(matches, match, match.home_team_id),
+    awaySourceLabel: bracketSourceLabel(matches, match, match.away_team_id),
+  }));
+}
+
+function withBracketEliminationMarkers(matches, format) {
+  const lossesByTeam = {};
+  const maxLosses = format === "double_elimination" ? 2 : 1;
+  const eliminatedMatches = {};
+
+  [...(matches || [])]
+    .sort((a, b) => Number(a.created_order || 0) - Number(b.created_order || 0))
+    .forEach((match) => {
+      if (match.status !== "done" || !match.winner_team_id || match.result_type === "not_played") return;
+      const loserId = loserTeamId(match);
+      if (!loserId) return;
+
+      lossesByTeam[loserId] = (lossesByTeam[loserId] || 0) + 1;
+      if (lossesByTeam[loserId] >= maxLosses) {
+        eliminatedMatches[`${match.id}:${loserId}`] = true;
+      }
+    });
+
+  return (matches || []).map((match) => ({
+    ...match,
+    homeEliminated: Boolean(eliminatedMatches[`${match.id}:${match.home_team_id}`]),
+    awayEliminated: Boolean(eliminatedMatches[`${match.id}:${match.away_team_id}`]),
+  }));
+}
+
+function loserTeamId(match) {
+  const winnerId = String(match?.winner_team_id || "");
+  if (!winnerId) return "";
+  if (String(match.home_team_id || "") === winnerId) return String(match.away_team_id || "");
+  if (String(match.away_team_id || "") === winnerId) return String(match.home_team_id || "");
+  return "";
+}
+
+function bracketSourceLabel(matches, currentMatch, teamId) {
+  const cleanTeamId = String(teamId || "");
+  if (!cleanTeamId) return "";
+
+  const currentOrder = Number(currentMatch?.created_order || Number.MAX_SAFE_INTEGER);
+  const candidates = (matches || [])
+    .filter((match) => String(match.id) !== String(currentMatch.id))
+    .filter((match) => match.status === "done" && match.winner_team_id)
+    .filter((match) => String(match.home_team_id || "") === cleanTeamId || String(match.away_team_id || "") === cleanTeamId)
+    .filter((match) => {
+      const order = Number(match.created_order || 0);
+      return !Number.isFinite(currentOrder) || currentOrder === Number.MAX_SAFE_INTEGER || order < currentOrder;
+    })
+    .sort((a, b) =>
+      Number(b.created_order || 0) - Number(a.created_order || 0) ||
+      Number(b.bracketMatchNumber || 0) - Number(a.bracketMatchNumber || 0)
+    );
+  const source = candidates[0];
+  if (!source) return "";
+
+  const resultPrefix = String(source.winner_team_id || "") === cleanTeamId ? "W" : "L";
+  return `${resultPrefix}${source.bracketMatchNumber || source.bracketMeta?.match || ""}`;
+}
+
+function bracketNumberSectionRound(match, format) {
+  const meta = match.bracketMeta || {};
+  if (format !== "double_elimination") return Number(meta.round || 0) * 10;
+  if (meta.bracket === "F") return 999;
+  return Number(meta.round || 0) * 10 + (meta.bracket === "L" ? 1 : 0);
+}
+
+function bracketSections(matches, format) {
+  const groups = (matches || []).reduce((map, match) => {
+    const bracket = match.bracketMeta?.bracket || "W";
+    map[bracket] ||= {};
+    const round = Number(match.bracketMeta?.round || 1);
+    map[bracket][round] ||= [];
+    map[bracket][round].push(match);
+    return map;
+  }, {});
+
+  return Object.entries(groups)
+    .sort(([a], [b]) => bracketSectionOrder(a, format) - bracketSectionOrder(b, format))
+    .map(([bracket, rounds]) => ({
+      key: bracket,
+      title: bracketTitle(bracket, format),
+      rounds: displayBracketRounds(bracket, rounds, format)
+        .filter((round) => round.matches.length > 0),
+    }))
+    .filter((section) => section.rounds.length > 0);
+}
+
+function displayBracketRounds(bracket, rounds, format) {
+  let previousRoundCount = 0;
+
+  return Object.entries(rounds)
+    .sort(([a], [b]) => Number(a) - Number(b))
+    .map(([round, roundMatches]) => {
+      const sortedMatches = [...roundMatches].sort((a, b) =>
+        Number(a.bracketMeta?.match || 0) - Number(b.bracketMeta?.match || 0)
+      );
+      const visibleMatches = sortedMatches.filter(visibleBracketMatch);
+      const futureMatchCount = visibleMatches.length === 0 && previousRoundCount > 1
+        ? Math.ceil(previousRoundCount / 2)
+        : 0;
+      const matches = visibleMatches.length > 0
+        ? visibleMatches
+        : sortedMatches.slice(0, futureMatchCount);
+
+      if (matches.length > 0) previousRoundCount = matches.length;
+
+      return {
+        key: `${bracket}-${round}`,
+        title: roundTitle(bracket, Number(round), matches.length, format),
+        matches,
+      };
+    });
+}
+
+function visibleBracketMatch(match) {
+  if (match?.home_team_id || match?.away_team_id) return true;
+  if (match?.status === "done" || match?.status === "playing") return true;
+  return false;
+}
+
+function bracketChampion(matches, teamsById, format) {
+  if (format === "double_elimination") {
+    const finalMatches = (matches || [])
+      .filter((match) => match.bracketMeta?.bracket === "F")
+      .sort((a, b) => Number(a.bracketMeta?.round || 0) - Number(b.bracketMeta?.round || 0));
+    const firstFinal = finalMatches.find((match) => Number(match.bracketMeta?.round || 0) === 1);
+    const resetFinal = finalMatches.find((match) => Number(match.bracketMeta?.round || 0) === 2);
+
+    if (resetFinal?.status === "done" && resetFinal.winner_team_id) {
+      return teamsById[String(resetFinal.winner_team_id)] || resetFinal.winner_team || null;
+    }
+
+    if (!firstFinal || firstFinal.status !== "done" || !firstFinal.winner_team_id) return null;
+    if (String(firstFinal.winner_team_id || "") !== String(firstFinal.home_team_id || "")) return null;
+    return teamsById[String(firstFinal.winner_team_id)] || firstFinal.winner_team || null;
+  }
+
+  const finalBracket = format === "double_elimination" ? "F" : "W";
+  const finalMatches = (matches || [])
+    .filter((match) => match.bracketMeta?.bracket === finalBracket)
+    .sort((a, b) =>
+      Number(b.bracketMeta?.round || 0) - Number(a.bracketMeta?.round || 0) ||
+      Number(b.bracketMeta?.match || 0) - Number(a.bracketMeta?.match || 0)
+    );
+  const final = finalMatches[0];
+  if (!final || final.status !== "done" || !final.winner_team_id) return null;
+  return teamsById[String(final.winner_team_id)] || final.winner_team || null;
+}
+
+function bracketSectionOrder(bracket, format) {
+  if (format === "double_elimination") {
+    if (bracket === "W") return 0;
+    if (bracket === "L") return 1;
+    if (bracket === "F") return 2;
+  }
+  return bracket === "W" ? 0 : 9;
+}
+
+function bracketTitle(bracket, format) {
+  if (format === "double_elimination") {
+    if (bracket === "W") return "Winners Bracket";
+    if (bracket === "L") return "Elimination Bracket";
+    if (bracket === "F") return "Championship";
+  }
+  return "Bracket";
+}
+
+function roundTitle(bracket, round, matchCount, format) {
+  if (bracket === "F") return round > 1 ? "Championship If Necessary" : "Championship Match";
+  if (format === "single_elimination" && matchCount === 1 && round > 1) return "Final";
+  if (matchCount === 2) return "Semifinals";
+  return `Round ${round}`;
 }
 
 function blankStanding(team, teamRecord = {}) {
@@ -337,6 +666,12 @@ function compareStandingRule(a, b, rule) {
 function regularSeasonStandingValue(teamRecord = {}) {
   const value = teamRecord.seed;
   return Number.isFinite(Number(value)) ? Number(value) : null;
+}
+
+function scoreValue(value) {
+  if (value === null || value === undefined || value === "") return "";
+  const number = Number(value);
+  return Number.isFinite(number) ? String(number) : "";
 }
 
 function isUuid(value) {

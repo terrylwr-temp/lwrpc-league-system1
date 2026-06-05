@@ -1,7 +1,7 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -46,6 +46,8 @@ export default function RatingsPage() {
     direction: "asc",
   });
   const [page, setPage] = useState(1);
+  const [requestedMemberId, setRequestedMemberId] = useState("");
+  const requestedMemberRowRef = useRef(null);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -829,8 +831,24 @@ export default function RatingsPage() {
   }, [checkAuth, loadInitialData]);
 
   useEffect(() => {
+    setRequestedMemberId(new URLSearchParams(window.location.search).get("member") || "");
+  }, []);
+
+  useEffect(() => {
     setPage(1);
   }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly, showInvalidDuprIdsOnly]);
+
+  useEffect(() => {
+    if (!requestedMemberId || loading) return;
+
+    setSearch("");
+    setShowCurrentRosterOnly(false);
+    setShowMissingDoublesOnly(false);
+    setShowNrDoublesOnly(false);
+    setShowNrAgeOnly(false);
+    setShowInvalidDuprIdsOnly(false);
+    setMemberSort({ field: "name", direction: "asc" });
+  }, [loading, requestedMemberId]);
 
   useEffect(() => {
     if (!loading && selectedSeason) {
@@ -901,6 +919,29 @@ export default function RatingsPage() {
     const start = (page - 1) * PAGE_SIZE;
     return filteredMembers.slice(start, start + PAGE_SIZE);
   }, [filteredMembers, page]);
+
+  useEffect(() => {
+    if (!requestedMemberId || loading || filteredMembers.length === 0) return;
+
+    const memberIndex = filteredMembers.findIndex((member) => String(member.id) === String(requestedMemberId));
+    if (memberIndex < 0) return;
+
+    const targetPage = Math.floor(memberIndex / PAGE_SIZE) + 1;
+    setPage((currentPage) => currentPage === targetPage ? currentPage : targetPage);
+  }, [filteredMembers, loading, requestedMemberId]);
+
+  useEffect(() => {
+    if (!requestedMemberId || loading || !requestedMemberRowRef.current) return;
+
+    const scrollTimer = window.setTimeout(() => {
+      requestedMemberRowRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 50);
+
+    return () => window.clearTimeout(scrollTimer);
+  }, [loading, page, pagedMembers, requestedMemberId]);
 
 function goToPage(value) {
   const requestedPage = Number(value);
@@ -1329,8 +1370,11 @@ function goToPage(value) {
                 return (
                   <tr
                     key={member.id}
+                    ref={String(member.id) === String(requestedMemberId) ? requestedMemberRowRef : null}
                     className={`border-b border-slate-100 ${
-                      missingDoublesRating
+                      String(member.id) === String(requestedMemberId)
+                        ? "bg-blue-50 ring-2 ring-inset ring-blue-300 hover:bg-blue-100"
+                        : missingDoublesRating
                         ? "bg-amber-50 hover:bg-amber-100"
                         : "hover:bg-slate-50"
                     }`}
