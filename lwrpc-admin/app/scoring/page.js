@@ -365,6 +365,10 @@ export default function ScoringPage() {
         match_lines (
           id,
           line_number,
+          posted_to_dupr,
+          division_lines (
+            posted_to_dupr
+          ),
           home_player_1:members!match_lines_home_player_1_id_fkey(first_name, last_name, full_name, dupr_id),
           home_player_2:members!match_lines_home_player_2_id_fkey(first_name, last_name, full_name, dupr_id),
           away_player_1:members!match_lines_away_player_1_id_fkey(first_name, last_name, full_name, dupr_id),
@@ -390,14 +394,15 @@ export default function ScoringPage() {
         const sourceMatch = exportMatches.find((item) => item.id === match.id) || match;
         return {
           ...sourceMatch,
-          match_lines: match.match_lines || [],
+          match_lines: (match.match_lines || []).filter(linePostsToDupr),
         };
       })
+      .filter((match) => match.match_lines.length > 0)
       .sort(compareScoringMatches);
 
     if (rows.length === 0) {
       setExportingScores(false);
-      alert("No verified scores were found for the selected matches.");
+      alert("No selected verified matches have completed line scores marked to Post to DUPR.");
       return;
     }
 
@@ -491,7 +496,7 @@ export default function ScoringPage() {
                 disabled={exportingScores}
                 className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
               >
-                {exportingScores ? "Exporting..." : "Export For DUPR"}
+                {exportingScores ? "Exporting..." : "DUPR Export"}
               </button>
             </div>
           </div>
@@ -596,11 +601,14 @@ function MatchRow({ match, selected, membersById, onToggle, onOpen }) {
 }
 
 function compareScoringMatches(a, b) {
+  const dateCompare = String(b.scheduled_date || "").localeCompare(String(a.scheduled_date || ""));
+  if (dateCompare !== 0) return dateCompare;
+
+  const timeCompare = String(a.scheduled_time || "").localeCompare(String(b.scheduled_time || ""));
+  if (timeCompare !== 0) return timeCompare;
+
   const divisionCompare = (a.divisions?.name || "").localeCompare(b.divisions?.name || "");
   if (divisionCompare !== 0) return divisionCompare;
-
-  const dateCompare = String(a.scheduled_date || "").localeCompare(String(b.scheduled_date || ""));
-  if (dateCompare !== 0) return dateCompare;
 
   return (a.home_team?.name || "").localeCompare(b.home_team?.name || "");
 }
@@ -633,6 +641,11 @@ function duprRowsForMatch(match) {
         ...gameScores,
       ];
     });
+}
+
+function linePostsToDupr(line) {
+  const value = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
+  return value === true || value === "true" || value === 1 || value === "1";
 }
 
 function duprPlayerName(member) {
