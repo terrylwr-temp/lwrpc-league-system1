@@ -535,12 +535,13 @@ export default function TeamsPage() {
     const currentlyActive = team.is_active !== false;
 
     if (currentlyActive) {
-      const ok = confirm([
-        `Inactivate team "${team.name}"?`,
-        "",
-        "This will mark the team inactive and reset its standings record to 0.",
-        "Historical matches, scores, roster history, and player history will not be deleted.",
-      ].join("\n"));
+      const ok = confirmTypedInactivateAction({
+        title: `Inactivate team "${team.name}"?`,
+        details: [
+          "This will mark the team inactive and reset its standings record to 0.",
+          "Historical matches, scores, roster history, and player history will not be deleted.",
+        ].join("\n"),
+      });
 
       if (!ok) return;
     }
@@ -1248,53 +1249,33 @@ if (loading) {
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
-            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
-                Teams
-              </h2>
+            <div className="mb-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_12rem_11rem] xl:items-start">
+              <div className="space-y-3">
+                <h2 className="text-xl font-bold text-slate-900">
+                  Teams
+                </h2>
 
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  value={teamSearch}
-                  onChange={(e) => setTeamSearch(e.target.value)}
-                  placeholder="Filter teams, leagues, divisions, captains, club pros..."
-                  className="min-w-72 rounded-xl border border-slate-300 px-4 py-3"
-                />
+                <div className="flex flex-col gap-2 sm:flex-row">
+                  <input
+                    value={teamSearch}
+                    onChange={(e) => setTeamSearch(e.target.value)}
+                    placeholder="Filter teams, leagues, divisions, captains, club pros..."
+                    className="w-full min-w-0 rounded-xl border border-slate-300 px-4 py-3"
+                  />
 
-                {teamSearch && (
-                  <button
-                    type="button"
-                    onClick={() => setTeamSearch("")}
-                    className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
-                  >
-                    Clear
-                  </button>
-                )}
+                  {teamSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setTeamSearch("")}
+                      className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
 
-                <button
-                  type="button"
-                  onClick={expandAllGroups}
-                  className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
-                >
-                  Expand All
-                </button>
-
-                <button
-                  type="button"
-                  onClick={collapseAllGroups}
-                  className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
-                >
-                  Collapse All
-                </button>
-
-                <button
-                  type="button"
-                  onClick={openCopyDivisionTeams}
-                  className="rounded-xl bg-emerald-100 px-4 py-3 font-semibold text-emerald-900 hover:bg-emerald-200"
-                >
-                  Copy Division Teams
-                </button>
-
+              <div className="space-y-2">
                 <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
                   <div className="text-xs uppercase tracking-wide text-slate-300">
                     Teams
@@ -1304,6 +1285,32 @@ if (loading) {
                     {filteredTeams.length}
                   </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={openCopyDivisionTeams}
+                  className="w-full rounded-xl bg-emerald-100 px-4 py-3 font-semibold text-emerald-900 hover:bg-emerald-200"
+                >
+                  Copy Division Teams
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  onClick={expandAllGroups}
+                  className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
+                >
+                  Expand All
+                </button>
+
+                <button
+                  type="button"
+                  onClick={collapseAllGroups}
+                  className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
+                >
+                  Collapse All
+                </button>
               </div>
             </div>
 
@@ -1888,5 +1895,19 @@ function filterByesForPublishedSchedule(byes, matches) {
 
 function scheduleWeekKey(divisionId, weekNumber, date) {
   return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
+}
+
+function confirmTypedInactivateAction({ title, details }) {
+  const firstOk = confirm([
+    title,
+    "",
+    details,
+    "This is a major administrative change and may not be fully undoable.",
+  ].join("\n"));
+
+  if (!firstOk) return false;
+
+  const typed = prompt("Type INACTIVATE to confirm.");
+  return String(typed || "").trim() === "INACTIVATE";
 }
 

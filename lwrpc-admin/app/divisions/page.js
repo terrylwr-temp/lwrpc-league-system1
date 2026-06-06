@@ -247,7 +247,10 @@ export default function DivisionsPage() {
     const currentlyActive = division.is_active !== false;
 
     if (currentlyActive) {
-      const ok = confirm(`Inactivate division "${division.name}"? It will be hidden from current setup dropdowns.`);
+      const ok = confirmTypedInactivateAction({
+        title: `Inactivate division "${division.name}"?`,
+        details: "This will hide the division from current setup dropdowns and can affect active team, schedule, standings, and history workflows.",
+      });
       if (!ok) return;
     }
 
@@ -1341,4 +1344,18 @@ function copyDivisionLinePayload(line, divisionId) {
     division_id: divisionId,
     updated_at: new Date().toISOString(),
   };
+}
+
+function confirmTypedInactivateAction({ title, details }) {
+  const firstOk = confirm([
+    title,
+    "",
+    details,
+    "This is a major administrative change and may not be fully undoable.",
+  ].join("\n"));
+
+  if (!firstOk) return false;
+
+  const typed = prompt("Type INACTIVATE to confirm.");
+  return String(typed || "").trim() === "INACTIVATE";
 }

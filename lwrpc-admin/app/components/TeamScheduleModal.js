@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export default function TeamScheduleModal({
   title,
@@ -201,6 +201,7 @@ function ScheduleByeCard({ bye }) {
 
 function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, ratingType }) {
   const [expanded, setExpanded] = useState(false);
+  const matchCardRef = useRef(null);
   const isHome = String(match.home_team_id) === String(selectedTeamId);
   const opponent = isHome ? match.away_team : match.home_team;
   const selectedScore = isHome ? match.home_score : match.away_score;
@@ -231,27 +232,54 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
     : selectedTeamLost
       ? "bg-red-500"
       : "bg-blue-500";
+  function hideMatchDetails() {
+    setExpanded(false);
+    requestAnimationFrame(() => {
+      matchCardRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  }
+
+  function hideMatchDetailsOnKeyDown(event) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+
+    event.preventDefault();
+    hideMatchDetails();
+  }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <div ref={matchCardRef} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className={`h-1 ${matchAccentClass}`} />
       <div className="p-3 sm:p-4">
       <div className={compact ? "grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_14rem] md:items-start" : "flex flex-wrap items-start justify-between gap-3"}>
         <div className="min-w-0">
-          <div className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-950 sm:text-sm">
-            {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-black text-blue-950 sm:text-sm">
+              {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+            </div>
+            <div className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white sm:text-sm">
+              Week {match.week_number || "-"}
+            </div>
           </div>
           <div className={`${compact ? "break-words" : ""} mt-1 text-base font-black text-slate-900 sm:text-lg`}>
             {formatTeamName(match.home_team, "Home")} vs {formatTeamName(match.away_team, "Away")}
           </div>
           <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-600">
             <span>{isHome ? "Home" : "Away"} vs {formatTeamName(opponent, "Opponent")}</span>
-            <span>{match.locations?.name || "Location TBD"}</span>
-            <span>Week {match.week_number || "-"}</span>
+            <span>at {match.locations?.name || "Location TBD"}</span>
             {showMatchDetails && (
               <button
                 type="button"
-                onClick={() => setExpanded((current) => !current)}
+                onClick={() => {
+                  if (expanded) {
+                    hideMatchDetails();
+                    return;
+                  }
+
+                  setExpanded(true);
+                }}
                 className="rounded-lg bg-blue-100 px-3 py-1 text-xs font-black text-blue-900 hover:bg-blue-200"
               >
                 {expanded ? "Hide Match Details" : "Show Match Details"}
@@ -279,16 +307,24 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
       </div>
 
       {showMatchDetails && expanded && match.match_lines?.length > 0 && (
-        <div className="mx-3 mb-4 space-y-3 rounded-2xl border border-blue-100 bg-blue-50/60 p-3 sm:mx-4">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={hideMatchDetails}
+          onKeyDown={hideMatchDetailsOnKeyDown}
+          className="mx-3 mb-4 cursor-pointer space-y-3 rounded-2xl border border-blue-100 bg-blue-50/60 p-3 sm:mx-4"
+          aria-label="Hide match details"
+        >
           {match.match_lines
             .slice()
             .sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0))
             .map((line) => {
               const winnerName = formatLineWinnerName(match, line);
+              const lineAccentClass = lineHeaderAccentClass(match, line, selectedTeamId);
 
               return (
               <div key={line.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg ${matchAccentClass} px-3 py-2 text-sm text-white`}>
+                <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg ${lineAccentClass} px-3 py-2 text-sm text-white`}>
                   <span className="font-black">
                     Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
                   </span>
@@ -327,7 +363,14 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
         </div>
       )}
       {showMatchDetails && expanded && !match.match_lines?.length && (
-        <div className="mx-4 mb-4 rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-500">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={hideMatchDetails}
+          onKeyDown={hideMatchDetailsOnKeyDown}
+          className="mx-4 mb-4 cursor-pointer rounded-lg bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-500"
+          aria-label="Hide match details"
+        >
           No game details have been entered for this match yet.
         </div>
       )}
@@ -484,6 +527,30 @@ function formatLineTeamPoints(line) {
   const points = Number(line?.division_lines?.team_win_points ?? 1);
 
   return Number.isNaN(points) ? "-" : points;
+}
+
+function lineHeaderAccentClass(match, line, selectedTeamId) {
+  const selectedId = String(selectedTeamId || "");
+  const winningId = String(line?.winning_team_id || "");
+
+  if (selectedId && winningId) {
+    return winningId === selectedId ? "bg-emerald-500" : "bg-red-500";
+  }
+
+  const selectedIsHome = selectedId && String(match?.home_team_id || "") === selectedId;
+  const selectedIsAway = selectedId && String(match?.away_team_id || "") === selectedId;
+  const homeWins = Number(line?.home_team_games_won || 0);
+  const awayWins = Number(line?.away_team_games_won || 0);
+
+  if ((selectedIsHome && homeWins > awayWins) || (selectedIsAway && awayWins > homeWins)) {
+    return "bg-emerald-500";
+  }
+
+  if ((selectedIsHome && awayWins > homeWins) || (selectedIsAway && homeWins > awayWins)) {
+    return "bg-red-500";
+  }
+
+  return "bg-blue-500";
 }
 
 function duprPostedLabel(line) {

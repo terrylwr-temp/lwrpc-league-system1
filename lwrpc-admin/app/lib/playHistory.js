@@ -63,6 +63,7 @@ function addHistoryScopeOption({ seasons, leagues, divisions, teams, season, lea
     seasons.set(String(season.id), {
       id: season.id,
       name: season.name || "No Season",
+      abbreviation: season.abbreviation || "",
     });
   }
 
@@ -70,7 +71,9 @@ function addHistoryScopeOption({ seasons, leagues, divisions, teams, season, lea
     leagues.set(String(league.id), {
       id: league.id,
       name: league.name || "No League",
+      abbreviation: league.abbreviation || "",
       seasonName: season?.name || "",
+      seasonAbbreviation: season?.abbreviation || "",
     });
   }
 
@@ -83,13 +86,38 @@ function addHistoryScopeOption({ seasons, leagues, divisions, teams, season, lea
   }
 
   if (team?.id) {
+    const existing = teams.get(String(team.id)) || {};
+    const teamDivision = team.divisions || division;
+    const teamLeague = teamDivision?.leagues || league;
+    const teamSeason = teamLeague?.seasons || season;
+
     teams.set(String(team.id), {
+      ...existing,
       id: team.id,
-      name: team.name || "No Team",
-      divisionName: team.divisions?.name || division?.name || "",
-      leagueName: team.divisions?.leagues?.name || league?.name || "",
+      name: team.name || existing.name || "No Team",
+      isActive: team.is_active === false || existing.isActive === false ? false : true,
+      divisionName: teamDivision?.name || existing.divisionName || "",
+      leagueName: teamLeague?.name || existing.leagueName || "",
+      leagueAbbreviation: teamLeague?.abbreviation || existing.leagueAbbreviation || "",
+      seasonName: teamSeason?.name || existing.seasonName || "",
+      seasonAbbreviation: teamSeason?.abbreviation || existing.seasonAbbreviation || "",
     });
   }
+}
+
+export function historyTeamOptionLabel(team) {
+  const name = team?.name || "No Team";
+
+  if (team?.isActive !== false) {
+    return name;
+  }
+
+  return [
+    name,
+    team.divisionName,
+    team.leagueAbbreviation || team.leagueName,
+    team.seasonAbbreviation || team.seasonName,
+  ].filter(Boolean).join(" / ");
 }
 
 export function filterHistoryRows(historyRows, selectedFilter, memberId = null, playerTeams = []) {

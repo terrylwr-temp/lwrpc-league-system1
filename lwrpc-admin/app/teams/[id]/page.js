@@ -12,6 +12,7 @@ import {
   filterHistoryRows,
   formatDate,
   historyFilterOptions,
+  historyTeamOptionLabel,
   playerLineDetails,
   sortHistoryRows,
 } from "../../lib/playHistory";
@@ -56,10 +57,12 @@ export default function TeamRosterPage() {
           leagues (
             id,
             name,
+            abbreviation,
             season_id,
             seasons (
               id,
-              name
+              name,
+              abbreviation
             ),
             rosters_locked
           )
@@ -196,16 +199,19 @@ export default function TeamRosterPage() {
           teams (
             id,
             name,
+            is_active,
             divisions (
               id,
               name,
               leagues (
                 id,
                 name,
+                abbreviation,
                 season_id,
                 seasons (
                   id,
-                  name
+                  name,
+                  abbreviation
                 )
               )
             )
@@ -253,11 +259,13 @@ export default function TeamRosterPage() {
             away_team_id,
             home_team:teams!matches_home_team_id_fkey (
               id,
-              name
+              name,
+              is_active
             ),
             away_team:teams!matches_away_team_id_fkey (
               id,
-              name
+              name,
+              is_active
             ),
             divisions (
               id,
@@ -266,9 +274,11 @@ export default function TeamRosterPage() {
             leagues (
               id,
               name,
+              abbreviation,
               seasons (
                 id,
-                name
+                name,
+                abbreviation
               )
             )
           )
@@ -336,14 +346,14 @@ export default function TeamRosterPage() {
     const ratingType = getRatingType();
 
     if (ratingType === "primetime") {
-      return "Season PrimeTime";
+      return "Season PrimeTime (Age-Based)";
     }
 
     if (ratingType === "self_rating") {
       return "Self Rating";
     }
 
-    return "Season DUPR";
+    return "Season DUPR Rating";
   }
 
   function getPlayerRating(member) {
@@ -920,7 +930,7 @@ function getAverageTeamRating() {
 
           </div>
 
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-6">
+          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
 
             <Info
               label="Division"
@@ -1163,9 +1173,11 @@ function getAverageTeamRating() {
                             {member?.club_location || "—"}
                           </div>
 
-                          <div className={membershipRenewalNeedsAttention(member) ? "font-black text-red-700" : ""}>
-                            {membershipInfoLabel(member)}
-                          </div>
+                          {membershipRenewalNeedsAttention(member) && (
+                            <div className="font-black text-red-700">
+                              {membershipInfoLabel(member)}
+                            </div>
+                          )}
 
                         </div>
 
@@ -1292,7 +1304,7 @@ function PlayerHistoryPanel({
             <optgroup label="Teams">
               {options.teams.map((team) => (
                 <option key={team.id} value={`team:${team.id}`}>
-                  {team.name}{team.divisionName ? ` / ${team.divisionName}` : ""}
+                  {historyTeamOptionLabel(team)}
                 </option>
               ))}
             </optgroup>
@@ -1367,12 +1379,14 @@ function playerHistoryRecord(rows, memberId) {
 
 function Info({ label, value }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-4">
-      <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-gradient-to-br from-white to-blue-50 p-4 shadow-sm ring-1 ring-slate-100">
+      <div className="absolute inset-x-0 top-0 h-1 bg-blue-700" />
+
+      <div className="text-xs font-black uppercase tracking-wide text-slate-500">
         {label}
       </div>
 
-      <div className="mt-1 font-semibold text-slate-900">
+      <div className="mt-2 break-words text-base font-black leading-snug text-slate-950">
         {value}
       </div>
     </div>

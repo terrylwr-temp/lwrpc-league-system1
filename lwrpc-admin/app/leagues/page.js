@@ -21,6 +21,7 @@ export default function LeaguesPage() {
   const [seasons, setSeasons] = useState([]);
   const [leagues, setLeagues] = useState([]);
   const [leagueName, setLeagueName] = useState("");
+  const [leagueAbbreviation, setLeagueAbbreviation] = useState("");
   const [selectedSeason, setSelectedSeason] = useState("");
   const [rostersLocked, setRostersLocked] = useState(false);
   const [matchSetupReminderDaysBefore, setMatchSetupReminderDaysBefore] = useState("2");
@@ -35,7 +36,7 @@ export default function LeaguesPage() {
   const [hydrated, setHydrated] = useState(false);
 
   useUnsavedChangesWarning(
-    Boolean(editingLeagueId || leagueName.trim() || selectedSeason || rostersLocked || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean)),
+    Boolean(editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || rostersLocked || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean)),
     "league"
   );
 
@@ -56,6 +57,7 @@ export default function LeaguesPage() {
           *,
           seasons (
             name,
+            abbreviation,
             is_active
           )
         `)
@@ -76,6 +78,7 @@ export default function LeaguesPage() {
 
     const payload = {
       name: leagueName,
+      abbreviation: leagueAbbreviation.trim() || null,
       season_id: selectedSeason,
       rosters_locked: rostersLocked,
       match_setup_reminder_days_before: Number(matchSetupReminderDaysBefore || 0),
@@ -129,7 +132,10 @@ export default function LeaguesPage() {
     const currentlyActive = league.is_active !== false;
 
     if (currentlyActive) {
-      const ok = confirm(`Inactivate league "${league.name}"? It will be hidden from current setup dropdowns.`);
+      const ok = confirmTypedInactivateAction({
+        title: `Inactivate league "${league.name}"?`,
+        details: "This will hide the league from current setup dropdowns and can affect active division, team, schedule, and history workflows.",
+      });
       if (!ok) return;
     }
 
@@ -152,6 +158,7 @@ export default function LeaguesPage() {
   function editLeague(league) {
     setEditingLeagueId(league.id);
     setLeagueName(league.name || "");
+    setLeagueAbbreviation(league.abbreviation || "");
     setSelectedSeason(league.season_id || "");
     setRostersLocked(league.rosters_locked === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
@@ -169,6 +176,7 @@ export default function LeaguesPage() {
   function copyLeague(league) {
     setEditingLeagueId(null);
     setLeagueName(league.name || "");
+    setLeagueAbbreviation(league.abbreviation || "");
     setSelectedSeason("");
     setRostersLocked(league.rosters_locked === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
@@ -187,6 +195,7 @@ export default function LeaguesPage() {
   function clearLeagueForm() {
     setEditingLeagueId(null);
     setLeagueName("");
+    setLeagueAbbreviation("");
     setSelectedSeason("");
     setRostersLocked(false);
     setMatchSetupReminderDaysBefore("2");
@@ -294,6 +303,16 @@ export default function LeaguesPage() {
                 placeholder="League Name"
               />
 
+              <Field label="League Abbreviation">
+                <input
+                  type="text"
+                  value={leagueAbbreviation}
+                  onChange={(e) => setLeagueAbbreviation(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  placeholder="Short league label"
+                />
+              </Field>
+
               <select
                 value={selectedSeason}
                 onChange={(e) => setSelectedSeason(e.target.value)}
@@ -302,7 +321,7 @@ export default function LeaguesPage() {
                 <option value="">Select Season</option>
                 {seasons.map((season) => (
                   <option key={season.id} value={season.id}>
-                    {season.name}
+                    {season.name}{season.abbreviation ? ` (${season.abbreviation})` : ""}
                   </option>
                 ))}
               </select>
@@ -448,6 +467,11 @@ export default function LeaguesPage() {
                       <div className="text-lg font-bold text-slate-900">
                         {league.name}
                       </div>
+                      {league.abbreviation && (
+                        <div className="mt-1 text-sm font-black text-slate-700">
+                          Abbreviation: {league.abbreviation}
+                        </div>
+                      )}
                       <div className="mt-1 text-sm text-slate-600">
                         Season: {league.seasons?.name || "—"}
                       </div>
@@ -584,4 +608,18 @@ async function listPdfFiles(bucket, prefix = "", depth = 0) {
   }
 
   return { files, error: null };
+}
+
+function confirmTypedInactivateAction({ title, details }) {
+  const firstOk = confirm([
+    title,
+    "",
+    details,
+    "This is a major administrative change and may not be fully undoable.",
+  ].join("\n"));
+
+  if (!firstOk) return false;
+
+  const typed = prompt("Type INACTIVATE to confirm.");
+  return String(typed || "").trim() === "INACTIVATE";
 }

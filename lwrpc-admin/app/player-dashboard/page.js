@@ -12,6 +12,7 @@ import {
   filterHistoryRows,
   formatDate,
   historyFilterOptions,
+  historyTeamOptionLabel,
   playerLineDetails,
   rowHasSpecialGame,
   sortHistoryRows,
@@ -120,10 +121,12 @@ export default function PlayerDashboardPage() {
             leagues (
               id,
               name,
+              abbreviation,
               season_id,
               seasons (
                 id,
-                name
+                name,
+                abbreviation
               ),
               league_document_bucket,
               code_of_conduct_pdf_path,
@@ -204,10 +207,12 @@ export default function PlayerDashboardPage() {
             leagues (
               id,
               name,
+              abbreviation,
               season_id,
               seasons (
                 id,
-                name
+                name,
+                abbreviation
               )
             ),
             locations (
@@ -220,11 +225,13 @@ export default function PlayerDashboardPage() {
             ),
             home_team:teams!matches_home_team_id_fkey (
               id,
-              name
+              name,
+              is_active
             ),
             away_team:teams!matches_away_team_id_fkey (
               id,
-              name
+              name,
+              is_active
             ),
             match_lines (
               id,
@@ -428,28 +435,32 @@ export default function PlayerDashboardPage() {
           status,
           home_team_id,
           away_team_id,
-          home_team:teams!matches_home_team_id_fkey (
-            id,
-            name
-          ),
-          away_team:teams!matches_away_team_id_fkey (
-            id,
-            name
-          ),
+            home_team:teams!matches_home_team_id_fkey (
+              id,
+              name,
+              is_active
+            ),
+            away_team:teams!matches_away_team_id_fkey (
+              id,
+              name,
+              is_active
+            ),
           divisions (
             id,
             name,
             rating_type
           ),
-          leagues (
-            id,
-            name,
-            season_id,
-            seasons (
+            leagues (
               id,
-              name
+              name,
+              abbreviation,
+              season_id,
+              seasons (
+                id,
+                name,
+                abbreviation
+              )
             )
-          )
         )
       `)
       .or(
@@ -1393,7 +1404,7 @@ export default function PlayerDashboardPage() {
                   <optgroup label="Teams">
                     {playHistoryOptions.teams.map((team) => (
                       <option key={team.id} value={`team:${team.id}`}>
-                        {team.name}{team.divisionName ? ` / ${team.divisionName}` : ""}
+                        {historyTeamOptionLabel(team)}
                       </option>
                     ))}
                   </optgroup>
@@ -2884,33 +2895,63 @@ function PlayerHistoryRowWithScores({ row, memberId, ratingForMember }) {
 
       {gameScores.length > 0 && (
         <div className="mt-4 grid gap-2">
-          {gameScores.map((game) => (
-            <div key={game.key} className={`rounded-xl border px-3 py-3 shadow-sm ${resultTone.score}`}>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-xs font-black uppercase tracking-wide">
-                  {game.label}
+          {gameScores.map((game) => {
+            const gameScoreTone =
+              game.result === "W"
+                ? "border-2 border-green-500 bg-white text-green-950"
+                : game.result === "L"
+                ? "border-2 border-red-500 bg-white text-red-950"
+                : resultTone.score;
+            const gameResultLabel =
+              game.result === "W" ? "Win" : game.result === "L" ? "Loss" : "";
+            const gameResultBadgeTone =
+              game.result === "W"
+                ? "bg-green-100 text-green-800 ring-1 ring-green-200"
+                : game.result === "L"
+                ? "bg-red-100 text-red-800 ring-1 ring-red-200"
+                : "";
+            const gameScoreBadgeTone =
+              game.result === "W"
+                ? "bg-green-600 text-white"
+                : game.result === "L"
+                ? "bg-red-600 text-white"
+                : "bg-slate-950 text-white";
+
+            return (
+              <div key={game.key} className={`flex flex-col gap-3 rounded-xl border px-3 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between ${gameScoreTone}`}>
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide">
+                    <span>{game.label}</span>
+                    {gameResultLabel && (
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] leading-none ${gameResultBadgeTone}`}>
+                        {gameResultLabel}
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-700">
+                    <div>
+                      <span className="font-black text-slate-950">{game.playerTeamName}:</span> {game.players}{" "}
+                      <span className="font-black text-slate-950">Team Rating:</span>{" "}
+                      <span className="font-semibold">{game.playerTeamRating}</span>
+                    </div>
+                    <div>
+                      <span className="font-black text-slate-950">{game.opponentTeamName}:</span> {game.opponentPlayers}{" "}
+                      <span className="font-black text-slate-950">Team Rating:</span>{" "}
+                      <span className="font-semibold">{game.opponentTeamRating}</span>
+                    </div>
+                    {game.specialLabel && (
+                      <div className="font-black text-amber-800">{game.specialLabel}</div>
+                    )}
+                  </div>
                 </div>
-                <div className="rounded-lg bg-slate-950 px-3 py-1.5 text-center text-lg font-black leading-none text-white shadow-sm">
-                  {game.score}
+                <div className="flex shrink-0 items-center sm:self-stretch">
+                  <div className={`flex min-h-10 min-w-20 items-center justify-center rounded-lg px-3 py-1.5 text-center text-lg font-black leading-none shadow-sm ${gameScoreBadgeTone}`}>
+                    {game.score}
+                  </div>
                 </div>
               </div>
-              <div className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-700">
-                <div>
-                  <span className="font-black text-slate-950">{game.playerTeamName}:</span> {game.players}{" "}
-                  <span className="font-black text-slate-950">Team Rating:</span>{" "}
-                  <span className="font-semibold">{game.playerTeamRating}</span>
-                </div>
-                <div>
-                  <span className="font-black text-slate-950">{game.opponentTeamName}:</span> {game.opponentPlayers}{" "}
-                  <span className="font-black text-slate-950">Team Rating:</span>{" "}
-                  <span className="font-semibold">{game.opponentTeamRating}</span>
-                </div>
-                {game.specialLabel && (
-                  <div className="font-black text-amber-800">{game.specialLabel}</div>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
       </div>
@@ -2939,10 +2980,19 @@ function formatGameScores(row, sideLabel, ratingForMember) {
       const playerScore = isHome ? game.home_score : game.away_score;
       const opponentScore = isHome ? game.away_score : game.home_score;
       const special = specialGameStatus(game.game_status);
+      const hasScores = playerScore !== null && opponentScore !== null;
+      const result = hasScores
+        ? Number(playerScore) > Number(opponentScore)
+          ? "W"
+          : Number(playerScore) < Number(opponentScore)
+          ? "L"
+          : "T"
+        : "";
 
       return {
         key: game.id || game.game_number,
         label: `Game ${game.game_number || ""}`.trim(),
+        result,
         playerTeamName,
         players,
         playerTeamRating,

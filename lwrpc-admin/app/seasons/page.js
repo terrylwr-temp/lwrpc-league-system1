@@ -12,12 +12,13 @@ export default function SeasonsPage() {
   const router = useRouter();
   const [seasons, setSeasons] = useState([]);
   const [seasonName, setSeasonName] = useState("");
+  const [seasonAbbreviation, setSeasonAbbreviation] = useState("");
   const [seasonStart, setSeasonStart] = useState("");
   const [seasonEnd, setSeasonEnd] = useState("");
   const [editingSeasonId, setEditingSeasonId] = useState(null);
 
   useUnsavedChangesWarning(
-    Boolean(editingSeasonId || seasonName.trim() || seasonStart || seasonEnd),
+    Boolean(editingSeasonId || seasonName.trim() || seasonAbbreviation.trim() || seasonStart || seasonEnd),
     "season"
   );
 
@@ -50,6 +51,7 @@ export default function SeasonsPage() {
 
     const payload = {
       name: seasonName,
+      abbreviation: seasonAbbreviation.trim() || null,
       start_date: seasonStart || null,
       end_date: seasonEnd || null,
     };
@@ -120,17 +122,15 @@ export default function SeasonsPage() {
       return;
     }
 
-    const firstOk = confirm([
-      `Inactivate season "${season.name}"?`,
-      "",
-      "This will mark the season inactive, mark all teams in this season inactive, and reset those division standings records to 0.",
-      "Historical matches and player history will not be deleted.",
-    ].join("\n"));
+    const ok = confirmTypedInactivateAction({
+      title: `Inactivate season "${season.name}"?`,
+      details: [
+        "This will mark the season inactive, mark all teams in this season inactive, and reset those division standings records to 0.",
+        "Historical matches and player history will not be deleted.",
+      ].join("\n"),
+    });
 
-    if (!firstOk) return;
-
-    const typed = prompt(`Type INACTIVATE to confirm inactivating "${season.name}".`);
-    if (String(typed || "").trim() !== "INACTIVATE") return;
+    if (!ok) return;
 
     const { error } = await inactivateSeasonCascade(season.id);
 
@@ -219,6 +219,7 @@ export default function SeasonsPage() {
   function editSeason(season) {
     setEditingSeasonId(season.id);
     setSeasonName(season.name || "");
+    setSeasonAbbreviation(season.abbreviation || "");
     setSeasonStart(season.start_date || "");
     setSeasonEnd(season.end_date || "");
   }
@@ -226,6 +227,7 @@ export default function SeasonsPage() {
   function clearSeasonForm() {
     setEditingSeasonId(null);
     setSeasonName("");
+    setSeasonAbbreviation("");
     setSeasonStart("");
     setSeasonEnd("");
   }
@@ -272,6 +274,16 @@ export default function SeasonsPage() {
                 className="w-full rounded-xl border border-slate-300 px-4 py-3"
                 placeholder="Season Name"
               />
+
+              <Field label="Season Abbreviation">
+                <input
+                  type="text"
+                  value={seasonAbbreviation}
+                  onChange={(e) => setSeasonAbbreviation(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  placeholder="Short season label"
+                />
+              </Field>
 
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Start Date">
@@ -332,6 +344,11 @@ export default function SeasonsPage() {
                       <div className="text-lg font-bold text-slate-900">
                         {season.name}
                       </div>
+                      {season.abbreviation && (
+                        <div className="mt-1 text-sm font-black text-slate-700">
+                          Abbreviation: {season.abbreviation}
+                        </div>
+                      )}
                       <div className="mt-1 text-sm text-slate-600">
                         {formatDisplayDate(season.start_date, "—")} to {formatDisplayDate(season.end_date, "—")}
                       </div>
@@ -399,6 +416,20 @@ function SeasonStatusBadge({ active }) {
       {active ? "Active" : "Inactive"}
     </div>
   );
+}
+
+function confirmTypedInactivateAction({ title, details }) {
+  const firstOk = confirm([
+    title,
+    "",
+    details,
+    "This is a major administrative change and may not be fully undoable.",
+  ].join("\n"));
+
+  if (!firstOk) return false;
+
+  const typed = prompt("Type INACTIVATE to confirm.");
+  return String(typed || "").trim() === "INACTIVATE";
 }
 
 function zeroStandingRow({ leagueId, divisionId, teamId, rank, updatedAt }) {
