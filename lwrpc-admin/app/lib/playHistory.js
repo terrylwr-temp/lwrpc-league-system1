@@ -92,7 +92,7 @@ function addHistoryScopeOption({ seasons, leagues, divisions, teams, season, lea
   }
 }
 
-export function filterHistoryRows(historyRows, selectedFilter, memberId = null) {
+export function filterHistoryRows(historyRows, selectedFilter, memberId = null, playerTeams = []) {
   const [filterType, filterId] = String(selectedFilter || "all").split(":");
   if (!filterId || filterType === "all") return historyRows;
 
@@ -112,8 +112,17 @@ export function filterHistoryRows(historyRows, selectedFilter, memberId = null) 
     }
 
     if (filterType === "team") {
+      const selectedTeam = teamById(playerTeams, filterId);
       const playerTeam = teamForHistoryRow(row, memberId);
-      if (playerTeam?.id) return String(playerTeam.id) === String(filterId);
+      const playerTeamIds = teamIdsForHistoryRow(row, memberId);
+
+      if (playerTeamIds.some((teamId) => String(teamId) === String(filterId))) {
+        return true;
+      }
+
+      if (selectedTeam && playerTeam && sameTeamIdentity(playerTeam, selectedTeam, match)) {
+        return true;
+      }
 
       return (
         String(match?.home_team_id || "") === String(filterId) ||
@@ -129,26 +138,76 @@ function sortHistoryOptions(options) {
   return options.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
 }
 
+function teamById(teams, teamId) {
+  return (teams || []).find((team) => String(team?.id || "") === String(teamId));
+}
+
 function teamForHistoryRow(row, memberId) {
   const match = row.matches;
+  const side = historyRowPlayerSide(row, memberId);
 
-  if (memberId) {
-    const isHomePlayer =
-      row.home_player_1_id === memberId || row.home_player_2_id === memberId;
-    const isAwayPlayer =
-      row.away_player_1_id === memberId || row.away_player_2_id === memberId;
-
-    if (isHomePlayer) return match?.home_team;
-    if (isAwayPlayer) return match?.away_team;
-  }
+  if (side === "home") return match?.home_team || { id: match?.home_team_id };
+  if (side === "away") return match?.away_team || { id: match?.away_team_id };
 
   return match?.home_team || match?.away_team || null;
 }
 
+function teamIdsForHistoryRow(row, memberId) {
+  const match = row.matches;
+  const side = historyRowPlayerSide(row, memberId);
+
+  if (side === "home") return [match?.home_team_id, match?.home_team?.id].filter(Boolean);
+  if (side === "away") return [match?.away_team_id, match?.away_team?.id].filter(Boolean);
+
+  return [
+    match?.home_team_id,
+    match?.home_team?.id,
+    match?.away_team_id,
+    match?.away_team?.id,
+  ].filter(Boolean);
+}
+
+function historyRowPlayerSide(row, memberId) {
+  const id = String(memberId || "");
+  if (!id) return "";
+
+  const homePlayerIds = [
+    row.home_player_1_id,
+    row.home_player_2_id,
+    row.home_player_1?.id,
+    row.home_player_2?.id,
+  ];
+  const awayPlayerIds = [
+    row.away_player_1_id,
+    row.away_player_2_id,
+    row.away_player_1?.id,
+    row.away_player_2?.id,
+  ];
+
+  if (homePlayerIds.some((playerId) => String(playerId || "") === id)) return "home";
+  if (awayPlayerIds.some((playerId) => String(playerId || "") === id)) return "away";
+
+  return "";
+}
+
+function sameTeamIdentity(playerTeam, selectedTeam, match) {
+  if (normalizeTeamName(playerTeam?.name) !== normalizeTeamName(selectedTeam?.name)) {
+    return false;
+  }
+
+  const selectedDivisionId = selectedTeam?.division_id || selectedTeam?.divisions?.id;
+  const rowDivisionId = match?.division_id || match?.divisions?.id;
+
+  return !selectedDivisionId || !rowDivisionId || String(selectedDivisionId) === String(rowDivisionId);
+}
+
+function normalizeTeamName(name) {
+  return String(name || "").trim().toLowerCase();
+}
+
 export function playerLineDetails(row, memberId) {
   const match = row.matches;
-  const isHomePlayer =
-    row.home_player_1_id === memberId || row.home_player_2_id === memberId;
+  const isHomePlayer = historyRowPlayerSide(row, memberId) === "home";
   const playerTeamId = isHomePlayer ? match?.home_team_id : match?.away_team_id;
   const playerTeam = isHomePlayer ? match?.home_team : match?.away_team;
   const opponentTeam = isHomePlayer ? match?.away_team : match?.home_team;

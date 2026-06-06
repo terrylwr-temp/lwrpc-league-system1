@@ -8,7 +8,7 @@ export default function LoadingScreen({
   title = "",
   subtitle = "Loading..."
 }) {
-  const [cachedSettings, setCachedSettings] = useState(() => cachedSystemSettings());
+  const [cachedSettings, setCachedSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
   const clubName = cachedSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
   const systemName = title || cachedSettings.system_name || DEFAULT_SYSTEM_SETTINGS.system_name;
   const logoUrl = cachedSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;

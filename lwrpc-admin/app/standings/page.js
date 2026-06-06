@@ -197,7 +197,15 @@ export default function StandingsPage() {
     ] = await Promise.all([
       supabase
         .from("teams")
-        .select("id, name, division_id, locations(id, name)")
+        .select(`
+          id,
+          name,
+          division_id,
+          locations(id, name),
+          captain:members!teams_captain_member_id_fkey(id, first_name, last_name, full_name, email),
+          co_captain_1:members!teams_co_captain_member_id_fkey(id, first_name, last_name, full_name, email),
+          co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, full_name, email)
+        `)
         .eq("division_id", team.division_id)
         .order("name", { ascending: true }),
       supabase

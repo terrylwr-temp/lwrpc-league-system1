@@ -680,8 +680,8 @@ export default function PlayerDashboardPage() {
   }, [member, sortedPlayHistory, teams]);
 
   const filteredPlayHistory = useMemo(() => {
-    return filterHistoryRows(sortedPlayHistory, historyFilter);
-  }, [sortedPlayHistory, historyFilter]);
+    return filterHistoryRows(sortedPlayHistory, historyFilter, member?.id, teams);
+  }, [sortedPlayHistory, historyFilter, member, teams]);
 
   const playHistoryStats = useMemo(() => {
     return filteredPlayHistory.reduce(
@@ -851,7 +851,15 @@ export default function PlayerDashboardPage() {
     ] = await Promise.all([
       supabase
         .from("teams")
-        .select("id, name, division_id, locations(id, name)")
+        .select(`
+          id,
+          name,
+          division_id,
+          locations(id, name),
+          captain:members!teams_captain_member_id_fkey(id, first_name, last_name, full_name, email),
+          co_captain_1:members!teams_co_captain_member_id_fkey(id, first_name, last_name, full_name, email),
+          co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, full_name, email)
+        `)
         .eq("division_id", divisionId)
         .order("name", { ascending: true }),
       supabase
@@ -1317,6 +1325,7 @@ export default function PlayerDashboardPage() {
                   <MatchSummaryCard
                     key={item.key}
                     match={item.data}
+                    selectedTeamId={selectedPlayerTeamId}
                     standings={standings}
                     onOpenDetails={setMatchDetails}
                   />
@@ -1956,71 +1965,87 @@ function TeamSelect({ value, onChange, teams, label }) {
   );
 }
 
-function MatchSummaryCard({ match, standings, onOpenDetails }) {
-  const homeStanding = teamStanding(standings, match.home_team_id);
-  const awayStanding = teamStanding(standings, match.away_team_id);
+function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
   const homeScore = matchTeamScore(match, "home");
   const awayScore = matchTeamScore(match, "away");
   const isVerifiedCompleted = match.status === "completed" && match.score_status === "verified";
   const hasVerifiedMatchScore = isVerifiedCompleted && homeScore !== null && awayScore !== null;
+  const selectedResult = selectedTeamMatchResult(match, selectedTeamId);
+  const headingClass =
+    selectedResult === "win"
+      ? "bg-gradient-to-r from-emerald-700 to-green-700"
+      : selectedResult === "loss"
+        ? "bg-gradient-to-r from-rose-700 to-red-700"
+        : "bg-gradient-to-r from-blue-800 to-indigo-800";
 
   return (
-    <div
-      className={`overflow-hidden rounded-2xl border shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-        isVerifiedCompleted
-          ? "border-emerald-300 bg-gradient-to-br from-emerald-50 via-white to-blue-50 ring-1 ring-emerald-200"
-          : "border-slate-200 bg-white"
-      }`}
-    >
-      <div
-        className={`h-1 ${
-          isVerifiedCompleted
-            ? "bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500"
-            : "bg-gradient-to-r from-slate-500 via-zinc-500 to-stone-500"
-        }`}
-      />
-      <div className="px-4 py-4">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 font-bold text-slate-900">
-            <span>{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</span>
-            {hasVerifiedMatchScore && (
-              <span className="rounded-full bg-emerald-600 px-3 py-1 text-xs font-black uppercase tracking-wide text-white shadow-sm ring-1 ring-emerald-300">
-                Total Score: {homeScore}-{awayScore}
-              </span>
-            )}
-          </div>
-          <div className="mt-1 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
-            <span className="rounded-full bg-green-100 px-2 py-0.5 text-green-900">
-              Home: {match.home_team?.name || "Home"} ({formatStandingRecord(homeStanding)})
-            </span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-800">
-              Away: {match.away_team?.name || "Away"} ({formatStandingRecord(awayStanding)})
-            </span>
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-700">
-              Played at: {match.locations?.name || "No Location"}
-            </span>
-          </div>
-          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
-            <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
-            <span>{match.divisions?.name || "No Division"}</span>
-            <span>{match.score_status ? match.score_status.replaceAll("_", " ") : match.status || "scheduled"}</span>
-            <span>Week {match.week_number || "—"}</span>
-          </div>
+    <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className={`${headingClass} px-4 py-3 text-white`}>
+        <div className="text-xs font-black uppercase tracking-wide text-white/80">
+          Week {match.week_number || "-"}
         </div>
-
-        <div className="grid w-full grid-cols-1 gap-2 md:w-auto">
-          <button
-            type="button"
-            onClick={() => onOpenDetails(match)}
-            className={`rounded-xl px-4 py-2 text-sm font-bold text-white ${
-              isVerifiedCompleted ? "bg-emerald-700 hover:bg-emerald-800" : "bg-slate-900 hover:bg-slate-800"
-            }`}
-          >
-            {isVerifiedCompleted ? "Match Results" : "Match Details"}
-          </button>
+        <div className="mt-1 text-lg font-black">
+          {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
         </div>
       </div>
+
+      <div className="p-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
+            <span className="rounded-full bg-green-100 px-2 py-1 text-green-900">
+              Home: {match.home_team?.name || "Home"}
+            </span>
+            <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-900">
+              Away: {match.away_team?.name || "Away"}
+            </span>
+            <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+              {match.status || "scheduled"}
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
+            <div className="rounded-lg bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                Date / Time
+              </div>
+              <div className="font-black text-slate-950">
+                {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+              </div>
+            </div>
+            <div className="rounded-lg bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                Location
+              </div>
+              <div className="font-black text-slate-950">
+                {match.locations?.name || "No Location"}
+              </div>
+            </div>
+            <div className="rounded-lg bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                Score Status
+              </div>
+              <div className="font-black text-slate-950">
+                {formatMatchScoreStatus(match)}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => onOpenDetails(match)}
+              className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800"
+            >
+              {isVerifiedCompleted ? "Match Score Details" : "Match Details"}
+            </button>
+          </div>
+
+          {hasVerifiedMatchScore && (
+            <div className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-sm font-black text-slate-900">
+              Score: {homeScore} - {awayScore} | Winner: {winningTeamName(match)}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -2259,6 +2284,7 @@ function MatchLineResult({ line, match, ratingForMember }) {
           players={[line.home_player_1, line.home_player_2]}
           match={match}
           tone="home"
+          won={winnerSide === "home"}
           ratingForMember={ratingForMember}
         />
         <ResultTeamPlayers
@@ -2266,6 +2292,7 @@ function MatchLineResult({ line, match, ratingForMember }) {
           players={[line.away_player_1, line.away_player_2]}
           match={match}
           tone="away"
+          won={winnerSide === "away"}
           ratingForMember={ratingForMember}
         />
       </div>
@@ -2339,14 +2366,17 @@ function GameScoreCard({ game, match }) {
   );
 }
 
-function ResultTeamPlayers({ label, players, match, ratingForMember, tone = "home" }) {
+function ResultTeamPlayers({ label, players, match, ratingForMember, tone = "home", won = false }) {
   const toneClass =
     tone === "away"
       ? "bg-indigo-50 text-indigo-950"
       : "bg-emerald-50 text-emerald-950";
+  const borderClass = won
+    ? "border-4 border-emerald-600 shadow-md ring-2 ring-emerald-100"
+    : "border border-transparent";
 
   return (
-    <div className={`rounded-xl px-3 py-3 ${toneClass}`}>
+    <div className={`rounded-xl px-3 py-3 ${toneClass} ${borderClass}`}>
       <div className="text-xs font-black uppercase tracking-wide text-slate-500">
         {label}
       </div>
@@ -2437,6 +2467,32 @@ function matchLineWinnerSide(line, match) {
 
 function teamStanding(standings, teamId) {
   return standings.find((standing) => String(standing.team_id) === String(teamId));
+}
+
+function selectedTeamMatchResult(match, selectedTeamId) {
+  if (
+    !selectedTeamId ||
+    match.status !== "completed" ||
+    !match.winning_team_id ||
+    (String(match.home_team_id) !== String(selectedTeamId) &&
+      String(match.away_team_id) !== String(selectedTeamId))
+  ) {
+    return "";
+  }
+
+  return String(match.winning_team_id) === String(selectedTeamId) ? "win" : "loss";
+}
+
+function winningTeamName(match) {
+  if (String(match?.winning_team_id || "") === String(match?.home_team_id || "")) {
+    return match?.home_team?.name || "Home";
+  }
+
+  if (String(match?.winning_team_id || "") === String(match?.away_team_id || "")) {
+    return match?.away_team?.name || "Away";
+  }
+
+  return "TBD";
 }
 
 function playerLineSide(line, memberId) {

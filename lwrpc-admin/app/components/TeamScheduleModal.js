@@ -18,6 +18,7 @@ export default function TeamScheduleModal({
   onClose,
 }) {
   const selectedTeam = teams.find((team) => String(team.id) === String(selectedTeamId));
+  const selectedTeamCaptainNames = captainNames(selectedTeam);
   const ratingByMemberId = Object.fromEntries(
     ratings.map((rating) => [String(rating.member_id), rating])
   );
@@ -96,11 +97,23 @@ export default function TeamScheduleModal({
 
           <section className="min-h-0 overflow-auto bg-slate-50 p-3 sm:p-5 md:max-h-[72vh]">
             <div className="mb-3 overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-700 via-blue-800 to-emerald-700 p-4 text-white shadow-lg sm:mb-4 sm:p-5">
-              <div className="text-xs font-black uppercase tracking-wide text-blue-100">
-                Selected Team
-              </div>
-              <div className="mt-1 text-xl font-black sm:text-2xl">
-                {selectedTeam?.name || "Select a team"}
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-black uppercase tracking-wide text-blue-100">
+                    Selected Team
+                  </div>
+                  <div className="mt-1 truncate text-xl font-black sm:text-2xl">
+                    {selectedTeam?.name || "Select a team"}
+                  </div>
+                </div>
+                {selectedTeam && selectedTeamCaptainNames && (
+                  <div
+                    className="max-w-[48%] shrink-0 truncate text-right text-[11px] font-bold leading-tight text-blue-100 sm:max-w-[42%] sm:text-xs"
+                    title={`Captains: ${selectedTeamCaptainNames}`}
+                  >
+                    Captains: {selectedTeamCaptainNames}
+                  </div>
+                )}
               </div>
               {selectedTeam && (
                 <div className="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
@@ -444,6 +457,27 @@ function formatTeamSummary(team) {
 
 function formatHomeLocation(team) {
   return team?.locations?.name || "No Home Location";
+}
+
+function captainNames(team) {
+  return [
+    team?.captain,
+    team?.co_captain_1,
+    team?.co_captain_2,
+  ]
+    .map(formatCaptainName)
+    .filter(Boolean)
+    .join(", ");
+}
+
+function formatCaptainName(member) {
+  if (!member) return "";
+  return (
+    member.full_name ||
+    `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+    member.email ||
+    ""
+  );
 }
 
 function formatLineTeamPoints(line) {

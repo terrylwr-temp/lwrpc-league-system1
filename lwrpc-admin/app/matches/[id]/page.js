@@ -922,12 +922,18 @@ export default function MatchDetailPage() {
     return isManagerOverride() && searchParams.get("from") === "scoring";
   }
 
+  function shouldReturnToScheduleEditor() {
+    return isScoringOperationsOverride() && searchParams.get("returnTo") === "schedule-editor";
+  }
+
   function matchReturnPath() {
+    if (shouldReturnToScheduleEditor()) return "/schedule-editor";
     if (isScoringOperationsOverride()) return "/scoring";
     return isCaptainView() ? "/captain-dashboard" : "/schedule-editor";
   }
 
   function matchReturnLabel() {
+    if (shouldReturnToScheduleEditor()) return "Schedule Editor";
     if (isScoringOperationsOverride()) return "Scoring Operations";
     return isCaptainView() ? "Captain Dashboard" : "Schedule Editor";
   }

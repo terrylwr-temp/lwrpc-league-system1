@@ -1584,7 +1584,15 @@ export default function CaptainDashboardPage() {
       await Promise.all([
         supabase
           .from("teams")
-          .select("id, name, division_id, locations(id, name)")
+          .select(`
+            id,
+            name,
+            division_id,
+            locations(id, name),
+            captain:members!teams_captain_member_id_fkey(id, first_name, last_name, full_name, email),
+            co_captain_1:members!teams_co_captain_member_id_fkey(id, first_name, last_name, full_name, email),
+            co_captain_2:members!teams_co_captain_2_member_id_fkey(id, first_name, last_name, full_name, email)
+          `)
           .eq("division_id", team.division_id)
           .order("name", { ascending: true }),
         supabase
@@ -1605,6 +1613,7 @@ export default function CaptainDashboardPage() {
             score_verified_at,
             home_score,
             away_score,
+            winning_team_id,
             is_published,
             locations (
               id,
@@ -2783,6 +2792,14 @@ function MatchLineResult({ line, match, ratingForMember }) {
       : winnerSide === "away"
         ? "bg-indigo-50 text-indigo-950"
         : "bg-slate-100 text-slate-900";
+  const homeTeamCardClass =
+    winnerSide === "home"
+      ? "border-4 border-emerald-600 shadow-md ring-2 ring-emerald-100"
+      : "border border-transparent";
+  const awayTeamCardClass =
+    winnerSide === "away"
+      ? "border-4 border-emerald-600 shadow-md ring-2 ring-emerald-100"
+      : "border border-transparent";
 
   return (
     <div className="overflow-hidden rounded-2xl border-2 border-slate-200 bg-white shadow-sm">
@@ -2806,7 +2823,7 @@ function MatchLineResult({ line, match, ratingForMember }) {
       </div>
 
       <div className="grid grid-cols-1 gap-3 p-3 sm:p-4 md:grid-cols-2">
-        <div className="rounded-xl bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-950">
+        <div className={`rounded-xl bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-950 ${homeTeamCardClass}`}>
           <div className="text-xs font-black uppercase tracking-wide text-emerald-800">Home: {match.home_team?.name || "Home"}</div>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <PlayerScoreCard member={line.home_player_1} match={match} ratingForMember={ratingForMember} tone="home" />
@@ -2816,7 +2833,7 @@ function MatchLineResult({ line, match, ratingForMember }) {
             Team Rating: {teamLineRating([line.home_player_1, line.home_player_2], match, ratingForMember)}
           </div>
         </div>
-        <div className="rounded-xl bg-indigo-50 px-3 py-3 text-sm font-semibold text-indigo-950">
+        <div className={`rounded-xl bg-indigo-50 px-3 py-3 text-sm font-semibold text-indigo-950 ${awayTeamCardClass}`}>
           <div className="text-xs font-black uppercase tracking-wide text-indigo-800">Away: {match.away_team?.name || "Away"}</div>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
             <PlayerScoreCard member={line.away_player_1} match={match} ratingForMember={ratingForMember} tone="away" />

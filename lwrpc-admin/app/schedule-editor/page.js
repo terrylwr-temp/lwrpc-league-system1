@@ -34,6 +34,8 @@ export default function ScheduleEditorPage() {
   const [showHomeAwayCounts, setShowHomeAwayCounts] = useState(false);
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [isBulkUpdating, setIsBulkUpdating] = useState(false);
+  const [swapPrompt, setSwapPrompt] = useState(null);
+  const [swapUpdating, setSwapUpdating] = useState(false);
   const [collapsedMatchGroups, setCollapsedMatchGroups] = useState({});
 
   const checkAuth = useCallback(async function checkAuth() {
@@ -169,9 +171,36 @@ export default function ScheduleEditorPage() {
     return locations.find((location) => String(location.id) === String(locationId))?.name || "No Location";
   }
 
-  function courtUsageTextForMatch(match, sourceMatches = matches) {
-    const usage = courtUsageForMatch(match, sourceMatches);
-    return `${usage.used}/${usage.available || usage.total || "?"} courts used`;
+  function proposedCourtUsageText(proposedMatch, proposedMatches, courtOk) {
+    if (!proposedMatch?.location_id || !proposedMatch?.scheduled_date) {
+      return "";
+    }
+
+    const sameSlot = (match) =>
+      String(match.location_id || "") === String(proposedMatch.location_id || "") &&
+      match.scheduled_date === proposedMatch.scheduled_date &&
+      (match.scheduled_time || "") === (proposedMatch.scheduled_time || "");
+    const currentUsed = matches
+      .filter(sameSlot)
+      .reduce((sum, match) => sum + courtsNeededForMatch(match), 0);
+    const afterSwapUsed = proposedMatches
+      .filter(sameSlot)
+      .reduce((sum, match) => sum + courtsNeededForMatch(match), 0);
+    const usage = courtUsageForMatch(proposedMatch, proposedMatches);
+    const available = usage.available ?? usage.total ?? "?";
+    const availableCount = Number(usage.available ?? usage.total ?? 0);
+    const overbookedBy = Math.max(afterSwapUsed - availableCount, 0);
+    const unavailableText = usage.unavailable
+      ? ` (${usage.unavailable} unavailable)`
+      : "";
+
+    return [
+      `Courts available: ${available}${unavailableText}`,
+      `Current Courts Used: ${currentUsed}`,
+      courtOk
+        ? `Courts Used After Swap: ${afterSwapUsed}`
+        : `Overbooked Courts by: ${overbookedBy}`,
+    ];
   }
 
   function courtIssueReasonForMatch(match, sourceMatches = matches) {
@@ -252,6 +281,55 @@ export default function ScheduleEditorPage() {
     return Object.values(counts).reduce(
       (sum, count) => sum + Math.abs(Number(count.home || 0) - Number(count.away || 0)),
       0
+    );
+  }
+
+  function swapHomeAwayCountSummary(match) {
+    const sourceMatches = matches.filter(
+      (row) =>
+        row.home_team_id &&
+        row.away_team_id &&
+        row.status !== "cancelled" &&
+        String(row.division_id || "") === String(match.division_id || "")
+    );
+    const proposedMatches = sourceMatches.map((row) =>
+      row.id === match.id
+        ? {
+            ...row,
+            home_team_id: match.away_team_id,
+            away_team_id: match.home_team_id,
+          }
+        : row
+    );
+
+    return [
+      {
+        teamId: match.home_team_id,
+        teamName: match.home_team?.name || "Home",
+        currentRole: "Current Home",
+        nextRole: "Becomes Away",
+      },
+      {
+        teamId: match.away_team_id,
+        teamName: match.away_team?.name || "Away",
+        currentRole: "Current Away",
+        nextRole: "Becomes Home",
+      },
+    ].map((team) => ({
+      ...team,
+      current: homeAwayCountForTeam(sourceMatches, team.teamId),
+      next: homeAwayCountForTeam(proposedMatches, team.teamId),
+    }));
+  }
+
+  function homeAwayCountForTeam(sourceMatches, teamId) {
+    return sourceMatches.reduce(
+      (count, match) => {
+        if (String(match.home_team_id || "") === String(teamId || "")) count.home += 1;
+        if (String(match.away_team_id || "") === String(teamId || "")) count.away += 1;
+        return count;
+      },
+      { home: 0, away: 0 }
     );
   }
 
@@ -463,9 +541,19 @@ export default function ScheduleEditorPage() {
     }
 
     const newLocationId = match.away_team?.home_location_id || null;
+    const countSummary = swapHomeAwayCountSummary(match);
 
     if (!newLocationId) {
-      alert(`${match.away_team?.name || "Away team"} does not have a home location assigned.`);
+      setSwapPrompt({
+        match,
+        proposedMatch: null,
+        proposedMatches: matches,
+        canSwap: false,
+        courtOk: false,
+        courtIssue: `${match.away_team?.name || "Away team"} does not have a home location assigned.`,
+        courtUsage: "",
+        countSummary,
+      });
       return;
     }
 
@@ -473,51 +561,54 @@ export default function ScheduleEditorPage() {
       ...match,
       home_team_id: match.away_team_id,
       away_team_id: match.home_team_id,
+      home_team: match.away_team,
+      away_team: match.home_team,
       location_id: newLocationId,
       locations: locations.find((location) => String(location.id) === String(newLocationId)) || null,
     };
 
     const proposedMatches = matches.map((row) => (row.id === match.id ? proposedMatch : row));
+    const courtOk = wouldHaveEnoughCourts(proposedMatches, proposedMatch);
 
-    if (!wouldHaveEnoughCourts(proposedMatches, proposedMatch)) {
-      const ok = confirm(
-        [
-          `Swap ${match.home_team?.name || "Home"} and ${match.away_team?.name || "Away"} anyway?`,
-          "",
-          courtIssueReasonForMatch(proposedMatch, proposedMatches) || `${locationName(newLocationId)} may not have enough available courts at this date/time.`,
-          `Proposed: ${courtUsageTextForMatch(proposedMatch, proposedMatches)}`,
-        ].join("\n")
-      );
+    setSwapPrompt({
+      match,
+      proposedMatch,
+      proposedMatches,
+      canSwap: true,
+      courtOk,
+      courtIssue: courtOk
+        ? ""
+        : courtIssueReasonForMatch(proposedMatch, proposedMatches) ||
+          `${locationName(newLocationId)} may not have enough available courts at this date/time.`,
+      courtUsage: proposedCourtUsageText(proposedMatch, proposedMatches, courtOk),
+      countSummary,
+    });
+  }
 
-      if (!ok) return;
-    }
+  async function confirmSwapHomeAway() {
+    if (!swapPrompt?.canSwap || !swapPrompt?.proposedMatch) return;
 
-    const ok = confirm(
-      [
-        `Swap home and away teams for ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}?`,
-        "",
-        `Home team will become: ${match.away_team?.name || "Away"}`,
-        `Location will become: ${locationName(newLocationId)}`,
-      ].join("\n")
-    );
-
-    if (!ok) return;
+    const { proposedMatch } = swapPrompt;
+    setSwapUpdating(true);
 
     const { error } = await supabase
       .from("matches")
       .update({
-        home_team_id: match.away_team_id,
-        away_team_id: match.home_team_id,
-        location_id: newLocationId,
+        home_team_id: proposedMatch.home_team_id,
+        away_team_id: proposedMatch.away_team_id,
+        location_id: proposedMatch.location_id,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", match.id);
+      .eq("id", proposedMatch.id);
+
+    setSwapUpdating(false);
 
     if (error) {
       alert(error.message);
       return;
     }
 
+    setSwapPrompt(null);
     loadData();
   }
 
@@ -943,7 +1034,7 @@ export default function ScheduleEditorPage() {
             : "border-amber-200 bg-amber-50"
         }`}
       >
-        <div className="grid grid-cols-1 gap-2 xl:grid-cols-[32px_minmax(320px,1.7fr)_130px_120px_minmax(180px,1fr)_130px_minmax(190px,auto)] xl:items-center">
+        <div className="grid grid-cols-1 gap-2 xl:grid-cols-[32px_minmax(320px,1.7fr)_135px_minmax(180px,1fr)_120px_210px] xl:items-center">
           <label className="flex items-center xl:justify-center">
             <input
               type="checkbox"
@@ -978,85 +1069,92 @@ export default function ScheduleEditorPage() {
             )}
           </div>
 
-          <input
-            type="date"
-            value={match.scheduled_date || ""}
-            onChange={e => updateMatch(match.id, "scheduled_date", e.target.value)}
-            disabled={locked}
-            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
-            aria-label="Match date"
-          />
+          <div className="grid grid-cols-1 gap-1.5">
+            <input
+              type="date"
+              value={match.scheduled_date || ""}
+              onChange={e => updateMatch(match.id, "scheduled_date", e.target.value)}
+              disabled={locked}
+              className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
+              aria-label="Match date"
+            />
 
-          <input
-            type="time"
-            value={match.scheduled_time || ""}
-            onChange={e => updateMatch(match.id, "scheduled_time", e.target.value)}
-            disabled={locked}
-            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
-            aria-label="Match time"
-          />
+            <input
+              type="time"
+              value={match.scheduled_time || ""}
+              onChange={e => updateMatch(match.id, "scheduled_time", e.target.value)}
+              disabled={locked}
+              className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
+              aria-label="Match time"
+            />
+          </div>
 
-          <select
-            value={match.location_id || ""}
-            onChange={e => updateMatch(match.id, "location_id", e.target.value)}
-            disabled={locked}
-            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
-            aria-label="Match location"
-          >
-            <option value="">No Location</option>
-            {locations.map(location => (
-              <option key={location.id} value={location.id}>
-                {location.name}
-              </option>
-            ))}
-          </select>
+          <div className="grid grid-cols-1 gap-1.5">
+            <select
+              value={match.location_id || ""}
+              onChange={e => updateMatch(match.id, "location_id", e.target.value)}
+              disabled={locked}
+              className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
+              aria-label="Match location"
+            >
+              <option value="">No Location</option>
+              {locations.map(location => (
+                <option key={location.id} value={location.id}>
+                  {location.name}
+                </option>
+              ))}
+            </select>
 
-          <select
-            value={match.status || "draft"}
-            onChange={e => updateMatch(match.id, "status", e.target.value)}
-            disabled={locked}
-            className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
-            aria-label="Match status"
-          >
-            <option value="draft">Draft</option>
-            <option value="scheduled">Scheduled</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="rainout">Rainout</option>
-          </select>
+            <select
+              value={match.status || "draft"}
+              onChange={e => updateMatch(match.id, "status", e.target.value)}
+              disabled={locked}
+              className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
+              aria-label="Match status"
+            >
+              <option value="draft">Draft</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="in_progress">In Progress</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+              <option value="rainout">Rainout</option>
+            </select>
+          </div>
 
-          <div className="flex w-full flex-wrap gap-1.5 xl:justify-end">
-            <span className={`rounded-full px-2 py-1 text-xs font-bold ${
+          <div className="xl:flex xl:justify-center">
+            <span className={`inline-flex w-fit rounded-full px-2 py-1 text-xs font-bold ${
               match.is_published
                 ? "bg-green-100 text-green-800"
                 : "bg-amber-100 text-amber-800"
             }`}>
-              {match.is_published ? "Published" : "Draft"}
+              {match.is_published ? "Published" : "Not Published"}
             </span>
+          </div>
+
+          <div className="grid w-full grid-cols-2 gap-1.5">
             <button
               onClick={() => swapHomeAway(match)}
               disabled={locked}
-              className="rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-semibold text-blue-800 hover:bg-blue-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+              className="min-h-8 rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-semibold text-blue-800 hover:bg-blue-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
             >
               Swap
             </button>
             <button
-              onClick={() => router.push(`/matches/${match.id}`)}
-              className="rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
+              onClick={() => router.push(`/matches/${match.id}?from=scoring&returnTo=schedule-editor`)}
+              className="min-h-8 rounded-lg bg-slate-900 px-2.5 py-1.5 text-xs font-semibold text-white hover:bg-slate-800"
             >
-              Open
+              Open Scores
             </button>
             <button
               onClick={() => resetMatch(match)}
-              className="rounded-lg bg-orange-100 px-2.5 py-1.5 text-xs font-semibold text-orange-900 hover:bg-orange-200"
+              className="min-h-8 rounded-lg bg-orange-100 px-2.5 py-1.5 text-xs font-semibold text-orange-900 hover:bg-orange-200"
             >
               Reset Scores
             </button>
             <button
               onClick={() => deleteMatch(match)}
               disabled={locked}
-              className="rounded-lg bg-red-100 px-2.5 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+              className="min-h-8 rounded-lg bg-red-100 px-2.5 py-1.5 text-xs font-semibold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
             >
               Delete
             </button>
@@ -1480,6 +1578,115 @@ export default function ScheduleEditorPage() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {swapPrompt && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+            <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="border-b border-slate-200 bg-slate-900 px-6 py-4 text-white">
+                <div className="text-xs font-black uppercase tracking-wide text-blue-100">
+                  Swap Home / Away
+                </div>
+                <h2 className="mt-1 text-xl font-black">
+                  {swapPrompt.match.home_team?.name || "Home"} vs {swapPrompt.match.away_team?.name || "Away"}
+                </h2>
+              </div>
+
+              <div className="space-y-4 p-6">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                    <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                      New Home Team
+                    </div>
+                    <div className="mt-1 text-lg font-black text-slate-950">
+                      {swapPrompt.proposedMatch?.home_team?.name || swapPrompt.match.away_team?.name || "Away"}
+                    </div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 px-4 py-3">
+                    <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                      New Location
+                    </div>
+                    <div className="mt-1 text-lg font-black text-slate-950">
+                      {swapPrompt.proposedMatch ? locationName(swapPrompt.proposedMatch.location_id) : "No Location"}
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`rounded-xl px-4 py-3 text-sm font-bold ring-1 ${
+                  swapPrompt.canSwap && swapPrompt.courtOk
+                    ? "bg-emerald-50 text-emerald-800 ring-emerald-200"
+                    : "bg-red-50 text-red-800 ring-red-200"
+                }`}>
+                  <div>
+                    {swapPrompt.canSwap && swapPrompt.courtOk
+                      ? `Enough courts are available at ${locationName(swapPrompt.proposedMatch.location_id)}.`
+                      : swapPrompt.courtIssue || "There are not enough courts available for this swap."}
+                  </div>
+                  {Array.isArray(swapPrompt.courtUsage) && swapPrompt.courtUsage.length > 0 && (
+                    <div className={`mt-1 text-xs font-black uppercase tracking-wide ${
+                      swapPrompt.canSwap && swapPrompt.courtOk ? "text-emerald-700" : "text-red-700"
+                    }`}>
+                      {swapPrompt.courtUsage.map((line) => (
+                        <div key={line}>{line}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                    Home / Away Counts
+                  </div>
+                  <div className="mt-2 overflow-hidden rounded-xl border border-slate-200">
+                    <table className="w-full text-sm">
+                      <thead className="bg-slate-100 text-left text-xs uppercase tracking-wide text-slate-600">
+                        <tr>
+                          <th className="px-3 py-2">Team</th>
+                          <th className="px-3 py-2">Current</th>
+                          <th className="px-3 py-2">After Swap</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {swapPrompt.countSummary.map((row) => (
+                          <tr key={row.teamId || row.teamName} className="border-t border-slate-100">
+                            <td className="px-3 py-2">
+                              <div className="font-black text-slate-950">{row.teamName}</div>
+                              <div className="text-xs font-semibold text-slate-500">{row.currentRole} {"->"} {row.nextRole}</div>
+                            </td>
+                            <td className="px-3 py-2 font-bold text-slate-800">
+                              Home {row.current.home} / Away {row.current.away}
+                            </td>
+                            <td className="px-3 py-2 font-bold text-slate-800">
+                              Home {row.next.home} / Away {row.next.away}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setSwapPrompt(null)}
+                  disabled={swapUpdating}
+                  className="rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-800 ring-1 ring-slate-300 hover:bg-slate-100 disabled:opacity-60"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={confirmSwapHomeAway}
+                  disabled={!swapPrompt.canSwap || swapUpdating}
+                  className="rounded-lg bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {swapUpdating ? "Swapping..." : "Confirm Swap"}
+                </button>
               </div>
             </div>
           </div>
