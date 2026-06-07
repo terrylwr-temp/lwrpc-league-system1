@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
+import { ROLE_LEVELS } from "../lib/permissions";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
@@ -30,6 +31,10 @@ export default function MembersPage() {
   const [members, setMembers] = useState([]);
   const [seasons, setSeasons] = useState([]);
   const [search, setSearch] = useState("");
+  const [sortConfig, setSortConfig] = useState({
+    key: "member",
+    direction: "asc",
+  });
   const [showCurrentRosterOnly, setShowCurrentRosterOnly] = useState(false);
   const [includeInactiveMembers, setIncludeInactiveMembers] = useState(false);
   const [page, setPage] = useState(1);
@@ -520,6 +525,15 @@ export default function MembersPage() {
     return formatRole(member.user_roles?.[0]?.role || "player");
   }, []);
 
+  function changeSort(key) {
+    setSortConfig((current) => ({
+      key,
+      direction:
+        current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
+    setPage(1);
+  }
+
   function goToPage(value) {
     const requestedPage = Number(value);
 
@@ -572,14 +586,29 @@ export default function MembersPage() {
     });
   }, [getMemberRole, includeInactiveMembers, members, search, showCurrentRosterOnly]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
+  const sortedMembers = useMemo(() => {
+    const direction = sortConfig.direction === "desc" ? -1 : 1;
+
+    return [...filteredMembers].sort((a, b) => {
+      const result = compareSortValues(
+        memberSortValue(a, sortConfig.key),
+        memberSortValue(b, sortConfig.key)
+      );
+
+      if (result !== 0) return result * direction;
+
+      return compareSortValues(memberSortValue(a, "member"), memberSortValue(b, "member"));
+    });
+  }, [filteredMembers, sortConfig]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedMembers.length / PAGE_SIZE));
 
   const clubLocations = uniqueMemberLocations(members);
 
   const pagedMembers = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
-    return filteredMembers.slice(start, start + PAGE_SIZE);
-  }, [filteredMembers, page]);
+    return sortedMembers.slice(start, start + PAGE_SIZE);
+  }, [page, sortedMembers]);
 
   if (loading) {
     return <LoadingScreen subtitle="Loading Members..." />;
@@ -730,7 +759,7 @@ export default function MembersPage() {
           </div>
         )}
 
-        <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+        <div className="mt-6 rounded-2xl bg-white shadow">
           <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 md:flex-row md:items-center md:justify-between">
             <div className="text-sm text-slate-600">
               Showing{" "}
@@ -758,27 +787,67 @@ export default function MembersPage() {
             />
           </div>
 
-          <div className="overflow-x-auto">
-          <table className="min-w-[1180px] table-fixed">
+          <div className="overflow-visible">
+          <table className="min-w-[1250px] table-fixed">
             <colgroup>
-              <col className="w-[280px]" />
-              <col className="w-[180px]" />
+              <col className="w-[250px]" />
               <col className="w-[160px]" />
-              <col className="w-[150px]" />
-              <col className="w-[120px]" />
-              <col className="w-[150px]" />
-              <col className="w-[340px]" />
+              <col className="w-[145px]" />
+              <col className="w-[130px]" />
+              <col className="w-[115px]" />
+              <col className="w-[170px]" />
+              <col className="w-[280px]" />
             </colgroup>
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
-                <th className="px-4 py-4 text-left">Member</th>
-                <th className="px-4 py-4 text-left">Location</th>
-                <th className="px-4 py-4 text-left">Phone</th>
-                <th className="px-4 py-4 text-left">DUPR ID</th>
-                <th className="px-4 py-4 text-left">Status</th>
-                <th className="px-4 py-4 text-left">
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("member", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "member"}
+                    direction={sortConfig.direction}
+                    label="Member"
+                    onClick={() => changeSort("member")}
+                  />
+                </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("location", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "location"}
+                    direction={sortConfig.direction}
+                    label="Location"
+                    onClick={() => changeSort("location")}
+                  />
+                </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("phone", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "phone"}
+                    direction={sortConfig.direction}
+                    label="Phone"
+                    onClick={() => changeSort("phone")}
+                  />
+                </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("dupr_id", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "dupr_id"}
+                    direction={sortConfig.direction}
+                    label="DUPR ID"
+                    onClick={() => changeSort("dupr_id")}
+                  />
+                </th>
+                <th className="sticky right-[450px] top-0 z-30 bg-slate-900 px-4 py-4 text-left shadow-[-10px_0_16px_-16px_rgba(15,23,42,0.8)]" aria-sort={sortAria("status", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "status"}
+                    direction={sortConfig.direction}
+                    label="Status"
+                    onClick={() => changeSort("status")}
+                  />
+                </th>
+                <th className="sticky right-[280px] top-0 z-30 bg-slate-900 px-4 py-4 text-left shadow-[-10px_0_16px_-16px_rgba(15,23,42,0.8)]" aria-sort={sortAria("role", sortConfig)}>
                   <div className="flex items-center gap-2">
-                    <span>Role</span>
+                    <SortHeader
+                      active={sortConfig.key === "role"}
+                      direction={sortConfig.direction}
+                      label="Role"
+                      onClick={() => changeSort("role")}
+                    />
                     <button
                       type="button"
                       onClick={() => setRoleHelpOpen(true)}
@@ -790,7 +859,11 @@ export default function MembersPage() {
                     </button>
                   </div>
                 </th>
-                <th className="px-4 py-4 text-right">Actions</th>
+                <th className="sticky right-0 top-0 z-40 bg-slate-900 px-4 py-4 text-right">
+                  <div className="font-black text-white">
+                    Actions
+                  </div>
+                </th>
               </tr>
             </thead>
 
@@ -799,7 +872,7 @@ export default function MembersPage() {
                 <tr
                   key={member.id}
                   onClick={() => openMember(member.id)}
-                  className="cursor-pointer border-b border-slate-100 hover:bg-slate-50"
+                  className="group cursor-pointer border-b border-slate-100 hover:bg-slate-50"
                 >
                   <td className="px-4 py-4 align-middle">
                     <div className="truncate font-semibold text-slate-900">
@@ -823,7 +896,7 @@ export default function MembersPage() {
                     {member.dupr_id || "—"}
                   </td>
 
-                  <td className="px-4 py-4 align-middle">
+                  <td className="sticky right-[450px] z-10 bg-white px-4 py-4 align-middle shadow-[-10px_0_16px_-16px_rgba(15,23,42,0.45)] group-hover:bg-slate-50">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
                         member.is_active_member === false
@@ -835,12 +908,12 @@ export default function MembersPage() {
                     </span>
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm font-semibold text-slate-700">
+                  <td className="sticky right-[280px] z-10 whitespace-nowrap bg-white px-4 py-4 align-middle text-sm font-semibold text-slate-700 shadow-[-10px_0_16px_-16px_rgba(15,23,42,0.45)] group-hover:bg-slate-50">
                     {getMemberRole(member)}
                   </td>
 
-                  <td className="px-4 py-4 text-right align-middle">
-                    <div className="flex flex-nowrap justify-end gap-2">
+                  <td className="sticky right-0 z-20 bg-white px-4 py-4 text-right align-middle group-hover:bg-slate-50">
+                    <div className="flex flex-wrap justify-end gap-2">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1201,6 +1274,65 @@ function uniqueMemberLocations(members) {
 
 function normalizeLocationName(value) {
   return String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+function SortHeader({ active, direction, label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex flex-col items-start gap-1 rounded-lg px-2 py-1 text-left font-black text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-300"
+    >
+      <span className={`rounded-full px-2 py-0.5 text-[10px] ${active ? "bg-blue-300 text-slate-950" : "bg-white/10 text-slate-300"}`}>
+        {active ? (direction === "asc" ? "ASC" : "DESC") : "SORT"}
+      </span>
+      <span>{label}</span>
+    </button>
+  );
+}
+
+function sortAria(key, sortConfig) {
+  if (sortConfig.key !== key) return "none";
+  return sortConfig.direction === "asc" ? "ascending" : "descending";
+}
+
+function memberSortValue(member, key) {
+  if (key === "location") {
+    return member.club_location || "";
+  }
+
+  if (key === "phone") {
+    return formatPhoneNumberForStorage(member.phone) || "";
+  }
+
+  if (key === "dupr_id") {
+    return member.dupr_id || "";
+  }
+
+  if (key === "status") {
+    return member.is_active_member === false ? "Inactive" : "Active";
+  }
+
+  if (key === "role") {
+    return ROLE_LEVELS[memberRole(member)] || 0;
+  }
+
+  if (key === "actions") {
+    return member.teams?.length || 0;
+  }
+
+  return `${member.last_name || ""} ${member.first_name || ""} ${member.email || ""}`;
+}
+
+function compareSortValues(aValue, bValue) {
+  if (typeof aValue === "number" && typeof bValue === "number") {
+    return aValue - bValue;
+  }
+
+  return String(aValue || "").localeCompare(String(bValue || ""), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
 }
 
 function memberHasInactiveProtectedRole(member) {

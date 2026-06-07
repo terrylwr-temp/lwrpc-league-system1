@@ -312,7 +312,7 @@ export default function RatingsPage() {
     setMemberSort((current) => ({
       field,
       direction:
-        current.field === field && current.direction === "desc" ? "asc" : "desc",
+        current.field === field && current.direction === "asc" ? "desc" : "asc",
     }));
   }
 
@@ -1277,7 +1277,7 @@ function goToPage(value) {
         </div>
         )}
 
-        <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+        <div className="mt-6 rounded-2xl bg-white shadow">
           <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 md:flex-row md:items-center md:justify-between">
             <div className="text-sm text-slate-600">
               Showing{" "}
@@ -1334,32 +1334,31 @@ function goToPage(value) {
 </div>
           </div>
 
+          <div className="overflow-visible">
           <table className="min-w-full">
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
-                <th className="px-4 py-4 text-left">
-                  <button
-                    type="button"
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("name", memberSort)} data-sort-indicator={sortIndicator("name")}>
+                  <SortHeader
+                    active={memberSort.field === "name"}
+                    direction={memberSort.direction}
+                    label="Player"
                     onClick={() => toggleMemberSort("name")}
-                    className="font-semibold uppercase tracking-wide"
-                  >
-                    Player{sortIndicator("name")}
-                  </button>
+                  />
                 </th>
-                <th className="px-4 py-4 text-left">DUPR ID</th>
-                <th className="px-4 py-4 text-left">
-                  <button
-                    type="button"
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR ID</th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("created_at", memberSort)} data-sort-indicator={sortIndicator("created_at")}>
+                  <SortHeader
+                    active={memberSort.field === "created_at"}
+                    direction={memberSort.direction}
+                    label="Added"
                     onClick={() => toggleMemberSort("created_at")}
-                    className="font-semibold uppercase tracking-wide"
-                  >
-                    Added{sortIndicator("created_at")}
-                  </button>
+                  />
                 </th>
-                <th className="px-4 py-4 text-left">DUPR Doubles ({selectedSeasonLabel()})</th>
-                <th className="px-4 py-4 text-left">DUPR Notes ({selectedSeasonLabel()})</th>
-                <th className="px-4 py-4 text-left">Season DUPR ({selectedSeasonLabel()})</th>
-                <th className="px-4 py-4 text-left">Age-Based ({selectedSeasonLabel()})</th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Doubles ({selectedSeasonLabel()})</th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Notes ({selectedSeasonLabel()})</th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">Season DUPR ({selectedSeasonLabel()})</th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">Age-Based ({selectedSeasonLabel()})</th>
               </tr>
             </thead>
 
@@ -1514,6 +1513,7 @@ function goToPage(value) {
               )}
             </tbody>
           </table>
+          </div>
 <div className="flex flex-wrap items-center gap-2">
   <button
     disabled={page <= 1}
@@ -1548,6 +1548,26 @@ function goToPage(value) {
       </div>
     </main>
   );
+}
+
+function SortHeader({ active, direction, label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="inline-flex flex-col items-start gap-1 rounded-lg px-2 py-1 text-left font-black text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-300"
+    >
+      <span className={`rounded-full px-2 py-0.5 text-[10px] ${active ? "bg-blue-300 text-slate-950" : "bg-white/10 text-slate-300"}`}>
+        {active ? (direction === "asc" ? "ASC" : "DESC") : "SORT"}
+      </span>
+      <span>{label}</span>
+    </button>
+  );
+}
+
+function sortAria(field, memberSort) {
+  if (memberSort.field !== field) return "none";
+  return memberSort.direction === "asc" ? "ascending" : "descending";
 }
 
 async function loadAllRatingRosterRows() {
