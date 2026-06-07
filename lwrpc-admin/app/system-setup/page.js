@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { DEFAULT_SYSTEM_SETTINGS, SYSTEM_SETTING_FIELDS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
+import { browserTabTitle, DEFAULT_SYSTEM_SETTINGS, SYSTEM_SETTING_FIELDS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { useRouter } from "next/navigation";
 
@@ -86,6 +86,7 @@ export default function SystemSetupPage() {
 
     setSavedSettings(settings);
     cacheSystemSettings(settings);
+    document.title = browserTabTitle(settings);
     setSchemaWarning("");
     alert("System setup saved.");
   }
@@ -185,6 +186,7 @@ export default function SystemSetupPage() {
                 <PreviewRow label="Email" value={settings.main_email} />
                 <PreviewRow label="Support" value={settings.support_email} />
                 <PreviewRow label="Website" value={settings.club_website} />
+                <PreviewRow label="Browser Tab" value={browserTabTitle(settings)} />
                 <PreviewRow label="Timezone" value={settings.timezone} />
               </div>
             </div>

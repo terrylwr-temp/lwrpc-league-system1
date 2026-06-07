@@ -4120,33 +4120,45 @@ function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) 
 
 function DashboardTeamSelector({ teams, teamStats, selectedTeamId, onSelect }) {
   return (
-    <div className="-mb-4 overflow-x-auto px-2 pt-1" role="tablist" aria-label="Select team">
-      <div className="flex min-w-max items-end gap-1">
-        {teams.map((team) => {
-          const selected = String(team.id) === String(selectedTeamId);
-          const standing = teamStats?.[team.id]?.standing || null;
+    <div className="relative -mb-4">
+      <div className="overflow-x-auto px-2 pt-1" role="tablist" aria-label="Select team">
+        <div className="flex min-w-max items-end gap-1 pr-12">
+          {teams.map((team) => {
+            const selected = String(team.id) === String(selectedTeamId);
+            const standing = teamStats?.[team.id]?.standing || null;
 
-          return (
-            <button
-              key={team.id}
-              type="button"
-              role="tab"
-              aria-selected={selected}
-              onClick={() => onSelect(team.id)}
-              className={`relative shrink-0 cursor-pointer rounded-t-2xl border px-4 text-left shadow-sm transition-transform duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-0 ${
-                selected
-                  ? "z-10 border-emerald-500 border-b-emerald-800 bg-gradient-to-r from-emerald-800 to-blue-800 py-3 text-white shadow-md"
-                  : "border-slate-200 bg-slate-100 py-2 text-slate-700 hover:border-blue-200 hover:bg-blue-50"
-              }`}
-            >
-              <div className="max-w-52 truncate text-sm font-black">{team.name}</div>
-              <div className={`mt-0.5 text-xs font-bold ${selected ? "text-blue-100" : "text-slate-500"}`}>
-                Rank #{standing?.rank || "N/A"}
-              </div>
-            </button>
-          );
-        })}
+            return (
+              <button
+                key={team.id}
+                type="button"
+                role="tab"
+                aria-selected={selected}
+                onClick={() => onSelect(team.id)}
+                className={`relative shrink-0 cursor-pointer rounded-t-2xl border px-4 text-left shadow-sm transition-transform duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-0 ${
+                  selected
+                    ? "z-10 border-emerald-500 border-b-emerald-800 bg-gradient-to-r from-emerald-800 to-blue-800 py-3 text-white shadow-md"
+                    : "border-slate-200 bg-slate-100 py-2 text-slate-700 hover:border-blue-200 hover:bg-blue-50"
+                }`}
+              >
+                <div className="max-w-52 truncate text-sm font-black">{team.name}</div>
+                <div className={`mt-0.5 text-xs font-bold ${selected ? "text-blue-100" : "text-slate-500"}`}>
+                  Rank #{standing?.rank || "N/A"}
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
+      {teams.length > 2 && (
+        <div
+          className="pointer-events-none absolute inset-y-1 right-0 flex w-14 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent pr-2 md:hidden"
+          aria-hidden="true"
+        >
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 shadow ring-1 ring-slate-200">
+            <span className="h-2.5 w-2.5 rotate-45 border-r-2 border-t-2 border-slate-700" />
+          </span>
+        </div>
+      )}
     </div>
   );
 }

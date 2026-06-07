@@ -1,4 +1,5 @@
 import "./globals.css";
+import BrowserTitle from "./components/BrowserTitle";
 import SystemFooter from "./components/SystemFooter";
 
 export const metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
+        <BrowserTitle />
         {children}
         <SystemFooter />
       </body>

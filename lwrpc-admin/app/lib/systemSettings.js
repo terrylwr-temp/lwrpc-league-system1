@@ -2,6 +2,7 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   club_name: "Lakewood Ranch Pickleball Club",
   club_short_name: "LWRPC",
   system_name: "LWRPC League Management System",
+  browser_tab_title: "LWR PC League Management",
   logo_url: "https://lwrpickleballclub.com/lwrpc-logo.png",
   main_email: "info@lwrpickleballclub.com",
   support_email: "info@lwrpickleballclub.com",
@@ -29,6 +30,12 @@ export const SYSTEM_SETTING_FIELDS = [
     label: "System Name",
     type: "text",
     hint: "Name of this league management system.",
+  },
+  {
+    key: "browser_tab_title",
+    label: "Browser Tab Name",
+    type: "text",
+    hint: "Name shown in the browser tab for the league site.",
   },
   {
     key: "logo_url",
@@ -83,6 +90,10 @@ export function mergeSystemSettings(settings = {}) {
       Object.entries(settings || {}).filter(([, value]) => value !== null && value !== undefined && value !== "")
     ),
   };
+}
+
+export function browserTabTitle(settings = {}) {
+  return mergeSystemSettings(settings).browser_tab_title || DEFAULT_SYSTEM_SETTINGS.browser_tab_title;
 }
 
 export function cachedSystemSettings() {
