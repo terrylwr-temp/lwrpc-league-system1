@@ -2037,15 +2037,15 @@ export default function CaptainDashboardPage() {
 
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-bold text-slate-700">
                   <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
-                    <span className="block text-[10px] uppercase tracking-wide text-slate-500">Players</span>
+                    <span className="block text-[11px] font-black uppercase leading-tight tracking-wide text-slate-700">Players</span>
                     {stats.playerCount ?? 0}
                   </span>
                   <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
-                    <span className="block text-[10px] uppercase tracking-wide text-slate-500">Season Points</span>
+                    <span className="block text-[11px] font-black uppercase leading-tight tracking-wide text-slate-700">Season Points</span>
                     {standing?.standings_points ?? 0}
                   </span>
                   <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
-                    <span className="block text-[10px] uppercase tracking-wide text-slate-500">W-L-T</span>
+                    <span className="block text-[11px] font-black uppercase leading-tight tracking-wide text-slate-700">W-L-T</span>
                     {standing?.match_wins ?? 0}-{standing?.match_losses ?? 0}-{standing?.match_ties ?? 0}
                   </span>
                 </div>
