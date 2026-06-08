@@ -49,6 +49,23 @@ function lmsLineGamesNeededToWin(lineGames) {
   return gameCount > 1 && gameCount % 2 === 1 ? Math.floor(gameCount / 2) + 1 : gameCount;
 }
 
+function lmsLineScoreRequired(line) {
+  const value = line?.division_lines?.score_required;
+  return value !== false && value !== "false" && value !== 0 && value !== "0";
+}
+
+function lmsGameHasScoreEntry(game) {
+  return (
+    (game.home_score !== null && game.home_score !== undefined) ||
+    (game.away_score !== null && game.away_score !== undefined) ||
+    (game.game_status && game.game_status !== "scheduled")
+  );
+}
+
+function lmsLineRequiresValidation(line, lineGames) {
+  return lmsLineScoreRequired(line) || lineGames.some(lmsGameHasScoreEntry);
+}
+
 function lmsRequiredLineGameIds(lineGames, line = null) {
   const sortedGames = [...lineGames].sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
   const neededToWin = lmsLineGamesNeededToWin(sortedGames);
@@ -170,7 +187,8 @@ export default function MatchDetailPage() {
           team_win_points,
           standings_points_mode,
           posted_to_dupr,
-          uses_saved_match_lineups
+          uses_saved_match_lineups,
+          score_required
         ),
         home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name),
         home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name),
@@ -392,6 +410,7 @@ export default function MatchDetailPage() {
     const pieces = [
       capitalizeFirst(divisionLine?.line_type),
       duprPostedLabel(line),
+      lmsLineScoreRequired(line) ? "Required" : "Optional",
       capitalizeFirst(divisionLine?.game_format),
       `${lineGames.length || divisionLine?.games_per_line || 1} game(s)`,
     ].filter(Boolean);
@@ -993,7 +1012,9 @@ export default function MatchDetailPage() {
     const winBy = Number(line.division_lines?.win_by || 0);
     const requiredGameIds = lmsRequiredLineGameIds(lineGames, line);
 
-    if (lineWarnings(line).length > 0) {
+    const lineRequiresValidation = lmsLineRequiresValidation(line, lineGames);
+
+    if (lineRequiresValidation && lineWarnings(line).length > 0) {
       issues.push(
         ...lineWarnings(line).map((message) => ({
           lineId: line.id,
@@ -1005,6 +1026,7 @@ export default function MatchDetailPage() {
 
     lineGames.forEach((game) => {
       if (!requiredGameIds.has(String(game.id))) return;
+      if (!lineRequiresValidation) return;
 
       const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
       const gameLabel = `${teamSlotLabel(line)} Game ${game.game_number || ""}`.trim();

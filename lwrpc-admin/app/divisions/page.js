@@ -982,12 +982,68 @@ export default function DivisionsPage() {
                         key={division.id}
                         className="rounded-xl border border-slate-200 p-4"
                       >
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="min-w-0 flex-1">
-                            <div className="text-lg font-bold text-slate-900">
-                              {division.name}
+                        <div className="flex flex-col gap-3">
+                          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0">
+                              <div className="text-lg font-bold text-slate-900">
+                                {division.name}
+                              </div>
                             </div>
 
+                            <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
+                              <div className="flex flex-wrap gap-2 sm:justify-end">
+                                <button
+                                  type="button"
+                                  onClick={() => editDivision(division)}
+                                  className="rounded-lg bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800 hover:bg-blue-200"
+                                >
+                                  Edit
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => openCopyDivision(division)}
+                                  className="rounded-lg bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 hover:bg-emerald-200"
+                                >
+                                  Copy
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => deleteDivision(division.id)}
+                                  className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
+                                >
+                                  Delete
+                                </button>
+                              </div>
+
+                              <div className="flex flex-wrap gap-2 sm:justify-end">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (confirmUnsavedChanges()) router.push(`/divisions/${division.id}`);
+                                  }}
+                                  className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
+                                >
+                                  Configure Game Lines ({division.configured_line_count || 0})
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => toggleDivisionActive(division)}
+                                  className={`rounded-lg px-3 py-1 text-sm font-semibold ${
+                                    division.is_active === false
+                                      ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                                      : "bg-amber-100 text-amber-900 hover:bg-amber-200"
+                                  }`}
+                                >
+                                  {division.is_active === false ? "Activate" : "Inactivate"}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="min-w-0">
                             <div className="mt-1 text-sm text-slate-600">
                               <span className="font-semibold text-slate-700">Season:</span>{" "}
                               {division.leagues?.seasons?.name || "—"}
@@ -1069,58 +1125,6 @@ export default function DivisionsPage() {
                                 {division.line_notes}
                               </div>
                             )}
-                          </div>
-
-                          <div className="flex shrink-0 flex-col items-end gap-2">
-                            <div className="flex flex-wrap justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => editDivision(division)}
-                                className="rounded-lg bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800 hover:bg-blue-200"
-                              >
-                                Edit
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => openCopyDivision(division)}
-                                className="rounded-lg bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 hover:bg-emerald-200"
-                              >
-                                Copy
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => deleteDivision(division.id)}
-                                className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
-                              >
-                                Delete
-                              </button>
-                            </div>
-
-                            <div className="flex flex-wrap justify-end gap-2">
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  if (confirmUnsavedChanges()) router.push(`/divisions/${division.id}`);
-                                }}
-                                className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
-                              >
-                                Configure Game Lines ({division.configured_line_count || 0})
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => toggleDivisionActive(division)}
-                                className={`rounded-lg px-3 py-1 text-sm font-semibold ${
-                                  division.is_active === false
-                                    ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
-                                    : "bg-amber-100 text-amber-900 hover:bg-amber-200"
-                                }`}
-                              >
-                                {division.is_active === false ? "Activate" : "Inactivate"}
-                              </button>
-                            </div>
                           </div>
                         </div>
                       </div>

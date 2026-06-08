@@ -966,7 +966,7 @@ export default function TeamsPage() {
       displayMemberName(team.captain),
       displayMemberName(team.co_captain_1),
       displayMemberName(team.co_captain_2),
-      displayMemberName(team.club_pro),
+      team.club_pro ? `${displayMemberName(team.club_pro)} (Pro)` : "",
     ].filter(Boolean);
 
     return names.join(", ");
@@ -1351,38 +1351,42 @@ if (loading) {
                     {group.teams.map(team => (
                       <div
                         key={team.id}
-                        className={`grid grid-cols-1 gap-3 rounded-2xl border px-4 py-4 text-sm shadow-sm ring-1 transition hover:-translate-y-0.5 hover:shadow-md md:grid-cols-[minmax(170px,1.1fr)_minmax(130px,0.7fr)_minmax(190px,1fr)_minmax(220px,auto)] md:items-center ${
+                        className={`grid grid-cols-1 gap-3 rounded-2xl border px-4 py-4 text-sm shadow-sm ring-1 transition hover:-translate-y-0.5 hover:shadow-md md:grid-cols-[minmax(0,1fr)_minmax(220px,auto)] md:items-start ${
                           editingTeamId === team.id
                             ? "border-blue-300 bg-blue-50 ring-blue-200"
                             : "border-slate-200 bg-white ring-slate-100"
                         }`}
                       >
-                        <div className="min-w-0">
-                          <div className="truncate font-bold text-slate-900">
-                            {team.name}
-                            {team.abbreviation ? ` (${team.abbreviation})` : ""}
+                        <div className="min-w-0 space-y-2">
+                          <div className="min-w-0">
+                            <div className="truncate font-bold text-slate-900">
+                              {team.name}
+                              {team.abbreviation ? ` (${team.abbreviation})` : ""}
+                            </div>
+                            <div className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide ${
+                              team.is_active === false
+                                ? "bg-slate-200 text-slate-700"
+                                : "bg-emerald-100 text-emerald-800"
+                            }`}>
+                              {team.is_active === false ? "Inactive" : "Active"}
+                            </div>
                           </div>
-                          <div className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide ${
-                            team.is_active === false
-                              ? "bg-slate-200 text-slate-700"
-                              : "bg-emerald-100 text-emerald-800"
-                          }`}>
-                            {team.is_active === false ? "Inactive" : "Active"}
+
+                          <div className="text-slate-700">
+                            <span className="font-semibold text-slate-900">Location:</span>{" "}
+                            {team.locations?.name || "No Location"}
                           </div>
+
+                          <div className="text-slate-700">
+                            <span className="font-semibold text-slate-900">Team Captains:</span>{" "}
+                            {captainSummary(team)}
+                          </div>
+
                           {team.notes && (
-                            <div className="truncate text-xs text-slate-500">
+                            <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600">
                               {team.notes}
                             </div>
                           )}
-                        </div>
-
-                        <div className="truncate text-slate-700">
-                          {team.locations?.name || ""}
-                        </div>
-
-                        <div className="truncate text-slate-700">
-                          <span className="font-semibold text-slate-900">Team Leads:</span>{" "}
-                          {captainSummary(team)}
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-200 bg-slate-50 p-2 shadow-inner md:justify-end">

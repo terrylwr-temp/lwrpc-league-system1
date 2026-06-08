@@ -66,6 +66,10 @@ export default function CaptainDashboardPage() {
   const [scoreDetailsMatch, setScoreDetailsMatch] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
   const [rosterTeam, setRosterTeam] = useState(null);
+  const [flexScheduleMatch, setFlexScheduleMatch] = useState(null);
+  const [flexScheduleDate, setFlexScheduleDate] = useState("");
+  const [flexScheduleTime, setFlexScheduleTime] = useState("");
+  const [savingFlexSchedule, setSavingFlexSchedule] = useState(false);
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
   useUnsavedChangesWarning(Boolean(setupMatch && setupDirty), "match setup");
@@ -205,6 +209,7 @@ export default function CaptainDashboardPage() {
             name,
             season_id,
             rosters_locked,
+            flex_league,
             league_document_bucket,
             code_of_conduct_pdf_path,
             captains_guide_pdf_path,
@@ -287,11 +292,17 @@ export default function CaptainDashboardPage() {
           id,
           name,
           season_id,
-          rosters_locked
+          rosters_locked,
+          flex_league
         ),
         divisions (
           id,
           name,
+          leagues (
+            id,
+            name,
+            flex_league
+          ),
           number_of_lines,
           games_per_line,
           points_to_win,
@@ -822,6 +833,8 @@ export default function CaptainDashboardPage() {
 
     const setupTeams = showSetup ? getCaptainTeamsForMatch(match) : [];
     const opposingEmails = showSetup ? opposingCaptainEmailsForMatch(match) : [];
+    const flexScheduleAvailable = canShowFlexScheduleControl(match);
+    const flexScheduleAllowed = canManageFlexSchedule(match);
     const selectedResult = selectedTeamMatchResult(match);
     const headingClass =
       selectedResult === "win"
@@ -961,6 +974,20 @@ export default function CaptainDashboardPage() {
                 </button>
               )}
 
+              {flexScheduleAvailable && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (flexScheduleAllowed) openFlexSchedule(match);
+                  }}
+                  disabled={!flexScheduleAllowed}
+                  className="rounded-lg bg-violet-700 px-3 py-2 text-sm font-bold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  title={flexScheduleAllowed ? "Modify this Flex League match date/time" : "Only the home team captain or co-captain can modify this Flex League match date/time"}
+                >
+                  Modify Match Date/Time
+                </button>
+              )}
+
               <button
                 type="button"
                 disabled={!canEnterScores}
@@ -1049,6 +1076,192 @@ export default function CaptainDashboardPage() {
       `mailto:${emails.join(",")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
       "_self"
     );
+  }
+
+  function canManageFlexSchedule(match) {
+    if (!canShowFlexScheduleControl(match)) return false;
+    if (!currentMemberId) return false;
+
+    return isCurrentMemberHomeCaptainContact(match);
+  }
+
+  function canShowFlexScheduleControl(match) {
+    if (!isFlexLeagueMatch(match)) return false;
+    if (match?.status === "completed" || match?.status === "cancelled") return false;
+    if (match?.score_status === "verified") return false;
+    return true;
+  }
+
+  function isFlexLeagueMatch(match) {
+    const value = match?.leagues?.flex_league ?? match?.divisions?.leagues?.flex_league;
+    return value === true || value === "true" || value === 1 || value === "1";
+  }
+
+  function isCurrentMemberHomeCaptainContact(match) {
+    const homeTeamId = match?.home_team_id || match?.home_team?.id;
+    const loadedHomeTeam = teams.find((team) => String(team.id || "") === String(homeTeamId || ""));
+    const homeCaptainIds = [
+      loadedHomeTeam?.captain_member_id,
+      loadedHomeTeam?.co_captain_member_id,
+      loadedHomeTeam?.co_captain_2_member_id,
+    ].filter(Boolean);
+
+    if (homeCaptainIds.some((memberId) => String(memberId) === String(currentMemberId))) {
+      return true;
+    }
+
+    return teamCaptainContactsOnly(match.home_team).some((member) =>
+      String(member.id || "") === String(currentMemberId)
+    );
+  }
+
+  function openFlexSchedule(match) {
+    setFlexScheduleMatch(match);
+    setFlexScheduleDate(match.scheduled_date || localDateString());
+    setFlexScheduleTime(match.scheduled_time || "");
+  }
+
+  function closeFlexSchedule() {
+    if (savingFlexSchedule) return;
+    setFlexScheduleMatch(null);
+    setFlexScheduleDate("");
+    setFlexScheduleTime("");
+  }
+
+  function flexScheduleWindow(match) {
+    const baseDate = match?.scheduled_date || localDateString();
+    return {
+      min: addDaysToDateString(baseDate, -7),
+      max: addDaysToDateString(baseDate, 7),
+    };
+  }
+
+  async function saveFlexSchedule() {
+    if (!flexScheduleMatch || savingFlexSchedule) return;
+
+    if (!canManageFlexSchedule(flexScheduleMatch)) {
+      alert("Only the home team captain or co-captain can update a Flex League match date/time.");
+      return;
+    }
+
+    if (!flexScheduleDate || !flexScheduleTime) {
+      alert("Match date and time are required.");
+      return;
+    }
+
+    const { min, max } = flexScheduleWindow(flexScheduleMatch);
+
+    if (flexScheduleDate < min || flexScheduleDate > max) {
+      alert(`Flex League match date must stay between ${formatDate(min)} and ${formatDate(max)}.`);
+      return;
+    }
+
+    setSavingFlexSchedule(true);
+
+    const payload = {
+      scheduled_date: flexScheduleDate,
+      scheduled_time: flexScheduleTime,
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase
+      .from("matches")
+      .update(payload)
+      .eq("id", flexScheduleMatch.id)
+      .select("id, scheduled_date, scheduled_time")
+      .maybeSingle();
+
+    if (error) {
+      setSavingFlexSchedule(false);
+      alert(error.message);
+      return;
+    }
+
+    const updatedMatch = {
+      ...flexScheduleMatch,
+      scheduled_date: data?.scheduled_date || flexScheduleDate,
+      scheduled_time: data?.scheduled_time || flexScheduleTime,
+    };
+
+    setMatches((current) =>
+      current.map((match) =>
+        String(match.id) === String(updatedMatch.id) ? { ...match, ...updatedMatch } : match
+      )
+    );
+
+    const notificationSent = await sendFlexScheduleNotification(updatedMatch).catch((notificationError) => {
+      console.warn("Flex schedule notification failed.", notificationError);
+      return false;
+    });
+
+    setSavingFlexSchedule(false);
+    setFlexScheduleMatch(null);
+    setFlexScheduleDate("");
+    setFlexScheduleTime("");
+
+    alert(
+      notificationSent
+        ? "Flex League match date/time saved and opposing captains notified."
+        : "Flex League match date/time saved, but no opponent notification was sent."
+    );
+  }
+
+  async function sendFlexScheduleNotification(match) {
+    const { emails, phones } = splitNotificationRecipients(teamCaptainContactsOnly(match.away_team));
+
+    if (emails.length === 0 && phones.length === 0) {
+      return false;
+    }
+
+    const subject = `Flex League Match Scheduled: ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`;
+    const text = [
+      "Flex League match date/time has been updated.",
+      "",
+      `Match: ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`,
+      `League: ${match.leagues?.name || "League"}`,
+      `Division: ${match.divisions?.name || "Division"}`,
+      `Date: ${formatDate(match.scheduled_date)}`,
+      `Time: ${formatDisplayTime(match.scheduled_time, "Time TBD")}`,
+      `Location: ${match.locations?.name || "No Location"}`,
+      "",
+      "Please contact the home captain if this date/time needs to be adjusted.",
+    ].join("\n");
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Flex League Match Scheduled</h2>
+        <p>The home team has updated the match date/time.</p>
+        <p>
+          <strong>Match:</strong> ${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")}<br />
+          <strong>League:</strong> ${escapeHtml(match.leagues?.name || "League")}<br />
+          <strong>Division:</strong> ${escapeHtml(match.divisions?.name || "Division")}<br />
+          <strong>Date:</strong> ${escapeHtml(formatDate(match.scheduled_date))}<br />
+          <strong>Time:</strong> ${escapeHtml(formatDisplayTime(match.scheduled_time, "Time TBD"))}<br />
+          <strong>Location:</strong> ${escapeHtml(match.locations?.name || "No Location")}
+        </p>
+        <p>Please contact the home captain if this date/time needs to be adjusted.</p>
+      </div>
+    `;
+
+    const response = await fetch("/api/notifications", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        emails,
+        phones,
+        subject,
+        text,
+        html,
+        smsBody: text,
+      }),
+    });
+
+    if (!response.ok) return false;
+
+    const result = await response.json().catch(() => null);
+    const emailSent = Number(result?.email?.sent || 0);
+    const smsSent = Number(result?.sms?.sent || 0);
+
+    return emailSent + smsSent > 0;
   }
 
   async function openMatchSetup(match, team) {
@@ -1962,6 +2175,80 @@ export default function CaptainDashboardPage() {
             </div>
             </div>
           </div>
+          </div>
+        )}
+
+        {flexScheduleMatch && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+            <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="bg-slate-950 px-5 py-4 text-white">
+                <div className="text-xs font-black uppercase tracking-wide text-violet-200">
+                  Flex League Schedule
+                </div>
+                <h2 className="mt-1 text-2xl font-black">
+                  {flexScheduleMatch.home_team?.name || "Home"} vs {flexScheduleMatch.away_team?.name || "Away"}
+                </h2>
+                <div className="mt-2 text-sm font-semibold text-slate-200">
+                  {flexScheduleMatch.leagues?.name || "League"} · {flexScheduleMatch.divisions?.name || "Division"}
+                </div>
+              </div>
+
+              <div className="space-y-4 p-5">
+                <div className="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-950">
+                  Select a match date within one week of the current scheduled date:
+                  {" "}
+                  {formatDate(flexScheduleWindow(flexScheduleMatch).min)} to {formatDate(flexScheduleWindow(flexScheduleMatch).max)}.
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <label>
+                    <span className="mb-1 block text-sm font-bold text-slate-700">Match Date</span>
+                    <input
+                      type="date"
+                      value={flexScheduleDate}
+                      min={flexScheduleWindow(flexScheduleMatch).min}
+                      max={flexScheduleWindow(flexScheduleMatch).max}
+                      onChange={(event) => setFlexScheduleDate(event.target.value)}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    />
+                  </label>
+
+                  <label>
+                    <span className="mb-1 block text-sm font-bold text-slate-700">Match Time</span>
+                    <input
+                      type="time"
+                      value={flexScheduleTime}
+                      onChange={(event) => setFlexScheduleTime(event.target.value)}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    />
+                  </label>
+                </div>
+
+                <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+                  Opposing captains will receive the full match details by email or text based on their notification preferences.
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={saveFlexSchedule}
+                    disabled={savingFlexSchedule}
+                    className="rounded-xl bg-violet-700 px-4 py-3 text-sm font-bold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    {savingFlexSchedule ? "Sending..." : "Save and Notify"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={closeFlexSchedule}
+                    disabled={savingFlexSchedule}
+                    className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -3189,6 +3476,15 @@ function localDateString() {
   return `${date.getFullYear()}-${month}-${day}`;
 }
 
+function addDaysToDateString(value, days) {
+  const [year, month, day] = String(value || localDateString()).split("-").map(Number);
+  const date = new Date(year, Number(month || 1) - 1, Number(day || 1));
+  date.setDate(date.getDate() + days);
+  const nextMonth = String(date.getMonth() + 1).padStart(2, "0");
+  const nextDay = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${nextMonth}-${nextDay}`;
+}
+
 function matchSetupKey(matchId, teamId) {
   return `${matchId}:${teamId}`;
 }
@@ -3359,6 +3655,24 @@ function captainContacts(team) {
     team?.co_captain_1,
     team?.co_captain_2,
     team?.club_pro,
+  ].filter(Boolean);
+  const seen = new Set();
+
+  return contacts.filter((member) => {
+    const key = member.email || member.id;
+
+    if (!key || seen.has(key)) return false;
+
+    seen.add(key);
+    return true;
+  });
+}
+
+function teamCaptainContactsOnly(team) {
+  const contacts = [
+    team?.captain,
+    team?.co_captain_1,
+    team?.co_captain_2,
   ].filter(Boolean);
   const seen = new Set();
 

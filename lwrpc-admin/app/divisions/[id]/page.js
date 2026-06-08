@@ -9,6 +9,14 @@ import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUn
 
 const GLOBAL_DEFAULT_LINES_KEY = "lwrpc-default-lines-config";
 
+function normalizeScoreType(value) {
+  return String(value || "").trim().toLowerCase() === "rally" ? "rally" : "sideout";
+}
+
+function normalizeScoreRequired(value) {
+  return value !== false && value !== "false" && value !== 0 && value !== "0";
+}
+
 export default function DivisionDetailPage() {
   const { id } = useParams();
   const router = useRouter();
@@ -20,8 +28,10 @@ export default function DivisionDetailPage() {
   const [teamName, setTeamName] = useState("");
   const [postedToDupr, setPostedToDupr] = useState(true);
   const [usesSavedMatchLineups, setUsesSavedMatchLineups] = useState(true);
+  const [scoreRequired, setScoreRequired] = useState(true);
   const [teamType, setTeamType] = useState("doubles");
   const [gameFormat, setGameFormat] = useState("");
+  const [scoreType, setScoreType] = useState("sideout");
   const [gamesPerTeam, setGamesPerTeam] = useState("3");
   const [pointsToWin, setPointsToWin] = useState("11");
   const [winBy, setWinBy] = useState("2");
@@ -36,8 +46,10 @@ export default function DivisionDetailPage() {
       teamName.trim() ||
       !postedToDupr ||
       !usesSavedMatchLineups ||
+      !scoreRequired ||
       teamType !== "doubles" ||
       gameFormat ||
+      scoreType !== "sideout" ||
       gamesPerTeam !== "3" ||
       pointsToWin !== "11" ||
       winBy !== "2" ||
@@ -146,8 +158,10 @@ export default function DivisionDetailPage() {
       line_name: line.line_name ?? line.name ?? `Line ${index + 1}`,
       posted_to_dupr: line.posted_to_dupr ?? true,
       uses_saved_match_lineups: line.uses_saved_match_lineups ?? true,
+      score_required: normalizeScoreRequired(line.score_required),
       line_type: line.line_type ?? "doubles",
       game_format: line.game_format ?? line.format ?? null,
+      score_type: normalizeScoreType(line.score_type),
       games_per_line: Number(line.games_per_line ?? line.games_per_team ?? 3),
       points_to_win: Number(line.points_to_win ?? 11),
       win_by: Number(line.win_by ?? 2),
@@ -174,8 +188,10 @@ export default function DivisionDetailPage() {
       line_name: line.line_name || fallback.line_name,
       posted_to_dupr: line.posted_to_dupr ?? fallback.posted_to_dupr,
       uses_saved_match_lineups: line.uses_saved_match_lineups ?? fallback.uses_saved_match_lineups ?? true,
+      score_required: normalizeScoreRequired(line.score_required ?? fallback.score_required),
       line_type: line.line_type || fallback.line_type,
       game_format: line.game_format || fallback.game_format,
+      score_type: normalizeScoreType(line.score_type || fallback.score_type),
       games_per_line: Number(line.games_per_line ?? fallback.games_per_line),
       points_to_win: Number(line.points_to_win ?? fallback.points_to_win),
       win_by: Number(line.win_by ?? fallback.win_by),
@@ -245,6 +261,15 @@ export default function DivisionDetailPage() {
     };
 
     return labels[value] || value || "-";
+  }
+
+  function scoreTypeLabel(value) {
+    const labels = {
+      sideout: "Sideout",
+      rally: "Rally",
+    };
+
+    return labels[normalizeScoreType(value)];
   }
 
   async function saveDivisionDefaultConfig(nextLines) {
@@ -372,8 +397,10 @@ export default function DivisionDetailPage() {
       line_name: teamName || null,
       posted_to_dupr: postedToDupr,
       uses_saved_match_lineups: usesSavedMatchLineups,
+      score_required: scoreRequired,
       line_type: teamType || null,
       game_format: gameFormat || null,
+      score_type: normalizeScoreType(scoreType),
       games_per_line: Number(gamesPerTeam || 3),
       points_to_win: Number(pointsToWin || 11),
       win_by: Number(winBy || 2),
@@ -547,8 +574,10 @@ export default function DivisionDetailPage() {
             line_name: `Line ${index + 1}`,
             posted_to_dupr: true,
             uses_saved_match_lineups: true,
+            score_required: true,
             line_type: "doubles",
             game_format: division.default_game_format || null,
+            score_type: "sideout",
             games_per_line: division.games_per_line || 3,
             points_to_win: division.points_to_win || 11,
             win_by: division.win_by || 2,
@@ -623,8 +652,10 @@ export default function DivisionDetailPage() {
     setTeamName(line.line_name || "");
     setPostedToDupr(line.posted_to_dupr ?? true);
     setUsesSavedMatchLineups(line.uses_saved_match_lineups ?? true);
+    setScoreRequired(normalizeScoreRequired(line.score_required));
     setTeamType(line.line_type || "doubles");
     setGameFormat(line.game_format || "");
+    setScoreType(normalizeScoreType(line.score_type));
     setGamesPerTeam(String(line.games_per_line || 3));
     setPointsToWin(String(line.points_to_win || 11));
     setWinBy(String(line.win_by || 2));
@@ -639,8 +670,10 @@ export default function DivisionDetailPage() {
     setTeamName("");
     setPostedToDupr(true);
     setUsesSavedMatchLineups(true);
+    setScoreRequired(true);
     setTeamType("doubles");
     setGameFormat("");
+    setScoreType("sideout");
     setGamesPerTeam("3");
     setPointsToWin("11");
     setWinBy("2");
@@ -808,6 +841,21 @@ export default function DivisionDetailPage() {
                 </span>
               </label>
 
+              <label className="flex items-start gap-3 rounded-xl border border-slate-300 px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={scoreRequired}
+                  onChange={(e) => setScoreRequired(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  <span className="block font-medium text-slate-700">Required for Score Entry</span>
+                  <span className="mt-1 block text-xs text-slate-500">
+                    When unchecked, this line can be left blank when submitting scores.
+                  </span>
+                </span>
+              </label>
+
               <div>
                 <FieldLabel label="Game Format" />
                 <input
@@ -819,6 +867,18 @@ export default function DivisionDetailPage() {
                 <p className="mt-1 text-xs text-slate-500">
                   How each game for this line is scored or structured.
                 </p>
+              </div>
+
+              <div>
+                <FieldLabel label="Score Type" />
+                <select
+                  value={scoreType}
+                  onChange={(e) => setScoreType(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                >
+                  <option value="sideout">Sideout</option>
+                  <option value="rally">Rally</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -947,7 +1007,15 @@ export default function DivisionDetailPage() {
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">
+                        Required for Score Entry: {normalizeScoreRequired(line.score_required) ? "Yes" : "No"}
+                      </div>
+
+                      <div className="mt-1 text-sm text-slate-600">
                         Format: {line.game_format || "—"}
+                      </div>
+
+                      <div className="mt-1 text-sm text-slate-600">
+                        Score Type: {scoreTypeLabel(line.score_type)}
                       </div>
 
                       <div className="mt-1 text-sm text-slate-600">

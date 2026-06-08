@@ -367,7 +367,8 @@ export default function ScoringPage() {
           line_number,
           posted_to_dupr,
           division_lines (
-            posted_to_dupr
+            posted_to_dupr,
+            score_type
           ),
           home_player_1:members!match_lines_home_player_1_id_fkey(first_name, last_name, full_name, dupr_id),
           home_player_2:members!match_lines_home_player_2_id_fkey(first_name, last_name, full_name, dupr_id),
@@ -385,7 +386,7 @@ export default function ScoringPage() {
 
     if (error) {
       setExportingScores(false);
-      alert("Score export requires the score_exported_at schema update. Run the updated Supabase SQL, then try again.");
+      alert("Score export requires the latest scoring schema updates, including score_exported_at and division line score_type. Run the updated Supabase SQL, then try again.");
       return;
     }
 
@@ -627,7 +628,7 @@ function duprRowsForMatch(match) {
 
       return [
         "D",
-        "SIDEOUT",
+        duprScoreType(line),
         DUPR_EXPORT_EVENT,
         match.scheduled_date || "",
         duprPlayerName(line.home_player_1),
@@ -641,6 +642,11 @@ function duprRowsForMatch(match) {
         ...gameScores,
       ];
     });
+}
+
+function duprScoreType(line) {
+  const value = String(line?.division_lines?.score_type || "sideout").trim().toLowerCase();
+  return value === "rally" ? "RALLY" : "SIDEOUT";
 }
 
 function linePostsToDupr(line) {

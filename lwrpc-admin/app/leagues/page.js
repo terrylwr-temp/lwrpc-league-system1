@@ -23,6 +23,7 @@ export default function LeaguesPage() {
   const [leagueName, setLeagueName] = useState("");
   const [leagueAbbreviation, setLeagueAbbreviation] = useState("");
   const [selectedSeason, setSelectedSeason] = useState("");
+  const [flexLeague, setFlexLeague] = useState(false);
   const [rostersLocked, setRostersLocked] = useState(false);
   const [matchSetupReminderDaysBefore, setMatchSetupReminderDaysBefore] = useState("2");
   const [documentBucket, setDocumentBucket] = useState(DEFAULT_LEAGUE_DOCUMENT_BUCKET);
@@ -36,7 +37,7 @@ export default function LeaguesPage() {
   const [hydrated, setHydrated] = useState(false);
 
   useUnsavedChangesWarning(
-    Boolean(editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || rostersLocked || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean)),
+    Boolean(editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || flexLeague || rostersLocked || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean)),
     "league"
   );
 
@@ -80,6 +81,7 @@ export default function LeaguesPage() {
       name: leagueName,
       abbreviation: leagueAbbreviation.trim() || null,
       season_id: selectedSeason,
+      flex_league: flexLeague,
       rosters_locked: rostersLocked,
       match_setup_reminder_days_before: Number(matchSetupReminderDaysBefore || 0),
       league_document_bucket: documentBucket.trim() || null,
@@ -160,6 +162,7 @@ export default function LeaguesPage() {
     setLeagueName(league.name || "");
     setLeagueAbbreviation(league.abbreviation || "");
     setSelectedSeason(league.season_id || "");
+    setFlexLeague(league.flex_league === true);
     setRostersLocked(league.rosters_locked === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
     setDocumentBucket(league.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET);
@@ -178,6 +181,7 @@ export default function LeaguesPage() {
     setLeagueName(league.name || "");
     setLeagueAbbreviation(league.abbreviation || "");
     setSelectedSeason("");
+    setFlexLeague(league.flex_league === true);
     setRostersLocked(league.rosters_locked === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
     setDocumentBucket(league.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET);
@@ -197,6 +201,7 @@ export default function LeaguesPage() {
     setLeagueName("");
     setLeagueAbbreviation("");
     setSelectedSeason("");
+    setFlexLeague(false);
     setRostersLocked(false);
     setMatchSetupReminderDaysBefore("2");
     setDocumentBucket(DEFAULT_LEAGUE_DOCUMENT_BUCKET);
@@ -325,6 +330,21 @@ export default function LeaguesPage() {
                   </option>
                 ))}
               </select>
+
+              <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={flexLeague}
+                  onChange={(e) => setFlexLeague(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  Flex League
+                  <span className="mt-1 block text-xs font-normal text-slate-500">
+                    When checked, this league will have the flexibility for the Captain of the Home Team to change the pre-scheduled date/time of the match.
+                  </span>
+                </span>
+              </label>
 
               <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
                 <input
@@ -462,21 +482,61 @@ export default function LeaguesPage() {
             <div className="space-y-3">
               {visibleLeagues.map((league) => (
                 <div key={league.id} className="rounded-xl border border-slate-200 p-4">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="text-lg font-bold text-slate-900">
-                        {league.name}
-                      </div>
-                      {league.abbreviation && (
-                        <div className="mt-1 text-sm font-black text-slate-700">
-                          Abbreviation: {league.abbreviation}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <div className="text-lg font-bold text-slate-900">
+                          {league.name}
                         </div>
-                      )}
+                        {league.abbreviation && (
+                          <div className="mt-1 text-sm font-black text-slate-700">
+                            Abbreviation: {league.abbreviation}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end">
+                        <button
+                          type="button"
+                          onClick={() => editLeague(league)}
+                          className="rounded-lg bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800 hover:bg-blue-200"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => copyLeague(league)}
+                          className="rounded-lg bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 hover:bg-emerald-200"
+                        >
+                          Copy
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => toggleLeagueActive(league)}
+                          className={`rounded-lg px-3 py-1 text-sm font-semibold ${
+                            league.is_active === false
+                              ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
+                              : "bg-amber-100 text-amber-900 hover:bg-amber-200"
+                          }`}
+                        >
+                          {league.is_active === false ? "Activate" : "Inactivate"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deleteLeague(league.id)}
+                          className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="min-w-0">
                       <div className="mt-1 text-sm text-slate-600">
                         Season: {league.seasons?.name || "—"}
                       </div>
-                      <div className="mt-2">
-                        <span className={`mr-2 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
                           league.is_active === false
                             ? "bg-slate-200 text-slate-700"
                             : "bg-emerald-100 text-emerald-800"
@@ -490,6 +550,11 @@ export default function LeaguesPage() {
                         }`}>
                           Rosters {league.rosters_locked ? "Locked" : "Open"}
                         </span>
+                        {league.flex_league === true && (
+                          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-800">
+                            Flex League
+                          </span>
+                        )}
                       </div>
                       <div className="mt-2 text-sm font-semibold text-slate-600">
                         Match setup reminder: {league.match_setup_reminder_days_before ?? 2} day{Number(league.match_setup_reminder_days_before ?? 2) === 1 ? "" : "s"} before match date
@@ -508,41 +573,6 @@ export default function LeaguesPage() {
                           </span>
                         ))}
                       </div>
-                    </div>
-
-                    <div className="flex shrink-0 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => toggleLeagueActive(league)}
-                        className={`rounded-lg px-3 py-1 text-sm font-semibold ${
-                          league.is_active === false
-                            ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-200"
-                            : "bg-amber-100 text-amber-900 hover:bg-amber-200"
-                        }`}
-                      >
-                        {league.is_active === false ? "Activate" : "Inactivate"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => editLeague(league)}
-                        className="rounded-lg bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-800 hover:bg-blue-200"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => copyLeague(league)}
-                        className="rounded-lg bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-800 hover:bg-emerald-200"
-                      >
-                        Copy
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteLeague(league.id)}
-                        className="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-800 hover:bg-red-200"
-                      >
-                        Delete
-                      </button>
                     </div>
                   </div>
                 </div>

@@ -28,9 +28,38 @@ alter table public.member_season_ratings
 alter table public.division_lines
   add column if not exists team_win_points integer default 1,
   add column if not exists standings_points_mode text not null default 'line_result',
+  add column if not exists score_type text not null default 'sideout',
+  add column if not exists score_required boolean not null default true,
   add column if not exists picklebreaker_win_points integer default 1,
   add column if not exists picklebreaker_loss_points integer default 0,
   add column if not exists uses_saved_match_lineups boolean not null default true;
+
+alter table public.division_lines
+  alter column score_type set default 'sideout';
+
+update public.division_lines
+set score_type = 'sideout'
+where score_type is null;
+
+alter table public.division_lines
+  alter column score_type set not null;
+
+alter table public.division_lines
+  drop constraint if exists division_lines_score_type_check;
+
+alter table public.division_lines
+  add constraint division_lines_score_type_check
+  check (score_type in ('sideout', 'rally'));
+
+alter table public.division_lines
+  alter column score_required set default true;
+
+update public.division_lines
+set score_required = true
+where score_required is null;
+
+alter table public.division_lines
+  alter column score_required set not null;
 
 alter table public.division_lines
   drop constraint if exists division_lines_standings_points_mode_check;
@@ -48,6 +77,19 @@ alter table public.match_lines
 
 alter table public.leagues
   add column if not exists rosters_locked boolean not null default false;
+
+alter table public.leagues
+  add column if not exists flex_league boolean not null default false;
+
+alter table public.leagues
+  alter column flex_league set default false;
+
+update public.leagues
+set flex_league = false
+where flex_league is null;
+
+alter table public.leagues
+  alter column flex_league set not null;
 
 alter table public.leagues
   add column if not exists match_setup_reminder_days_before integer not null default 2;

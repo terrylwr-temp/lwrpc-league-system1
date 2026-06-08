@@ -84,7 +84,8 @@ export default function MobileScoreEntryPage() {
           points_to_win,
           win_by,
           team_win_points,
-          standings_points_mode
+          standings_points_mode,
+          score_required
         )
       `)
       .eq("match_id", id)
@@ -279,6 +280,23 @@ export default function MobileScoreEntryPage() {
     return gameCount > 1 && gameCount % 2 === 1 ? Math.floor(gameCount / 2) + 1 : gameCount;
   }
 
+  function lineScoreRequired(line) {
+    const value = line?.division_lines?.score_required;
+    return value !== false && value !== "false" && value !== 0 && value !== "0";
+  }
+
+  function gameHasScoreEntry(game) {
+    return (
+      (game.home_score !== null && game.home_score !== undefined) ||
+      (game.away_score !== null && game.away_score !== undefined) ||
+      (game.game_status && game.game_status !== "scheduled")
+    );
+  }
+
+  function lineRequiresValidation(line, lineGames) {
+    return lineScoreRequired(line) || lineGames.some(gameHasScoreEntry);
+  }
+
   function requiredLineGameIds(lineGames, line = null) {
     const sortedGames = [...lineGames].sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
     const neededToWin = lineGamesNeededToWin(sortedGames);
@@ -310,9 +328,11 @@ export default function MobileScoreEntryPage() {
     const lineLabel = line.division_lines?.line_name || `Line ${line.line_number}`;
     const issues = [];
     const requiredGameIds = requiredLineGameIds(lineGames, line);
+    const shouldValidateLine = lineRequiresValidation(line, lineGames);
 
     lineGames.forEach((game) => {
       if (!requiredGameIds.has(String(game.id))) return;
+      if (!shouldValidateLine) return;
 
       const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
       const gameLabel = `${lineLabel} Game ${game.game_number || ""}`.trim();
@@ -617,7 +637,7 @@ export default function MobileScoreEntryPage() {
                     </h2>
 
                     <div className="mt-1 text-sm text-slate-600">
-                      {line.division_lines?.line_name || line.division_lines?.line_type || "Team"} · {duprPostedLabel(line)}
+                      {line.division_lines?.line_name || line.division_lines?.line_type || "Team"} · {duprPostedLabel(line)} · {lineScoreRequired(line) ? "Required" : "Optional"}
                     </div>
                   </div>
 
