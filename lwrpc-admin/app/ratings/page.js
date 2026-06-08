@@ -1346,7 +1346,6 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("name")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR ID</th>
                 <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("created_at", memberSort)} data-sort-indicator={sortIndicator("created_at")}>
                   <SortHeader
                     active={memberSort.field === "created_at"}
@@ -1355,10 +1354,11 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("created_at")}
                   />
                 </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR ID</th>
                 <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Doubles ({selectedSeasonLabel()})</th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Notes ({selectedSeasonLabel()})</th>
                 <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">Season DUPR ({selectedSeasonLabel()})</th>
                 <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">Age-Based ({selectedSeasonLabel()})</th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Notes ({selectedSeasonLabel()})</th>
               </tr>
             </thead>
 
@@ -1379,29 +1379,39 @@ function goToPage(value) {
                     }`}
                   >
                     <td className="px-4 py-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="font-semibold text-slate-900">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0 flex-1 font-semibold text-slate-900">
                           {member.last_name}, {member.first_name}
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => copyMemberName(member)}
-                          className="shrink-0 rounded-lg bg-slate-100 px-2 py-1 text-xs font-bold text-slate-700 hover:bg-slate-200"
-                        >
-                          Copy Name
-                        </button>
+                        <div className="flex shrink-0 items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => copyMemberName(member)}
+                            aria-label={`Copy name for ${member.first_name} ${member.last_name}`}
+                            title="Copy name"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200"
+                          >
+                            <CopyIcon />
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (confirmUnsavedChanges()) router.push(`/members/${member.id}`);
+                            }}
+                            aria-label={`Edit member ${member.first_name} ${member.last_name}`}
+                            title="Edit member"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200"
+                          >
+                            <EditIcon />
+                          </button>
+                        </div>
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (confirmUnsavedChanges()) router.push(`/members/${member.id}`);
-                        }}
-                        className="mt-2 rounded-lg bg-blue-100 px-2 py-1 text-xs font-bold text-blue-800 hover:bg-blue-200"
-                      >
-                        Edit Member
-                      </button>
+                    </td>
 
+                    <td className="px-4 py-4 text-sm text-slate-700">
+                      {formatMemberCreatedAt(member.created_at)}
                     </td>
 
                     <td className="px-4 py-4">
@@ -1417,10 +1427,6 @@ function goToPage(value) {
                         className="w-28 rounded-xl border border-slate-300 px-3 py-2"
                         placeholder="DUPR ID"
                       />
-                    </td>
-
-                    <td className="px-4 py-4 text-sm text-slate-700">
-                      {formatMemberCreatedAt(member.created_at)}
                     </td>
 
                     <td className="px-4 py-4">
@@ -1439,22 +1445,6 @@ function goToPage(value) {
                         }}
                         className="w-32 rounded-xl border border-slate-300 px-3 py-2"
                         placeholder="3.999 or NR"
-                      />
-                    </td>
-
-                    <td className="px-4 py-4">
-                      <textarea
-                        key={`${member.id}-${selectedSeason}-dupr-notes`}
-                        defaultValue={getRating(member.id, "notes")}
-                        onBlur={(e) =>
-                          updateRating(
-                            member.id,
-                            "notes",
-                            e.target.value
-                          )
-                        }
-                        className="min-h-16 w-48 resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm"
-                        placeholder="DUPR notes"
                       />
                     </td>
 
@@ -1496,6 +1486,22 @@ function goToPage(value) {
                         }
                         className="w-32 rounded-xl border border-slate-300 px-3 py-2"
                         placeholder="3.50"
+                      />
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <textarea
+                        key={`${member.id}-${selectedSeason}-dupr-notes`}
+                        defaultValue={getRating(member.id, "notes")}
+                        onBlur={(e) =>
+                          updateRating(
+                            member.id,
+                            "notes",
+                            e.target.value
+                          )
+                        }
+                        className="min-h-16 w-48 resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm"
+                        placeholder="DUPR notes"
                       />
                     </td>
                   </tr>
@@ -1562,6 +1568,38 @@ function SortHeader({ active, direction, label, onClick }) {
       </span>
       <span>{label}</span>
     </button>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <rect x="8" y="8" width="11" height="11" rx="2" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
   );
 }
 
