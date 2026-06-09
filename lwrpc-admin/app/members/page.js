@@ -787,16 +787,16 @@ export default function MembersPage() {
             />
           </div>
 
-          <div className="overflow-visible">
-          <table className="min-w-[1250px] table-fixed">
+          <div className="hidden overflow-visible md:block">
+          <table className="min-w-[1265px] table-fixed">
             <colgroup>
               <col className="w-[250px]" />
               <col className="w-[160px]" />
+              <col className="w-[190px]" />
               <col className="w-[145px]" />
-              <col className="w-[130px]" />
               <col className="w-[115px]" />
-              <col className="w-[170px]" />
-              <col className="w-[280px]" />
+              <col className="w-[155px]" />
+              <col className="w-[250px]" />
             </colgroup>
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
@@ -832,7 +832,7 @@ export default function MembersPage() {
                     onClick={() => changeSort("dupr_id")}
                   />
                 </th>
-                <th className="sticky right-[450px] top-0 z-30 bg-slate-900 px-4 py-4 text-left shadow-[-10px_0_16px_-16px_rgba(15,23,42,0.8)]" aria-sort={sortAria("status", sortConfig)}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("status", sortConfig)}>
                   <SortHeader
                     active={sortConfig.key === "status"}
                     direction={sortConfig.direction}
@@ -840,7 +840,7 @@ export default function MembersPage() {
                     onClick={() => changeSort("status")}
                   />
                 </th>
-                <th className="sticky right-[280px] top-0 z-30 bg-slate-900 px-4 py-4 text-left shadow-[-10px_0_16px_-16px_rgba(15,23,42,0.8)]" aria-sort={sortAria("role", sortConfig)}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("role", sortConfig)}>
                   <div className="flex items-center gap-2">
                     <SortHeader
                       active={sortConfig.key === "role"}
@@ -888,7 +888,7 @@ export default function MembersPage() {
                     {member.club_location || "—"}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm text-slate-700">
+                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm tabular-nums text-slate-700">
                     {formatPhoneNumberForStorage(member.phone) || "—"}
                   </td>
 
@@ -896,7 +896,7 @@ export default function MembersPage() {
                     {member.dupr_id || "—"}
                   </td>
 
-                  <td className="sticky right-[450px] z-10 bg-white px-4 py-4 align-middle shadow-[-10px_0_16px_-16px_rgba(15,23,42,0.45)] group-hover:bg-slate-50">
+                  <td className="bg-white px-4 py-4 align-middle group-hover:bg-slate-50">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${
                         member.is_active_member === false
@@ -908,7 +908,7 @@ export default function MembersPage() {
                     </span>
                   </td>
 
-                  <td className="sticky right-[280px] z-10 whitespace-nowrap bg-white px-4 py-4 align-middle text-sm font-semibold text-slate-700 shadow-[-10px_0_16px_-16px_rgba(15,23,42,0.45)] group-hover:bg-slate-50">
+                  <td className="whitespace-nowrap bg-white px-4 py-4 align-middle text-sm font-semibold text-slate-700 group-hover:bg-slate-50">
                     {getMemberRole(member)}
                   </td>
 
@@ -965,6 +965,49 @@ export default function MembersPage() {
               )}
             </tbody>
           </table>
+          </div>
+
+          <div className="divide-y divide-slate-100 md:hidden">
+            {pagedMembers.map((member) => (
+              <div key={member.id} className="px-4 py-4">
+                <div className="font-semibold text-slate-900">
+                  {member.last_name}, {member.first_name}
+                </div>
+
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/members/${member.id}?edit=1`)}
+                    className="h-10 whitespace-nowrap rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white hover:bg-slate-700"
+                  >
+                    Edit
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openMemberTeams(member)}
+                    className="h-10 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white hover:bg-emerald-800"
+                  >
+                    Teams ({member.teams?.length || 0})
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => resetMemberPassword(member)}
+                    disabled={resettingPasswordMemberId === member.id}
+                    className="h-10 whitespace-nowrap rounded-lg bg-blue-700 px-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {resettingPasswordMemberId === member.id ? "Sending..." : "Reset Password"}
+                  </button>
+                </div>
+              </div>
+            ))}
+
+            {pagedMembers.length === 0 && (
+              <div className="px-4 py-10 text-center text-slate-500">
+                No members found.
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end border-t border-slate-200 px-4 py-4">

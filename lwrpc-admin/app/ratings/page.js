@@ -210,13 +210,13 @@ export default function RatingsPage() {
     }
   }
 
-  function getRating(memberId, field) {
+  const getRating = useCallback(function getRating(memberId, field) {
     const row = ratings.find(
       (r) => r.member_id === memberId && r.season_id === selectedSeason
     );
 
     return row?.[field] ?? "";
-  }
+  }, [ratings, selectedSeason]);
 
   async function updateMemberDuprId(memberId, value) {
     const cleanValue = String(value || "").trim() || null;
@@ -320,6 +320,21 @@ export default function RatingsPage() {
     if (memberSort.field !== field) return "";
     return memberSort.direction === "desc" ? " ↓" : " ↑";
   }
+
+  const compareRatingValues = useCallback(function compareRatingValues(a, b, field) {
+    const aValue = getRating(a.id, field);
+    const bValue = getRating(b.id, field);
+    const aNumber = Number(aValue);
+    const bNumber = Number(bValue);
+    const aHasNumber = aValue !== "" && !Number.isNaN(aNumber);
+    const bHasNumber = bValue !== "" && !Number.isNaN(bNumber);
+
+    if (aHasNumber && bHasNumber) return aNumber - bNumber;
+    if (aHasNumber) return -1;
+    if (bHasNumber) return 1;
+
+    return String(aValue || "").localeCompare(String(bValue || ""));
+  }, [getRating]);
 
   async function deleteRatingsForSelectedSeason() {
     if (!selectedSeason) {
@@ -909,9 +924,17 @@ export default function RatingsPage() {
         result = aTime - bTime || compareMemberName(a, b);
       }
 
+      if (memberSort.field === "dupr_id") {
+        result = String(a.dupr_id || "").localeCompare(String(b.dupr_id || "")) || compareMemberName(a, b);
+      }
+
+      if (["dupr_doubles_rating", "season_dupr_rating", "season_primetime_rating"].includes(memberSort.field)) {
+        result = compareRatingValues(a, b, memberSort.field) || compareMemberName(a, b);
+      }
+
       return memberSort.direction === "desc" ? -result : result;
     });
-  }, [currentRosterMemberIds, hasDoublesRating, hasNumericRating, memberSort, members, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly]);
+  }, [compareRatingValues, currentRosterMemberIds, hasDoublesRating, hasNumericRating, memberSort, members, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
@@ -1278,8 +1301,8 @@ function goToPage(value) {
         )}
 
         <div className="mt-6 rounded-2xl bg-white shadow">
-          <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-4 md:flex-row md:items-center md:justify-between">
-            <div className="text-sm text-slate-600">
+          <div className="flex flex-col gap-2 border-b border-slate-200 px-4 py-2 md:flex-row md:items-center md:justify-between">
+            <div className="text-xs text-slate-600">
               Showing{" "}
               <span className="font-semibold text-slate-900">
                 {filteredMembers.length === 0
@@ -1296,15 +1319,18 @@ function goToPage(value) {
               </span>{" "}
               players
               {ratingsLoading ? " - loading ratings..." : ""}
+              <span className="ml-2 inline-flex whitespace-nowrap rounded-full bg-blue-100 px-3 py-1 text-sm font-black uppercase text-blue-900">
+                Based on the {selectedSeasonLabel()}
+              </span>
             </div>
 
-<div className="flex justify-end border-t border-slate-200 px-4 py-4">
+<div className="flex justify-end">
 
   <div className="flex flex-wrap items-center gap-2">
     <button
       disabled={page <= 1}
       onClick={() => setPage((p) => Math.max(1, p - 1))}
-      className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+      className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
     >
       Previous
     </button>
@@ -1319,13 +1345,13 @@ function goToPage(value) {
       max={totalPages}
       value={page}
       onChange={(e) => goToPage(e.target.value)}
-      className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+      className="w-20 rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
     />
 
     <button
       disabled={page >= totalPages}
       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-      className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+      className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
     >
       Next
     </button>
@@ -1354,11 +1380,39 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("created_at")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR ID</th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Doubles ({selectedSeasonLabel()})</th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">Season DUPR ({selectedSeasonLabel()})</th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">Age-Based ({selectedSeasonLabel()})</th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Notes ({selectedSeasonLabel()})</th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("dupr_id", memberSort)} data-sort-indicator={sortIndicator("dupr_id")}>
+                  <SortHeader
+                    active={memberSort.field === "dupr_id"}
+                    direction={memberSort.direction}
+                    label="DUPR ID"
+                    onClick={() => toggleMemberSort("dupr_id")}
+                  />
+                </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("dupr_doubles_rating", memberSort)} data-sort-indicator={sortIndicator("dupr_doubles_rating")}>
+                  <SortHeader
+                    active={memberSort.field === "dupr_doubles_rating"}
+                    direction={memberSort.direction}
+                    label="DUPR Doubles"
+                    onClick={() => toggleMemberSort("dupr_doubles_rating")}
+                  />
+                </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("season_dupr_rating", memberSort)} data-sort-indicator={sortIndicator("season_dupr_rating")}>
+                  <SortHeader
+                    active={memberSort.field === "season_dupr_rating"}
+                    direction={memberSort.direction}
+                    label="Season DUPR"
+                    onClick={() => toggleMemberSort("season_dupr_rating")}
+                  />
+                </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("season_primetime_rating", memberSort)} data-sort-indicator={sortIndicator("season_primetime_rating")}>
+                  <SortHeader
+                    active={memberSort.field === "season_primetime_rating"}
+                    direction={memberSort.direction}
+                    label="Age-Based"
+                    onClick={() => toggleMemberSort("season_primetime_rating")}
+                  />
+                </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Notes</th>
               </tr>
             </thead>
 

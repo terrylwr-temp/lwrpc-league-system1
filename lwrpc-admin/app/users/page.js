@@ -230,7 +230,7 @@ if (loading) {
 
         </div>
 
-        <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+        <div className="mt-6 overflow-visible rounded-2xl bg-white shadow">
 
           <table className="w-full border-collapse">
 
@@ -238,7 +238,7 @@ if (loading) {
 
               <tr>
 
-                <th className="p-4 text-left" aria-sort={sortAria("member", sortConfig)}>
+                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("member", sortConfig)}>
                   <SortHeader
                     active={sortConfig.key === "member"}
                     direction={sortConfig.direction}
@@ -247,7 +247,7 @@ if (loading) {
                   />
                 </th>
 
-                <th className="p-4 text-left" aria-sort={sortAria("location", sortConfig)}>
+                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("location", sortConfig)}>
                   <SortHeader
                     active={sortConfig.key === "location"}
                     direction={sortConfig.direction}
@@ -256,7 +256,7 @@ if (loading) {
                   />
                 </th>
 
-                <th className="p-4 text-left" aria-sort={sortAria("last_login", sortConfig)}>
+                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("last_login", sortConfig)}>
                   <SortHeader
                     active={sortConfig.key === "last_login"}
                     direction={sortConfig.direction}
@@ -265,7 +265,7 @@ if (loading) {
                   />
                 </th>
 
-                <th className="p-4 text-left" aria-sort={sortAria("role", sortConfig)}>
+                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("role", sortConfig)}>
                   <div className="flex items-center gap-2">
                     <SortHeader
                       active={sortConfig.key === "role"}
@@ -285,7 +285,7 @@ if (loading) {
                   </div>
                 </th>
 
-                <th className="p-4 text-left" aria-sort={sortAria("change_role", sortConfig)}>
+                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("change_role", sortConfig)}>
                   <SortHeader
                     active={sortConfig.key === "change_role"}
                     direction={sortConfig.direction}

@@ -397,14 +397,14 @@ function DirectorHeader({ state, systemSettings, smsEnabled, exitToLms, tourname
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-2 text-sm font-black text-white hover:bg-blue-900" href={`/tourney/${tournamentKey}/display`}>
-            Public Display
-          </Link>
           <span
             className={`rounded-full px-4 py-2 text-sm font-black ${smsEnabled ? "bg-emerald-700 text-white" : "bg-rose-950 text-rose-100"}`}
           >
             SMS {smsEnabled ? "ON" : "OFF"}
           </span>
+          <Link className="rounded-xl border border-blue-300/40 bg-blue-950 px-4 py-2 text-sm font-black text-white hover:bg-blue-900" href={`/tourney/${tournamentKey}/display`}>
+            Public Display
+          </Link>
           <button type="button" onClick={exitToLms} className="rounded-xl border border-blue-400/50 bg-blue-950 px-4 py-2 text-sm font-black text-white hover:bg-blue-900">
             Exit to LMS
           </button>
@@ -1128,19 +1128,22 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
   const divisionsById = useMemo(() => Object.fromEntries(activeDivisions.map((division) => [division.id, division])), [activeDivisions]);
   const divisionOrder = useMemo(() => activeDivisions.map((division) => division.name), [activeDivisions]);
   const [teamFilter, setTeamFilter] = useState("all");
+  const [playerFilter, setPlayerFilter] = useState("");
   const [editingTeam, setEditingTeam] = useState(null);
   const [addingTeam, setAddingTeam] = useState(false);
   const [checkInPrompt, setCheckInPrompt] = useState(null);
+  const cleanPlayerFilter = playerFilter.trim();
   const teamsByDivision = useMemo(() => {
     return state.teams
       .filter((team) => activeDivisionIds.has(String(team.division_id)))
       .filter((team) => teamFilter === "all" || !teamReady(team))
+      .filter((team) => teamMatchesPlayerFilter(team, contactsByTeam[String(team.id)] || [], cleanPlayerFilter))
       .reduce((map, team) => {
         const division = divisionsById[team.division_id]?.name || "Unassigned";
         map[division] = [...(map[division] || []), team];
         return map;
       }, {});
-  }, [activeDivisionIds, state.teams, divisionsById, teamFilter]);
+  }, [activeDivisionIds, state.teams, divisionsById, teamFilter, contactsByTeam, cleanPlayerFilter]);
 
   const divisionEntries = useMemo(() => {
     return Object.entries(teamsByDivision)
@@ -1235,7 +1238,17 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
     <section className="mt-5 space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-black">Team List</h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <label className="min-w-[260px] flex-1">
+            <span className="sr-only">Find player by name or phone number</span>
+            <input
+              type="search"
+              value={playerFilter}
+              onChange={(event) => setPlayerFilter(event.target.value)}
+              placeholder="Find player by name or phone"
+              className="h-11 w-full rounded-xl border border-blue-300/40 bg-blue-950 px-4 text-sm font-semibold text-white placeholder:text-blue-200 focus:border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-300/40"
+            />
+          </label>
           <button
             type="button"
             onClick={() => setAddingTeam(true)}
@@ -3077,6 +3090,24 @@ function playerSummary(team, contacts, slot) {
     name || `Player ${slot}`,
     phone ? `(${phone})` : "",
   ].filter(Boolean).join(" ");
+}
+
+function teamMatchesPlayerFilter(team, contacts, query) {
+  const cleanQuery = String(query || "").trim().toLowerCase();
+  if (!cleanQuery) return true;
+
+  const queryDigits = cleanQuery.replace(/\D/g, "");
+  const candidates = [
+    team.player_1_name,
+    team.player_2_name,
+    ...(contacts || []).flatMap((contact) => [contact.display_name, contact.phone]),
+  ];
+
+  return candidates.some((value) => {
+    const text = String(value || "").toLowerCase();
+    if (text.includes(cleanQuery)) return true;
+    return Boolean(queryDigits && text.replace(/\D/g, "").includes(queryDigits));
+  });
 }
 
 function playerDisplayName(team, contacts, slot) {
