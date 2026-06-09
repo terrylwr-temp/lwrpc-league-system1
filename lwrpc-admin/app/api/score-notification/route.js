@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { sendEmailMessages, sendSmsMessages } from "../../lib/notifications";
 import { EMAIL_TEMPLATE_KEYS, renderEmailTemplate } from "../../lib/emailTemplates";
 import { loadEmailTemplate, loadServerSystemSettings } from "../../lib/serverEmailTemplates";
+import { formatDisplayDateWithWeekday } from "../../lib/dateTime";
 
 export const runtime = "nodejs";
 
@@ -40,7 +41,7 @@ export async function POST(req) {
     const rendered = renderEmailTemplate(template, {
       home_team: homeTeam || "Home",
       away_team: awayTeam || "Away",
-      match_date: matchDate || "N/A",
+      match_date: formatDisplayDateWithWeekday(matchDate, "N/A"),
       score: score || "N/A",
       actor_name: enteredBy || "Unknown",
       league_site_url: systemSettings.league_site_url,

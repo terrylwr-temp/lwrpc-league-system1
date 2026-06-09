@@ -5,6 +5,7 @@ import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { EMAIL_TEMPLATE_KEYS, renderEmailTemplate } from "../../lib/emailTemplates";
 import { loadEmailTemplate, loadServerSystemSettings } from "../../lib/serverEmailTemplates";
 import { hasRole } from "../../lib/permissions";
+import { formatDisplayDateWithWeekday, formatDisplayTime } from "../../lib/dateTime";
 
 export const runtime = "nodejs";
 
@@ -228,8 +229,8 @@ export async function POST(req) {
             league: league.name || "League",
             home_team: formatTeamName(match.home_team),
             away_team: formatTeamName(match.away_team),
-            match_date: match.scheduled_date || "Date TBD",
-            match_time: match.scheduled_time || "Time TBD",
+            match_date: formatDisplayDateWithWeekday(match.scheduled_date, "Date TBD"),
+            match_time: formatDisplayTime(match.scheduled_time, "Time TBD"),
             division: match.divisions?.name || "Division",
             location: match.locations?.name || "Location TBD",
             league_site_url: systemSettings.league_site_url,

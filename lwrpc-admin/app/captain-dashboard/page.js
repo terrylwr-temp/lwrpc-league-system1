@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import { requireRole, supabase } from "../lib/auth";
-import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
+import { formatDisplayDate, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import TeamScheduleModal from "../components/TeamScheduleModal";
@@ -1189,7 +1189,7 @@ export default function CaptainDashboardPage() {
       )
     );
 
-    const notificationSent = await sendFlexScheduleNotification(updatedMatch).catch((notificationError) => {
+    const notificationSent = await sendFlexScheduleNotification(updatedMatch, flexScheduleMatch).catch((notificationError) => {
       console.warn("Flex schedule notification failed.", notificationError);
       return false;
     });
@@ -1206,41 +1206,28 @@ export default function CaptainDashboardPage() {
     );
   }
 
-  async function sendFlexScheduleNotification(match) {
+  async function sendFlexScheduleNotification(match, previousMatch = null) {
     const { emails, phones } = splitNotificationRecipients(teamCaptainContactsOnly(match.away_team));
 
     if (emails.length === 0 && phones.length === 0) {
       return false;
     }
 
-    const subject = `Flex League Match Scheduled: ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`;
-    const text = [
-      "Flex League match date/time has been updated.",
-      "",
-      `Match: ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}`,
-      `League: ${match.leagues?.name || "League"}`,
-      `Division: ${match.divisions?.name || "Division"}`,
-      `Date: ${formatDate(match.scheduled_date)}`,
-      `Time: ${formatDisplayTime(match.scheduled_time, "Time TBD")}`,
-      `Location: ${match.locations?.name || "No Location"}`,
-      "",
-      "Please contact the home captain if this date/time needs to be adjusted.",
-    ].join("\n");
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Flex League Match Scheduled</h2>
-        <p>The home team has updated the match date/time.</p>
-        <p>
-          <strong>Match:</strong> ${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")}<br />
-          <strong>League:</strong> ${escapeHtml(match.leagues?.name || "League")}<br />
-          <strong>Division:</strong> ${escapeHtml(match.divisions?.name || "Division")}<br />
-          <strong>Date:</strong> ${escapeHtml(formatDate(match.scheduled_date))}<br />
-          <strong>Time:</strong> ${escapeHtml(formatDisplayTime(match.scheduled_time, "Time TBD"))}<br />
-          <strong>Location:</strong> ${escapeHtml(match.locations?.name || "No Location")}
-        </p>
-        <p>Please contact the home captain if this date/time needs to be adjusted.</p>
-      </div>
-    `;
+    const template = await loadClientEmailTemplate(EMAIL_TEMPLATE_KEYS.flexDateTimeChange);
+    const rendered = renderEmailTemplate(template, {
+      home_team: match.home_team?.name || "Home",
+      away_team: match.away_team?.name || "Away",
+      league: match.leagues?.name || "League",
+      division: match.divisions?.name || "Division",
+      previous_match_date: formatEmailDate(previousMatch?.scheduled_date || match.scheduled_date),
+      previous_match_time: formatDisplayTime(previousMatch?.scheduled_time, "Time TBD"),
+      match_date: formatEmailDate(match.scheduled_date),
+      match_time: formatDisplayTime(match.scheduled_time, "Time TBD"),
+      location: match.locations?.name || "No Location",
+      home_captain_contacts: teamCaptainContactsHtml(match.home_team),
+      league_site_url: systemSettings.league_site_url,
+      main_email: systemSettings.main_email,
+    });
 
     const response = await fetch("/api/notifications", {
       method: "POST",
@@ -1248,10 +1235,10 @@ export default function CaptainDashboardPage() {
       body: JSON.stringify({
         emails,
         phones,
-        subject,
-        text,
-        html,
-        smsBody: text,
+        subject: rendered.subject,
+        text: rendered.text,
+        html: rendered.html,
+        smsBody: rendered.text,
       }),
     });
 
@@ -1678,7 +1665,7 @@ export default function CaptainDashboardPage() {
       opponent_team: opponentTeam?.name || "Opponent",
       home_team: setupMatch.home_team?.name || "Home",
       away_team: setupMatch.away_team?.name || "Away",
-      match_date: formatDate(setupMatch.scheduled_date),
+      match_date: formatEmailDate(setupMatch.scheduled_date),
       match_time: formatDisplayTime(setupMatch.scheduled_time, "Time TBD"),
       division: setupTeam.divisions?.name || setupMatch.divisions?.name || "Division",
       lineup_list: htmlLineups,
@@ -3453,6 +3440,10 @@ function formatDate(value) {
   return formatDisplayDate(value, "-");
 }
 
+function formatEmailDate(value) {
+  return formatDisplayDateWithWeekday(value, "Date TBD");
+}
+
 function formatScoreStatus(match) {
   const status = match?.score_status || "not_entered";
 
@@ -3684,6 +3675,30 @@ function teamCaptainContactsOnly(team) {
     seen.add(key);
     return true;
   });
+}
+
+function teamCaptainContactsHtml(team) {
+  const contacts = [
+    { label: "Captain", member: team?.captain },
+    { label: "Co-Captain 1", member: team?.co_captain_1 },
+    { label: "Co-Captain 2", member: team?.co_captain_2 },
+  ].filter(({ member }) => member);
+  const seen = new Set();
+  const lines = [];
+
+  contacts.forEach(({ label, member }) => {
+    const key = member.email || member.id;
+
+    if (!key || seen.has(key)) return;
+
+    seen.add(key);
+    const name = formatMemberName(member);
+    const email = String(member.email || "").trim();
+    const contactText = email ? `${name} <${email}>` : name;
+    lines.push(`${escapeHtml(label)}: ${escapeHtml(contactText)}`);
+  });
+
+  return lines.length > 0 ? lines.join("<br />") : "Home captain contact not listed.";
 }
 
 function formatMemberName(member) {

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
+import { formatDisplayDate, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
 
@@ -788,7 +788,7 @@ function scoreSubmitterSide(match) {
 function scoreReminderValues(matches) {
   const matchLines = matches.length > 0
     ? `<ul>${matches.map((match) => {
-      return `<li><strong>${escapeHtml(formatDate(match.scheduled_date))} at ${escapeHtml(formatDisplayTime(match.scheduled_time, "TBD"))}</strong>: ${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")} (${escapeHtml(match.divisions?.name || "No Division")}, score status: ${escapeHtml(scoreStatusLabel(match.score_status))})</li>`;
+      return `<li><strong>${escapeHtml(formatEmailDate(match.scheduled_date))} at ${escapeHtml(formatDisplayTime(match.scheduled_time, "TBD"))}</strong>: ${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")} (${escapeHtml(match.divisions?.name || "No Division")}, score status: ${escapeHtml(scoreStatusLabel(match.score_status))})</li>`;
     }).join("")}</ul>`
     : "<p><em>Selected matches will appear here when reminders are sent.</em></p>";
   const firstMatch = matches[0] || {};
@@ -796,7 +796,7 @@ function scoreReminderValues(matches) {
   return {
     home_team: firstMatch.home_team?.name || "Home",
     away_team: firstMatch.away_team?.name || "Away",
-    match_date: firstMatch.scheduled_date ? formatDate(firstMatch.scheduled_date) : "TBD",
+    match_date: firstMatch.scheduled_date ? formatEmailDate(firstMatch.scheduled_date) : "TBD",
     match_time: formatDisplayTime(firstMatch.scheduled_time, "TBD"),
     division: firstMatch.divisions?.name || "No Division",
     score_status: scoreStatusLabel(firstMatch.score_status),
@@ -838,6 +838,10 @@ function formatMemberName(member) {
 
 function formatDate(value) {
   return formatDisplayDate(value, "TBD");
+}
+
+function formatEmailDate(value) {
+  return formatDisplayDateWithWeekday(value, "TBD");
 }
 
 function localDateString() {

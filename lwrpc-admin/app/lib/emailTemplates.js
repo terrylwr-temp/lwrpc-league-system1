@@ -7,6 +7,7 @@ export const EMAIL_TEMPLATE_KEYS = {
   scoreValidated: "score_validated",
   scoreChanged: "score_changed",
   matchSetupReminder: "match_setup_reminder",
+  flexDateTimeChange: "flex_date_time_change",
   ratingCheckAlert: "rating_check_alert",
 };
 
@@ -129,6 +130,32 @@ export const EMAIL_TEMPLATES = [
     <strong>Location:</strong> {{location}}
   </p>
   <p>Open the Captain Dashboard and use Match Setup for this match.</p>
+</div>`,
+  },
+  {
+    key: EMAIL_TEMPLATE_KEYS.flexDateTimeChange,
+    label: "Flex Date/Time Change",
+    description: "Sent to opposing captains when a home captain changes a Flex League match date/time.",
+    placeholders: withCommonPlaceholders(["{{home_team}}", "{{away_team}}", "{{league}}", "{{division}}", "{{previous_match_date}}", "{{previous_match_time}}", "{{match_date}}", "{{match_time}}", "{{location}}", "{{home_captain_contacts}}"]),
+    defaultSubject: "Flex Date/Time Change: {{home_team}} vs {{away_team}}",
+    defaultBody: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
+  <h2>Flex Date/Time Change</h2>
+  <p>The home team has updated the date/time for this Flex League match.</p>
+  <p>
+    <strong>League:</strong> {{league}}<br />
+    <strong>Division:</strong> {{division}}<br />
+    <strong>Match:</strong> {{home_team}} vs {{away_team}}<br />
+    <strong>Previous Date/Time:</strong> {{previous_match_date}} at {{previous_match_time}}<br />
+    <strong>Updated Date/Time:</strong> {{match_date}} at {{match_time}}<br />
+    <strong>Location:</strong> {{location}}
+  </p>
+  <p>
+    <strong>Home Captain Contacts:</strong><br />
+    {{home_captain_contacts}}
+  </p>
+  <p>Please contact the home captain if this date/time needs to be adjusted.</p>
+  <hr />
+  <p style="font-size: 12px; color: #666;">LWRPC League Management System</p>
 </div>`,
   },
   {
@@ -284,16 +311,19 @@ export function sampleTemplateValues() {
     captain_contacts: "Captain: Jane Captain <jane@example.com><br />Co-Captain 1: Pat Partner <pat@example.com>",
     division: "3.5 Mixed",
     home_team: "Lakewood Ranch Dinkers",
+    home_captain_contacts: "Captain: Jane Captain &lt;jane@example.com&gt;<br />Co-Captain 1: Pat Partner &lt;pat@example.com&gt;",
     league: "Spring League",
     lineup_list: "<li><strong>Team 1:</strong> Alex Player (DUPR: 3.72) / Morgan Player (DUPR: 3.51) <strong>Team Rating:</strong> 7.23</li><li><strong>Team 2:</strong> Casey Player (DUPR: 3.44) / Taylor Player (DUPR: 3.33) <strong>Team Rating:</strong> 6.77</li>",
     location: "Lakewood Ranch Country Club",
     match_count: "1",
-    match_date: "06/04/2026",
+    match_date: "06/04/2026 Thursday",
     match_time: "6:00 PM",
     matches: "<ul><li><strong>06/04/2026 at 6:00 PM</strong>: Lakewood Ranch Dinkers vs River Strand Aces (3.5 Mixed, score status: not entered)</li></ul>",
     opponent_setup_status: "Please log into the Captain Dashboard and enter your match setup if you have not already done so.",
     opponent_team: "River Strand Aces",
     player_name: "Sam Sample",
+    previous_match_date: "06/03/2026 Wednesday",
+    previous_match_time: "5:30 PM",
     rating_range: "3.000 to 3.499",
     rating_type: "DUPR",
     reason: "Player is missing a season DUPR rating.",
