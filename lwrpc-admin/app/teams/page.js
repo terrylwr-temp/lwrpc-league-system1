@@ -120,9 +120,6 @@ export default function TeamsPage() {
   const filteredTeams = useMemo(() => {
     const q = teamSearch.trim().toLowerCase();
     const sortedTeams = [...teams].sort((a, b) => {
-      const nameCompare = (a.name || "").localeCompare(b.name || "");
-      if (nameCompare !== 0) return nameCompare;
-
       const leagueCompare = (a.divisions?.leagues?.name || "").localeCompare(
         b.divisions?.leagues?.name || ""
       );
@@ -134,6 +131,9 @@ export default function TeamsPage() {
       );
 
       if (divisionCompare !== 0) return divisionCompare;
+
+      const nameCompare = (a.name || "").localeCompare(b.name || "");
+      if (nameCompare !== 0) return nameCompare;
 
       return String(a.id || "").localeCompare(String(b.id || ""));
     });
@@ -180,7 +180,18 @@ export default function TeamsPage() {
       groupMap[groupKey].teams.push(team);
     });
 
-    return groups;
+    return groups
+      .map((group) => ({
+        ...group,
+        teams: [...group.teams].sort((a, b) =>
+          (a.name || "").localeCompare(b.name || "") ||
+          String(a.id || "").localeCompare(String(b.id || ""))
+        ),
+      }))
+      .sort((a, b) =>
+        a.leagueName.localeCompare(b.leagueName) ||
+        a.divisionName.localeCompare(b.divisionName)
+      );
   }, [filteredTeams]);
 
   const checkAuth = useCallback(async function checkAuth() {

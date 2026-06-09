@@ -584,20 +584,22 @@ export default function DivisionsPage() {
   const filteredDivisions = useMemo(() => {
     const search = divisionSearch.trim().toLowerCase();
 
-    return divisions.filter((division) => {
-      const matchesLeague = !leagueFilter || division.league_id === leagueFilter;
-      const matchesName =
-        !search || (division.name || "").toLowerCase().includes(search);
-      const matchesActiveScope =
-        showInactiveDivisions ||
-        (
-          division.is_active !== false &&
-          division.leagues?.is_active !== false &&
-          division.leagues?.seasons?.is_active !== false
-        );
+    return divisions
+      .filter((division) => {
+        const matchesLeague = !leagueFilter || division.league_id === leagueFilter;
+        const matchesName =
+          !search || (division.name || "").toLowerCase().includes(search);
+        const matchesActiveScope =
+          showInactiveDivisions ||
+          (
+            division.is_active !== false &&
+            division.leagues?.is_active !== false &&
+            division.leagues?.seasons?.is_active !== false
+          );
 
-      return matchesActiveScope && matchesLeague && matchesName;
-    });
+        return matchesActiveScope && matchesLeague && matchesName;
+      })
+      .sort(compareDivisionsByLeagueThenName);
   }, [divisions, divisionSearch, leagueFilter, showInactiveDivisions]);
 
   const groupedDivisions = useMemo(() => {
@@ -615,7 +617,11 @@ export default function DivisionsPage() {
       groups[groupName].push(division);
     });
 
-    return groups;
+    return Object.fromEntries(
+      Object.entries(groups)
+        .map(([groupName, rows]) => [groupName, [...rows].sort(compareDivisionsByLeagueThenName)])
+        .sort(([, aRows], [, bRows]) => compareDivisionsByLeagueThenName(aRows[0] || {}, bRows[0] || {}))
+    );
   }, [filteredDivisions]);
 
   const activeLeagues = useMemo(() => {
@@ -988,6 +994,13 @@ export default function DivisionsPage() {
                               <div className="text-lg font-bold text-slate-900">
                                 {division.name}
                               </div>
+                              <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                                division.is_active === false
+                                  ? "bg-slate-200 text-slate-700"
+                                  : "bg-emerald-100 text-emerald-800"
+                              }`}>
+                                {division.is_active === false ? "Inactive" : "Active"}
+                              </div>
                             </div>
 
                             <div className="flex shrink-0 flex-col items-start gap-2 sm:items-end">
@@ -1052,14 +1065,6 @@ export default function DivisionsPage() {
                             <div className="mt-1 text-sm text-slate-600">
                               <span className="font-semibold text-slate-700">League:</span>{" "}
                               {division.leagues?.name || "No League"}
-                            </div>
-
-                            <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
-                              division.is_active === false
-                                ? "bg-slate-200 text-slate-700"
-                                : "bg-emerald-100 text-emerald-800"
-                            }`}>
-                              {division.is_active === false ? "Inactive" : "Active"}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">
@@ -1307,6 +1312,14 @@ function ratingNumber(value) {
   if (Number.isNaN(number)) return null;
 
   return Math.round((number + Number.EPSILON) * 100) / 100;
+}
+
+function compareDivisionsByLeagueThenName(a, b) {
+  return (
+    String(a?.leagues?.name || "").localeCompare(String(b?.leagues?.name || "")) ||
+    String(a?.name || "").localeCompare(String(b?.name || "")) ||
+    String(a?.id || "").localeCompare(String(b?.id || ""))
+  );
 }
 
 function copyDivisionPayload(division, leagueId, name) {
