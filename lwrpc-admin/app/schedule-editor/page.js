@@ -1212,180 +1212,218 @@ export default function ScheduleEditorPage() {
 
         <div className="rounded-2xl bg-white p-6 shadow">
 
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
 
             <h2 className="text-xl font-bold text-slate-900">
               Schedule Filters
             </h2>
 
-            <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-              <div className="text-xs uppercase tracking-wide text-slate-300">
-                Matches
-              </div>
+            <div className="flex flex-wrap items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="h-11 whitespace-nowrap rounded-xl bg-slate-200 px-5 text-sm font-bold text-slate-800 hover:bg-slate-300"
+              >
+                Clear Filters
+              </button>
 
-              <div className="text-2xl font-bold">
-                {filteredMatches.length}
+              <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
+                <div className="text-xs uppercase tracking-wide text-slate-300">
+                  Matches
+                </div>
+
+                <div className="text-2xl font-bold">
+                  {filteredMatches.length}
+                </div>
               </div>
             </div>
 
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-12">
-
-            <select
-              value={leagueFilter}
-              onChange={e => {
-                setLeagueFilter(e.target.value);
-                setDivisionFilters([]);
-              }}
-              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-2"
-            >
-              <option value="">All Leagues</option>
-
-              {leagues.map(league => (
-                <option
-                  key={league.id}
-                  value={league.id}
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <label className="block">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  League
+                </span>
+                <select
+                  value={leagueFilter}
+                  onChange={e => {
+                    setLeagueFilter(e.target.value);
+                    setDivisionFilters([]);
+                  }}
+                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"
                 >
-                  {league.name}
-                </option>
-              ))}
-            </select>
+                  <option value="">All Leagues</option>
 
-            <div className="max-h-32 overflow-y-auto rounded-xl border border-slate-300 bg-white px-3 py-2 md:col-span-4">
+                  {leagues.map(league => (
+                    <option
+                      key={league.id}
+                      value={league.id}
+                    >
+                      {league.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Location
+                </span>
+                <select
+                  value={locationFilter}
+                  onChange={e => setLocationFilter(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"
+                >
+                  <option value="">All Locations</option>
+
+                  {locations.map(location => (
+                    <option
+                      key={location.id}
+                      value={location.id}
+                    >
+                      {location.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Week
+                </span>
+                <select
+                  value={weekFilter}
+                  onChange={e => setWeekFilter(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"
+                >
+                  <option value="">All Weeks</option>
+
+                  {weeks.map(week => (
+                    <option
+                      key={week}
+                      value={week}
+                    >
+                      Week {week}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Status
+                </span>
+                <select
+                  value={publishedFilter}
+                  onChange={e => setPublishedFilter(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"
+                >
+                  <option value="all">
+                    Published + Draft
+                  </option>
+
+                  <option value="draft">
+                    Draft Only
+                  </option>
+
+                  <option value="published">
+                    Published Only
+                  </option>
+                </select>
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Team
+                </span>
+                <input
+                  type="search"
+                  value={teamNameFilter}
+                  onChange={e => setTeamNameFilter(e.target.value)}
+                  placeholder="Team name"
+                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Keyword
+                </span>
+                <input
+                  type="search"
+                  value={matchSearch}
+                  onChange={e => setMatchSearch(e.target.value)}
+                  placeholder="Keyword search"
+                  title="Searches league, division, teams, location, status, date, and notes."
+                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Match Date
+                </span>
+                <input
+                  type="date"
+                  value={dateFilter}
+                  onChange={e => setDateFilter(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"
+                  aria-label="Specific match date"
+                />
+              </label>
+
+              <label className="block">
+                <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  Sort
+                </span>
+                <select
+                  value={sortBy}
+                  onChange={e => setSortBy(e.target.value)}
+                  className="h-11 w-full rounded-xl border border-slate-300 px-3 text-sm"
+                >
+                  <option value="date">Sort by Date</option>
+                  <option value="location">Sort by Location</option>
+                  <option value="week">Sort by Week</option>
+                  <option value="league">Sort by League</option>
+                  <option value="division">Sort by Division</option>
+                  <option value="team">Sort by Home Team</option>
+                </select>
+              </label>
+            </div>
+
+            <div>
               <div className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-500">
                 Divisions
               </div>
 
-              <label className="flex items-center gap-2 border-b border-slate-100 py-1 text-sm font-semibold text-slate-800">
-                <input
-                  type="checkbox"
-                  checked={divisionFilters.length === 0}
-                  onChange={selectAllDivisions}
-                />
-                <span>All Divisions</span>
-              </label>
-
-              {filteredDivisions.map(division => (
-                <label key={division.id} className="flex items-center gap-2 py-0.5 text-sm text-slate-700">
+              <div className="max-h-32 overflow-y-auto rounded-xl border border-slate-300 bg-white px-3 py-2">
+                <label className="flex items-center gap-2 border-b border-slate-100 py-1 text-sm font-semibold text-slate-800">
                   <input
                     type="checkbox"
-                    checked={divisionFilters.includes(division.id)}
-                    onChange={() => toggleDivisionFilter(division.id)}
+                    checked={divisionFilters.length === 0}
+                    onChange={selectAllDivisions}
                   />
-                  <span className="truncate">{division.name}</span>
+                  <span>All Divisions</span>
                 </label>
-              ))}
 
-              {filteredDivisions.length === 0 && (
-                <div className="text-sm text-slate-500">No divisions</div>
-              )}
+                {filteredDivisions.map(division => (
+                  <label key={division.id} className="flex items-center gap-2 py-0.5 text-sm text-slate-700">
+                    <input
+                      type="checkbox"
+                      checked={divisionFilters.includes(division.id)}
+                      onChange={() => toggleDivisionFilter(division.id)}
+                    />
+                    <span className="truncate">{division.name}</span>
+                  </label>
+                ))}
+
+                {filteredDivisions.length === 0 && (
+                  <div className="text-sm text-slate-500">No divisions</div>
+                )}
+              </div>
             </div>
-
-            <select
-              value={locationFilter}
-              onChange={e => setLocationFilter(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-2"
-            >
-              <option value="">All Locations</option>
-
-              {locations.map(location => (
-                <option
-                  key={location.id}
-                  value={location.id}
-                >
-                  {location.name}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={weekFilter}
-              onChange={e => setWeekFilter(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3"
-            >
-              <option value="">All Weeks</option>
-
-              {weeks.map(week => (
-                <option
-                  key={week}
-                  value={week}
-                >
-                  Week {week}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={publishedFilter}
-              onChange={e => setPublishedFilter(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-2"
-            >
-              <option value="all">
-                Published + Draft
-              </option>
-
-              <option value="draft">
-                Draft Only
-              </option>
-
-              <option value="published">
-                Published Only
-              </option>
-            </select>
-
-            <input
-              type="search"
-              value={teamNameFilter}
-              onChange={e => setTeamNameFilter(e.target.value)}
-              placeholder="Team name"
-              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
-            />
-
-            <input
-              type="search"
-              value={matchSearch}
-              onChange={e => setMatchSearch(e.target.value)}
-              placeholder="Keyword search"
-              title="Searches league, division, teams, location, status, date, and notes."
-              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
-            />
-
-            <label className="md:col-span-3">
-              <span className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">
-                Match Date
-              </span>
-              <input
-                type="date"
-                value={dateFilter}
-                onChange={e => setDateFilter(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                aria-label="Specific match date"
-              />
-              <span className="mt-1 block text-xs font-semibold text-slate-500">
-                Use the picker or enter MM/DD/YYYY.
-              </span>
-            </label>
-
-            <select
-              value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
-              className="rounded-xl border border-slate-300 px-4 py-3 md:col-span-3"
-            >
-              <option value="date">Sort by Date</option>
-              <option value="location">Sort by Location</option>
-              <option value="week">Sort by Week</option>
-              <option value="league">Sort by League</option>
-              <option value="division">Sort by Division</option>
-              <option value="team">Sort by Home Team</option>
-            </select>
-
-            <button
-              onClick={clearFilters}
-              className="rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300"
-            >
-              Clear Filters
-            </button>
 
           </div>
 

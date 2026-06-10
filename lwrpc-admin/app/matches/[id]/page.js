@@ -1223,10 +1223,14 @@ export default function MatchDetailPage() {
     }
 
     if (scoringOperationsOverride) {
-      await rebuildDivisionStandings();
+      const standingsResult = await rebuildDivisionStandings();
       await sendScoreNotification("changed");
 
-      alert("Scores submitted, verified, standings updated, and match captains notified.");
+      alert(
+        standingsResult?.byeAdjustmentApplied
+          ? "Scores submitted, verified, final bye adjustments applied, standings updated, and match captains notified."
+          : "Scores submitted, verified, standings updated, and match captains notified."
+      );
     } else {
       await sendScoreNotification("submitted");
 
@@ -1276,10 +1280,14 @@ export default function MatchDetailPage() {
       return;
     }
 
-    await rebuildDivisionStandings();
+    const standingsResult = await rebuildDivisionStandings();
     await sendScoreNotification("verified");
 
-    alert("Scores verified and standings updated.");
+    alert(
+      standingsResult?.byeAdjustmentApplied
+        ? "Scores verified, final bye adjustments applied, and standings updated."
+        : "Scores verified and standings updated."
+    );
 
     setScoreDirty(false);
     router.push(matchReturnPath());
@@ -1448,11 +1456,13 @@ export default function MatchDetailPage() {
   }
 
   async function rebuildDivisionStandings() {
-    if (!match?.division_id) return;
+    if (!match?.division_id) return null;
 
     const result = await rebuildDivisionStandingsForDivision(supabase, match.division_id);
 
     if (!result.success) alert(result.error || "Unable to rebuild standings.");
+
+    return result;
   }
 
   useEffect(() => {

@@ -875,12 +875,29 @@ export default function MembersPage() {
                   className="group cursor-pointer border-b border-slate-100 hover:bg-slate-50"
                 >
                   <td className="px-4 py-4 align-middle">
-                    <div className="truncate font-semibold text-slate-900">
-                      {member.last_name}, {member.first_name}
-                    </div>
+                    <div className="flex items-start gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate font-semibold text-slate-900">
+                          {member.last_name}, {member.first_name}
+                        </div>
 
-                    <div className="mt-1 truncate text-sm text-slate-500">
-                      {member.email || "No Email"}
+                        <div className="mt-1 truncate text-sm text-slate-500">
+                          {member.email || "No Email"}
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/members/${member.id}?edit=1`);
+                        }}
+                        aria-label={`Edit member ${member.first_name} ${member.last_name}`}
+                        title="Edit member"
+                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      >
+                        <EditIcon />
+                      </button>
                     </div>
                   </td>
 
@@ -913,18 +930,7 @@ export default function MembersPage() {
                   </td>
 
                   <td className="sticky right-0 z-20 bg-white px-4 py-4 text-right align-middle group-hover:bg-slate-50">
-                    <div className="flex flex-wrap justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          router.push(`/members/${member.id}?edit=1`);
-                        }}
-                        className="h-9 whitespace-nowrap rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white hover:bg-slate-700"
-                      >
-                        Edit
-                      </button>
-
+                    <div className="flex flex-nowrap justify-end gap-2">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -970,19 +976,23 @@ export default function MembersPage() {
           <div className="divide-y divide-slate-100 md:hidden">
             {pagedMembers.map((member) => (
               <div key={member.id} className="px-4 py-4">
-                <div className="font-semibold text-slate-900">
-                  {member.last_name}, {member.first_name}
-                </div>
+                <div className="flex items-start gap-2">
+                  <div className="min-w-0 flex-1 font-semibold text-slate-900">
+                    {member.last_name}, {member.first_name}
+                  </div>
 
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
                   <button
                     type="button"
                     onClick={() => router.push(`/members/${member.id}?edit=1`)}
-                    className="h-10 whitespace-nowrap rounded-lg bg-slate-900 px-3 text-sm font-semibold text-white hover:bg-slate-700"
+                    aria-label={`Edit member ${member.first_name} ${member.last_name}`}
+                    title="Edit member"
+                    className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300"
                   >
-                    Edit
+                    <EditIcon />
                   </button>
+                </div>
 
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   <button
                     type="button"
                     onClick={() => openMemberTeams(member)}
@@ -1684,6 +1694,22 @@ function FormField({ label, children }) {
       <span className="mb-1 block text-sm font-bold text-slate-700">{label}</span>
       {children}
     </label>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="h-4 w-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="2"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 20h9" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+    </svg>
   );
 }
 

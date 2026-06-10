@@ -192,6 +192,7 @@ export default function PlayerDashboardPage() {
       const [
         { data, error },
         { data: teamByeRows, error: teamByeError },
+        { data: publishedDivisionMatches, error: publishedDivisionMatchesError },
         { data: standingsRows, error: standingsError },
       ] = await Promise.all([
         supabase
@@ -304,6 +305,11 @@ export default function PlayerDashboardPage() {
           .in("team_id", teamIds)
           .order("bye_date", { ascending: true }),
         supabase
+          .from("matches")
+          .select("id, division_id, week_number, scheduled_date")
+          .in("division_id", divisionIds.length > 0 ? divisionIds : ["00000000-0000-0000-0000-000000000000"])
+          .eq("is_published", true),
+        supabase
           .from("team_standings")
           .select(`
             *,
@@ -329,6 +335,12 @@ export default function PlayerDashboardPage() {
         return;
       }
 
+      if (publishedDivisionMatchesError) {
+        alert(publishedDivisionMatchesError.message);
+        setLoading(false);
+        return;
+      }
+
       if (standingsError) {
         alert(standingsError.message);
         setLoading(false);
@@ -336,7 +348,7 @@ export default function PlayerDashboardPage() {
       }
 
       matchData = data || [];
-      byeData = filterByesForPublishedSchedule(teamByeRows || [], matchData);
+      byeData = filterByesForPublishedSchedule(teamByeRows || [], publishedDivisionMatches || []);
       standingsData = standingsRows || [];
       const matchTeamIds = [
         ...new Set(
@@ -2076,31 +2088,59 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
 
 function ByeSummaryCard({ bye }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 shadow-sm">
-      <div className="h-1 bg-amber-500" />
-      <div className="px-4 py-4">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="font-bold text-amber-950">
-              Bye Week
+    <div className="overflow-hidden rounded-2xl border border-amber-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+      <div className="bg-gradient-to-r from-amber-700 to-orange-700 px-4 py-3 text-white">
+        <div className="text-xs font-black uppercase tracking-wide text-white/80">
+          Week {bye.week_number || "-"}
+        </div>
+        <div className="mt-1 text-lg font-black">
+          {bye.teams?.name || "Team"} Bye Week
+        </div>
+      </div>
+
+      <div className="p-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
+            <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-950">
+              BYE WEEK
+            </span>
+            <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+              No Match Scheduled
+            </span>
+            <span className="rounded-full bg-orange-100 px-2 py-1 text-orange-900">
+              Week {bye.week_number || "-"}
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
+            <div className="rounded-lg bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                Date
+              </div>
+              <div className="font-black text-slate-950">
+                {formatDate(bye.bye_date)}
+              </div>
             </div>
-            <div className="mt-1 flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
-              <span className="rounded-full bg-amber-200 px-2 py-0.5 text-amber-950">
-                {bye.teams?.name || "Team"}
-              </span>
-              <span className="rounded-full bg-white px-2 py-0.5 text-amber-900">
-                No Match Scheduled
-              </span>
+            <div className="rounded-lg bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                Division
+              </div>
+              <div className="font-black text-slate-950">
+                {bye.divisions?.name || "No Division"}
+              </div>
             </div>
-            <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-amber-900">
-              <span>{formatDate(bye.bye_date)}</span>
-              <span>{bye.divisions?.name || "No Division"}</span>
-              <span>Week {bye.week_number || "-"}</span>
+            <div className="rounded-lg bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                Status
+              </div>
+              <div className="font-black text-slate-950">
+                BYE WEEK
+              </div>
             </div>
           </div>
 
-          <div className="rounded-xl bg-white px-4 py-2 text-center text-sm font-black uppercase tracking-wide text-amber-900">
-            Bye
+          <div className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-black text-amber-950">
+            {bye.teams?.name || "Team"} has no match scheduled.
           </div>
         </div>
       </div>

@@ -101,6 +101,79 @@ function sortStandingsRows(rows, division) {
   });
 }
 
+function scheduleWeekKey(divisionId, weekNumber, date) {
+  return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
+}
+
+function filterByesForPublishedSchedule(byes, matches) {
+  const publishedScheduleKeys = new Set(
+    (matches || []).map((match) =>
+      scheduleWeekKey(match.division_id, match.week_number, match.scheduled_date)
+    )
+  );
+
+  return (byes || []).filter((bye) =>
+    publishedScheduleKeys.has(scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date))
+  );
+}
+
+function publishedScheduleIsFullyVerified(matches) {
+  const publishedMatches = matches || [];
+
+  return (
+    publishedMatches.length > 0 &&
+    publishedMatches.every((match) =>
+      match.status === "completed" && match.score_status === "verified"
+    )
+  );
+}
+
+function roundStandingsPoints(value) {
+  return Math.round(Number(value || 0) * 100) / 100;
+}
+
+function applyFinalByeAdjustments(rows, byes, publishedMatches) {
+  if (!publishedScheduleIsFullyVerified(publishedMatches)) {
+    return { rows, applied: false };
+  }
+
+  const byeCountsByTeamId = filterByesForPublishedSchedule(byes, publishedMatches).reduce((counts, bye) => {
+    const key = String(bye.team_id || "");
+    if (!key) return counts;
+
+    counts[key] = (counts[key] || 0) + 1;
+    return counts;
+  }, {});
+
+  const rowByeCounts = (rows || []).map((row) =>
+    byeCountsByTeamId[String(row.team_id || "")] || 0
+  );
+  const hasBye = rowByeCounts.some((count) => count > 0);
+  const hasNoBye = rowByeCounts.some((count) => count === 0);
+
+  if (!hasBye || !hasNoBye) {
+    return { rows, applied: false };
+  }
+
+  let applied = false;
+  const adjustedRows = rows.map((row) => {
+    const byeCount = byeCountsByTeamId[String(row.team_id || "")] || 0;
+    if (byeCount <= 0 || Number(row.matches_played || 0) <= 0) return row;
+
+    const averagePoints = Number(row.standings_points || 0) / Number(row.matches_played || 0);
+    const adjustment = averagePoints * byeCount;
+    if (adjustment > 0) applied = true;
+
+    row.standings_points = roundStandingsPoints(
+      Number(row.standings_points || 0) + adjustment
+    );
+
+    return row;
+  });
+
+  return { rows: adjustedRows, applied };
+}
+
 export async function rebuildDivisionStandingsForDivision(supabase, divisionId) {
   if (!divisionId) {
     return { success: false, error: "Select a division before rebuilding statistics." };
@@ -163,6 +236,21 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
     .order("scheduled_time", { ascending: true });
 
   if (matchesError) return { success: false, error: matchesError.message };
+
+  const { data: publishedMatches, error: publishedMatchesError } = await supabase
+    .from("matches")
+    .select("id, division_id, week_number, scheduled_date, status, score_status")
+    .eq("division_id", divisionId)
+    .eq("is_published", true);
+
+  if (publishedMatchesError) return { success: false, error: publishedMatchesError.message };
+
+  const { data: divisionByes, error: byesError } = await supabase
+    .from("team_byes")
+    .select("id, team_id, division_id, week_number, bye_date")
+    .eq("division_id", divisionId);
+
+  if (byesError) return { success: false, error: byesError.message };
 
   const standingsMap = {};
 
@@ -307,11 +395,17 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
     if (matchUpdateError) return { success: false, error: matchUpdateError.message };
   }
 
-  const ordered = sortStandingsRows(
+  const finalByeAdjustment = applyFinalByeAdjustments(
     Object.values(standingsMap).map((team) => {
       team.point_differential = team.points_for - team.points_against;
       return applyRecentFields(team);
     }),
+    divisionByes || [],
+    publishedMatches || []
+  );
+
+  const ordered = sortStandingsRows(
+    finalByeAdjustment.rows,
     division
   );
 
@@ -337,5 +431,6 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
     success: true,
     teams: ordered.length,
     matches: (verifiedMatches || []).length,
+    byeAdjustmentApplied: finalByeAdjustment.applied,
   };
 }

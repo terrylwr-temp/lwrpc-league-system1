@@ -17,6 +17,8 @@ export default function StandingsPage() {
   const [leagues, setLeagues] = useState([]);
   const [divisions, setDivisions] = useState([]);
   const [standings, setStandings] = useState([]);
+  const [publishedMatches, setPublishedMatches] = useState([]);
+  const [byeRows, setByeRows] = useState([]);
   const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("");
   const [currentUserRole, setCurrentUserRole] = useState("player");
@@ -57,9 +59,30 @@ export default function StandingsPage() {
       `)
       .order("rank", { ascending: true });
 
+    const { data: publishedMatchData, error: publishedMatchError } = await supabase
+      .from("matches")
+      .select("id, division_id, week_number, scheduled_date")
+      .eq("is_published", true);
+
+    const { data: byeData, error: byeError } = await supabase
+      .from("team_byes")
+      .select("id, team_id, division_id, week_number, bye_date");
+
+    if (publishedMatchError) {
+      alert(publishedMatchError.message);
+      return;
+    }
+
+    if (byeError) {
+      alert(byeError.message);
+      return;
+    }
+
     setLeagues((leagueData || []).filter((league) => league.is_active !== false && league.seasons?.is_active !== false));
     setDivisions((divisionData || []).filter((division) => division.is_active !== false));
     setStandings(standingsData || []);
+    setPublishedMatches(publishedMatchData || []);
+    setByeRows(byeData || []);
 
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -116,13 +139,28 @@ export default function StandingsPage() {
       return row.teams?.is_active !== false;
     });
 
-    return sortStandingsByDivisionRules(visibleRows, selectedDivisionRow);
+    const divisionMatches = publishedMatches.filter(
+      (match) => String(match.division_id) === String(selectedDivision)
+    );
+    const divisionByes = filterByesForPublishedSchedule(
+      byeRows.filter((bye) => String(bye.division_id) === String(selectedDivision)),
+      divisionMatches
+    );
+
+    return sortStandingsByDivisionRules(
+      applyByeCounts(visibleRows, divisionByes),
+      selectedDivisionRow
+    );
   }, [
     standings,
+    publishedMatches,
+    byeRows,
     selectedLeague,
     selectedDivision,
     selectedDivisionRow
   ]);
+
+  const showByesColumn = filteredStandings.some((team) => Number(team.bye_count || 0) > 0);
 
   const playoffTeamCount = Number(selectedDivisionRow?.playoff_team_count || 0);
   const playoffTeamIds = useMemo(() => {
@@ -472,14 +510,16 @@ if (loading) {
                         Pts
                       </div>
                       <div className="text-xl font-black">
-                        {team.standings_points}
+                        {formatStandingNumber(team.standings_points)}
                       </div>
                     </div>
                   </div>
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
                     <StandingStat label="W-L-T" value={`${team.match_wins}-${team.match_losses}-${team.match_ties}`} />
-                    <StandingStat label="Teams" value={`${team.line_wins}-${team.line_losses}`} />
+                    {showByesColumn && (
+                      <StandingStat label="Byes" value={team.bye_count || 0} />
+                    )}
                     <StandingStat label="Games" value={`${team.game_wins}-${team.game_losses}`} />
                     <StandingStat label="Home" value={`${team.home_wins}-${team.home_losses}`} />
                     <StandingStat label="Away" value={`${team.away_wins}-${team.away_losses}`} />
@@ -516,10 +556,6 @@ if (loading) {
                 </th>
 
                 <th className="p-3 text-left">
-                  Teams
-                </th>
-
-                <th className="p-3 text-left">
                   Games
                 </th>
 
@@ -550,6 +586,12 @@ if (loading) {
                 <th className="p-3 text-left">
                   Streak
                 </th>
+
+                {showByesColumn && (
+                  <th className="p-3 text-left">
+                    Byes
+                  </th>
+                )}
 
                 <th className="p-3 text-left">
                   Pts
@@ -597,11 +639,6 @@ if (loading) {
                   </td>
 
                   <td className="p-3">
-                    {team.line_wins}-
-                    {team.line_losses}
-                  </td>
-
-                  <td className="p-3">
                     {team.game_wins}-
                     {team.game_losses}
                   </td>
@@ -636,8 +673,14 @@ if (loading) {
                     {team.current_streak || "-"}
                   </td>
 
+                  {showByesColumn && (
+                    <td className="p-3 font-semibold text-amber-700">
+                      {team.bye_count || 0}
+                    </td>
+                  )}
+
                   <td className="p-3 font-bold text-blue-700">
-                    {team.standings_points}
+                    {formatStandingNumber(team.standings_points)}
                   </td>
 
                 </tr>
@@ -711,6 +754,32 @@ function filterByesForPublishedSchedule(byes, matches) {
   return byes.filter((bye) =>
     publishedScheduleKeys.has(scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date))
   );
+}
+
+function applyByeCounts(rows, byes) {
+  const byeCountsByTeamId = (byes || []).reduce((counts, bye) => {
+    const key = String(bye.team_id || "");
+    if (!key) return counts;
+
+    counts[key] = (counts[key] || 0) + 1;
+    return counts;
+  }, {});
+
+  return (rows || []).map((row) => {
+    const byeCount = byeCountsByTeamId[String(row.team_id || row.id || "")] || 0;
+
+    return {
+      ...row,
+      bye_count: byeCount,
+    };
+  });
+}
+
+function formatStandingNumber(value) {
+  const number = Number(value || 0);
+  if (Number.isInteger(number)) return String(number);
+
+  return number.toFixed(2).replace(/\.?0+$/, "");
 }
 
 function compareDivisionScheduleTeams(a, b) {

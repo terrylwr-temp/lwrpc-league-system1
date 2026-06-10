@@ -177,15 +177,21 @@ function ScheduleByeCard({ bye }) {
       <div className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
-            <div className="inline-flex rounded-full bg-amber-200 px-3 py-1 text-xs font-black uppercase tracking-wide text-amber-950">
-              Bye Week
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-950 sm:text-sm">
+                {formatDate(bye.bye_date)}
+              </div>
+              <div className="inline-flex rounded-full bg-amber-500 px-3 py-1 text-xs font-black uppercase tracking-wide text-white sm:text-sm">
+                BYE WEEK
+              </div>
+              <div className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white sm:text-sm">
+                Week {bye.week_number || "-"}
+              </div>
             </div>
             <div className="mt-2 text-base font-black text-amber-950 sm:text-lg">
               {bye.teams?.name || "Team"} has no match scheduled
             </div>
             <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold text-amber-900">
-              <span>{formatDate(bye.bye_date)}</span>
-              <span>Week {bye.week_number || "-"}</span>
               <span>{bye.divisions?.name || "Division"}</span>
             </div>
           </div>

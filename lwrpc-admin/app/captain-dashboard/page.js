@@ -253,6 +253,7 @@ export default function CaptainDashboardPage() {
     });
 
     const teamIds = captainTeams.map((team) => team.id);
+    const divisionIds = [...new Set(captainTeams.map((team) => team.divisions?.id).filter(Boolean))];
 
     if (teamIds.length === 0) {
       setMatches([]);
@@ -451,6 +452,18 @@ export default function CaptainDashboardPage() {
 
     setMatches(matchData || []);
 
+    const { data: publishedDivisionMatches, error: publishedDivisionMatchesError } = await supabase
+      .from("matches")
+      .select("id, division_id, week_number, scheduled_date")
+      .in("division_id", divisionIds.length > 0 ? divisionIds : ["00000000-0000-0000-0000-000000000000"])
+      .eq("is_published", true);
+
+    if (publishedDivisionMatchesError) {
+      alert(publishedDivisionMatchesError.message);
+      setLoading(false);
+      return;
+    }
+
     const matchTeamIds = [
       ...new Set(
         [
@@ -558,17 +571,7 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    const publishedScheduleKeys = new Set(
-      (matchData || []).map((match) =>
-        scheduleWeekKey(match.division_id, match.week_number, match.scheduled_date)
-      )
-    );
-
-    setByeWeeks(
-      (byeData || []).filter((bye) =>
-        publishedScheduleKeys.has(scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date))
-      )
-    );
+    setByeWeeks(filterByesForPublishedSchedule(byeData || [], publishedDivisionMatches || []));
     finishLoading(startedAt, setLoading);
   }, [loadMatchSetupStatus, router]);
 
@@ -4392,19 +4395,49 @@ function byeCard(bye) {
   return (
     <div
       key={`bye-${bye.id}`}
-      className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2"
+      className="overflow-hidden rounded-2xl border border-amber-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-amber-900">
-          <span className="font-bold">BYE WEEK</span>
-          <span>{bye.teams?.name || "—"}</span>
-          <span>{bye.divisions?.name || "—"}</span>
-          <span>Week {bye.week_number || "—"}</span>
-          <span>{formatDate(bye.bye_date)}</span>
+      <div className="bg-gradient-to-r from-amber-700 to-orange-700 px-4 py-3 text-white">
+        <div className="text-xs font-black uppercase tracking-wide text-white/80">
+          Week {bye.week_number || "-"}
         </div>
+        <div className="mt-1 text-lg font-black">
+          {bye.teams?.name || "Team"} Bye Week
+        </div>
+      </div>
 
-        <div className="rounded-lg bg-amber-200 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-amber-900">
-          No Match Scheduled
+      <div className="p-4">
+        <div className="min-w-0">
+          <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
+            <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-950">
+              BYE WEEK
+            </span>
+            <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
+              No Match Scheduled
+            </span>
+            <span className="rounded-full bg-orange-100 px-2 py-1 text-orange-900">
+              Week {bye.week_number || "-"}
+            </span>
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
+            <div className="rounded-xl bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">Date</div>
+              <div className="font-bold text-slate-900">{formatDate(bye.bye_date)}</div>
+            </div>
+            <div className="rounded-xl bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">Division</div>
+              <div className="font-bold text-slate-900">{bye.divisions?.name || "No Division"}</div>
+            </div>
+            <div className="rounded-xl bg-slate-50 px-3 py-2">
+              <div className="text-xs font-black uppercase tracking-wide text-slate-500">Status</div>
+              <div className="font-bold text-slate-900">BYE WEEK</div>
+            </div>
+          </div>
+
+          <div className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-black text-amber-950">
+            {bye.teams?.name || "Team"} has no match scheduled.
+          </div>
         </div>
       </div>
     </div>
