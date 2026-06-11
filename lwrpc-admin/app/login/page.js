@@ -7,7 +7,6 @@ import { supabase } from "../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { defaultDashboardForRole } from "../lib/permissions";
 import { passkeyErrorMessage } from "../lib/passkeyErrors";
-import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 
@@ -415,14 +414,6 @@ export default function LoginPage() {
             </div>
           </div>
         )}
-
-        <div className="mt-6 text-center text-xs leading-relaxed text-slate-500">
-          © {COPYRIGHT_YEAR} {clubName}.
-          <br />
-          All rights reserved.
-          <br />
-          Version {APP_VERSION}
-        </div>
 
       </div>
 
