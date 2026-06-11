@@ -43,12 +43,14 @@ export async function POST(req) {
     if (action === "updateStatus") {
       const result = await updatePlayerSessionStatus(supabase, group, player, body);
       const history = await loadPlayerHistory(supabase, group, player);
-      return NextResponse.json({ success: true, group: sanitizeGroup(group), player: sanitizePlayer(player), systemSettings: sanitizeSystemSettings(systemSettings), history, ...result });
+      const hostSetup = await loadHostSetupData(supabase, group, result.sessions);
+      return NextResponse.json({ success: true, group: sanitizeGroup(group), player: sanitizePlayer(player), systemSettings: sanitizeSystemSettings(systemSettings), history, ...hostSetup, ...result });
     }
 
     const sessions = await loadPlayerSessions(supabase, group, player);
     const history = await loadPlayerHistory(supabase, group, player);
-    return NextResponse.json({ success: true, group: sanitizeGroup(group), player: sanitizePlayer(player), systemSettings: sanitizeSystemSettings(systemSettings), sessions, history });
+    const hostSetup = await loadHostSetupData(supabase, group, sessions);
+    return NextResponse.json({ success: true, group: sanitizeGroup(group), player: sanitizePlayer(player), systemSettings: sanitizeSystemSettings(systemSettings), sessions, history, ...hostSetup });
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message },
@@ -122,7 +124,7 @@ async function loadPlayerSessions(supabase, group, player) {
 
   const sessionsResult = await supabase
     .from("round_robin_sessions")
-    .select("id, session_name, location, session_date, starts_at, status, max_players, repeats_weekly, host_player_id, cohost_player_id, updated_at")
+    .select("id, session_name, location, session_date, starts_at, status, max_players, repeats_weekly, invited_group_ids, host_player_id, cohost_player_id, updated_at")
     .eq("group_id", group.id)
     .gte("session_date", today)
     .in("status", ["draft", "open", "playing"])
@@ -135,14 +137,24 @@ async function loadPlayerSessions(supabase, group, player) {
   ));
   if (sessions.length === 0) return [];
 
-  const sessionPlayerCountsResult = await supabase
+  const sessionPlayerRowsResult = await supabase
     .from("round_robin_session_players")
-    .select("session_id, response_status")
+    .select("id, session_id, player_id, display_name, email, phone, response_status, sort_order")
     .in("session_id", sessions.map((session) => session.id));
-  if (sessionPlayerCountsResult.error) throw sessionPlayerCountsResult.error;
+  if (sessionPlayerRowsResult.error) throw sessionPlayerRowsResult.error;
+  const activeSessionPlayerRows = await filterActiveSessionPlayers(supabase, group.id, sessionPlayerRowsResult.data || []);
 
   const playerRowBySession = new Map(playerRows.map((row) => [String(row.session_id), row]));
-  const countsBySession = sessionPlayerCountsResult.data.reduce((counts, row) => {
+  const sessionPlayersBySession = activeSessionPlayerRows.reduce((map, row) => {
+    const key = String(row.session_id || "");
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(row);
+    return map;
+  }, new Map());
+  sessionPlayersBySession.forEach((rows) => {
+    rows.sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0) || String(a.displayName || "").localeCompare(String(b.displayName || "")));
+  });
+  const countsBySession = activeSessionPlayerRows.reduce((counts, row) => {
     const key = String(row.session_id);
     counts[key] ||= { joined: 0, invited: 0, declined: 0, waitlist: 0 };
     if (counts[key][row.response_status] !== undefined) counts[key][row.response_status] += 1;
@@ -153,16 +165,18 @@ async function loadPlayerSessions(supabase, group, player) {
     const counts = countsBySession[String(session.id)] || { joined: 0, invited: 0, declined: 0, waitlist: 0 };
     const playerRow = playerRowBySession.get(String(session.id));
     const maxPlayers = Number(session.max_players || 0);
+    const canManageSession = isSessionHost(session, player.id);
     return {
       ...session,
       playerStatus: playerRow?.response_status || "invited",
       hasPlayerResponse: Boolean(playerRow),
-      canManageSession: isSessionHost(session, player.id),
+      canManageSession,
       hostRole: hostRoleForSession(session, player.id),
       joinedCount: counts.joined,
       invitedCount: counts.invited,
       declinedCount: counts.declined,
       waitlistCount: counts.waitlist,
+      sessionPlayers: (sessionPlayersBySession.get(String(session.id)) || []).map((row) => sanitizeSessionPlayer(row, canManageSession)),
       maxPlayers,
       isFull: maxPlayers > 0 && counts.joined >= maxPlayers,
     };
@@ -255,6 +269,7 @@ async function updatePlayerSessionStatus(supabase, group, player, body) {
   }
 
   const sessionPlayers = await loadSessionPlayers(supabase, session.id);
+  const activeSessionPlayers = await filterActiveSessionPlayers(supabase, group.id, sessionPlayers);
   const target = sessionPlayers.find((row) => String(row.player_id || "") === String(player.id));
   if (!target) {
     const error = new Error("You are not currently invited to this session.");
@@ -264,7 +279,7 @@ async function updatePlayerSessionStatus(supabase, group, player, body) {
 
   let resolvedStatus = requestedStatus;
   if (requestedStatus === "joined" && session.max_players) {
-    const joinedCount = sessionPlayers.filter((row) => row.response_status === "joined" && String(row.player_id || "") !== String(player.id)).length;
+    const joinedCount = activeSessionPlayers.filter((row) => row.response_status === "joined" && String(row.player_id || "") !== String(player.id)).length;
     if (joinedCount >= Number(session.max_players)) resolvedStatus = "waitlist";
   }
 
@@ -304,11 +319,29 @@ async function loadSessionPlayers(supabase, sessionId) {
   return data || [];
 }
 
+async function filterActiveSessionPlayers(supabase, groupId, sessionPlayers = []) {
+  const playerIds = [...new Set((sessionPlayers || [])
+    .map((player) => String(player.player_id || "").trim())
+    .filter(Boolean))];
+  if (playerIds.length === 0) return sessionPlayers || [];
+
+  const { data, error } = await supabase
+    .from("round_robin_players")
+    .select("id")
+    .eq("group_id", groupId)
+    .eq("is_active", true)
+    .in("id", playerIds);
+  if (error) throw error;
+
+  const activePlayerIds = new Set((data || []).map((player) => String(player.id)));
+  return (sessionPlayers || []).filter((player) => !player.player_id || activePlayerIds.has(String(player.player_id)));
+}
+
 async function promoteWaitlistSpots(supabase, session) {
   const maxPlayers = Number(session?.max_players || 0);
   if (!maxPlayers) return [];
 
-  const players = await loadSessionPlayers(supabase, session.id);
+  const players = await filterActiveSessionPlayers(supabase, session.group_id, await loadSessionPlayers(supabase, session.id));
   const joinedCount = players.filter((player) => player.response_status === "joined").length;
   const openSpots = maxPlayers - joinedCount;
   if (openSpots <= 0) return [];
@@ -334,6 +367,9 @@ function sanitizeGroup(group) {
     name: group.name,
     slug: group.slug,
     mode: group.mode,
+    settings: {
+      smsSendingEnabled: group.settings?.smsSendingEnabled === true,
+    },
   };
 }
 
@@ -342,6 +378,61 @@ function sanitizePlayer(player) {
     id: player.id,
     displayName: player.display_name,
     firstName: player.first_name,
+  };
+}
+
+function sanitizeSessionPlayer(player, includeContact = false) {
+  const payload = {
+    id: player.id,
+    playerId: player.player_id,
+    displayName: player.display_name,
+    responseStatus: player.response_status || "invited",
+    sortOrder: player.sort_order,
+  };
+  if (includeContact) {
+    payload.email = player.email || "";
+    payload.phone = player.phone || "";
+  }
+  return payload;
+}
+
+async function loadHostSetupData(supabase, group, sessions = []) {
+  const hasHostSession = (sessions || []).some((session) => session.canManageSession);
+  if (!hasHostSession) {
+    return { players: [], playerGroups: [], playerGroupMembers: [] };
+  }
+
+  const [playersResult, groupsResult] = await Promise.all([
+    supabase
+      .from("round_robin_players")
+      .select("id, display_name, first_name, phone, email, is_active")
+      .eq("group_id", group.id)
+      .eq("is_active", true)
+      .order("display_name", { ascending: true }),
+    supabase
+      .from("round_robin_player_groups")
+      .select("id, name, description, is_active")
+      .eq("group_id", group.id)
+      .eq("is_active", true)
+      .order("name", { ascending: true }),
+  ]);
+  if (playersResult.error) throw playersResult.error;
+  if (groupsResult.error) throw groupsResult.error;
+
+  const groupIds = (groupsResult.data || []).map((row) => row.id);
+  const membershipsResult = groupIds.length > 0
+    ? await supabase
+      .from("round_robin_player_group_members")
+      .select("id, player_group_id, player_id")
+      .in("player_group_id", groupIds)
+    : { data: [], error: null };
+  if (membershipsResult.error) throw membershipsResult.error;
+
+  return {
+    players: playersResult.data || [],
+    playerGroups: groupsResult.data || [],
+    playerGroupMembers: membershipsResult.data || [],
+    smsTemplates: group.settings?.smsTemplates || {},
   };
 }
 

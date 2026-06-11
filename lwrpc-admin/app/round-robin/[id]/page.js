@@ -20,9 +20,9 @@ export default function RoundRobinPublicPage() {
 
   const rounds = useMemo(() => groupMatchesByRound(state?.matches || []), [state]);
 
-  if (loading) return <Shell title="Loading Round Robin..." />;
-  if (error) return <Shell title="Round Robin" error={error} />;
-  if (!state) return <Shell title="Round Robin" error="Round Robin group not found." />;
+  if (loading) return <Shell title="Loading PBCourtCommand..." />;
+  if (error) return <Shell title="PBCourtCommand" error={error} />;
+  if (!state) return <Shell title="PBCourtCommand" error="PBCourtCommand group not found." />;
 
   const group = state.group;
   const key = group.slug || group.id;
@@ -122,7 +122,7 @@ function Shell({ title, subtitle, error, playerHref, adminHref, children }) {
           <div className="p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs font-black uppercase tracking-wide text-teal-200">Round Robin</div>
+              <div className="text-xs font-black uppercase tracking-wide text-teal-200">PBCourtCommand</div>
               <h1 className="text-3xl font-black sm:text-4xl">{title}</h1>
               {subtitle && <p className="mt-1 text-sm font-semibold text-slate-300">{subtitle}</p>}
             </div>
@@ -134,7 +134,7 @@ function Shell({ title, subtitle, error, playerHref, adminHref, children }) {
               )}
               {adminHref && (
                 <Link className="rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg" href={adminHref}>
-                  Manager
+                  Admin Setup
                 </Link>
               )}
             </div>

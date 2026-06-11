@@ -8,7 +8,38 @@ import { roundRobinModeLabel } from "../../../lib/roundRobins";
 import { roundRobinPlayerLabel } from "../../../lib/roundRobinSchedule";
 
 const TABS = ["Session", "Players", "Groups", "Courts", "Settings", "SMS", "Log"];
+const TAB_TONES = {
+  Session: {
+    active: "border-teal-700 bg-teal-600 text-white ring-2 ring-teal-200",
+    idle: "border-teal-200 bg-teal-50 text-teal-950 hover:border-teal-400 hover:bg-teal-100",
+  },
+  Players: {
+    active: "border-blue-700 bg-blue-600 text-white ring-2 ring-blue-200",
+    idle: "border-blue-200 bg-blue-50 text-blue-950 hover:border-blue-400 hover:bg-blue-100",
+  },
+  Groups: {
+    active: "border-emerald-700 bg-emerald-600 text-white ring-2 ring-emerald-200",
+    idle: "border-emerald-200 bg-emerald-50 text-emerald-950 hover:border-emerald-400 hover:bg-emerald-100",
+  },
+  Courts: {
+    active: "border-cyan-700 bg-cyan-600 text-white ring-2 ring-cyan-200",
+    idle: "border-cyan-200 bg-cyan-50 text-cyan-950 hover:border-cyan-400 hover:bg-cyan-100",
+  },
+  Settings: {
+    active: "border-amber-600 bg-amber-400 text-slate-950 ring-2 ring-amber-200",
+    idle: "border-amber-200 bg-amber-50 text-amber-950 hover:border-amber-400 hover:bg-amber-100",
+  },
+  SMS: {
+    active: "border-fuchsia-700 bg-fuchsia-600 text-white ring-2 ring-fuchsia-200",
+    idle: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-950 hover:border-fuchsia-400 hover:bg-fuchsia-100",
+  },
+  Log: {
+    active: "border-slate-700 bg-slate-700 text-white ring-2 ring-slate-200",
+    idle: "border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-400 hover:bg-slate-100",
+  },
+};
 const DEFAULT_SMS_TEMPLATES = {
+  newPlayer: "{{group_name}}: {{player_name}}, you have been added to PBCourtCommand. You may receive session invite/update texts at this number. Reply STOP to opt out. {{public_link}}",
   sessionInvite: "{{group_name}}: {{session_name}} is open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Reply to the host or open {{public_link}} to join.",
   sessionReminder: "{{group_name}} reminder: {{session_name}} is still open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Please reply if you can play or if you are out.",
   gameUpdate: "{{group_name}} game update: ",
@@ -16,6 +47,7 @@ const DEFAULT_SMS_TEMPLATES = {
   sessionResults: "{{group_name}} Results for {{date}}:\n{{result_rankings}}",
 };
 const SMS_TEMPLATE_OPTIONS = [
+  { key: "newPlayer", label: "New Player" },
   { key: "sessionInvite", label: "New Session" },
   { key: "sessionReminder", label: "Pending Reminder" },
   { key: "gameUpdate", label: "Game Update" },
@@ -29,6 +61,9 @@ const PLAYER_STATS_RANGES = [
   { id: "currentYear", label: "Current Year" },
   { id: "all", label: "All" },
 ];
+const MODAL_HEADER_CHROME = "border-b border-teal-200/60 bg-[linear-gradient(135deg,#0f766e,#2563eb)] text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.18)]";
+const MODAL_EYEBROW_CHROME = "text-xs font-black uppercase tracking-wide text-cyan-100";
+const MODAL_SUPPORTING_TEXT = "mt-1 text-sm font-semibold text-blue-50/90";
 
 export default function RoundRobinAdminPage() {
   const { id } = useParams();
@@ -122,7 +157,7 @@ export default function RoundRobinAdminPage() {
     if (!response.ok || !result.success) {
       window.sessionStorage.removeItem(storageKey);
       setState(null);
-      setError(result.error || "Unable to unlock Round Robin manager.");
+      setError(result.error || "Unable to unlock Admin Setup.");
       return;
     }
 
@@ -183,6 +218,7 @@ export default function RoundRobinAdminPage() {
       body: JSON.stringify({
         groupId: id,
         ...(isHostAccess ? { hostPhone: cleanHostPhone, hostSessionId: cleanHostSessionId } : { eventCode: cleanCode }),
+        publicUrl: playerRoundRobinUrl(state?.group),
         action,
         ...payload,
       }),
@@ -256,6 +292,8 @@ export default function RoundRobinAdminPage() {
   async function exitLiveSession() {
     setLiveSessionId("");
     setSwapSelection([]);
+    const cleanHostPhone = String(hostPhone || window.sessionStorage.getItem(hostPhoneStorageKey) || "").trim();
+    if (cleanHostPhone) window.localStorage.setItem(playerPhoneStorageKey, cleanHostPhone);
     router.push(`/round-robin/${state?.group?.slug || id}/player`);
   }
 
@@ -271,6 +309,8 @@ export default function RoundRobinAdminPage() {
   }
 
   function exitHostToPlayer() {
+    const cleanHostPhone = String(hostPhone || window.sessionStorage.getItem(hostPhoneStorageKey) || "").trim();
+    if (cleanHostPhone) window.localStorage.setItem(playerPhoneStorageKey, cleanHostPhone);
     router.push(`/round-robin/${state?.group?.slug || id}/player`);
   }
 
@@ -302,8 +342,8 @@ export default function RoundRobinAdminPage() {
         <div className="w-full max-w-lg overflow-hidden rounded-lg border border-white/15 bg-slate-950 shadow-[0_34px_90px_-46px_rgba(0,0,0,0.95)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
           <div className="border-b border-teal-300/20 bg-slate-900 px-6 py-5">
-            <div className="text-xs font-black uppercase tracking-wide text-teal-200">Round Robin</div>
-            <h1 className="mt-1 text-3xl font-black">Manager System</h1>
+            <div className="text-xs font-black uppercase tracking-wide text-teal-200">PBCourtCommand</div>
+            <h1 className="mt-1 text-3xl font-black">Admin Setup</h1>
             <p className="mt-2 text-sm font-semibold text-teal-100">
               Public schedule and results do not require this code. Player contacts, setup, scoring, and texts do.
             </p>
@@ -338,7 +378,7 @@ export default function RoundRobinAdminPage() {
               disabled={loading || !eventCode.trim()}
               className="mt-4 w-full rounded-lg bg-teal-500 px-5 py-4 font-black text-white shadow-sm hover:bg-teal-400 disabled:cursor-not-allowed disabled:bg-slate-700"
             >
-              {loading ? "Unlocking..." : "Unlock Manager"}
+              {loading ? "Unlocking..." : "Unlock Admin Setup"}
             </button>
             <Link className="mt-4 block text-center text-sm font-bold text-teal-200 hover:text-white" href={`/round-robin/${id}/player`}>
               Back to Player View
@@ -458,8 +498,8 @@ export default function RoundRobinAdminPage() {
           <div className="p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <div className="text-xs font-black uppercase tracking-wide text-teal-200">{state.accessMode === "host" ? "Round Robin Host" : "Round Robin Manager"}</div>
-              <h1 className="text-3xl font-black sm:text-4xl">{state.group.name}</h1>
+              <div className="text-xs font-black uppercase tracking-wide text-teal-200">{state.accessMode === "host" ? "PBCourtCommand Host" : "Administration Setup"}</div>
+              <h1 className="text-3xl font-black sm:text-4xl">PBCourtCommand</h1>
               <p className="mt-1 text-sm font-semibold text-slate-300">
                 {roundRobinModeLabel(state.group.mode)}
                 {latestSession ? ` - Latest: ${formatDate(latestSession.session_date)} (${latestSession.status})` : ""}
@@ -485,9 +525,7 @@ export default function RoundRobinAdminPage() {
               type="button"
               onClick={() => setActiveTab(tab)}
               className={`rounded-lg border px-4 py-3 text-sm font-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
-                activeTab === tab
-                  ? "border-slate-950 bg-slate-950 text-white ring-2 ring-teal-300/70"
-                  : "border-slate-300 bg-slate-50 text-slate-800 ring-1 ring-white hover:border-teal-500 hover:bg-teal-50 hover:text-teal-950"
+                activeTab === tab ? tabTone(tab).active : tabTone(tab).idle
               }`}
             >
               {tab}
@@ -542,6 +580,7 @@ function SessionTab(props) {
   const [playersModalStatus, setPlayersModalStatus] = useState("joined");
   const [startModalSession, setStartModalSession] = useState(null);
   const [startCourts, setStartCourts] = useState([]);
+  const [startCheckedPlayerIds, setStartCheckedPlayerIds] = useState([]);
   const [resultsModalSession, setResultsModalSession] = useState(null);
   const isEditingSession = Boolean(editingSessionId);
   const visibleSessionBase = useMemo(
@@ -578,6 +617,7 @@ function SessionTab(props) {
     if (saved) {
       setSessionModalOpen(false);
       setEditingSessionId("");
+      setShowPastSessions(false);
       setForm(newSessionForm(state));
     }
   }
@@ -610,14 +650,28 @@ function SessionTab(props) {
   }
 
   function openStartModal(session) {
-    const joinedCount = sessionPlayersForStatus(state, session.id, "joined").length;
-    const suggestedCourtCount = suggestedCourtCountForPlayers(joinedCount);
+    const joinedPlayers = sessionPlayersForStatus(state, session.id, "joined");
+    const checkedIds = joinedPlayers.map((player) => String(player.id));
+    const suggestedCourtCount = suggestedCourtCountForPlayers(checkedIds.length);
     setStartModalSession(session);
     setStartCourts(sessionCourtRows(session, state.courts, suggestedCourtCount));
+    setStartCheckedPlayerIds(checkedIds);
   }
 
   function updateStartCourt(index, field, value) {
     setStartCourts((current) => current.map((court, courtIndex) => courtIndex === index ? { ...court, [field]: value } : court));
+  }
+
+  function toggleStartPlayer(playerId) {
+    setStartCheckedPlayerIds((current) => {
+      const cleanPlayerId = String(playerId || "");
+      const next = current.includes(cleanPlayerId)
+        ? current.filter((id) => id !== cleanPlayerId)
+        : [...current, cleanPlayerId];
+      const suggestedCourtCount = suggestedCourtCountForPlayers(next.length);
+      setStartCourts((currentCourts) => sessionCourtRows(startModalSession, state.courts, suggestedCourtCount, currentCourts));
+      return next;
+    });
   }
 
   async function confirmStartSession() {
@@ -627,9 +681,11 @@ function SessionTab(props) {
       sessionId,
       courtCount: startCourts.length,
       sessionCourts: startCourts,
+      selectedSessionPlayerIds: startCheckedPlayerIds,
     });
     if (started) {
       setStartModalSession(null);
+      setStartCheckedPlayerIds([]);
       enterLiveSession(sessionId);
     }
   }
@@ -694,9 +750,11 @@ function SessionTab(props) {
           session={startModalSession}
           courts={startCourts}
           updateCourt={updateStartCourt}
-          joinedCount={sessionPlayersForStatus(state, startModalSession.id, "joined").length}
+          joinedPlayers={sessionPlayersForStatus(state, startModalSession.id, "joined")}
+          checkedPlayerIds={startCheckedPlayerIds}
+          togglePlayer={toggleStartPlayer}
           actionLoading={actionLoading}
-          onClose={() => setStartModalSession(null)}
+          onClose={() => { setStartModalSession(null); setStartCheckedPlayerIds([]); }}
           onStart={confirmStartSession}
         />
       )}
@@ -719,9 +777,9 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
       <div className="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-950 p-4 text-white">
+        <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
           <div>
-            <div className="text-xs font-black uppercase tracking-wide text-teal-200">Session Setup</div>
+            <div className={MODAL_EYEBROW_CHROME}>Session Setup</div>
             <h2 className="text-2xl font-black">{isEditingSession ? "Edit Session" : "Add Session"}</h2>
           </div>
           <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
@@ -735,8 +793,8 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
             <TextInput label="Date" type="date" value={form.sessionDate} onChange={(value) => setForm((current) => ({ ...current, sessionDate: value }))} />
             <TextInput label="Start time" type="time" value={form.startsAt} onChange={(value) => setForm((current) => ({ ...current, startsAt: value }))} />
             <TextInput label="Max players" type="number" value={form.maxPlayers} onChange={(value) => setForm((current) => ({ ...current, maxPlayers: Number(value) }))} />
-            <label className="flex items-end gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
-              <input type="checkbox" checked={form.repeatsWeekly} onChange={(event) => setForm((current) => ({ ...current, repeatsWeekly: event.target.checked }))} className="mb-1 h-5 w-5 rounded border-slate-300 text-teal-700" />
+            <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+              <input type="checkbox" checked={form.repeatsWeekly} onChange={(event) => setForm((current) => ({ ...current, repeatsWeekly: event.target.checked }))} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
               Repeats weekly
             </label>
             <label className="block text-sm font-bold text-slate-600">
@@ -886,25 +944,70 @@ function SessionsPanel(props) {
 
 function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScores = null, actionLoading, onExit = null, showExit = false, hostMode = false }) {
   const [statsOpen, setStatsOpen] = useState(false);
+  const [startModalOpen, setStartModalOpen] = useState(false);
+  const [startCourts, setStartCourts] = useState([]);
+  const [startCheckedPlayerIds, setStartCheckedPlayerIds] = useState([]);
   const isPlaying = session.status === "playing";
   const isClosed = ["done", "cancelled"].includes(session.status);
-  const joinedCount = allPlayersForSession(state, session.id).filter((player) => player.response_status === "joined").length;
+  const joinedPlayers = sessionPlayersForStatus(state, session.id, "joined");
+  const joinedCount = joinedPlayers.length;
   const canStartSession = isPlaying || joinedCount >= 4;
 
   async function primaryAction() {
     if (isPlaying) {
       if (saveCurrentRoundScores) await saveCurrentRoundScores();
-      await runAction("generateNextGame", { sessionId: session.id });
+      const generated = await runAction("generateNextGame", { sessionId: session.id }, { returnResult: true });
+      if (generated?.roundNumber) {
+        window.setTimeout(() => {
+          document.getElementById(roundElementId(generated.roundNumber))?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 150);
+      }
       return;
     }
 
-    await runAction("startSessionAndGenerateFirstGame", { sessionId: session.id });
+    openStartModal();
+  }
+
+  function openStartModal() {
+    const checkedIds = joinedPlayers.map((player) => String(player.id));
+    setStartCheckedPlayerIds(checkedIds);
+    setStartCourts(sessionCourtRows(session, state.courts, suggestedCourtCountForPlayers(checkedIds.length)));
+    setStartModalOpen(true);
+  }
+
+  function updateStartCourt(index, field, value) {
+    setStartCourts((current) => current.map((court, courtIndex) => courtIndex === index ? { ...court, [field]: value } : court));
+  }
+
+  function toggleStartPlayer(playerId) {
+    setStartCheckedPlayerIds((current) => {
+      const cleanPlayerId = String(playerId || "");
+      const next = current.includes(cleanPlayerId)
+        ? current.filter((id) => id !== cleanPlayerId)
+        : [...current, cleanPlayerId];
+      setStartCourts((currentCourts) => sessionCourtRows(session, state.courts, suggestedCourtCountForPlayers(next.length), currentCourts));
+      return next;
+    });
+  }
+
+  async function confirmStartSession() {
+    const started = await runAction("startSessionAndGenerateFirstGame", {
+      sessionId: session.id,
+      courtCount: startCourts.length,
+      sessionCourts: startCourts,
+      selectedSessionPlayerIds: startCheckedPlayerIds,
+    });
+    if (started) {
+      setStartModalOpen(false);
+      setStartCheckedPlayerIds([]);
+    }
   }
 
   async function finishSession() {
     if (!window.confirm(`Finish ${session.session_name || "this session"}? This will close scoring and save final results.`)) return;
     if (saveCurrentRoundScores) await saveCurrentRoundScores();
-    await runAction("completeSession", { sessionId: session.id, smsEnabled: true });
+    const completed = await runAction("completeSession", { sessionId: session.id, smsEnabled: true }, { returnResult: true });
+    if (completed?.success !== false) onExit?.();
   }
 
   async function exitSession() {
@@ -918,43 +1021,43 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }
 
   return (
-    <section className="sticky top-2 z-30 rounded-lg border border-teal-200 bg-teal-50/95 p-4 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] backdrop-blur">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
+    <section className="sticky top-0 z-30 rounded-lg border border-teal-200 bg-teal-50/95 p-3 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] backdrop-blur sm:top-2 sm:p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Session</div>
-          <h2 className="text-xl font-black text-slate-950">{session.session_name || "Session"}</h2>
+          <h2 className="break-words text-lg font-black text-slate-950 sm:text-xl">{session.session_name || "Session"}</h2>
           <div className="mt-1 text-sm font-bold text-slate-600">
             {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={openStats}
-            className="rounded-lg border border-teal-300 bg-white px-4 py-3 text-sm font-black text-teal-900 shadow-sm hover:border-teal-500 hover:bg-white"
-          >
-            Stats
-          </button>
+        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
           <button
             type="button"
             onClick={primaryAction}
             disabled={isClosed || !canStartSession || ["generateNextGame", "startSessionAndGenerateFirstGame"].includes(actionLoading)}
-            className="rounded-lg bg-slate-950 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800 disabled:bg-slate-300"
+            className="rounded-lg bg-blue-700 px-3 py-3 text-sm font-black text-white shadow-sm hover:bg-blue-800 disabled:bg-slate-300 sm:px-4"
           >
             {["generateNextGame", "startSessionAndGenerateFirstGame"].includes(actionLoading)
               ? "Working..."
-              : isPlaying ? "Next Game" : "Start Session"}
+              : isPlaying ? "Next Round" : "Start Session"}
           </button>
           <button
             type="button"
             onClick={finishSession}
             disabled={isClosed || actionLoading === "completeSession"}
-            className="rounded-lg bg-emerald-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-emerald-800 disabled:bg-slate-300"
+            className="rounded-lg bg-emerald-700 px-3 py-3 text-sm font-black text-white shadow-sm hover:bg-emerald-800 disabled:bg-slate-300 sm:px-4"
           >
-            {actionLoading === "completeSession" ? "Finishing..." : "Finish"}
+            {actionLoading === "completeSession" ? "Finishing..." : "Finish Session"}
+          </button>
+          <button
+            type="button"
+            onClick={openStats}
+            className="rounded-lg border border-teal-300 bg-white px-3 py-3 text-sm font-black text-teal-900 shadow-sm hover:border-teal-500 hover:bg-white sm:px-4"
+          >
+            Stats
           </button>
           {(showExit || hostMode) && onExit && (
-            <button type="button" onClick={exitSession} className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:border-teal-500 hover:bg-teal-50">
+            <button type="button" onClick={exitSession} className="rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm font-black text-slate-800 shadow-sm hover:border-teal-500 hover:bg-teal-50 sm:px-4">
               Exit
             </button>
           )}
@@ -966,6 +1069,19 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
         </div>
       )}
       {statsOpen && <SessionStatsModal session={session} state={state} onClose={() => setStatsOpen(false)} />}
+      {startModalOpen && (
+        <StartSessionModal
+          session={session}
+          courts={startCourts}
+          updateCourt={updateStartCourt}
+          joinedPlayers={joinedPlayers}
+          checkedPlayerIds={startCheckedPlayerIds}
+          togglePlayer={toggleStartPlayer}
+          actionLoading={actionLoading}
+          onClose={() => { setStartModalOpen(false); setStartCheckedPlayerIds([]); }}
+          onStart={confirmStartSession}
+        />
+      )}
     </section>
   );
 }
@@ -978,6 +1094,7 @@ function ModalPortal({ children }) {
 }
 
 function SessionStatsModal({ session, state, onClose }) {
+  const [showMobileStatsDetail, setShowMobileStatsDetail] = useState(false);
   const matches = state?.matches || [];
   const latestRoundNumber = Math.max(0, ...matches.map((match) => Number(match.round_number || 0)));
   const currentMatches = latestRoundNumber > 0 ? matches.filter((match) => Number(match.round_number || 0) === latestRoundNumber) : matches;
@@ -1012,20 +1129,31 @@ function SessionStatsModal({ session, state, onClose }) {
 
   return (
     <ModalPortal>
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
-      <div className="my-2 max-h-[calc(100vh-1rem)] w-full max-w-4xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-950 p-4 text-white">
-          <div>
-            <div className="text-xs font-black uppercase tracking-wide text-teal-200">Current Game Stats</div>
-            <h2 className="text-2xl font-black">{session.session_name || "Session"}</h2>
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-slate-950/70 p-0 sm:p-6">
+      <div className="h-full max-h-screen w-full max-w-4xl overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-2 sm:h-auto sm:max-h-[calc(100vh-1rem)] sm:rounded-lg">
+        <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
+          <div className="min-w-0">
+            <div className={MODAL_EYEBROW_CHROME}>Current Game Stats</div>
+            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
+          <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
             Close
           </button>
         </div>
-        <div className="max-h-[70vh] overflow-y-auto p-4">
+        <div className="max-h-[calc(100vh-6.5rem)] overflow-y-auto p-3 sm:max-h-[70vh] sm:p-4">
           {rows.length > 0 ? (
-            <div className="overflow-x-auto rounded-lg border border-slate-200">
+            <>
+            <div className="mb-3 flex items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-100 px-3 py-2 md:hidden">
+              <div className="text-sm font-black text-slate-700">Standings</div>
+              <button
+                type="button"
+                onClick={() => setShowMobileStatsDetail((current) => !current)}
+                className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-black text-slate-800 shadow-sm"
+              >
+                {showMobileStatsDetail ? "Summary" : "Detail"}
+              </button>
+            </div>
+            <div className="hidden overflow-x-auto rounded-lg border border-slate-200 md:block">
               <table className="w-full min-w-[720px] text-sm">
                 <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
                   <tr>
@@ -1053,6 +1181,16 @@ function SessionStatsModal({ session, state, onClose }) {
                 </tbody>
               </table>
             </div>
+            <div className="grid grid-cols-1 gap-2 md:hidden">
+              {rows.map((row) => (
+                showMobileStatsDetail ? (
+                  <AdminStandingMobileCard key={row.player_id} row={row} rank={row.displayRank} />
+                ) : (
+                  <AdminStandingMobileSummaryRow key={row.player_id} row={row} rank={row.displayRank} />
+                )
+              ))}
+            </div>
+            </>
           ) : (
             <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm font-bold text-slate-500">
               Generate a game to show current player rankings.
@@ -1065,34 +1203,142 @@ function SessionStatsModal({ session, state, onClose }) {
   );
 }
 
+function tabTone(tab) {
+  return TAB_TONES[tab] || TAB_TONES.Log;
+}
+
+function AdminStandingMobileSummaryRow({ row, rank }) {
+  return (
+    <div className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 shadow-sm">
+      <div className="flex min-w-0 items-center gap-2">
+        <span className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">#{rank}</span>
+        <span className="truncate text-sm font-black text-slate-950">{row.display_name || "Player"}</span>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <span className="rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">{row.wins || 0}-{row.losses || 0}</span>
+        <span className="rounded-md bg-white px-2 py-1 text-xs font-black text-amber-800 shadow-sm">Byes {row.byes || 0}</span>
+      </div>
+    </div>
+  );
+}
+
+function AdminStandingMobileCard({ row, rank }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-xs font-black uppercase tracking-wide text-slate-500">Rank #{rank}</div>
+          <div className="mt-1 break-words text-base font-black text-slate-950">{row.display_name || "Player"}</div>
+        </div>
+        <div className="rounded-md bg-white px-2 py-1 text-sm font-black text-teal-800 shadow-sm">
+          {formatPercent(winPctForStanding(row))}
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+        <MobileStatPill label="Record" value={`${row.wins || 0}-${row.losses || 0}`} />
+        <MobileStatPill label="Games" value={row.games || 0} />
+        <MobileStatPill label="Points" value={`${row.points_for || 0}-${row.points_against || 0}`} />
+        <MobileStatPill label="Diff" value={formatSignedNumber(row.point_diff || 0)} />
+        <MobileStatPill label="Byes" value={row.byes || 0} />
+      </div>
+    </div>
+  );
+}
+
+function MobileStatPill({ label, value }) {
+  return (
+    <div className="rounded-md bg-white px-2 py-2 shadow-sm">
+      <div className="text-[11px] font-black uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="mt-0.5 font-black text-slate-950">{value}</div>
+    </div>
+  );
+}
+
+function AdminGameResultCard({ match }) {
+  return (
+    <div className="rounded-lg border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.95)]">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+          {match.court_name || `Court ${match.court_number || "-"}`}
+        </div>
+        <div className="rounded-md bg-slate-100 px-2 py-1 text-xs font-black uppercase tracking-wide text-slate-500">
+          Final
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-stretch">
+        <AdminGameTeamPanel
+          players={match.team1_players}
+          score={match.team1_score}
+          tone="teal"
+          isWinner={isWinningScore(match.team1_score, match.team2_score)}
+        />
+        <div className="flex items-center justify-center text-xs font-black uppercase tracking-wide text-slate-400">vs</div>
+        <AdminGameTeamPanel
+          players={match.team2_players}
+          score={match.team2_score}
+          tone="blue"
+          isWinner={isWinningScore(match.team2_score, match.team1_score)}
+        />
+      </div>
+      {(match.bye_players || []).length > 0 && (
+        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black text-amber-900">
+          Bye: {playerNames(match.bye_players)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AdminGameTeamPanel({ players, score, tone, isWinner }) {
+  const toneClass = tone === "blue"
+    ? "border-blue-200 bg-blue-50 text-blue-950"
+    : "border-teal-200 bg-teal-50 text-teal-950";
+
+  return (
+    <div className={`flex min-w-0 items-center justify-between gap-2 rounded-lg border px-2.5 py-2 font-bold shadow-sm ${toneClass}`}>
+      <div className="min-w-0 break-words text-sm">{playerNames(players)}</div>
+      <div className={`shrink-0 rounded-lg px-2.5 py-1.5 text-center shadow-[0_10px_18px_-14px_rgba(15,23,42,0.9)] ${
+        isWinner ? "bg-teal-700 text-white" : "bg-slate-950 text-white"
+      }`}>
+        <div className="text-[10px] font-black uppercase tracking-wide opacity-80">Score</div>
+        <div className="text-xl font-black leading-none">{formatGameScore(score)}</div>
+      </div>
+    </div>
+  );
+}
+
 function SessionResultsModal({ state, session, onClose }) {
   const standings = sessionResultsForSession(state, session.id);
   const matches = sessionMatchesForSession(state, session.id);
+  const roundGroups = groupMatchesByRound(matches);
 
   return (
     <ModalPortal>
-      <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
-        <div className="my-2 max-h-[calc(100vh-1rem)] w-full max-w-5xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
-          <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-950 p-4 text-white">
-            <div>
-              <div className="text-xs font-black uppercase tracking-wide text-teal-200">Past Session Results</div>
-              <h2 className="text-2xl font-black">{session.session_name || "Session"}</h2>
-              <div className="mt-1 text-sm font-semibold text-slate-300">
+      <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-slate-950/70 p-0 sm:p-6">
+        <div className="h-full max-h-screen w-full max-w-5xl overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-2 sm:h-auto sm:max-h-[calc(100vh-1rem)] sm:rounded-lg">
+          <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
+            <div className="min-w-0">
+              <div className={MODAL_EYEBROW_CHROME}>Past Session Results</div>
+              <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
+              <div className={MODAL_SUPPORTING_TEXT}>
                 {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}{session.location ? ` - ${session.location}` : ""}
               </div>
             </div>
-            <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
+            <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
               Close
             </button>
           </div>
-          <div className="max-h-[76vh] overflow-y-auto p-4">
-            <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="max-h-[calc(100vh-7rem)] overflow-y-auto p-3 sm:max-h-[76vh] sm:p-4">
+            <div className="overflow-hidden rounded-lg border border-slate-200">
+              <div className="bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">Standings</div>
+              <div className="hidden overflow-x-auto md:block">
               <table className="w-full min-w-[720px] text-sm">
                 <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-3 py-2 text-left">Rank</th>
                     <th className="px-3 py-2 text-left">Player</th>
                     <th className="px-3 py-2 text-right">Record</th>
+                    <th className="px-3 py-2 text-right">Win %</th>
                     <th className="px-3 py-2 text-right">Games</th>
                     <th className="px-3 py-2 text-right">Points</th>
                     <th className="px-3 py-2 text-right">Diff</th>
@@ -1105,6 +1351,7 @@ function SessionResultsModal({ state, session, onClose }) {
                       <td className="px-3 py-2 font-black text-slate-950">#{index + 1}</td>
                       <td className="px-3 py-2 font-black text-slate-950">{row.display_name || "Player"}</td>
                       <td className="px-3 py-2 text-right font-black text-slate-950">{row.wins || 0}-{row.losses || 0}</td>
+                      <td className="px-3 py-2 text-right font-black text-teal-800">{formatPercent(winPctForStanding(row))}</td>
                       <td className="px-3 py-2 text-right font-bold text-slate-700">{row.games || 0}</td>
                       <td className="px-3 py-2 text-right font-bold text-slate-700">{row.points_for || 0}-{row.points_against || 0}</td>
                       <td className="px-3 py-2 text-right font-bold text-slate-700">{formatSignedNumber(row.point_diff || 0)}</td>
@@ -1113,35 +1360,39 @@ function SessionResultsModal({ state, session, onClose }) {
                   ))}
                   {standings.length === 0 && (
                     <tr>
-                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={7}>No played-player stats are saved for this session yet.</td>
+                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={8}>No played-player stats are saved for this session yet.</td>
                     </tr>
                   )}
                 </tbody>
               </table>
+              </div>
+              <div className="grid grid-cols-1 gap-2 bg-white p-3 md:hidden">
+                {standings.map((row, index) => (
+                  <AdminStandingMobileCard key={row.id || `${row.session_id}-${row.player_id}`} row={row} rank={index + 1} />
+                ))}
+                {standings.length === 0 && (
+                  <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No played-player stats are saved for this session yet.</div>
+                )}
+              </div>
             </div>
 
-            <div className="mt-4 rounded-lg border border-slate-200">
-              <div className="bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">Rounds</div>
-              <div className="divide-y divide-slate-100">
-                {matches.map((match) => (
-                  <div key={match.id} className="px-3 py-3 text-sm">
-                    <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                      <div className="font-black text-slate-600">Round {match.round_number} - {match.court_name || `Court ${match.court_number}`}</div>
-                      <div className="rounded-md bg-slate-950 px-3 py-1 text-center font-black text-white">
-                        {match.team1_score ?? "-"} - {match.team2_score ?? "-"}
+            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="text-sm font-black text-slate-700">Rounds</div>
+              <div className="mt-3 space-y-3">
+                {roundGroups.map((round) => (
+                  <section key={round.roundNumber} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_18px_38px_-28px_rgba(15,23,42,0.85)]">
+                    <div className="flex flex-wrap items-center justify-between gap-2 bg-[linear-gradient(90deg,#0f766e,#2563eb)] px-3 py-2 text-white">
+                      <div className="text-base font-black">Round {round.roundNumber}</div>
+                      <div className="rounded-md bg-white/15 px-2 py-1 text-xs font-black uppercase tracking-wide text-teal-50">
+                        {round.matches.length} game{round.matches.length === 1 ? "" : "s"}
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
-                      <div className="rounded-lg bg-teal-50 px-3 py-2 font-bold text-teal-950">{playerNames(match.team1_players)}</div>
-                      <div className="text-center text-xs font-black uppercase tracking-wide text-slate-400">vs</div>
-                      <div className="rounded-lg bg-blue-50 px-3 py-2 font-bold text-blue-950">{playerNames(match.team2_players)}</div>
+                    <div className="grid grid-cols-1 gap-3 p-3">
+                      {round.matches.map((match) => (
+                        <AdminGameResultCard key={match.id} match={match} />
+                      ))}
                     </div>
-                    {(match.bye_players || []).length > 0 && (
-                      <div className="mt-2 rounded-lg bg-amber-50 px-3 py-2 text-xs font-black text-amber-900">
-                        Bye: {playerNames(match.bye_players)}
-                      </div>
-                    )}
-                  </div>
+                  </section>
                 ))}
                 {matches.length === 0 && (
                   <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No games were saved for this session.</div>
@@ -1220,11 +1471,11 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
             </button>
           )}
           {canResume ? (
-            <button type="button" onClick={(event) => { stopActionClick(event); enterLiveSession(session.id); }} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-slate-800">
+            <button type="button" onClick={(event) => { stopActionClick(event); enterLiveSession(session.id); }} className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-blue-800">
               Resume Session
             </button>
           ) : (
-            <button type="button" onClick={(event) => { stopActionClick(event); openStartModal(session); }} disabled={!canStart || actionLoading === "startSessionAndGenerateFirstGame"} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-slate-800 disabled:bg-slate-300">
+            <button type="button" onClick={(event) => { stopActionClick(event); openStartModal(session); }} disabled={!canStart || actionLoading === "startSessionAndGenerateFirstGame"} className="rounded-lg bg-teal-700 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
               Start Session
             </button>
           )}
@@ -1272,11 +1523,11 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
       <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-950 p-4 text-white">
+        <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
           <div>
-            <div className="text-xs font-black uppercase tracking-wide text-teal-200">Session Players</div>
+            <div className={MODAL_EYEBROW_CHROME}>Session Players</div>
             <h2 className="text-2xl font-black">{session.session_name || "Session"}</h2>
-            <div className="mt-1 text-sm font-semibold text-slate-300">
+            <div className={MODAL_SUPPORTING_TEXT}>
               {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
             </div>
           </div>
@@ -1341,7 +1592,7 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
                       type="button"
                       onClick={() => updatePlayerStatus(player, "declined")}
                       disabled={statusActionLoading}
-                      className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs font-black text-red-800 shadow-sm hover:bg-red-100 disabled:border-slate-300 disabled:bg-slate-100 disabled:text-slate-400"
+                      className="rounded-lg border border-red-800 bg-red-600 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-red-700 disabled:border-slate-300 disabled:bg-slate-300 disabled:text-slate-400"
                     >
                       Decline
                     </button>
@@ -1361,45 +1612,104 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
   );
 }
 
-function StartSessionModal({ session, courts, updateCourt, joinedCount, actionLoading, onClose, onStart }) {
+function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checkedPlayerIds, togglePlayer, actionLoading, onClose, onStart }) {
+  const checkedSet = new Set((checkedPlayerIds || []).map(String));
+  const checkedCount = checkedSet.size;
+  const courtLabel = `${courts.length} court${courts.length === 1 ? "" : "s"}`;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-950 p-4 text-white">
-          <div>
-            <div className="text-xs font-black uppercase tracking-wide text-teal-200">Start Session</div>
-            <h2 className="text-2xl font-black">{session.session_name || "Session"}</h2>
-            <div className="mt-1 text-sm font-semibold text-slate-300">
-              {joinedCount} joined players - {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
+    <ModalPortal>
+    <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-slate-950/70 p-0 sm:p-4">
+      <div className="flex h-screen w-full max-w-4xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-4 sm:h-auto sm:max-h-[92vh] sm:rounded-lg">
+        <div className={`shrink-0 p-3 sm:p-4 ${MODAL_HEADER_CHROME}`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className={MODAL_EYEBROW_CHROME}>Start Session</div>
+            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
+            <div className={MODAL_SUPPORTING_TEXT}>
+              {checkedCount} checked players - {courtLabel} - {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
             </div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
+          <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
             Cancel
           </button>
+          </div>
         </div>
-        <div className="p-4">
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div className="text-sm font-black text-slate-700">Confirm Court Names</div>
-            <div className="mt-3 grid grid-cols-1 gap-3">
-              {courts.map((court, index) => (
-                <div key={`start-court-${index}`} className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                  <TextInput label={`Court ${index + 1}`} value={court.name} onChange={(value) => updateCourt(index, "name", value)} />
-                  <TextInput label="Description" value={court.description} onChange={(value) => updateCourt(index, "description", value)} />
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <div className="text-sm font-black text-blue-950">Verify Players</div>
+                  <div className="mt-1 text-xs font-bold text-blue-800">Uncheck anyone who did not show up.</div>
                 </div>
-              ))}
+                <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-blue-900 shadow-sm">
+                  {checkedCount} of {joinedPlayers.length}
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-1 gap-2">
+                {joinedPlayers.map((player) => {
+                  const playerId = String(player.id);
+                  const checked = checkedSet.has(playerId);
+                  return (
+                    <label key={player.id} className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-sm font-black shadow-sm ${
+                      checked ? "border-teal-300 bg-white text-slate-950" : "border-slate-200 bg-slate-100 text-slate-500"
+                    }`}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => togglePlayer(playerId)}
+                        className="h-5 w-5 rounded border-slate-300 text-teal-700"
+                      />
+                      <span className="min-w-0 break-words">{player.display_name || "Player"}</span>
+                    </label>
+                  );
+                })}
+                {joinedPlayers.length === 0 && (
+                  <div className="rounded-lg border border-dashed border-blue-200 bg-white px-3 py-6 text-center text-sm font-bold text-blue-900">
+                    No joined players are listed for this session.
+                  </div>
+                )}
+              </div>
+            </div>
+
+          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <div className="text-sm font-black text-slate-700">Confirm Courts</div>
+              </div>
+              <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">{courtLabel}</div>
+            </div>
+              <div className="mt-3 grid grid-cols-1 gap-3">
+                {courts.map((court, index) => (
+                  <div key={`start-court-${index}`} className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                    <TextInput label={`Court ${index + 1}`} value={court.name} onChange={(value) => updateCourt(index, "name", value)} />
+                    <TextInput label="Description" value={court.description} onChange={(value) => updateCourt(index, "description", value)} />
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-          <button type="button" onClick={onStart} disabled={actionLoading === "startSessionAndGenerateFirstGame" || joinedCount < 4} className="mt-4 w-full rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
+          {checkedCount < 4 && (
+            <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-black text-amber-900">
+              At least 4 checked players are required to generate games.
+            </div>
+          )}
+        </div>
+        <div className="shrink-0 border-t border-slate-200 bg-white p-3 shadow-[0_-16px_36px_-28px_rgba(15,23,42,0.9)] sm:p-4">
+          <button type="button" onClick={onStart} disabled={actionLoading === "startSessionAndGenerateFirstGame" || checkedCount < 4} className="w-full rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
             {actionLoading === "startSessionAndGenerateFirstGame" ? "Starting..." : "Start And Generate First Game"}
           </button>
         </div>
       </div>
     </div>
+    </ModalPortal>
   );
 }
 
 function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapSelection, onPendingScoreChange }) {
   const roundScored = round.matches.length > 0 && round.matches.every(matchHasSavedScore);
+  const byeSlots = round.matches.flatMap((match) => slotPlayers(match, "bye"));
   const playersInRound = round.matches.flatMap((match) => [
     ...slotPlayers(match, "team1"),
     ...slotPlayers(match, "team2"),
@@ -1427,8 +1737,17 @@ function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapS
     setSwapSelection([]);
   }
 
+  function pickRoundSlot(slot) {
+    if (roundScored) return;
+    const next = [...swapSelection, slot].slice(-2);
+    setSwapSelection(next);
+    if (next.length === 2) {
+      performSwap(next[0], next[1], runAction).then(() => setSwapSelection([]));
+    }
+  }
+
   return (
-    <section className={`rounded-lg border p-4 shadow-[0_20px_60px_-42px_rgba(15,23,42,0.75)] ${
+    <section id={roundElementId(round.roundNumber)} className={`scroll-mt-28 rounded-lg border p-4 shadow-[0_20px_60px_-42px_rgba(15,23,42,0.75)] ${
       roundScored
         ? "border-emerald-300 bg-emerald-50/95 ring-2 ring-emerald-200/80"
         : "border-white/80 bg-white/95"
@@ -1444,6 +1763,16 @@ function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapS
             )}
           </div>
           {roundScored && <div className="mt-1 text-xs font-black uppercase tracking-wide text-emerald-700">Scores saved - lineup locked</div>}
+          {byeSlots.length > 0 && (
+            <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-950">
+              <span className="mr-2 font-black">Bye:</span>
+              <span className="inline-flex flex-wrap gap-2 align-middle">
+                {byeSlots.map((slot, index) => (
+                  <PlayerChip key={`${slot.id || "bye"}-${index}`} player={slot} slot={slot} pickSlot={pickRoundSlot} selected={swapSelection} locked={roundScored} />
+                ))}
+              </span>
+            </div>
+          )}
         </div>
         {!roundScored && (
           <button type="button" onClick={shuffleRound} disabled={actionLoading === "updateMatchLineup"} className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-amber-600 disabled:bg-slate-300">
@@ -1458,7 +1787,6 @@ function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapS
             match={match}
             lineupLocked={roundScored}
             runAction={runAction}
-            actionLoading={actionLoading}
             swapSelection={swapSelection}
             setSwapSelection={setSwapSelection}
             onPendingScoreChange={onPendingScoreChange}
@@ -1469,7 +1797,7 @@ function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapS
   );
 }
 
-function ScoreCourt({ match, lineupLocked = false, runAction, actionLoading, swapSelection, setSwapSelection, onPendingScoreChange }) {
+function ScoreCourt({ match, lineupLocked = false, runAction, swapSelection, setSwapSelection, onPendingScoreChange }) {
   const [team1Score, setTeam1Score] = useState(match.team1_score ?? "");
   const [team2Score, setTeam2Score] = useState(match.team2_score ?? "");
   const team2ScoreRef = useRef(null);
@@ -1511,55 +1839,48 @@ function ScoreCourt({ match, lineupLocked = false, runAction, actionLoading, swa
 
   return (
     <div className="overflow-hidden rounded-lg border border-slate-900/10 bg-white shadow-[0_18px_45px_-32px_rgba(15,23,42,0.9)]">
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[linear-gradient(90deg,#0f3b36,#166b61)] px-3 py-2 text-white">
+      <div className="flex flex-col gap-2 bg-[linear-gradient(90deg,#0f3b36,#166b61)] px-3 py-2 text-white sm:flex-row sm:items-center sm:justify-between">
         <div className="font-black">{match.court_name || `Court ${match.court_number}`}</div>
-        <div className="flex items-center gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:flex sm:items-center">
           {matchHasSavedScore(match) && <div className="rounded-md bg-emerald-300 px-2 py-1 text-xs font-black text-emerald-950">Score Saved</div>}
-          <button type="button" onClick={saveScore} disabled={actionLoading === "updateMatchScore"} className="rounded-md bg-amber-300 px-3 py-1.5 text-xs font-black text-slate-950 shadow-sm hover:bg-amber-200 disabled:bg-slate-200">
-            Save Score
-          </button>
         </div>
       </div>
-      <div className="relative min-h-48 overflow-hidden bg-[#163f38] p-3" style={{ perspective: "900px" }}>
+      <div className="relative min-h-48 overflow-hidden bg-[#163f38] p-2 sm:p-3" style={{ perspective: "900px" }}>
         <div className="absolute inset-4 rounded-lg border border-white/35 bg-[linear-gradient(145deg,#9fe7c5_0%,#54c49a_48%,#20856f_100%)] shadow-[0_24px_42px_-24px_rgba(0,0,0,0.65)]" style={{ transform: "rotateX(8deg)", transformOrigin: "center bottom" }}>
           <div className="absolute inset-3 rounded-md border border-white/60" />
-          <div className="absolute bottom-3 top-3 left-1/2 w-px bg-white/65" />
+          <div className="absolute bottom-3 top-3 left-1/2 w-1 -translate-x-1/2 rounded-full bg-white/85 shadow-[0_0_14px_rgba(255,255,255,0.85)]" />
           <div className="absolute left-3 right-3 top-1/2 h-px bg-white/50" />
           <div className="absolute bottom-3 top-3 left-[25%] w-px bg-white/35" />
           <div className="absolute bottom-3 top-3 right-[25%] w-px bg-white/35" />
         </div>
-        <div className="relative z-10 grid min-h-44 grid-cols-[1fr_auto_1fr] items-stretch gap-3 p-3">
-          <div className="flex flex-col justify-start gap-3 pt-2">
-            <input value={team1Score} onChange={(event) => { setTeam1Score(event.target.value); onPendingScoreChange?.(match.id, "team1Score", event.target.value); }} onKeyDown={moveToSecondScore} inputMode="numeric" className="ml-auto mr-1 w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4" />
-            <SlotSide match={match} side="team1" align="right" pickSlot={pickSlot} selected={swapSelection} tone="teal" locked={lineupLocked} />
+        <div className="relative z-10 grid min-h-44 grid-cols-[minmax(0,1fr)_0.75rem_minmax(0,1fr)] items-stretch gap-2 p-2 sm:gap-3 sm:p-3">
+          <div className="flex min-w-0 flex-col items-center justify-start gap-3 pt-2">
+            <input value={team1Score} onChange={(event) => { setTeam1Score(event.target.value); onPendingScoreChange?.(match.id, "team1Score", event.target.value); }} onKeyDown={moveToSecondScore} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4" />
+            <SlotSide match={match} side="team1" align="center" pickSlot={pickSlot} selected={swapSelection} tone="teal" locked={lineupLocked} />
           </div>
           <div className="flex items-center justify-center">
-            <div className="h-full w-px rounded-full bg-white/70 shadow-[0_0_16px_rgba(255,255,255,0.65)]" />
+            <div className="h-full w-1.5 rounded-full bg-white/90 shadow-[0_0_18px_rgba(255,255,255,0.8)]" />
           </div>
-          <div className="flex flex-col justify-start gap-3 pt-2">
-            <input ref={team2ScoreRef} value={team2Score} onChange={(event) => { setTeam2Score(event.target.value); onPendingScoreChange?.(match.id, "team2Score", event.target.value); }} onKeyDown={submitScoreFromKeyboard} inputMode="numeric" className="ml-1 w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4" />
-            <SlotSide match={match} side="team2" pickSlot={pickSlot} selected={swapSelection} tone="blue" locked={lineupLocked} />
+          <div className="flex min-w-0 flex-col items-center justify-start gap-3 pt-2">
+            <input ref={team2ScoreRef} value={team2Score} onChange={(event) => { setTeam2Score(event.target.value); onPendingScoreChange?.(match.id, "team2Score", event.target.value); }} onKeyDown={submitScoreFromKeyboard} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4" />
+            <SlotSide match={match} side="team2" align="center" pickSlot={pickSlot} selected={swapSelection} tone="blue" locked={lineupLocked} />
           </div>
         </div>
       </div>
-      {(match.bye_players || []).length > 0 && (
-        <div className="border-t border-amber-200 bg-amber-50 p-2 text-sm font-bold text-amber-900">
-          Bye:
-          <div className="mt-1 flex flex-wrap gap-2">
-            {(match.bye_players || []).map((player, index) => (
-              <PlayerChip key={`${player.id}-${index}`} player={player} slot={{ match, side: "bye", index, player }} pickSlot={pickSlot} selected={swapSelection} locked={lineupLocked} />
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
 function SlotSide({ match, side, align = "left", pickSlot, selected, tone = "teal", locked = false }) {
   const players = side === "team1" ? match.team1_players || [] : match.team2_players || [];
+  const alignClass = align === "center"
+    ? "items-stretch text-center"
+    : align === "right"
+      ? "items-start text-left sm:items-end sm:text-right"
+      : "items-start text-left";
+
   return (
-    <div className={`flex flex-col justify-center gap-2 ${align === "right" ? "items-end text-right" : "items-start text-left"}`}>
+    <div className={`flex w-full min-w-0 flex-col justify-center gap-2 ${alignClass}`}>
       {players.map((player, index) => (
         <PlayerChip key={`${player.id}-${index}`} player={player} slot={{ match, side, index, player }} pickSlot={pickSlot} selected={selected} tone={tone} locked={locked} />
       ))}
@@ -1578,7 +1899,7 @@ function PlayerChip({ player, slot, pickSlot, selected, tone = "teal", locked = 
       onClick={() => pickSlot(slot)}
       disabled={locked}
       tabIndex={-1}
-      className={`w-fit rounded-full border px-4 py-2 text-base font-black shadow-[0_14px_28px_-18px_rgba(15,23,42,0.95)] ring-1 ring-white/25 transition ${
+      className={`w-full max-w-full rounded-full border px-2.5 py-2 text-center text-sm font-black shadow-[0_14px_28px_-18px_rgba(15,23,42,0.95)] ring-1 ring-white/25 transition sm:w-fit sm:px-4 sm:text-base ${
         locked ? "cursor-default border-slate-300 bg-slate-700/90 text-white" : isSelected ? "border-amber-200 bg-amber-300 text-slate-950 ring-2 ring-amber-100" : toneClass
       }`}
     >
@@ -1620,7 +1941,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
   const [playerSearch, setPlayerSearch] = useState("");
   const [statsPlayer, setStatsPlayer] = useState(null);
   const savedPlayers = useMemo(
-    () => (state.players || []).filter((player) => player.is_active !== false),
+    () => state.players || [],
     [state.players]
   );
   const filteredSavedPlayers = useMemo(
@@ -1639,7 +1960,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
       memberId: player.member_id || "",
       displayName: player.display_name || "",
       email: player.email || "",
-      phone: player.phone || "",
+      phone: formatPhoneInput(player.phone || ""),
       notes: player.notes || "",
       isActive: player.is_active !== false,
       groupIds: groupIdsForPlayer(state, player.id),
@@ -1656,7 +1977,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
       memberId: member.id,
       displayName: member.full_name || [member.first_name, member.last_name].filter(Boolean).join(" "),
       email: member.email || "",
-      phone: member.phone || "",
+      phone: formatPhoneInput(member.phone || ""),
     }));
     setMemberSearch(memberLabel(member));
     setMemberPickerOpen(false);
@@ -1692,10 +2013,11 @@ function PlayersTab({ state, runAction, actionLoading }) {
         memberId: form.memberId,
         displayName: form.displayName,
         email: form.email,
-        phone: form.phone,
+        phone: formatPhoneInput(form.phone),
         notes: form.notes,
         is_active: form.isActive,
         groupIds: form.groupIds,
+        publicUrl: playerRoundRobinUrl(state.group),
       },
     });
     if (saved) {
@@ -1707,7 +2029,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
 
   async function deleteSavedPlayer(player) {
     const playerName = player.display_name || "this player";
-    if (!window.confirm(`Delete ${playerName} from Saved Players? Past session history will stay saved.`)) return;
+    if (!window.confirm(`Deactivate ${playerName}? Past session history will stay saved.`)) return;
 
     const deleted = await runAction("deletePlayer", { playerId: player.id });
     if (deleted && String(form.id) === String(player.id)) {
@@ -1715,6 +2037,22 @@ function PlayersTab({ state, runAction, actionLoading }) {
       setMemberSearch("");
       setMemberPickerOpen(false);
     }
+  }
+
+  async function toggleSavedPlayerActive(player, isActive) {
+    await runAction("savePlayer", {
+      player: {
+        id: player.id,
+        memberId: player.member_id || "",
+        displayName: player.display_name || "",
+        email: player.email || "",
+        phone: formatPhoneInput(player.phone || ""),
+        notes: player.notes || "",
+        is_active: isActive,
+        groupIds: groupIdsForPlayer(state, player.id),
+        publicUrl: playerRoundRobinUrl(state.group),
+      },
+    });
   }
 
   return (
@@ -1766,9 +2104,9 @@ function PlayersTab({ state, runAction, actionLoading }) {
               </div>
             )}
           </div>
-          <TextInput label="Name" value={form.displayName} onChange={(value) => setForm((current) => ({ ...current, displayName: value }))} />
+          <TextInput label="Name" value={form.displayName} onChange={(value) => setForm((current) => ({ ...current, displayName: value }))} required />
           <TextInput label="Email" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
-          <TextInput label="Phone" value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: value }))} />
+          <TextInput label="Phone" type="tel" value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: formatPhoneInput(value) }))} required />
           <TextInput label="Notes" value={form.notes} onChange={(value) => setForm((current) => ({ ...current, notes: value }))} />
           <div>
             <div className="text-sm font-bold text-slate-600">Player groups</div>
@@ -1787,7 +2125,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
             Active
           </label>
           <div className="flex gap-2">
-            <button type="button" onClick={save} disabled={actionLoading === "savePlayer" || !form.displayName.trim()} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
+            <button type="button" onClick={save} disabled={actionLoading === "savePlayer" || !form.displayName.trim() || normalizePhone(form.phone).length < 10} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
               Save Player
             </button>
             {form.id && <button type="button" onClick={() => { setForm(emptyPlayerForm()); setMemberSearch(""); setMemberPickerOpen(false); }} className="rounded-lg bg-slate-100 px-4 py-3 font-black text-slate-700 hover:bg-slate-200">Cancel</button>}
@@ -1819,14 +2157,28 @@ function PlayersTab({ state, runAction, actionLoading }) {
             <thead className="bg-slate-950 text-xs uppercase tracking-wide text-white">
               <tr>
                 <th className="px-3 py-2 text-left">Name</th>
+                <th className="px-3 py-2 text-center">Active</th>
                 <th className="px-3 py-2 text-left">Contact</th>
                 <th className="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredSavedPlayers.map((player) => (
-                <tr key={player.id}>
-                  <td className="px-3 py-2 font-black">{player.display_name}</td>
+                <tr key={player.id} className={player.is_active === false ? "bg-slate-50 text-slate-500" : ""}>
+                  <td className="px-3 py-2 font-black">
+                    <div>{player.display_name}</div>
+                    {player.is_active === false && <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">Inactive</div>}
+                  </td>
+                  <td className="px-3 py-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={player.is_active !== false}
+                      onChange={(event) => toggleSavedPlayerActive(player, event.target.checked)}
+                      disabled={actionLoading === "savePlayer"}
+                      className="h-5 w-5 rounded border-slate-300 text-teal-700"
+                      aria-label={`Set ${player.display_name || "player"} active`}
+                    />
+                  </td>
                   <td className="px-3 py-2 font-semibold text-slate-600">
                     <div>{[player.email, player.phone].filter(Boolean).join(" / ") || "No contact"}</div>
                     <div className="mt-1 text-xs text-slate-500">{groupNamesForPlayer(state, player.id).join(", ") || "No groups"}</div>
@@ -1835,19 +2187,21 @@ function PlayersTab({ state, runAction, actionLoading }) {
                     <div className="flex justify-end gap-2">
                       <button type="button" onClick={() => editPlayer(player)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-slate-800">Edit</button>
                       <button type="button" onClick={() => setStatsPlayer(player)} className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">Stats</button>
-                      <button type="button" onClick={() => deleteSavedPlayer(player)} disabled={actionLoading === "deletePlayer"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">Delete</button>
+                      {player.is_active !== false && (
+                        <button type="button" onClick={() => deleteSavedPlayer(player)} disabled={actionLoading === "deletePlayer"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">Deactivate</button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))}
               {savedPlayers.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-3 py-8 text-center font-semibold text-slate-500">No saved players yet.</td>
+                  <td colSpan={4} className="px-3 py-8 text-center font-semibold text-slate-500">No saved players yet.</td>
                 </tr>
               )}
               {savedPlayers.length > 0 && filteredSavedPlayers.length === 0 && (
                 <tr>
-                  <td colSpan={3} className="px-3 py-8 text-center font-semibold text-slate-500">No players match that search.</td>
+                  <td colSpan={4} className="px-3 py-8 text-center font-semibold text-slate-500">No players match that search.</td>
                 </tr>
               )}
             </tbody>
@@ -1867,9 +2221,9 @@ function PlayerStatsModal({ state, player, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
       <div className="my-2 max-h-[calc(100vh-1rem)] w-full max-w-5xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
-        <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200 bg-slate-950 p-4 text-white">
+        <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
           <div>
-            <div className="text-xs font-black uppercase tracking-wide text-teal-200">Saved Player Stats</div>
+            <div className={MODAL_EYEBROW_CHROME}>Saved Player Stats</div>
             <h2 className="text-2xl font-black">{player.display_name || "Player"}</h2>
           </div>
           <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
@@ -2031,9 +2385,9 @@ function GroupsTab({ state, runAction, actionLoading }) {
     {selectedGroup && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
         <div className="w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-2xl">
-          <div className="flex items-center justify-between gap-3 bg-slate-950 px-5 py-4 text-white">
+          <div className={`flex items-center justify-between gap-3 px-5 py-4 ${MODAL_HEADER_CHROME}`}>
             <div>
-              <div className="text-xs font-black uppercase tracking-wide text-teal-200">Current Players</div>
+              <div className={MODAL_EYEBROW_CHROME}>Current Players</div>
               <h2 className="text-2xl font-black">{selectedGroup.name}</h2>
             </div>
             <button type="button" onClick={() => setSelectedGroup(null)} className="rounded-lg bg-white px-3 py-2 text-sm font-black text-slate-950">Close</button>
@@ -2187,7 +2541,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
   const initialSessionId = String(latestSession?.id || smsSessions[0]?.id || "");
   const [selectedSessionId, setSelectedSessionId] = useState(initialSessionId);
   const selectedSmsSession = smsSessions.find((session) => String(session.id || "") === String(selectedSessionId)) || null;
-  const selectedSessionPlayers = allPlayersForSession(state, selectedSmsSession?.id);
+  const selectedSessionPlayers = activeSessionPlayersForSession(state, selectedSmsSession?.id);
   const [templates, setTemplates] = useState(() => normalizeSmsTemplates(state.group.settings?.smsTemplates));
   const [message, setMessage] = useState(() => renderClientSmsTemplate(normalizeSmsTemplates(state.group.settings?.smsTemplates).gameUpdate, state.group, selectedSmsSession, selectedSessionPlayers));
   const [smsEnabled, setSmsEnabled] = useState(state.group.settings?.smsSendingEnabled === true);
@@ -2231,7 +2585,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
   function selectSmsSession(sessionId) {
     const nextSession = smsSessions.find((session) => String(session.id || "") === String(sessionId)) || null;
     setSelectedSessionId(sessionId);
-    setMessage(renderClientSmsTemplate(templates[selectedTemplateKey], state.group, nextSession, allPlayersForSession(state, nextSession?.id)));
+    setMessage(renderClientSmsTemplate(templates[selectedTemplateKey], state.group, nextSession, activeSessionPlayersForSession(state, nextSession?.id)));
   }
 
   async function sendSelectedText() {
@@ -2330,7 +2684,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
           <div className="flex flex-wrap items-end gap-2">
             <label className="block text-xs font-black uppercase tracking-wide text-slate-500">
               Test phone
-              <input type="tel" value={testPhone} onChange={(event) => setTestPhone(formatPhoneInput(event.target.value))} placeholder="941-555-1212" className="mt-1 w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-black text-slate-950" />
+              <input type="tel" value={testPhone} onChange={(event) => setTestPhone(formatPhoneInput(event.target.value))} placeholder="(941) 555-1212" className="mt-1 w-40 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-black text-slate-950" />
             </label>
             <button type="button" onClick={() => saveSmsSettings()} disabled={actionLoading === "saveSmsSettings"} className="rounded-lg bg-slate-950 px-4 py-2 text-sm font-black text-white hover:bg-slate-800 disabled:bg-slate-300">
               Save SMS Settings
@@ -2338,6 +2692,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
           </div>
         </div>
         <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+          <TemplateTextarea label="New Player" value={templates.newPlayer} onChange={(value) => setTemplate("newPlayer", value)} onTest={() => sendTemplateTest("newPlayer")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
           <TemplateTextarea label="New session text" value={templates.sessionInvite} onChange={(value) => setTemplate("sessionInvite", value)} onTest={() => sendTemplateTest("sessionInvite")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
           <TemplateTextarea label="Pending signup reminder" value={templates.sessionReminder} onChange={(value) => setTemplate("sessionReminder", value)} onTest={() => sendTemplateTest("sessionReminder")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
           <TemplateTextarea label="Game update" value={templates.gameUpdate} onChange={(value) => setTemplate("gameUpdate", value)} onTest={() => sendTemplateTest("gameUpdate")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
@@ -2345,7 +2700,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
           <TemplateTextarea label="Session results" value={templates.sessionResults} onChange={(value) => setTemplate("sessionResults", value)} onTest={() => sendTemplateTest("sessionResults")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
         </div>
         <div className="mt-3 rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-500">
-          Placeholders: {"{{group_name}}"}, {"{{session_name}}"}, {"{{date}}"}, {"{{time}}"}, {"{{location}}"}, {"{{location_line}}"}, {"{{public_link}}"}, {"{{joined_count}}"}, {"{{available_spots}}"}, {"{{result_rankings}}"}
+          Placeholders: {"{{group_name}}"}, {"{{player_name}}"}, {"{{session_name}}"}, {"{{date}}"}, {"{{time}}"}, {"{{location}}"}, {"{{location_line}}"}, {"{{public_link}}"}, {"{{joined_count}}"}, {"{{available_spots}}"}, {"{{result_rankings}}"}
         </div>
       </div>
     </section>
@@ -2385,11 +2740,11 @@ function TemplateTextarea({ label, value, onChange, onTest = null, testDisabled 
   );
 }
 
-function TextInput({ label, value, onChange, placeholder = "", type = "text" }) {
+function TextInput({ label, value, onChange, placeholder = "", type = "text", required = false }) {
   return (
     <label className="block text-sm font-bold text-slate-600">
-      {label}
-      <input type={type} value={value} placeholder={placeholder} onChange={(event) => onChange(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950" />
+      {label}{required ? " *" : ""}
+      <input type={type} value={value} placeholder={placeholder} required={required} onChange={(event) => onChange(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950" />
     </label>
   );
 }
@@ -2421,7 +2776,7 @@ function sessionSortValue(session) {
 }
 
 function sessionPlayersForStatus(state, sessionId, status) {
-  return allPlayersForSession(state, sessionId)
+  return activeSessionPlayersForSession(state, sessionId)
     .filter((player) => player.response_status === status)
     .sort((a, b) => String(a.display_name || "").localeCompare(String(b.display_name || "")));
 }
@@ -2430,6 +2785,14 @@ function allPlayersForSession(state, sessionId) {
   const rows = state.allSessionPlayers || [];
   const fallbackRows = rows.length > 0 ? rows : state.sessionPlayers || [];
   return fallbackRows.filter((player) => String(player.session_id) === String(sessionId));
+}
+
+function activeSessionPlayersForSession(state, sessionId) {
+  const activePlayerIds = new Set((state.players || [])
+    .filter((player) => player.is_active !== false)
+    .map((player) => String(player.id)));
+  return allPlayersForSession(state, sessionId)
+    .filter((player) => !player.player_id || activePlayerIds.has(String(player.player_id)));
 }
 
 function sessionResultsForSession(state, sessionId) {
@@ -2456,6 +2819,24 @@ function sessionMatchesForSession(state, sessionId) {
     });
 }
 
+function winPctForStanding(row) {
+  const wins = Number(row?.wins || 0);
+  const losses = Number(row?.losses || 0);
+  const games = Number(row?.games || wins + losses);
+  return games > 0 ? wins / games : 0;
+}
+
+function isWinningScore(score, opponentScore) {
+  const numeric = Number(score);
+  const opponentNumeric = Number(opponentScore);
+  if (Number.isNaN(numeric) || Number.isNaN(opponentNumeric)) return false;
+  return numeric > opponentNumeric;
+}
+
+function formatGameScore(score) {
+  return score ?? "-";
+}
+
 function playerIdsFromMatches(matches = []) {
   return matches.reduce((ids, match) => {
     [
@@ -2478,9 +2859,12 @@ function playerNames(players) {
 
 function suggestedCourtCountForPlayers(playerCount) {
   const count = Number(playerCount || 0);
-  if (count < 8) return 1;
-  if (count < 12) return 2;
-  return Math.max(1, Math.floor(count / 4));
+  if (count <= 7) return 1;
+  return Math.max(1, Math.ceil((count - 3) / 4));
+}
+
+function roundElementId(roundNumber) {
+  return `live-round-${String(roundNumber || "").replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
 function sessionLifecycleClass(status) {
@@ -2595,10 +2979,11 @@ function editableCourt(court) {
   };
 }
 
-function sessionCourtRows(session, defaultCourts, count) {
+function sessionCourtRows(session, defaultCourts, count, currentCourts = []) {
   const desiredCount = Math.max(1, Number(count || session?.court_count || 1));
   const existingCourts = Array.isArray(session?.settings?.sessionCourts) ? session.settings.sessionCourts : [];
-  const sourceCourts = existingCourts.length > 0 ? existingCourts : activeCourts(defaultCourts);
+  const currentRows = Array.isArray(currentCourts) ? currentCourts : [];
+  const sourceCourts = currentRows.length > 0 ? currentRows : existingCourts.length > 0 ? existingCourts : activeCourts(defaultCourts);
 
   return Array.from({ length: desiredCount }, (_, index) => ({
     name: sourceCourts[index]?.name || `Court ${index + 1}`,
@@ -2608,6 +2993,7 @@ function sessionCourtRows(session, defaultCourts, count) {
 
 function normalizeSmsTemplates(templates = {}) {
   return {
+    newPlayer: templates.newPlayer || DEFAULT_SMS_TEMPLATES.newPlayer,
     sessionInvite: templates.sessionInvite || DEFAULT_SMS_TEMPLATES.sessionInvite,
     sessionReminder: templates.sessionReminder || DEFAULT_SMS_TEMPLATES.sessionReminder,
     gameUpdate: templates.gameUpdate || DEFAULT_SMS_TEMPLATES.gameUpdate,
@@ -2633,6 +3019,7 @@ function renderClientSmsTemplate(template, group, session, sessionPlayers = []) 
     location,
     location_line: location ? ` at ${location}` : "",
     public_link: playerRoundRobinUrl(group),
+    player_name: "Player",
     joined_count: joinedCount,
     available_spots: availableSpots,
     result_rankings: "Rankings will be inserted when the session is finished.",
@@ -2861,12 +3248,15 @@ function noticeForAction(action, result) {
   if (action === "updateSessionPlayerStatus") return "Player status updated.";
   if (action === "addSessionPlayer") return "Player added and joined.";
   if (action === "startSession") return "Session started.";
-  if (action === "startSessionAndGenerateFirstGame") return `Session started. Game ${result.roundNumber || 1} generated.`;
+  if (action === "startSessionAndGenerateFirstGame") return `Session started. Round ${result.roundNumber || 1} generated.`;
   if (action === "deleteSession") return "Session deleted from active sessions.";
-  if (action === "generateNextGame") return `Game ${result.roundNumber || ""} generated.`;
+  if (action === "generateNextGame") return `Round ${result.roundNumber || ""} generated.`;
   if (action === "updateMatchScore") return "Score saved.";
   if (action === "updateMatchLineup") return "Lineup updated.";
-  if (action === "completeSession") return result.sms?.skipped ? "Session completed. Result text was logged only." : `Session completed. Result texts sent: ${result.sms?.sent || 0}.`;
+  if (action === "completeSession") {
+    const base = result.sms?.skipped ? "Session completed. Result text was logged only." : `Session completed. Result texts sent: ${result.sms?.sent || 0}.`;
+    return `${base}${weeklyRepeatNotice(result.weeklyRepeat)}`;
+  }
   if (action === "sendBroadcastText") {
     if (result.sms?.skipped) return `Test text logged for ${result.recipients || 0} recipient${Number(result.recipients || 0) === 1 ? "" : "s"}. SMS is off.`;
     return `Text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`;
@@ -2879,12 +3269,28 @@ function noticeForAction(action, result) {
     if (result.sms?.skipped) return "Test template text logged. SMS is off.";
     return "Test template text sent.";
   }
-  if (action === "savePlayer") return "Player saved.";
-  if (action === "deletePlayer") return "Player deleted from Saved Players.";
+  if (action === "savePlayer") {
+    if (result.newPlayerTextSent) {
+      if (result.sms?.skipped) return `Player saved. New Player text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
+      return `Player saved. New Player text sent: ${result.sms?.sent || 0}.`;
+    }
+    return "Player saved.";
+  }
+  if (action === "deletePlayer") return "Player deactivated in Saved Players.";
   if (action === "saveCourts") return "Courts saved.";
   if (action === "saveSettings") return "Settings saved.";
   if (action === "masterResetRoundRobin") return `Master Reset complete. Deleted ${result.sessionsDeleted || 0} session${Number(result.sessionsDeleted || 0) === 1 ? "" : "s"} and all related play history.`;
   return "Saved.";
+}
+
+function weeklyRepeatNotice(weeklyRepeat) {
+  if (weeklyRepeat?.created) {
+    return ` Next weekly session opened for ${formatDate(weeklyRepeat.sessionDate)}.`;
+  }
+  if (weeklyRepeat?.requested && weeklyRepeat?.skipped) {
+    return ` Weekly repeat was not created: ${weeklyRepeat.reason || "unknown reason"}.`;
+  }
+  return "";
 }
 
 function formatDate(value) {
@@ -2917,10 +3323,16 @@ function formatPercent(value) {
 }
 
 function formatPhoneInput(value) {
-  const digits = String(value || "").replace(/\D/g, "").slice(0, 10);
+  const digits = normalizePhone(value).slice(0, 10);
   if (digits.length <= 3) return digits;
-  if (digits.length <= 6) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
-  return `${digits.slice(0, 3)}-${digits.slice(3, 6)}-${digits.slice(6)}`;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
+function normalizePhone(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+  if (digits.length > 10 && digits.startsWith("1")) return digits.slice(-10);
+  return digits;
 }
 
 function timeInputValue(value) {

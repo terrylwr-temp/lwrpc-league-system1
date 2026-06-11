@@ -21,7 +21,7 @@ export default function RoundRobinGroupsPage() {
     <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-4 text-slate-950 sm:p-6">
       <div className="w-full">
         <AppHeader
-          title="Round Robin"
+          title="PBCourtCommand"
           subtitle="Nightly round robin groups, ladder sessions, lineups, scores, and results."
         />
 
@@ -61,7 +61,7 @@ export default function RoundRobinGroupsPage() {
                       Open
                     </Link>
                     <Link className="rounded-lg border border-teal-800 bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_24px_-16px_rgba(15,118,110,0.8)] ring-1 ring-white transition hover:-translate-y-0.5 hover:bg-teal-800 hover:shadow-lg" href={`/round-robin/${key}/admin`}>
-                      Manager
+                      Admin Setup
                     </Link>
                   </div>
                   </div>

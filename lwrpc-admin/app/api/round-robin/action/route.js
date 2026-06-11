@@ -6,13 +6,16 @@ import { createNextRoundRobinRound, createRoundRobinSchedule, roundRobinPlayerLa
 export const runtime = "nodejs";
 
 const HOST_ALLOWED_ACTIONS = new Set([
+  "updatePlannedSession",
   "updateSessionPlayerStatus",
+  "addSessionPlayer",
   "startSession",
   "startSessionAndGenerateFirstGame",
   "generateNextGame",
   "updateMatchScore",
   "updateMatchLineup",
   "completeSession",
+  "sendBroadcastText",
 ]);
 
 function adminClient() {
@@ -145,7 +148,7 @@ export async function POST(req) {
     }
 
     if (action === "sendBroadcastText") {
-      const result = await sendBroadcastText(supabase, group, body);
+      const result = await sendBroadcastText(supabase, group, body, access);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -259,6 +262,20 @@ async function saveSettings(supabase, group, body) {
 async function savePlayer(supabase, group, player = {}) {
   const displayName = String(player.display_name || player.displayName || "").trim();
   if (!displayName) throw new Error("Player name is required.");
+  const cleanPhone = normalizePhone(player.phone);
+  if (!cleanPhone) throw new Error("Phone number is required.");
+  if (cleanPhone.length < 10) throw new Error("Enter a full 10-digit phone number.");
+  let existingPlayer = null;
+  if (player.id) {
+    const existingResult = await supabase
+      .from("round_robin_players")
+      .select("id, is_active")
+      .eq("id", player.id)
+      .eq("group_id", group.id)
+      .maybeSingle();
+    if (existingResult.error) throw existingResult.error;
+    existingPlayer = existingResult.data || null;
+  }
 
   const payload = {
     group_id: group.id,
@@ -266,7 +283,7 @@ async function savePlayer(supabase, group, player = {}) {
     display_name: displayName,
     first_name: String(player.first_name || player.firstName || displayName.split(/\s+/)[0] || "").trim() || null,
     email: String(player.email || "").trim().toLowerCase() || null,
-    phone: String(player.phone || "").trim() || null,
+    phone: formatPhoneInput(cleanPhone),
     is_active: player.is_active !== false,
     notes: String(player.notes || "").trim() || null,
     updated_at: new Date().toISOString(),
@@ -283,7 +300,9 @@ async function savePlayer(supabase, group, player = {}) {
     if (error) throw error;
     await addLog(supabase, group.id, null, "player", `${displayName} updated.`);
     await replacePlayerGroupMemberships(supabase, group.id, data.id, player.groupIds || player.group_ids || []);
-    return { player: data };
+    const shouldSendNewPlayerText = payload.is_active === true && existingPlayer?.is_active === false;
+    const sms = shouldSendNewPlayerText ? await sendNewPlayerText(supabase, group, data, player.publicUrl) : null;
+    return { player: data, sms, newPlayerTextSent: Boolean(shouldSendNewPlayerText) };
   }
 
   const { data, error } = await supabase
@@ -295,7 +314,35 @@ async function savePlayer(supabase, group, player = {}) {
   if (error) throw error;
   await replacePlayerGroupMemberships(supabase, group.id, data.id, player.groupIds || player.group_ids || []);
   await addLog(supabase, group.id, null, "player", `${displayName} added.`);
-  return { player: data };
+  const sms = payload.is_active ? await sendNewPlayerText(supabase, group, data, player.publicUrl) : null;
+  return { player: data, sms, newPlayerTextSent: payload.is_active };
+}
+
+async function sendNewPlayerText(supabase, group, player, publicUrl = "") {
+  const smsEnabled = group.settings?.smsSendingEnabled === true;
+  const phones = player.phone ? [player.phone] : [];
+  const sms = smsEnabled
+    ? await sendSmsMessages({
+      phones,
+      body: renderSmsTemplate(
+        normalizeSmsTemplates(group.settings?.smsTemplates || {}).newPlayer,
+        { group, publicUrl, playerName: player.display_name || "Player" }
+      ),
+    })
+    : smsDisabledResult("SMS disabled in settings", 1, phones.length);
+
+  await addLog(
+    supabase,
+    group.id,
+    null,
+    "sms",
+    smsEnabled
+      ? `New Player text sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"} for ${player.display_name || "Player"}.`
+      : `New Player text skipped for ${player.display_name || "Player"} because SMS is off.`,
+    { sms, recipientScope: "newPlayer", recipientCount: 1, phoneCount: phones.length, playerId: player.id }
+  );
+
+  return sms;
 }
 
 async function savePlayerGroup(supabase, group, playerGroup = {}) {
@@ -743,7 +790,8 @@ async function updatePlannedSession(supabase, group, body) {
 
   const promotedPlayers = await promoteWaitlistSpots(supabase, session);
   const latestSessionPlayers = await loadSessionPlayers(supabase, session.id);
-  const joinedPlayers = latestSessionPlayers.filter((player) => player.response_status === "joined");
+  const activeLatestSessionPlayers = await filterActiveSessionPlayers(supabase, group.id, latestSessionPlayers);
+  const joinedPlayers = activeLatestSessionPlayers.filter((player) => player.response_status === "joined");
   const smsEnabled = body.smsEnabled === true && group.settings?.smsSendingEnabled === true && joinedPlayers.length > 0;
   let sms = smsDisabledResult(
     joinedPlayers.length === 0
@@ -755,7 +803,7 @@ async function updatePlannedSession(supabase, group, body) {
     const template = normalizeSmsTemplates(group.settings?.smsTemplates || {}).sessionInvite;
     sms = await sendSmsMessages({
       phones: joinedPlayers.map((player) => player.phone).filter(Boolean),
-      body: renderSmsTemplate(template, { group, session, publicUrl: body.publicUrl, ...sessionTextCounts(session, latestSessionPlayers) }),
+      body: renderSmsTemplate(template, { group, session, publicUrl: body.publicUrl, ...sessionTextCounts(session, activeLatestSessionPlayers) }),
     });
   }
 
@@ -786,12 +834,13 @@ async function updateSessionPlayerStatus(supabase, group, body) {
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   const currentPlayers = await loadSessionPlayers(supabase, session.id);
-  const target = currentPlayers.find((player) => String(player.player_id || "") === playerId);
+  const activeCurrentPlayers = await filterActiveSessionPlayers(supabase, group.id, currentPlayers);
+  const target = activeCurrentPlayers.find((player) => String(player.player_id || "") === playerId);
   if (!target) throw new Error("Player is not part of this session.");
 
   let resolvedStatus = status;
   if (status === "joined" && session.max_players) {
-    const joinedCount = currentPlayers.filter((player) => player.response_status === "joined" && String(player.player_id || "") !== playerId).length;
+    const joinedCount = activeCurrentPlayers.filter((player) => player.response_status === "joined" && String(player.player_id || "") !== playerId).length;
     if (joinedCount >= Number(session.max_players)) resolvedStatus = "waitlist";
   }
 
@@ -930,8 +979,27 @@ async function startSession(supabase, group, body) {
   if (!sessionId) throw new Error("Session is required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
-  const sessionPlayers = await loadSessionPlayers(supabase, session.id);
-  const joinedPlayers = sessionPlayers.filter((player) => player.response_status === "joined");
+  const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, session.id));
+  let joinedPlayers = sessionPlayers.filter((player) => player.response_status === "joined");
+  if (Array.isArray(body.selectedSessionPlayerIds)) {
+    const selectedIds = new Set(body.selectedSessionPlayerIds.map((id) => String(id || "")).filter(Boolean));
+    joinedPlayers = joinedPlayers.filter((player) => selectedIds.has(String(player.id || "")));
+    if (joinedPlayers.length < 4) throw new Error("Confirm at least 4 joined players before starting.");
+
+    const uncheckedJoinedPlayerIds = sessionPlayers
+      .filter((player) => player.response_status === "joined")
+      .filter((player) => !selectedIds.has(String(player.id || "")))
+      .map((player) => player.id)
+      .filter(Boolean);
+
+    if (uncheckedJoinedPlayerIds.length > 0) {
+      const { error: attendanceError } = await supabase
+        .from("round_robin_session_players")
+        .update({ response_status: "declined", updated_at: new Date().toISOString() })
+        .in("id", uncheckedJoinedPlayerIds);
+      if (attendanceError) throw attendanceError;
+    }
+  }
   if (joinedPlayers.length < 4) throw new Error("Confirm at least 4 joined players before starting.");
 
   const sessionCourts = sanitizeSessionCourts(body.sessionCourts);
@@ -965,7 +1033,7 @@ async function generateNextGame(supabase, group, body) {
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   if (session.status !== "playing") throw new Error("Start the session before generating games.");
 
-  const [sessionPlayers, existingMatches, courtsResult] = await Promise.all([
+  const [sessionPlayersSnapshot, existingMatches, courtsResult] = await Promise.all([
     loadSessionPlayers(supabase, session.id),
     loadSessionMatches(supabase, session.id),
     supabase
@@ -978,6 +1046,7 @@ async function generateNextGame(supabase, group, body) {
   ]);
   if (courtsResult.error) throw courtsResult.error;
 
+  const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, sessionPlayersSnapshot);
   const joinedPlayers = sessionPlayers
     .filter((player) => player.response_status === "joined")
     .map((player) => ({
@@ -1025,7 +1094,7 @@ async function generateNextGame(supabase, group, body) {
   if (sessionError) throw sessionError;
 
   await rebuildResults(supabase, group, session.id);
-  await addLog(supabase, group.id, session.id, "session", `Generated game ${nextRound.roundNumber}.`);
+  await addLog(supabase, group.id, session.id, "session", `Generated round ${nextRound.roundNumber}.`);
   return { session: updatedSession, matches: matchesResult.data || [], roundNumber: nextRound.roundNumber };
 }
 
@@ -1111,7 +1180,7 @@ async function completeSession(supabase, group, body) {
   const smsEnabled = body.smsEnabled === true && group.settings?.smsSendingEnabled === true;
   let sms = smsDisabledResult(smsEnabled ? "" : body.smsEnabled ? "SMS disabled in settings" : "SMS disabled", 0);
   if (smsEnabled) {
-    const sessionPlayers = await loadSessionPlayers(supabase, sessionId);
+    const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, sessionId));
     const playedPlayerIds = new Set(playedResults.map((row) => String(row.player_id)));
     const recipientPlayers = sessionPlayers.filter((player) => (
       playedPlayerIds.size > 0
@@ -1134,16 +1203,85 @@ async function completeSession(supabase, group, body) {
     });
   }
 
-  await addLog(supabase, group.id, sessionId, "session", `Session completed. Result texts sent: ${sms.sent || 0}.`, { sms });
-  return { session: data, results, summaryText, sms };
+  const repeatsWeekly = isWeeklyRepeatEnabled(data.repeats_weekly) || isWeeklyRepeatEnabled(session.repeats_weekly);
+  let weeklyRepeat = { requested: repeatsWeekly, created: false, skipped: true, reason: "Session is not set to repeat weekly" };
+  if (repeatsWeekly) {
+    try {
+      weeklyRepeat = await createNextWeeklySession(supabase, group, data, body);
+    } catch (repeatError) {
+      weeklyRepeat = { requested: true, created: false, skipped: true, reason: repeatError.message || "Unable to create next weekly session" };
+      await addLog(supabase, group.id, sessionId, "session", `Weekly repeat was not created: ${weeklyRepeat.reason}`, { weeklyRepeat });
+    }
+  }
+
+  await addLog(supabase, group.id, sessionId, "session", `Session completed. Result texts sent: ${sms.sent || 0}.`, { sms, weeklyRepeat });
+  return { session: data, results, summaryText, sms, weeklyRepeat };
 }
 
-async function sendBroadcastText(supabase, group, body) {
+async function createNextWeeklySession(supabase, group, session, body) {
+  const nextDate = addDaysToIsoDate(session.session_date, 7);
+  const invitedGroupIds = [...new Set([
+    ...(Array.isArray(session.invited_group_ids) ? session.invited_group_ids : []),
+    ...(Array.isArray(session.settings?.createdFromGroups) ? session.settings.createdFromGroups : []),
+  ].map((id) => String(id || "").trim()).filter(Boolean))];
+  if (!nextDate) return { requested: true, created: false, skipped: true, reason: "Original session date is missing" };
+  if (invitedGroupIds.length === 0) return { requested: true, created: false, skipped: true, reason: "Original session has no invited groups" };
+
+  const duplicateResult = await supabase
+    .from("round_robin_sessions")
+    .select("id, session_name, session_date, starts_at")
+    .eq("group_id", group.id)
+    .eq("session_date", nextDate)
+    .eq("session_name", session.session_name || "Round Robin Session")
+    .limit(10);
+  if (duplicateResult.error) throw duplicateResult.error;
+
+  const existingRepeat = (duplicateResult.data || []).find((row) => String(row.starts_at || "") === String(session.starts_at || ""));
+  if (existingRepeat) {
+    return { requested: true, created: false, skipped: true, reason: "Next weekly session already exists", sessionId: existingRepeat.id, sessionDate: nextDate };
+  }
+
+  const repeatResult = await createPlannedSession(supabase, group, {
+    sessionName: session.session_name || "Round Robin Session",
+    location: session.location || "",
+    sessionDate: nextDate,
+    startsAt: session.starts_at || "",
+    maxPlayers: session.max_players || 8,
+    repeatsWeekly: true,
+    hostPlayerId: session.host_player_id || "",
+    cohostPlayerId: session.cohost_player_id || "",
+    invitedGroupIds,
+    mode: session.mode || group.mode,
+    smsEnabled: true,
+    publicUrl: body.publicUrl,
+  });
+
+  await addLog(
+    supabase,
+    group.id,
+    session.id,
+    "session",
+    `Next weekly session opened for ${formatIsoDateForLog(nextDate)}.`,
+    { nextSessionId: repeatResult.session?.id, nextSessionDate: nextDate, sms: repeatResult.sms }
+  );
+
+  return {
+    requested: true,
+    created: true,
+    sessionId: repeatResult.session?.id,
+    sessionDate: nextDate,
+    sms: repeatResult.sms,
+  };
+}
+
+async function sendBroadcastText(supabase, group, body, access = null) {
   const sessionId = String(body.sessionId || "").trim();
   const message = String(body.message || "").trim();
   if (!message) throw new Error("Message is required.");
 
-  const recipientScope = ["joined", "invited", "session", "all"].includes(body.recipientScope) ? body.recipientScope : "joined";
+  const recipientScope = access?.mode === "host"
+    ? "joined"
+    : ["joined", "invited", "session", "all"].includes(body.recipientScope) ? body.recipientScope : "joined";
   const smsEnabled = body.smsEnabled === true && group.settings?.smsSendingEnabled === true;
   let logSessionId = null;
   let session = null;
@@ -1158,11 +1296,14 @@ async function sendBroadcastText(supabase, group, body) {
   if (!logSessionId && recipientScope !== "all") {
     throw new Error("A session is required for that recipient group.");
   }
+  if (access?.mode === "host" && !logSessionId) {
+    throw new Error("A session is required for host text updates.");
+  }
 
   if (recipientScope === "all" || !logSessionId) {
     players = await loadActivePlayers(supabase, group.id);
   } else {
-    sessionPlayers = await loadSessionPlayers(supabase, logSessionId);
+    sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, logSessionId));
     if (recipientScope === "session") {
       players = sessionPlayers.filter((player) => player.response_status !== "declined");
     } else if (recipientScope === "invited") {
@@ -1229,7 +1370,7 @@ async function sendSessionReminderText(supabase, group, body) {
   if (!sessionId) throw new Error("Session is required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
-  const sessionPlayers = await loadSessionPlayers(supabase, session.id);
+  const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, session.id));
   const pendingPlayers = sessionPlayers.filter((player) => player.response_status === "invited");
   const phones = pendingPlayers.map((player) => player.phone).filter(Boolean);
   const templates = normalizeSmsTemplates(group.settings?.smsTemplates || {});
@@ -1322,11 +1463,29 @@ async function loadSessionPlayers(supabase, sessionId) {
   return data || [];
 }
 
+async function filterActiveSessionPlayers(supabase, groupId, sessionPlayers = []) {
+  const playerIds = [...new Set((sessionPlayers || [])
+    .map((player) => String(player.player_id || "").trim())
+    .filter(Boolean))];
+  if (playerIds.length === 0) return sessionPlayers || [];
+
+  const { data, error } = await supabase
+    .from("round_robin_players")
+    .select("id")
+    .eq("group_id", groupId)
+    .eq("is_active", true)
+    .in("id", playerIds);
+  if (error) throw error;
+
+  const activePlayerIds = new Set((data || []).map((player) => String(player.id)));
+  return (sessionPlayers || []).filter((player) => !player.player_id || activePlayerIds.has(String(player.player_id)));
+}
+
 async function promoteWaitlistSpots(supabase, session) {
   const maxPlayers = Number(session?.max_players || 0);
   if (!maxPlayers) return [];
 
-  const players = await loadSessionPlayers(supabase, session.id);
+  const players = await filterActiveSessionPlayers(supabase, session.group_id, await loadSessionPlayers(supabase, session.id));
   const joinedCount = players.filter((player) => player.response_status === "joined").length;
   const openSpots = maxPlayers - joinedCount;
   if (openSpots <= 0) return [];
@@ -1541,12 +1700,13 @@ function normalizeScore(value) {
 
 function suggestedCourtCount(playerCount) {
   const count = Number(playerCount || 0);
-  if (count < 4) return 1;
-  return Math.max(1, Math.floor(count / 4));
+  if (count <= 7) return 1;
+  return Math.max(1, Math.ceil((count - 3) / 4));
 }
 
 function defaultSmsTemplates() {
   return {
+    newPlayer: "{{group_name}}: {{player_name}}, you have been added to PBCourtCommand. You may receive session invite/update texts at this number. Reply STOP to opt out. {{public_link}}",
     sessionInvite: "{{group_name}}: {{session_name}} is open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Reply to the host or open {{public_link}} to join.",
     sessionReminder: "{{group_name}} reminder: {{session_name}} is still open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Please reply if you can play or if you are out.",
     gameUpdate: "{{group_name}} game update: ",
@@ -1558,6 +1718,7 @@ function defaultSmsTemplates() {
 function normalizeSmsTemplates(templates = {}) {
   const defaults = defaultSmsTemplates();
   return {
+    newPlayer: String(templates.newPlayer || defaults.newPlayer),
     sessionInvite: String(templates.sessionInvite || defaults.sessionInvite),
     sessionReminder: String(templates.sessionReminder || defaults.sessionReminder),
     gameUpdate: String(templates.gameUpdate || defaults.gameUpdate),
@@ -1566,7 +1727,7 @@ function normalizeSmsTemplates(templates = {}) {
   };
 }
 
-function renderSmsTemplate(template, { group, session, publicUrl, joinedCount, availableSpots, resultRankings } = {}) {
+function renderSmsTemplate(template, { group, session, publicUrl, joinedCount, availableSpots, resultRankings, playerName } = {}) {
   const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next session";
   const time = session?.starts_at ? formatSessionTime(session.starts_at) : "TBD";
   const location = session?.location ? session.location : "";
@@ -1581,6 +1742,7 @@ function renderSmsTemplate(template, { group, session, publicUrl, joinedCount, a
     location,
     location_line: location ? ` at ${location}` : "",
     public_link: publicUrl || "",
+    player_name: playerName || "Player",
     joined_count: resolvedJoinedCount,
     available_spots: resolvedAvailableSpots,
     result_rankings: resultRankings || "",
@@ -1649,6 +1811,25 @@ function formatSessionTime(value) {
   return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
+function addDaysToIsoDate(value, days) {
+  if (!value) return "";
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  date.setDate(date.getDate() + Number(days || 0));
+  return date.toISOString().slice(0, 10);
+}
+
+function isWeeklyRepeatEnabled(value) {
+  return value === true || value === 1 || String(value || "").toLowerCase() === "true";
+}
+
+function formatIsoDateForLog(value) {
+  if (!value) return "the next date";
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString("en-US");
+}
+
 function isValidRoundRobinAdminCode(group, eventCode) {
   const cleanCode = String(eventCode || "").trim();
   const overrideCode = String(process.env.ROUND_ROBIN_ADMIN_OVERRIDE_CODE || "").trim();
@@ -1665,6 +1846,13 @@ function normalizePhone(value) {
   const digits = String(value || "").replace(/\D/g, "");
   if (digits.length > 10 && digits.startsWith("1")) return digits.slice(-10);
   return digits;
+}
+
+function formatPhoneInput(value) {
+  const digits = normalizePhone(value).slice(0, 10);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }
 
 function isUuid(value) {
