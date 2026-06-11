@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
+import { passkeyErrorMessage } from "../lib/passkeyErrors";
 import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
@@ -27,6 +28,7 @@ export default function AppHeader({
   const [openGroups, setOpenGroups] = useState({});
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
   const [memberEmailIssue, setMemberEmailIssue] = useState(null);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
 
   const primaryLinks = useMemo(() => [
     { label: "Player Dashboard", path: "/player-dashboard", role: "player", icon: "\u{1F3E0}" },
@@ -124,6 +126,25 @@ export default function AppHeader({
 
     await supabase.auth.signOut();
     router.push("/login");
+  }
+
+  async function registerPasskey() {
+    if (!confirmUnsavedChanges()) return;
+    if (!supabase.auth.registerPasskey) {
+      alert("Passkey / fingerprint registration is not available in this browser yet.");
+      return;
+    }
+
+    setPasskeyLoading(true);
+    const { error } = await supabase.auth.registerPasskey();
+    setPasskeyLoading(false);
+
+    if (error) {
+      alert(passkeyErrorMessage(error, "registration"));
+      return;
+    }
+
+    alert("Passkey / fingerprint login registered.");
   }
 
   async function loadSystemSettings() {
@@ -333,8 +354,16 @@ export default function AppHeader({
                 </div>
 
                 <button
+                  onClick={registerPasskey}
+                  disabled={passkeyLoading}
+                  className="mt-4 w-full rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
+                >
+                  {passkeyLoading ? "Registering..." : "Register Passkey / Fingerprint"}
+                </button>
+
+                <button
                   onClick={logout}
-                  className="mt-4 w-full rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
+                  className="mt-2 w-full rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
                 >
                   Logout
                 </button>
@@ -348,13 +377,23 @@ export default function AppHeader({
                 </div>
               </>
             ) : (
-              <button
-                onClick={logout}
-                className="w-full rounded-xl bg-white/10 px-2 py-3 text-sm font-semibold text-white hover:bg-white/20"
-                title="Logout"
-              >
-                {"\u{23FB}"}
-              </button>
+              <div className="space-y-2">
+                <button
+                  onClick={registerPasskey}
+                  disabled={passkeyLoading}
+                  className="w-full rounded-xl bg-blue-500 px-2 py-3 text-xs font-semibold text-white hover:bg-blue-400 disabled:opacity-50"
+                  title="Register Passkey / Fingerprint"
+                >
+                  Bio
+                </button>
+                <button
+                  onClick={logout}
+                  className="w-full rounded-xl bg-white/10 px-2 py-3 text-sm font-semibold text-white hover:bg-white/20"
+                  title="Logout"
+                >
+                  {"\u{23FB}"}
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -474,8 +513,16 @@ export default function AppHeader({
             <NavGroups mobile />
 
             <button
+              onClick={registerPasskey}
+              disabled={passkeyLoading}
+              className="mt-6 w-full rounded-xl bg-blue-500 px-4 py-3 font-semibold text-white disabled:opacity-50"
+            >
+              {passkeyLoading ? "Registering..." : "Register Passkey / Fingerprint"}
+            </button>
+
+            <button
               onClick={logout}
-              className="mt-6 w-full rounded-xl bg-white/10 px-4 py-3 font-semibold text-white"
+              className="mt-3 w-full rounded-xl bg-white/10 px-4 py-3 font-semibold text-white"
             >
               Logout
             </button>

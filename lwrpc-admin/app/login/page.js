@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { defaultDashboardForRole } from "../lib/permissions";
+import { passkeyErrorMessage } from "../lib/passkeyErrors";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
@@ -54,6 +55,10 @@ export default function LoginPage() {
       return;
     }
 
+    await routeSignedInUser();
+  }
+
+  async function routeSignedInUser() {
     const {
       data: { user }
     } = await supabase.auth.getUser();
@@ -78,6 +83,26 @@ export default function LoginPage() {
     const role = highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [selectedMember]);
 
     router.push(defaultDashboardForRole(role));
+  }
+
+  async function signInWithPasskey() {
+    if (!supabase.auth.signInWithPasskey) {
+      setMessage("Passkey / fingerprint sign in is not available in this browser yet.");
+      return;
+    }
+
+    setLoading(true);
+    setMessage("Opening passkey / fingerprint sign in...");
+
+    const { error } = await supabase.auth.signInWithPasskey();
+
+    if (error) {
+      setMessage(passkeyErrorMessage(error, "sign in"));
+      setLoading(false);
+      return;
+    }
+
+    await routeSignedInUser();
   }
 
   async function forgotPassword() {
@@ -153,7 +178,8 @@ export default function LoginPage() {
   const isPendingMessage =
     messageText.includes("signing") ||
     messageText.includes("sending") ||
-    messageText.includes("checking");
+    messageText.includes("checking") ||
+    messageText.includes("opening");
   const isErrorMessage =
     Boolean(message) && !isSuccessMessage && !isPendingMessage;
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
@@ -301,6 +327,19 @@ export default function LoginPage() {
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>
+
+            <button
+              type="button"
+              onClick={signInWithPasskey}
+              disabled={loading}
+              className="mt-3 w-full rounded-xl border border-blue-200 bg-blue-50 px-5 py-3 font-bold text-blue-900 transition hover:border-blue-400 hover:bg-blue-100 disabled:opacity-50"
+            >
+              Sign In with Passkey / Fingerprint
+            </button>
+
+            <p className="mt-2 text-center text-xs font-semibold text-slate-500">
+              Uses the fingerprint, face, PIN, or security key saved on this device.
+            </p>
 
             <p className="mt-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-center text-sm font-normal text-teal-900">
               First time logging in? Enter your email and click Forgot Password.

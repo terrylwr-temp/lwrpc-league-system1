@@ -511,7 +511,7 @@ export default function RoundRobinAdminPage() {
                 Player View
               </Link>
               <button type="button" onClick={exitToDashboard} className="rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg">
-                Exit
+                Exit to LMS
               </button>
             </div>
           </div>

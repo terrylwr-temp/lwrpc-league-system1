@@ -7,7 +7,13 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 export const supabase =
   globalThis.__lwrpcSupabaseClient ||
-  createClient(supabaseUrl, supabaseAnonKey);
+  createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      experimental: {
+        passkey: true,
+      },
+    },
+  });
 
 if (!globalThis.__lwrpcSupabaseClient) {
   globalThis.__lwrpcSupabaseClient = supabase;
