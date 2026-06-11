@@ -14,9 +14,11 @@ import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsav
 
 const PAGE_SIZE = 100;
 const CLEAN_MEMBERS_BATCH_SIZE = 25;
+const ROLE_CORRECTION_BATCH_SIZE = 25;
 const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
 const MEMBER_EXPORT_TYPES = [
   { value: "membership_all", label: "Membership (All)" },
+  { value: "league", label: "League" },
   { value: "players", label: "Players" },
   { value: "captains", label: "Captains" },
   { value: "club_pro", label: "Club Pro" },
@@ -48,6 +50,7 @@ export default function MembersPage() {
   const [exportType, setExportType] = useState("membership_all");
   const [exportSeasonId, setExportSeasonId] = useState("");
   const [exportingMembers, setExportingMembers] = useState(false);
+  const [correctingRoles, setCorrectingRoles] = useState(false);
   const [teamsMember, setTeamsMember] = useState(null);
   const [savingNewMember, setSavingNewMember] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState(initialMemberForm());
@@ -273,6 +276,91 @@ export default function MembersPage() {
     await loadMembers();
     setIncludeInactiveMembers(true);
     alert(`${activeCount} member${activeCount === 1 ? "" : "s"} marked inactive.`);
+  }
+
+  async function correctRoles() {
+    if (correctingRoles) return;
+
+    setCorrectingRoles(true);
+
+    const [
+      { data: captainRoleRows, error: roleError },
+      { rows: teamMemberRows, error: teamMemberError },
+    ] = await Promise.all([
+      supabase
+        .from("user_roles")
+        .select("id, member_id, role")
+        .eq("role", "captain"),
+      loadAllMemberTeamRows(),
+    ]);
+
+    if (roleError || teamMemberError) {
+      alert(roleError?.message || teamMemberError?.message);
+      setCorrectingRoles(false);
+      return;
+    }
+
+    const activeCaptainMemberIds = new Set();
+
+    (teamMemberRows || [])
+      .filter((row) => row.teams?.is_active !== false)
+      .forEach((row) => {
+        const teamRole = memberTeamRole(row.member_id, row.teams);
+
+        if (teamRole === "Captain" || teamRole === "Co-Captain") {
+          activeCaptainMemberIds.add(String(row.member_id));
+        }
+      });
+
+    const staleCaptainRoles = (captainRoleRows || []).filter(
+      (roleRow) => roleRow.member_id && !activeCaptainMemberIds.has(String(roleRow.member_id))
+    );
+
+    if (staleCaptainRoles.length === 0) {
+      alert("No stale Captain roles found. Every Captain role is tied to an active team captain or co-captain assignment.");
+      setCorrectingRoles(false);
+      return;
+    }
+
+    const ok = confirm(
+      [
+        `Change ${staleCaptainRoles.length} stale Captain role${staleCaptainRoles.length === 1 ? "" : "s"} back to Player?`,
+        "",
+        "This checks active team captain and co-captain assignments, including captain-only assignments outside the roster.",
+        "Members who are no longer assigned as a captain or co-captain on an active team will be changed to Player.",
+        "",
+        "Continue?",
+      ].join("\n")
+    );
+
+    if (!ok) {
+      setCorrectingRoles(false);
+      return;
+    }
+
+    const updatedAt = new Date().toISOString();
+    const staleRoleIds = staleCaptainRoles.map((roleRow) => roleRow.id).filter(Boolean);
+
+    for (let i = 0; i < staleRoleIds.length; i += ROLE_CORRECTION_BATCH_SIZE) {
+      const batchIds = staleRoleIds.slice(i, i + ROLE_CORRECTION_BATCH_SIZE);
+      const { error } = await supabase
+        .from("user_roles")
+        .update({
+          role: "player",
+          updated_at: updatedAt,
+        })
+        .in("id", batchIds);
+
+      if (error) {
+        alert(error.message);
+        setCorrectingRoles(false);
+        return;
+      }
+    }
+
+    await loadMembers();
+    setCorrectingRoles(false);
+    alert(`${staleRoleIds.length} Captain role${staleRoleIds.length === 1 ? "" : "s"} changed back to Player.`);
   }
 
   function updateNewMember(field, value) {
@@ -748,6 +836,15 @@ export default function MembersPage() {
 
                 <button
                   type="button"
+                  onClick={correctRoles}
+                  disabled={correctingRoles}
+                  className="rounded-xl bg-indigo-700 px-5 py-3 font-semibold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {correctingRoles ? "Correcting..." : "Correct Roles"}
+                </button>
+
+                <button
+                  type="button"
                   onClick={markAllMembersInactive}
                   disabled={markingAllInactive}
                   className="rounded-xl bg-red-700 px-5 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
@@ -1115,7 +1212,88 @@ async function loadAllMemberTeamRows() {
     from += pageSize;
   }
 
+  const { rows: assignmentTeams, error: assignmentError } = await loadAllTeamAssignmentRows();
+  if (assignmentError) return { rows: [], error: assignmentError };
+
+  return {
+    rows: mergeMemberTeamRows(rows, assignmentTeams),
+    error: null,
+  };
+}
+
+async function loadAllTeamAssignmentRows() {
+  const pageSize = 1000;
+  let from = 0;
+  const rows = [];
+
+  while (true) {
+    const { data, error } = await supabase
+      .from("teams")
+      .select(`
+        id,
+        name,
+        is_active,
+        captain_member_id,
+        co_captain_member_id,
+        co_captain_2_member_id,
+        club_pro_member_id,
+        divisions (
+          id,
+          name,
+          leagues (
+            id,
+            name,
+            season_id,
+            seasons (
+              id,
+              name
+            )
+          )
+        )
+      `)
+      .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+
+    if (!data || data.length < pageSize) break;
+
+    from += pageSize;
+  }
+
   return { rows, error: null };
+}
+
+function mergeMemberTeamRows(rosterRows, assignmentTeams) {
+  const mergedRows = [];
+  const seen = new Set();
+
+  function addRow(memberId, team) {
+    if (!memberId || !team?.id) return;
+
+    const key = `${memberId}:${team.id}`;
+    if (seen.has(key)) return;
+
+    seen.add(key);
+    mergedRows.push({
+      member_id: memberId,
+      teams: team,
+    });
+  }
+
+  (rosterRows || []).forEach((row) => addRow(row.member_id, row.teams));
+
+  (assignmentTeams || []).forEach((team) => {
+    [
+      team.captain_member_id,
+      team.co_captain_member_id,
+      team.co_captain_2_member_id,
+      team.club_pro_member_id,
+    ].forEach((memberId) => addRow(memberId, team));
+  });
+
+  return mergedRows;
 }
 
 async function loadAllExportMemberRows() {
@@ -1226,6 +1404,7 @@ function memberMatchesExportType(member, teamRows, exportType, seasonId) {
   const role = memberRole(member);
   const matchingTeamRows = teamRows.filter((row) => teamRowMatchesSeason(row, seasonId));
 
+  if (exportType === "league") return matchingTeamRows.length > 0;
   if (exportType === "players") return role === "player";
   if (exportType === "captains") {
     return (
@@ -1664,22 +1843,43 @@ function MemberTeamsModal({ member, onClose }) {
             </div>
           ) : (
             <div className="space-y-3">
-              {teams.map((team) => (
-                <div
-                  key={team.id}
-                  className="rounded-xl border border-slate-200 bg-white p-4"
-                >
-                  <div className="text-lg font-black text-slate-900">
-                    {team.name || "Unnamed Team"}
+              {teams.map((team, index) => {
+                const teamRole = team.roster_role || memberTeamRole(member.id, team);
+
+                return (
+                  <div
+                    key={team.id || `${member.id}:team:${index}`}
+                    className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
+                  >
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">
+                      <div className="min-w-0">
+                        <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                          Team
+                        </div>
+                        <div className="mt-1 break-words text-lg font-black text-slate-900">
+                          {team.name || "Unnamed Team"}
+                        </div>
+                        <div className="mt-2 text-sm font-semibold text-slate-600">
+                          {team.divisions?.leagues?.name || "League TBD"} / {team.divisions?.name || "Division TBD"}
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2 sm:justify-end">
+                        <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-blue-900">
+                          {teamRole}
+                        </span>
+                        <span className={`inline-flex rounded-full px-3 py-1 text-xs font-black uppercase tracking-wide ${
+                          team.is_active === false
+                            ? "bg-slate-200 text-slate-700"
+                            : "bg-emerald-100 text-emerald-900"
+                        }`}>
+                          {team.is_active === false ? "Inactive Team" : "Active Team"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mt-1 inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-blue-900">
-                    {team.roster_role || "Player"}
-                  </div>
-                  <div className="mt-1 text-sm font-semibold text-slate-600">
-                    {team.divisions?.leagues?.name || "League TBD"} / {team.divisions?.name || "Division TBD"}
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

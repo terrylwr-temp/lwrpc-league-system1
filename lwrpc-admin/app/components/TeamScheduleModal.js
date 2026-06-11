@@ -17,6 +17,7 @@ export default function TeamScheduleModal({
   compact = false,
   onClose,
 }) {
+  const [standingsView, setStandingsView] = useState("summary");
   const selectedTeam = teams.find((team) => String(team.id) === String(selectedTeamId));
   const selectedTeamCaptainNames = captainNames(selectedTeam);
   const ratingByMemberId = Object.fromEntries(
@@ -46,8 +47,8 @@ export default function TeamScheduleModal({
   ].sort(compareScheduleItems);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
-      <div className="flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 p-0">
+      <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-6xl flex-col overflow-hidden rounded-none bg-white shadow-2xl">
         <div className="flex flex-wrap items-start justify-between gap-3 bg-gradient-to-r from-slate-950 via-blue-950 to-emerald-900 px-4 py-4 text-white sm:px-6 sm:py-5">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
@@ -66,9 +67,35 @@ export default function TeamScheduleModal({
         </div>
 
         <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[290px_minmax(0,1fr)]">
-          <aside className="max-h-40 overflow-auto border-b border-slate-200 bg-slate-100 p-3 sm:p-4 md:max-h-[72vh] md:border-b-0 md:border-r">
-            <div className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-500">
-              Teams sorted by Rank
+          <aside className="max-h-52 overflow-auto border-b border-slate-200 bg-slate-100 p-3 sm:p-4 md:max-h-none md:border-b-0 md:border-r">
+            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+              <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+                Teams sorted by Rank
+              </div>
+              <div className="inline-grid grid-cols-2 overflow-hidden rounded-xl border border-slate-300 bg-white p-0.5 text-xs font-black shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setStandingsView("summary")}
+                  className={`rounded-lg px-3 py-1.5 ${
+                    standingsView === "summary"
+                      ? "bg-blue-700 text-white"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  Summary
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStandingsView("detail")}
+                  className={`rounded-lg px-3 py-1.5 ${
+                    standingsView === "detail"
+                      ? "bg-blue-700 text-white"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  Detail
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:block md:space-y-2">
               {teams.map((team) => (
@@ -82,20 +109,31 @@ export default function TeamScheduleModal({
                       : "border-white bg-white text-slate-800 hover:border-blue-200 hover:bg-blue-50"
                   }`}
                 >
-                  <span>{team.standing?.rank ? `#${team.standing.rank} ` : ""}{team.name}</span>
-                  <span className={`mt-1 block text-xs ${
-                    String(team.id) === String(selectedTeamId)
-                      ? "text-slate-300"
-                      : "text-slate-500"
-                  }`}>
-                    {formatTeamSummary(team)}
-                  </span>
+                  {standingsView === "summary" ? (
+                    <span className="flex min-w-0 items-center justify-between gap-3">
+                      <span className="min-w-0 truncate">{team.name}</span>
+                      <span className="shrink-0 text-right text-xs font-black">
+                        {team.standing?.standings_points ?? 0} pts / {formatTeamRecord(team)}
+                      </span>
+                    </span>
+                  ) : (
+                    <>
+                      <span>{team.standing?.rank ? `#${team.standing.rank} ` : ""}{team.name}</span>
+                      <span className={`mt-1 block text-xs ${
+                        String(team.id) === String(selectedTeamId)
+                          ? "text-slate-300"
+                          : "text-slate-500"
+                      }`}>
+                        {formatTeamSummary(team)}
+                      </span>
+                    </>
+                  )}
                 </button>
               ))}
             </div>
           </aside>
 
-          <section className="min-h-0 overflow-auto bg-slate-50 p-3 sm:p-5 md:max-h-[72vh]">
+          <section className="min-h-0 overflow-auto bg-slate-50 p-3 sm:p-5">
             <div className="mb-3 overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-700 via-blue-800 to-emerald-700 p-4 text-white shadow-lg sm:mb-4 sm:p-5">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">

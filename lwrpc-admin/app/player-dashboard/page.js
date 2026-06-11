@@ -857,6 +857,21 @@ export default function PlayerDashboardPage() {
       divisions: selectedStandingsTeam.divisions,
     };
 
+    await openDivisionScheduleForTeam(baseTeam);
+  }
+
+  async function openDivisionScheduleForTeam(team) {
+    const divisionId = team?.division_id || team?.divisions?.id;
+    if (!divisionId) {
+      alert("This team is not assigned to a division.");
+      return;
+    }
+
+    const baseTeam = {
+      ...team,
+      division_id: divisionId,
+    };
+
     setDivisionScheduleTeam(baseTeam);
     setDivisionScheduleTeams([]);
     setDivisionScheduleMatches([]);
@@ -864,7 +879,7 @@ export default function PlayerDashboardPage() {
     setDivisionScheduleRatings([]);
     setDivisionScheduleLoading(true);
 
-    const seasonId = selectedStandingsTeam.divisions?.leagues?.season_id;
+    const seasonId = baseTeam.divisions?.leagues?.season_id;
     const [
       { data: divisionTeams, error: teamsError },
       { data: divisionMatches, error: matchesError },
@@ -1038,7 +1053,7 @@ export default function PlayerDashboardPage() {
             </button>
           }
           actions={
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-1">
               <button
                 type="button"
                 onClick={() => router.push("/reset-password")}
@@ -1052,7 +1067,7 @@ export default function PlayerDashboardPage() {
                 target="_blank"
                 rel="noreferrer"
                 title="This will take you to the Manage Membership website."
-                className="rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-950 hover:bg-slate-100"
+                className="hidden rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 md:block"
               >
                 Membership Info
               </a>
@@ -1122,7 +1137,7 @@ export default function PlayerDashboardPage() {
                 onOpenDocument={openLeagueDocument}
                 onOpenRoster={setRosterTeam}
                 onOpenStandings={(team) =>
-                  router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`)
+                  openDivisionScheduleForTeam(team)
                 }
               />
             )}

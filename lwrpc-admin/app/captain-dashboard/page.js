@@ -2006,7 +2006,7 @@ export default function CaptainDashboardPage() {
             </button>
           }
           actions={
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-1">
+            <div className="grid grid-cols-2 gap-2 md:grid-cols-1">
               <button
                 type="button"
                 onClick={() => {
@@ -2021,7 +2021,7 @@ export default function CaptainDashboardPage() {
                 href="https://lwrpickleballclub.com/manage-membership"
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-950 hover:bg-slate-100"
+                className="hidden rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 md:block"
               >
                 Membership Info
               </a>
@@ -2302,7 +2302,7 @@ export default function CaptainDashboardPage() {
                       onClick={(event) => {
                         event.stopPropagation();
                         if (confirmUnsavedChanges()) {
-                          router.push(`/standings?league=${team.divisions?.leagues?.id || ""}&division=${team.divisions?.id || ""}`);
+                          openDivisionSchedule(team);
                         }
                       }}
                       className="cursor-pointer rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
