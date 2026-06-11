@@ -337,10 +337,6 @@ export default function LoginPage() {
               Sign In with Passkey / Fingerprint
             </button>
 
-            <p className="mt-2 text-center text-xs font-semibold text-slate-500">
-              Uses the fingerprint, face, PIN, or security key saved on this device.
-            </p>
-
             <p className="mt-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-center text-sm font-normal text-teal-900">
               First time logging in? Enter your email and click Forgot Password.
             </p>
