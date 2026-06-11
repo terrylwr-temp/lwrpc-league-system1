@@ -813,6 +813,7 @@ export default function DashboardPage() {
     desc: "Standalone tools that share club data with the main league system.",
     cards: [
       { title: "Tournaments", desc: "Open public tournament displays and event-code tournament operations.", path: "/tourney/tpro", code: "TN", tone: "emerald" },
+      { title: "Round Robin", desc: "Run nightly round robin and ladder sessions with saved players, lineups, scores, and texts.", path: "/round-robin/rpro/admin", code: "RR", tone: "blue" },
     ],
   };
 
