@@ -519,17 +519,17 @@ function PlayerHistorySummary({ history, player, range, setRange, onPartnerCompa
   const stats = aggregateHistorySessions(filteredSessions);
 
   return (
-    <section className="overflow-hidden rounded-lg border border-teal-200 bg-teal-50/95 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)]">
-      <div className="h-2 bg-[linear-gradient(90deg,#0f766e,#2563eb,#f59e0b)]" />
+    <section className="overflow-hidden rounded-lg border border-teal-700 bg-[linear-gradient(135deg,#0f766e_0%,#1d4ed8_72%,#f59e0b_130%)] text-white shadow-[0_24px_70px_-36px_rgba(15,23,42,0.95)]">
+      <div className="h-2 bg-white/35" />
       <div className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-700 text-lg font-black text-white shadow-[0_14px_26px_-18px_rgba(29,78,216,0.95)] ring-4 ring-blue-100">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white text-lg font-black text-teal-900 shadow-[0_14px_26px_-18px_rgba(15,23,42,0.95)] ring-4 ring-white/30">
               {playerInitials(player?.displayName)}
             </div>
             <div className="min-w-0">
-              <div className="text-xs font-black uppercase tracking-wide text-slate-500">Player Record</div>
-              <h2 className="mt-0.5 break-words text-2xl font-black leading-tight text-blue-800 sm:text-3xl">
+              <div className="text-xs font-black uppercase tracking-wide text-cyan-100">Player Record</div>
+              <h2 className="mt-0.5 break-words text-2xl font-black leading-tight text-white sm:text-3xl">
                 {player?.displayName || "Player"}
               </h2>
             </div>
@@ -537,7 +537,7 @@ function PlayerHistorySummary({ history, player, range, setRange, onPartnerCompa
           <button
             type="button"
             onClick={onPartnerComparison}
-            className="rounded-lg border border-teal-700 bg-teal-50 px-4 py-2 text-sm font-black text-teal-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-100"
+            className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-teal-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-cyan-50"
           >
             Partner Comparison
           </button>
@@ -548,7 +548,7 @@ function PlayerHistorySummary({ history, player, range, setRange, onPartnerCompa
               key={item.id}
               type="button"
               onClick={() => setRange(item.id)}
-              className={`rounded-lg px-3 py-2 text-xs font-black shadow-sm ${range === item.id ? "bg-slate-950 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"}`}
+              className={`rounded-lg px-3 py-2 text-xs font-black shadow-sm ${range === item.id ? "bg-white text-teal-950" : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"}`}
             >
               {item.label}
             </button>
@@ -897,14 +897,14 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
 
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
             {players.map((player) => (
-              <div key={player.id} className="grid grid-cols-1 gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+              <div key={player.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0">
                 <div className="min-w-0">
                   <div className="font-black text-slate-950">{player.displayName}</div>
                   <div className="mt-1 hidden text-xs font-semibold text-slate-500 sm:block">
                     {[player.email, player.phone].filter(Boolean).join(" / ") || "No contact saved"}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 sm:justify-end">
+                <div className="flex flex-wrap justify-end gap-2">
                   {player.responseStatus !== "joined" && (
                     <button
                       type="button"

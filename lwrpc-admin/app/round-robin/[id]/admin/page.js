@@ -943,20 +943,29 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   const [startModalOpen, setStartModalOpen] = useState(false);
   const [startCourts, setStartCourts] = useState([]);
   const [startCheckedPlayerIds, setStartCheckedPlayerIds] = useState([]);
+  const [pendingRoundScroll, setPendingRoundScroll] = useState(null);
   const isPlaying = session.status === "playing";
   const isClosed = ["done", "cancelled"].includes(session.status);
   const joinedPlayers = sessionPlayersForStatus(state, session.id, "joined");
   const joinedCount = joinedPlayers.length;
   const canStartSession = isPlaying || joinedCount >= 4;
 
+  useEffect(() => {
+    if (!pendingRoundScroll) return;
+    if (!(state?.matches || []).some((match) => Number(match.round_number) === Number(pendingRoundScroll))) return;
+    const timeout = window.setTimeout(() => {
+      scrollToRoundHeader(pendingRoundScroll);
+      setPendingRoundScroll(null);
+    }, 75);
+    return () => window.clearTimeout(timeout);
+  }, [pendingRoundScroll, state?.matches]);
+
   async function primaryAction() {
     if (isPlaying) {
       if (saveCurrentRoundScores) await saveCurrentRoundScores();
       const generated = await runAction("generateNextGame", { sessionId: session.id }, { returnResult: true });
       if (generated?.roundNumber) {
-        window.setTimeout(() => {
-          document.getElementById(roundElementId(generated.roundNumber))?.scrollIntoView({ behavior: "smooth", block: "start" });
-        }, 150);
+        setPendingRoundScroll(generated.roundNumber);
       }
       return;
     }
@@ -1608,14 +1617,14 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
           </div>
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
             {players.map((player) => (
-              <div key={player.id} className="grid grid-cols-1 gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+              <div key={player.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0">
                 <div className="min-w-0">
                   <div className="font-black text-slate-950">{player.display_name}</div>
                   <div className="mt-1 text-xs font-semibold text-slate-500">
                     {[player.email, player.phone].filter(Boolean).join(" / ") || "No contact saved"}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 sm:justify-end">
+                <div className="flex flex-wrap justify-end gap-2">
                   {player.response_status !== "joined" && (
                     <button
                       type="button"
@@ -2900,6 +2909,14 @@ function suggestedCourtCountForPlayers(playerCount) {
 
 function roundElementId(roundNumber) {
   return `live-round-${String(roundNumber || "").replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
+function scrollToRoundHeader(roundNumber) {
+  const element = document.getElementById(roundElementId(roundNumber));
+  if (!element) return;
+  const offset = 112;
+  const top = element.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
 }
 
 function sessionLifecycleClass(status) {
