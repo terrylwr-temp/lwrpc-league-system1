@@ -519,7 +519,7 @@ function PlayerHistorySummary({ history, player, range, setRange, onPartnerCompa
   const stats = aggregateHistorySessions(filteredSessions);
 
   return (
-    <section className="overflow-hidden rounded-lg border border-white/80 bg-white/95 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)]">
+    <section className="overflow-hidden rounded-lg border border-teal-200 bg-teal-50/95 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)]">
       <div className="h-2 bg-[linear-gradient(90deg,#0f766e,#2563eb,#f59e0b)]" />
       <div className="p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -567,7 +567,7 @@ function PlayerHistorySummary({ history, player, range, setRange, onPartnerCompa
 
 function StatTile({ label, value }) {
   return (
-    <div className="min-w-0 rounded-lg border border-slate-200 bg-slate-50 px-3 py-3">
+    <div className="min-w-0 rounded-lg border border-teal-100 bg-white px-3 py-3 shadow-sm">
       <div className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</div>
       <div className="mt-1 break-words text-2xl font-black text-slate-950">{value}</div>
     </div>
@@ -900,7 +900,7 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
               <div key={player.id} className="grid grid-cols-1 gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div className="min-w-0">
                   <div className="font-black text-slate-950">{player.displayName}</div>
-                  <div className="mt-1 text-xs font-semibold text-slate-500">
+                  <div className="mt-1 hidden text-xs font-semibold text-slate-500 sm:block">
                     {[player.email, player.phone].filter(Boolean).join(" / ") || "No contact saved"}
                   </div>
                 </div>

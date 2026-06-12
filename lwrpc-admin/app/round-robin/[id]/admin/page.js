@@ -1522,8 +1522,8 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
+      <div className="flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
         <div className={`shrink-0 p-4 ${MODAL_HEADER_CHROME}`}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
@@ -1659,7 +1659,7 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
   return (
     <ModalPortal>
     <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-slate-950/70 p-0 sm:p-4">
-      <div className="flex h-screen w-full max-w-4xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-4 sm:h-auto sm:max-h-[92vh] sm:rounded-lg">
+      <div className="flex h-[100dvh] w-full max-w-4xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-4 sm:h-auto sm:max-h-[92vh] sm:rounded-lg">
         <div className={`shrink-0 p-3 sm:p-4 ${MODAL_HEADER_CHROME}`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
@@ -1674,7 +1674,7 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
           </button>
           </div>
         </div>
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+        <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1721,9 +1721,8 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
             </div>
               <div className="mt-3 grid grid-cols-1 gap-3">
                 {courts.map((court, index) => (
-                  <div key={`start-court-${index}`} className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                  <div key={`start-court-${index}`}>
                     <TextInput label={`Court ${index + 1}`} value={court.name} onChange={(value) => updateCourt(index, "name", value)} />
-                    <TextInput label="Description" value={court.description} onChange={(value) => updateCourt(index, "description", value)} />
                   </div>
                 ))}
               </div>
@@ -1735,9 +1734,9 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
             </div>
           )}
         </div>
-        <div className="shrink-0 border-t border-slate-200 bg-white p-3 shadow-[0_-16px_36px_-28px_rgba(15,23,42,0.9)] sm:p-4">
+        <div className="sticky bottom-0 z-10 mt-auto shrink-0 border-t border-slate-200 bg-white p-3 shadow-[0_-16px_36px_-28px_rgba(15,23,42,0.9)] sm:p-4">
           <button type="button" onClick={onStart} disabled={actionLoading === "startSessionAndGenerateFirstGame" || checkedCount < 4} className="w-full rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
-            {actionLoading === "startSessionAndGenerateFirstGame" ? "Starting..." : "Start And Generate First Game"}
+            {actionLoading === "startSessionAndGenerateFirstGame" ? "Starting..." : "Start and Generate First Game"}
           </button>
         </div>
       </div>
