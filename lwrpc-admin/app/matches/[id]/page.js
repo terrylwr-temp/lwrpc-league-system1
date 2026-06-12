@@ -434,6 +434,13 @@ export default function MatchDetailPage() {
     return labels.length > 0 ? `${labels.join(" / ")}${suffix}` : "-";
   }
 
+  function lineIsNotPlayedPicklebreaker(line) {
+    if (!isPicklebreakerLine(line)) return false;
+    const summary = getLineSummary(line);
+    const linePoints = lineTeamWinPoints(line, summary);
+    return linePoints.mode === "not_played";
+  }
+
   const playerAssignmentCounts = useMemo(() => {
     const counts = {};
 
@@ -554,6 +561,11 @@ export default function MatchDetailPage() {
 
     if (!selectedLine) return;
 
+    if (lineIsNotPlayedPicklebreaker(selectedLine)) {
+      alert("This Picklebreaker is not played because the regular game-line team points are not tied.");
+      return;
+    }
+
     setScoreDirty(true);
     clearScoreValidationIssuesForLineIds([lineId]);
 
@@ -617,6 +629,11 @@ export default function MatchDetailPage() {
 
     const lineup = matchLineups.find((item) => item.id === lineupId);
     if (!lineup) return;
+
+    if (lineIsNotPlayedPicklebreaker(line)) {
+      alert("This Picklebreaker is not played because the regular game-line team points are not tied.");
+      return;
+    }
 
     setScoreDirty(true);
     clearScoreValidationIssuesForLineIds([line.id]);
@@ -702,6 +719,11 @@ export default function MatchDetailPage() {
 
     const game = games.find((item) => item.id === gameId);
     const line = lines.find((item) => item.id === game?.match_line_id);
+
+    if (line && lineIsNotPlayedPicklebreaker(line)) {
+      alert("This Picklebreaker is not played because the regular game-line team points are not tied.");
+      return;
+    }
 
     if ((field === "home_score" || field === "away_score") && line && lineHasBlockingRatingWarning(line)) {
       alert("This game line has a team over the division rating maximum. Fix the players before entering scores for this line.");
@@ -1538,6 +1560,9 @@ export default function MatchDetailPage() {
             const lineSummary = getLineSummary(line);
             const linePoints = lineTeamWinPoints(line, lineSummary);
             const warnings = lineWarnings(line);
+            const isPicklebreaker = isPicklebreakerLine(line);
+            const picklebreakerNotPlayed = linePoints.mode === "not_played";
+            const lineEntryDisabled = !scoreEntryEditable || picklebreakerNotPlayed;
             const scoresBlockedForLine = lineHasBlockingRatingWarning(line);
 
             const hasDuplicate =
@@ -1564,8 +1589,13 @@ export default function MatchDetailPage() {
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-600">
                         <span>{formatLineInfo(line, lineGames)}</span>
                         <span className="font-semibold text-slate-800">
-                        Team Points: {formatLineTeamPoints(linePoints)}
-                      </span>
+                          Team Points: {formatLineTeamPoints(linePoints)}
+                          {isPicklebreaker && (
+                            <span className="ml-2 font-black text-red-700">
+                              Enter starting team players only
+                            </span>
+                          )}
+                        </span>
                     </div>
 
                     {warnings.length > 0 && (
@@ -1582,7 +1612,6 @@ export default function MatchDetailPage() {
                   <TeamPlayers
                     title={match.home_team?.name || "Home Team"}
                     teamRating={teamDuprRating(line.home_player_1, line.home_player_2)}
-                    ratingLabel={ratingLabel()}
                     savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.home_team_id))}
                     useSavedLineups={line.division_lines?.uses_saved_match_lineups !== false}
                     roster={homeRoster}
@@ -1592,13 +1621,12 @@ export default function MatchDetailPage() {
                     updateLinePlayer={updateLinePlayer}
                     applySavedLineup={(lineupId) => applySavedLineup(line, "home", lineupId)}
                     rosterOptionName={rosterOptionLabel}
-                    disabled={!scoreEntryEditable}
+                    disabled={lineEntryDisabled}
                   />
 
                   <TeamPlayers
                     title={match.away_team?.name || "Away Team"}
                     teamRating={teamDuprRating(line.away_player_1, line.away_player_2)}
-                    ratingLabel={ratingLabel()}
                     savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.away_team_id))}
                     useSavedLineups={line.division_lines?.uses_saved_match_lineups !== false}
                     roster={awayRoster}
@@ -1608,7 +1636,7 @@ export default function MatchDetailPage() {
                     updateLinePlayer={updateLinePlayer}
                     applySavedLineup={(lineupId) => applySavedLineup(line, "away", lineupId)}
                     rosterOptionName={rosterOptionLabel}
-                    disabled={!scoreEntryEditable}
+                    disabled={lineEntryDisabled}
                   />
                 </div>
 
@@ -1650,7 +1678,7 @@ export default function MatchDetailPage() {
                               pattern="[0-9]*"
                               value={game.home_score ?? ""}
                               onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
-                              disabled={!scoreEntryEditable || scoresBlockedForLine || !gameNeeded}
+                              disabled={lineEntryDisabled || scoresBlockedForLine || !gameNeeded}
                               className="mt-1 w-full rounded-2xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
                             />
                           </label>
@@ -1663,7 +1691,7 @@ export default function MatchDetailPage() {
                               pattern="[0-9]*"
                               value={game.away_score ?? ""}
                               onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
-                              disabled={!scoreEntryEditable || scoresBlockedForLine || !gameNeeded}
+                              disabled={lineEntryDisabled || scoresBlockedForLine || !gameNeeded}
                               className="mt-1 w-full rounded-2xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
                             />
                           </label>
@@ -1672,7 +1700,7 @@ export default function MatchDetailPage() {
                         <select
                           value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                           onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
-                          disabled={!scoreEntryEditable || !gameNeeded}
+                          disabled={lineEntryDisabled || !gameNeeded}
                           className="mx-4 mb-4 w-[calc(100%-2rem)] rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           {gameStatusOptions().map((option) => (
@@ -1739,7 +1767,7 @@ export default function MatchDetailPage() {
                                 pattern="[0-9]*"
                                 value={game.home_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "home_score", e.target.value)}
-                                disabled={!scoreEntryEditable || scoresBlockedForLine || !gameNeeded}
+                                disabled={lineEntryDisabled || scoresBlockedForLine || !gameNeeded}
                                 className={`w-20 rounded-xl border-2 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:ring-4 ${
                                   hasGameIssues ? "border-red-400 focus:border-red-600 focus:ring-red-100" : "border-slate-300 focus:border-blue-600 focus:ring-blue-100"
                                 } disabled:cursor-not-allowed disabled:opacity-50`}
@@ -1753,7 +1781,7 @@ export default function MatchDetailPage() {
                                 pattern="[0-9]*"
                                 value={game.away_score ?? ""}
                                 onChange={(e) => updateGame(game.id, "away_score", e.target.value)}
-                                disabled={!scoreEntryEditable || scoresBlockedForLine || !gameNeeded}
+                                disabled={lineEntryDisabled || scoresBlockedForLine || !gameNeeded}
                                 className={`w-20 rounded-xl border-2 bg-white px-2 py-2 text-center text-lg font-black shadow-inner outline-none transition focus:ring-4 ${
                                   hasGameIssues ? "border-red-400 focus:border-red-600 focus:ring-red-100" : "border-slate-300 focus:border-blue-600 focus:ring-blue-100"
                                 } disabled:cursor-not-allowed disabled:opacity-50`}
@@ -1764,7 +1792,7 @@ export default function MatchDetailPage() {
                               <select
                                 value={game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed"}
                                 onChange={(e) => updateGame(game.id, "game_status", e.target.value)}
-                                disabled={!scoreEntryEditable || !gameNeeded}
+                                disabled={lineEntryDisabled || !gameNeeded}
                                 className={`w-full min-w-40 rounded-xl border bg-white px-3 py-2 text-xs font-semibold ${
                                   hasGameIssues ? "border-red-400" : "border-slate-300"
                                 } disabled:cursor-not-allowed disabled:opacity-50`}
@@ -1858,7 +1886,6 @@ export default function MatchDetailPage() {
 function TeamPlayers({
   title,
   teamRating,
-  ratingLabel,
   savedLineups,
   useSavedLineups,
   roster,
@@ -1899,7 +1926,7 @@ function TeamPlayers({
       <h3 className="flex flex-wrap items-center gap-2 text-sm font-bold text-slate-900">
         <span>{title}</span>
         <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-800">
-          Team {ratingLabel}: {teamRating}
+          Team Rating: {teamRating}
         </span>
       </h3>
 
