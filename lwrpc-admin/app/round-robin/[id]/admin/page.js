@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { roundRobinModeLabel } from "../../../lib/roundRobins";
+import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { roundRobinPlayerLabel } from "../../../lib/roundRobinSchedule";
 
 const TABS = ["Session", "Players", "Groups", "Courts", "Settings", "SMS", "Log"];
@@ -294,10 +294,11 @@ export default function RoundRobinAdminPage() {
     setSwapSelection([]);
     const cleanHostPhone = String(hostPhone || window.sessionStorage.getItem(hostPhoneStorageKey) || "").trim();
     if (cleanHostPhone) window.localStorage.setItem(playerPhoneStorageKey, cleanHostPhone);
-    router.push(`/round-robin/${state?.group?.slug || id}/player`);
+    router.push(roundRobinPath(state?.group || id, "player"));
   }
 
   function exitToDashboard() {
+    if (!window.confirm("Exit to LMS? Your PBCC admin session will be closed.")) return;
     window.sessionStorage.removeItem(storageKey);
     window.sessionStorage.removeItem(hostPhoneStorageKey);
     window.sessionStorage.removeItem(hostSessionStorageKey);
@@ -311,7 +312,7 @@ export default function RoundRobinAdminPage() {
   function exitHostToPlayer() {
     const cleanHostPhone = String(hostPhone || window.sessionStorage.getItem(hostPhoneStorageKey) || "").trim();
     if (cleanHostPhone) window.localStorage.setItem(playerPhoneStorageKey, cleanHostPhone);
-    router.push(`/round-robin/${state?.group?.slug || id}/player`);
+    router.push(roundRobinPath(state?.group || id, "player"));
   }
 
   if (!state && requestedHostSessionId && !requestedManagerMode) {
@@ -326,7 +327,7 @@ export default function RoundRobinAdminPage() {
               {error || "Verifying your saved player phone and opening the assigned live session."}
             </p>
             {error && (
-              <button type="button" onClick={() => router.push(`/round-robin/${id}/player`)} className="mt-4 rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800">
+              <button type="button" onClick={() => router.push(roundRobinPath(id, "player"))} className="mt-4 rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800">
                 Back to Player Screen
               </button>
             )}
@@ -380,7 +381,7 @@ export default function RoundRobinAdminPage() {
             >
               {loading ? "Unlocking..." : "Unlock Admin Setup"}
             </button>
-            <Link className="mt-4 block text-center text-sm font-bold text-teal-200 hover:text-white" href={`/round-robin/${id}/player`}>
+            <Link className="mt-4 block text-center text-sm font-bold text-teal-200 hover:text-white" href={roundRobinPath(id, "player")}>
               Back to Player View
             </Link>
           </div>
@@ -500,14 +501,9 @@ export default function RoundRobinAdminPage() {
             <div>
               <div className="text-xs font-black uppercase tracking-wide text-teal-200">{state.accessMode === "host" ? "PBCourtCommand Host" : "Administration Setup"}</div>
               <h1 className="text-3xl font-black sm:text-4xl">PBCourtCommand</h1>
-              <p className="mt-1 text-sm font-semibold text-slate-300">
-                {roundRobinModeLabel(state.group.mode)}
-                {latestSession ? ` - Latest: ${formatDate(latestSession.session_date)} (${latestSession.status})` : ""}
-                {state.hostPlayer ? ` - ${state.hostPlayer.display_name}` : ""}
-              </p>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-slate-950 shadow-[0_10px_24px_-14px_rgba(255,255,255,0.9)] ring-1 ring-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-lg" href={`/round-robin/${groupKey}/player`}>
+              <Link className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-slate-950 shadow-[0_10px_24px_-14px_rgba(255,255,255,0.9)] ring-1 ring-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-lg" href={roundRobinPath(groupKey, "player")}>
                 Player View
               </Link>
               <button type="button" onClick={exitToDashboard} className="rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg">
@@ -1280,11 +1276,6 @@ function AdminGameResultCard({ match }) {
           isWinner={isWinningScore(match.team2_score, match.team1_score)}
         />
       </div>
-      {(match.bye_players || []).length > 0 && (
-        <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs font-black text-amber-900">
-          Bye: {playerNames(match.bye_players)}
-        </div>
-      )}
     </div>
   );
 }
@@ -1379,21 +1370,29 @@ function SessionResultsModal({ state, session, onClose }) {
             <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="text-sm font-black text-slate-700">Rounds</div>
               <div className="mt-3 space-y-3">
-                {roundGroups.map((round) => (
-                  <section key={round.roundNumber} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_18px_38px_-28px_rgba(15,23,42,0.85)]">
-                    <div className="flex flex-wrap items-center justify-between gap-2 bg-[linear-gradient(90deg,#0f766e,#2563eb)] px-3 py-2 text-white">
-                      <div className="text-base font-black">Round {round.roundNumber}</div>
-                      <div className="rounded-md bg-white/15 px-2 py-1 text-xs font-black uppercase tracking-wide text-teal-50">
-                        {round.matches.length} game{round.matches.length === 1 ? "" : "s"}
+                {roundGroups.map((round) => {
+                  const byes = roundByePlayers(round);
+                  return (
+                    <section key={round.roundNumber} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_18px_38px_-28px_rgba(15,23,42,0.85)]">
+                      <div className="flex flex-wrap items-center justify-between gap-2 bg-[linear-gradient(90deg,#0f766e,#2563eb)] px-3 py-2 text-white">
+                        <div className="text-base font-black">Round {round.roundNumber}</div>
+                        <div className="rounded-md bg-white/15 px-2 py-1 text-xs font-black uppercase tracking-wide text-teal-50">
+                          {round.matches.length} game{round.matches.length === 1 ? "" : "s"}
+                        </div>
                       </div>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3 p-3">
-                      {round.matches.map((match) => (
-                        <AdminGameResultCard key={match.id} match={match} />
-                      ))}
-                    </div>
-                  </section>
-                ))}
+                      {byes.length > 0 && (
+                        <div className="border-b border-amber-200 bg-amber-50 px-3 py-2 text-sm font-black text-amber-900">
+                          Bye: {playerNames(byes)}
+                        </div>
+                      )}
+                      <div className="grid grid-cols-1 gap-3 p-3">
+                        {round.matches.map((match) => (
+                          <AdminGameResultCard key={match.id} match={match} />
+                        ))}
+                      </div>
+                    </section>
+                  );
+                })}
                 {matches.length === 0 && (
                   <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No games were saved for this session.</div>
                 )}
@@ -1436,7 +1435,7 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
           <div className="flex flex-wrap items-center gap-2">
             <div className="font-black text-slate-950">{session.session_name || "Session"}</div>
             <span className={`rounded-md px-2 py-1 text-[11px] font-black uppercase tracking-wide ${sessionLifecycleClass(session.status)}`}>
-              {session.status}
+              {sessionStatusLabel(session.status)}
             </span>
           </div>
           <div className="mt-1 text-lg font-black leading-tight text-slate-950 sm:text-xl">
@@ -1491,14 +1490,13 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
 }
 
 function SessionPlayersModal({ state, session, status, setStatus, runAction, actionLoading, onClose }) {
+  const [showAddPlayer, setShowAddPlayer] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerPhone, setNewPlayerPhone] = useState("");
   const players = sessionPlayersForStatus(state, session.id, status);
   const statuses = ["joined", "declined", "waitlist", "invited"];
   const statusActionLoading = actionLoading === "updateSessionPlayerStatus";
-  const [addPlayerId, setAddPlayerId] = useState("");
-  const currentSessionPlayerIds = new Set(allPlayersForSession(state, session.id).map((player) => String(player.player_id || "")).filter(Boolean));
-  const addablePlayers = activePlayers(state.players)
-    .filter((player) => !currentSessionPlayerIds.has(String(player.id)))
-    .sort((a, b) => String(a.display_name || "").localeCompare(String(b.display_name || "")));
+  const addPlayerLoading = actionLoading === "addSessionNewPlayer";
 
   function updatePlayerStatus(player, nextStatus) {
     runAction("updateSessionPlayerStatus", {
@@ -1508,66 +1506,107 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
     });
   }
 
-  async function addSavedPlayer() {
-    if (!addPlayerId) return;
-    const added = await runAction("addSessionPlayer", {
+  async function addNewPlayer() {
+    if (!newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10) return;
+    const added = await runAction("addSessionNewPlayer", {
       sessionId: session.id,
-      playerId: addPlayerId,
+      displayName: newPlayerName,
+      phone: newPlayerPhone,
     });
     if (added) {
-      setAddPlayerId("");
+      setNewPlayerName("");
+      setNewPlayerPhone("");
+      setShowAddPlayer(false);
       setStatus("joined");
     }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
-        <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
-          <div>
-            <div className={MODAL_EYEBROW_CHROME}>Session Players</div>
-            <h2 className="text-2xl font-black">{session.session_name || "Session"}</h2>
-            <div className={MODAL_SUPPORTING_TEXT}>
-              {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
+      <div className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+        <div className={`shrink-0 p-4 ${MODAL_HEADER_CHROME}`}>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className={MODAL_EYEBROW_CHROME}>Session Players</div>
+              <h2 className="text-2xl font-black">{session.session_name || "Session"}</h2>
+              <div className={MODAL_SUPPORTING_TEXT}>
+                {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
+              </div>
             </div>
+            <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
+              Close
+            </button>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
-            Close
-          </button>
-        </div>
-        <div className="p-4">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {statuses.map((item) => (
               <button key={item} type="button" onClick={() => setStatus(item)} className={`rounded-lg border px-3 py-2 text-sm font-black capitalize shadow-sm ${
-                status === item ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-slate-50 text-slate-700 hover:bg-white"
+                status === item ? "border-white bg-white text-slate-950" : "border-white/35 bg-white/10 text-white hover:bg-white/20"
               }`}>
                 {item} ({sessionPlayersForStatus(state, session.id, item).length})
               </button>
             ))}
           </div>
-          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <label className="block text-sm font-bold text-slate-600">
-                Add saved player to this session
-                <select value={addPlayerId} onChange={(event) => setAddPlayerId(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950">
-                  <option value="">Select player</option>
-                  {addablePlayers.map((player) => (
-                    <option key={player.id} value={player.id}>{player.display_name}</option>
-                  ))}
-                </select>
-              </label>
+        </div>
+        <div className="flex-1 overflow-y-auto p-4">
+          <div>
+            {!showAddPlayer ? (
               <button
                 type="button"
-                onClick={addSavedPlayer}
-                disabled={!addPlayerId || actionLoading === "addSessionPlayer"}
-                className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
+                onClick={() => setShowAddPlayer(true)}
+                className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-800"
               >
-                {actionLoading === "addSessionPlayer" ? "Adding..." : "Add Joined"}
+                Add Player
               </button>
-            </div>
-            {addablePlayers.length === 0 && <div className="mt-2 text-xs font-bold text-slate-500">All saved active players are already listed for this session.</div>}
+            ) : (
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <label className="block text-sm font-bold text-slate-600">
+                    Player name
+                    <input
+                      type="text"
+                      value={newPlayerName}
+                      onChange={(event) => setNewPlayerName(event.target.value)}
+                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950"
+                      required
+                    />
+                  </label>
+                  <label className="block text-sm font-bold text-slate-600">
+                    Phone #
+                    <input
+                      type="tel"
+                      value={newPlayerPhone}
+                      onChange={(event) => setNewPlayerPhone(formatPhoneInput(event.target.value))}
+                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950"
+                      placeholder="(941) 555-1212"
+                      required
+                    />
+                  </label>
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:flex sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddPlayer(false);
+                      setNewPlayerName("");
+                      setNewPlayerPhone("");
+                    }}
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={addNewPlayer}
+                    disabled={addPlayerLoading || !newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10}
+                    className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
+                  >
+                    {addPlayerLoading ? "Adding..." : "Add Player"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="mt-4 max-h-[52vh] overflow-y-auto rounded-lg border border-slate-200">
+          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
             {players.map((player) => (
               <div key={player.id} className="grid grid-cols-1 gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                 <div className="min-w-0">
@@ -2029,7 +2068,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
 
   async function deleteSavedPlayer(player) {
     const playerName = player.display_name || "this player";
-    if (!window.confirm(`Deactivate ${playerName}? Past session history will stay saved.`)) return;
+    if (!window.confirm(`Delete ${playerName} from saved PBCC players? Upcoming session roster entries will be removed. Completed session history will keep the saved display name.`)) return;
 
     const deleted = await runAction("deletePlayer", { playerId: player.id });
     if (deleted && String(form.id) === String(player.id)) {
@@ -2167,7 +2206,6 @@ function PlayersTab({ state, runAction, actionLoading }) {
                 <tr key={player.id} className={player.is_active === false ? "bg-slate-50 text-slate-500" : ""}>
                   <td className="px-3 py-2 font-black">
                     <div>{player.display_name}</div>
-                    {player.is_active === false && <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">Inactive</div>}
                   </td>
                   <td className="px-3 py-2 text-center">
                     <input
@@ -2187,9 +2225,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
                     <div className="flex justify-end gap-2">
                       <button type="button" onClick={() => editPlayer(player)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-slate-800">Edit</button>
                       <button type="button" onClick={() => setStatsPlayer(player)} className="rounded-lg bg-blue-50 px-3 py-2 text-xs font-black text-blue-700 hover:bg-blue-100">Stats</button>
-                      {player.is_active !== false && (
-                        <button type="button" onClick={() => deleteSavedPlayer(player)} disabled={actionLoading === "deletePlayer"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">Deactivate</button>
-                      )}
+                      <button type="button" onClick={() => deleteSavedPlayer(player)} disabled={actionLoading === "deletePlayer"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">Delete</button>
                     </div>
                   </td>
                 </tr>
@@ -2778,7 +2814,7 @@ function sessionSortValue(session) {
 function sessionPlayersForStatus(state, sessionId, status) {
   return activeSessionPlayersForSession(state, sessionId)
     .filter((player) => player.response_status === status)
-    .sort((a, b) => String(a.display_name || "").localeCompare(String(b.display_name || "")));
+    .sort((a, b) => compareNamesByFirstName(a.display_name, b.display_name));
 }
 
 function allPlayersForSession(state, sessionId) {
@@ -2875,6 +2911,20 @@ function sessionLifecycleClass(status) {
   return "bg-slate-200 text-slate-700";
 }
 
+function sessionStatusLabel(status) {
+  if (status === "done") return "Finished";
+  return status || "";
+}
+
+function compareNamesByFirstName(firstName, secondName) {
+  const first = String(firstName || "").trim();
+  const second = String(secondName || "").trim();
+  const firstGiven = first.split(/\s+/)[0] || first;
+  const secondGiven = second.split(/\s+/)[0] || second;
+  return firstGiven.localeCompare(secondGiven, undefined, { sensitivity: "base" })
+    || first.localeCompare(second, undefined, { sensitivity: "base" });
+}
+
 function filterSessions(sessions = [], query, state) {
   const cleanQuery = normalizeSearchText(query);
   if (!cleanQuery) return sessions;
@@ -2889,6 +2939,7 @@ function filterSessions(sessions = [], query, state) {
       session.session_date,
       session.starts_at,
       session.status,
+      sessionStatusLabel(session.status),
       session.mode,
       session.max_players,
       session.repeats_weekly ? "weekly recurring repeats" : "",
@@ -3037,14 +3088,13 @@ function smsSessionLabel(session) {
     formatDate(session.session_date) || "Date pending",
     session.starts_at ? formatTime(session.starts_at) : "",
     session.session_name || "Session",
-    session.status ? `(${session.status})` : "",
+    session.status ? `(${sessionStatusLabel(session.status)})` : "",
   ].filter(Boolean).join(" - ");
 }
 
 function publicRoundRobinUrl(group) {
-  const key = group?.slug || group?.id || "";
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  return `${origin}/round-robin/${key}`;
+  return roundRobinPublicUrl(group, origin);
 }
 
 function playerRoundRobinUrl(group) {
@@ -3058,6 +3108,10 @@ function groupMatchesByRound(matches) {
     byRound[match.round_number].matches.push(match);
   });
   return Object.values(byRound).sort((a, b) => a.roundNumber - b.roundNumber);
+}
+
+function roundByePlayers(round) {
+  return (round?.matches || []).flatMap((match) => match.bye_players || []);
 }
 
 function slotPlayers(match, side) {
@@ -3276,9 +3330,13 @@ function noticeForAction(action, result) {
     }
     return "Player saved.";
   }
-  if (action === "deletePlayer") return "Player deactivated in Saved Players.";
+  if (action === "deletePlayer") return "Player deleted from Saved Players.";
   if (action === "saveCourts") return "Courts saved.";
   if (action === "saveSettings") return "Settings saved.";
+  if (action === "addSessionNewPlayer") {
+    if (result.sms?.skipped) return `Player added to this session and saved to PBCC Players. New Player text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
+    return `Player added to this session and saved to PBCC Players. New Player texts sent: ${result.sms?.sent || 0}.`;
+  }
   if (action === "masterResetRoundRobin") return `Master Reset complete. Deleted ${result.sessionsDeleted || 0} session${Number(result.sessionsDeleted || 0) === 1 ? "" : "s"} and all related play history.`;
   return "Saved.";
 }

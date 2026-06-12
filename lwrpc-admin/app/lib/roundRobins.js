@@ -1,6 +1,9 @@
 import { supabase } from "./auth";
 import { roundRobinPlayerLabel, roundRobinStandings } from "./roundRobinSchedule";
 
+export const PBCC_ROUND_ROBIN_SLUG = "rpro";
+export const PBCC_ROUTE = "/pbcc";
+
 export function roundRobinDisplayName(group) {
   return group?.name || "Round Robin";
 }
@@ -50,7 +53,7 @@ export async function loadPublicRoundRobin(identifier) {
 }
 
 export async function loadRoundRobinGroup(identifier) {
-  const clean = String(identifier || "").trim();
+  const clean = roundRobinIdentifier(identifier);
   if (!clean) return null;
 
   const query = supabase
@@ -64,6 +67,34 @@ export async function loadRoundRobinGroup(identifier) {
 
   if (error) throw error;
   return data || null;
+}
+
+export function roundRobinIdentifier(identifier) {
+  const clean = String(identifier || "").trim();
+  return clean === "pbcc" ? PBCC_ROUND_ROBIN_SLUG : clean;
+}
+
+export function roundRobinPath(groupOrIdentifier, section = "") {
+  const key = roundRobinKey(groupOrIdentifier);
+  const suffix = section ? `/${String(section).replace(/^\/+/, "")}` : "";
+
+  if (key === PBCC_ROUND_ROBIN_SLUG || key === "pbcc") {
+    return `${PBCC_ROUTE}${suffix}`;
+  }
+
+  return `/round-robin/${key}${suffix}`;
+}
+
+export function publicRoundRobinUrl(groupOrIdentifier, origin = "") {
+  return `${origin}${roundRobinPath(groupOrIdentifier)}`;
+}
+
+function roundRobinKey(groupOrIdentifier) {
+  if (typeof groupOrIdentifier === "object" && groupOrIdentifier !== null) {
+    return roundRobinIdentifier(groupOrIdentifier.slug || groupOrIdentifier.id || "");
+  }
+
+  return roundRobinIdentifier(groupOrIdentifier);
 }
 
 async function loadRoundRobinCourts(groupId) {

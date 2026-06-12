@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppHeader from "../components/AppHeader";
-import { loadPublicRoundRobinGroups, roundRobinModeLabel } from "../lib/roundRobins";
+import { loadPublicRoundRobinGroups, roundRobinModeLabel, roundRobinPath } from "../lib/roundRobins";
 
 export default function RoundRobinGroupsPage() {
   const [groups, setGroups] = useState([]);
@@ -57,10 +57,10 @@ export default function RoundRobinGroupsPage() {
                     </span>
                   </div>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    <Link className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_24px_-16px_rgba(15,23,42,0.9)] ring-1 ring-white transition hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg" href={`/round-robin/${key}`}>
+                    <Link className="rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_24px_-16px_rgba(15,23,42,0.9)] ring-1 ring-white transition hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-lg" href={roundRobinPath(key)}>
                       Open
                     </Link>
-                    <Link className="rounded-lg border border-teal-800 bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_24px_-16px_rgba(15,118,110,0.8)] ring-1 ring-white transition hover:-translate-y-0.5 hover:bg-teal-800 hover:shadow-lg" href={`/round-robin/${key}/admin`}>
+                    <Link className="rounded-lg border border-teal-800 bg-teal-700 px-4 py-2 text-sm font-bold text-white shadow-[0_10px_24px_-16px_rgba(15,118,110,0.8)] ring-1 ring-white transition hover:-translate-y-0.5 hover:bg-teal-800 hover:shadow-lg" href={roundRobinPath(key, "admin")}>
                       Admin Setup
                     </Link>
                   </div>

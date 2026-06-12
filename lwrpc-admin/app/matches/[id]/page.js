@@ -10,84 +10,31 @@ import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
 import { rebuildDivisionStandingsForDivision } from "../../lib/standingsRebuild";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
-
-function lmsScoreRuleSettings(line) {
-  return {
-    pointsToWin: Number(line?.division_lines?.points_to_win || 0),
-    winBy: Number(line?.division_lines?.win_by || 0),
-  };
-}
-
-function lmsGameWinnerSide(game, line = null) {
-  if (game.game_status === "forfeit_home" || game.game_status === "retired_home") return "home";
-  if (game.game_status === "forfeit_away" || game.game_status === "retired_away") return "away";
-  if (game.home_score !== null && game.home_score !== undefined && game.away_score !== null && game.away_score !== undefined) {
-    const homeScore = Number(game.home_score);
-    const awayScore = Number(game.away_score);
-    const { pointsToWin, winBy } = lmsScoreRuleSettings(line);
-
-    if (!Number.isFinite(homeScore) || !Number.isFinite(awayScore)) return "";
-    if (homeScore === awayScore) return "";
-
-    const highScore = Math.max(homeScore, awayScore);
-    const lowScore = Math.min(homeScore, awayScore);
-
-    if (pointsToWin > 0) {
-      if (winBy === 1 && highScore !== pointsToWin) return "";
-      if (winBy > 1 && highScore < pointsToWin) return "";
-      if (winBy > 0 && highScore - lowScore < winBy) return "";
-    }
-
-    if (homeScore > awayScore) return "home";
-    if (awayScore > homeScore) return "away";
-  }
-  return "";
-}
-
-function lmsLineGamesNeededToWin(lineGames) {
-  const gameCount = lineGames.length;
-  return gameCount > 1 && gameCount % 2 === 1 ? Math.floor(gameCount / 2) + 1 : gameCount;
-}
+import {
+  gameHasScoreEntry as sharedGameHasScoreEntry,
+  getLineSummary as sharedGetLineSummary,
+  isPicklebreakerLine as sharedIsPicklebreakerLine,
+  lineRequiresValidation as sharedLineRequiresValidation,
+  lineScoreRequired as sharedLineScoreRequired,
+  matchPointSummary as sharedMatchPointSummary,
+  picklebreakerValidationIssues,
+  requiredLineGameIds as sharedRequiredLineGameIds,
+} from "../../lib/matchScoring";
 
 function lmsLineScoreRequired(line) {
-  const value = line?.division_lines?.score_required;
-  return value !== false && value !== "false" && value !== 0 && value !== "0";
+  return sharedLineScoreRequired(line);
 }
 
 function lmsGameHasScoreEntry(game) {
-  return (
-    (game.home_score !== null && game.home_score !== undefined) ||
-    (game.away_score !== null && game.away_score !== undefined) ||
-    (game.game_status && game.game_status !== "scheduled")
-  );
+  return sharedGameHasScoreEntry(game);
 }
 
 function lmsLineRequiresValidation(line, lineGames) {
-  return lmsLineScoreRequired(line) || lineGames.some(lmsGameHasScoreEntry);
+  return sharedLineRequiresValidation(line, lineGames);
 }
 
 function lmsRequiredLineGameIds(lineGames, line = null) {
-  const sortedGames = [...lineGames].sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0));
-  const neededToWin = lmsLineGamesNeededToWin(sortedGames);
-  const requiredIds = new Set();
-  let homeWins = 0;
-  let awayWins = 0;
-
-  sortedGames.forEach((game) => {
-    if (neededToWin > 0 && (homeWins >= neededToWin || awayWins >= neededToWin)) return;
-    requiredIds.add(String(game.id));
-
-    const winner = lmsGameWinnerSide(game, line);
-    if (winner === "home") homeWins += 1;
-    if (winner === "away") awayWins += 1;
-  });
-
-  return requiredIds;
-}
-
-function lmsRequiredLineGames(lineGames, line = null) {
-  const requiredIds = lmsRequiredLineGameIds(lineGames, line);
-  return lineGames.filter((game) => requiredIds.has(String(game.id)));
+  return sharedRequiredLineGameIds(lineGames, line);
 }
 
 export default function MatchDetailPage() {
@@ -185,6 +132,9 @@ export default function MatchDetailPage() {
           points_to_win,
           win_by,
           team_win_points,
+          picklebreaker_not_played_points,
+          picklebreaker_not_played_award_rule,
+          picklebreaker_play_rule,
           standings_points_mode,
           posted_to_dupr,
           uses_saved_match_lineups,
@@ -397,7 +347,7 @@ export default function MatchDetailPage() {
   }
 
   function isPicklebreakerLine(line) {
-    return lineTypeKey(line?.division_lines?.line_type) === "picklebreaker";
+    return sharedIsPicklebreakerLine(line);
   }
 
   function teamSlotLabel(line) {
@@ -456,62 +406,16 @@ export default function MatchDetailPage() {
   }
 
   const getLineSummary = useCallback(function getLineSummary(line) {
-    const lineGames = lmsRequiredLineGames(games.filter((game) => game.match_line_id === line.id), line);
-
-    let homeGameWins = 0;
-    let awayGameWins = 0;
-    let homePoints = 0;
-    let awayPoints = 0;
-
-    lineGames.forEach((game) => {
-      if (game.home_score !== null && game.away_score !== null) {
-        homePoints += Number(game.home_score || 0);
-        awayPoints += Number(game.away_score || 0);
-      }
-
-      const winnerSide = lmsGameWinnerSide(game, line);
-      if (winnerSide === "home") homeGameWins++;
-      if (winnerSide === "away") awayGameWins++;
-    });
-
-    let winningTeamId = null;
-    let winnerName = "-";
-
-    if (homeGameWins > awayGameWins) {
-      winningTeamId = match?.home_team_id;
-      winnerName = match?.home_team?.name || "Home";
-    }
-
-    if (awayGameWins > homeGameWins) {
-      winningTeamId = match?.away_team_id;
-      winnerName = match?.away_team?.name || "Away";
-    }
-
-    return {
-      homeGameWins,
-      awayGameWins,
-      homePoints,
-      awayPoints,
-      winningTeamId,
-      winnerName,
-    };
+    return sharedGetLineSummary(line, games.filter((game) => game.match_line_id === line.id), match);
   }, [games, match]);
 
+  const matchPointTotals = useMemo(() =>
+    sharedMatchPointSummary(displayedLines, games, match),
+  [displayedLines, games, match]);
+
   const lineTeamWinPoints = useCallback(function lineTeamWinPoints(line, summary) {
-    const configuredPoints = Number(line.division_lines?.team_win_points ?? 1);
-
-    if (line.division_lines?.standings_points_mode === "per_game") {
-      return {
-        home: summary.homeGameWins * configuredPoints,
-        away: summary.awayGameWins * configuredPoints,
-      };
-    }
-
-    return {
-      home: summary.winningTeamId === match?.home_team_id ? configuredPoints : 0,
-      away: summary.winningTeamId === match?.away_team_id ? configuredPoints : 0,
-    };
-  }, [match]);
+    return matchPointTotals.pointsByLineId[String(line.id)] || { home: 0, away: 0, mode: "unawarded", pointAwardTeamId: summary?.winningTeamId || null };
+  }, [matchPointTotals]);
 
   function formatLineTeamPoints(linePoints) {
     const homePoints = Number(linePoints.home || 0);
@@ -526,7 +430,8 @@ export default function MatchDetailPage() {
       labels.push(`${awayPoints} to ${match?.away_team?.name || "Away"}`);
     }
 
-    return labels.length > 0 ? labels.join(" / ") : "-";
+    const suffix = linePoints.mode === "not_played" ? " (not played)" : "";
+    return labels.length > 0 ? `${labels.join(" / ")}${suffix}` : "-";
   }
 
   const playerAssignmentCounts = useMemo(() => {
@@ -631,37 +536,13 @@ export default function MatchDetailPage() {
   }
 
   const matchSummary = useMemo(() => {
-    let homeWins = 0;
-    let awayWins = 0;
-
-    displayedLines.forEach((line) => {
-      const summary = getLineSummary(line);
-      const points = lineTeamWinPoints(line, summary);
-
-      homeWins += points.home;
-      awayWins += points.away;
-    });
-
-    let winningTeamId = null;
-    let winnerName = "-";
-
-    if (homeWins > awayWins) {
-      winningTeamId = match?.home_team_id;
-      winnerName = match?.home_team?.name || "Home";
-    }
-
-    if (awayWins > homeWins) {
-      winningTeamId = match?.away_team_id;
-      winnerName = match?.away_team?.name || "Away";
-    }
-
     return {
-      homeWins,
-      awayWins,
-      winningTeamId,
-      winnerName,
+      homeWins: matchPointTotals.homeWins,
+      awayWins: matchPointTotals.awayWins,
+      winningTeamId: matchPointTotals.winningTeamId,
+      winnerName: matchPointTotals.winnerName,
     };
-  }, [displayedLines, getLineSummary, lineTeamWinPoints, match]);
+  }, [matchPointTotals]);
 
   async function updateLinePlayer(lineId, field, value) {
     if (!canEditScoreEntry()) {
@@ -1011,6 +892,16 @@ export default function MatchDetailPage() {
     const pointsToWin = Number(line.division_lines?.points_to_win || 0);
     const winBy = Number(line.division_lines?.win_by || 0);
     const requiredGameIds = lmsRequiredLineGameIds(lineGames, line);
+    const picklebreakerIssues = isPicklebreakerLine(line)
+      ? picklebreakerValidationIssues(displayedLines, games, match, teamSlotLabel)
+          .filter((issue) => String(issue.lineId || "") === String(line.id))
+      : [];
+
+    if (picklebreakerIssues.length > 0) return picklebreakerIssues;
+
+    if (isPicklebreakerLine(line) && !lineGames.some(lmsGameHasScoreEntry)) {
+      return issues;
+    }
 
     const lineRequiresValidation = lmsLineRequiresValidation(line, lineGames);
 
@@ -1109,12 +1000,16 @@ export default function MatchDetailPage() {
 
     for (const line of displayedLines) {
       const summary = getLineSummary(line);
-      const lineStatus = summary.winningTeamId ? "completed" : "scheduled";
+      const linePoints = lineTeamWinPoints(line, summary);
+      const winningTeamId = isPicklebreakerLine(line) && linePoints.mode === "not_played"
+        ? linePoints.pointAwardTeamId
+        : summary.winningTeamId;
+      const lineStatus = winningTeamId ? "completed" : "scheduled";
 
       const { error } = await supabase
         .from("match_lines")
         .update({
-          winning_team_id: summary.winningTeamId,
+          winning_team_id: winningTeamId,
           home_team_games_won: summary.homeGameWins,
           away_team_games_won: summary.awayGameWins,
           home_team_points: summary.homePoints,
@@ -2087,13 +1982,6 @@ function capitalizeFirst(value) {
   const text = String(value).trim();
   if (!text) return "";
   return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
-function lineTypeKey(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
 }
 
 function formatMatchScoreStatus(match) {

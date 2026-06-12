@@ -568,9 +568,20 @@ function formatCaptainName(member) {
 }
 
 function formatLineTeamPoints(line) {
-  const points = Number(line?.division_lines?.team_win_points ?? 1);
+  const divisionLine = line?.division_lines || {};
+  const lineType = String(divisionLine.line_type || "").trim().toLowerCase();
+  const games = line?.line_games || [];
+  const hasPlayedGame = games.some((game) =>
+    game.home_score !== null && game.home_score !== undefined ||
+    game.away_score !== null && game.away_score !== undefined ||
+    game.game_status && game.game_status !== "scheduled"
+  );
+  const points = lineType === "picklebreaker" && !hasPlayedGame
+    ? Number(divisionLine.picklebreaker_not_played_points ?? divisionLine.team_win_points ?? 1)
+    : Number(divisionLine.team_win_points ?? 1);
 
-  return Number.isNaN(points) ? "-" : points;
+  if (Number.isNaN(points)) return "-";
+  return lineType === "picklebreaker" && !hasPlayedGame ? `${points} not played` : points;
 }
 
 function lineHeaderAccentClass(match, line, selectedTeamId) {

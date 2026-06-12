@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { loadPublicRoundRobin, roundRobinDisplayName, roundRobinModeLabel } from "../../lib/roundRobins";
+import { loadPublicRoundRobin, roundRobinDisplayName, roundRobinModeLabel, roundRobinPath } from "../../lib/roundRobins";
 
 export default function RoundRobinPublicPage() {
   const { id } = useParams();
@@ -30,7 +30,7 @@ export default function RoundRobinPublicPage() {
   const title = roundRobinDisplayName(group);
 
   return (
-    <Shell title={title} subtitle={roundRobinModeLabel(group.mode)} playerHref={`/round-robin/${key}/player`} adminHref={`/round-robin/${key}/admin`}>
+    <Shell title={title} subtitle={roundRobinModeLabel(group.mode)} playerHref={roundRobinPath(key, "player")} adminHref={roundRobinPath(key, "admin")}>
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_24rem]">
         <section className="space-y-5">
           <div className="overflow-hidden rounded-lg border border-white/80 bg-white/95 shadow-[0_24px_70px_-42px_rgba(15,23,42,0.75)]">
@@ -154,12 +154,12 @@ function RoundCard({ round }) {
     <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_20px_60px_-42px_rgba(15,23,42,0.75)]">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="text-xl font-black text-slate-950">Round {round.roundNumber}</h2>
-        {byes.length > 0 && (
-          <div className="rounded-lg bg-amber-100 px-3 py-1 text-sm font-black text-amber-900">
-            Bye: {byes.map((player) => player.firstLabel || player.displayName).join(", ")}
-          </div>
-        )}
       </div>
+      {byes.length > 0 && (
+        <div className="mt-2 rounded-lg bg-amber-100 px-3 py-2 text-sm font-black text-amber-900">
+          Bye: {byes.map((player) => player.firstLabel || player.displayName).join(", ")}
+        </div>
+      )}
       <div className="mt-3 grid grid-cols-1 gap-4 md:grid-cols-2">
         {round.matches.map((match) => (
           <CourtDiagram key={match.id} match={match} />

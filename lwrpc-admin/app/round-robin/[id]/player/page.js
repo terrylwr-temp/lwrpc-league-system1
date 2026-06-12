@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { DEFAULT_SYSTEM_SETTINGS } from "../../../lib/systemSettings";
 
 const PLAYER_RECORD_RANGES = [
@@ -217,11 +218,12 @@ export default function RoundRobinPlayerPage() {
     }, "updateSessionPlayerStatus");
   }
 
-  function addHostSessionPlayer(session, playerId) {
-    return runHostAction("addSessionPlayer", {
+  function addHostSessionNewPlayer(session, player) {
+    return runHostAction("addSessionNewPlayer", {
       sessionId: session.id,
-      playerId,
-    }, "addSessionPlayer");
+      displayName: player.displayName,
+      phone: player.phone,
+    }, "addSessionNewPlayer");
   }
 
   function openHostGameUpdate(session) {
@@ -255,14 +257,14 @@ export default function RoundRobinPlayerPage() {
 
     window.sessionStorage.setItem(`lwrpc-round-robin-host-phone-${groupKey}`, cleanPhone);
     window.sessionStorage.setItem(`lwrpc-round-robin-host-session-${groupKey}`, session.id);
-    window.location.href = `/round-robin/${groupKey}/admin?hostSessionId=${encodeURIComponent(session.id)}`;
+    window.location.href = `${roundRobinPath(groupKey, "admin")}?hostSessionId=${encodeURIComponent(session.id)}`;
   }
 
   function openManagerSystem() {
     window.sessionStorage.removeItem(`lwrpc-round-robin-host-phone-${groupKey}`);
     window.sessionStorage.removeItem(`lwrpc-round-robin-host-session-${groupKey}`);
     window.sessionStorage.removeItem(`lwrpc-round-robin-code-${groupKey}`);
-    window.location.href = `/round-robin/${groupKey}/admin?manager=1`;
+    window.location.href = `${roundRobinPath(groupKey, "admin")}?manager=1`;
   }
 
   async function finishHostSession(session) {
@@ -464,7 +466,7 @@ export default function RoundRobinPlayerPage() {
               setStatus={setHostPlayersStatus}
               actionLoading={actionLoading}
               onUpdateStatus={updateHostSessionPlayerStatus}
-              onAddPlayer={addHostSessionPlayer}
+              onAddNewPlayer={addHostSessionNewPlayer}
               onClose={() => setSelectedPlayersSession(null)}
             />
           ) : (
@@ -652,11 +654,15 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
             {session.location || "Location pending"}
           </div>
           <div className="mt-3 flex flex-wrap gap-2 text-sm font-black">
-            <span className="rounded-lg bg-teal-50 px-3 py-2 text-teal-900">
+            <button
+              type="button"
+              onClick={() => onPlayers(session)}
+              className="rounded-lg bg-teal-50 px-3 py-2 text-left text-teal-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-300"
+            >
               {availableSpots === null
                 ? `${session.joinedCount} joined`
                 : `${session.joinedCount} joined / ${availableSpots} player spot${availableSpots === 1 ? "" : "s"} available`}
-            </span>
+            </button>
             {session.waitlistCount > 0 && (
               <span className="rounded-lg bg-amber-50 px-3 py-2 text-amber-900">{session.waitlistCount} waitlist</span>
             )}
@@ -786,21 +792,25 @@ function SessionPlayersViewModal({ session, onClose }) {
   );
 }
 
-function HostSessionPlayersModal({ state, session, status, setStatus, actionLoading, onUpdateStatus, onAddPlayer, onClose }) {
-  const [addPlayerId, setAddPlayerId] = useState("");
+function HostSessionPlayersModal({ session, status, setStatus, actionLoading, onUpdateStatus, onAddNewPlayer, onClose }) {
+  const [showAddPlayer, setShowAddPlayer] = useState(false);
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerPhone, setNewPlayerPhone] = useState("");
   const statuses = ["joined", "declined", "waitlist", "invited"];
   const players = sessionPlayersForStatusView(session.sessionPlayers || [], status);
-  const currentSessionPlayerIds = new Set((session.sessionPlayers || []).map((player) => String(player.playerId || "")).filter(Boolean));
-  const addablePlayers = activeHostPlayers(state?.players || [])
-    .filter((player) => !currentSessionPlayerIds.has(String(player.id)))
-    .sort((a, b) => String(a.display_name || "").localeCompare(String(b.display_name || "")));
   const statusActionLoading = actionLoading === "updateSessionPlayerStatus";
+  const addPlayerLoading = actionLoading === "addSessionNewPlayer";
 
-  async function addSavedPlayer() {
-    if (!addPlayerId) return;
-    const added = await onAddPlayer(session, addPlayerId);
+  async function addNewPlayer() {
+    if (!newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10) return;
+    const added = await onAddNewPlayer(session, {
+      displayName: newPlayerName,
+      phone: newPlayerPhone,
+    });
     if (added) {
-      setAddPlayerId("");
+      setNewPlayerName("");
+      setNewPlayerPhone("");
+      setShowAddPlayer(false);
       setStatus("joined");
     }
   }
@@ -808,50 +818,81 @@ function HostSessionPlayersModal({ state, session, status, setStatus, actionLoad
   return (
     <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
       <div className="flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
-        <div className={`flex shrink-0 flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
-          <div className="min-w-0">
-            <div className={MODAL_EYEBROW_CHROME}>Session Players</div>
-            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
-            <div className={MODAL_SUPPORTING_TEXT}>
-              {formatSessionHeadline(session)}
+        <div className={`shrink-0 p-4 ${MODAL_HEADER_CHROME}`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className={MODAL_EYEBROW_CHROME}>Session Players</div>
+              <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
+              <div className={MODAL_SUPPORTING_TEXT}>
+                {formatSessionHeadline(session)}
+              </div>
             </div>
+            <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
+              Close
+            </button>
           </div>
-          <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
-            Close
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
             {statuses.map((item) => (
               <button key={item} type="button" onClick={() => setStatus(item)} className={`rounded-lg border px-3 py-2 text-sm font-black capitalize shadow-sm ${
-                status === item ? "border-slate-950 bg-slate-950 text-white" : "border-slate-300 bg-slate-50 text-slate-700 hover:bg-white"
+                status === item ? "border-white bg-white text-slate-950" : "border-white/35 bg-white/10 text-white hover:bg-white/20"
               }`}>
                 {item} ({sessionPlayersForStatusView(session.sessionPlayers || [], item).length})
               </button>
             ))}
           </div>
+        </div>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
 
-          <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-              <label className="block text-sm font-bold text-slate-600">
-                Add saved player to this session
-                <select value={addPlayerId} onChange={(event) => setAddPlayerId(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950">
-                  <option value="">Select player</option>
-                  {addablePlayers.map((player) => (
-                    <option key={player.id} value={player.id}>{player.display_name}</option>
-                  ))}
-                </select>
-              </label>
+          <div className="mt-4">
+            {!showAddPlayer ? (
               <button
                 type="button"
-                onClick={addSavedPlayer}
-                disabled={!addPlayerId || actionLoading === "addSessionPlayer"}
-                className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
+                onClick={() => setShowAddPlayer(true)}
+                className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-800"
               >
-                {actionLoading === "addSessionPlayer" ? "Adding..." : "Add Joined"}
+                Add Player
               </button>
-            </div>
-            {addablePlayers.length === 0 && <div className="mt-2 text-xs font-bold text-slate-500">All saved active players are already listed for this session.</div>}
+            ) : (
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <ModalTextInput
+                    label="Player name"
+                    value={newPlayerName}
+                    onChange={setNewPlayerName}
+                    required
+                  />
+                  <ModalTextInput
+                    label="Phone #"
+                    type="tel"
+                    value={newPlayerPhone}
+                    onChange={(value) => setNewPlayerPhone(formatPhoneInput(value))}
+                    placeholder="(941) 555-1212"
+                    required
+                  />
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:flex sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddPlayer(false);
+                      setNewPlayerName("");
+                      setNewPlayerPhone("");
+                    }}
+                    className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={addNewPlayer}
+                    disabled={addPlayerLoading || !newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10}
+                    className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
+                  >
+                    {addPlayerLoading ? "Adding..." : "Add Player"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
@@ -1077,7 +1118,16 @@ function SessionPlayerStatusGroup({ label, tone, players }) {
 function sessionPlayersForStatusView(players, status) {
   return (players || [])
     .filter((player) => String(player.responseStatus || "invited") === status)
-    .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0) || String(a.displayName || "").localeCompare(String(b.displayName || "")));
+    .sort((a, b) => compareNamesByFirstName(a.displayName, b.displayName));
+}
+
+function compareNamesByFirstName(firstName, secondName) {
+  const first = String(firstName || "").trim();
+  const second = String(secondName || "").trim();
+  const firstGiven = first.split(/\s+/)[0] || first;
+  const secondGiven = second.split(/\s+/)[0] || second;
+  return firstGiven.localeCompare(secondGiven, undefined, { sensitivity: "base" })
+    || first.localeCompare(second, undefined, { sensitivity: "base" });
 }
 
 function activeHostPlayers(players = []) {
@@ -1115,6 +1165,10 @@ function hostNoticeForAction(action, result) {
   }
   if (action === "updateSessionPlayerStatus") return "Player status updated.";
   if (action === "addSessionPlayer") return "Player added and joined.";
+  if (action === "addSessionNewPlayer") {
+    if (result.sms?.skipped) return `Player added to this session and saved to PBCC Players. New Player text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
+    return `Player added to this session and saved to PBCC Players. New Player texts sent: ${result.sms?.sent || 0}.`;
+  }
   if (action === "sendBroadcastText") {
     if (result.sms?.skipped) return `Game update text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
     return `Game update text sent: ${result.sms?.sent || 0}.`;
@@ -1165,9 +1219,8 @@ function renderHostSmsTemplate(template, group, session, sessionPlayers = []) {
 }
 
 function publicRoundRobinUrl(group) {
-  const key = group?.slug || group?.id || "";
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  return `${origin}/round-robin/${key}`;
+  return roundRobinPublicUrl(group, origin);
 }
 
 function playerRoundRobinUrl(group) {
@@ -1403,52 +1456,55 @@ function HistorySessionModal({ session, player, onClose }) {
           <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
             <div className="text-sm font-black text-slate-700">Session Game Details</div>
             <div className="mt-3 space-y-3">
-              {roundGroups.map((round) => (
-                <section key={round.roundNumber} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_18px_38px_-28px_rgba(15,23,42,0.85)] ring-1 ring-white">
-                  <div className="flex flex-wrap items-center justify-between gap-2 bg-[linear-gradient(90deg,#0f766e,#2563eb)] px-3 py-2 text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.18)]">
-                    <div className="text-base font-black">Round {round.roundNumber}</div>
-                    <div className="rounded-md bg-white/15 px-2 py-1 text-xs font-black uppercase tracking-wide text-teal-50">
-                      {round.matches.length} game{round.matches.length === 1 ? "" : "s"}
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 p-3">
-                    {round.matches.map((match) => (
-                      <div key={match.id} className="rounded-lg border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.95)]">
-                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                          <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                            {match.court_name || `Court ${match.court_number || "-"}`}
-                          </div>
-                          <div className="rounded-md bg-slate-100 px-2 py-1 text-xs font-black uppercase tracking-wide text-slate-500">
-                            Final
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-stretch">
-                          <GameTeamScorePanel
-                            players={match.team1_players}
-                            score={match.team1_score}
-                            isWinner={isWinningScore(match.team1_score, match.team2_score)}
-                            highlightedPlayerId={highlightedPlayerId}
-                          />
-                          <div className="text-center text-xs font-black uppercase tracking-wide text-slate-400">vs</div>
-                          <GameTeamScorePanel
-                            players={match.team2_players}
-                            score={match.team2_score}
-                            isWinner={isWinningScore(match.team2_score, match.team1_score)}
-                            highlightedPlayerId={highlightedPlayerId}
-                            align="right"
-                          />
-                        </div>
-                        {(match.bye_players || []).length > 0 && (
-                          <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-950">
-                            <span className="font-black">Bye:</span>{" "}
-                            <PlayerNameList players={match.bye_players} highlightedPlayerId={highlightedPlayerId} inline />
-                          </div>
-                        )}
+              {roundGroups.map((round) => {
+                const byes = roundByePlayers(round);
+                return (
+                  <section key={round.roundNumber} className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_18px_38px_-28px_rgba(15,23,42,0.85)] ring-1 ring-white">
+                    <div className="flex flex-wrap items-center justify-between gap-2 bg-[linear-gradient(90deg,#0f766e,#2563eb)] px-3 py-2 text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.18)]">
+                      <div className="text-base font-black">Round {round.roundNumber}</div>
+                      <div className="rounded-md bg-white/15 px-2 py-1 text-xs font-black uppercase tracking-wide text-teal-50">
+                        {round.matches.length} game{round.matches.length === 1 ? "" : "s"}
                       </div>
-                    ))}
-                  </div>
-                </section>
-              ))}
+                    </div>
+                    {byes.length > 0 && (
+                      <div className="border-b border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-950">
+                        <span className="font-black">Bye:</span>{" "}
+                        <PlayerNameList players={byes} highlightedPlayerId={highlightedPlayerId} inline />
+                      </div>
+                    )}
+                    <div className="grid grid-cols-1 gap-3 p-3">
+                      {round.matches.map((match) => (
+                        <div key={match.id} className="rounded-lg border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.95)]">
+                          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                            <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                              {match.court_name || `Court ${match.court_number || "-"}`}
+                            </div>
+                            <div className="rounded-md bg-slate-100 px-2 py-1 text-xs font-black uppercase tracking-wide text-slate-500">
+                              Final
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-stretch">
+                            <GameTeamScorePanel
+                              players={match.team1_players}
+                              score={match.team1_score}
+                              isWinner={isWinningScore(match.team1_score, match.team2_score)}
+                              highlightedPlayerId={highlightedPlayerId}
+                            />
+                            <div className="text-center text-xs font-black uppercase tracking-wide text-slate-400">vs</div>
+                            <GameTeamScorePanel
+                              players={match.team2_players}
+                              score={match.team2_score}
+                              isWinner={isWinningScore(match.team2_score, match.team1_score)}
+                              highlightedPlayerId={highlightedPlayerId}
+                              align="right"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
               {matches.length === 0 && (
                 <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No games were saved for this session.</div>
               )}
@@ -1804,6 +1860,10 @@ function groupMatchesByRound(matches = []) {
     if (Number.isNaN(bRound)) return -1;
     return aRound - bRound;
   });
+}
+
+function roundByePlayers(round) {
+  return (round?.matches || []).flatMap((match) => match.bye_players || []);
 }
 
 function winPctForStanding(row) {

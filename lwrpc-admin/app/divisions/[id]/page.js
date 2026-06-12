@@ -36,6 +36,7 @@ export default function DivisionDetailPage() {
   const [pointsToWin, setPointsToWin] = useState("11");
   const [winBy, setWinBy] = useState("2");
   const [teamWinPoints, setTeamWinPoints] = useState("1");
+  const [picklebreakerNotPlayedPoints, setPicklebreakerNotPlayedPoints] = useState("1");
   const [standingsPointsMode, setStandingsPointsMode] = useState("line_result");
   const [editingId, setEditingId] = useState(null);
 
@@ -54,6 +55,7 @@ export default function DivisionDetailPage() {
       pointsToWin !== "11" ||
       winBy !== "2" ||
       teamWinPoints !== "1" ||
+      picklebreakerNotPlayedPoints !== "1" ||
       standingsPointsMode !== "line_result"
     ),
     "game line"
@@ -166,6 +168,9 @@ export default function DivisionDetailPage() {
       points_to_win: Number(line.points_to_win ?? 11),
       win_by: Number(line.win_by ?? 2),
       team_win_points: Number(line.team_win_points ?? 1),
+      picklebreaker_not_played_points: Number(line.picklebreaker_not_played_points ?? line.team_win_points ?? 1),
+      picklebreaker_not_played_award_rule: line.picklebreaker_not_played_award_rule ?? "regular_line_leader",
+      picklebreaker_play_rule: line.picklebreaker_play_rule ?? "regular_lines_tied",
       standings_points_mode: line.standings_points_mode ?? "line_result",
       picklebreaker_enabled: (line.line_type ?? "") === "picklebreaker",
       picklebreaker_points: Number(line.picklebreaker_points ?? line.points_to_win ?? 25),
@@ -196,6 +201,11 @@ export default function DivisionDetailPage() {
       points_to_win: Number(line.points_to_win ?? fallback.points_to_win),
       win_by: Number(line.win_by ?? fallback.win_by),
       team_win_points: Number(line.team_win_points ?? fallback.team_win_points ?? 1),
+      picklebreaker_not_played_points: Number(
+        line.picklebreaker_not_played_points ?? fallback.picklebreaker_not_played_points ?? line.team_win_points ?? fallback.team_win_points ?? 1
+      ),
+      picklebreaker_not_played_award_rule: line.picklebreaker_not_played_award_rule || fallback.picklebreaker_not_played_award_rule || "regular_line_leader",
+      picklebreaker_play_rule: line.picklebreaker_play_rule || fallback.picklebreaker_play_rule || "regular_lines_tied",
       standings_points_mode: line.standings_points_mode ?? fallback.standings_points_mode ?? "line_result",
       picklebreaker_enabled: (line.line_type || fallback.line_type) === "picklebreaker",
       picklebreaker_points: Number(
@@ -405,6 +415,9 @@ export default function DivisionDetailPage() {
       points_to_win: Number(pointsToWin || 11),
       win_by: Number(winBy || 2),
       team_win_points: Number(teamWinPoints || 1),
+      picklebreaker_not_played_points: Number(picklebreakerNotPlayedPoints || 0),
+      picklebreaker_not_played_award_rule: "regular_line_leader",
+      picklebreaker_play_rule: "regular_lines_tied",
       standings_points_mode: standingsPointsMode,
       picklebreaker_enabled: teamType === "picklebreaker",
       picklebreaker_points: Number(pointsToWin || 11),
@@ -582,6 +595,9 @@ export default function DivisionDetailPage() {
             points_to_win: division.points_to_win || 11,
             win_by: division.win_by || 2,
             team_win_points: 1,
+            picklebreaker_not_played_points: 1,
+            picklebreaker_not_played_award_rule: "regular_line_leader",
+            picklebreaker_play_rule: "regular_lines_tied",
             standings_points_mode: "line_result",
             picklebreaker_enabled: false,
             picklebreaker_points: division.points_to_win || 11,
@@ -660,6 +676,7 @@ export default function DivisionDetailPage() {
     setPointsToWin(String(line.points_to_win || 11));
     setWinBy(String(line.win_by || 2));
     setTeamWinPoints(String(line.team_win_points ?? 1));
+    setPicklebreakerNotPlayedPoints(String(line.picklebreaker_not_played_points ?? line.team_win_points ?? 1));
     setStandingsPointsMode(line.standings_points_mode || "line_result");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -678,6 +695,7 @@ export default function DivisionDetailPage() {
     setPointsToWin("11");
     setWinBy("2");
     setTeamWinPoints("1");
+    setPicklebreakerNotPlayedPoints("1");
     setStandingsPointsMode("line_result");
   }
 
@@ -798,7 +816,15 @@ export default function DivisionDetailPage() {
                 <FieldLabel label="Line Type" />
                 <select
                   value={teamType}
-                  onChange={(e) => setTeamType(e.target.value)}
+                  onChange={(e) => {
+                    const nextType = e.target.value;
+                    setTeamType(nextType);
+                    if (nextType === "picklebreaker") {
+                      setScoreRequired(false);
+                      setGamesPerTeam("1");
+                      setStandingsPointsMode("line_result");
+                    }
+                  }}
                   className="w-full rounded-xl border border-slate-300 px-4 py-3"
                 >
                   <option value="doubles">Doubles</option>
@@ -807,7 +833,7 @@ export default function DivisionDetailPage() {
                   <option value="picklebreaker">Picklebreaker</option>
                 </select>
                 <p className="mt-1 text-xs text-slate-500">
-                  The type of play for this line.
+                  Picklebreaker lines are only required when the regular game-line team points are tied.
                 </p>
               </div>
 
@@ -944,7 +970,7 @@ export default function DivisionDetailPage() {
                 )}
 
                 <div className={Number(gamesPerTeam || 0) > 1 ? "mt-4 border-t border-slate-200 pt-4" : ""}>
-                  <FieldLabel label="Team Points Awarded" />
+                  <FieldLabel label={teamType === "picklebreaker" ? "Points if Played" : "Team Points Awarded"} />
                   <input
                     type="number"
                     min="0"
@@ -954,11 +980,33 @@ export default function DivisionDetailPage() {
                     placeholder="Points"
                   />
                   <p className="mt-1 text-xs text-slate-500">
-                    {standingsPointsMode === "per_game" && Number(gamesPerTeam || 0) > 1
+                    {teamType === "picklebreaker"
+                      ? "The Picklebreaker winner receives this many team points when the Picklebreaker is played."
+                      : standingsPointsMode === "per_game" && Number(gamesPerTeam || 0) > 1
                       ? "EACH GAME winner receives this many team points per game."
                       : "The LINE winner receives this many team points."}
                   </p>
                 </div>
+
+                {teamType === "picklebreaker" && (
+                  <div className="mt-4 border-t border-slate-200 pt-4">
+                    <FieldLabel label="Points if Not Played" />
+                    <input
+                      type="number"
+                      min="0"
+                      value={picklebreakerNotPlayedPoints}
+                      onChange={(e) => setPicklebreakerNotPlayedPoints(e.target.value)}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                      placeholder="Reserved points"
+                    />
+                    <p className="mt-1 text-xs text-slate-500">
+                      If the regular game lines do not end tied, these reserved points go to the team leading on regular game-line team points.
+                    </p>
+                    <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-950">
+                      Recommended Picklebreaker setup: Line Type Picklebreaker, Required unchecked, Games / Line 1, Points if Played 1, Points if Not Played 1, Not Posted to DUPR unless your league wants tiebreakers exported.
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-3">
@@ -1021,6 +1069,12 @@ export default function DivisionDetailPage() {
                       <div className="mt-1 text-sm text-slate-600">
                         Games / Line: {line.games_per_line} · To {line.points_to_win} · Win by {line.win_by} · Team points: {line.standings_points_mode === "per_game" ? `${line.team_win_points ?? 1} per score-row win` : `Line winner gets ${line.team_win_points ?? 1}`}
                       </div>
+
+                      {line.line_type === "picklebreaker" && (
+                        <div className="mt-1 text-sm font-semibold text-blue-800">
+                          Picklebreaker: played only if regular game-line team points are tied; if not played, {line.picklebreaker_not_played_points ?? line.team_win_points ?? 1} point{Number(line.picklebreaker_not_played_points ?? line.team_win_points ?? 1) === 1 ? "" : "s"} go to the regular-line leader.
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex gap-2">

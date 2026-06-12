@@ -244,7 +244,10 @@ export default function PlayerDashboardPage() {
                 id,
                 line_name,
                 line_type,
-                team_win_points
+                team_win_points,
+                picklebreaker_not_played_points,
+                picklebreaker_not_played_award_rule,
+                picklebreaker_play_rule
               ),
               home_player_1:members!match_lines_home_player_1_id_fkey (
                 id,
@@ -438,7 +441,11 @@ export default function PlayerDashboardPage() {
           id,
           line_name,
           line_type,
-          posted_to_dupr
+          posted_to_dupr,
+          team_win_points,
+          picklebreaker_not_played_points,
+          picklebreaker_not_played_award_rule,
+          picklebreaker_play_rule
         ),
         matches (
           id,
@@ -930,7 +937,7 @@ export default function PlayerDashboardPage() {
             home_team_games_won,
             away_team_games_won,
             winning_team_id,
-            division_lines ( line_name, line_type, posted_to_dupr, team_win_points ),
+            division_lines ( line_name, line_type, posted_to_dupr, team_win_points, picklebreaker_not_played_points, picklebreaker_not_played_award_rule, picklebreaker_play_rule ),
             home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
             home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
             away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, self_rating),
@@ -2621,9 +2628,19 @@ function teamLineRating(players, match, ratingForMember) {
 }
 
 function lineTeamPointsText(line) {
-  const configuredPoints = Number(line.division_lines?.team_win_points ?? 1);
+  const lineType = String(line?.division_lines?.line_type || "").trim().toLowerCase();
+  const games = line?.line_games || [];
+  const hasPlayedGame = games.some((game) =>
+    game.home_score !== null && game.home_score !== undefined ||
+    game.away_score !== null && game.away_score !== undefined ||
+    game.game_status && game.game_status !== "scheduled"
+  );
+  const configuredPoints = lineType === "picklebreaker" && !hasPlayedGame
+    ? Number(line.division_lines?.picklebreaker_not_played_points ?? line.division_lines?.team_win_points ?? 1)
+    : Number(line.division_lines?.team_win_points ?? 1);
 
-  return Number.isNaN(configuredPoints) ? "-" : configuredPoints;
+  if (Number.isNaN(configuredPoints)) return "-";
+  return lineType === "picklebreaker" && !hasPlayedGame ? `${configuredPoints} not played` : configuredPoints;
 }
 
 function specialGameStatusLabel(game, match) {

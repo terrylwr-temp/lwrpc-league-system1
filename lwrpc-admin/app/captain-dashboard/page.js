@@ -201,6 +201,9 @@ export default function CaptainDashboardPage() {
             points_to_win,
             win_by,
             team_win_points,
+            picklebreaker_not_played_points,
+            picklebreaker_not_played_award_rule,
+            picklebreaker_play_rule,
             standings_points_mode,
             sort_order
           ),
@@ -330,6 +333,9 @@ export default function CaptainDashboardPage() {
             points_to_win,
             win_by,
             team_win_points,
+            picklebreaker_not_played_points,
+            picklebreaker_not_played_award_rule,
+            picklebreaker_play_rule,
             standings_points_mode,
             sort_order
           )
@@ -428,7 +434,11 @@ export default function CaptainDashboardPage() {
           division_lines (
             line_name,
             line_type,
-            posted_to_dupr
+            posted_to_dupr,
+            team_win_points,
+            picklebreaker_not_played_points,
+            picklebreaker_not_played_award_rule,
+            picklebreaker_play_rule
           ),
           home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, email, self_rating),
           home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, email, self_rating),
@@ -1613,7 +1623,7 @@ export default function CaptainDashboardPage() {
           away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, email, self_rating),
           away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, email, self_rating),
           line_games(id, game_number, home_score, away_score, game_status),
-          division_lines(line_name, line_type, posted_to_dupr, team_win_points, standings_points_mode)
+          division_lines(line_name, line_type, posted_to_dupr, team_win_points, picklebreaker_not_played_points, picklebreaker_not_played_award_rule, picklebreaker_play_rule, standings_points_mode)
         )
       `)
       .eq("id", match.id)
@@ -1841,7 +1851,10 @@ export default function CaptainDashboardPage() {
                 line_name,
                 line_type,
                 posted_to_dupr,
-                team_win_points
+                team_win_points,
+                picklebreaker_not_played_points,
+                picklebreaker_not_played_award_rule,
+                picklebreaker_play_rule
               ),
               home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
               home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
@@ -3412,9 +3425,19 @@ function gameTeamPointsText(game, line, match) {
 }
 
 function lineTeamPointsText(line) {
-  const configuredPoints = Number(line.division_lines?.team_win_points ?? 1);
+  const lineType = String(line?.division_lines?.line_type || "").trim().toLowerCase();
+  const games = line?.line_games || [];
+  const hasPlayedGame = games.some((game) =>
+    game.home_score !== null && game.home_score !== undefined ||
+    game.away_score !== null && game.away_score !== undefined ||
+    game.game_status && game.game_status !== "scheduled"
+  );
+  const configuredPoints = lineType === "picklebreaker" && !hasPlayedGame
+    ? Number(line.division_lines?.picklebreaker_not_played_points ?? line.division_lines?.team_win_points ?? 1)
+    : Number(line.division_lines?.team_win_points ?? 1);
 
-  return Number.isNaN(configuredPoints) ? "-" : configuredPoints;
+  if (Number.isNaN(configuredPoints)) return "-";
+  return lineType === "picklebreaker" && !hasPlayedGame ? `${configuredPoints} not played` : configuredPoints;
 }
 
 function gameScoreText(game, line = null, match = null) {
@@ -4170,6 +4193,9 @@ function scoreSheetConfiguredLines(match) {
     points_to_win: match.divisions?.points_to_win || 11,
     win_by: match.divisions?.win_by || 2,
     team_win_points: 1,
+    picklebreaker_not_played_points: 1,
+    picklebreaker_not_played_award_rule: "regular_line_leader",
+    picklebreaker_play_rule: "regular_lines_tied",
     standings_points_mode: "line_result",
   }));
 }

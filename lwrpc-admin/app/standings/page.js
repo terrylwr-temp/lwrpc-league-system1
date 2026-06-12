@@ -287,7 +287,10 @@ export default function StandingsPage() {
             division_lines (
               line_name,
               line_type,
-              team_win_points
+              team_win_points,
+              picklebreaker_not_played_points,
+              picklebreaker_not_played_award_rule,
+              picklebreaker_play_rule
             ),
             home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
             home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),

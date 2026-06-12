@@ -32,6 +32,9 @@ alter table public.division_lines
   add column if not exists score_required boolean not null default true,
   add column if not exists picklebreaker_win_points integer default 1,
   add column if not exists picklebreaker_loss_points integer default 0,
+  add column if not exists picklebreaker_not_played_points integer default 1,
+  add column if not exists picklebreaker_not_played_award_rule text not null default 'regular_line_leader',
+  add column if not exists picklebreaker_play_rule text not null default 'regular_lines_tied',
   add column if not exists uses_saved_match_lineups boolean not null default true;
 
 alter table public.division_lines
@@ -67,6 +70,20 @@ alter table public.division_lines
 alter table public.division_lines
   add constraint division_lines_standings_points_mode_check
   check (standings_points_mode in ('line_result', 'per_game'));
+
+alter table public.division_lines
+  drop constraint if exists division_lines_picklebreaker_not_played_award_rule_check;
+
+alter table public.division_lines
+  add constraint division_lines_picklebreaker_not_played_award_rule_check
+  check (picklebreaker_not_played_award_rule in ('regular_line_leader'));
+
+alter table public.division_lines
+  drop constraint if exists division_lines_picklebreaker_play_rule_check;
+
+alter table public.division_lines
+  add constraint division_lines_picklebreaker_play_rule_check
+  check (picklebreaker_play_rule in ('regular_lines_tied'));
 
 alter table public.match_lines
   add column if not exists home_team_games_won integer default 0,

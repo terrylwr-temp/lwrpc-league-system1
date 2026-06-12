@@ -9,6 +9,7 @@ const HOST_ALLOWED_ACTIONS = new Set([
   "updatePlannedSession",
   "updateSessionPlayerStatus",
   "addSessionPlayer",
+  "addSessionNewPlayer",
   "startSession",
   "startSessionAndGenerateFirstGame",
   "generateNextGame",
@@ -113,6 +114,11 @@ export async function POST(req) {
 
     if (action === "addSessionPlayer") {
       const result = await addSessionPlayer(supabase, group, body);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "addSessionNewPlayer") {
+      const result = await addSessionNewPlayer(supabase, group, body);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -435,14 +441,31 @@ async function deletePlayer(supabase, group, playerId) {
 
   if (loadError) throw loadError;
 
+  const activeSessions = await supabase
+    .from("round_robin_sessions")
+    .select("id")
+    .eq("group_id", group.id)
+    .in("status", ["draft", "open", "playing", "cancelled"]);
+  if (activeSessions.error) throw activeSessions.error;
+
+  const activeSessionIds = (activeSessions.data || []).map((session) => session.id);
+  if (activeSessionIds.length > 0) {
+    const removedUpcoming = await supabase
+      .from("round_robin_session_players")
+      .delete()
+      .eq("player_id", cleanPlayerId)
+      .in("session_id", activeSessionIds);
+    if (removedUpcoming.error) throw removedUpcoming.error;
+  }
+
   const { error } = await supabase
     .from("round_robin_players")
-    .update({ is_active: false, updated_at: new Date().toISOString() })
+    .delete()
     .eq("id", cleanPlayerId)
     .eq("group_id", group.id);
 
   if (error) throw error;
-  await addLog(supabase, group.id, null, "player", `${player.display_name || "Player"} deactivated.`);
+  await addLog(supabase, group.id, null, "player", `${player.display_name || "Player"} deleted from saved players.`);
   return { playerId: cleanPlayerId };
 }
 
@@ -907,6 +930,78 @@ async function addSessionPlayer(supabase, group, body) {
 
   await addLog(supabase, group.id, session.id, "session", `${player.display_name} manually added and joined ${session.session_name || "Session"}.`);
   return { sessionPlayer: data, mode: "inserted" };
+}
+
+async function addSessionNewPlayer(supabase, group, body) {
+  const sessionId = String(body.sessionId || "").trim();
+  const displayName = String(body.displayName || body.playerName || "").trim();
+  const cleanPhone = normalizePhone(body.phone);
+  if (!sessionId) throw new Error("Session is required.");
+  if (!displayName) throw new Error("Player name is required.");
+  if (!cleanPhone || cleanPhone.length < 10) throw new Error("Enter a full 10-digit phone number.");
+
+  const session = await loadSessionForGroup(supabase, group.id, sessionId);
+  if (["done", "cancelled"].includes(session.status)) throw new Error("This session is no longer accepting players.");
+
+  const groupIds = Array.isArray(session.invited_group_ids) ? session.invited_group_ids : [];
+  const playersResult = await supabase
+    .from("round_robin_players")
+    .select("*")
+    .eq("group_id", group.id)
+    .order("display_name", { ascending: true });
+  if (playersResult.error) throw playersResult.error;
+
+  const existingPlayer = (playersResult.data || []).find((player) => phonesMatch(player.phone, cleanPhone));
+  const playerPayload = {
+    group_id: group.id,
+    display_name: displayName,
+    first_name: displayName.split(/\s+/)[0] || null,
+    phone: formatPhoneInput(cleanPhone),
+    is_active: true,
+    updated_at: new Date().toISOString(),
+  };
+
+  let player = existingPlayer;
+  if (existingPlayer) {
+    const { data, error } = await supabase
+      .from("round_robin_players")
+      .update({
+        display_name: playerPayload.display_name,
+        first_name: playerPayload.first_name,
+        phone: playerPayload.phone,
+        is_active: true,
+        updated_at: playerPayload.updated_at,
+      })
+      .eq("id", existingPlayer.id)
+      .eq("group_id", group.id)
+      .select("*")
+      .single();
+    if (error) throw error;
+    player = data;
+  } else {
+    const { data, error } = await supabase
+      .from("round_robin_players")
+      .insert(playerPayload)
+      .select("*")
+      .single();
+    if (error) throw error;
+    player = data;
+    await addLog(supabase, group.id, session.id, "player", `${displayName} added by host.`);
+  }
+
+  await replacePlayerGroupMemberships(supabase, group.id, player.id, groupIds);
+  const sms = await sendNewPlayerText(supabase, group, player, body.publicUrl);
+  const sessionPlayerResult = await addSessionPlayer(supabase, group, {
+    sessionId: session.id,
+    playerId: player.id,
+  });
+
+  return {
+    player,
+    groupIds,
+    sms,
+    ...sessionPlayerResult,
+  };
 }
 
 async function deleteSession(supabase, group, body) {

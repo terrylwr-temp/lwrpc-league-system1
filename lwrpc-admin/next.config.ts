@@ -19,6 +19,14 @@ const nextConfig: NextConfig = {
         source: "/tourney/:id/:path*",
         destination: "/tournaments/:id/:path*",
       },
+      {
+        source: "/pbcc",
+        destination: "/round-robin/rpro",
+      },
+      {
+        source: "/pbcc/:path*",
+        destination: "/round-robin/rpro/:path*",
+      },
     ];
   },
   images: {

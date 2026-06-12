@@ -1,3 +1,8 @@
+import {
+  isPicklebreakerLine,
+  matchPointSummary,
+} from "./matchScoring";
+
 function gameSummary(game) {
   if (game.game_status === "forfeit_home" || game.game_status === "retired_home") {
     return { homeGameWins: 1, awayGameWins: 0, homePoints: 0, awayPoints: 0 };
@@ -41,23 +46,6 @@ function emptyStanding(division, teamId) {
     away_wins: 0,
     away_losses: 0,
     recentResults: [],
-  };
-}
-
-function lineStandingsPoints(line, winningTeamId, matchRow) {
-  const mode = line.division_lines?.standings_points_mode || "line_result";
-  const teamWinPoints = Number(line.division_lines?.team_win_points ?? 1);
-
-  if (mode === "per_game") {
-    return {
-      home: Number(line.rebuilt?.homeGameWins || 0) * teamWinPoints,
-      away: Number(line.rebuilt?.awayGameWins || 0) * teamWinPoints,
-    };
-  }
-
-  return {
-    home: winningTeamId === matchRow.home_team_id ? teamWinPoints : 0,
-    away: winningTeamId === matchRow.away_team_id ? teamWinPoints : 0,
   };
 }
 
@@ -218,6 +206,10 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
         away_team_points,
         division_lines (
           team_win_points,
+          line_type,
+          picklebreaker_not_played_points,
+          picklebreaker_not_played_award_rule,
+          picklebreaker_play_rule,
           standings_points_mode
         ),
         line_games (
@@ -277,6 +269,13 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
     const away = ensureTeam(matchRow.away_team_id);
     let homeTeamWinPoints = 0;
     let awayTeamWinPoints = 0;
+    const matchGames = (matchRow.match_lines || []).flatMap((line) =>
+      (line.line_games || []).map((game) => ({
+        ...game,
+        match_line_id: game.match_line_id || line.id,
+      }))
+    );
+    const matchPoints = matchPointSummary(matchRow.match_lines || [], matchGames, matchRow);
 
     (matchRow.match_lines || []).forEach((line) => {
       let homeGameWins = 0;
@@ -298,9 +297,15 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
           : awayGameWins > homeGameWins
           ? matchRow.away_team_id
           : null;
+      const pointAwards = matchPoints.pointsByLineId[String(line.id)] || { home: 0, away: 0, mode: "unawarded", pointAwardTeamId: winningTeamId };
+      const pointAwardTeamId = isPicklebreakerLine(line) && pointAwards.mode === "not_played"
+        ? pointAwards.pointAwardTeamId
+        : winningTeamId;
 
       line.rebuilt = {
         winningTeamId,
+        pointAwardTeamId,
+        pointAwardMode: pointAwards.mode,
         homeGameWins,
         awayGameWins,
         homePoints,
@@ -316,7 +321,9 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
       away.points_for += awayPoints;
       away.points_against += homePoints;
 
-      if (winningTeamId === matchRow.home_team_id) {
+      if (pointAwards.mode === "not_played") {
+        // Reserved Picklebreaker points do not count as a played line win/loss.
+      } else if (winningTeamId === matchRow.home_team_id) {
         home.line_wins += 1;
         away.line_losses += 1;
       } else if (winningTeamId === matchRow.away_team_id) {
@@ -327,9 +334,8 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
         away.line_ties += 1;
       }
 
-      const points = lineStandingsPoints(line, winningTeamId, matchRow);
-      homeTeamWinPoints += points.home;
-      awayTeamWinPoints += points.away;
+      homeTeamWinPoints += Number(pointAwards.home || 0);
+      awayTeamWinPoints += Number(pointAwards.away || 0);
     });
 
     const matchWinningTeamId =
@@ -369,7 +375,7 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
       const { error: lineError } = await supabase
         .from("match_lines")
         .update({
-          winning_team_id: line.rebuilt.winningTeamId,
+          winning_team_id: line.rebuilt.pointAwardTeamId,
           home_team_games_won: line.rebuilt.homeGameWins,
           away_team_games_won: line.rebuilt.awayGameWins,
           home_team_points: line.rebuilt.homePoints,
