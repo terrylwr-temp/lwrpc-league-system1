@@ -2043,11 +2043,20 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
   return (
     <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
       <div className={`${headingClass} px-4 py-3 text-white`}>
-        <div className="text-xs font-black uppercase tracking-wide text-white/80">
-          Week {match.week_number || "-"}
-        </div>
-        <div className="mt-1 text-lg font-black">
-          {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="text-xs font-black uppercase tracking-wide text-white/80">
+              Week {match.week_number || "-"}
+            </div>
+            <div className="mt-1 text-lg font-black">
+              {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+            </div>
+          </div>
+          {hasVerifiedMatchScore && (
+            <div className="w-fit rounded-xl bg-white/95 px-3 py-2 text-sm font-black text-slate-950 shadow-sm">
+              Score: {homeScore} - {awayScore} | Winner: {winningTeamName(match)}
+            </div>
+          )}
         </div>
       </div>
 
@@ -2102,11 +2111,6 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
             </button>
           </div>
 
-          {hasVerifiedMatchScore && (
-            <div className="mt-3 rounded-lg bg-slate-100 px-3 py-2 text-sm font-black text-slate-900">
-              Score: {homeScore} - {awayScore} | Winner: {winningTeamName(match)}
-            </div>
-          )}
         </div>
       </div>
     </div>
@@ -2750,6 +2754,10 @@ function formatStandingRecord(standing) {
 function matchTeamScore(match, side) {
   const scoreField = side === "home" ? "home_score" : "away_score";
 
+  if (match?.[scoreField] !== null && match?.[scoreField] !== undefined) {
+    return Number(match[scoreField]);
+  }
+
   if (match?.match_lines?.length) {
     let hasAnyLineScore = false;
 
@@ -2767,10 +2775,6 @@ function matchTeamScore(match, side) {
     }, 0);
 
     if (hasAnyLineScore) return score;
-  }
-
-  if (match?.[scoreField] !== null && match?.[scoreField] !== undefined) {
-    return Number(match[scoreField]);
   }
 
   return null;
@@ -2955,6 +2959,9 @@ function PlayerHistoryMatchGroup({ group, memberId, ratingForMember }) {
           <span className="font-bold text-white">
             {details.playerTeamName} vs {details.opponentName}
           </span>
+          <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-black uppercase text-slate-950">
+            {details.sideLabel}
+          </span>
           <span className="rounded-full bg-blue-500 px-2 py-0.5 text-xs font-black uppercase text-white">
             {lineCount} line{lineCount === 1 ? "" : "s"}
           </span>
@@ -3046,44 +3053,55 @@ function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
 
       {gameScores.length > 0 && (
         <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          {gameScores.map((game, index) => {
-            const gameScoreBadgeTone =
-              countsForIndividualWinLoss && game.result === "W"
-                ? "bg-green-600 text-white"
-                : countsForIndividualWinLoss && game.result === "L"
-                ? "bg-red-600 text-white"
-                : scoreBadgeTone;
-
-            return (
-              <div key={game.key} className={`flex flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:justify-between ${index > 0 ? "border-t border-slate-200" : ""}`}>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide">
-                    <span className="text-blue-700">{game.label}</span>
-                  </div>
-                  <div className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-700">
-                    <div>
-                      <span className="font-black text-slate-950">Your players:</span> {game.players}{" "}
-                      <span className="font-black text-slate-950">Team Rating:</span>{" "}
-                      <span className="font-semibold">{game.playerTeamRating}</span>
-                    </div>
-                    <div>
-                      <span className="font-black text-slate-950">Opponents:</span> {game.opponentPlayers}{" "}
-                      <span className="font-black text-slate-950">Team Rating:</span>{" "}
-                      <span className="font-semibold">{game.opponentTeamRating}</span>
-                    </div>
-                    {game.specialLabel && (
-                      <div className="font-black text-amber-800">{game.specialLabel}</div>
-                    )}
-                  </div>
+          <div className="flex flex-col gap-3 px-3 py-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0 flex-1">
+              <div className="grid gap-1 text-xs font-semibold leading-5 text-slate-700">
+                <div>
+                  <span className="font-black text-slate-950">Your team:</span> {gameScores[0].players}{" "}
+                  <span className="font-black text-slate-950">Team Rating:</span>{" "}
+                  <span className="font-semibold">{gameScores[0].playerTeamRating}</span>
                 </div>
-                <div className="flex shrink-0 items-center sm:self-stretch">
-                  <div className={`flex min-h-10 min-w-20 items-center justify-center rounded-lg px-3 py-1.5 text-center text-lg font-black leading-none shadow-sm ${gameScoreBadgeTone}`}>
-                    {game.score}
-                  </div>
+                <div>
+                  <span className="font-black text-slate-950">Opponents:</span> {gameScores[0].opponentPlayers}{" "}
+                  <span className="font-black text-slate-950">Team Rating:</span>{" "}
+                  <span className="font-semibold">{gameScores[0].opponentTeamRating}</span>
                 </div>
               </div>
-            );
-          })}
+              {gameScores.some((game) => game.specialLabel) && (
+                <div className="mt-2 space-y-1">
+                  {gameScores
+                    .filter((game) => game.specialLabel)
+                    .map((game) => (
+                      <div key={`${game.key}-special`} className="text-xs font-black text-amber-800">
+                        {game.label}: {game.specialLabel}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex shrink-0 flex-wrap gap-2">
+              {gameScores.map((game) => {
+                const gameScoreBadgeTone =
+                  countsForIndividualWinLoss && game.result === "W"
+                    ? "bg-green-600 text-white"
+                    : countsForIndividualWinLoss && game.result === "L"
+                    ? "bg-red-600 text-white"
+                    : scoreBadgeTone;
+
+                return (
+                  <div key={game.key} className="flex min-w-20 flex-col items-stretch gap-1">
+                    <div className="text-center text-xs font-black uppercase tracking-wide text-blue-700">
+                      {game.label}
+                    </div>
+                    <div className={`flex min-h-10 min-w-20 items-center justify-center rounded-lg px-3 py-1.5 text-center text-lg font-black leading-none shadow-sm ${gameScoreBadgeTone}`}>
+                      {game.score}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       )}
       </div>

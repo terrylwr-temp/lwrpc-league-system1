@@ -288,6 +288,7 @@ async function savePlayer(supabase, group, player = {}) {
     member_id: player.memberId || player.member_id || null,
     display_name: displayName,
     first_name: String(player.first_name || player.firstName || displayName.split(/\s+/)[0] || "").trim() || null,
+    dupr_id: String(player.duprId || player.dupr_id || "").trim() || null,
     email: String(player.email || "").trim().toLowerCase() || null,
     phone: formatPhoneInput(cleanPhone),
     is_active: player.is_active !== false,
@@ -571,6 +572,7 @@ async function createSession(supabase, group, body) {
     id: player.id,
     displayName: player.display_name,
     firstLabel: roundRobinPlayerLabel(player.display_name),
+    duprId: player.dupr_id || "",
     email: player.email || "",
     phone: player.phone || "",
   }));
@@ -619,6 +621,7 @@ async function createSession(supabase, group, body) {
     session_id: session.id,
     player_id: player.id,
     display_name: player.displayName,
+    dupr_id: player.duprId || null,
     email: player.email || null,
     phone: player.phone || null,
     source: "roster",
@@ -714,6 +717,7 @@ async function createPlannedSession(supabase, group, body) {
     session_id: session.id,
     player_id: player.id,
     display_name: player.display_name,
+    dupr_id: player.dupr_id || null,
     email: player.email || null,
     phone: player.phone || null,
     source: "roster",
@@ -797,6 +801,7 @@ async function updatePlannedSession(supabase, group, body) {
       session_id: session.id,
       player_id: player.id,
       display_name: player.display_name,
+      dupr_id: player.dupr_id || null,
       email: player.email || null,
       phone: player.phone || null,
       source: "roster",
@@ -918,6 +923,7 @@ async function addSessionPlayer(supabase, group, body) {
       session_id: session.id,
       player_id: player.id,
       display_name: player.display_name,
+      dupr_id: player.dupr_id || null,
       email: player.email || null,
       phone: player.phone || null,
       source: "roster",
@@ -956,6 +962,7 @@ async function addSessionNewPlayer(supabase, group, body) {
     group_id: group.id,
     display_name: displayName,
     first_name: displayName.split(/\s+/)[0] || null,
+    dupr_id: String(body.duprId || body.dupr_id || "").trim() || null,
     phone: formatPhoneInput(cleanPhone),
     is_active: true,
     updated_at: new Date().toISOString(),
@@ -1772,6 +1779,7 @@ function publicPlayerPayload(player) {
     id: player.id,
     displayName: player.displayName || player.display_name || player.name || "Player",
     firstLabel: player.firstLabel || roundRobinPlayerLabel(player.displayName || player.display_name || player.name),
+    duprId: player.duprId || player.dupr_id || "",
   };
 }
 
@@ -1782,6 +1790,7 @@ function sanitizeMatchPlayers(players = []) {
       id: String(player.id || "").trim(),
       displayName: String(player.displayName || player.display_name || player.name || "").trim(),
       firstLabel: String(player.firstLabel || "").trim() || roundRobinPlayerLabel(player.displayName || player.display_name || player.name),
+      duprId: String(player.duprId || player.dupr_id || "").trim(),
     }))
     .filter((player) => player.id && player.displayName);
 }

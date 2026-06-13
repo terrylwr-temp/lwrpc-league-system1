@@ -199,7 +199,7 @@ async function loadMemberDirectory(supabase) {
   while (from < 20000) {
     const { data, error } = await supabase
       .from("members")
-      .select("id, full_name, first_name, last_name, email, phone, is_active_member")
+      .select("id, full_name, first_name, last_name, email, phone, dupr_id, is_active_member")
       .or("is_active_member.eq.true,is_active_member.is.null")
       .order("first_name", { ascending: true })
       .order("last_name", { ascending: true })

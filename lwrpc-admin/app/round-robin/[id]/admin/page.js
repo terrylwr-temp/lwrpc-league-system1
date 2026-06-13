@@ -61,6 +61,30 @@ const PLAYER_STATS_RANGES = [
   { id: "currentYear", label: "Current Year" },
   { id: "all", label: "All" },
 ];
+const DUPR_EXPORT_HEADERS = [
+  "matchType",
+  "scoreType",
+  "event",
+  "date",
+  "playerA1",
+  "playerA1DuprId",
+  "playerA2",
+  "playerA2DuprId",
+  "playerB1",
+  "playerB1DuprId",
+  "playerB2",
+  "playerB2DuprId",
+  "teamAGame1",
+  "teamBGame1",
+  "teamAGame2",
+  "teamBGame2",
+  "teamAGame3",
+  "teamBGame3",
+  "teamAGame4",
+  "teamBGame4",
+  "teamAGame5",
+  "teamBGame5",
+];
 const MODAL_HEADER_CHROME = "border-b border-teal-200/60 bg-[linear-gradient(135deg,#0f766e,#2563eb)] text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.18)]";
 const MODAL_EYEBROW_CHROME = "text-xs font-black uppercase tracking-wide text-cyan-100";
 const MODAL_SUPPORTING_TEXT = "mt-1 text-sm font-semibold text-blue-50/90";
@@ -711,6 +735,7 @@ function SessionTab(props) {
           openSessionResults={setResultsModalSession}
           enterLiveSession={enterLiveSession}
           deleteSession={deleteSession}
+          exportSessionDupr={(session) => exportSessionDuprCsv(state, session)}
           runAction={runAction}
           actionLoading={actionLoading}
         />
@@ -871,6 +896,7 @@ function SessionsPanel(props) {
     openSessionResults,
     enterLiveSession,
     deleteSession,
+    exportSessionDupr,
     runAction,
     actionLoading,
   } = props;
@@ -924,6 +950,7 @@ function SessionsPanel(props) {
             openSessionResults={openSessionResults}
             enterLiveSession={enterLiveSession}
             deleteSession={deleteSession}
+            exportSessionDupr={exportSessionDupr}
             runAction={runAction}
             actionLoading={actionLoading}
           />
@@ -1414,7 +1441,7 @@ function SessionResultsModal({ state, session, onClose }) {
   );
 }
 
-function SessionListItem({ state, session, isEditing, editSession, duplicateSession, openPlayersModal, openStartModal, openSessionResults, enterLiveSession, deleteSession, actionLoading }) {
+function SessionListItem({ state, session, isEditing, editSession, duplicateSession, openPlayersModal, openStartModal, openSessionResults, enterLiveSession, deleteSession, exportSessionDupr, actionLoading }) {
   const joined = sessionPlayersForStatus(state, session.id, "joined").length;
   const waitlist = sessionPlayersForStatus(state, session.id, "waitlist").length;
   const canStart = !["playing", "done", "cancelled"].includes(session.status) && joined >= 4;
@@ -1471,6 +1498,11 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
           {canShowResults && (
             <button type="button" onClick={(event) => { stopActionClick(event); openSessionResults(session); }} className="rounded-lg border border-teal-300 bg-teal-50 px-3 py-2 text-xs font-black text-teal-900 shadow-sm hover:border-teal-500 hover:bg-teal-100">
               Results
+            </button>
+          )}
+          {canShowResults && session.status === "done" && (
+            <button type="button" onClick={(event) => { stopActionClick(event); exportSessionDupr(session); }} className="rounded-lg border border-blue-300 bg-blue-50 px-3 py-2 text-xs font-black text-blue-900 shadow-sm hover:border-blue-500 hover:bg-blue-100">
+              DUPR Export
             </button>
           )}
           {canDuplicate && (
@@ -2006,6 +2038,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
       id: player.id,
       memberId: player.member_id || "",
       displayName: player.display_name || "",
+      duprId: player.dupr_id || "",
       email: player.email || "",
       phone: formatPhoneInput(player.phone || ""),
       notes: player.notes || "",
@@ -2023,6 +2056,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
       ...current,
       memberId: member.id,
       displayName: member.full_name || [member.first_name, member.last_name].filter(Boolean).join(" "),
+      duprId: member.dupr_id || "",
       email: member.email || "",
       phone: formatPhoneInput(member.phone || ""),
     }));
@@ -2059,6 +2093,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
         id: form.id,
         memberId: form.memberId,
         displayName: form.displayName,
+        duprId: form.duprId,
         email: form.email,
         phone: formatPhoneInput(form.phone),
         notes: form.notes,
@@ -2092,6 +2127,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
         id: player.id,
         memberId: player.member_id || "",
         displayName: player.display_name || "",
+        duprId: player.dupr_id || "",
         email: player.email || "",
         phone: formatPhoneInput(player.phone || ""),
         notes: player.notes || "",
@@ -2152,6 +2188,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
             )}
           </div>
           <TextInput label="Name" value={form.displayName} onChange={(value) => setForm((current) => ({ ...current, displayName: value }))} required />
+          <TextInput label="DUPR ID" value={form.duprId} onChange={(value) => setForm((current) => ({ ...current, duprId: value }))} />
           <TextInput label="Email" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
           <TextInput label="Phone" type="tel" value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: formatPhoneInput(value) }))} required />
           <TextInput label="Notes" value={form.notes} onChange={(value) => setForm((current) => ({ ...current, notes: value }))} />
@@ -2227,6 +2264,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
                   </td>
                   <td className="px-3 py-2 font-semibold text-slate-600">
                     <div>{[player.email, player.phone].filter(Boolean).join(" / ") || "No contact"}</div>
+                    <div className="mt-1 text-xs font-bold text-slate-500">DUPR ID: {player.dupr_id || "-"}</div>
                     <div className="mt-1 text-xs text-slate-500">{groupNamesForPlayer(state, player.id).join(", ") || "No groups"}</div>
                   </td>
                   <td className="px-3 py-2 text-right">
@@ -2977,6 +3015,7 @@ function filterPlayers(state, players = [], query) {
     const text = normalizeSearchText([
       player.display_name,
       player.first_name,
+      player.dupr_id,
       player.email,
       player.phone,
       player.notes,
@@ -3117,6 +3156,67 @@ function playerRoundRobinUrl(group) {
   return `${publicRoundRobinUrl(group)}/player`;
 }
 
+function exportSessionDuprCsv(state, session) {
+  const defaultEventName = session.session_name || `${state.group?.name || "PBCC"} Session`;
+  const eventName = window.prompt("DUPR event name", defaultEventName);
+  if (eventName === null) return;
+
+  const cleanEventName = String(eventName || "").trim() || defaultEventName;
+  const rows = duprRowsForSession(state, session, cleanEventName);
+  if (rows.length === 0) {
+    window.alert("No completed PBCC games with scores were found for this session.");
+    return;
+  }
+
+  const csv = [DUPR_EXPORT_HEADERS, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+  downloadCsv(csv, `${slugify(defaultEventName)}-dupr-export.csv`);
+}
+
+function duprRowsForSession(state, session, eventName) {
+  return sessionMatchesForSession(state, session.id)
+    .filter((match) => match.status === "complete" && matchHasSavedScore(match))
+    .map((match) => {
+      const team1 = duprTeamPlayers(match.team1_players);
+      const team2 = duprTeamPlayers(match.team2_players);
+
+      return [
+        "D",
+        "SIDEOUT",
+        eventName,
+        csvDate(session.session_date || match.updated_at || match.created_at),
+        duprPlayerName(team1[0]),
+        duprPlayerId(state, match, team1[0]),
+        duprPlayerName(team1[1]),
+        duprPlayerId(state, match, team1[1]),
+        duprPlayerName(team2[0]),
+        duprPlayerId(state, match, team2[0]),
+        duprPlayerName(team2[1]),
+        duprPlayerId(state, match, team2[1]),
+        match.team1_score ?? "",
+        match.team2_score ?? "",
+        "", "", "", "", "", "", "", "",
+      ];
+    });
+}
+
+function duprTeamPlayers(players = []) {
+  return Array.from({ length: 2 }, (_, index) => players[index] || null);
+}
+
+function duprPlayerName(player) {
+  if (!player) return "";
+  return player.displayName || player.display_name || player.name || "";
+}
+
+function duprPlayerId(state, match, player) {
+  if (!player) return "";
+  const playerId = String(player.id || player.player_id || "").trim();
+  const savedPlayer = (state.players || []).find((row) => String(row.id || "") === playerId);
+  const sessionPlayer = allPlayersForSession(state, match.session_id)
+    .find((row) => String(row.player_id || "") === playerId);
+  return player.duprId || player.dupr_id || savedPlayer?.dupr_id || sessionPlayer?.dupr_id || "";
+}
+
 function groupMatchesByRound(matches) {
   const byRound = {};
   matches.forEach((match) => {
@@ -3171,6 +3271,7 @@ function emptyPlayerForm() {
     id: "",
     memberId: "",
     displayName: "",
+    duprId: "",
     email: "",
     phone: "",
     notes: "",
@@ -3411,4 +3512,32 @@ function normalizePhone(value) {
 
 function timeInputValue(value) {
   return String(value || "").slice(0, 5);
+}
+
+function csvDate(value) {
+  return String(value || "").slice(0, 10);
+}
+
+function csvCell(value) {
+  const text = String(value ?? "");
+  if (/[",\n]/.test(text)) return `"${text.replaceAll("\"", "\"\"")}"`;
+  return text;
+}
+
+function downloadCsv(csv, fileName) {
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function slugify(value) {
+  return String(value || "pbcc-session")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80) || "pbcc-session";
 }
