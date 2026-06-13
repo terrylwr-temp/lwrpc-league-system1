@@ -287,13 +287,13 @@ export default function TournamentAdminPage() {
           tournamentKey={tournamentKey}
         />
 
-        <div className="sticky top-0 z-30 mt-4 grid grid-cols-2 gap-2 rounded-2xl border border-blue-300/20 bg-[#07111f]/95 p-2 shadow-xl backdrop-blur sm:flex sm:flex-wrap">
+        <div className="sticky top-0 z-30 -mx-2 mt-3 flex gap-1 overflow-x-auto border-y border-blue-300/20 bg-[#07111f]/95 px-2 py-1.5 shadow-xl backdrop-blur sm:mx-0 sm:mt-4 sm:flex-wrap sm:overflow-visible sm:rounded-2xl sm:border sm:p-2">
           {TABS.map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`rounded-xl border px-3 py-3 text-sm font-black shadow-sm transition sm:px-4 ${
+              className={`shrink-0 rounded-lg border px-3 py-2 text-xs font-black shadow-sm transition sm:rounded-xl sm:px-4 sm:py-3 sm:text-sm ${
                 activeTab === tab
                   ? "border-cyan-300 bg-cyan-500 text-white"
                   : "border-blue-400/40 bg-blue-950/70 text-white hover:bg-blue-900"
@@ -1133,9 +1133,16 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
   const [addingTeam, setAddingTeam] = useState(false);
   const [checkInPrompt, setCheckInPrompt] = useState(null);
   const cleanPlayerFilter = playerFilter.trim();
+  const activeTeams = useMemo(() => {
+    return state.teams.filter((team) => activeDivisionIds.has(String(team.division_id)));
+  }, [activeDivisionIds, state.teams]);
+  const notReadyTeamCount = useMemo(() => activeTeams.filter((team) => !teamReady(team)).length, [activeTeams]);
+  const teamFilterOptions = [
+    { value: "all", label: "All Teams", count: activeTeams.length },
+    { value: "notReady", label: "Teams Not Ready", count: notReadyTeamCount },
+  ];
   const teamsByDivision = useMemo(() => {
-    return state.teams
-      .filter((team) => activeDivisionIds.has(String(team.division_id)))
+    return activeTeams
       .filter((team) => teamFilter === "all" || !teamReady(team))
       .filter((team) => teamMatchesPlayerFilter(team, contactsByTeam[String(team.id)] || [], cleanPlayerFilter))
       .reduce((map, team) => {
@@ -1143,7 +1150,7 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
         map[division] = [...(map[division] || []), team];
         return map;
       }, {});
-  }, [activeDivisionIds, state.teams, divisionsById, teamFilter, contactsByTeam, cleanPlayerFilter]);
+  }, [activeTeams, divisionsById, teamFilter, contactsByTeam, cleanPlayerFilter]);
 
   const divisionEntries = useMemo(() => {
     return Object.entries(teamsByDivision)
@@ -1238,7 +1245,7 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
     <section className="mt-5 space-y-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-2xl font-black">Team List</h2>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
           <label className="min-w-[260px] flex-1">
             <span className="sr-only">Find player by name or phone number</span>
             <input
@@ -1252,24 +1259,27 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
           <button
             type="button"
             onClick={() => setAddingTeam(true)}
-            className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white hover:bg-emerald-500"
+            className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-black text-white hover:bg-emerald-500 sm:w-auto"
           >
             Add Team
           </button>
-          <button
-            type="button"
-            onClick={() => setTeamFilter("all")}
-            className={`rounded-xl px-4 py-3 text-sm font-black ${teamFilter === "all" ? "bg-cyan-500 text-white" : "border border-blue-300/40 bg-blue-950 text-white"}`}
-          >
-            All Teams
-          </button>
-          <button
-            type="button"
-            onClick={() => setTeamFilter("notReady")}
-            className={`rounded-xl px-4 py-3 text-sm font-black ${teamFilter === "notReady" ? "bg-cyan-500 text-white" : "border border-blue-300/40 bg-blue-950 text-white"}`}
-          >
-            Teams Not Ready
-          </button>
+          <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-blue-300/40 bg-blue-950/70" role="group" aria-label="Filter teams">
+            {teamFilterOptions.map((option) => {
+              const active = teamFilter === option.value;
+
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => setTeamFilter(option.value)}
+                  className={`px-3 py-3 text-sm font-black transition ${active ? "bg-cyan-500 text-white" : "text-blue-100 hover:bg-blue-900"}`}
+                >
+                  {option.label} ({option.count})
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

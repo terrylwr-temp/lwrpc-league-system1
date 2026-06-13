@@ -1,4 +1,5 @@
 import { formatDisplayDate } from "./dateTime";
+import { isPicklebreakerLine } from "./matchScoring";
 
 export function formatDate(value) {
   return formatDisplayDate(value, "-");
@@ -269,6 +270,10 @@ export function specialGameStatus(gameStatus) {
 
 export function rowHasSpecialGame(row) {
   return (row.line_games || []).some((game) => specialGameStatus(game.game_status));
+}
+
+export function rowCountsForIndividualWinLoss(row) {
+  return !isPicklebreakerLine(row);
 }
 
 export function sortHistoryRows(historyRows) {

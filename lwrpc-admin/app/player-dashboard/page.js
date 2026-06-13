@@ -14,6 +14,7 @@ import {
   historyFilterOptions,
   historyTeamOptionLabel,
   playerLineDetails,
+  rowCountsForIndividualWinLoss,
   rowHasSpecialGame,
   sortHistoryRows,
   specialGameStatus,
@@ -713,6 +714,10 @@ export default function PlayerDashboardPage() {
     return filterHistoryRows(sortedPlayHistory, historyFilter, member?.id, teams);
   }, [sortedPlayHistory, historyFilter, member, teams]);
 
+  const groupedPlayHistory = useMemo(() => {
+    return groupPlayHistoryRows(filteredPlayHistory);
+  }, [filteredPlayHistory]);
+
   const playHistoryStats = useMemo(() => {
     return filteredPlayHistory.reduce(
       (stats, row) => {
@@ -720,7 +725,7 @@ export default function PlayerDashboardPage() {
 
         stats.games += 1;
 
-        if (rowHasSpecialGame(row)) {
+        if (!rowCountsForIndividualWinLoss(row) || rowHasSpecialGame(row)) {
           stats.other += 1;
         } else if (details.result === "W") {
           stats.wins += 1;
@@ -1455,10 +1460,10 @@ export default function PlayerDashboardPage() {
           </div>
 
           <div className="space-y-3 p-5">
-            {filteredPlayHistory.map((row) => (
-              <PlayerHistoryRowWithScores
-                key={row.id}
-                row={row}
+            {groupedPlayHistory.map((group) => (
+              <PlayerHistoryMatchGroup
+                key={group.key}
+                group={group}
                 memberId={member?.id}
                 ratingForMember={ratingForMember}
               />
@@ -2927,36 +2932,100 @@ function PlayerHistoryRow({ row, memberId }) {
   );
 }
 
-function PlayerHistoryRowWithScores({ row, memberId, ratingForMember }) {
-  const match = row.matches;
+function PlayerHistoryMatchGroup({ group, memberId, ratingForMember }) {
+  const firstRow = group.rows[0];
+  const match = firstRow?.matches;
+  const details = playerLineDetails(firstRow, memberId);
+  const lineCount = group.rows.length;
+  const gameCount = group.rows.reduce(
+    (total, row) => total + formatGameScores(row, playerLineDetails(row, memberId).sideLabel, ratingForMember).length,
+    0
+  );
+
+  return (
+    <div className="overflow-hidden rounded-2xl border-2 border-slate-500 bg-slate-50 shadow-md">
+      <div className="border-b border-slate-600 bg-slate-900 px-4 py-4 text-white">
+        <div className="text-[11px] font-black uppercase tracking-wide text-blue-200">
+          Match
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-black text-white">
+            {formatDate(match?.scheduled_date)}
+          </span>
+          <span className="font-bold text-white">
+            {details.playerTeamName} vs {details.opponentName}
+          </span>
+          <span className="rounded-full bg-blue-500 px-2 py-0.5 text-xs font-black uppercase text-white">
+            {lineCount} line{lineCount === 1 ? "" : "s"}
+          </span>
+          <span className="rounded-full bg-white px-2 py-0.5 text-xs font-black uppercase text-slate-900">
+            {gameCount} game{gameCount === 1 ? "" : "s"}
+          </span>
+        </div>
+        <div className="mt-1 text-sm font-semibold text-slate-200">
+          {match?.leagues?.seasons?.name || "No Season"} / {match?.leagues?.name || "No League"} / {match?.divisions?.name || "No Division"}
+        </div>
+      </div>
+
+      <div className="divide-y divide-slate-200">
+        {group.rows.map((row) => (
+          <PlayerHistoryLineWithScores
+            key={row.id}
+            row={row}
+            memberId={memberId}
+            ratingForMember={ratingForMember}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
   const details = playerLineDetails(row, memberId);
   const gameScores = formatGameScores(row, details.sideLabel, ratingForMember);
-  const isWin = details.result === "W";
-  const isLoss = details.result === "L";
-  const resultLabel = isWin ? "Win" : isLoss ? "Loss" : "Other";
+  const countsForIndividualWinLoss = rowCountsForIndividualWinLoss(row);
+  const isWin = countsForIndividualWinLoss && details.result === "W";
+  const isLoss = countsForIndividualWinLoss && details.result === "L";
+  const resultLabel = !countsForIndividualWinLoss
+    ? "Picklebreaker"
+    : isWin
+    ? "Win"
+    : isLoss
+    ? "Loss"
+    : "Other";
+  const scoreBadgeTone = isWin
+    ? "bg-green-600 text-white"
+    : isLoss
+    ? "bg-red-600 text-white"
+    : "bg-slate-950 text-white";
   const resultTone = isWin
-    ? {
+      ? {
         shell: "border-emerald-200 bg-emerald-50",
         bar: "bg-emerald-600",
         badge: "bg-emerald-700 text-white",
-        score: "border-emerald-300 bg-white text-emerald-950",
       }
     : isLoss
     ? {
         shell: "border-rose-200 bg-rose-50",
         bar: "bg-rose-600",
         badge: "bg-rose-700 text-white",
-        score: "border-rose-300 bg-white text-rose-950",
+      }
+    : !countsForIndividualWinLoss
+    ? {
+        shell: "border-amber-200 bg-amber-50",
+        bar: "bg-amber-500",
+        badge: "bg-amber-700 text-white",
       }
     : {
         shell: "border-slate-200 bg-slate-50",
         bar: "bg-slate-500",
         badge: "bg-slate-700 text-white",
-        score: "border-slate-300 bg-white text-slate-950",
       };
+  const lineLabel = row.division_lines?.line_name || row.division_lines?.line_type || `Line ${row.line_number || "-"}`;
 
   return (
-    <div className={`overflow-hidden rounded-2xl border shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${resultTone.shell}`}>
+    <div className={`${resultTone.shell}`}>
       <div className={`h-1.5 ${resultTone.bar}`} />
       <div className="px-4 py-4">
       <div className="flex flex-wrap items-center gap-2">
@@ -2965,52 +3034,38 @@ function PlayerHistoryRowWithScores({ row, memberId, ratingForMember }) {
         >
           {resultLabel}
         </span>
-        <span className="font-bold text-slate-900">
-          {formatDate(match?.scheduled_date)}
+        <span className="font-black text-slate-900">
+          {lineLabel}
         </span>
-        <span className="font-semibold text-slate-900">
-          {details.playerTeamName} vs {details.opponentName}
+        <span className="rounded-full bg-white px-2 py-0.5 text-xs font-black uppercase text-slate-700 ring-1 ring-slate-200">
+          {details.sideLabel}
         </span>
       </div>
 
       <div className="mt-1 text-sm text-slate-600">
-        {match?.leagues?.seasons?.name || "No Season"} / {match?.leagues?.name || "No League"} / {match?.divisions?.name || "No Division"}
+        {details.playerTeamName} vs {details.opponentName}
       </div>
+      {!countsForIndividualWinLoss && (
+        <div className="mt-2 text-sm font-bold text-amber-900">
+          Picklebreaker team result only; excluded from individual W/L.
+        </div>
+      )}
 
       {gameScores.length > 0 && (
-        <div className="mt-4 grid gap-2">
-          {gameScores.map((game) => {
-            const gameScoreTone =
-              game.result === "W"
-                ? "border-2 border-green-500 bg-white text-green-950"
-                : game.result === "L"
-                ? "border-2 border-red-500 bg-white text-red-950"
-                : resultTone.score;
-            const gameResultLabel =
-              game.result === "W" ? "Win" : game.result === "L" ? "Loss" : "";
-            const gameResultBadgeTone =
-              game.result === "W"
-                ? "bg-green-100 text-green-800 ring-1 ring-green-200"
-                : game.result === "L"
-                ? "bg-red-100 text-red-800 ring-1 ring-red-200"
-                : "";
+        <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+          {gameScores.map((game, index) => {
             const gameScoreBadgeTone =
-              game.result === "W"
+              countsForIndividualWinLoss && game.result === "W"
                 ? "bg-green-600 text-white"
-                : game.result === "L"
+                : countsForIndividualWinLoss && game.result === "L"
                 ? "bg-red-600 text-white"
-                : "bg-slate-950 text-white";
+                : scoreBadgeTone;
 
             return (
-              <div key={game.key} className={`flex flex-col gap-3 rounded-xl border px-3 py-3 shadow-sm sm:flex-row sm:items-center sm:justify-between ${gameScoreTone}`}>
+              <div key={game.key} className={`flex flex-col gap-3 px-3 py-3 sm:flex-row sm:items-center sm:justify-between ${index > 0 ? "border-t border-slate-200" : ""}`}>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide">
-                    <span>{game.label}</span>
-                    {gameResultLabel && (
-                      <span className={`rounded-full px-2 py-0.5 text-[11px] leading-none ${gameResultBadgeTone}`}>
-                        {gameResultLabel}
-                      </span>
-                    )}
+                    <span className="text-blue-700">{game.label}</span>
                   </div>
                   <div className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-700">
                     <div>
@@ -3041,6 +3096,36 @@ function PlayerHistoryRowWithScores({ row, memberId, ratingForMember }) {
       </div>
     </div>
   );
+}
+
+function groupPlayHistoryRows(rows) {
+  const groups = [];
+  const groupsByKey = new Map();
+
+  (rows || []).forEach((row) => {
+    const match = row.matches;
+    const key = match?.id
+      ? `match:${match.id}`
+      : [
+          "match",
+          match?.scheduled_date || "",
+          match?.scheduled_time || "",
+          match?.home_team_id || match?.home_team?.id || "",
+          match?.away_team_id || match?.away_team?.id || "",
+          match?.divisions?.id || "",
+          match?.leagues?.id || "",
+        ].join(":");
+
+    if (!groupsByKey.has(key)) {
+      const group = { key, rows: [] };
+      groupsByKey.set(key, group);
+      groups.push(group);
+    }
+
+    groupsByKey.get(key).rows.push(row);
+  });
+
+  return groups;
 }
 
 function formatGameScores(row, sideLabel, ratingForMember) {
@@ -3113,6 +3198,10 @@ function linePlayerNames(row, sideLabel, ratingForMember) {
 }
 
 function lineTeamRating(row, sideLabel, ratingForMember) {
+  if (typeof ratingForMember !== "function") {
+    return "NR";
+  }
+
   const players =
     sideLabel === "Home"
       ? [row.home_player_1, row.home_player_2]
