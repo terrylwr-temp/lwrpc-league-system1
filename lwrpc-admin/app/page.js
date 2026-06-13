@@ -814,6 +814,7 @@ export default function DashboardPage() {
     cards: [
       { title: "Tournaments", desc: "Open public tournament displays and event-code tournament operations.", path: "/tourney/tpro", code: "TN", tone: "emerald" },
       { title: "PBCourtCommand", desc: "Run round robin and ladder sessions with saved players, lineups, scores, and texts.", path: "/pbcc/admin", code: "PB", tone: "blue" },
+      { title: "AI League Insights", desc: "Ask LMS, weekly health, anomalies, lineup gaps, and cleanup suggestions.", path: "/ai-insights", code: "AI", tone: "amber" },
     ],
   };
 
