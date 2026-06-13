@@ -3023,7 +3023,6 @@ function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
         badge: "bg-slate-700 text-white",
       };
   const lineLabel = row.division_lines?.line_name || row.division_lines?.line_type || `Line ${row.line_number || "-"}`;
-
   return (
     <div className={`${resultTone.shell}`}>
       <div className={`h-1.5 ${resultTone.bar}`} />
@@ -3037,14 +3036,8 @@ function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
         <span className="font-black text-slate-900">
           {lineLabel}
         </span>
-        <span className="rounded-full bg-white px-2 py-0.5 text-xs font-black uppercase text-slate-700 ring-1 ring-slate-200">
-          {details.sideLabel}
-        </span>
       </div>
 
-      <div className="mt-1 text-sm text-slate-600">
-        {details.playerTeamName} vs {details.opponentName}
-      </div>
       {!countsForIndividualWinLoss && (
         <div className="mt-2 text-sm font-bold text-amber-900">
           Picklebreaker team result only; excluded from individual W/L.
@@ -3069,12 +3062,12 @@ function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
                   </div>
                   <div className="mt-2 grid gap-1 text-xs font-semibold leading-5 text-slate-700">
                     <div>
-                      <span className="font-black text-slate-950">{game.playerTeamName}:</span> {game.players}{" "}
+                      <span className="font-black text-slate-950">Your players:</span> {game.players}{" "}
                       <span className="font-black text-slate-950">Team Rating:</span>{" "}
                       <span className="font-semibold">{game.playerTeamRating}</span>
                     </div>
                     <div>
-                      <span className="font-black text-slate-950">{game.opponentTeamName}:</span> {game.opponentPlayers}{" "}
+                      <span className="font-black text-slate-950">Opponents:</span> {game.opponentPlayers}{" "}
                       <span className="font-black text-slate-950">Team Rating:</span>{" "}
                       <span className="font-semibold">{game.opponentTeamRating}</span>
                     </div>
