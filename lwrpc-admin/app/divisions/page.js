@@ -7,6 +7,11 @@ import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
+const TEAM_TYPE_OPTIONS = [
+  { value: "gender_doubles", label: "Gender Doubles" },
+  { value: "mixed_doubles", label: "Mixed Doubles" },
+];
+
 export default function DivisionsPage() {
   const router = useRouter();
 
@@ -38,6 +43,9 @@ export default function DivisionsPage() {
   const [playoffTeamCount, setPlayoffTeamCount] = useState("");
 
   const [numberOfTeams, setNumberOfTeams] = useState("3");
+  const [teamType, setTeamType] = useState("gender_doubles");
+  const [secondaryNumberOfTeams, setSecondaryNumberOfTeams] = useState("");
+  const [secondaryTeamType, setSecondaryTeamType] = useState("");
   const [defaultGameFormat, setDefaultGameFormat] = useState("");
   const [gamesPerTeam, setGamesPerTeam] = useState("3");
   const [pointsToWin, setPointsToWin] = useState("11");
@@ -69,6 +77,9 @@ export default function DivisionsPage() {
       sortOrder ||
       playoffTeamCount ||
       numberOfTeams !== "3" ||
+      teamType !== "gender_doubles" ||
+      secondaryNumberOfTeams ||
+      secondaryTeamType ||
       defaultGameFormat ||
       gamesPerTeam !== "3" ||
       pointsToWin !== "11" ||
@@ -179,6 +190,25 @@ export default function DivisionsPage() {
       return;
     }
 
+    const primaryType = teamType || "gender_doubles";
+    const secondaryCount = secondaryNumberOfTeams ? Number(secondaryNumberOfTeams) : null;
+    const secondaryType = secondaryTeamType || null;
+
+    if (secondaryCount && !secondaryType) {
+      alert("Select a Team Type for the second Number of Teams.");
+      return;
+    }
+
+    if (secondaryType && !secondaryCount) {
+      alert("Enter the second Number of Teams or clear the second Team Type.");
+      return;
+    }
+
+    if (secondaryCount && secondaryType === primaryType) {
+      alert("The two Team Type selections cannot be the same.");
+      return;
+    }
+
     const payload = {
       league_id: selectedLeague,
       name,
@@ -190,6 +220,9 @@ export default function DivisionsPage() {
       playoff_team_count: playoffTeamCount ? Number(playoffTeamCount) : null,
 
       number_of_lines: Number(numberOfTeams || 3),
+      primary_team_type: primaryType,
+      secondary_number_of_lines: secondaryCount,
+      secondary_team_type: secondaryType,
       default_game_format: defaultGameFormat || null,
       games_per_line: Number(gamesPerTeam || 3),
       points_to_win: Number(pointsToWin || 11),
@@ -472,6 +505,13 @@ export default function DivisionsPage() {
     setNumberOfTeams(
       division.number_of_lines == null ? "3" : String(division.number_of_lines)
     );
+    setTeamType(division.primary_team_type || "gender_doubles");
+    setSecondaryNumberOfTeams(
+      division.secondary_number_of_lines == null
+        ? ""
+        : String(division.secondary_number_of_lines)
+    );
+    setSecondaryTeamType(division.secondary_team_type || "");
 
     setDefaultGameFormat(division.default_game_format || "");
 
@@ -546,6 +586,9 @@ export default function DivisionsPage() {
     setPlayoffTeamCount("");
 
     setNumberOfTeams("3");
+    setTeamType("gender_doubles");
+    setSecondaryNumberOfTeams("");
+    setSecondaryTeamType("");
     setDefaultGameFormat("");
     setGamesPerTeam("3");
 
@@ -634,6 +677,20 @@ export default function DivisionsPage() {
     if (type === "primetime") return "Season PrimeTime";
     if (type === "self_rating") return "Self Rating";
     return "Season DUPR";
+  }
+
+  function teamTypeLabel(type) {
+    return TEAM_TYPE_OPTIONS.find((option) => option.value === type)?.label || "Gender Doubles";
+  }
+
+  function divisionTeamSetupLabel(division) {
+    const primaryLabel = `${division.number_of_lines ?? 3} ${teamTypeLabel(division.primary_team_type)}`;
+
+    if (!division.secondary_number_of_lines || !division.secondary_team_type) {
+      return primaryLabel;
+    }
+
+    return `${primaryLabel}; ${division.secondary_number_of_lines} ${teamTypeLabel(division.secondary_team_type)}`;
   }
 
   function tiebreakLabel(value) {
@@ -753,13 +810,59 @@ export default function DivisionsPage() {
               </Field>
 
               <Field label="Number of Teams">
-                <input
-                  type="number"
-                  min="1"
-                  value={numberOfTeams}
-                  onChange={(e) => setNumberOfTeams(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                />
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+                    <input
+                      type="number"
+                      min="1"
+                      value={numberOfTeams}
+                      onChange={(e) => setNumberOfTeams(e.target.value)}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    />
+
+                    <select
+                      value={teamType}
+                      onChange={(e) => {
+                        const nextType = e.target.value;
+                        setTeamType(nextType);
+                        if (secondaryTeamType === nextType) setSecondaryTeamType("");
+                      }}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    >
+                      {TEAM_TYPE_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)]">
+                    <input
+                      type="number"
+                      min="1"
+                      value={secondaryNumberOfTeams}
+                      onChange={(e) => setSecondaryNumberOfTeams(e.target.value)}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                      placeholder="Optional"
+                    />
+
+                    <select
+                      value={secondaryTeamType}
+                      onChange={(e) => setSecondaryTeamType(e.target.value)}
+                      className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    >
+                      <option value="">Second Team Type</option>
+                      {TEAM_TYPE_OPTIONS
+                        .filter((option) => option.value !== teamType)
+                        .map((option) => (
+                          <option key={option.value} value={option.value}>
+                            {option.label}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                </div>
                 <p className="mt-2 text-xs text-slate-500">
                   Number of teams each community team will use in a match.
                 </p>
@@ -1085,7 +1188,7 @@ export default function DivisionsPage() {
 
                             <div className="mt-1 text-sm text-slate-600">
                               <span className="font-semibold text-slate-700">Number of Teams:</span>{" "}
-                              {division.number_of_lines ?? 3}
+                              {divisionTeamSetupLabel(division)}
                             </div>
 
                             <div className="mt-1 text-sm text-slate-600">

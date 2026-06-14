@@ -229,6 +229,9 @@ export default function CaptainDashboardPage() {
           id,
           name,
           number_of_lines,
+          primary_team_type,
+          secondary_number_of_lines,
+          secondary_team_type,
           games_per_line,
           points_to_win,
           win_by,
@@ -361,6 +364,9 @@ export default function CaptainDashboardPage() {
             flex_league
           ),
           number_of_lines,
+          primary_team_type,
+          secondary_number_of_lines,
+          secondary_team_type,
           games_per_line,
           points_to_win,
           win_by,
@@ -1363,7 +1369,7 @@ export default function CaptainDashboardPage() {
       ratingData = data || [];
     }
 
-    const lineCount = Number(team.divisions?.number_of_lines || match.divisions?.number_of_lines || 3);
+    const lineCount = matchSetupLineCount(team.divisions || match.divisions);
     const existingByLine = {};
 
     (lineupData || []).forEach((lineup) => {
@@ -1508,7 +1514,11 @@ export default function CaptainDashboardPage() {
   }
 
   function setupDuplicateWarning(lineup) {
+    const lineupType = matchSetupLineType(setupTeam?.divisions, lineup.line_number);
     const selectedPlayers = setupLineups
+      .filter((setupLineup) =>
+        matchSetupLineType(setupTeam?.divisions, setupLineup.line_number) === lineupType
+      )
       .flatMap((setupLineup) => [
         setupLineup.player_1_member_id,
         setupLineup.player_2_member_id,
@@ -1540,7 +1550,7 @@ export default function CaptainDashboardPage() {
         (row) => String(row.member_id) === String(duplicatePlayer)
       )?.members;
 
-      return `${formatMemberName(member)} is already selected on another match setup team.`;
+      return `${formatMemberName(member)} is already selected on another ${matchSetupTeamTypeLabel(lineupType)} match setup team.`;
     }
 
     return "";
@@ -1548,7 +1558,7 @@ export default function CaptainDashboardPage() {
 
   function setupLineIssue(lineup) {
     if (!lineup.player_1_member_id || !lineup.player_2_member_id) {
-      return `Team ${lineup.line_number} needs two players before match setup can be saved.`;
+      return `${matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)} needs two players before match setup can be saved.`;
     }
 
     return setupDuplicateWarning(lineup) || setupLineWarning(lineup);
@@ -1717,7 +1727,7 @@ export default function CaptainDashboardPage() {
         const teamRating = setupTeamRating(lineup);
 
         return [
-          `<li><strong>Team ${lineup.line_number}:</strong>`,
+          `<li><strong>${matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)}:</strong>`,
           `${setupEmailPlayerLabel(player1)} / ${setupEmailPlayerLabel(player2)}`,
           `<strong>Team Rating:</strong> ${teamRating === null ? "NR" : escapeHtml(teamRating.toFixed(2))}`,
           "</li>",
@@ -2148,12 +2158,12 @@ export default function CaptainDashboardPage() {
                     <span className="rounded-lg bg-white/15 px-3 py-1 text-lg font-black text-white md:text-xl">
                       {formatDisplayTime(setupMatch.scheduled_time, "Time TBD")}
                     </span>
-                    <span className="text-sm">{setupTeam.divisions?.leagues?.name || "League"}</span>
-                    <span className="text-sm">{setupTeam.divisions?.name || "Division"}</span>
+                    <span className="hidden text-sm md:inline">{setupTeam.divisions?.leagues?.name || "League"}</span>
+                    <span className="hidden text-sm md:inline">{setupTeam.divisions?.name || "Division"}</span>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 text-sm md:min-w-72">
+                <div className="hidden grid-cols-1 gap-2 text-sm md:grid md:min-w-72">
                   <div className="rounded-xl bg-white/10 px-4 py-3">
                     <div className="text-xs uppercase tracking-wide text-blue-200">Home Team</div>
                     <div className="font-bold">{setupMatch.home_team?.name || "Home"}</div>
@@ -2172,7 +2182,7 @@ export default function CaptainDashboardPage() {
                 <span className="font-bold">Doubles Team Maximum:</span>{" "}
                 {setupTeam.divisions?.team_dupr_max ?? "None"} ({setupRatingLabel()})
               </div>
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 md:grid">
                 <button
                   type="button"
                   onClick={saveMatchSetup}
@@ -2208,7 +2218,7 @@ export default function CaptainDashboardPage() {
                 return (
                   <div key={lineup.line_number} className={`rounded-xl border p-4 ${warning ? "border-amber-300 bg-amber-50" : "border-slate-200"}`}>
                     <div className="mb-3 flex items-center justify-between gap-2">
-                      <div className="font-bold text-slate-900">Team {lineup.line_number}</div>
+                      <div className="font-bold text-slate-900">{matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)}</div>
                       <div className="rounded-full bg-blue-100 px-2 py-1 text-xs font-bold text-blue-900">
                         {setupRatingLabel()}: {rating === null ? "NR" : rating.toFixed(2)}
                       </div>
@@ -2250,6 +2260,32 @@ export default function CaptainDashboardPage() {
                   </div>
                 );
               })}
+            </div>
+            <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 md:hidden">
+              <button
+                type="button"
+                onClick={saveMatchSetup}
+                disabled={savingSetup}
+                className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
+              >
+                {savingSetup ? "Saving..." : "Save Match Setup"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (!confirmUnsavedChanges()) return;
+
+                  setSetupMatch(null);
+                  setSetupTeam(null);
+                  setSetupRoster([]);
+                  setSetupLineups([]);
+                  setSetupDirty(false);
+                }}
+                className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-300"
+              >
+                Close
+              </button>
             </div>
             </div>
           </div>
@@ -3644,7 +3680,7 @@ function compareDivisionScheduleTeams(a, b) {
 }
 
 function buildSingleMatchSetupStatus(match, teamId, lineups) {
-  const expectedLines = Number(match.divisions?.number_of_lines || 3);
+  const expectedLines = matchSetupLineCount(match.divisions);
   const teamLineups = (lineups || []).filter(
     (lineup) =>
       String(lineup.match_id) === String(match.id) &&
@@ -3659,6 +3695,59 @@ function buildSingleMatchSetupStatus(match, teamId, lineups) {
     completedLines: completeLines.length,
     expectedLines,
   };
+}
+
+function matchSetupTeamBlocks(division = {}) {
+  const primaryCount = Math.max(1, Number(division?.number_of_lines || 3));
+  const primaryType = division?.primary_team_type || "gender_doubles";
+  const secondaryCount = Math.max(0, Number(division?.secondary_number_of_lines || 0));
+  const secondaryType = division?.secondary_team_type || "";
+  const blocks = [
+    {
+      start: 1,
+      count: primaryCount,
+      type: primaryType,
+    },
+  ];
+
+  if (secondaryCount > 0 && secondaryType && secondaryType !== primaryType) {
+    blocks.push({
+      start: primaryCount + 1,
+      count: secondaryCount,
+      type: secondaryType,
+    });
+  }
+
+  return blocks;
+}
+
+function matchSetupLineCount(division = {}) {
+  return matchSetupTeamBlocks(division).reduce((total, block) => total + block.count, 0);
+}
+
+function matchSetupLineBlock(division = {}, lineNumber) {
+  const number = Number(lineNumber || 0);
+  return matchSetupTeamBlocks(division).find((block) => (
+    number >= block.start && number < block.start + block.count
+  )) || matchSetupTeamBlocks(division)[0];
+}
+
+function matchSetupLineType(division = {}, lineNumber) {
+  return matchSetupLineBlock(division, lineNumber)?.type || "gender_doubles";
+}
+
+function matchSetupTeamTypeLabel(type) {
+  if (type === "mixed_doubles") return "Mixed Doubles";
+  return "Gender Doubles";
+}
+
+function matchSetupLineLabel(division = {}, lineNumber) {
+  const base = `Team ${lineNumber}`;
+  const blocks = matchSetupTeamBlocks(division);
+
+  if (blocks.length < 2) return base;
+
+  return `${base} - ${matchSetupTeamTypeLabel(matchSetupLineType(division, lineNumber))}`;
 }
 
 function sortRosterMembers(members) {
@@ -3926,7 +4015,7 @@ function matchScoreDetailsPrintHtml(match, lines, clubName = DEFAULT_SYSTEM_SETT
 function matchScoreSheetPrintHtml(match, lineups, ratingForMember, clubName = DEFAULT_SYSTEM_SETTINGS.club_name) {
   const homeLineups = scoreSheetLineupsForTeam(lineups, match.home_team_id);
   const awayLineups = scoreSheetLineupsForTeam(lineups, match.away_team_id);
-  const lineCount = Number(match.divisions?.number_of_lines || 3);
+  const lineCount = matchSetupLineCount(match.divisions);
   const rows = Array.from({ length: lineCount }, (_, index) => {
     const lineNumber = index + 1;
     const homeLineup = homeLineups[lineNumber] || {};
@@ -3937,13 +4026,13 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember, clubName = DE
     return `
       <tr>
         <td class="line-cell">
-          <div class="line-number">${lineNumber}</div>
+          <div class="line-number">${escapeHtml(matchSetupLineLabel(match.divisions, lineNumber))}</div>
           <div>${scoreSheetPlayerLine(homePlayers[0], match, ratingForMember)}</div>
           <div>${scoreSheetPlayerLine(homePlayers[1], match, ratingForMember)}</div>
           <div class="team-rating">Team Rating: ${escapeHtml(scoreSheetTeamRating(homePlayers, match, ratingForMember))}</div>
         </td>
         <td class="line-cell">
-          <div class="line-number">${lineNumber}</div>
+          <div class="line-number">${escapeHtml(matchSetupLineLabel(match.divisions, lineNumber))}</div>
           <div>${scoreSheetPlayerLine(awayPlayers[0], match, ratingForMember)}</div>
           <div>${scoreSheetPlayerLine(awayPlayers[1], match, ratingForMember)}</div>
           <div class="team-rating">Team Rating: ${escapeHtml(scoreSheetTeamRating(awayPlayers, match, ratingForMember))}</div>
@@ -4257,10 +4346,10 @@ function scoreSheetConfiguredLines(match) {
 
   if (lines.length > 0) return lines;
 
-  const lineCount = Math.max(1, Number(match.divisions?.number_of_lines || 3));
+  const lineCount = matchSetupLineCount(match.divisions);
   return Array.from({ length: lineCount }, (_, index) => ({
     line_number: index + 1,
-    line_name: `Line ${index + 1}`,
+    line_name: matchSetupLineLabel(match.divisions, index + 1),
     line_type: "doubles",
     game_format: match.divisions?.default_game_format || "regular",
     games_per_line: match.divisions?.games_per_line || 3,

@@ -31,6 +31,7 @@ export default function TeamRosterPage() {
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [playHistory, setPlayHistory] = useState([]);
   const [playerTeamsByMemberId, setPlayerTeamsByMemberId] = useState({});
+  const [addPlayerModalOpen, setAddPlayerModalOpen] = useState(false);
   const [expandedHistoryMemberId, setExpandedHistoryMemberId] = useState("");
   const [historyFilters, setHistoryFilters] = useState({});
 
@@ -783,7 +784,29 @@ function getAverageTeamRating() {
     }
 
     setSelectedMemberId("");
+    setAddPlayerModalOpen(false);
     loadData();
+  }
+
+  function openAddPlayerModal() {
+    setAddPlayerModalOpen(true);
+  }
+
+  function closeAddPlayerModal() {
+    if (selectedMemberId && !confirmUnsavedChanges()) return;
+
+    setSelectedMemberId("");
+    setAddPlayerModalOpen(false);
+  }
+
+  function closePlayerHistory(memberId) {
+    setExpandedHistoryMemberId("");
+
+    window.requestAnimationFrame(() => {
+      document
+        .getElementById(`roster-player-${memberId}`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
   }
 
   async function removePlayer(teamMemberId) {
@@ -979,9 +1002,9 @@ function getAverageTeamRating() {
 
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-6">
+        <div className="mt-6">
 
-          <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
+          <div className="hidden">
 
             <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
@@ -1058,9 +1081,9 @@ function getAverageTeamRating() {
                       value={member.id}
                     >
                       {member.last_name}, {member.first_name}
-                      {" · "}
+                      {" - "}
                       {getRatingLabel()}: {getRatingDisplay(member)}
-                      {" · "}
+                      {" - "}
                       {playerRatingEligibility(member)}
                     </option>
                   ))}
@@ -1084,7 +1107,7 @@ function getAverageTeamRating() {
 
           </div>
 
-          <div className="rounded-2xl bg-white p-4 shadow sm:p-6 lg:col-span-2">
+          <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
 
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
@@ -1092,13 +1115,24 @@ function getAverageTeamRating() {
                 Team Roster
               </h2>
 
-              <div className="w-full rounded-xl bg-slate-900 px-5 py-3 text-white sm:w-auto">
-                <div className="text-xs uppercase tracking-wide text-slate-300">
-                  Players
-                </div>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
+                <button
+                  type="button"
+                  onClick={openAddPlayerModal}
+                  disabled={!canModifyRoster}
+                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  Add Player
+                </button>
 
-                <div className="text-2xl font-bold">
-                  {roster.length}
+                <div className="w-full rounded-xl bg-slate-900 px-5 py-3 text-white sm:w-auto">
+                  <div className="text-xs uppercase tracking-wide text-slate-300">
+                    Players
+                  </div>
+
+                  <div className="text-2xl font-bold">
+                    {roster.length}
+                  </div>
                 </div>
               </div>
 
@@ -1126,6 +1160,7 @@ function getAverageTeamRating() {
                 return (
                   <div
                     key={player.id}
+                    id={member?.id ? `roster-player-${member.id}` : undefined}
                     className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50"
                   >
 
@@ -1234,6 +1269,7 @@ function getAverageTeamRating() {
                             [member.id]: value,
                           }))
                         }
+                        onClose={() => closePlayerHistory(member.id)}
                       />
                     )}
 
@@ -1253,6 +1289,130 @@ function getAverageTeamRating() {
 
         </div>
 
+        {addPlayerModalOpen && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6"
+            onClick={closeAddPlayerModal}
+          >
+            <div
+              className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl sm:p-6"
+              onClick={(event) => event.stopPropagation()}
+            >
+
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Add Player
+                  </h2>
+
+                  <div className="mt-1 text-sm font-semibold text-slate-600">
+                    {availableMembers.length} Available
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeAddPlayerModal}
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                >
+                  Close
+                </button>
+
+              </div>
+
+              <div className="space-y-4">
+
+                {!canModifyRoster && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-900">
+                    Team rosters are locked for this league. Only League Managers and Commissioners can view and modify rosters while locked.
+                  </div>
+                )}
+
+                <div>
+
+                  <label className="mb-1 block text-sm font-semibold text-slate-700">
+                    Player Home Location
+                  </label>
+
+                  <select
+                    value={selectedLocationId ?? ""}
+                    onChange={e => {
+                      setSelectedLocationId(e.target.value);
+                      setSelectedMemberId("");
+                    }}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  >
+                    <option value="">
+                      All Locations
+                    </option>
+
+                    {locations.map(location => (
+                      <option
+                        key={location.id}
+                        value={location.id}
+                      >
+                        {location.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <p className="mt-2 text-xs text-slate-500">
+                    Defaults to the team&apos;s home location but can be overridden.
+                  </p>
+
+                </div>
+
+                <div>
+
+                  <label className="mb-1 block text-sm font-semibold text-slate-700">
+                    Available Players
+                  </label>
+
+                  <select
+                    value={selectedMemberId}
+                    onChange={e => setSelectedMemberId(e.target.value)}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  >
+                    <option value="">
+                      Select Player
+                    </option>
+
+                    {availableMembers.map(member => (
+                      <option
+                        key={member.id}
+                        value={member.id}
+                      >
+                        {member.last_name}, {member.first_name}
+                        {" - "}
+                        {getRatingLabel()}: {getRatingDisplay(member)}
+                        {" - "}
+                        {playerRatingEligibility(member)}
+                      </option>
+                    ))}
+                  </select>
+
+                  <p className="mt-2 text-xs text-slate-500">
+                    Players are matched by linked location or exact home-community name.
+                  </p>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={addPlayer}
+                  disabled={!canModifyRoster}
+                  className="w-full rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  Add Player To Team
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+        )}
+
       </div>
     </main>
   );
@@ -1264,13 +1424,25 @@ function PlayerHistoryPanel({
   playerTeams,
   selectedFilter,
   onFilterChange,
+  onClose,
 }) {
   const options = historyFilterOptions(historyRows, playerTeams, memberId);
   const filteredRows = filterHistoryRows(historyRows, selectedFilter, memberId);
   const filteredRecord = playerHistoryRecord(filteredRows, memberId);
 
   return (
-    <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <div
+      className="mt-4 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 p-4"
+      onClick={onClose}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClose();
+        }
+      }}
+      role="button"
+      tabIndex={0}
+    >
       <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="font-bold text-slate-900">
@@ -1284,6 +1456,8 @@ function PlayerHistoryPanel({
         <select
           value={selectedFilter || "all"}
           onChange={(e) => onFilterChange(e.target.value)}
+          onClick={(event) => event.stopPropagation()}
+          onKeyDown={(event) => event.stopPropagation()}
           className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-800"
           aria-label="Filter player history by league and season"
         >

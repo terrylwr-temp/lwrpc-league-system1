@@ -96,7 +96,18 @@ export async function POST(req) {
 
     const { data: match, error: matchError } = await supabase
       .from("matches")
-      .select("id, home_team_id, away_team_id")
+      .select(`
+        id,
+        home_team_id,
+        away_team_id,
+        divisions (
+          id,
+          number_of_lines,
+          primary_team_type,
+          secondary_number_of_lines,
+          secondary_team_type
+        )
+      `)
       .eq("id", matchId)
       .single();
 
@@ -192,6 +203,18 @@ export async function POST(req) {
       );
     }
 
+    const duplicateByTeamType = duplicatePlayerByTeamType(rows, match.divisions);
+
+    if (duplicateByTeamType) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `A player can only be used once in the ${matchSetupTeamTypeLabel(duplicateByTeamType)} match setup teams.`,
+        },
+        { status: 400 }
+      );
+    }
+
     const { data: savedRows, error: saveError } = await supabase
       .from("match_lineups")
       .upsert(rows, {
@@ -211,4 +234,59 @@ export async function POST(req) {
       { status: 500 }
     );
   }
+}
+
+function duplicatePlayerByTeamType(rows, division) {
+  const seen = new Set();
+
+  for (const row of rows) {
+    const type = matchSetupLineType(division, row.line_number);
+    const playerIds = [row.player_1_member_id, row.player_2_member_id].filter(Boolean);
+
+    for (const playerId of playerIds) {
+      const key = `${type}:${playerId}`;
+      if (seen.has(key)) return type;
+      seen.add(key);
+    }
+  }
+
+  return "";
+}
+
+function matchSetupTeamBlocks(division = {}) {
+  const primaryCount = Math.max(1, Number(division?.number_of_lines || 3));
+  const primaryType = division?.primary_team_type || "gender_doubles";
+  const secondaryCount = Math.max(0, Number(division?.secondary_number_of_lines || 0));
+  const secondaryType = division?.secondary_team_type || "";
+  const blocks = [
+    {
+      start: 1,
+      count: primaryCount,
+      type: primaryType,
+    },
+  ];
+
+  if (secondaryCount > 0 && secondaryType && secondaryType !== primaryType) {
+    blocks.push({
+      start: primaryCount + 1,
+      count: secondaryCount,
+      type: secondaryType,
+    });
+  }
+
+  return blocks;
+}
+
+function matchSetupLineType(division = {}, lineNumber) {
+  const number = Number(lineNumber || 0);
+  const block = matchSetupTeamBlocks(division).find((candidate) => (
+    number >= candidate.start && number < candidate.start + candidate.count
+  ));
+
+  return block?.type || "gender_doubles";
+}
+
+function matchSetupTeamTypeLabel(type) {
+  if (type === "mixed_doubles") return "Mixed Doubles";
+  return "Gender Doubles";
 }
