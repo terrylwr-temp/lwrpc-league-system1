@@ -28,6 +28,24 @@ import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSetti
 import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
+const CAPTAIN_SECTION_IDS = {
+  upcoming: "captain-dashboard-upcoming-matches",
+  completed: "captain-dashboard-completed-matches",
+  pending: "captain-dashboard-pending-score-verification",
+};
+
+function scrollDashboardSectionIntoView(sectionId) {
+  if (!sectionId || typeof window === "undefined") return;
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  });
+}
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
@@ -73,6 +91,11 @@ export default function CaptainDashboardPage() {
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
   useUnsavedChangesWarning(Boolean(setupMatch && setupDirty), "match setup");
+
+  function selectCaptainSection(section) {
+    setCaptainSection(section);
+    scrollDashboardSectionIntoView(CAPTAIN_SECTION_IDS[section]);
+  }
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
@@ -914,7 +937,7 @@ export default function CaptainDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex w-full flex-wrap gap-2 sm:w-auto">
                     {setupTeams.map((team) => {
                       const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
                       const setupComplete = setupStatus?.complete === true;
@@ -924,7 +947,7 @@ export default function CaptainDashboardPage() {
                           key={team.id}
                           type="button"
                           onClick={() => openMatchSetup(match, team)}
-                          className={`rounded-lg px-3 py-2 text-sm font-bold text-white ${
+                          className={`w-full rounded-lg px-3 py-2 text-sm font-bold text-white sm:w-auto ${
                             setupComplete
                               ? "bg-blue-700 hover:bg-blue-800"
                               : "bg-red-700 hover:bg-red-800"
@@ -959,7 +982,7 @@ export default function CaptainDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setMatchDetails(match)}
-                  className="rounded-lg bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800"
+                  className="w-full rounded-lg bg-blue-700 px-3 py-2 text-sm font-bold text-white hover:bg-blue-800 sm:w-auto"
                 >
                   Match Details
                 </button>
@@ -969,7 +992,7 @@ export default function CaptainDashboardPage() {
                 <button
                   type="button"
                   onClick={() => openMatchScoreSheet(match)}
-                  className="rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-800"
+                  className="w-full rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-800 sm:w-auto"
                 >
                   Match Score Sheet
                 </button>
@@ -980,7 +1003,7 @@ export default function CaptainDashboardPage() {
                   type="button"
                   onClick={() => emailOpposingCaptains(match)}
                   disabled={opposingEmails.length === 0}
-                  className="rounded-lg bg-sky-700 px-3 py-2 text-sm font-bold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="w-full rounded-lg bg-sky-700 px-3 py-2 text-sm font-bold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
                   title={opposingEmails.length > 0 ? `Email ${opposingEmails.length} opposing captain contact${opposingEmails.length === 1 ? "" : "s"}` : "No opposing captain email addresses found"}
                 >
                   Email Opposing Captains
@@ -994,7 +1017,7 @@ export default function CaptainDashboardPage() {
                     if (flexScheduleAllowed) openFlexSchedule(match);
                   }}
                   disabled={!flexScheduleAllowed}
-                  className="rounded-lg bg-violet-700 px-3 py-2 text-sm font-bold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  className="w-full rounded-lg bg-violet-700 px-3 py-2 text-sm font-bold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
                   title={flexScheduleAllowed ? "Modify this Flex League match date/time" : "Only the home team captain or co-captain can modify this Flex League match date/time"}
                 >
                   Modify Match Date/Time
@@ -1011,7 +1034,7 @@ export default function CaptainDashboardPage() {
                   }
                   if (canEnterScores && confirmUnsavedChanges()) router.push(`/matches/${match.id}`);
                 }}
-                className={`rounded-lg px-3 py-2 text-sm font-bold text-white ${scoreButtonClass}`}
+                className={`w-full rounded-lg px-3 py-2 text-sm font-bold text-white sm:w-auto ${scoreButtonClass}`}
                 title={canEnterScores ? scoreButtonTitle : "Scores unlock on the scheduled match date"}
               >
                 {scoreButtonLabel}
@@ -2438,34 +2461,34 @@ export default function CaptainDashboardPage() {
           </div>
         </div>
 
-        <div className="mt-4 rounded-2xl border border-white/80 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-3 shadow-xl ring-1 ring-slate-200">
-        <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+        <div className="sticky top-0 z-30 mt-4 rounded-2xl border border-white/80 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-2 shadow-xl ring-1 ring-slate-200 md:p-3">
+        <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
           <CaptainSectionButton
             active={captainSection === "upcoming"}
-            label="Upcoming/Unverified Matches"
+            label="Upcoming Matches"
             value={upcomingItems.length}
             tone="blue"
-            onClick={() => setCaptainSection("upcoming")}
+            onClick={() => selectCaptainSection("upcoming")}
           />
           <CaptainSectionButton
             active={captainSection === "completed"}
             label="Completed Matches"
             value={completedMatches.length}
             tone="emerald"
-            onClick={() => setCaptainSection("completed")}
+            onClick={() => selectCaptainSection("completed")}
           />
           <CaptainSectionButton
             active={captainSection === "pending"}
             label="Pending Score Verification"
             value={pendingVerification.length}
             tone="red"
-            onClick={() => setCaptainSection("pending")}
+            onClick={() => selectCaptainSection("pending")}
           />
         </div>
         </div>
 
         {captainSection === "pending" && (
-          <Section title={`Pending Score Verification${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={pendingVerification.length}>
+          <Section id={CAPTAIN_SECTION_IDS.pending} title={`Pending Score Verification${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={pendingVerification.length}>
             {pendingVerification.map((match) =>
               matchCard(match, {
                 showSetup: false,
@@ -2480,6 +2503,7 @@ export default function CaptainDashboardPage() {
 
         {captainSection === "upcoming" && (
           <Section
+            id={CAPTAIN_SECTION_IDS.upcoming}
             title={`Upcoming/Unverified Matches / Byes${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`}
             count={upcomingItems.length}
           >
@@ -2492,7 +2516,7 @@ export default function CaptainDashboardPage() {
         )}
 
         {captainSection === "completed" && (
-          <Section title={`Completed Matches${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={completedMatches.length}>
+          <Section id={CAPTAIN_SECTION_IDS.completed} title={`Completed Matches${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={completedMatches.length}>
             {completedMatches.map((match) =>
               matchCard(match, {
                 showSetup: false,
@@ -4489,16 +4513,16 @@ function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) 
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-2xl border-2 p-4 text-left shadow-lg ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.blue}`}
+      className={`min-w-44 flex-1 rounded-2xl border-2 p-3 text-left shadow-lg ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 md:min-w-0 md:p-4 ${tones[tone] || tones.blue}`}
     >
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="text-sm font-black">{label}</div>
+        <div className="min-w-0">
+          <div className="text-sm font-black leading-tight">{label}</div>
           <div className={`mt-1 text-xs font-bold ${helperClass}`}>
             Click to view
           </div>
         </div>
-        <div className={`rounded-xl px-3 py-1 text-sm font-black shadow-sm ${badgeClass}`}>
+        <div className={`shrink-0 rounded-xl px-3 py-1 text-sm font-black shadow-sm ${badgeClass}`}>
           {value}
         </div>
       </div>
@@ -4570,11 +4594,11 @@ function writeDashboardTeamSelection(prefix, memberId, teamId) {
   }
 }
 
-function Section({ title, count, actions, children }) {
+function Section({ id, title, count, actions, children }) {
   return (
-    <div className="mt-6 rounded-2xl bg-white p-4 shadow md:p-6">
+    <div id={id} className="mt-6 scroll-mt-32 rounded-2xl bg-white p-3 shadow sm:p-4 md:p-6">
       <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+        <h2 className="break-words text-lg font-bold text-slate-900 sm:text-xl">{title}</h2>
 
         <div className="flex flex-col gap-2 md:flex-row md:items-center">
           {actions}

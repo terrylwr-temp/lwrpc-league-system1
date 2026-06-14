@@ -40,6 +40,24 @@ const PLAYER_LEAGUE_DOCUMENT_TYPES = LEAGUE_DOCUMENT_TYPES.filter((documentType)
 );
 
 const PLAYER_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-player-dashboard-selected-team";
+const PLAYER_PANEL_SECTION_IDS = {
+  history: "player-dashboard-play-history",
+  standings: "player-dashboard-division-standings",
+  upcoming: "player-dashboard-team-matches",
+};
+
+function scrollDashboardSectionIntoView(sectionId) {
+  if (!sectionId || typeof window === "undefined") return;
+
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(() => {
+      document.getElementById(sectionId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+  });
+}
 
 export default function PlayerDashboardPage() {
   const router = useRouter();
@@ -856,6 +874,8 @@ export default function PlayerDashboardPage() {
     if ((panel === "standings" || panel === "upcoming") && !selectedPlayerTeamId && visibleTeams.length > 0) {
       setSelectedPlayerTeamId(visibleTeams[0].id);
     }
+
+    scrollDashboardSectionIntoView(PLAYER_PANEL_SECTION_IDS[panel]);
   }
 
   async function openDivisionScheduleFromStanding(row) {
@@ -1163,8 +1183,10 @@ export default function PlayerDashboardPage() {
             )}
           </div>
 
-          <div className="border-t border-slate-100 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-4 shadow-inner md:p-5">
-          <div className="grid grid-cols-1 gap-3 rounded-2xl border border-white/80 bg-white/70 p-3 shadow-xl ring-1 ring-slate-200 md:grid-cols-3">
+        </section>
+
+        <div className="sticky top-0 z-30 mt-4 rounded-2xl border border-white/80 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-2 shadow-xl ring-1 ring-slate-200 md:p-3">
+          <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
             <DashboardOption
               active={activePanel === "history"}
               label="My Play History"
@@ -1194,8 +1216,7 @@ export default function PlayerDashboardPage() {
               onClick={() => selectPanel("upcoming")}
             />
           </div>
-          </div>
-        </section>
+        </div>
 
         <LoginMessageModal
           templateKey="player_login_popup"
@@ -1203,7 +1224,7 @@ export default function PlayerDashboardPage() {
         />
 
         {activePanel === "standings" && (
-          <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          <div id={PLAYER_PANEL_SECTION_IDS.standings} className="mt-6 scroll-mt-32 overflow-hidden rounded-2xl bg-white shadow">
             <div className="flex flex-col gap-2 bg-gradient-to-r from-emerald-700 to-teal-700 p-6 text-white md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="text-xs font-black uppercase tracking-wide text-emerald-100">
@@ -1339,7 +1360,7 @@ export default function PlayerDashboardPage() {
         )}
 
         {activePanel === "upcoming" && (
-          <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+          <div id={PLAYER_PANEL_SECTION_IDS.upcoming} className="mt-6 scroll-mt-32 overflow-hidden rounded-2xl bg-white shadow">
             <div className="flex flex-col gap-2 bg-gradient-to-r from-slate-700 to-zinc-700 p-6 text-white md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="text-xs font-black uppercase tracking-wide text-slate-200">
@@ -1392,7 +1413,7 @@ export default function PlayerDashboardPage() {
         )}
 
         {activePanel === "history" && (
-        <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+        <div id={PLAYER_PANEL_SECTION_IDS.history} className="mt-6 scroll-mt-32 overflow-hidden rounded-2xl bg-white shadow">
           <div className="flex flex-col gap-3 bg-gradient-to-r from-blue-700 to-indigo-700 p-6 text-white md:flex-row md:items-center md:justify-between">
             <div>
               <div className="text-xs font-black uppercase tracking-wide text-blue-100">
@@ -1559,16 +1580,16 @@ function DashboardOption({ active, label, value, tone = "blue", onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`group rounded-2xl border-2 p-4 text-left shadow-lg ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.blue}`}
+      className={`group min-w-40 flex-1 rounded-2xl border-2 p-3 text-left shadow-lg ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 md:min-w-0 md:p-4 ${tones[tone] || tones.blue}`}
     >
       <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="text-sm font-black">{label}</div>
+        <div className="min-w-0">
+          <div className="text-sm font-black leading-tight">{label}</div>
           <div className={`mt-1 text-xs font-bold ${helperClass}`}>
             Click to view
           </div>
         </div>
-        <div className={`rounded-xl px-3 py-1 text-sm font-black shadow-sm ${badgeClass}`}>
+        <div className={`shrink-0 rounded-xl px-3 py-1 text-sm font-black shadow-sm ${badgeClass}`}>
           {value}
         </div>
       </div>
@@ -2105,7 +2126,7 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
             <button
               type="button"
               onClick={() => onOpenDetails(match)}
-              className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800"
+              className="w-full rounded-lg bg-slate-900 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800 sm:w-auto"
             >
               {isVerifiedCompleted ? "Match Score Details" : "Match Details"}
             </button>
@@ -3080,7 +3101,7 @@ function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
               )}
             </div>
 
-            <div className="flex shrink-0 flex-wrap gap-2">
+            <div className="flex w-full flex-wrap gap-2 lg:w-auto lg:shrink-0 lg:justify-end">
               {gameScores.map((game) => {
                 const gameScoreBadgeTone =
                   countsForIndividualWinLoss && game.result === "W"
