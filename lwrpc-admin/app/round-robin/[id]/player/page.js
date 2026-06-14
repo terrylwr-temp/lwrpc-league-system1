@@ -715,7 +715,7 @@ function PlayerHistorySummary({ history, player, range, setRange, ladders = [], 
             className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-teal-900 shadow-sm transition hover:bg-cyan-50 md:hidden"
             aria-expanded={mobileExpanded}
           >
-            {mobileExpanded ? "Hide Details" : "Show Details"}
+            {mobileExpanded ? "Hide Details" : "Show Player Details"}
           </button>
           {!showingLadders && hasRegularMatches && (
             <button
