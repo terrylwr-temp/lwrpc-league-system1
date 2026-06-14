@@ -28,6 +28,7 @@ import {
 } from "../lib/leagueDocuments";
 import { GUIDE_DOCUMENT_TYPES, guidePdfDocument } from "../lib/dashboardGuides";
 import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
+import { buildActiveDivisionOptions } from "../lib/divisionOptions";
 
 const PLAYER_DOCUMENT_KEYS = new Set([
   "code_of_conduct",
@@ -87,6 +88,7 @@ export default function PlayerDashboardPage() {
   const [divisionScheduleByes, setDivisionScheduleByes] = useState([]);
   const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
+  const [activeDivisionOptions, setActiveDivisionOptions] = useState([]);
 
   const loadData = useCallback(async function loadData() {
     const {
@@ -121,6 +123,34 @@ export default function PlayerDashboardPage() {
       setLoading(false);
       return;
     }
+
+    const { data: activeDivisionRows, error: activeDivisionError } = await supabase
+      .from("divisions")
+      .select(`
+        id,
+        name,
+        is_active,
+        rating_type,
+        leagues (
+          id,
+          name,
+          season_id,
+          is_active,
+          seasons (
+            id,
+            name,
+            is_active
+          )
+        )
+      `);
+
+    if (activeDivisionError) {
+      alert(activeDivisionError.message);
+      setLoading(false);
+      return;
+    }
+
+    setActiveDivisionOptions(buildActiveDivisionOptions(activeDivisionRows || []));
 
     const { data: rosterData, error: rosterError } = await supabase
       .from("team_members")
@@ -1018,17 +1048,38 @@ export default function PlayerDashboardPage() {
       (divisionStandings || []).map((standing) => [String(standing.team_id), standing])
     );
 
-    setDivisionScheduleTeams(
-      (divisionTeams || [])
-        .map((team) => ({
-          ...team,
-          standing: standingsByTeamId[String(team.id)] || null,
-        }))
-        .sort(compareDivisionScheduleTeams)
-    );
+    const nextDivisionTeams = (divisionTeams || [])
+      .map((team) => ({
+        ...team,
+        standing: standingsByTeamId[String(team.id)] || null,
+      }))
+      .sort(compareDivisionScheduleTeams);
+    const selectedScheduleTeam =
+      nextDivisionTeams.find((divisionTeam) => String(divisionTeam.id) === String(baseTeam.id)) ||
+      nextDivisionTeams[0] ||
+      baseTeam;
+
+    setDivisionScheduleTeam({
+      ...baseTeam,
+      ...selectedScheduleTeam,
+      division_id: divisionId,
+      divisions: baseTeam.divisions,
+    });
+    setDivisionScheduleTeams(nextDivisionTeams);
     setDivisionScheduleMatches(divisionMatches || []);
     setDivisionScheduleByes(filterByesForPublishedSchedule(divisionByes || [], divisionMatches || []));
     setDivisionScheduleRatings(divisionRatings || []);
+  }
+
+  function selectDivisionScheduleDivision(divisionId) {
+    const option = activeDivisionOptions.find((division) => String(division.id) === String(divisionId));
+    if (option?.division) {
+      openDivisionScheduleForTeam({
+        name: option.divisionName,
+        division_id: option.id,
+        divisions: option.division,
+      });
+    }
   }
 
   async function openLeagueDocument(team, documentType) {
@@ -1497,7 +1548,7 @@ export default function PlayerDashboardPage() {
             </label>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 bg-slate-50 p-4 md:grid-cols-4 md:p-5">
+          <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 md:grid-cols-4 md:gap-3 md:p-5">
             <HistoryStat label="Games Played" value={playHistoryStats.games} tone="slate" />
             <HistoryStat label="Wins" value={playHistoryStats.wins} tone="emerald" />
             <HistoryStat label="Losses" value={playHistoryStats.losses} tone="red" />
@@ -1554,6 +1605,9 @@ export default function PlayerDashboardPage() {
           <TeamScheduleModal
             title="Division Team Schedules"
             subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} / ${divisionScheduleTeam.divisions?.name || "Division"}`}
+            divisionOptions={activeDivisionOptions}
+            selectedDivisionId={divisionScheduleTeam.divisions?.id || divisionScheduleTeam.division_id}
+            onSelectDivision={selectDivisionScheduleDivision}
             teams={divisionScheduleTeams}
             selectedTeamId={divisionScheduleTeam.id}
             onSelectTeam={(team) =>
@@ -1656,11 +1710,11 @@ function HistoryStat({ label, value, tone = "slate" }) {
   const labelClass = tone === "amber" ? "text-slate-800" : "text-white/75";
 
   return (
-    <div className={`rounded-xl p-4 shadow-sm ${tones[tone] || tones.slate}`}>
-      <div className={`text-xs font-bold uppercase tracking-wide ${labelClass}`}>
+    <div className={`rounded-xl p-2.5 shadow-sm sm:p-4 ${tones[tone] || tones.slate}`}>
+      <div className={`text-[10px] font-bold uppercase leading-tight tracking-wide sm:text-xs ${labelClass}`}>
         {label}
       </div>
-      <div className="mt-1 text-2xl font-black">{value}</div>
+      <div className="mt-0.5 text-xl font-black sm:mt-1 sm:text-2xl">{value}</div>
     </div>
   );
 }

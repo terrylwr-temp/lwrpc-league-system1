@@ -15,11 +15,26 @@ export default function TeamScheduleModal({
   ratingType = "dupr",
   loading = false,
   compact = false,
+  divisionOptions = [],
+  selectedDivisionId = "",
+  onSelectDivision = null,
   onClose,
 }) {
   const [standingsView, setStandingsView] = useState("summary");
   const selectedTeam = teams.find((team) => String(team.id) === String(selectedTeamId));
   const selectedTeamCaptainNames = captainNames(selectedTeam);
+  const divisionOptionGroups = divisionOptions.reduce((groups, division) => {
+    const leagueName = division.leagueName || "League";
+    const current = groups.find((group) => group.leagueName === leagueName);
+
+    if (current) {
+      current.divisions.push(division);
+    } else {
+      groups.push({ leagueName, divisions: [division] });
+    }
+
+    return groups;
+  }, []);
   const ratingByMemberId = Object.fromEntries(
     ratings.map((rating) => [String(rating.member_id), rating])
   );
@@ -49,7 +64,7 @@ export default function TeamScheduleModal({
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 p-0">
       <div className="flex h-[100dvh] max-h-[100dvh] w-full max-w-6xl flex-col overflow-hidden rounded-none bg-white shadow-2xl">
-        <div className="flex flex-wrap items-start justify-between gap-3 bg-gradient-to-r from-slate-950 via-blue-950 to-emerald-900 px-4 py-4 text-white sm:px-6 sm:py-5">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-950 via-blue-950 to-emerald-900 px-4 py-4 text-white sm:px-6 sm:py-5 md:flex-row md:items-start md:justify-between">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
               Division Schedule
@@ -57,13 +72,36 @@ export default function TeamScheduleModal({
             <h2 className="mt-1 text-xl font-black sm:text-2xl">{title || "Team Schedule"}</h2>
             {subtitle && <p className="mt-1 text-sm font-semibold text-slate-200">{subtitle}</p>}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
-          >
-            Close
-          </button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center md:justify-end">
+            {divisionOptions.length > 0 && (
+              <label className="block sm:min-w-72">
+                <span className="sr-only">Choose division</span>
+                <select
+                  value={selectedDivisionId || ""}
+                  onChange={(event) => onSelectDivision?.(event.target.value)}
+                  className="w-full rounded-xl border border-white/30 bg-white px-3 py-2 text-sm font-bold text-slate-950 shadow-sm"
+                  aria-label="Choose active division"
+                >
+                  {divisionOptionGroups.map((group) => (
+                    <optgroup key={group.leagueName} label={group.leagueName}>
+                      {group.divisions.map((division) => (
+                        <option key={division.id} value={division.id}>
+                          {division.divisionName || "Division"}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </label>
+            )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 shadow-sm hover:bg-slate-100"
+            >
+              Close
+            </button>
+          </div>
         </div>
 
         <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[290px_minmax(0,1fr)]">

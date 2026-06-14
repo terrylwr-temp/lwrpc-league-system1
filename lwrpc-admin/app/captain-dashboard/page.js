@@ -26,6 +26,7 @@ import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
+import { buildActiveDivisionOptions } from "../lib/divisionOptions";
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
 const CAPTAIN_SECTION_IDS = {
@@ -78,6 +79,7 @@ export default function CaptainDashboardPage() {
   const [divisionScheduleByes, setDivisionScheduleByes] = useState([]);
   const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
+  const [activeDivisionOptions, setActiveDivisionOptions] = useState([]);
   const [pdfDocument, setPdfDocument] = useState(null);
   const [scoreSheetPreview, setScoreSheetPreview] = useState(null);
   const [divisionCaptainsPreview, setDivisionCaptainsPreview] = useState(null);
@@ -167,6 +169,34 @@ export default function CaptainDashboardPage() {
     }
 
     setCurrentMember(memberData);
+
+    const { data: activeDivisionRows, error: activeDivisionError } = await supabase
+      .from("divisions")
+      .select(`
+        id,
+        name,
+        is_active,
+        rating_type,
+        leagues (
+          id,
+          name,
+          season_id,
+          is_active,
+          seasons (
+            id,
+            name,
+            is_active
+          )
+        )
+      `);
+
+    if (activeDivisionError) {
+      alert(activeDivisionError.message);
+      setLoading(false);
+      return;
+    }
+
+    setActiveDivisionOptions(buildActiveDivisionOptions(activeDivisionRows || []));
 
     const { data: clubProLocations, error: clubProLocationsError } = await supabase
       .from("locations")
@@ -658,7 +688,6 @@ export default function CaptainDashboardPage() {
   }, [selectedCaptainTeamId, visibleTeams]);
 
   const selectedTeamId = selectedCaptainTeam?.id || "";
-
   function selectCaptainTeam(teamId) {
     setSelectedCaptainTeamId(teamId);
     writeDashboardTeamSelection(
@@ -1954,15 +1983,36 @@ export default function CaptainDashboardPage() {
       (divisionStandings || []).map((standing) => [String(standing.team_id), standing])
     );
 
-    setDivisionScheduleTeams(
-      (divisionTeams || []).map((divisionTeam) => ({
+    const nextDivisionTeams = (divisionTeams || []).map((divisionTeam) => ({
         ...divisionTeam,
         standing: standingsByTeamId[String(divisionTeam.id)] || null,
-      })).sort(compareDivisionScheduleTeams)
-    );
+      })).sort(compareDivisionScheduleTeams);
+    const selectedScheduleTeam =
+      nextDivisionTeams.find((divisionTeam) => String(divisionTeam.id) === String(team.id)) ||
+      nextDivisionTeams[0] ||
+      team;
+
+    setDivisionScheduleTeam({
+      ...team,
+      ...selectedScheduleTeam,
+      division_id: team.division_id,
+      divisions: team.divisions,
+    });
+    setDivisionScheduleTeams(nextDivisionTeams);
     setDivisionScheduleMatches(divisionMatches || []);
     setDivisionScheduleByes(filterByesForPublishedSchedule(divisionByes || [], divisionMatches || []));
     setDivisionScheduleRatings(divisionRatings || []);
+  }
+
+  function selectDivisionScheduleDivision(divisionId) {
+    const option = activeDivisionOptions.find((division) => String(division.id) === String(divisionId));
+    if (option?.division) {
+      openDivisionSchedule({
+        name: option.divisionName,
+        division_id: option.id,
+        divisions: option.division,
+      });
+    }
   }
 
   async function openLeagueDocument(team, documentType) {
@@ -2530,6 +2580,9 @@ export default function CaptainDashboardPage() {
           <TeamScheduleModal
             title="Division Team Schedules/Standings"
             subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} · ${divisionScheduleTeam.divisions?.name || "Division"}`}
+            divisionOptions={activeDivisionOptions}
+            selectedDivisionId={divisionScheduleTeam.divisions?.id || divisionScheduleTeam.division_id}
+            onSelectDivision={selectDivisionScheduleDivision}
             teams={divisionScheduleTeams}
             selectedTeamId={divisionScheduleTeam.id}
             onSelectTeam={(team) =>
