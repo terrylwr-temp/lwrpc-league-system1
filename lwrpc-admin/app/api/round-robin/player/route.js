@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { compareLadderRowsByCriteria, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
+import { sendSmsMessages } from "../../../lib/notifications";
 import { loadServerSystemSettings } from "../../../lib/serverEmailTemplates";
 
 export const runtime = "nodejs";
@@ -300,8 +301,9 @@ async function updatePlayerSessionStatus(supabase, group, player, body) {
   if (error) throw error;
 
   const promotedPlayers = resolvedStatus === "declined" ? await promoteWaitlistSpots(supabase, session) : [];
+  const promotionSms = await sendWaitlistPromotionTexts(group, session, promotedPlayers);
   const sessions = await loadPlayerSessions(supabase, group, player);
-  return { sessionPlayer: data, resolvedStatus, promotedPlayers: promotedPlayers.length, sessions };
+  return { sessionPlayer: data, resolvedStatus, promotedPlayers: promotedPlayers.length, promotionSms, sessions };
 }
 
 async function loadSessionForGroup(supabase, groupId, sessionId) {
@@ -366,6 +368,41 @@ async function promoteWaitlistSpots(supabase, session) {
     .select("*");
   if (error) throw error;
   return data || [];
+}
+
+async function sendWaitlistPromotionTexts(group, session, promotedPlayers = []) {
+  const phones = (promotedPlayers || []).map((player) => player.phone).filter(Boolean);
+  if (promotedPlayers.length === 0 || group.settings?.smsSendingEnabled !== true || phones.length === 0) {
+    return {
+      skipped: true,
+      reason: promotedPlayers.length === 0 ? "No waitlist promotions" : group.settings?.smsSendingEnabled === true ? "No phone numbers" : "SMS disabled in settings",
+      sent: 0,
+      results: [],
+      recipientCount: promotedPlayers.length,
+      phoneCount: phones.length,
+    };
+  }
+
+  return sendSmsMessages({
+    phones,
+    body: waitlistPromotionSmsBody(group, session),
+  });
+}
+
+function waitlistPromotionSmsBody(group, session) {
+  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next match";
+  const time = session?.starts_at ? formatSessionTime(session.starts_at) : "TBD";
+  const location = session?.location ? ` at ${session.location}` : "";
+  return `${group?.name || "PBCourtCommand"}: A spot opened for ${session?.session_name || "your match"} on ${date} at ${time}${location}. You have been moved from Waitlist to Joined.`;
+}
+
+function formatSessionTime(value) {
+  const [hourText, minuteText] = String(value || "").split(":");
+  const hour = Number(hourText || 0);
+  const minute = Number(minuteText || 0);
+  const date = new Date();
+  date.setHours(hour, minute, 0, 0);
+  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
 async function loadPlayerLadders(supabase, group, player) {

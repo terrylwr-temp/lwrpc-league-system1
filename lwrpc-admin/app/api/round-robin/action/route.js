@@ -892,12 +892,13 @@ async function createLadderMatch(supabase, group, body = {}) {
     startsAt,
     maxPlayers: 100,
     repeatsWeekly: false,
-    hostPlayerId: group.settings?.defaultHostPlayerId || "",
-    cohostPlayerId: "",
+    hostPlayerId: body.hostPlayerId || ladder.hostPlayerId || group.settings?.defaultHostPlayerId || "",
+    cohostPlayerId: body.cohostPlayerId || ladder.cohostPlayerId || "",
     invitedGroupIds: [ladder.playerGroupId],
     mode: "ladder",
     publicUrl: body.publicUrl,
     smsEnabled: body.smsEnabled === true,
+    reminderHoursBefore: normalizeReminderHours(body.reminderHoursBefore ?? ladder.reminderHoursBefore),
     ladderId: ladder.id,
     ladderName: ladder.name,
     ladderConfig: ladder,
@@ -1056,6 +1057,7 @@ async function createPlannedSession(supabase, group, body) {
     settings: {
       createdFromGroups: invitedGroupIds,
       smsTemplates: normalizeSmsTemplates(group.settings?.smsTemplates || {}),
+      reminderHoursBefore: normalizeReminderHours(body.reminderHoursBefore),
       ...ladderSettings,
     },
     opened_at: now,
@@ -1145,6 +1147,7 @@ async function updatePlannedSession(supabase, group, body) {
       ...(existingSession.settings || {}),
       createdFromGroups: invitedGroupIds,
       smsTemplates: normalizeSmsTemplates(group.settings?.smsTemplates || {}),
+      reminderHoursBefore: normalizeReminderHours(body.reminderHoursBefore),
       ...ladderSettings,
     },
     updated_at: now,
@@ -1250,7 +1253,18 @@ async function updateSessionPlayerStatus(supabase, group, body) {
   if (error) throw error;
 
   const promotedPlayers = resolvedStatus === "declined" ? await promoteWaitlistSpots(supabase, session) : [];
-  return { sessionPlayer: data, promotedPlayers };
+  const promotionSms = await sendWaitlistPromotionTexts(group, session, promotedPlayers);
+  if (promotedPlayers.length > 0) {
+    await addLog(
+      supabase,
+      group.id,
+      session.id,
+      "session",
+      `${target.display_name || "Player"} declined. ${promotedPlayers.length} waitlisted player${promotedPlayers.length === 1 ? "" : "s"} moved to Joined.`,
+      { promotionSms, promotedPlayers: promotedPlayers.length }
+    );
+  }
+  return { sessionPlayer: data, promotedPlayers, promotionSms };
 }
 
 async function addSessionPlayer(supabase, group, body) {
@@ -2247,6 +2261,27 @@ async function promoteWaitlistSpots(supabase, session) {
   return data || [];
 }
 
+async function sendWaitlistPromotionTexts(group, session, promotedPlayers = []) {
+  const phones = (promotedPlayers || []).map((player) => player.phone).filter(Boolean);
+  if (promotedPlayers.length === 0) return smsDisabledResult("No waitlist promotions", 0, 0);
+  if (group.settings?.smsSendingEnabled !== true) {
+    return smsDisabledResult("SMS disabled in settings", promotedPlayers.length, phones.length);
+  }
+  if (phones.length === 0) return smsDisabledResult("No phone numbers", promotedPlayers.length, 0);
+
+  return sendSmsMessages({
+    phones,
+    body: waitlistPromotionSmsBody(group, session),
+  });
+}
+
+function waitlistPromotionSmsBody(group, session) {
+  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next match";
+  const time = session?.starts_at ? formatSessionTime(session.starts_at) : "TBD";
+  const location = session?.location ? ` at ${session.location}` : "";
+  return `${group?.name || "PBCourtCommand"}: A spot opened for ${session?.session_name || "your match"} on ${date} at ${time}${location}. You have been moved from Waitlist to Joined.`;
+}
+
 async function loadActivePlayers(supabase, groupId) {
   const { data, error } = await supabase
     .from("round_robin_players")
@@ -2795,6 +2830,9 @@ function normalizeLadder(ladder = {}, options = {}) {
     endDate: normalizeIsoDate(ladder.endDate),
     dayOfWeek,
     startTime: String(ladder.startTime || "").slice(0, 5),
+    hostPlayerId: String(ladder.hostPlayerId || "").trim(),
+    cohostPlayerId: String(ladder.cohostPlayerId || "").trim(),
+    reminderHoursBefore: normalizeReminderHours(ladder.reminderHoursBefore),
     playerGroupId: String(ladder.playerGroupId || "").trim(),
     participationRequirement,
     balanceMode: ladder.balanceMode === "season" ? "season" : "session",
@@ -2804,6 +2842,12 @@ function normalizeLadder(ladder = {}, options = {}) {
     initialPositions: normalizeInitialPositions(ladder.initialPositions || ladder.initial_positions || {}),
     updatedAt: new Date().toISOString(),
   };
+}
+
+function normalizeReminderHours(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return 0;
+  return Math.min(168, Math.max(0, Math.round(numeric)));
 }
 
 function normalizeInitialPositions(positions = {}, rosterIds = []) {

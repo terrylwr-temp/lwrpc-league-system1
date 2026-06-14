@@ -860,6 +860,18 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
             <TextInput label="Date" type="date" value={form.sessionDate} onChange={(value) => setForm((current) => ({ ...current, sessionDate: value }))} />
             <TextInput label="Start time" type="time" value={form.startsAt} onChange={(value) => setForm((current) => ({ ...current, startsAt: value }))} />
             <TextInput label="Max players" type="number" value={form.maxPlayers} onChange={(value) => setForm((current) => ({ ...current, maxPlayers: Number(value) }))} />
+            <label className="block text-sm font-bold text-slate-600">
+              Text reminder hours before match
+              <input
+                type="number"
+                min="0"
+                max="168"
+                value={form.reminderHoursBefore}
+                onChange={(event) => setForm((current) => ({ ...current, reminderHoursBefore: clampNumber(event.target.value, 0, 168, 0) }))}
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
+              />
+              <span className="mt-1 block text-xs font-bold text-slate-500">Use 0 for no reminder.</span>
+            </label>
             <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
               <input type="checkbox" checked={form.repeatsWeekly} onChange={(event) => setForm((current) => ({ ...current, repeatsWeekly: event.target.checked }))} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
               Repeats weekly
@@ -1461,13 +1473,13 @@ function SessionResultsModal({ state, session, onClose }) {
                 <div className="border-t border-slate-200 bg-blue-50 px-3 py-3 text-sm font-semibold text-blue-950">
                   <div className="font-black">Ladder movement rules</div>
                   <div className="mt-1">
-                    {ladder?.movementMode === "top2" ? "Top 2 move up and bottom 2 move down" : "Top 1 moves up and bottom 1 moves down"} on each court after the match. Middle players stay on the same court.
+                    Selected movement: {ladderMovementLabel(ladder)}. {ladder?.movementMode === "top2" ? "Top 2 move up and bottom 2 move down" : "Top 1 moves up and bottom 1 moves down"} on each court after the match. Middle players stay on the same court.
                   </div>
                   <div className="mt-1">
                     Match-date ranking uses total points scored, then head-to-head if points are tied, then win percentage, average point differential, games played, and player name.
                   </div>
                   <div className="mt-1">
-                    Starting with session 4, players below the participation requirement drop one court for the next ladder date.
+                    Starting with session 4, players below the {clampNumber(ladder?.participationRequirement, 10, 100, 50)}% participation requirement drop one court for the next ladder date.
                   </div>
                 </div>
               )}
@@ -1578,6 +1590,7 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
   const canDuplicate = !isHostAccess && session.status === "done";
   const isLadder = isLadderSession(session);
   const duprExported = sessionDuprExported(session);
+  const spotsOpen = session.max_players ? Math.max(0, Number(session.max_players || 0) - joined) : null;
   const stopActionClick = (event) => event.stopPropagation();
 
   return (
@@ -1618,15 +1631,17 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
           </div>
           {session.location && <div className="mt-1 text-xs font-bold text-slate-500">{session.location}</div>}
           <div className="mt-2 flex flex-wrap gap-2 text-xs font-black">
-            <span className="rounded-md bg-teal-100 px-2 py-1 text-teal-900">{joined} Joined</span>
+            <button
+              type="button"
+              onClick={(event) => { stopActionClick(event); openPlayersModal(session); }}
+              className="rounded-md bg-teal-100 px-2 py-1 text-teal-900 shadow-sm hover:bg-teal-200"
+            >
+              {spotsOpen === null ? `${joined} Joined` : `${joined} Joined / ${spotsOpen} spots open`}
+            </button>
             <span className="rounded-md bg-amber-100 px-2 py-1 text-amber-900">{waitlist} Waitlist</span>
-            {session.max_players && <span className="rounded-md bg-blue-100 px-2 py-1 text-blue-900">Max {session.max_players}</span>}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
-          <button type="button" onClick={(event) => { stopActionClick(event); openPlayersModal(session); }} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-800 shadow-sm hover:border-blue-500 hover:bg-blue-50">
-            Players
-          </button>
           {!isHostAccess && !isStarted && (
             <button type="button" onClick={(event) => { stopActionClick(event); editSession(session); }} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-800 shadow-sm hover:border-teal-500 hover:bg-teal-50">
               Edit
@@ -2650,6 +2665,9 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
       ladder,
       sessionDate: summary.nextDate || ladder.startDate || new Date().toISOString().slice(0, 10),
       startsAt: ladder.startTime || state.group?.schedule_time || "",
+      hostPlayerId: ladder.hostPlayerId || defaultHostPlayerId(state) || activePlayers(state.players)[0]?.id || "",
+      cohostPlayerId: ladder.cohostPlayerId || "",
+      reminderHoursBefore: clampNumber(ladder.reminderHoursBefore, 0, 168, 0),
     });
   }
 
@@ -2664,6 +2682,9 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
       ladderId: ladder.id,
       sessionDate: ladderMatchModal.sessionDate,
       startsAt: ladderMatchModal.startsAt,
+      hostPlayerId: ladderMatchModal.hostPlayerId,
+      cohostPlayerId: ladderMatchModal.cohostPlayerId,
+      reminderHoursBefore: ladderMatchModal.reminderHoursBefore,
       publicUrl: playerRoundRobinUrl(state.group),
       smsEnabled: state.group.settings?.smsSendingEnabled === true,
     });
@@ -3016,6 +3037,7 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
           form={form}
           setForm={setForm}
           activeGroups={activeGroups}
+          activePlayers={activePlayers(state.players)}
           actionLoading={actionLoading}
           hasStartedMatches={ladderHasStarted(state, form.id)}
           onRecalculate={() => recalculateLadderRankings(form)}
@@ -3067,6 +3089,18 @@ function LadderMatchConfirmModal({ modal, actionLoading, onChange, onCreate, onC
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <TextInput label="Match date" type="date" value={modal.sessionDate || ""} onChange={(value) => onChange("sessionDate", value)} required />
               <TextInput label="Start time" type="time" value={modal.startsAt || ""} onChange={(value) => onChange("startsAt", value)} />
+              <label className="block text-sm font-bold text-slate-600 sm:col-span-2">
+                Text reminder hours before match
+                <input
+                  type="number"
+                  min="0"
+                  max="168"
+                  value={modal.reminderHoursBefore ?? 0}
+                  onChange={(event) => onChange("reminderHoursBefore", clampNumber(event.target.value, 0, 168, 0))}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
+                />
+                <span className="mt-1 block text-xs font-bold text-slate-500">Use 0 for no reminder.</span>
+              </label>
             </div>
             <div className="mt-4 rounded-lg border border-violet-100 bg-violet-50 px-3 py-2 text-sm font-bold text-violet-950">
               This will open the match date, invite the selected ladder group, and send New Match texts when SMS is enabled.
@@ -3086,7 +3120,7 @@ function LadderMatchConfirmModal({ modal, actionLoading, onChange, onCreate, onC
   );
 }
 
-function LadderFormModal({ form, setForm, activeGroups, actionLoading, hasStartedMatches, onRecalculate, onSave, onClose }) {
+function LadderFormModal({ form, setForm, activeGroups, activePlayers, actionLoading, hasStartedMatches, onRecalculate, onSave, onClose }) {
   const isEditing = Boolean(form.id);
   const saving = actionLoading === "saveLadder";
   const recalculating = actionLoading === "recalculateLadderRankings";
@@ -3134,6 +3168,32 @@ function LadderFormModal({ form, setForm, activeGroups, actionLoading, hasStarte
                 </select>
               </label>
               <TextInput label="Start time" type="time" value={form.startTime} onChange={(value) => setForm((current) => ({ ...current, startTime: value }))} />
+              <label className="block text-sm font-bold text-slate-600">
+                Host
+                <select value={form.hostPlayerId} onChange={(event) => setForm((current) => ({ ...current, hostPlayerId: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold">
+                  <option value="">Select host</option>
+                  {activePlayers.map((player) => <option key={player.id} value={player.id}>{player.display_name}</option>)}
+                </select>
+              </label>
+              <label className="block text-sm font-bold text-slate-600">
+                Co-Host
+                <select value={form.cohostPlayerId} onChange={(event) => setForm((current) => ({ ...current, cohostPlayerId: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold">
+                  <option value="">No co-host</option>
+                  {activePlayers.map((player) => <option key={player.id} value={player.id}>{player.display_name}</option>)}
+                </select>
+              </label>
+              <label className="block text-sm font-bold text-slate-600">
+                Default Text reminder hours before match
+                <input
+                  type="number"
+                  min="0"
+                  max="168"
+                  value={form.reminderHoursBefore}
+                  onChange={(event) => setForm((current) => ({ ...current, reminderHoursBefore: clampNumber(event.target.value, 0, 168, 0) }))}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
+                />
+                <span className="mt-1 block text-xs font-bold text-slate-500">Use 0 for no reminder.</span>
+              </label>
               <label className="block text-sm font-bold text-slate-600">
                 <span className="flex items-center gap-2">
                   <span>Participation requirements</span>
@@ -4079,6 +4139,9 @@ function emptyLadderForm(state) {
     endDate: "",
     dayOfWeek: dayOfWeekForDate(startDate) || "monday",
     startTime: timeInputValue(state.group.schedule_time),
+    hostPlayerId: defaultHostPlayerId(state) || activePlayers(state.players)[0]?.id || "",
+    cohostPlayerId: "",
+    reminderHoursBefore: 0,
     playerGroupId: "",
     participationRequirement: 50,
     balanceMode: "session",
@@ -4097,6 +4160,9 @@ function ladderFormFromLadder(ladder) {
     endDate: ladder.endDate || "",
     dayOfWeek: ladder.dayOfWeek || "monday",
     startTime: ladder.startTime || "",
+    hostPlayerId: ladder.hostPlayerId || "",
+    cohostPlayerId: ladder.cohostPlayerId || "",
+    reminderHoursBefore: clampNumber(ladder.reminderHoursBefore, 0, 168, 0),
     playerGroupId: ladder.playerGroupId || "",
     participationRequirement: ladder.participationRequirement || 50,
     balanceMode: ladder.balanceMode || "session",
@@ -4117,6 +4183,9 @@ function normalizeLadderList(ladders = []) {
     dayOfWeek: normalizeDayOfWeek(ladder.dayOfWeek) || dayOfWeekForDate(ladder.startDate) || "monday",
     dayOfWeekLabel: LADDER_DAYS.find((day) => day.value === normalizeDayOfWeek(ladder.dayOfWeek))?.label || "",
     startTime: String(ladder.startTime || "").slice(0, 5),
+    hostPlayerId: String(ladder.hostPlayerId || "").trim(),
+    cohostPlayerId: String(ladder.cohostPlayerId || "").trim(),
+    reminderHoursBefore: clampNumber(ladder.reminderHoursBefore, 0, 168, 0),
     playerGroupId: String(ladder.playerGroupId || "").trim(),
     participationRequirement: clampNumber(ladder.participationRequirement, 10, 100, 50),
     balanceMode: ladder.balanceMode === "season" ? "season" : "session",
@@ -4447,6 +4516,7 @@ function newSessionForm(state) {
     cohostPlayerId: "",
     invitedGroupIds: [],
     smsEnabled: state.group.settings?.smsSendingEnabled === true,
+    reminderHoursBefore: 0,
   };
 }
 
@@ -4469,6 +4539,7 @@ function sessionFormFromSession(state, session) {
     cohostPlayerId: session.cohost_player_id || "",
     invitedGroupIds: Array.isArray(session.invited_group_ids) ? session.invited_group_ids : [],
     smsEnabled: false,
+    reminderHoursBefore: clampNumber(session.settings?.reminderHoursBefore, 0, 168, 0),
   };
 }
 

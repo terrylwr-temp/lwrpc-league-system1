@@ -1066,7 +1066,6 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
   const isPlaying = session.status === "playing";
   const canRespond = session.hasPlayerResponse !== false && !isPlaying;
   const canStartSession = isPlaying || Number(session.joinedCount || 0) >= 4;
-  const showSetupButtons = !(session.canManageSession && isPlaying);
   const isLadder = isLadderSession(session);
 
   return (
@@ -1114,15 +1113,6 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
           </div>
         </div>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap lg:justify-end">
-          {showSetupButtons && (
-            <button
-              type="button"
-              onClick={() => onPlayers(session)}
-              className="rounded-lg border border-blue-300 bg-blue-50 px-5 py-3 text-sm font-black text-blue-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-500 hover:bg-blue-100"
-            >
-              Players
-            </button>
-          )}
           {session.canManageSession && !isPlaying && (
             <button
               type="button"
@@ -1919,13 +1909,13 @@ function HistorySessionModal({ session, player, onClose }) {
               <div className="border-t border-slate-200 bg-blue-50 px-3 py-3 text-sm font-semibold text-blue-950">
                 <div className="font-black">Ladder movement rules</div>
                 <div className="mt-1">
-                  {session.settings?.ladderConfig?.movementMode === "top2" ? "Top 2 move up and bottom 2 move down" : "Top 1 moves up and bottom 1 moves down"} on each court after the match. Middle players stay on the same court.
+                  Selected movement: {ladderMovementLabel(session.settings?.ladderConfig)}. {session.settings?.ladderConfig?.movementMode === "top2" ? "Top 2 move up and bottom 2 move down" : "Top 1 moves up and bottom 1 moves down"} on each court after the match. Middle players stay on the same court.
                 </div>
                 <div className="mt-1">
                   Match-date ranking uses total points scored, then head-to-head if points are tied, then win percentage, average point differential, games played, and player name.
                 </div>
                 <div className="mt-1">
-                  Starting with session 4, players below the participation requirement drop one court for the next ladder date.
+                  Starting with session 4, players below the {clampNumber(session.settings?.ladderConfig?.participationRequirement, 10, 100, 50)}% participation requirement drop one court for the next ladder date.
                 </div>
               </div>
             )}
@@ -2480,6 +2470,16 @@ function playerIdsFromMatches(matches = []) {
     });
     return ids;
   }, new Set());
+}
+
+function ladderMovementLabel(ladder) {
+  return ladder?.movementMode === "top2" ? "Top 2 up, bottom 2 down" : "Top 1 up, bottom 1 down";
+}
+
+function clampNumber(value, min, max, fallback) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.min(max, Math.max(min, numeric));
 }
 
 function formatPercent(value) {
