@@ -1119,17 +1119,31 @@ export default function PlayerDashboardPage() {
             <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
               <div>
                 <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
-                  Player Workspace
+                  {formatMemberName(member) || "Player"}
                 </div>
                 <h2 className="mt-1 text-2xl font-black">My Teams</h2>
               </div>
               <div className="flex flex-col gap-2 text-sm font-semibold text-slate-300 md:items-end">
                 <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                  <span className="rounded-xl bg-white/10 px-3 py-2 text-xs font-black text-white">
+                  <button
+                    type="button"
+                    onClick={() => selectPanel("history")}
+                    className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-black shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-slate-950 active:translate-y-0 ${
+                      activePanel === "history"
+                        ? "border-blue-300 bg-blue-600 text-white hover:bg-blue-500"
+                        : "border-blue-200 bg-blue-100 text-blue-950 hover:bg-blue-200"
+                    }`}
+                  >
+                    My Play History
+                    <span className={`ml-2 rounded-lg px-2 py-0.5 ${activePanel === "history" ? "bg-white/20" : "bg-white"}`}>
+                      {filteredPlayHistory.length}
+                    </span>
+                  </button>
+                  <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-200">
                     {visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}
                   </span>
                   {mySelectedTeamRatingSummary() && (
-                    <span className="rounded-xl bg-emerald-400 px-3 py-2 text-xs font-black text-slate-950">
+                    <span className="rounded-full border border-emerald-300/30 bg-emerald-300/15 px-3 py-1.5 text-xs font-bold text-emerald-100">
                       {mySelectedTeamRatingSummary().label}: {mySelectedTeamRatingSummary().value}
                     </span>
                   )}
@@ -1171,6 +1185,18 @@ export default function PlayerDashboardPage() {
                 onOpenStandings={(team) =>
                   openDivisionScheduleForTeam(team)
                 }
+                onOpenDivisionStandings={() => {
+                  if (visibleTeams.length === 0) {
+                    router.push("/standings");
+                    return;
+                  }
+
+                  selectPanel("standings");
+                }}
+                onOpenTeamMatches={() => selectPanel("upcoming")}
+                activePanel={activePanel}
+                standingsCount={selectedDivisionStandings.length}
+                teamMatchesCount={upcomingMatchesBySelectedTeam.length}
               />
             )}
 
@@ -1184,39 +1210,6 @@ export default function PlayerDashboardPage() {
           </div>
 
         </section>
-
-        <div className="sticky top-0 z-30 mt-4 rounded-2xl border border-white/80 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-2 shadow-xl ring-1 ring-slate-200 md:p-3">
-          <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
-            <DashboardOption
-              active={activePanel === "history"}
-              label="My Play History"
-              value={filteredPlayHistory.length}
-              tone="blue"
-              onClick={() => selectPanel("history")}
-            />
-            <DashboardOption
-              active={visibleTeams.length > 0 && activePanel === "standings"}
-              label={visibleTeams.length === 0 ? "Current Division Standings" : "Division Standings"}
-              value={visibleTeams.length === 0 ? "View" : selectedDivisionStandings.length}
-              tone="emerald"
-              onClick={() => {
-                if (visibleTeams.length === 0) {
-                  router.push("/standings");
-                  return;
-                }
-
-                selectPanel("standings");
-              }}
-            />
-            <DashboardOption
-              active={activePanel === "upcoming"}
-              label="Team Matches"
-              value={upcomingMatchesBySelectedTeam.length}
-              tone="gray"
-              onClick={() => selectPanel("upcoming")}
-            />
-          </div>
-        </div>
 
         <LoginMessageModal
           templateKey="player_login_popup"
@@ -1558,45 +1551,6 @@ export default function PlayerDashboardPage() {
   );
 }
 
-function DashboardOption({ active, label, value, tone = "blue", onClick }) {
-  const tones = {
-    blue: active
-      ? "border-blue-700 bg-blue-700 text-white"
-      : "border-blue-200 bg-blue-50 text-blue-950 hover:border-blue-500",
-    emerald: active
-      ? "border-emerald-700 bg-emerald-700 text-white"
-      : "border-emerald-200 bg-emerald-50 text-emerald-950 hover:border-emerald-500",
-    amber: active
-      ? "border-amber-500 bg-amber-400 text-slate-950"
-      : "border-amber-200 bg-amber-50 text-amber-950 hover:border-amber-500",
-    gray: active
-      ? "border-slate-700 bg-slate-700 text-white"
-      : "border-slate-300 bg-slate-50 text-slate-950 hover:border-slate-500",
-  };
-  const badgeClass = active ? "bg-white/20" : "bg-white";
-  const helperClass = active ? "text-white/80" : "text-slate-600";
-
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`group min-w-40 flex-1 rounded-2xl border-2 p-3 text-left shadow-lg ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 md:min-w-0 md:p-4 ${tones[tone] || tones.blue}`}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <div className="text-sm font-black leading-tight">{label}</div>
-          <div className={`mt-1 text-xs font-bold ${helperClass}`}>
-            Click to view
-          </div>
-        </div>
-        <div className={`shrink-0 rounded-xl px-3 py-1 text-sm font-black shadow-sm ${badgeClass}`}>
-          {value}
-        </div>
-      </div>
-    </button>
-  );
-}
-
 function DashboardTeamSelector({ teams, selectedTeamId, onSelect }) {
   return (
     <div className="relative -mb-4">
@@ -1688,6 +1642,11 @@ function TeamCard({
   onOpenDocument,
   onOpenRoster,
   onOpenStandings,
+  onOpenDivisionStandings,
+  onOpenTeamMatches,
+  activePanel,
+  standingsCount,
+  teamMatchesCount,
 }) {
   const standing = team.standing;
   const captainContacts = teamCaptainContacts(team);
@@ -1738,7 +1697,7 @@ function TeamCard({
         </div>
       </div>
 
-      <div className="border-t border-slate-100 p-4">
+      <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-3">
         <button
           type="button"
           onClick={(event) => {
@@ -1748,6 +1707,40 @@ function TeamCard({
           className="w-full cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
         >
           Team Roster
+        </button>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenDivisionStandings();
+          }}
+          className={`w-full cursor-pointer rounded-xl px-3 py-3 text-sm font-bold shadow-sm ${
+            activePanel === "standings"
+              ? "bg-emerald-700 text-white hover:bg-emerald-800"
+              : "bg-emerald-100 text-emerald-950 hover:bg-emerald-200"
+          }`}
+        >
+          Division Standings
+          <span className={`ml-2 rounded-lg px-2 py-0.5 text-xs ${activePanel === "standings" ? "bg-white/20" : "bg-white"}`}>
+            {standingsCount}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenTeamMatches();
+          }}
+          className={`w-full cursor-pointer rounded-xl px-3 py-3 text-sm font-bold shadow-sm ${
+            activePanel === "upcoming"
+              ? "bg-slate-800 text-white hover:bg-slate-900"
+              : "bg-slate-100 text-slate-950 hover:bg-slate-200"
+          }`}
+        >
+          Team Matches
+          <span className={`ml-2 rounded-lg px-2 py-0.5 text-xs ${activePanel === "upcoming" ? "bg-white/20" : "bg-white"}`}>
+            {teamMatchesCount}
+          </span>
         </button>
       </div>
 

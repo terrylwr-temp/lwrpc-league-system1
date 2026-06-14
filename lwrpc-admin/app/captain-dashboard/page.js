@@ -2364,7 +2364,28 @@ export default function CaptainDashboardPage() {
                 </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-3">
+                <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-3 xl:grid-cols-6">
+                  <CaptainSectionButton
+                    active={captainSection === "upcoming"}
+                    label="Upcoming Matches"
+                    value={upcomingItems.length}
+                    tone="blue"
+                    onClick={() => selectCaptainSection("upcoming")}
+                  />
+                  <CaptainSectionButton
+                    active={captainSection === "completed"}
+                    label="Completed Matches"
+                    value={completedMatches.length}
+                    tone="emerald"
+                    onClick={() => selectCaptainSection("completed")}
+                  />
+                  <CaptainSectionButton
+                    active={captainSection === "pending"}
+                    label="Pending Score Verification"
+                    value={pendingVerification.length}
+                    tone="red"
+                    onClick={() => selectCaptainSection("pending")}
+                  />
                   <button
                     type="button"
                     onClick={(event) => {
@@ -2459,32 +2480,6 @@ export default function CaptainDashboardPage() {
               </div>
             )}
           </div>
-        </div>
-
-        <div className="sticky top-0 z-30 mt-4 rounded-2xl border border-white/80 bg-gradient-to-br from-slate-200 via-white to-blue-100 p-2 shadow-xl ring-1 ring-slate-200 md:p-3">
-        <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
-          <CaptainSectionButton
-            active={captainSection === "upcoming"}
-            label="Upcoming Matches"
-            value={upcomingItems.length}
-            tone="blue"
-            onClick={() => selectCaptainSection("upcoming")}
-          />
-          <CaptainSectionButton
-            active={captainSection === "completed"}
-            label="Completed Matches"
-            value={completedMatches.length}
-            tone="emerald"
-            onClick={() => selectCaptainSection("completed")}
-          />
-          <CaptainSectionButton
-            active={captainSection === "pending"}
-            label="Pending Score Verification"
-            value={pendingVerification.length}
-            tone="red"
-            onClick={() => selectCaptainSection("pending")}
-          />
-        </div>
         </div>
 
         {captainSection === "pending" && (
@@ -4497,32 +4492,28 @@ function byeCard(bye) {
 function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) {
   const tones = {
     blue: active
-      ? "border-blue-700 bg-blue-700 text-white"
-      : "border-blue-200 bg-blue-50 text-blue-950 hover:border-blue-500",
+      ? "bg-blue-700 text-white"
+      : "bg-blue-100 text-blue-900 hover:bg-blue-200",
     red: active
-      ? "border-red-700 bg-red-700 text-white"
-      : "border-red-200 bg-red-50 text-red-950 hover:border-red-500",
+      ? "bg-red-700 text-white"
+      : "bg-red-100 text-red-900 hover:bg-red-200",
     emerald: active
-      ? "border-emerald-700 bg-emerald-700 text-white"
-      : "border-emerald-200 bg-emerald-50 text-emerald-950 hover:border-emerald-500",
+      ? "bg-emerald-700 text-white"
+      : "bg-emerald-100 text-emerald-950 hover:bg-emerald-200",
   };
-  const helperClass = active ? "text-white/80" : "text-slate-600";
   const badgeClass = active ? "bg-white/20" : "bg-white";
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`min-w-44 flex-1 rounded-2xl border-2 p-3 text-left shadow-lg ring-1 ring-white/70 transition hover:-translate-y-1 hover:shadow-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 md:min-w-0 md:p-4 ${tones[tone] || tones.blue}`}
+      className={`w-full cursor-pointer rounded-xl px-3 py-3 text-left text-sm font-bold shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:translate-y-0 ${tones[tone] || tones.blue}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <div className="text-sm font-black leading-tight">{label}</div>
-          <div className={`mt-1 text-xs font-bold ${helperClass}`}>
-            Click to view
-          </div>
+          <div className="leading-tight">{label}</div>
         </div>
-        <div className={`shrink-0 rounded-xl px-3 py-1 text-sm font-black shadow-sm ${badgeClass}`}>
+        <div className={`shrink-0 rounded-lg px-2 py-0.5 text-xs font-black shadow-sm ${badgeClass}`}>
           {value}
         </div>
       </div>
