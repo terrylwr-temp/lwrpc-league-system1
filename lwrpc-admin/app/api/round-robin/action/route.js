@@ -18,6 +18,14 @@ const HOST_ALLOWED_ACTIONS = new Set([
   "completeSession",
   "sendBroadcastText",
 ]);
+const SECONDARY_ALLOWED_ACTIONS = new Set([
+  "savePlayer",
+  "deletePlayer",
+  "saveLadder",
+  "deleteLadder",
+  "saveLadderPositions",
+  "createLadderMatch",
+]);
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -79,6 +87,26 @@ export async function POST(req) {
 
     if (action === "saveCourts") {
       const result = await saveCourts(supabase, group, body.courts);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "saveLadder") {
+      const result = await saveLadder(supabase, group, body.ladder);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "deleteLadder") {
+      const result = await deleteLadder(supabase, group, body.ladderId);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "saveLadderPositions") {
+      const result = await saveLadderPositions(supabase, group, body);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "createLadderMatch") {
+      const result = await createLadderMatch(supabase, group, body);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -200,17 +228,24 @@ async function validateRoundRobinAccess(supabase, body, action) {
   if (error) throw error;
 
   if (cleanCode) {
-    if (!isValidRoundRobinAdminCode(data, cleanCode)) {
+    const codeAccessMode = roundRobinAdminAccessMode(data, cleanCode);
+    if (!codeAccessMode) {
       const codeError = new Error("Incorrect manager code.");
       codeError.status = 401;
       throw codeError;
     }
 
-    return { mode: "manager", group: data };
+    if (codeAccessMode === "secondary" && !SECONDARY_ALLOWED_ACTIONS.has(action)) {
+      const scopeError = new Error("Secondary code access can only manage Ladders and Players.");
+      scopeError.status = 403;
+      throw scopeError;
+    }
+
+    return { mode: codeAccessMode, group: data };
   }
 
   if (!HOST_ALLOWED_ACTIONS.has(action)) {
-    const hostScopeError = new Error("Host access can only manage assigned sessions.");
+    const hostScopeError = new Error("Host access can only manage assigned matches.");
     hostScopeError.status = 403;
     throw hostScopeError;
   }
@@ -218,7 +253,7 @@ async function validateRoundRobinAccess(supabase, body, action) {
   const hostPlayer = await findPlayerByPhone(supabase, data.id, body.hostPhone);
   const sessionId = await resolveActionSessionId(supabase, body);
   if (!sessionId) {
-    const sessionError = new Error("Session is required for host access.");
+    const sessionError = new Error("Match is required for host access.");
     sessionError.status = 400;
     throw sessionError;
   }
@@ -231,6 +266,14 @@ async function validateRoundRobinAccess(supabase, body, action) {
   }
 
   return { mode: "host", group: data, hostPlayer, hostSession };
+}
+
+function sanitizeActionGroup(group = {}) {
+  const safeGroup = { ...group };
+  delete safeGroup.admin_code;
+  safeGroup.settings = { ...(safeGroup.settings || {}) };
+  delete safeGroup.settings.secondaryAdminCode;
+  return safeGroup;
 }
 
 async function saveSettings(supabase, group, body) {
@@ -248,6 +291,9 @@ async function saveSettings(supabase, group, body) {
       ...(group.settings || {}),
       smsTemplates: body.smsTemplates || group.settings?.smsTemplates || {},
       defaultRounds: Number(body.defaultRounds || group.settings?.defaultRounds || 6),
+      defaultLocation: String(body.defaultLocation || "").trim(),
+      defaultHostPlayerId: String(body.defaultHostPlayerId || "").trim(),
+      secondaryAdminCode: String(body.secondaryCode || "").trim() || String(group.settings?.secondaryAdminCode || "").trim(),
     },
     updated_at: new Date().toISOString(),
   };
@@ -262,7 +308,7 @@ async function saveSettings(supabase, group, body) {
 
   if (error) throw error;
   await addLog(supabase, group.id, null, "setup", adminCode ? "Round Robin settings and manager code updated." : "Round Robin settings updated.");
-  return { group: { ...group, ...payload, admin_code: undefined } };
+  return { group: sanitizeActionGroup({ ...group, ...payload }) };
 }
 
 async function savePlayer(supabase, group, player = {}) {
@@ -288,7 +334,7 @@ async function savePlayer(supabase, group, player = {}) {
     member_id: player.memberId || player.member_id || null,
     display_name: displayName,
     first_name: String(player.first_name || player.firstName || displayName.split(/\s+/)[0] || "").trim() || null,
-    dupr_id: String(player.duprId || player.dupr_id || "").trim() || null,
+    dupr_id: normalizeDuprId(player.duprId || player.dupr_id) || null,
     email: String(player.email || "").trim().toLowerCase() || null,
     phone: formatPhoneInput(cleanPhone),
     is_active: player.is_active !== false,
@@ -347,6 +393,53 @@ async function sendNewPlayerText(supabase, group, player, publicUrl = "") {
       ? `New Player text sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"} for ${player.display_name || "Player"}.`
       : `New Player text skipped for ${player.display_name || "Player"} because SMS is off.`,
     { sms, recipientScope: "newPlayer", recipientCount: 1, phoneCount: phones.length, playerId: player.id }
+  );
+
+  return sms;
+}
+
+async function sendLadderAddedText(supabase, group, ladder, publicUrl = "") {
+  const smsEnabled = group.settings?.smsSendingEnabled === true;
+  const ladderPlayers = await loadPlayersForGroups(supabase, group.id, [ladder.playerGroupId]);
+  const phones = ladderPlayers.map((player) => player.phone).filter(Boolean);
+  const template = normalizeSmsTemplates(group.settings?.smsTemplates || {}).ladderAdded;
+  const results = [];
+
+  if (smsEnabled) {
+    for (const player of ladderPlayers) {
+      if (!player.phone) continue;
+      const result = await sendSmsMessages({
+        phones: [player.phone],
+        body: renderSmsTemplate(template, {
+          group,
+          publicUrl,
+          playerName: player.display_name || "Player",
+          ladderName: ladder.name || "Ladder",
+        }),
+      });
+      results.push({ playerId: player.id, ...result });
+    }
+  }
+
+  const sms = smsEnabled
+    ? {
+      skipped: false,
+      sent: results.reduce((total, result) => total + Number(result.sent || 0), 0),
+      results,
+      recipientCount: ladderPlayers.length,
+      phoneCount: phones.length,
+    }
+    : smsDisabledResult("SMS disabled in settings", ladderPlayers.length, phones.length);
+
+  await addLog(
+    supabase,
+    group.id,
+    null,
+    "sms",
+    smsEnabled
+      ? `Ladder Added text sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"} for ${ladder.name || "Ladder"}.`
+      : `Ladder Added text skipped for ${ladder.name || "Ladder"} because SMS is off.`,
+    { sms, recipientScope: "ladderAdded", recipientCount: ladderPlayers.length, phoneCount: phones.length, ladderId: ladder.id }
   );
 
   return sms;
@@ -426,7 +519,7 @@ async function saveSmsSettings(supabase, group, body) {
   if (error) throw error;
 
   await addLog(supabase, group.id, null, "sms", settings.smsSendingEnabled ? "SMS sending enabled." : "SMS sending disabled.");
-  return { group: { ...data, admin_code: undefined } };
+  return { group: sanitizeActionGroup(data) };
 }
 
 async function deletePlayer(supabase, group, playerId) {
@@ -557,6 +650,187 @@ async function saveCourts(supabase, group, courts = []) {
   return { courts: savedCourts };
 }
 
+async function saveLadder(supabase, group, ladder = {}) {
+  const normalized = normalizeLadder(ladder);
+  if (!normalized.name) throw new Error("Ladder name is required.");
+  if (!normalized.startDate) throw new Error("Start date is required.");
+  if (!normalized.playerGroupId) throw new Error("Player group is required.");
+  const existingLadders = normalizeLadders(group.settings?.ladders || []);
+  const existing = existingLadders.find((item) => item.id === normalized.id);
+  const isNewLadder = !existing;
+  const ladderToSave = {
+    ...normalized,
+    initialPositions: Object.keys(normalized.initialPositions || {}).length > 0
+      ? normalized.initialPositions
+      : existing?.initialPositions || {},
+  };
+  const nextLadders = existingLadders.some((item) => item.id === normalized.id)
+    ? existingLadders.map((item) => item.id === normalized.id ? ladderToSave : item)
+    : [...existingLadders, ladderToSave];
+
+  const settings = {
+    ...(group.settings || {}),
+    ladders: nextLadders,
+  };
+
+  const { error } = await supabase
+    .from("round_robin_groups")
+    .update({ settings, updated_at: new Date().toISOString() })
+    .eq("id", group.id);
+  if (error) throw error;
+
+  await addLog(supabase, group.id, null, "setup", `${ladderToSave.name} ladder saved.`);
+  const sms = isNewLadder ? await sendLadderAddedText(supabase, group, ladderToSave, ladder.publicUrl) : null;
+  return { ladder: ladderToSave, ladders: nextLadders, group: sanitizeActionGroup({ ...group, settings }), sms, ladderTextSent: Boolean(isNewLadder) };
+}
+
+async function deleteLadder(supabase, group, ladderId) {
+  const cleanId = String(ladderId || "").trim();
+  if (!cleanId) throw new Error("Ladder is required.");
+
+  const existingLadders = normalizeLadders(group.settings?.ladders || []);
+  const target = existingLadders.find((item) => item.id === cleanId);
+  if (!target) throw new Error("Ladder was not found.");
+  const ladderSessions = await loadLadderSessionsForGroup(supabase, group, target);
+  const sessionIds = ladderSessions.map((session) => session.id).filter(Boolean);
+  if (sessionIds.length > 0) {
+    const [matchesResult, resultsResult] = await Promise.all([
+      supabase
+        .from("round_robin_matches")
+        .select("id, team1_score, team2_score, status")
+        .in("session_id", sessionIds),
+      supabase
+        .from("round_robin_player_session_results")
+        .select("id, games, wins, losses, points_for, points_against")
+        .in("session_id", sessionIds),
+    ]);
+    if (matchesResult.error) throw matchesResult.error;
+    if (resultsResult.error) throw resultsResult.error;
+
+    const hasPlayedGames = (matchesResult.data || []).some((match) => (
+      match.status === "complete" ||
+      match.team1_score !== null ||
+      match.team2_score !== null
+    )) || (resultsResult.data || []).some((row) => (
+      Number(row.games || 0) > 0 ||
+      Number(row.wins || 0) > 0 ||
+      Number(row.losses || 0) > 0 ||
+      Number(row.points_for || 0) > 0 ||
+      Number(row.points_against || 0) > 0
+    ));
+    if (hasPlayedGames) throw new Error("This ladder has played games and cannot be deleted. Use Master Reset if you need to remove ladder match history.");
+
+    const logDelete = await supabase
+      .from("round_robin_activity_log")
+      .delete()
+      .eq("group_id", group.id)
+      .in("session_id", sessionIds);
+    if (logDelete.error) throw logDelete.error;
+
+    const sessionDelete = await supabase
+      .from("round_robin_sessions")
+      .delete()
+      .eq("group_id", group.id)
+      .in("id", sessionIds);
+    if (sessionDelete.error) throw sessionDelete.error;
+  }
+  const nextLadders = existingLadders.filter((item) => item.id !== cleanId);
+  const settings = {
+    ...(group.settings || {}),
+    ladders: nextLadders,
+  };
+
+  const { error } = await supabase
+    .from("round_robin_groups")
+    .update({ settings, updated_at: new Date().toISOString() })
+    .eq("id", group.id);
+  if (error) throw error;
+
+  await addLog(supabase, group.id, null, "setup", `${target.name || "Ladder"} deleted. Removed ${sessionIds.length} unplayed ladder match date${sessionIds.length === 1 ? "" : "s"}.`);
+  return { ladders: nextLadders, group: sanitizeActionGroup({ ...group, settings }), sessionsDeleted: sessionIds.length };
+}
+
+async function saveLadderPositions(supabase, group, body = {}) {
+  const ladderId = String(body.ladderId || "").trim();
+  const requestedPositions = body.positions && typeof body.positions === "object" ? body.positions : {};
+  if (!ladderId) throw new Error("Ladder is required.");
+
+  const existingLadders = normalizeLadders(group.settings?.ladders || []);
+  const ladder = existingLadders.find((item) => item.id === ladderId);
+  if (!ladder) throw new Error("Ladder was not found.");
+
+  const existingSessions = await loadLadderSessionsForGroup(supabase, group, ladder);
+  const startedSession = existingSessions.find((session) => ["playing", "done"].includes(session.status));
+  if (startedSession) throw new Error("Initial ladder positions can only be changed before the first ladder match starts.");
+
+  const rosterPlayers = await loadPlayersForGroups(supabase, group.id, [ladder.playerGroupId]);
+  const rosterIds = rosterPlayers.map((player) => String(player.id));
+  const rawPositionValues = rosterIds
+    .map((playerId) => Number(requestedPositions[playerId]))
+    .filter((position) => Number.isFinite(position));
+  if (
+    rawPositionValues.length !== rosterIds.length ||
+    rawPositionValues.some((position) => !Number.isInteger(position) || position < 1 || position > rosterIds.length) ||
+    new Set(rawPositionValues).size !== rawPositionValues.length
+  ) {
+    throw new Error(`Positions must be unique numbers from 1 to ${rosterIds.length}.`);
+  }
+  const normalizedPositions = normalizeInitialPositions(requestedPositions, rosterIds);
+  const positionValues = Object.values(normalizedPositions);
+  const uniqueValues = new Set(positionValues);
+  if (positionValues.length !== rosterIds.length || uniqueValues.size !== rosterIds.length) {
+    throw new Error("Each ladder player must have a unique position.");
+  }
+
+  const nextLadders = existingLadders.map((item) => (
+    item.id === ladderId ? { ...item, initialPositions: normalizedPositions, updatedAt: new Date().toISOString() } : item
+  ));
+  const settings = {
+    ...(group.settings || {}),
+    ladders: nextLadders,
+  };
+
+  const { error } = await supabase
+    .from("round_robin_groups")
+    .update({ settings, updated_at: new Date().toISOString() })
+    .eq("id", group.id);
+  if (error) throw error;
+
+  await addLog(supabase, group.id, null, "setup", `${ladder.name} ladder positions saved.`);
+  return { ladder: nextLadders.find((item) => item.id === ladderId), ladders: nextLadders, group: sanitizeActionGroup({ ...group, settings }) };
+}
+
+async function createLadderMatch(supabase, group, body = {}) {
+  const ladderId = String(body.ladderId || "").trim();
+  const ladder = normalizeLadders(group.settings?.ladders || []).find((item) => item.id === ladderId);
+  if (!ladder) throw new Error("Ladder was not found.");
+  if (!ladder.playerGroupId) throw new Error("Select a ladder player group first.");
+
+  const requestedSessionDate = normalizeIsoDate(body.sessionDate);
+  const sessionDate = requestedSessionDate || await nextLadderSessionDate(supabase, group, ladder);
+  const startsAt = String(body.startsAt || ladder.startTime || group.schedule_time || "").trim();
+  const result = await createPlannedSession(supabase, group, {
+    sessionName: `${ladder.name} - ${formatIsoDateForLog(sessionDate)}`,
+    location: group.settings?.defaultLocation || "",
+    sessionDate,
+    startsAt,
+    maxPlayers: 100,
+    repeatsWeekly: false,
+    hostPlayerId: group.settings?.defaultHostPlayerId || "",
+    cohostPlayerId: "",
+    invitedGroupIds: [ladder.playerGroupId],
+    mode: "ladder",
+    publicUrl: body.publicUrl,
+    smsEnabled: body.smsEnabled === true,
+    ladderId: ladder.id,
+    ladderName: ladder.name,
+    ladderConfig: ladder,
+  });
+
+  await addLog(supabase, group.id, result.session?.id || null, "setup", `${ladder.name} ladder match created for ${formatIsoDateForLog(sessionDate)}.`);
+  return { ...result, ladder, sessionDate };
+}
+
 async function createSession(supabase, group, body) {
   const selectedPlayerIds = Array.isArray(body.playerIds) ? body.playerIds.map(String) : [];
   if (selectedPlayerIds.length < 4) throw new Error("Select at least 4 players.");
@@ -572,7 +846,7 @@ async function createSession(supabase, group, body) {
     id: player.id,
     displayName: player.display_name,
     firstLabel: roundRobinPlayerLabel(player.display_name),
-    duprId: player.dupr_id || "",
+    duprId: normalizeDuprId(player.dupr_id),
     email: player.email || "",
     phone: player.phone || "",
   }));
@@ -621,7 +895,7 @@ async function createSession(supabase, group, body) {
     session_id: session.id,
     player_id: player.id,
     display_name: player.displayName,
-    dupr_id: player.duprId || null,
+    dupr_id: normalizeDuprId(player.duprId) || null,
     email: player.email || null,
     phone: player.phone || null,
     source: "roster",
@@ -670,7 +944,7 @@ async function createSession(supabase, group, body) {
 
 async function createPlannedSession(supabase, group, body) {
   const sessionName = String(body.sessionName || "").trim();
-  if (!sessionName) throw new Error("Session name is required.");
+  if (!sessionName) throw new Error("Match name is required.");
 
   const invitedGroupIds = [...new Set((Array.isArray(body.invitedGroupIds) ? body.invitedGroupIds : []).map((id) => String(id || "").trim()).filter(Boolean))];
   if (invitedGroupIds.length === 0) throw new Error("Select at least one invited group.");
@@ -682,15 +956,21 @@ async function createPlannedSession(supabase, group, body) {
   if (!Number.isInteger(maxPlayers) || maxPlayers < 4) throw new Error("Max players must be at least 4.");
 
   const now = new Date().toISOString();
+  const isLadderMode = body.mode === "ladder";
+  const ladderSettings = isLadderMode ? {
+    ladderId: String(body.ladderId || "").trim(),
+    ladderName: String(body.ladderName || "").trim(),
+    ladderConfig: body.ladderConfig || null,
+  } : {};
   const sessionPayload = {
     group_id: group.id,
     session_name: sessionName,
-    location: String(body.location || "").trim() || null,
+    location: String(body.location || group.settings?.defaultLocation || "").trim() || null,
     session_date: body.sessionDate || new Date().toISOString().slice(0, 10),
     starts_at: String(body.startsAt || "").trim() || group.schedule_time || null,
     max_players: maxPlayers,
     repeats_weekly: Boolean(body.repeatsWeekly),
-    host_player_id: body.hostPlayerId || null,
+    host_player_id: body.hostPlayerId || group.settings?.defaultHostPlayerId || null,
     cohost_player_id: body.cohostPlayerId || null,
     invited_group_ids: invitedGroupIds,
     mode: body.mode === "ladder" ? "ladder" : group.mode || "daily_round_robin",
@@ -700,6 +980,7 @@ async function createPlannedSession(supabase, group, body) {
     settings: {
       createdFromGroups: invitedGroupIds,
       smsTemplates: normalizeSmsTemplates(group.settings?.smsTemplates || {}),
+      ...ladderSettings,
     },
     opened_at: now,
     updated_at: now,
@@ -717,7 +998,7 @@ async function createPlannedSession(supabase, group, body) {
     session_id: session.id,
     player_id: player.id,
     display_name: player.display_name,
-    dupr_id: player.dupr_id || null,
+    dupr_id: normalizeDuprId(player.dupr_id) || null,
     email: player.email || null,
     phone: player.phone || null,
     source: "roster",
@@ -747,11 +1028,11 @@ async function createPlannedSession(supabase, group, body) {
 
 async function updatePlannedSession(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
-  if (!sessionId) throw new Error("Session is required.");
+  if (!sessionId) throw new Error("Match is required.");
 
   const existingSession = await loadSessionForGroup(supabase, group.id, sessionId);
   const sessionName = String(body.sessionName || "").trim();
-  if (!sessionName) throw new Error("Session name is required.");
+  if (!sessionName) throw new Error("Match name is required.");
 
   const invitedGroupIds = [...new Set((Array.isArray(body.invitedGroupIds) ? body.invitedGroupIds : []).map((id) => String(id || "").trim()).filter(Boolean))];
   if (invitedGroupIds.length === 0) throw new Error("Select at least one invited group.");
@@ -763,6 +1044,16 @@ async function updatePlannedSession(supabase, group, body) {
   if (!Number.isInteger(maxPlayers) || maxPlayers < 4) throw new Error("Max players must be at least 4.");
 
   const now = new Date().toISOString();
+  const isLadderMode = body.mode === "ladder";
+  const ladderSettings = isLadderMode ? {
+    ladderId: String(body.ladderId || existingSession.settings?.ladderId || "").trim(),
+    ladderName: String(body.ladderName || existingSession.settings?.ladderName || "").trim(),
+    ladderConfig: body.ladderConfig || existingSession.settings?.ladderConfig || null,
+  } : {
+    ladderId: "",
+    ladderName: "",
+    ladderConfig: null,
+  };
   const sessionPayload = {
     session_name: sessionName,
     location: String(body.location || "").trim() || null,
@@ -778,6 +1069,7 @@ async function updatePlannedSession(supabase, group, body) {
       ...(existingSession.settings || {}),
       createdFromGroups: invitedGroupIds,
       smsTemplates: normalizeSmsTemplates(group.settings?.smsTemplates || {}),
+      ...ladderSettings,
     },
     updated_at: now,
   };
@@ -801,7 +1093,7 @@ async function updatePlannedSession(supabase, group, body) {
       session_id: session.id,
       player_id: player.id,
       display_name: player.display_name,
-      dupr_id: player.dupr_id || null,
+      dupr_id: normalizeDuprId(player.dupr_id) || null,
       email: player.email || null,
       phone: player.phone || null,
       source: "roster",
@@ -864,7 +1156,7 @@ async function updateSessionPlayerStatus(supabase, group, body) {
   const currentPlayers = await loadSessionPlayers(supabase, session.id);
   const activeCurrentPlayers = await filterActiveSessionPlayers(supabase, group.id, currentPlayers);
   const target = activeCurrentPlayers.find((player) => String(player.player_id || "") === playerId);
-  if (!target) throw new Error("Player is not part of this session.");
+  if (!target) throw new Error("Player is not part of this match.");
 
   let resolvedStatus = status;
   if (status === "joined" && session.max_players) {
@@ -888,10 +1180,10 @@ async function updateSessionPlayerStatus(supabase, group, body) {
 async function addSessionPlayer(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
   const playerId = String(body.playerId || "").trim();
-  if (!sessionId || !playerId) throw new Error("Session and player are required.");
+  if (!sessionId || !playerId) throw new Error("Match and player are required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
-  if (["done", "cancelled"].includes(session.status)) throw new Error("This session is no longer accepting players.");
+  if (["done", "cancelled"].includes(session.status)) throw new Error("This match is no longer accepting players.");
 
   const player = await loadRoundRobinPlayer(supabase, group.id, playerId);
   const currentPlayers = await loadSessionPlayers(supabase, session.id);
@@ -923,7 +1215,7 @@ async function addSessionPlayer(supabase, group, body) {
       session_id: session.id,
       player_id: player.id,
       display_name: player.display_name,
-      dupr_id: player.dupr_id || null,
+      dupr_id: normalizeDuprId(player.dupr_id) || null,
       email: player.email || null,
       phone: player.phone || null,
       source: "roster",
@@ -942,12 +1234,12 @@ async function addSessionNewPlayer(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
   const displayName = String(body.displayName || body.playerName || "").trim();
   const cleanPhone = normalizePhone(body.phone);
-  if (!sessionId) throw new Error("Session is required.");
+  if (!sessionId) throw new Error("Match is required.");
   if (!displayName) throw new Error("Player name is required.");
   if (!cleanPhone || cleanPhone.length < 10) throw new Error("Enter a full 10-digit phone number.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
-  if (["done", "cancelled"].includes(session.status)) throw new Error("This session is no longer accepting players.");
+  if (["done", "cancelled"].includes(session.status)) throw new Error("This match is no longer accepting players.");
 
   const groupIds = Array.isArray(session.invited_group_ids) ? session.invited_group_ids : [];
   const playersResult = await supabase
@@ -962,7 +1254,7 @@ async function addSessionNewPlayer(supabase, group, body) {
     group_id: group.id,
     display_name: displayName,
     first_name: displayName.split(/\s+/)[0] || null,
-    dupr_id: String(body.duprId || body.dupr_id || "").trim() || null,
+    dupr_id: normalizeDuprId(body.duprId || body.dupr_id) || null,
     phone: formatPhoneInput(cleanPhone),
     is_active: true,
     updated_at: new Date().toISOString(),
@@ -1013,7 +1305,7 @@ async function addSessionNewPlayer(supabase, group, body) {
 
 async function deleteSession(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
-  if (!sessionId) throw new Error("Session is required.");
+  if (!sessionId) throw new Error("Match is required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   const { data, error } = await supabase
@@ -1028,7 +1320,7 @@ async function deleteSession(supabase, group, body) {
     .single();
   if (error) throw error;
 
-  await addLog(supabase, group.id, session.id, "session", `${session.session_name || "Session"} deleted from active sessions.`);
+  await addLog(supabase, group.id, session.id, "session", `${session.session_name || "Match"} deleted from active matches.`);
   return { session: data };
 }
 
@@ -1070,7 +1362,7 @@ async function masterResetRoundRobin(supabase, group) {
     group.id,
     null,
     "setup",
-    `Master Reset deleted ${sessionIds.length} session${sessionIds.length === 1 ? "" : "s"} and all session scoring/player history. Saved players, player groups, and group memberships were kept.`
+    `Master Reset deleted ${sessionIds.length} regular/ladders match${sessionIds.length === 1 ? "" : "es"} and all match scoring/player history. Saved players, player groups, and group memberships were kept.`
   );
 
   return { sessionsDeleted: sessionIds.length };
@@ -1078,7 +1370,7 @@ async function masterResetRoundRobin(supabase, group) {
 
 async function startSession(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
-  if (!sessionId) throw new Error("Session is required.");
+  if (!sessionId) throw new Error("Match is required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, session.id));
@@ -1130,7 +1422,7 @@ async function startSession(supabase, group, body) {
 
 async function generateNextGame(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
-  if (!sessionId) throw new Error("Session is required.");
+  if (!sessionId) throw new Error("Match is required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   if (session.status !== "playing") throw new Error("Start the session before generating games.");
@@ -1159,10 +1451,17 @@ async function generateNextGame(supabase, group, body) {
       email: player.email || "",
     }));
 
+  if (isLadderSession(session)) {
+    return generateNextLadderGame(supabase, group, session, joinedPlayers, existingMatches, courtsResult.data || []);
+  }
+
+  const historyMatches = await loadLadderSeasonHistoryMatches(supabase, group, session);
+
   const nextRound = createNextRoundRobinRound({
     players: joinedPlayers,
     courts: resolveSessionCourts(session, courtsResult.data || []),
     existingMatches,
+    historyMatches,
     courtCount: Number(session.court_count || 0) || undefined,
   });
 
@@ -1198,6 +1497,77 @@ async function generateNextGame(supabase, group, body) {
   await rebuildResults(supabase, group, session.id);
   await addLog(supabase, group.id, session.id, "session", `Generated round ${nextRound.roundNumber}.`);
   return { session: updatedSession, matches: matchesResult.data || [], roundNumber: nextRound.roundNumber };
+}
+
+async function generateNextLadderGame(supabase, group, session, joinedPlayers, existingMatches, courts = []) {
+  const ladder = await loadCurrentLadderForSession(supabase, group, session);
+  if (!ladder) throw new Error("Ladder settings were not found for this match.");
+  if (joinedPlayers.length < 4) throw new Error("Confirm at least 4 joined players before generating a ladder round.");
+
+  const priorContext = await loadPriorLadderSessionContext(supabase, group, ladder, session);
+  const rosterPlayers = await loadPlayersForGroups(supabase, group.id, [ladder.playerGroupId]);
+  const rosterIds = rosterPlayers.map((player) => String(player.id));
+  const positionOrder = ladderPositionOrderForRoster(rosterIds, priorContext.sessions, priorContext.results, ladder, priorContext.matches);
+  const positionIndexByPlayer = new Map(positionOrder.map((playerId, index) => [String(playerId), index]));
+  const orderedJoinedPlayers = joinedPlayers
+    .slice()
+    .sort((first, second) => {
+      const firstIndex = positionIndexByPlayer.has(String(first.id)) ? positionIndexByPlayer.get(String(first.id)) : Number.MAX_SAFE_INTEGER;
+      const secondIndex = positionIndexByPlayer.has(String(second.id)) ? positionIndexByPlayer.get(String(second.id)) : Number.MAX_SAFE_INTEGER;
+      return firstIndex - secondIndex || String(first.displayName || "").localeCompare(String(second.displayName || ""));
+    });
+  const ladderCourts = splitLadderPlayersIntoCourts(orderedJoinedPlayers);
+  const sessionCourts = resolveSessionCourts(session, courts);
+  const generatedRounds = ladderCourts.map((players, courtIndex) => createNextRoundRobinRound({
+    players,
+    courts: [sessionCourts[courtIndex] || { name: `Ladder Court ${courtIndex + 1}` }],
+    existingMatches: existingMatches.filter((match) => Number(match.court_number || 0) === courtIndex + 1),
+    courtCount: 1,
+  }));
+  const roundNumber = Math.max(1, ...generatedRounds.map((round) => Number(round.roundNumber || 1)));
+
+  const matchPayload = generatedRounds.flatMap((round, courtIndex) => round.courts.map((court) => ({
+    session_id: session.id,
+    round_number: roundNumber,
+    court_number: courtIndex + 1,
+    court_name: court.courtName || `Ladder Court ${courtIndex + 1}`,
+    team1_players: court.team1.map(publicPlayerPayload),
+    team2_players: court.team2.map(publicPlayerPayload),
+    bye_players: round.byes.map(publicPlayerPayload),
+    status: "scheduled",
+  })));
+
+  const matchesResult = await supabase
+    .from("round_robin_matches")
+    .insert(matchPayload)
+    .select("*");
+  if (matchesResult.error) throw matchesResult.error;
+
+  const settings = {
+    ...(session.settings || {}),
+    ladderCourtCount: ladderCourts.length,
+    ladderCourtGroups: ladderCourts.map((players, index) => ({
+      courtNumber: index + 1,
+      playerIds: players.map((player) => String(player.id)),
+    })),
+  };
+
+  const { data: updatedSession, error: sessionError } = await supabase
+    .from("round_robin_sessions")
+    .update({
+      round_count: roundNumber,
+      court_count: ladderCourts.length,
+      settings,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", session.id)
+    .select("*")
+    .single();
+  if (sessionError) throw sessionError;
+
+  await rebuildResults(supabase, group, session.id);
+  await addLog(supabase, group.id, session.id, "session", `Generated ladder round ${roundNumber} across ${ladderCourts.length} court${ladderCourts.length === 1 ? "" : "s"}.`);
+  return { session: updatedSession, matches: matchesResult.data || [], roundNumber };
 }
 
 async function updateMatchScore(supabase, group, body) {
@@ -1252,11 +1622,58 @@ async function updateMatchLineup(supabase, group, body) {
 
 async function completeSession(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
-  if (!sessionId) throw new Error("Session is required.");
+  if (!sessionId) throw new Error("Match is required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   const results = await rebuildResults(supabase, group, sessionId);
   const playedResults = results.filter((row) => Number(row.games || 0) > 0 || Number(row.byes || 0) > 0);
+  let ladderPositionContext = new Map();
+  if (isLadderSession(session)) {
+    const ladder = await loadCurrentLadderForSession(supabase, group, session);
+    if (ladder) {
+      const [priorContext, rosterPlayers, currentMatches] = await Promise.all([
+        loadPriorLadderSessionContext(supabase, group, ladder, session),
+        loadPlayersForGroups(supabase, group.id, [ladder.playerGroupId]),
+        loadSessionMatches(supabase, session.id),
+      ]);
+      const rosterIds = rosterPlayers.map((player) => String(player.id));
+      const previousOrder = ladderPositionOrderForRoster(rosterIds, priorContext.sessions, priorContext.results, ladder, priorContext.matches);
+      const nextOrder = ladderPositionOrderForRoster(
+        rosterIds,
+        [...priorContext.sessions, { ...session, status: "done" }],
+        [...priorContext.results, ...playedResults],
+        ladder,
+        [...priorContext.matches, ...currentMatches]
+      );
+      ladderPositionContext = new Map(rosterIds.map((playerId) => [
+        String(playerId),
+        {
+          previousPosition: previousOrder.findIndex((id) => String(id) === String(playerId)) + 1 || null,
+          newPosition: nextOrder.findIndex((id) => String(id) === String(playerId)) + 1 || null,
+          positionCount: rosterIds.length,
+        },
+      ]));
+    }
+  }
+  if (ladderPositionContext.size > 0 && playedResults.length > 0) {
+    await Promise.all(playedResults.map(async (row) => {
+      const context = ladderPositionContext.get(String(row.player_id || ""));
+      if (!context) return null;
+      const metadata = {
+        ...resultMetadata(row),
+        ladderPreviousPosition: context.previousPosition || null,
+        ladderNewPosition: context.newPosition || null,
+        ladderPositionCount: context.positionCount || null,
+      };
+      const { error } = await supabase
+        .from("round_robin_player_session_results")
+        .update({ metadata })
+        .eq("id", row.id);
+      if (error) throw error;
+      row.metadata = metadata;
+      return null;
+    }));
+  }
   const standings = playedResults.map((row) => ({
     rank: row.rank,
     displayName: row.display_name,
@@ -1267,6 +1684,7 @@ async function completeSession(supabase, group, body) {
     pointsFor: row.points_for,
     pointsAgainst: row.points_against,
     byes: row.byes,
+    ...(ladderPositionContext.get(String(row.player_id || "")) || {}),
   }));
   const summaryText = summaryTextForStandings(group.name, session.session_date, standings);
 
@@ -1306,7 +1724,7 @@ async function completeSession(supabase, group, body) {
   }
 
   const repeatsWeekly = isWeeklyRepeatEnabled(data.repeats_weekly) || isWeeklyRepeatEnabled(session.repeats_weekly);
-  let weeklyRepeat = { requested: repeatsWeekly, created: false, skipped: true, reason: "Session is not set to repeat weekly" };
+  let weeklyRepeat = { requested: repeatsWeekly, created: false, skipped: true, reason: "Match is not set to repeat weekly" };
   if (repeatsWeekly) {
     try {
       weeklyRepeat = await createNextWeeklySession(supabase, group, data, body);
@@ -1316,7 +1734,7 @@ async function completeSession(supabase, group, body) {
     }
   }
 
-  await addLog(supabase, group.id, sessionId, "session", `Session completed. Result texts sent: ${sms.sent || 0}.`, { sms, weeklyRepeat });
+  await addLog(supabase, group.id, sessionId, "session", `Match completed. Result texts sent: ${sms.sent || 0}.`, { sms, weeklyRepeat });
   return { session: data, results, summaryText, sms, weeklyRepeat };
 }
 
@@ -1334,7 +1752,7 @@ async function createNextWeeklySession(supabase, group, session, body) {
     .select("id, session_name, session_date, starts_at")
     .eq("group_id", group.id)
     .eq("session_date", nextDate)
-    .eq("session_name", session.session_name || "Round Robin Session")
+    .eq("session_name", session.session_name || "Round Robin Match")
     .limit(10);
   if (duplicateResult.error) throw duplicateResult.error;
 
@@ -1344,7 +1762,7 @@ async function createNextWeeklySession(supabase, group, session, body) {
   }
 
   const repeatResult = await createPlannedSession(supabase, group, {
-    sessionName: session.session_name || "Round Robin Session",
+    sessionName: session.session_name || "Round Robin Match",
     location: session.location || "",
     sessionDate: nextDate,
     startsAt: session.starts_at || "",
@@ -1396,10 +1814,10 @@ async function sendBroadcastText(supabase, group, body, access = null) {
   }
 
   if (!logSessionId && recipientScope !== "all") {
-    throw new Error("A session is required for that recipient group.");
+    throw new Error("A match is required for that recipient group.");
   }
   if (access?.mode === "host" && !logSessionId) {
-    throw new Error("A session is required for host text updates.");
+    throw new Error("A match is required for host text updates.");
   }
 
   if (recipientScope === "all" || !logSessionId) {
@@ -1469,7 +1887,7 @@ async function sendTestTemplateText(supabase, group, body) {
 
 async function sendSessionReminderText(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
-  if (!sessionId) throw new Error("Session is required.");
+  if (!sessionId) throw new Error("Match is required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, session.id));
@@ -1498,12 +1916,13 @@ async function sendSessionReminderText(supabase, group, body) {
 }
 
 async function rebuildResults(supabase, group, sessionId) {
-  const [players, matches] = await Promise.all([
+  const [session, players, matches] = await Promise.all([
+    loadSessionForGroup(supabase, group.id, sessionId),
     loadSessionPlayers(supabase, sessionId),
     loadSessionMatches(supabase, sessionId),
   ]);
 
-  const standings = roundRobinStandings(matches.map((match) => ({
+  let standings = roundRobinStandings(matches.map((match) => ({
     ...match,
     team1: match.team1_players || [],
     team2: match.team2_players || [],
@@ -1512,6 +1931,18 @@ async function rebuildResults(supabase, group, sessionId) {
     id: player.player_id,
     displayName: player.display_name,
   })));
+  if (isLadderSession(session)) {
+    standings = sortLadderStandingsWithHeadToHead(standings, matches);
+  }
+
+  const { data: existingResults, error: existingResultsError } = await supabase
+    .from("round_robin_player_session_results")
+    .select("player_id, metadata")
+    .eq("session_id", sessionId);
+  if (existingResultsError) throw existingResultsError;
+  const existingMetadataByPlayer = new Map((existingResults || [])
+    .map((row) => [String(row.player_id || ""), resultMetadata(row)])
+    .filter(([, metadata]) => Object.keys(metadata).length > 0));
 
   await supabase
     .from("round_robin_player_session_results")
@@ -1532,6 +1963,9 @@ async function rebuildResults(supabase, group, sessionId) {
     point_diff: row.pointDiff,
     byes: row.byes,
     rank: row.rank,
+    ...(existingMetadataByPlayer.has(String(row.playerId))
+      ? { metadata: existingMetadataByPlayer.get(String(row.playerId)) }
+      : {}),
   }));
 
   const { data, error } = await supabase
@@ -1544,6 +1978,20 @@ async function rebuildResults(supabase, group, sessionId) {
   return data || [];
 }
 
+function resultMetadata(row) {
+  const metadata = row?.metadata;
+  if (!metadata) return {};
+  if (typeof metadata === "string") {
+    try {
+      const parsed = JSON.parse(metadata);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
+}
+
 async function loadResults(supabase, sessionId) {
   const { data, error } = await supabase
     .from("round_robin_player_session_results")
@@ -1552,6 +2000,25 @@ async function loadResults(supabase, sessionId) {
     .order("rank", { ascending: true });
   if (error) throw error;
   return data || [];
+}
+
+function sortLadderStandingsWithHeadToHead(standings = [], matches = []) {
+  return standings
+    .slice()
+    .sort((first, second) => {
+      if (Number(second.pointsFor || 0) !== Number(first.pointsFor || 0)) return Number(second.pointsFor || 0) - Number(first.pointsFor || 0);
+      const headToHead = headToHeadResult(String(first.playerId || ""), String(second.playerId || ""), matches);
+      if (headToHead !== 0) return -headToHead;
+      if (Number(second.winPct || 0) !== Number(first.winPct || 0)) return Number(second.winPct || 0) - Number(first.winPct || 0);
+      const firstGames = Number(first.games || (Number(first.wins || 0) + Number(first.losses || 0)));
+      const secondGames = Number(second.games || (Number(second.wins || 0) + Number(second.losses || 0)));
+      const firstAvgDiff = firstGames > 0 ? Number(first.pointDiff || 0) / firstGames : 0;
+      const secondAvgDiff = secondGames > 0 ? Number(second.pointDiff || 0) / secondGames : 0;
+      if (secondAvgDiff !== firstAvgDiff) return secondAvgDiff - firstAvgDiff;
+      if (secondGames !== firstGames) return secondGames - firstGames;
+      return String(first.displayName || "").localeCompare(String(second.displayName || ""));
+    })
+    .map((row, index) => ({ ...row, rank: index + 1 }));
 }
 
 async function loadSessionPlayers(supabase, sessionId) {
@@ -1674,6 +2141,215 @@ async function loadSessionMatches(supabase, sessionId) {
   return data || [];
 }
 
+async function loadLadderSeasonHistoryMatches(supabase, group, session) {
+  const ladderId = String(session.settings?.ladderId || "").trim();
+  const balanceMode = String(session.settings?.ladderConfig?.balanceMode || "");
+  if (session.mode !== "ladder" || !ladderId || balanceMode !== "season") return [];
+
+  const { data: sessions, error: sessionsError } = await supabase
+    .from("round_robin_sessions")
+    .select("id, settings")
+    .eq("group_id", group.id)
+    .eq("mode", "ladder")
+    .lt("session_date", session.session_date || new Date().toISOString().slice(0, 10))
+    .limit(100);
+  if (sessionsError) throw sessionsError;
+
+  const sessionIds = (sessions || [])
+    .filter((row) => String(row.settings?.ladderId || "") === ladderId)
+    .map((row) => row.id)
+    .filter(Boolean);
+  if (sessionIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("round_robin_matches")
+    .select("*")
+    .in("session_id", sessionIds)
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+async function loadCurrentLadderForSession(supabase, group, session) {
+  const ladderId = String(session.settings?.ladderId || "").trim();
+  if (!ladderId) return null;
+  const current = normalizeLadders(group.settings?.ladders || []).find((item) => item.id === ladderId);
+  if (current) return current;
+  return normalizeLadder({ ...(session.settings?.ladderConfig || {}), id: ladderId }, { allowExistingId: true });
+}
+
+async function loadPriorLadderSessionContext(supabase, group, ladder, session) {
+  const { data: sessions, error: sessionsError } = await supabase
+    .from("round_robin_sessions")
+    .select("id, session_date, settings")
+    .eq("group_id", group.id)
+    .eq("mode", "ladder")
+    .lt("session_date", session.session_date || new Date().toISOString().slice(0, 10))
+    .order("session_date", { ascending: true });
+  if (sessionsError) throw sessionsError;
+
+  const ladderSessions = (sessions || [])
+    .filter((row) => String(row.settings?.ladderId || "") === String(ladder.id));
+  const sessionIds = ladderSessions.map((row) => row.id).filter(Boolean);
+  if (sessionIds.length === 0) return { sessions: [], matches: [], results: [] };
+
+  const [matchesResult, resultsResult] = await Promise.all([
+    supabase
+      .from("round_robin_matches")
+      .select("*")
+      .in("session_id", sessionIds)
+      .order("round_number", { ascending: true })
+      .order("court_number", { ascending: true }),
+    supabase
+      .from("round_robin_player_session_results")
+      .select("*")
+      .in("session_id", sessionIds),
+  ]);
+  if (matchesResult.error) throw matchesResult.error;
+  if (resultsResult.error) throw resultsResult.error;
+
+  return {
+    sessions: ladderSessions,
+    matches: matchesResult.data || [],
+    results: resultsResult.data || [],
+  };
+}
+
+function splitLadderPlayersIntoCourts(players = []) {
+  const total = players.length;
+  const courtCount = Math.max(1, Math.floor(total / 4));
+  const baseSize = Math.floor(total / courtCount);
+  const extra = total % courtCount;
+  const courts = [];
+  let offset = 0;
+  for (let courtIndex = 0; courtIndex < courtCount; courtIndex += 1) {
+    const size = baseSize + (courtIndex < extra ? 1 : 0);
+    courts.push(players.slice(offset, offset + size));
+    offset += size;
+  }
+  return courts.filter((court) => court.length >= 4);
+}
+
+function ladderPositionOrderForRoster(rosterIds = [], sessions = [], resultRows = [], ladder = {}, matches = []) {
+  const initialPositions = normalizeInitialPositions(ladder.initialPositions || {}, rosterIds);
+  const order = rosterIds
+    .map(String)
+    .sort((first, second) => {
+      const firstPosition = Number(initialPositions[first] || Number.MAX_SAFE_INTEGER);
+      const secondPosition = Number(initialPositions[second] || Number.MAX_SAFE_INTEGER);
+      return firstPosition - secondPosition || first.localeCompare(second);
+    });
+  const resultsBySession = groupRowsByKey(resultRows, "session_id");
+  const matchesBySession = groupRowsByKey(matches, "session_id");
+  const movementCount = ladder.movementMode === "top2" ? 2 : 1;
+
+  sessions.forEach((session) => {
+    const sessionResults = resultsBySession.get(String(session.id)) || [];
+    const sessionMatches = matchesBySession.get(String(session.id)) || [];
+    const sessionPlayerIds = sessionPlayerIdsFromMatches(sessionMatches);
+    const participatingOrder = order.filter((playerId) => sessionPlayerIds.has(String(playerId)));
+    const courts = splitLadderIdsIntoCourts(participatingOrder);
+
+    courts.forEach((courtIds, courtIndex) => {
+      const ranked = courtIds
+        .map((playerId) => sessionResults.find((row) => String(row.player_id || "") === String(playerId)))
+        .filter(Boolean)
+        .sort((first, second) => compareLadderSessionRows(first, second, sessionMatches));
+      const topIds = courtIndex > 0 ? ranked.slice(0, movementCount).map((row) => String(row.player_id || "")) : [];
+      const bottomIds = courtIndex < courts.length - 1 ? ranked.slice(-movementCount).map((row) => String(row.player_id || "")) : [];
+      topIds.forEach((playerId) => movePlayerByStep(order, playerId, -Math.max(4, courts[courtIndex - 1]?.length || 4)));
+      bottomIds.reverse().forEach((playerId) => movePlayerByStep(order, playerId, Math.max(4, courts[courtIndex + 1]?.length || 4)));
+    });
+
+    if (sessions.length >= 4) {
+      const participationRequirement = Number(ladder.participationRequirement || 50);
+      const completedSessionIds = sessions.filter((item) => String(item.session_date || "") <= String(session.session_date || "")).map((item) => String(item.id));
+      order.forEach((playerId) => {
+        const playedCount = completedSessionIds.filter((sessionId) => (resultsBySession.get(sessionId) || []).some((row) => String(row.player_id || "") === String(playerId))).length;
+        const participationPct = completedSessionIds.length > 0 ? (playedCount / completedSessionIds.length) * 100 : 100;
+        if (participationPct < participationRequirement) movePlayerByStep(order, playerId, 4);
+      });
+    }
+  });
+
+  return order;
+}
+
+function splitLadderIdsIntoCourts(playerIds = []) {
+  return splitLadderPlayersIntoCourts(playerIds.map((id) => ({ id }))).map((court) => court.map((player) => String(player.id)));
+}
+
+function compareLadderSessionRows(first, second, matches = []) {
+  const firstPoints = Number(first.points_for || 0);
+  const secondPoints = Number(second.points_for || 0);
+  if (secondPoints !== firstPoints) return secondPoints - firstPoints;
+  const headToHead = headToHeadResult(String(first.player_id || ""), String(second.player_id || ""), matches);
+  if (headToHead !== 0) return -headToHead;
+  const firstWinPct = winPctForResultRow(first);
+  const secondWinPct = winPctForResultRow(second);
+  if (secondWinPct !== firstWinPct) return secondWinPct - firstWinPct;
+  const firstGames = Number(first.games || (Number(first.wins || 0) + Number(first.losses || 0)));
+  const secondGames = Number(second.games || (Number(second.wins || 0) + Number(second.losses || 0)));
+  const firstAvgDiff = firstGames > 0 ? Number(first.point_diff || 0) / firstGames : 0;
+  const secondAvgDiff = secondGames > 0 ? Number(second.point_diff || 0) / secondGames : 0;
+  if (secondAvgDiff !== firstAvgDiff) return secondAvgDiff - firstAvgDiff;
+  if (secondGames !== firstGames) return secondGames - firstGames;
+  return String(first.display_name || "").localeCompare(String(second.display_name || ""));
+}
+
+function headToHeadResult(firstPlayerId, secondPlayerId, matches = []) {
+  let firstWins = 0;
+  let secondWins = 0;
+  matches.forEach((match) => {
+    const team1Score = normalizeScore(match.team1_score);
+    const team2Score = normalizeScore(match.team2_score);
+    if (team1Score === null || team2Score === null || team1Score === team2Score) return;
+    const team1Ids = (match.team1_players || []).map((player) => String(player.id));
+    const team2Ids = (match.team2_players || []).map((player) => String(player.id));
+    const firstTeam = team1Ids.includes(firstPlayerId) ? 1 : team2Ids.includes(firstPlayerId) ? 2 : 0;
+    const secondTeam = team1Ids.includes(secondPlayerId) ? 1 : team2Ids.includes(secondPlayerId) ? 2 : 0;
+    if (!firstTeam || !secondTeam || firstTeam === secondTeam) return;
+    const winningTeam = team1Score > team2Score ? 1 : 2;
+    if (firstTeam === winningTeam) firstWins += 1;
+    if (secondTeam === winningTeam) secondWins += 1;
+  });
+  return firstWins - secondWins;
+}
+
+function winPctForResultRow(row) {
+  const games = Number(row.games || 0) || (Number(row.wins || 0) + Number(row.losses || 0));
+  return games > 0 ? Number(row.wins || 0) / games : 0;
+}
+
+function sessionPlayerIdsFromMatches(matches = []) {
+  const ids = new Set();
+  matches.forEach((match) => {
+    [...(match.team1_players || []), ...(match.team2_players || []), ...(match.bye_players || [])]
+      .forEach((player) => {
+        if (player?.id) ids.add(String(player.id));
+      });
+  });
+  return ids;
+}
+
+function movePlayerByStep(order, playerId, step) {
+  const index = order.findIndex((id) => String(id) === String(playerId));
+  if (index < 0) return;
+  const nextIndex = Math.max(0, Math.min(order.length - 1, index + Number(step || 0)));
+  if (nextIndex === index) return;
+  const [item] = order.splice(index, 1);
+  order.splice(nextIndex, 0, item);
+}
+
+function groupRowsByKey(rows = [], key) {
+  return rows.reduce((map, row) => {
+    const mapKey = String(row[key] || "");
+    if (!map.has(mapKey)) map.set(mapKey, []);
+    map.get(mapKey).push(row);
+    return map;
+  }, new Map());
+}
+
 async function resolveActionSessionId(supabase, body) {
   const sessionId = String(body.sessionId || "").trim();
   if (sessionId) return sessionId;
@@ -1779,8 +2455,12 @@ function publicPlayerPayload(player) {
     id: player.id,
     displayName: player.displayName || player.display_name || player.name || "Player",
     firstLabel: player.firstLabel || roundRobinPlayerLabel(player.displayName || player.display_name || player.name),
-    duprId: player.duprId || player.dupr_id || "",
+    duprId: normalizeDuprId(player.duprId || player.dupr_id),
   };
+}
+
+function normalizeDuprId(value) {
+  return String(value || "").trim().toUpperCase();
 }
 
 function sanitizeMatchPlayers(players = []) {
@@ -1790,7 +2470,7 @@ function sanitizeMatchPlayers(players = []) {
       id: String(player.id || "").trim(),
       displayName: String(player.displayName || player.display_name || player.name || "").trim(),
       firstLabel: String(player.firstLabel || "").trim() || roundRobinPlayerLabel(player.displayName || player.display_name || player.name),
-      duprId: String(player.duprId || player.dupr_id || "").trim(),
+      duprId: normalizeDuprId(player.duprId || player.dupr_id),
     }))
     .filter((player) => player.id && player.displayName);
 }
@@ -1810,9 +2490,10 @@ function suggestedCourtCount(playerCount) {
 
 function defaultSmsTemplates() {
   return {
-    newPlayer: "{{group_name}}: {{player_name}}, you have been added to PBCourtCommand. You may receive session invite/update texts at this number. Reply STOP to opt out. {{public_link}}",
-    sessionInvite: "{{group_name}}: {{session_name}} is open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Reply to the host or open {{public_link}} to join.",
-    sessionReminder: "{{group_name}} reminder: {{session_name}} is still open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Please reply if you can play or if you are out.",
+    newPlayer: "{{group_name}}: {{player_name}}, you have been added to PBCourtCommand. You may receive match invite/update texts at this number. Reply STOP to opt out. {{public_link}}",
+    ladderAdded: "{{group_name}}: {{player_name}}, you have been added to {{ladder_name}}. Watch for ladder match invites and results texts. {{public_link}}",
+    sessionInvite: "{{group_name}}: {{session_name}} match is open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Reply to the host or open {{public_link}} to join.",
+    sessionReminder: "{{group_name}} reminder: {{session_name}} match is still open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Please reply if you can play or if you are out.",
     gameUpdate: "{{group_name}} game update: ",
     weatherUpdate: "{{group_name}} weather update: ",
     sessionResults: "{{group_name}} Results for {{date}}:\n{{result_rankings}}",
@@ -1823,6 +2504,7 @@ function normalizeSmsTemplates(templates = {}) {
   const defaults = defaultSmsTemplates();
   return {
     newPlayer: String(templates.newPlayer || defaults.newPlayer),
+    ladderAdded: String(templates.ladderAdded || defaults.ladderAdded),
     sessionInvite: String(templates.sessionInvite || defaults.sessionInvite),
     sessionReminder: String(templates.sessionReminder || defaults.sessionReminder),
     gameUpdate: String(templates.gameUpdate || defaults.gameUpdate),
@@ -1831,8 +2513,8 @@ function normalizeSmsTemplates(templates = {}) {
   };
 }
 
-function renderSmsTemplate(template, { group, session, publicUrl, joinedCount, availableSpots, resultRankings, playerName } = {}) {
-  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next session";
+function renderSmsTemplate(template, { group, session, publicUrl, joinedCount, availableSpots, resultRankings, playerName, ladderName } = {}) {
+  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next match";
   const time = session?.starts_at ? formatSessionTime(session.starts_at) : "TBD";
   const location = session?.location ? session.location : "";
   const maxPlayers = Number(session?.max_players || 0);
@@ -1840,13 +2522,14 @@ function renderSmsTemplate(template, { group, session, publicUrl, joinedCount, a
   const resolvedAvailableSpots = availableSpots ?? (maxPlayers > 0 ? Math.max(0, maxPlayers - resolvedJoinedCount) : "");
   const replacements = {
     group_name: group?.name || "Round Robin",
-    session_name: session?.session_name || "Round Robin session",
+    session_name: session?.session_name || "Round Robin match",
     date,
     time,
     location,
     location_line: location ? ` at ${location}` : "",
     public_link: publicUrl || "",
     player_name: playerName || "Player",
+    ladder_name: ladderName || session?.settings?.ladderName || session?.settings?.ladderConfig?.name || "Ladder",
     joined_count: resolvedJoinedCount,
     available_spots: resolvedAvailableSpots,
     result_rankings: resultRankings || "",
@@ -1873,7 +2556,10 @@ function resultRankingsForSms(standings = []) {
   return standings.map((row) => {
     const diff = Number(row.pointDiff || 0);
     const diffText = diff > 0 ? `+${diff}` : String(diff);
-    return `${row.rank}. ${row.displayName || "Player"} ${row.wins || 0}-${row.losses || 0}, PF ${row.pointsFor || 0}, PA ${row.pointsAgainst || 0}, Diff ${diffText}, Byes ${row.byes || 0}`;
+    const positionText = row.previousPosition && row.newPosition
+      ? `, Position #${row.previousPosition} -> #${row.newPosition} out of ${row.positionCount || "?"}`
+      : "";
+    return `${row.rank}. ${row.displayName || "Player"} ${row.wins || 0}-${row.losses || 0}, PF ${row.pointsFor || 0}, PA ${row.pointsAgainst || 0}, Diff ${diffText}, Byes ${row.byes || 0}${positionText}`;
   }).join("\n");
 }
 
@@ -1923,6 +2609,116 @@ function addDaysToIsoDate(value, days) {
   return date.toISOString().slice(0, 10);
 }
 
+async function nextLadderSessionDate(supabase, group, ladder) {
+  const sessionsResult = await supabase
+    .from("round_robin_sessions")
+    .select("id, session_date, settings")
+    .eq("group_id", group.id)
+    .eq("mode", "ladder")
+    .order("session_date", { ascending: false })
+    .limit(100);
+  if (sessionsResult.error) throw sessionsResult.error;
+
+  const ladderSessions = (sessionsResult.data || [])
+    .filter((session) => String(session.settings?.ladderId || "") === String(ladder.id))
+    .sort((a, b) => String(b.session_date || "").localeCompare(String(a.session_date || "")));
+  const latestDate = ladderSessions[0]?.session_date || "";
+  return latestDate ? addDaysToIsoDate(latestDate, 7) : normalizeIsoDate(ladder.startDate) || new Date().toISOString().slice(0, 10);
+}
+
+async function loadLadderSessionsForGroup(supabase, group, ladder) {
+  const { data, error } = await supabase
+    .from("round_robin_sessions")
+    .select("id, session_date, status, settings")
+    .eq("group_id", group.id)
+    .eq("mode", "ladder")
+    .limit(200);
+  if (error) throw error;
+  return (data || []).filter((session) => String(session.settings?.ladderId || "") === String(ladder.id));
+}
+
+function normalizeLadders(ladders = []) {
+  return (Array.isArray(ladders) ? ladders : [])
+    .map((ladder) => normalizeLadder(ladder, { allowExistingId: true }))
+    .filter((ladder) => ladder.name && ladder.startDate && ladder.playerGroupId);
+}
+
+function normalizeLadder(ladder = {}, options = {}) {
+  const id = options.allowExistingId
+    ? String(ladder.id || "").trim()
+    : String(ladder.id || "").trim() || `ladder-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const startDate = normalizeIsoDate(ladder.startDate) || new Date().toISOString().slice(0, 10);
+  const dayOfWeek = normalizeDayOfWeek(ladder.dayOfWeek) || dayOfWeekForDate(startDate);
+  const participationRequirement = Math.min(100, Math.max(10, Number(ladder.participationRequirement || 50)));
+  return {
+    id: id || `ladder-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    name: String(ladder.name || "").trim(),
+    format: ladder.format === "ladder" ? "ladder" : "round_robin",
+    startDate,
+    endDate: normalizeIsoDate(ladder.endDate),
+    dayOfWeek,
+    startTime: String(ladder.startTime || "").slice(0, 5),
+    playerGroupId: String(ladder.playerGroupId || "").trim(),
+    participationRequirement,
+    balanceMode: ladder.balanceMode === "season" ? "season" : "session",
+    movementMode: ladder.movementMode === "top2" ? "top2" : "top1",
+    status: ladder.status === "inactive" ? "inactive" : "active",
+    initialPositions: normalizeInitialPositions(ladder.initialPositions || ladder.initial_positions || {}),
+    updatedAt: new Date().toISOString(),
+  };
+}
+
+function normalizeInitialPositions(positions = {}, rosterIds = []) {
+  const source = positions && typeof positions === "object" ? positions : {};
+  const rosterSet = new Set((rosterIds || []).map(String));
+  const entries = Object.entries(source)
+    .map(([playerId, position]) => [String(playerId), Number(position)])
+    .filter(([playerId, position]) => (
+      Number.isInteger(position) &&
+      position > 0 &&
+      (rosterSet.size === 0 || rosterSet.has(playerId))
+    ))
+    .sort((first, second) => first[1] - second[1] || first[0].localeCompare(second[0]));
+  const normalized = {};
+  const used = new Set();
+  entries.forEach(([playerId, position]) => {
+    if (used.has(position)) return;
+    normalized[playerId] = position;
+    used.add(position);
+  });
+
+  let nextPosition = 1;
+  (rosterIds || []).map(String).forEach((playerId) => {
+    if (normalized[playerId]) return;
+    while (used.has(nextPosition)) nextPosition += 1;
+    normalized[playerId] = nextPosition;
+    used.add(nextPosition);
+  });
+
+  return normalized;
+}
+
+function isLadderSession(session) {
+  return Boolean(session?.settings?.ladderId) || session?.mode === "ladder";
+}
+
+function normalizeIsoDate(value) {
+  const clean = String(value || "").slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(clean) ? clean : "";
+}
+
+function normalizeDayOfWeek(value) {
+  const clean = String(value || "").trim().toLowerCase();
+  const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  return days.includes(clean) ? clean : "";
+}
+
+function dayOfWeekForDate(value) {
+  const date = new Date(`${String(value || "").slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  return ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][date.getDay()];
+}
+
 function isWeeklyRepeatEnabled(value) {
   return value === true || value === 1 || String(value || "").toLowerCase() === "true";
 }
@@ -1934,10 +2730,13 @@ function formatIsoDateForLog(value) {
   return date.toLocaleDateString("en-US");
 }
 
-function isValidRoundRobinAdminCode(group, eventCode) {
+function roundRobinAdminAccessMode(group, eventCode) {
   const cleanCode = String(eventCode || "").trim();
   const overrideCode = String(process.env.ROUND_ROBIN_ADMIN_OVERRIDE_CODE || "").trim();
-  return String(group.admin_code || "") === cleanCode || (overrideCode && overrideCode === cleanCode);
+  if (!cleanCode) return "";
+  if (String(group.admin_code || "") === cleanCode || (overrideCode && overrideCode === cleanCode)) return "manager";
+  if (String(group.settings?.secondaryAdminCode || "").trim() === cleanCode) return "secondary";
+  return "";
 }
 
 function phonesMatch(savedPhone, cleanPhone) {

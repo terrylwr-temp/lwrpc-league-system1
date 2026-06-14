@@ -56,7 +56,7 @@ export default function AppHeader({
       links: [
         { label: "Scheduling", path: "/scheduling", role: "league_manager", icon: "\u{1F4C5}" },
         { label: "Schedule Editor", path: "/schedule-editor", role: "league_manager", icon: "\u{1F6E0}\u{FE0F}" },
-        { label: "Scoring", path: "/scoring", role: "league_manager", icon: "\u{2705}" },
+        { label: "Scoring (Master)", path: "/scoring", role: "league_manager", icon: "\u{2705}" },
         { label: "Matches", path: "/matches", role: "captain", icon: "\u{1F4CB}" }
       ]
     },

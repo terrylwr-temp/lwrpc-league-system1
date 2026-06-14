@@ -2,20 +2,25 @@
 
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { roundRobinPlayerLabel } from "../../../lib/roundRobinSchedule";
 
-const TABS = ["Session", "Players", "Groups", "Courts", "Settings", "SMS", "Log"];
+const TABS = ["Matches", "Ladders", "Players", "Groups", "Courts", "Settings", "SMS", "Log"];
+const SECONDARY_TABS = ["Ladders", "Players"];
 const TAB_TONES = {
-  Session: {
+  Matches: {
     active: "border-teal-700 bg-teal-600 text-white ring-2 ring-teal-200",
     idle: "border-teal-200 bg-teal-50 text-teal-950 hover:border-teal-400 hover:bg-teal-100",
   },
   Players: {
     active: "border-blue-700 bg-blue-600 text-white ring-2 ring-blue-200",
     idle: "border-blue-200 bg-blue-50 text-blue-950 hover:border-blue-400 hover:bg-blue-100",
+  },
+  Ladders: {
+    active: "border-violet-700 bg-violet-600 text-white ring-2 ring-violet-200",
+    idle: "border-violet-200 bg-violet-50 text-violet-950 hover:border-violet-400 hover:bg-violet-100",
   },
   Groups: {
     active: "border-emerald-700 bg-emerald-600 text-white ring-2 ring-emerald-200",
@@ -39,27 +44,38 @@ const TAB_TONES = {
   },
 };
 const DEFAULT_SMS_TEMPLATES = {
-  newPlayer: "{{group_name}}: {{player_name}}, you have been added to PBCourtCommand. You may receive session invite/update texts at this number. Reply STOP to opt out. {{public_link}}",
-  sessionInvite: "{{group_name}}: {{session_name}} is open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Reply to the host or open {{public_link}} to join.",
-  sessionReminder: "{{group_name}} reminder: {{session_name}} is still open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Please reply if you can play or if you are out.",
+  newPlayer: "{{group_name}}: {{player_name}}, you have been added to PBCourtCommand. You may receive match invite/update texts at this number. Reply STOP to opt out. {{public_link}}",
+  ladderAdded: "{{group_name}}: {{player_name}}, you have been added to {{ladder_name}}. Watch for ladder match invites and results texts. {{public_link}}",
+  sessionInvite: "{{group_name}}: {{session_name}} match is open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Reply to the host or open {{public_link}} to join.",
+  sessionReminder: "{{group_name}} reminder: {{session_name}} match is still open for {{date}} at {{time}}{{location_line}}. {{joined_count}} joined, {{available_spots}} spots open. Please reply if you can play or if you are out.",
   gameUpdate: "{{group_name}} game update: ",
   weatherUpdate: "{{group_name}} weather update: ",
   sessionResults: "{{group_name}} Results for {{date}}:\n{{result_rankings}}",
 };
 const SMS_TEMPLATE_OPTIONS = [
   { key: "newPlayer", label: "New Player" },
-  { key: "sessionInvite", label: "New Session" },
+  { key: "ladderAdded", label: "Ladder Added" },
+  { key: "sessionInvite", label: "New Match" },
   { key: "sessionReminder", label: "Pending Reminder" },
   { key: "gameUpdate", label: "Game Update" },
   { key: "weatherUpdate", label: "Weather Update" },
-  { key: "sessionResults", label: "Results" },
+  { key: "sessionResults", label: "Match Results" },
 ];
 const PLAYER_STATS_RANGES = [
-  { id: "currentSession", label: "Current Session" },
+  { id: "currentSession", label: "Current Match" },
   { id: "currentMonth", label: "Current Month" },
   { id: "lastMonth", label: "Last Month" },
   { id: "currentYear", label: "Current Year" },
   { id: "all", label: "All" },
+];
+const LADDER_DAYS = [
+  { value: "sunday", label: "Sunday" },
+  { value: "monday", label: "Monday" },
+  { value: "tuesday", label: "Tuesday" },
+  { value: "wednesday", label: "Wednesday" },
+  { value: "thursday", label: "Thursday" },
+  { value: "friday", label: "Friday" },
+  { value: "saturday", label: "Saturday" },
 ];
 const DUPR_EXPORT_HEADERS = [
   "matchType",
@@ -106,11 +122,12 @@ export default function RoundRobinAdminPage() {
   const [actionLoading, setActionLoading] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [activeTab, setActiveTab] = useState("Session");
+  const [activeTab, setActiveTab] = useState("Matches");
   const [swapSelection, setSwapSelection] = useState([]);
   const [liveSessionId, setLiveSessionId] = useState("");
   const [hostUnlocking, setHostUnlocking] = useState(false);
   const [pendingScores, setPendingScores] = useState({});
+  const [dirtyTabs, setDirtyTabs] = useState(() => new Set());
 
   useEffect(() => {
     if (requestedManagerMode) {
@@ -135,7 +152,7 @@ export default function RoundRobinAdminPage() {
     }
 
     if (requestedHostSessionId && !cachedHostPhone) {
-      setError("Open this session from your player screen so your phone can be verified.");
+      setError("Open this match from your player screen so your phone can be verified.");
       setHostUnlocking(false);
       return;
     }
@@ -153,6 +170,48 @@ export default function RoundRobinAdminPage() {
     const timeout = window.setTimeout(() => setNotice(""), 20000);
     return () => window.clearTimeout(timeout);
   }, [notice]);
+
+  useEffect(() => {
+    if (dirtyTabs.size === 0) return undefined;
+    const warnBeforeUnload = (event) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnBeforeUnload);
+    return () => window.removeEventListener("beforeunload", warnBeforeUnload);
+  }, [dirtyTabs]);
+
+  useEffect(() => {
+    if (state?.accessMode === "secondary" && !SECONDARY_TABS.includes(activeTab)) {
+      setActiveTab("Ladders");
+    }
+  }, [activeTab, state?.accessMode]);
+
+  const setTabDirty = useCallback((tab, isDirty) => {
+    setDirtyTabs((current) => {
+      const next = new Set(current);
+      if (isDirty) next.add(tab);
+      else next.delete(tab);
+      return next;
+    });
+  }, []);
+
+  function canLeaveCurrentTab() {
+    if (!dirtyTabs.has(activeTab)) return true;
+    window.alert("Save or cancel your changes before moving to another screen.");
+    return false;
+  }
+
+  function changeActiveTab(tab) {
+    if (tab === activeTab) return;
+    if (!canLeaveCurrentTab()) return;
+    setActiveTab(tab);
+  }
+
+  function goToPlayerView() {
+    if (!canLeaveCurrentTab()) return;
+    router.push(roundRobinPath(groupKey, "player"));
+  }
 
   async function unlock(code = eventCode, preferredSessionId = liveSessionId) {
     const cleanCode = String(code || "").trim();
@@ -187,6 +246,7 @@ export default function RoundRobinAdminPage() {
 
     window.sessionStorage.setItem(storageKey, cleanCode);
     setEventCode(cleanCode);
+    if (result.accessMode === "secondary") setActiveTab("Ladders");
     setState(result);
   }
 
@@ -194,7 +254,7 @@ export default function RoundRobinAdminPage() {
     const cleanPhone = String(nextPhone || window.sessionStorage.getItem(hostPhoneStorageKey) || window.localStorage.getItem(playerPhoneStorageKey) || "").trim();
     const cleanSessionId = String(nextSessionId || "").trim();
     if (!cleanPhone || !cleanSessionId) {
-      setError("Open this session from your player screen so your phone can be verified.");
+      setError("Open this match from your player screen so your phone can be verified.");
       return;
     }
 
@@ -222,7 +282,7 @@ export default function RoundRobinAdminPage() {
     window.sessionStorage.setItem(hostSessionStorageKey, result.hostSessionId || cleanSessionId);
     setHostPhone(cleanPhone);
     setEventCode("");
-    setActiveTab("Session");
+    setActiveTab("Matches");
     setState(result);
   }
 
@@ -306,7 +366,7 @@ export default function RoundRobinAdminPage() {
   async function enterLiveSession(sessionId) {
     const nextSessionId = String(sessionId || "").trim();
     if (!nextSessionId) return;
-    setActiveTab("Session");
+    setActiveTab("Matches");
     setSwapSelection([]);
     const cleanCode = String(eventCode || window.sessionStorage.getItem(storageKey) || "").trim();
     if (cleanCode) await unlock(cleanCode, nextSessionId);
@@ -322,7 +382,8 @@ export default function RoundRobinAdminPage() {
   }
 
   function exitToDashboard() {
-    if (!window.confirm("Exit to LMS? Your PBCC admin session will be closed.")) return;
+    if (!canLeaveCurrentTab()) return;
+    if (!window.confirm("Exit to LMS? Your PBCC admin access will be closed.")) return;
     window.sessionStorage.removeItem(storageKey);
     window.sessionStorage.removeItem(hostPhoneStorageKey);
     window.sessionStorage.removeItem(hostSessionStorageKey);
@@ -345,10 +406,10 @@ export default function RoundRobinAdminPage() {
         <div className="w-full max-w-lg overflow-hidden rounded-lg border border-white/80 bg-white/95 text-center shadow-[0_24px_70px_-42px_rgba(15,23,42,0.75)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
           <div className="p-6">
-            <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Session</div>
-            <h1 className="mt-1 text-2xl font-black text-slate-950">{hostUnlocking || loading ? "Opening session..." : "Live session access"}</h1>
+            <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Match</div>
+            <h1 className="mt-1 text-2xl font-black text-slate-950">{hostUnlocking || loading ? "Opening match..." : "Live match access"}</h1>
             <p className="mt-2 text-sm font-semibold text-slate-600">
-              {error || "Verifying your saved player phone and opening the assigned live session."}
+              {error || "Verifying your saved player phone and opening the assigned live match."}
             </p>
             {error && (
               <button type="button" onClick={() => router.push(roundRobinPath(id, "player"))} className="mt-4 rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800">
@@ -418,7 +479,7 @@ export default function RoundRobinAdminPage() {
   const latestSession = (state.sessions || []).find((session) => String(session.id) === String(state.activeSessionId || "")) || state.sessions?.[0] || null;
   const liveSession = liveSessionId ? (state.sessions || []).find((session) => String(session.id || "") === String(liveSessionId)) : null;
   const rounds = groupMatchesByRound(state.matches || []);
-  const visibleTabs = state.accessMode === "host" ? ["Session"] : TABS;
+  const visibleTabs = state.accessMode === "host" ? ["Matches"] : state.accessMode === "secondary" ? SECONDARY_TABS : TABS;
 
   if (state.accessMode === "host") {
     return (
@@ -444,7 +505,7 @@ export default function RoundRobinAdminPage() {
             />
           ) : (
             <section className="rounded-lg border border-white/80 bg-white/95 p-8 text-center shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
-              <h1 className="text-2xl font-black text-slate-950">No active session found</h1>
+              <h1 className="text-2xl font-black text-slate-950">No active match found</h1>
               <button type="button" onClick={exitHostToPlayer} className="mt-4 rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800">
                 Exit
               </button>
@@ -459,6 +520,7 @@ export default function RoundRobinAdminPage() {
               actionLoading={actionLoading}
               swapSelection={swapSelection}
               setSwapSelection={setSwapSelection}
+              isLadderMatch={isLadderSession(latestSession)}
               onPendingScoreChange={recordPendingScore}
             />
           ))}
@@ -467,7 +529,7 @@ export default function RoundRobinAdminPage() {
     );
   }
 
-  if (liveSessionId && activeTab === "Session") {
+  if (liveSessionId && activeTab === "Matches") {
     const selectedSession = liveSession || latestSession;
     return (
       <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
@@ -492,7 +554,7 @@ export default function RoundRobinAdminPage() {
             />
           ) : (
             <section className="rounded-lg border border-white/80 bg-white/95 p-8 text-center shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
-              <h1 className="text-2xl font-black text-slate-950">No active session found</h1>
+              <h1 className="text-2xl font-black text-slate-950">No active match found</h1>
               <button type="button" onClick={exitLiveSession} className="mt-4 rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800">
                 Exit
               </button>
@@ -507,6 +569,7 @@ export default function RoundRobinAdminPage() {
               actionLoading={actionLoading}
               swapSelection={swapSelection}
               setSwapSelection={setSwapSelection}
+              isLadderMatch={isLadderSession(selectedSession)}
               onPendingScoreChange={recordPendingScore}
             />
           ))}
@@ -527,12 +590,14 @@ export default function RoundRobinAdminPage() {
               <h1 className="text-3xl font-black sm:text-4xl">PBCourtCommand</h1>
             </div>
             <div className="flex flex-wrap gap-2">
-              <Link className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-slate-950 shadow-[0_10px_24px_-14px_rgba(255,255,255,0.9)] ring-1 ring-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-lg" href={roundRobinPath(groupKey, "player")}>
+              <button type="button" onClick={goToPlayerView} className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-slate-950 shadow-[0_10px_24px_-14px_rgba(255,255,255,0.9)] ring-1 ring-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-lg">
                 Player View
-              </Link>
-              <button type="button" onClick={exitToDashboard} className="rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg">
-                Exit to LMS
               </button>
+              {state.accessMode !== "secondary" && (
+                <button type="button" onClick={exitToDashboard} className="rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg">
+                  Exit to LMS
+                </button>
+              )}
             </div>
           </div>
           </div>
@@ -543,7 +608,7 @@ export default function RoundRobinAdminPage() {
             <button
               key={tab}
               type="button"
-              onClick={() => setActiveTab(tab)}
+              onClick={() => changeActiveTab(tab)}
               className={`rounded-lg border px-4 py-3 text-sm font-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
                 activeTab === tab ? tabTone(tab).active : tabTone(tab).idle
               }`}
@@ -561,7 +626,7 @@ export default function RoundRobinAdminPage() {
           </div>
         )}
 
-        {activeTab === "Session" && (
+        {activeTab === "Matches" && (
           <SessionTab
             state={state}
             runAction={runAction}
@@ -573,10 +638,11 @@ export default function RoundRobinAdminPage() {
           />
         )}
 
-        {activeTab === "Players" && <PlayersTab state={state} runAction={runAction} actionLoading={actionLoading} />}
+        {activeTab === "Ladders" && <LaddersTab state={state} runAction={runAction} actionLoading={actionLoading} setTabDirty={setTabDirty} />}
+        {activeTab === "Players" && <PlayersTab state={state} runAction={runAction} actionLoading={actionLoading} setTabDirty={setTabDirty} />}
         {activeTab === "Groups" && <GroupsTab state={state} runAction={runAction} actionLoading={actionLoading} />}
-        {activeTab === "Courts" && <CourtsTab state={state} runAction={runAction} actionLoading={actionLoading} />}
-        {activeTab === "Settings" && <SettingsTab state={state} runAction={runAction} actionLoading={actionLoading} />}
+        {activeTab === "Courts" && <CourtsTab state={state} runAction={runAction} actionLoading={actionLoading} setTabDirty={setTabDirty} />}
+        {activeTab === "Settings" && <SettingsTab state={state} runAction={runAction} actionLoading={actionLoading} setTabDirty={setTabDirty} />}
         {activeTab === "SMS" && <SmsTab state={state} latestSession={latestSession} runAction={runAction} actionLoading={actionLoading} />}
         {activeTab === "Log" && <LogTab state={state} />}
       </div>
@@ -589,7 +655,6 @@ function SessionTab(props) {
     state,
     runAction,
     actionLoading,
-    enterLiveSession,
   } = props;
   const [form, setForm] = useState(() => newSessionForm(state));
   const [editingSessionId, setEditingSessionId] = useState("");
@@ -598,9 +663,6 @@ function SessionTab(props) {
   const [showPastSessions, setShowPastSessions] = useState(false);
   const [playersModalSession, setPlayersModalSession] = useState(null);
   const [playersModalStatus, setPlayersModalStatus] = useState("joined");
-  const [startModalSession, setStartModalSession] = useState(null);
-  const [startCourts, setStartCourts] = useState([]);
-  const [startCheckedPlayerIds, setStartCheckedPlayerIds] = useState([]);
   const [resultsModalSession, setResultsModalSession] = useState(null);
   const isEditingSession = Boolean(editingSessionId);
   const visibleSessionBase = useMemo(
@@ -631,7 +693,7 @@ function SessionTab(props) {
     const saved = await runAction(isEditingSession ? "updatePlannedSession" : "createPlannedSession", {
       ...form,
       sessionId: editingSessionId,
-      mode: state.group.mode,
+      mode: form.mode || "daily_round_robin",
       publicUrl: playerRoundRobinUrl(state.group),
     });
     if (saved) {
@@ -669,49 +731,8 @@ function SessionTab(props) {
     setPlayersModalStatus(status);
   }
 
-  function openStartModal(session) {
-    const joinedPlayers = sessionPlayersForStatus(state, session.id, "joined");
-    const checkedIds = joinedPlayers.map((player) => String(player.id));
-    const suggestedCourtCount = suggestedCourtCountForPlayers(checkedIds.length);
-    setStartModalSession(session);
-    setStartCourts(sessionCourtRows(session, state.courts, suggestedCourtCount));
-    setStartCheckedPlayerIds(checkedIds);
-  }
-
-  function updateStartCourt(index, field, value) {
-    setStartCourts((current) => current.map((court, courtIndex) => courtIndex === index ? { ...court, [field]: value } : court));
-  }
-
-  function toggleStartPlayer(playerId) {
-    setStartCheckedPlayerIds((current) => {
-      const cleanPlayerId = String(playerId || "");
-      const next = current.includes(cleanPlayerId)
-        ? current.filter((id) => id !== cleanPlayerId)
-        : [...current, cleanPlayerId];
-      const suggestedCourtCount = suggestedCourtCountForPlayers(next.length);
-      setStartCourts((currentCourts) => sessionCourtRows(startModalSession, state.courts, suggestedCourtCount, currentCourts));
-      return next;
-    });
-  }
-
-  async function confirmStartSession() {
-    if (!startModalSession) return;
-    const sessionId = startModalSession.id;
-    const started = await runAction("startSessionAndGenerateFirstGame", {
-      sessionId,
-      courtCount: startCourts.length,
-      sessionCourts: startCourts,
-      selectedSessionPlayerIds: startCheckedPlayerIds,
-    });
-    if (started) {
-      setStartModalSession(null);
-      setStartCheckedPlayerIds([]);
-      enterLiveSession(sessionId);
-    }
-  }
-
   async function deleteSession(session) {
-    if (!window.confirm(`Delete ${session.session_name || "this session"}? It will be removed from active sessions and kept as cancelled history.`)) return;
+    if (!window.confirm(`Delete ${session.session_name || "this match"}? It will be removed from active matches and kept as cancelled history.`)) return;
     await runAction("deleteSession", { sessionId: session.id });
   }
 
@@ -731,9 +752,7 @@ function SessionTab(props) {
           editSession={editSession}
           duplicateSession={duplicateSession}
           openPlayersModal={openPlayersModal}
-          openStartModal={openStartModal}
           openSessionResults={setResultsModalSession}
-          enterLiveSession={enterLiveSession}
           deleteSession={deleteSession}
           exportSessionDupr={(session) => exportSessionDuprCsv(state, session)}
           runAction={runAction}
@@ -766,20 +785,6 @@ function SessionTab(props) {
         />
       )}
 
-      {startModalSession && (
-        <StartSessionModal
-          session={startModalSession}
-          courts={startCourts}
-          updateCourt={updateStartCourt}
-          joinedPlayers={sessionPlayersForStatus(state, startModalSession.id, "joined")}
-          checkedPlayerIds={startCheckedPlayerIds}
-          togglePlayer={toggleStartPlayer}
-          actionLoading={actionLoading}
-          onClose={() => { setStartModalSession(null); setStartCheckedPlayerIds([]); }}
-          onStart={confirmStartSession}
-        />
-      )}
-
       {resultsModalSession && (
         <SessionResultsModal
           state={state}
@@ -800,8 +805,8 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
       <div className="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
         <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
           <div>
-            <div className={MODAL_EYEBROW_CHROME}>Session Setup</div>
-            <h2 className="text-2xl font-black">{isEditingSession ? "Edit Session" : "Add Session"}</h2>
+            <div className={MODAL_EYEBROW_CHROME}>Match Setup</div>
+            <h2 className="text-2xl font-black">{isEditingSession ? "Edit Match" : "Add Match"}</h2>
           </div>
           <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
             Cancel
@@ -809,7 +814,7 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
         </div>
         <div className="max-h-[78vh] overflow-y-auto p-4">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <TextInput label="Session name" value={form.sessionName} onChange={(value) => setForm((current) => ({ ...current, sessionName: value }))} />
+            <TextInput label="Match name" value={form.sessionName} onChange={(value) => setForm((current) => ({ ...current, sessionName: value }))} />
             <TextInput label="Location" value={form.location} onChange={(value) => setForm((current) => ({ ...current, location: value }))} />
             <TextInput label="Date" type="date" value={form.sessionDate} onChange={(value) => setForm((current) => ({ ...current, sessionDate: value }))} />
             <TextInput label="Start time" type="time" value={form.startsAt} onChange={(value) => setForm((current) => ({ ...current, startsAt: value }))} />
@@ -870,7 +875,7 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
             disabled={saving || !form.sessionName.trim() || !form.sessionDate || form.invitedGroupIds.length === 0}
             className="mt-4 w-full rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
           >
-            {saving ? "Saving..." : isEditingSession ? "Update Session" : "Create Session"}
+            {saving ? "Saving..." : isEditingSession ? "Update Match" : "Create Match"}
           </button>
         </div>
       </div>
@@ -892,12 +897,9 @@ function SessionsPanel(props) {
     editSession,
     duplicateSession,
     openPlayersModal,
-    openStartModal,
     openSessionResults,
-    enterLiveSession,
     deleteSession,
     exportSessionDupr,
-    runAction,
     actionLoading,
   } = props;
 
@@ -905,14 +907,14 @@ function SessionsPanel(props) {
     <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 className="text-xl font-black">Sessions</h2>
+          <h2 className="text-xl font-black">Matches</h2>
           <div className="mt-1 text-xs font-bold text-slate-500">
             Showing {sessions.length} of {totalCount} {showPastSessions ? "past" : "upcoming/current"}
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <button type="button" onClick={openAddSession} className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800">
-            Add Session
+            Add Match
           </button>
           <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-300 bg-slate-100 p-1 text-xs font-black">
             <button type="button" onClick={() => setShowPastSessions(false)} className={`rounded-md px-3 py-2 ${showPastSessions ? "text-slate-600 hover:bg-white" : "bg-white text-slate-950 shadow-sm"}`}>
@@ -926,7 +928,7 @@ function SessionsPanel(props) {
       </div>
 
       <label className="mt-3 block text-sm font-bold text-slate-600">
-        Search sessions
+        Search matches
         <input
           type="search"
           value={sessionSearch}
@@ -946,18 +948,15 @@ function SessionsPanel(props) {
             editSession={editSession}
             duplicateSession={duplicateSession}
             openPlayersModal={openPlayersModal}
-            openStartModal={openStartModal}
             openSessionResults={openSessionResults}
-            enterLiveSession={enterLiveSession}
             deleteSession={deleteSession}
             exportSessionDupr={exportSessionDupr}
-            runAction={runAction}
             actionLoading={actionLoading}
           />
         ))}
         {sessions.length === 0 && (
           <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-6 text-center text-sm font-bold text-slate-500">
-            No sessions match this view.
+            No matches match this view.
           </div>
         )}
       </div>
@@ -1036,7 +1035,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }
 
   async function finishSession() {
-    if (!window.confirm(`Finish ${session.session_name || "this session"}? This will close scoring and save final results.`)) return;
+    if (!window.confirm(`Finish ${session.session_name || "this match"}? This will close scoring and save final results.`)) return;
     if (saveCurrentRoundScores) await saveCurrentRoundScores();
     const completed = await runAction("completeSession", { sessionId: session.id, smsEnabled: true }, { returnResult: true });
     if (completed?.success !== false) onExit?.();
@@ -1056,8 +1055,8 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
     <section className="sticky top-0 z-30 rounded-lg border border-teal-200 bg-teal-50/95 p-3 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] backdrop-blur sm:top-2 sm:p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Session</div>
-          <h2 className="break-words text-lg font-black text-slate-950 sm:text-xl">{session.session_name || "Session"}</h2>
+          <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Match</div>
+          <h2 className="break-words text-lg font-black text-slate-950 sm:text-xl">{session.session_name || "Match"}</h2>
           <div className="mt-1 text-sm font-bold text-slate-600">
             {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
           </div>
@@ -1071,7 +1070,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
           >
             {["generateNextGame", "startSessionAndGenerateFirstGame"].includes(actionLoading)
               ? "Working..."
-              : isPlaying ? "Next Round" : "Start Session"}
+              : isPlaying ? "Next Round" : "Start Match"}
           </button>
           <button
             type="button"
@@ -1079,7 +1078,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
             disabled={isClosed || actionLoading === "completeSession"}
             className="rounded-lg bg-emerald-700 px-3 py-3 text-sm font-black text-white shadow-sm hover:bg-emerald-800 disabled:bg-slate-300 sm:px-4"
           >
-            {actionLoading === "completeSession" ? "Finishing..." : "Finish Session"}
+            {actionLoading === "completeSession" ? "Finishing..." : "Finish Match"}
           </button>
           <button
             type="button"
@@ -1097,7 +1096,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
       </div>
       {!isPlaying && joinedCount < 4 && (
         <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-black text-amber-900">
-          At least 4 joined players are required before this session can start. Current joined players: {joinedCount}.
+          At least 4 joined players are required before this match can start. Current joined players: {joinedCount}.
         </div>
       )}
       {statsOpen && <SessionStatsModal session={session} state={state} onClose={() => setStatsOpen(false)} />}
@@ -1166,7 +1165,7 @@ function SessionStatsModal({ session, state, onClose }) {
         <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
           <div className="min-w-0">
             <div className={MODAL_EYEBROW_CHROME}>Current Game Stats</div>
-            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
+            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
             Close
@@ -1254,12 +1253,17 @@ function AdminStandingMobileSummaryRow({ row, rank }) {
   );
 }
 
-function AdminStandingMobileCard({ row, rank }) {
+function AdminStandingMobileCard({ row, rank, isLadder = false }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-xs font-black uppercase tracking-wide text-slate-500">Rank #{rank}</div>
+          {isLadder && (
+            <div className="mt-1 inline-flex rounded-md bg-blue-100 px-2 py-1 text-xs font-black text-blue-800">
+              Before {formatLadderRank(row.ladderPreviousPosition, row.ladderPositionCount)}
+            </div>
+          )}
           <div className="mt-1 break-words text-base font-black text-slate-950">{row.display_name || "Player"}</div>
         </div>
         <div className="rounded-md bg-white px-2 py-1 text-sm font-black text-teal-800 shadow-sm">
@@ -1335,9 +1339,17 @@ function AdminGameTeamPanel({ players, score, tone, isWinner }) {
 }
 
 function SessionResultsModal({ state, session, onClose }) {
-  const standings = sessionResultsForSession(state, session.id);
+  const [showLadderHelp, setShowLadderHelp] = useState(false);
+  const isLadder = isLadderSession(session);
+  const ladder = sessionLadderForSession(state, session);
+  const standings = sessionResultsForSession(state, session.id).map((row) => ({
+    ...row,
+    ladderPreviousPosition: ladderPreviousPositionForResult(state, session, row),
+    ladderPositionCount: ladderPositionCountForResult(state, session, row),
+  }));
   const matches = sessionMatchesForSession(state, session.id);
   const roundGroups = groupMatchesByRound(matches);
+  const rankColSpan = isLadder ? 9 : 8;
 
   return (
     <ModalPortal>
@@ -1345,8 +1357,8 @@ function SessionResultsModal({ state, session, onClose }) {
         <div className="h-full max-h-screen w-full max-w-5xl overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-2 sm:h-auto sm:max-h-[calc(100vh-1rem)] sm:rounded-lg">
           <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
             <div className="min-w-0">
-              <div className={MODAL_EYEBROW_CHROME}>Past Session Results</div>
-              <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
+              <div className={MODAL_EYEBROW_CHROME}>Past Match Results</div>
+              <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
               <div className={MODAL_SUPPORTING_TEXT}>
                 {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}{session.location ? ` - ${session.location}` : ""}
               </div>
@@ -1357,37 +1369,78 @@ function SessionResultsModal({ state, session, onClose }) {
           </div>
           <div className="max-h-[calc(100vh-7rem)] overflow-y-auto p-3 sm:max-h-[76vh] sm:p-4">
             <div className="overflow-hidden rounded-lg border border-slate-200">
-              <div className="bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">Standings</div>
+              <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100 px-3 py-2">
+                <div className="text-sm font-black text-slate-700">Match Standings</div>
+                {isLadder && (
+                  <button
+                    type="button"
+                    onClick={() => setShowLadderHelp((current) => !current)}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50"
+                    aria-label="Show ladder ranking rules"
+                  >
+                    ?
+                  </button>
+                )}
+              </div>
+              {isLadder && showLadderHelp && (
+                <div className="border-t border-slate-200 bg-blue-50 px-3 py-3 text-sm font-semibold text-blue-950">
+                  <div className="font-black">Ladder movement rules</div>
+                  <div className="mt-1">
+                    {ladder?.movementMode === "top2" ? "Top 2 move up and bottom 2 move down" : "Top 1 moves up and bottom 1 moves down"} on each court after the match. Middle players stay on the same court.
+                  </div>
+                  <div className="mt-1">
+                    Match-date ranking uses total points scored, then head-to-head if points are tied, then win percentage, average point differential, games played, and player name.
+                  </div>
+                  <div className="mt-1">
+                    Starting with session 4, players below the participation requirement drop one court for the next ladder date.
+                  </div>
+                </div>
+              )}
               <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[720px] text-sm">
+              <table className="w-full min-w-[760px] table-fixed text-xs sm:text-sm">
+                <colgroup>
+                  <col className="w-[8%]" />
+                  {isLadder && <col className="w-[14%]" />}
+                  <col className="w-[24%]" />
+                  <col className="w-[11%]" />
+                  <col className="w-[10%]" />
+                  <col className="w-[9%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[8%]" />
+                  <col className="w-[7%]" />
+                </colgroup>
                 <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th className="px-3 py-2 text-left">Rank</th>
-                    <th className="px-3 py-2 text-left">Player</th>
-                    <th className="px-3 py-2 text-right">Record</th>
-                    <th className="px-3 py-2 text-right">Win %</th>
-                    <th className="px-3 py-2 text-right">Games</th>
-                    <th className="px-3 py-2 text-right">Points</th>
-                    <th className="px-3 py-2 text-right">Diff</th>
-                    <th className="px-3 py-2 text-right">Byes</th>
+                    <th className="px-2 py-2 text-left">Rank</th>
+                    {isLadder && <th className="px-2 py-2 text-left">Rank Before</th>}
+                    <th className="px-2 py-2 text-left">Player</th>
+                    <th className="px-2 py-2 text-right">Record</th>
+                    <th className="px-2 py-2 text-right">Win %</th>
+                    <th className="px-2 py-2 text-right">Games</th>
+                    <th className="px-2 py-2 text-right">Points</th>
+                    <th className="px-2 py-2 text-right">Diff</th>
+                    <th className="px-2 py-2 text-right">Byes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 bg-white">
                   {standings.map((row, index) => (
                     <tr key={row.id || `${row.session_id}-${row.player_id}`}>
-                      <td className="px-3 py-2 font-black text-slate-950">#{index + 1}</td>
-                      <td className="px-3 py-2 font-black text-slate-950">{row.display_name || "Player"}</td>
-                      <td className="px-3 py-2 text-right font-black text-slate-950">{row.wins || 0}-{row.losses || 0}</td>
-                      <td className="px-3 py-2 text-right font-black text-teal-800">{formatPercent(winPctForStanding(row))}</td>
-                      <td className="px-3 py-2 text-right font-bold text-slate-700">{row.games || 0}</td>
-                      <td className="px-3 py-2 text-right font-bold text-slate-700">{row.points_for || 0}-{row.points_against || 0}</td>
-                      <td className="px-3 py-2 text-right font-bold text-slate-700">{formatSignedNumber(row.point_diff || 0)}</td>
-                      <td className="px-3 py-2 text-right font-bold text-slate-700">{row.byes || 0}</td>
+                      <td className="px-2 py-2 font-black text-slate-950">#{index + 1}</td>
+                      {isLadder && (
+                        <td className="px-2 py-2 font-black text-blue-800">{formatLadderRank(row.ladderPreviousPosition, row.ladderPositionCount)}</td>
+                      )}
+                      <td className="truncate px-2 py-2 font-black text-slate-950" title={row.display_name || "Player"}>{row.display_name || "Player"}</td>
+                      <td className="px-2 py-2 text-right font-black text-slate-950">{row.wins || 0}-{row.losses || 0}</td>
+                      <td className="px-2 py-2 text-right font-black text-teal-800">{formatPercent(winPctForStanding(row))}</td>
+                      <td className="px-2 py-2 text-right font-bold text-slate-700">{row.games || 0}</td>
+                      <td className="px-2 py-2 text-right font-bold text-slate-700">{row.points_for || 0}-{row.points_against || 0}</td>
+                      <td className="px-2 py-2 text-right font-bold text-slate-700">{formatSignedNumber(row.point_diff || 0)}</td>
+                      <td className="px-2 py-2 text-right font-bold text-slate-700">{row.byes || 0}</td>
                     </tr>
                   ))}
                   {standings.length === 0 && (
                     <tr>
-                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={8}>No played-player stats are saved for this session yet.</td>
+                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={rankColSpan}>No played-player stats are saved for this match yet.</td>
                     </tr>
                   )}
                 </tbody>
@@ -1395,10 +1448,10 @@ function SessionResultsModal({ state, session, onClose }) {
               </div>
               <div className="grid grid-cols-1 gap-2 bg-white p-3 md:hidden">
                 {standings.map((row, index) => (
-                  <AdminStandingMobileCard key={row.id || `${row.session_id}-${row.player_id}`} row={row} rank={index + 1} />
+                  <AdminStandingMobileCard key={row.id || `${row.session_id}-${row.player_id}`} row={row} rank={index + 1} isLadder={isLadder} />
                 ))}
                 {standings.length === 0 && (
-                  <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No played-player stats are saved for this session yet.</div>
+                  <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No played-player stats are saved for this match yet.</div>
                 )}
               </div>
             </div>
@@ -1430,7 +1483,7 @@ function SessionResultsModal({ state, session, onClose }) {
                   );
                 })}
                 {matches.length === 0 && (
-                  <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No games were saved for this session.</div>
+                  <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No games were saved for this match.</div>
                 )}
               </div>
             </div>
@@ -1441,16 +1494,14 @@ function SessionResultsModal({ state, session, onClose }) {
   );
 }
 
-function SessionListItem({ state, session, isEditing, editSession, duplicateSession, openPlayersModal, openStartModal, openSessionResults, enterLiveSession, deleteSession, exportSessionDupr, actionLoading }) {
+function SessionListItem({ state, session, isEditing, editSession, duplicateSession, openPlayersModal, openSessionResults, deleteSession, exportSessionDupr, actionLoading }) {
   const joined = sessionPlayersForStatus(state, session.id, "joined").length;
   const waitlist = sessionPlayersForStatus(state, session.id, "waitlist").length;
-  const canStart = !["playing", "done", "cancelled"].includes(session.status) && joined >= 4;
-  const canResume = session.status === "playing";
   const isHostAccess = state.accessMode === "host";
   const isStarted = ["playing", "done", "cancelled"].includes(session.status);
   const canShowResults = isPastSession(session);
   const canDuplicate = !isHostAccess && session.status === "done";
-  const canShowPlayers = session.status !== "done";
+  const isLadder = isLadderSession(session);
   const stopActionClick = (event) => event.stopPropagation();
 
   return (
@@ -1464,15 +1515,20 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
           openSessionResults(session);
         }
       } : undefined}
-      className={`rounded-lg border p-3 ${canShowResults ? "cursor-pointer transition hover:-translate-y-0.5 hover:border-teal-400 hover:bg-white hover:shadow-md" : ""} ${isEditing ? "border-teal-500 bg-teal-50" : "border-slate-200 bg-slate-50"}`}
+      className={`rounded-lg border p-3 ${canShowResults ? `cursor-pointer transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md ${isLadder ? "hover:border-violet-400" : "hover:border-teal-400"}` : ""} ${isEditing ? "border-teal-500 bg-teal-50" : isLadder ? "border-violet-200 bg-violet-50" : "border-slate-200 bg-slate-50"}`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="font-black text-slate-950">{session.session_name || "Session"}</div>
+            <div className="font-black text-slate-950">{session.session_name || "Match"}</div>
             <span className={`rounded-md px-2 py-1 text-[11px] font-black uppercase tracking-wide ${sessionLifecycleClass(session.status)}`}>
               {sessionStatusLabel(session.status)}
             </span>
+            {isLadder && (
+              <span className="rounded-md bg-violet-700 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-white">
+                Ladder
+              </span>
+            )}
           </div>
           <div className="mt-1 text-lg font-black leading-tight text-slate-950 sm:text-xl">
             {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
@@ -1485,14 +1541,17 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+          <button type="button" onClick={(event) => { stopActionClick(event); openPlayersModal(session); }} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-800 shadow-sm hover:border-blue-500 hover:bg-blue-50">
+            Players
+          </button>
           {!isHostAccess && !isStarted && (
             <button type="button" onClick={(event) => { stopActionClick(event); editSession(session); }} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-800 shadow-sm hover:border-teal-500 hover:bg-teal-50">
               Edit
             </button>
           )}
-          {canShowPlayers && (
-            <button type="button" onClick={(event) => { stopActionClick(event); openPlayersModal(session); }} className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-800 shadow-sm hover:border-blue-500 hover:bg-blue-50">
-              Players
+          {!isHostAccess && !isStarted && (
+            <button type="button" onClick={(event) => { stopActionClick(event); deleteSession(session); }} disabled={actionLoading === "deleteSession" || session.status === "cancelled"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 shadow-sm hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">
+              Delete
             </button>
           )}
           {canShowResults && (
@@ -1510,20 +1569,6 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
               Duplicate
             </button>
           )}
-          {canResume ? (
-            <button type="button" onClick={(event) => { stopActionClick(event); enterLiveSession(session.id); }} className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-blue-800">
-              Resume Session
-            </button>
-          ) : (
-            <button type="button" onClick={(event) => { stopActionClick(event); openStartModal(session); }} disabled={!canStart || actionLoading === "startSessionAndGenerateFirstGame"} className="rounded-lg bg-teal-700 px-3 py-2 text-xs font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
-              Start Session
-            </button>
-          )}
-          {!isHostAccess && !isStarted && (
-            <button type="button" onClick={(event) => { stopActionClick(event); deleteSession(session); }} disabled={actionLoading === "deleteSession" || session.status === "cancelled"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 shadow-sm hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">
-              Delete
-            </button>
-          )}
         </div>
       </div>
     </div>
@@ -1538,6 +1583,7 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
   const statuses = ["joined", "declined", "waitlist", "invited"];
   const statusActionLoading = actionLoading === "updateSessionPlayerStatus";
   const addPlayerLoading = actionLoading === "addSessionNewPlayer";
+  const canAddPlayer = !isLadderSession(session);
 
   function updatePlayerStatus(player, nextStatus) {
     runAction("updateSessionPlayerStatus", {
@@ -1549,12 +1595,14 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
 
   async function addNewPlayer() {
     if (!newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10) return;
-    const added = await runAction("addSessionNewPlayer", {
+    const result = await runAction("addSessionNewPlayer", {
       sessionId: session.id,
-      displayName: newPlayerName,
-      phone: newPlayerPhone,
+      player: {
+        displayName: newPlayerName,
+        phone: newPlayerPhone,
+      },
     });
-    if (added) {
+    if (result) {
       setNewPlayerName("");
       setNewPlayerPhone("");
       setShowAddPlayer(false);
@@ -1568,8 +1616,8 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
         <div className={`shrink-0 p-4 ${MODAL_HEADER_CHROME}`}>
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <div className={MODAL_EYEBROW_CHROME}>Session Players</div>
-              <h2 className="text-2xl font-black">{session.session_name || "Session"}</h2>
+              <div className={MODAL_EYEBROW_CHROME}>Match Players</div>
+              <h2 className="text-2xl font-black">{session.session_name || "Match"}</h2>
               <div className={MODAL_SUPPORTING_TEXT}>
                 {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
               </div>
@@ -1589,65 +1637,60 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-4">
-          <div>
-            {!showAddPlayer ? (
-              <button
-                type="button"
-                onClick={() => setShowAddPlayer(true)}
-                className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-800"
-              >
-                Add Player
-              </button>
-            ) : (
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <label className="block text-sm font-bold text-slate-600">
-                    Player name
-                    <input
-                      type="text"
+          {canAddPlayer && (
+            <div className="mb-4">
+              {!showAddPlayer ? (
+                <button
+                  type="button"
+                  onClick={() => setShowAddPlayer(true)}
+                  className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-800"
+                >
+                  Add Player
+                </button>
+              ) : (
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <TextInput
+                      label="Player name"
                       value={newPlayerName}
-                      onChange={(event) => setNewPlayerName(event.target.value)}
-                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950"
+                      onChange={setNewPlayerName}
                       required
                     />
-                  </label>
-                  <label className="block text-sm font-bold text-slate-600">
-                    Phone #
-                    <input
+                    <TextInput
+                      label="Phone #"
                       type="tel"
                       value={newPlayerPhone}
-                      onChange={(event) => setNewPlayerPhone(formatPhoneInput(event.target.value))}
-                      className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950"
+                      onChange={(value) => setNewPlayerPhone(formatPhoneInput(value))}
                       placeholder="(941) 555-1212"
                       required
                     />
-                  </label>
+                  </div>
+                  <div className="mt-3 grid grid-cols-1 gap-2 sm:flex sm:justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowAddPlayer(false);
+                        setNewPlayerName("");
+                        setNewPlayerPhone("");
+                      }}
+                      className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={addNewPlayer}
+                      disabled={addPlayerLoading || !newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10}
+                      className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
+                    >
+                      {addPlayerLoading ? "Adding..." : "Add Player"}
+                    </button>
+                  </div>
                 </div>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:flex sm:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAddPlayer(false);
-                      setNewPlayerName("");
-                      setNewPlayerPhone("");
-                    }}
-                    className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:bg-slate-50"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={addNewPlayer}
-                    disabled={addPlayerLoading || !newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10}
-                    className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
-                  >
-                    {addPlayerLoading ? "Adding..." : "Add Player"}
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
+              )}
+            </div>
+          )}
+          <div className="overflow-hidden rounded-lg border border-slate-200">
             {players.map((player) => (
               <div key={player.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0">
                 <div className="min-w-0">
@@ -1682,7 +1725,7 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
             ))}
             {players.length === 0 && (
               <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">
-                No {status} players for this session.
+                No {status} players for this match.
               </div>
             )}
           </div>
@@ -1704,8 +1747,8 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
         <div className={`shrink-0 p-3 sm:p-4 ${MODAL_HEADER_CHROME}`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <div className={MODAL_EYEBROW_CHROME}>Start Session</div>
-            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
+            <div className={MODAL_EYEBROW_CHROME}>Start Match</div>
+            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
             <div className={MODAL_SUPPORTING_TEXT}>
               {checkedCount} checked players - {courtLabel} - {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
             </div>
@@ -1747,7 +1790,7 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
                 })}
                 {joinedPlayers.length === 0 && (
                   <div className="rounded-lg border border-dashed border-blue-200 bg-white px-3 py-6 text-center text-sm font-bold text-blue-900">
-                    No joined players are listed for this session.
+                    No joined players are listed for this match.
                   </div>
                 )}
               </div>
@@ -1786,7 +1829,7 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
   );
 }
 
-function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapSelection, onPendingScoreChange }) {
+function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapSelection, isLadderMatch = false, onPendingScoreChange }) {
   const roundScored = round.matches.length > 0 && round.matches.every(matchHasSavedScore);
   const byeSlots = round.matches.flatMap((match) => slotPlayers(match, "bye"));
   const playersInRound = round.matches.flatMap((match) => [
@@ -1853,7 +1896,7 @@ function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapS
             </div>
           )}
         </div>
-        {!roundScored && (
+        {!roundScored && !isLadderMatch && (
           <button type="button" onClick={shuffleRound} disabled={actionLoading === "updateMatchLineup"} className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-amber-600 disabled:bg-slate-300">
             Shuffle Round
           </button>
@@ -2013,8 +2056,9 @@ async function performSwap(first, second, runAction) {
   }
 }
 
-function PlayersTab({ state, runAction, actionLoading }) {
+function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
   const [form, setForm] = useState(emptyPlayerForm());
+  const [formBaseline, setFormBaseline] = useState(() => emptyPlayerForm());
   const [memberSearch, setMemberSearch] = useState("");
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
   const [playerSearch, setPlayerSearch] = useState("");
@@ -2031,20 +2075,28 @@ function PlayersTab({ state, runAction, actionLoading }) {
     () => filteredMemberOptions(state.members || [], memberSearch),
     [state.members, memberSearch]
   );
+  const formDirty = JSON.stringify(form) !== JSON.stringify(formBaseline);
+
+  useEffect(() => {
+    setTabDirty?.("Players", JSON.stringify(form) !== JSON.stringify(formBaseline));
+    return () => setTabDirty?.("Players", false);
+  }, [form, formBaseline, setTabDirty]);
 
   function editPlayer(player) {
     const linkedMember = (state.members || []).find((member) => String(member.id) === String(player.member_id || ""));
-    setForm({
+    const nextForm = {
       id: player.id,
       memberId: player.member_id || "",
       displayName: player.display_name || "",
-      duprId: player.dupr_id || "",
+      duprId: normalizeDuprId(player.dupr_id),
       email: player.email || "",
       phone: formatPhoneInput(player.phone || ""),
       notes: player.notes || "",
       isActive: player.is_active !== false,
       groupIds: groupIdsForPlayer(state, player.id),
-    });
+    };
+    setForm(nextForm);
+    setFormBaseline(nextForm);
     setMemberSearch(linkedMember ? memberLabel(linkedMember) : "");
     setMemberPickerOpen(false);
   }
@@ -2056,7 +2108,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
       ...current,
       memberId: member.id,
       displayName: member.full_name || [member.first_name, member.last_name].filter(Boolean).join(" "),
-      duprId: member.dupr_id || "",
+      duprId: normalizeDuprId(member.dupr_id),
       email: member.email || "",
       phone: formatPhoneInput(member.phone || ""),
     }));
@@ -2093,7 +2145,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
         id: form.id,
         memberId: form.memberId,
         displayName: form.displayName,
-        duprId: form.duprId,
+        duprId: normalizeDuprId(form.duprId),
         email: form.email,
         phone: formatPhoneInput(form.phone),
         notes: form.notes,
@@ -2103,7 +2155,9 @@ function PlayersTab({ state, runAction, actionLoading }) {
       },
     });
     if (saved) {
-      setForm(emptyPlayerForm());
+      const emptyForm = emptyPlayerForm();
+      setForm(emptyForm);
+      setFormBaseline(emptyForm);
       setMemberSearch("");
       setMemberPickerOpen(false);
     }
@@ -2111,11 +2165,13 @@ function PlayersTab({ state, runAction, actionLoading }) {
 
   async function deleteSavedPlayer(player) {
     const playerName = player.display_name || "this player";
-    if (!window.confirm(`Delete ${playerName} from saved PBCC players? Upcoming session roster entries will be removed. Completed session history will keep the saved display name.`)) return;
+    if (!window.confirm(`Delete ${playerName} from saved PBCC players? Upcoming match roster entries will be removed. Completed match history will keep the saved display name.`)) return;
 
     const deleted = await runAction("deletePlayer", { playerId: player.id });
     if (deleted && String(form.id) === String(player.id)) {
-      setForm(emptyPlayerForm());
+      const emptyForm = emptyPlayerForm();
+      setForm(emptyForm);
+      setFormBaseline(emptyForm);
       setMemberSearch("");
       setMemberPickerOpen(false);
     }
@@ -2127,7 +2183,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
         id: player.id,
         memberId: player.member_id || "",
         displayName: player.display_name || "",
-        duprId: player.dupr_id || "",
+        duprId: normalizeDuprId(player.dupr_id),
         email: player.email || "",
         phone: formatPhoneInput(player.phone || ""),
         notes: player.notes || "",
@@ -2188,7 +2244,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
             )}
           </div>
           <TextInput label="Name" value={form.displayName} onChange={(value) => setForm((current) => ({ ...current, displayName: value }))} required />
-          <TextInput label="DUPR ID" value={form.duprId} onChange={(value) => setForm((current) => ({ ...current, duprId: value }))} />
+          <TextInput label="DUPR ID" value={form.duprId} onChange={(value) => setForm((current) => ({ ...current, duprId: normalizeDuprId(value) }))} />
           <TextInput label="Email" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
           <TextInput label="Phone" type="tel" value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: formatPhoneInput(value) }))} required />
           <TextInput label="Notes" value={form.notes} onChange={(value) => setForm((current) => ({ ...current, notes: value }))} />
@@ -2212,7 +2268,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
             <button type="button" onClick={save} disabled={actionLoading === "savePlayer" || !form.displayName.trim() || normalizePhone(form.phone).length < 10} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
               Save Player
             </button>
-            {form.id && <button type="button" onClick={() => { setForm(emptyPlayerForm()); setMemberSearch(""); setMemberPickerOpen(false); }} className="rounded-lg bg-slate-100 px-4 py-3 font-black text-slate-700 hover:bg-slate-200">Cancel</button>}
+            {formDirty && <button type="button" onClick={() => { const emptyForm = emptyPlayerForm(); setForm(emptyForm); setFormBaseline(emptyForm); setMemberSearch(""); setMemberPickerOpen(false); }} className="rounded-lg bg-slate-100 px-4 py-3 font-black text-slate-700 hover:bg-slate-200">Cancel</button>}
           </div>
         </div>
       </section>
@@ -2264,7 +2320,7 @@ function PlayersTab({ state, runAction, actionLoading }) {
                   </td>
                   <td className="px-3 py-2 font-semibold text-slate-600">
                     <div>{[player.email, player.phone].filter(Boolean).join(" / ") || "No contact"}</div>
-                    <div className="mt-1 text-xs font-bold text-slate-500">DUPR ID: {player.dupr_id || "-"}</div>
+                    <div className="mt-1 text-xs font-bold text-slate-500">DUPR ID: {normalizeDuprId(player.dupr_id) || "-"}</div>
                     <div className="mt-1 text-xs text-slate-500">{groupNamesForPlayer(state, player.id).join(", ") || "No groups"}</div>
                   </td>
                   <td className="px-3 py-2 text-right">
@@ -2296,9 +2352,10 @@ function PlayersTab({ state, runAction, actionLoading }) {
 }
 
 function PlayerStatsModal({ state, player, onClose }) {
-  const [range, setRange] = useState("currentSession");
+  const [range, setRange] = useState("currentMonth");
   const rows = playerResultsForRange(state, player.id, range);
   const totals = aggregatePlayerResultRows(rows);
+  const lastDatePlayed = lastPlayedDate(rows);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
@@ -2327,7 +2384,8 @@ function PlayerStatsModal({ state, player, onClose }) {
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
-            <StatBox label="Sessions" value={totals.sessions} />
+            <StatBox label="Dates Played" value={totals.sessions} />
+            <StatBox label="Last Date Played" value={lastDatePlayed ? formatDate(lastDatePlayed) : "-"} />
             <StatBox label="Record" value={`${totals.wins}-${totals.losses}`} />
             <StatBox label="Games" value={totals.games} />
             <StatBox label="Win %" value={formatPercent(totals.winPct)} />
@@ -2341,8 +2399,8 @@ function PlayerStatsModal({ state, player, onClose }) {
               <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-3 py-2 text-left">Date</th>
-                  <th className="px-3 py-2 text-left">Session</th>
-                  <th className="px-3 py-2 text-right">Session Rank</th>
+                  <th className="px-3 py-2 text-left">Match</th>
+                  <th className="px-3 py-2 text-right">Match Rank</th>
                   <th className="px-3 py-2 text-right">Record</th>
                   <th className="px-3 py-2 text-right">Points</th>
                   <th className="px-3 py-2 text-right">Diff</th>
@@ -2353,7 +2411,7 @@ function PlayerStatsModal({ state, player, onClose }) {
                 {rows.map((row) => (
                   <tr key={row.id || `${row.session_id}-${row.player_id}`}>
                     <td className="px-3 py-2 font-bold text-slate-700">{formatDate(row.session_date)}</td>
-                    <td className="px-3 py-2 font-black text-slate-950">{row.session_name || "Session"}</td>
+                    <td className="px-3 py-2 font-black text-slate-950">{row.session_name || "Match"}</td>
                     <td className="px-3 py-2 text-right font-black text-slate-950">#{row.rank || "-"}</td>
                     <td className="px-3 py-2 text-right font-black text-slate-950">{row.wins || 0}-{row.losses || 0}</td>
                     <td className="px-3 py-2 text-right font-bold text-slate-700">{row.points_for || 0}-{row.points_against || 0}</td>
@@ -2375,11 +2433,552 @@ function PlayerStatsModal({ state, player, onClose }) {
   );
 }
 
+function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
+  const ladders = normalizeLadderList(state.group.settings?.ladders);
+  const [form, setForm] = useState(() => emptyLadderForm(state));
+  const [formBaseline, setFormBaseline] = useState(() => emptyLadderForm(state));
+  const [ladderModalOpen, setLadderModalOpen] = useState(false);
+  const [ladderMatchModal, setLadderMatchModal] = useState(null);
+  const [expandedLadderIds, setExpandedLadderIds] = useState(() => new Set());
+  const [positionDrafts, setPositionDrafts] = useState({});
+  const [draggedLadderPlayer, setDraggedLadderPlayer] = useState(null);
+  const [resultsSession, setResultsSession] = useState(null);
+  const activeGroups = (state.playerGroups || []).filter((group) => group.is_active !== false);
+
+  useEffect(() => {
+    const formDirty = ladderModalOpen && JSON.stringify(form) !== JSON.stringify(formBaseline);
+    const positionsDirty = Object.keys(positionDrafts).length > 0;
+    setTabDirty?.("Ladders", formDirty || positionsDirty);
+    return () => setTabDirty?.("Ladders", false);
+  }, [form, formBaseline, ladderModalOpen, positionDrafts, setTabDirty]);
+
+  function closeLadderModal() {
+    const emptyForm = emptyLadderForm(state);
+    setForm(emptyForm);
+    setFormBaseline(emptyForm);
+    setLadderModalOpen(false);
+  }
+
+  function openAddLadder() {
+    const emptyForm = emptyLadderForm(state);
+    setForm(emptyForm);
+    setFormBaseline(emptyForm);
+    setLadderModalOpen(true);
+  }
+
+  function editLadder(ladder) {
+    const nextForm = ladderFormFromLadder(ladder);
+    setForm(nextForm);
+    setFormBaseline(nextForm);
+    setLadderModalOpen(true);
+  }
+
+  async function saveLadder() {
+    const saved = await runAction("saveLadder", { ladder: { ...form, format: "ladder", publicUrl: playerRoundRobinUrl(state.group) } });
+    if (saved) closeLadderModal();
+  }
+
+  async function deleteLadder(ladder) {
+    if (!window.confirm(`Delete ${ladder.name || "this ladder"}? If no games have been played, all match dates for this ladder will also be deleted.`)) return;
+    await runAction("deleteLadder", { ladderId: ladder.id });
+    if (form.id === ladder.id) closeLadderModal();
+  }
+
+  function openCreateNextMatch(ladder) {
+    const summary = ladderSummary(state, ladder);
+    setLadderMatchModal({
+      ladder,
+      sessionDate: summary.nextDate || ladder.startDate || new Date().toISOString().slice(0, 10),
+      startsAt: ladder.startTime || state.group?.schedule_time || "",
+    });
+  }
+
+  function closeCreateNextMatch() {
+    setLadderMatchModal(null);
+  }
+
+  async function createNextMatch() {
+    if (!ladderMatchModal?.ladder) return;
+    const ladder = ladderMatchModal.ladder;
+    const created = await runAction("createLadderMatch", {
+      ladderId: ladder.id,
+      sessionDate: ladderMatchModal.sessionDate,
+      startsAt: ladderMatchModal.startsAt,
+      publicUrl: playerRoundRobinUrl(state.group),
+      smsEnabled: state.group.settings?.smsSendingEnabled === true,
+    });
+    if (created) closeCreateNextMatch();
+  }
+
+  function setCreateMatchField(field, value) {
+    setLadderMatchModal((current) => current ? { ...current, [field]: value } : current);
+  }
+
+  function saveLadderPositionsDraft(ladder, rows) {
+    setPositionDrafts((current) => ({
+      ...current,
+      [ladder.id]: positionsFromRows(rows),
+    }));
+  }
+
+  function moveLadderPlayer(ladder, rows, playerId, nextPosition) {
+    saveLadderPositionsDraft(ladder, movePlayerToPosition(rows, playerId, nextPosition));
+  }
+
+  function dragLadderPlayerTo(ladder, rows, targetPlayerId) {
+    if (!draggedLadderPlayer || String(draggedLadderPlayer.ladderId) !== String(ladder.id)) return;
+    moveLadderPlayer(ladder, rows, draggedLadderPlayer.playerId, positionForPlayer(rows, targetPlayerId));
+    setDraggedLadderPlayer(null);
+  }
+
+  function toggleLadderPlayers(ladderId) {
+    setExpandedLadderIds((current) => {
+      const next = new Set(current);
+      const cleanId = String(ladderId || "");
+      if (next.has(cleanId)) next.delete(cleanId);
+      else next.add(cleanId);
+      return next;
+    });
+  }
+
+  function setPositionDraft(ladder, playerId, position) {
+    const summary = ladderSummary(state, ladder);
+    const rows = orderedRowsFromDraft(summary.rows, positionDrafts[ladder.id] || {});
+    moveLadderPlayer(ladder, rows, playerId, Number(position));
+  }
+
+  async function savePositions(ladder, rows) {
+    const positions = { ...positionsFromRows(rows), ...(positionDrafts[ladder.id] || {}) };
+    const saved = await runAction("saveLadderPositions", {
+      ladderId: ladder.id,
+      positions,
+    });
+    if (saved) {
+      setPositionDrafts((current) => {
+        const next = { ...current };
+        delete next[ladder.id];
+        return next;
+      });
+    }
+  }
+
+  return (
+    <div className="mt-4 space-y-4">
+      <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-black">Ladders</h2>
+            <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">{ladders.length} configured</div>
+          </div>
+          <button type="button" onClick={openAddLadder} className="rounded-lg bg-violet-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-violet-800">
+            Add Ladder
+          </button>
+        </div>
+        <div className="mt-3 space-y-3">
+          {ladders.map((ladder) => {
+            const summary = ladderSummary(state, ladder);
+            const groupName = groupNamesByIds(state, [ladder.playerGroupId])[0] || "Group missing";
+            const playersExpanded = expandedLadderIds.has(String(ladder.id));
+            const canEditPositions = !summary.sessions.some((session) => ["playing", "done"].includes(session.status));
+            const draftPositions = { ...positionsFromRows(summary.rows), ...(positionDrafts[ladder.id] || {}) };
+            const orderedRows = orderedRowsFromDraft(summary.rows, draftPositions);
+            const positionError = canEditPositions ? ladderPositionDraftError(draftPositions, orderedRows.length) : "";
+            return (
+              <div key={ladder.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <div className="text-lg font-black text-slate-950">{ladder.name}</div>
+                    <div className="mt-1 text-xs font-bold text-slate-500">
+                      {groupName} | {ladder.dayOfWeekLabel || ladder.dayOfWeek} {ladder.startTime || ""} | {ladder.participationRequirement}% participation
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <button type="button" onClick={() => toggleLadderPlayers(ladder.id)} className={`rounded-lg border px-3 py-2 text-xs font-black shadow-sm ${playersExpanded ? "border-violet-500 bg-violet-700 text-white" : "border-slate-300 bg-white text-slate-800 hover:border-blue-500 hover:bg-blue-50"}`}>Players</button>
+                    <button type="button" onClick={() => editLadder(ladder)} className="rounded-lg bg-slate-950 px-3 py-2 text-xs font-black text-white hover:bg-slate-800">Edit</button>
+                    <button type="button" onClick={() => deleteLadder(ladder)} disabled={actionLoading === "deleteLadder"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">Delete</button>
+                    <button type="button" onClick={() => openCreateNextMatch(ladder)} disabled={actionLoading === "createLadderMatch"} className="rounded-lg bg-violet-700 px-3 py-2 text-xs font-black text-white hover:bg-violet-800 disabled:bg-slate-300">Create Next Match Date</button>
+                  </div>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
+                  <StatBox label="Sessions" value={summary.sessionCount} />
+                  <StatBox label="Eligible" value={summary.eligibleCount} />
+                  <StatBox label="Next Date" value={summary.nextDate ? formatDate(summary.nextDate) : "-"} />
+                  <StatBox label="Movement" value={ladder.movementMode === "top2" ? "Top 2 up, bottom 2 down" : "Top 1 up, bottom 1 down"} />
+                </div>
+                {summary.sessions.length > 0 && (
+                  <div className="mt-3 rounded-lg border border-violet-100 bg-white p-3">
+                    <div className="text-xs font-black uppercase tracking-wide text-violet-700">Matches</div>
+                    <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
+                      {summary.sessions.map((session) => (
+                        <button
+                          key={session.id}
+                          type="button"
+                          onClick={() => setResultsSession(session)}
+                          className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-left text-sm font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-violet-400 hover:bg-white"
+                        >
+                          <span className="block font-black text-slate-950">{formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}</span>
+                          <span className="mt-0.5 block text-xs text-slate-500">{session.session_name || ladder.name} - {sessionStatusLabel(session.status)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {playersExpanded && (
+                  <div className="mt-3 rounded-lg border border-slate-200 bg-white">
+                    {canEditPositions && (
+                      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 bg-violet-50 px-3 py-2">
+                        <div className="text-sm font-black text-violet-950">Drag player rows or change Current Position. Positions can be edited until the first ladder match starts.</div>
+                        <button
+                          type="button"
+                          onClick={() => savePositions(ladder, orderedRows)}
+                          disabled={actionLoading === "saveLadderPositions" || Boolean(positionError)}
+                          className="rounded-lg bg-violet-700 px-3 py-2 text-xs font-black text-white hover:bg-violet-800 disabled:bg-slate-300"
+                        >
+                          {actionLoading === "saveLadderPositions" ? "Saving..." : "Save Positions"}
+                        </button>
+                        {positionDrafts[ladder.id] && (
+                          <button
+                            type="button"
+                            onClick={() => setPositionDrafts((current) => {
+                              const next = { ...current };
+                              delete next[ladder.id];
+                              return next;
+                            })}
+                            className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-50"
+                          >
+                            Discard Position Changes
+                          </button>
+                        )}
+                        {positionError && <div className="w-full text-xs font-black text-red-700">{positionError}</div>}
+                      </div>
+                    )}
+                    {!canEditPositions && (
+                      <div className="border-b border-slate-200 bg-slate-50 px-3 py-2 text-sm font-black text-slate-600">
+                        Current Position is locked because the first ladder match has started.
+                      </div>
+                    )}
+                    <div className="space-y-2 p-3 md:hidden">
+                      {orderedRows.map((row) => (
+                        <div
+                          key={row.playerId}
+                          draggable={canEditPositions}
+                          onDragStart={() => setDraggedLadderPlayer({ ladderId: ladder.id, playerId: row.playerId })}
+                          onDragOver={(event) => {
+                            if (canEditPositions) event.preventDefault();
+                          }}
+                          onDrop={(event) => {
+                            event.preventDefault();
+                            dragLadderPlayerTo(ladder, orderedRows, row.playerId);
+                          }}
+                          onDragEnd={() => setDraggedLadderPlayer(null)}
+                          className={`rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm ${canEditPositions ? "cursor-move" : ""}`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <div className="break-words text-base font-black text-slate-950">{row.displayName}</div>
+                              {canEditPositions && <div className="mt-0.5 text-xs font-black uppercase tracking-wide text-violet-700">Drag to reorder</div>}
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">Current Position</div>
+                              {canEditPositions ? (
+                                <select
+                                  value={draftPositions[row.playerId] || row.position}
+                                  onChange={(event) => setPositionDraft(ladder, row.playerId, event.target.value)}
+                                  className="mt-1 w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm font-black text-slate-950"
+                                >
+                                  {Array.from({ length: orderedRows.length }, (_, index) => index + 1).map((position) => (
+                                    <option key={position} value={position}>{position}</option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <div className="mt-1 rounded-lg bg-slate-900 px-3 py-1 text-sm font-black text-white">#{row.position}</div>
+                              )}
+                            </div>
+                          </div>
+                          <div className="mt-3 grid grid-cols-2 gap-2">
+                            <MobileStandingStat label="Dates Played" value={row.sessionsPlayed} />
+                            <MobileStandingStat label="Games Played" value={row.matchesPlayed} />
+                            <MobileStandingStat label="Points" value={row.pointsFor || 0} />
+                            <MobileStandingStat label="Win %" value={formatPercent(row.winPct)} />
+                          </div>
+                        </div>
+                      ))}
+                      {orderedRows.length === 0 && (
+                        <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No players are assigned to this ladder group.</div>
+                      )}
+                    </div>
+                    <div className="hidden overflow-x-auto md:block">
+                      <table className="w-full min-w-[760px] text-sm">
+                        <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
+                          <tr>
+                            <th className="px-3 py-2 text-left">Current Position</th>
+                            <th className="px-3 py-2 text-left">Player</th>
+                            <th className="px-3 py-2 text-right">Dates Played</th>
+                            <th className="px-3 py-2 text-right">Games Played</th>
+                            <th className="px-3 py-2 text-right">Points</th>
+                            <th className="px-3 py-2 text-right">Win %</th>
+                            <th className="px-3 py-2 text-center">Eligible</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                        {orderedRows.map((row) => (
+                          <tr
+                            key={row.playerId}
+                            draggable={canEditPositions}
+                            onDragStart={() => setDraggedLadderPlayer({ ladderId: ladder.id, playerId: row.playerId })}
+                            onDragOver={(event) => {
+                              if (canEditPositions) event.preventDefault();
+                            }}
+                            onDrop={(event) => {
+                              event.preventDefault();
+                              dragLadderPlayerTo(ladder, orderedRows, row.playerId);
+                            }}
+                            onDragEnd={() => setDraggedLadderPlayer(null)}
+                            className={canEditPositions ? "cursor-move transition hover:bg-violet-50" : ""}
+                          >
+                            <td className="px-3 py-2 font-black text-slate-950">
+                              {canEditPositions ? (
+                                <select
+                                  value={draftPositions[row.playerId] || row.position}
+                                  onChange={(event) => setPositionDraft(ladder, row.playerId, event.target.value)}
+                                  className="w-20 rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm font-black text-slate-950"
+                                >
+                                  {Array.from({ length: summary.rows.length }, (_, index) => index + 1).map((position) => (
+                                    <option key={position} value={position}>{position}</option>
+                                  ))}
+                                </select>
+                              ) : `#${row.position}`}
+                            </td>
+                            <td className="px-3 py-2 font-bold text-slate-700">
+                              <span className="inline-flex items-center gap-2">
+                                {canEditPositions && <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-slate-500">Drag</span>}
+                                {row.displayName}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-right font-bold text-slate-700">{row.sessionsPlayed}</td>
+                            <td className="px-3 py-2 text-right font-bold text-slate-700">{row.matchesPlayed}</td>
+                            <td className="px-3 py-2 text-right font-black text-slate-950">{row.pointsFor || 0}</td>
+                            <td className="px-3 py-2 text-right font-black text-slate-950">{formatPercent(row.winPct)}</td>
+                            <td className="px-3 py-2 text-center font-black">{row.eligible ? "Yes" : "No"}</td>
+                          </tr>
+                        ))}
+                        {orderedRows.length === 0 && (
+                          <tr>
+                            <td colSpan={7} className="px-3 py-8 text-center text-sm font-bold text-slate-500">No players are assigned to this ladder group.</td>
+                          </tr>
+                        )}
+                        </tbody>
+                      </table>
+                    </div>
+                    {summary.historyRows.length > 0 && (
+                      <div className="border-t border-slate-200 bg-slate-50 p-3">
+                        <div className="text-sm font-black text-slate-950">Ladder History by Date</div>
+                        <div className="mt-2 max-h-80 overflow-y-auto rounded-lg border border-slate-200 bg-white">
+                          <table className="w-full min-w-[720px] text-sm">
+                            <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
+                              <tr>
+                                <th className="px-3 py-2 text-left">Date</th>
+                                <th className="px-3 py-2 text-left">Player</th>
+                                <th className="px-3 py-2 text-right">Points</th>
+                                <th className="px-3 py-2 text-right">Win %</th>
+                                <th className="px-3 py-2 text-right">Games</th>
+                                <th className="px-3 py-2 text-right">Record</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                              {summary.historyRows.map((row) => (
+                                <tr key={`${row.sessionId}-${row.playerId}`}>
+                                  <td className="px-3 py-2 font-black text-slate-950">{formatDate(row.sessionDate)}</td>
+                                  <td className="px-3 py-2 font-bold text-slate-700">{row.displayName}</td>
+                                  <td className="px-3 py-2 text-right font-black text-slate-950">{row.pointsFor}</td>
+                                  <td className="px-3 py-2 text-right font-black text-slate-950">{formatPercent(row.winPct)}</td>
+                                  <td className="px-3 py-2 text-right font-bold text-slate-700">{row.games}</td>
+                                  <td className="px-3 py-2 text-right font-bold text-slate-700">{row.wins}-{row.losses}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          {ladders.length === 0 && (
+            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-8 text-center text-sm font-bold text-slate-500">No ladders created yet.</div>
+          )}
+        </div>
+      </section>
+
+      {ladderModalOpen && (
+        <LadderFormModal
+          form={form}
+          setForm={setForm}
+          activeGroups={activeGroups}
+          actionLoading={actionLoading}
+          onSave={saveLadder}
+          onClose={closeLadderModal}
+        />
+      )}
+
+      {ladderMatchModal && (
+        <LadderMatchConfirmModal
+          modal={ladderMatchModal}
+          actionLoading={actionLoading}
+          onChange={setCreateMatchField}
+          onCreate={createNextMatch}
+          onClose={closeCreateNextMatch}
+        />
+      )}
+
+      {resultsSession && (
+        <SessionResultsModal
+          state={state}
+          session={resultsSession}
+          onClose={() => setResultsSession(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+function LadderMatchConfirmModal({ modal, actionLoading, onChange, onCreate, onClose }) {
+  const creating = actionLoading === "createLadderMatch";
+  const ladder = modal.ladder || {};
+
+  return (
+    <ModalPortal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+        <div className="w-full max-w-xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+          <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
+            <div>
+              <div className={MODAL_EYEBROW_CHROME}>Create Ladder Match</div>
+              <h2 className="text-2xl font-black">{ladder.name || "Ladder"}</h2>
+              <p className={MODAL_SUPPORTING_TEXT}>Confirm the date and start time for the next ladder match.</p>
+            </div>
+            <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
+              Cancel
+            </button>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <TextInput label="Match date" type="date" value={modal.sessionDate || ""} onChange={(value) => onChange("sessionDate", value)} required />
+              <TextInput label="Start time" type="time" value={modal.startsAt || ""} onChange={(value) => onChange("startsAt", value)} />
+            </div>
+            <div className="mt-4 rounded-lg border border-violet-100 bg-violet-50 px-3 py-2 text-sm font-bold text-violet-950">
+              This will open the match date, invite the selected ladder group, and send New Match texts when SMS is enabled.
+            </div>
+            <button
+              type="button"
+              onClick={onCreate}
+              disabled={creating || !modal.sessionDate}
+              className="mt-4 w-full rounded-lg bg-violet-700 px-4 py-3 font-black text-white shadow-sm hover:bg-violet-800 disabled:bg-slate-300"
+            >
+              {creating ? "Creating..." : "Create Match"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ModalPortal>
+  );
+}
+
+function LadderFormModal({ form, setForm, activeGroups, actionLoading, onSave, onClose }) {
+  const isEditing = Boolean(form.id);
+  const saving = actionLoading === "saveLadder";
+
+  return (
+    <ModalPortal>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+        <div className="max-h-[92vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+          <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
+            <div>
+              <div className={MODAL_EYEBROW_CHROME}>Ladder Setup</div>
+              <h2 className="text-2xl font-black">{isEditing ? "Edit Ladder" : "Add Ladder"}</h2>
+            </div>
+            <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
+              Cancel
+            </button>
+          </div>
+          <div className="max-h-[78vh] overflow-y-auto p-4">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <TextInput label="Name of League/Ladder" value={form.name} onChange={(value) => setForm((current) => ({ ...current, name: value }))} required />
+              <label className="block text-sm font-bold text-slate-600">
+                Player Group
+                <select value={form.playerGroupId} onChange={(event) => setForm((current) => ({ ...current, playerGroupId: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold">
+                  <option value="">Select group</option>
+                  {activeGroups.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
+                </select>
+              </label>
+              <TextInput label="Start date" type="date" value={form.startDate} onChange={(value) => setForm((current) => ({ ...current, startDate: value, dayOfWeek: dayOfWeekForDate(value) || current.dayOfWeek }))} required />
+              <TextInput label="End date" type="date" value={form.endDate} onChange={(value) => setForm((current) => ({ ...current, endDate: value }))} />
+              <label className="block text-sm font-bold text-slate-600">
+                Day of week
+                <select value={form.dayOfWeek} onChange={(event) => setForm((current) => ({ ...current, dayOfWeek: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold">
+                  {LADDER_DAYS.map((day) => <option key={day.value} value={day.value}>{day.label}</option>)}
+                </select>
+              </label>
+              <TextInput label="Start time" type="time" value={form.startTime} onChange={(value) => setForm((current) => ({ ...current, startTime: value }))} />
+              <label className="block text-sm font-bold text-slate-600">
+                Participation requirements
+                <div className="relative mt-1">
+                  <input
+                    type="number"
+                    min="10"
+                    max="100"
+                    value={form.participationRequirement}
+                    onChange={(event) => setForm((current) => ({ ...current, participationRequirement: clampNumber(event.target.value, 10, 100, 50) }))}
+                    className="w-full rounded-lg border border-slate-300 px-3 py-2 pr-10 font-semibold text-slate-950"
+                  />
+                  <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-black text-slate-500">%</span>
+                </div>
+              </label>
+              <label className="block text-sm font-bold text-slate-600">
+                Balance Matchups
+                <select value={form.balanceMode} onChange={(event) => setForm((current) => ({ ...current, balanceMode: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold">
+                  <option value="session">Balance each match session</option>
+                  <option value="season">Balance across the length of the league</option>
+                </select>
+              </label>
+              <label className="block text-sm font-bold text-slate-600">
+                Movement
+                <select value={form.movementMode} onChange={(event) => setForm((current) => ({ ...current, movementMode: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold">
+                  <option value="top1">Top 1 up, bottom 1 down</option>
+                  <option value="top2">Top 2 up, bottom 2 down</option>
+                </select>
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={onSave}
+              disabled={saving || !form.name.trim() || !form.startDate || !form.playerGroupId}
+              className="mt-4 w-full rounded-lg bg-violet-700 px-4 py-3 font-black text-white shadow-sm hover:bg-violet-800 disabled:bg-slate-300"
+            >
+              {saving ? "Saving..." : isEditing ? "Update Ladder" : "Create Ladder"}
+            </button>
+          </div>
+        </div>
+      </div>
+    </ModalPortal>
+  );
+}
+
 function StatBox({ label, value }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
       <div className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</div>
       <div className="mt-1 text-2xl font-black text-slate-950">{value}</div>
+    </div>
+  );
+}
+
+function MobileStandingStat({ label, value }) {
+  return (
+    <div className="min-w-0 rounded-lg border border-slate-200 bg-white px-2 py-2">
+      <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">{label}</div>
+      <div className="mt-0.5 break-words text-base font-black text-slate-950">{value}</div>
     </div>
   );
 }
@@ -2411,7 +3010,7 @@ function GroupsTab({ state, runAction, actionLoading }) {
   }
 
   async function deleteGroup(group) {
-    if (!window.confirm(`Delete ${group.name}? Players and past sessions will stay saved.`)) return;
+    if (!window.confirm(`Delete ${group.name}? Players and past matches will stay saved.`)) return;
     const deleted = await runAction("deletePlayerGroup", { playerGroupId: group.id });
     if (deleted) {
       if (String(form.id) === String(group.id)) setForm(emptyPlayerGroupForm());
@@ -2505,12 +3104,20 @@ function GroupsTab({ state, runAction, actionLoading }) {
   );
 }
 
-function CourtsTab({ state, runAction, actionLoading }) {
+function CourtsTab({ state, runAction, actionLoading, setTabDirty }) {
   const [courts, setCourts] = useState(() => activeCourts(state.courts).map(editableCourt));
+  const [courtsBaseline, setCourtsBaseline] = useState(() => activeCourts(state.courts).map(editableCourt));
 
   useEffect(() => {
-    setCourts(activeCourts(state.courts).map(editableCourt));
+    const nextCourts = activeCourts(state.courts).map(editableCourt);
+    setCourts(nextCourts);
+    setCourtsBaseline(nextCourts);
   }, [state.courts]);
+
+  useEffect(() => {
+    setTabDirty?.("Courts", JSON.stringify(courts) !== JSON.stringify(courtsBaseline));
+    return () => setTabDirty?.("Courts", false);
+  }, [courts, courtsBaseline, setTabDirty]);
 
   function updateCourt(index, field, value) {
     setCourts((current) => current.map((court, courtIndex) => courtIndex === index ? { ...court, [field]: value } : court));
@@ -2539,14 +3146,21 @@ function CourtsTab({ state, runAction, actionLoading }) {
           </div>
         ))}
       </div>
-      <button type="button" onClick={() => runAction("saveCourts", { courts })} disabled={actionLoading === "saveCourts"} className="mt-4 rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
-        Save Courts
-      </button>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <button type="button" onClick={async () => { const saved = await runAction("saveCourts", { courts }); if (saved) setCourtsBaseline(courts); }} disabled={actionLoading === "saveCourts"} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
+          Save Courts
+        </button>
+        {JSON.stringify(courts) !== JSON.stringify(courtsBaseline) && (
+          <button type="button" onClick={() => setCourts(courtsBaseline)} className="rounded-lg bg-slate-100 px-4 py-3 font-black text-slate-700 hover:bg-slate-200">
+            Reset Changes
+          </button>
+        )}
+      </div>
     </section>
   );
 }
 
-function SettingsTab({ state, runAction, actionLoading }) {
+function SettingsTab({ state, runAction, actionLoading, setTabDirty }) {
   const [form, setForm] = useState({
     name: state.group.name || "",
     adminCode: "",
@@ -2555,14 +3169,24 @@ function SettingsTab({ state, runAction, actionLoading }) {
     scheduleTime: state.group.schedule_time || "",
     timezone: state.group.timezone || "America/New_York",
     defaultRounds: Number(state.group.settings?.defaultRounds || 6),
+    defaultLocation: state.group.settings?.defaultLocation || "",
+    defaultHostPlayerId: defaultHostPlayerId(state),
+    secondaryCode: "",
   });
+  const [formBaseline, setFormBaseline] = useState(form);
   const sessionCount = state.sessions?.length || 0;
+  const activeDefaultHostPlayers = activePlayers(state.players);
+
+  useEffect(() => {
+    setTabDirty?.("Settings", JSON.stringify(form) !== JSON.stringify(formBaseline));
+    return () => setTabDirty?.("Settings", false);
+  }, [form, formBaseline, setTabDirty]);
 
   async function masterResetRoundRobin() {
     const firstOk = window.confirm([
-      "Master Reset will permanently delete all Round Robin sessions for this group.",
+      "Master Reset will permanently delete all Round Robin and Ladder matches for this group.",
       "",
-      "This removes session history, joined/declined/waitlist session responses, generated rounds, scores, rankings, player stats, and session activity logs.",
+      "This removes match history, joined/declined/waitlist match responses, generated rounds, scores, rankings, player stats, and match activity logs.",
       "",
       "Saved Players, Groups, and the players assigned to those Groups will be kept.",
     ].join("\n"));
@@ -2591,11 +3215,27 @@ function SettingsTab({ state, runAction, actionLoading }) {
           <TextInput label="Default start time" value={form.scheduleTime} onChange={(value) => setForm((current) => ({ ...current, scheduleTime: value }))} placeholder="18:30" />
           <TextInput label="Default timezone" value={form.timezone} onChange={(value) => setForm((current) => ({ ...current, timezone: value }))} />
           <TextInput label="Default rounds" type="number" value={form.defaultRounds} onChange={(value) => setForm((current) => ({ ...current, defaultRounds: Number(value) }))} />
+          <TextInput label="Default Location" value={form.defaultLocation} onChange={(value) => setForm((current) => ({ ...current, defaultLocation: value }))} placeholder="Court location" />
+          <label className="block text-sm font-bold text-slate-600">
+            Default Host
+            <select value={form.defaultHostPlayerId} onChange={(event) => setForm((current) => ({ ...current, defaultHostPlayerId: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold">
+              <option value="">First active player</option>
+              {activeDefaultHostPlayers.map((player) => <option key={player.id} value={player.id}>{player.display_name}</option>)}
+            </select>
+          </label>
           <TextInput label="New manager code" value={form.adminCode} onChange={(value) => setForm((current) => ({ ...current, adminCode: value }))} placeholder="Leave blank to keep current" />
+          <TextInput label="Secondary Code" value={form.secondaryCode} onChange={(value) => setForm((current) => ({ ...current, secondaryCode: value }))} placeholder="Leave blank to keep current" />
         </div>
-        <button type="button" onClick={() => runAction("saveSettings", form)} disabled={actionLoading === "saveSettings" || !form.name.trim()} className="mt-4 rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
-          Save Settings
-        </button>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <button type="button" onClick={async () => { const saved = await runAction("saveSettings", form); if (saved) setFormBaseline(form); }} disabled={actionLoading === "saveSettings" || !form.name.trim()} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
+            Save Settings
+          </button>
+          {JSON.stringify(form) !== JSON.stringify(formBaseline) && (
+            <button type="button" onClick={() => setForm(formBaseline)} className="rounded-lg bg-slate-100 px-4 py-3 font-black text-slate-700 hover:bg-slate-200">
+              Reset Changes
+            </button>
+          )}
+        </div>
       </section>
 
       <section className="w-full rounded-lg border border-red-200 bg-red-50/95 p-4 shadow-[0_18px_48px_-36px_rgba(127,29,29,0.55)]">
@@ -2603,10 +3243,10 @@ function SettingsTab({ state, runAction, actionLoading }) {
           <div>
             <h2 className="text-xl font-black text-red-950">Master Reset</h2>
             <p className="mt-1 max-w-3xl text-sm font-semibold text-red-800">
-              Deletes all session history, generated games, scores, rankings, and player stats for this Round Robin group. Saved Players, Groups, and player group assignments stay in place.
+              Deletes all regular match and ladder match history, generated games, scores, rankings, and player stats for this Round Robin group. Saved Players, Groups, and player group assignments stay in place.
             </p>
             <p className="mt-2 text-xs font-black uppercase tracking-wide text-red-700">
-              Current sessions/history rows: {sessionCount}
+              Current matches/history rows: {sessionCount}
             </p>
           </div>
           <button type="button" onClick={masterResetRoundRobin} disabled={actionLoading === "masterResetRoundRobin"} className="rounded-lg bg-red-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-red-800 disabled:bg-slate-300">
@@ -2703,9 +3343,9 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
       </p>
       <div className="mt-3 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(16rem,1fr)_minmax(16rem,1fr)_auto] lg:items-end">
         <label className="block text-sm font-bold text-slate-600">
-          Texting session
+          Texting match
           <select value={selectedSessionId} onChange={(event) => selectSmsSession(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold">
-            <option value="">Select session</option>
+            <option value="">Select match</option>
             {smsSessions.map((session) => (
               <option key={session.id} value={session.id}>
                 {smsSessionLabel(session)}
@@ -2718,7 +3358,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
           <select value={recipientScope} onChange={(event) => setRecipientScope(event.target.value)} disabled={isPendingReminder} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold disabled:bg-slate-100 disabled:text-slate-500">
             <option value="joined">Current joined players</option>
             <option value="invited">All invited players not joined/declined</option>
-            <option value="session">All session players except declined</option>
+            <option value="session">All match players except declined</option>
             <option value="all">All saved active players</option>
           </select>
           {isPendingReminder && (
@@ -2756,7 +3396,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
         </button>
         {!selectedSmsSession && (
           <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold text-amber-900">
-            Select a session before sending or logging texts.
+            Select a match before sending or logging texts.
           </div>
         )}
       </div>
@@ -2775,14 +3415,15 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
         </div>
         <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
           <TemplateTextarea label="New Player" value={templates.newPlayer} onChange={(value) => setTemplate("newPlayer", value)} onTest={() => sendTemplateTest("newPlayer")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
-          <TemplateTextarea label="New session text" value={templates.sessionInvite} onChange={(value) => setTemplate("sessionInvite", value)} onTest={() => sendTemplateTest("sessionInvite")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
+          <TemplateTextarea label="Ladder Added" value={templates.ladderAdded} onChange={(value) => setTemplate("ladderAdded", value)} onTest={() => sendTemplateTest("ladderAdded")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
+          <TemplateTextarea label="New match text" value={templates.sessionInvite} onChange={(value) => setTemplate("sessionInvite", value)} onTest={() => sendTemplateTest("sessionInvite")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
           <TemplateTextarea label="Pending signup reminder" value={templates.sessionReminder} onChange={(value) => setTemplate("sessionReminder", value)} onTest={() => sendTemplateTest("sessionReminder")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
           <TemplateTextarea label="Game update" value={templates.gameUpdate} onChange={(value) => setTemplate("gameUpdate", value)} onTest={() => sendTemplateTest("gameUpdate")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
           <TemplateTextarea label="Weather update" value={templates.weatherUpdate} onChange={(value) => setTemplate("weatherUpdate", value)} onTest={() => sendTemplateTest("weatherUpdate")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
-          <TemplateTextarea label="Session results" value={templates.sessionResults} onChange={(value) => setTemplate("sessionResults", value)} onTest={() => sendTemplateTest("sessionResults")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
+          <TemplateTextarea label="Match results" value={templates.sessionResults} onChange={(value) => setTemplate("sessionResults", value)} onTest={() => sendTemplateTest("sessionResults")} testDisabled={!testPhone.trim() || actionLoading === "sendTestTemplateText"} />
         </div>
         <div className="mt-3 rounded-lg bg-white px-3 py-2 text-xs font-bold text-slate-500">
-          Placeholders: {"{{group_name}}"}, {"{{player_name}}"}, {"{{session_name}}"}, {"{{date}}"}, {"{{time}}"}, {"{{location}}"}, {"{{location_line}}"}, {"{{public_link}}"}, {"{{joined_count}}"}, {"{{available_spots}}"}, {"{{result_rankings}}"}
+          Placeholders: {"{{group_name}}"}, {"{{player_name}}"}, {"{{ladder_name}}"}, {"{{session_name}}"}, {"{{date}}"}, {"{{time}}"}, {"{{location}}"}, {"{{location_line}}"}, {"{{public_link}}"}, {"{{joined_count}}"}, {"{{available_spots}}"}, {"{{result_rankings}}"}
         </div>
       </div>
     </section>
@@ -2845,6 +3486,10 @@ function isPastSession(session) {
   return ["done", "cancelled"].includes(session.status) || String(session.session_date || "") < today;
 }
 
+function isLadderSession(session) {
+  return Boolean(session?.settings?.ladderId) || session?.mode === "ladder";
+}
+
 function sortSessionsAscending(a, b) {
   return sessionSortValue(a).localeCompare(sessionSortValue(b));
 }
@@ -2888,6 +3533,77 @@ function sessionResultsForSession(state, sessionId) {
       if (firstRank !== secondRank) return firstRank - secondRank;
       return String(first.display_name || "").localeCompare(String(second.display_name || ""));
     });
+}
+
+function sessionLadderForSession(state, session) {
+  const ladderId = String(session?.settings?.ladderId || "").trim();
+  if (!ladderId) return null;
+  const settingsLadder = normalizeLadderList(state.group?.settings?.ladders || [])
+    .find((ladder) => String(ladder.id) === ladderId);
+  if (settingsLadder) return settingsLadder;
+  const fallback = session?.settings?.ladderConfig || {};
+  const name = fallback.name || session?.settings?.ladderName || "Ladder";
+  return normalizeLadderList([{ ...fallback, id: ladderId, name }])[0] || null;
+}
+
+function ladderPreviousPositionForResult(state, session, row) {
+  const metadata = resultMetadata(row);
+  const savedPosition = positiveNumber(metadata.ladderPreviousPosition ?? metadata.previousPosition);
+  if (savedPosition) return savedPosition;
+  const ladder = sessionLadderForSession(state, session);
+  if (!ladder) return null;
+  const order = ladderPositionOrderBeforeSession(state, ladder, session);
+  const index = order.findIndex((playerId) => String(playerId) === String(row.player_id || ""));
+  return index >= 0 ? index + 1 : null;
+}
+
+function ladderPositionCountForResult(state, session, row) {
+  const metadata = resultMetadata(row);
+  const savedCount = positiveNumber(metadata.ladderPositionCount ?? metadata.positionCount);
+  if (savedCount) return savedCount;
+  const ladder = sessionLadderForSession(state, session);
+  return ladder ? playerIdsForGroup(state, ladder.playerGroupId).length : null;
+}
+
+function ladderPositionOrderBeforeSession(state, ladder, session) {
+  const priorSessions = (state.sessions || [])
+    .filter((item) => String(item.id || "") !== String(session?.id || ""))
+    .filter((item) => String(item.settings?.ladderId || "") === String(ladder.id))
+    .filter((item) => item.status === "done")
+    .filter((item) => sessionSortValue(item) < sessionSortValue(session))
+    .sort(sortSessionsAscending);
+  const priorSessionIds = new Set(priorSessions.map((item) => String(item.id || "")));
+  const resultRows = (state.allPlayerResults || state.results || [])
+    .filter((item) => priorSessionIds.has(String(item.session_id || "")));
+  const matchRows = (state.allMatches || state.matches || [])
+    .filter((item) => priorSessionIds.has(String(item.session_id || "")));
+  return ladderPositionOrder(playerIdsForGroup(state, ladder.playerGroupId), priorSessions, resultRows, ladder, matchRows);
+}
+
+function resultMetadata(row) {
+  const metadata = row?.metadata;
+  if (!metadata) return {};
+  if (typeof metadata === "string") {
+    try {
+      const parsed = JSON.parse(metadata);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
+}
+
+function positiveNumber(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+function formatLadderRank(position, count) {
+  const safePosition = positiveNumber(position);
+  if (!safePosition) return "-";
+  const safeCount = positiveNumber(count);
+  return safeCount ? `#${safePosition} out of ${safeCount}` : `#${safePosition}`;
 }
 
 function sessionMatchesForSession(state, sessionId) {
@@ -3042,24 +3758,425 @@ function normalizeSearchText(value) {
   return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
 }
 
+function emptyLadderForm(state) {
+  const startDate = new Date().toISOString().slice(0, 10);
+  return {
+    id: "",
+    name: "",
+    format: "ladder",
+    startDate,
+    endDate: "",
+    dayOfWeek: dayOfWeekForDate(startDate) || "monday",
+    startTime: timeInputValue(state.group.schedule_time),
+    playerGroupId: "",
+    participationRequirement: 50,
+    balanceMode: "session",
+    movementMode: "top1",
+    status: "active",
+  };
+}
+
+function ladderFormFromLadder(ladder) {
+  return {
+    id: ladder.id || "",
+    name: ladder.name || "",
+    format: ladder.format || "ladder",
+    startDate: ladder.startDate || "",
+    endDate: ladder.endDate || "",
+    dayOfWeek: ladder.dayOfWeek || "monday",
+    startTime: ladder.startTime || "",
+    playerGroupId: ladder.playerGroupId || "",
+    participationRequirement: ladder.participationRequirement || 50,
+    balanceMode: ladder.balanceMode || "session",
+    movementMode: ladder.movementMode || "top1",
+    status: ladder.status || "active",
+    initialPositions: ladder.initialPositions || {},
+  };
+}
+
+function normalizeLadderList(ladders = []) {
+  return (Array.isArray(ladders) ? ladders : []).map((ladder) => ({
+    id: String(ladder.id || "").trim(),
+    name: String(ladder.name || "").trim(),
+    format: ladder.format === "ladder" ? "ladder" : "round_robin",
+    startDate: normalizeIsoDate(ladder.startDate),
+    endDate: normalizeIsoDate(ladder.endDate),
+    dayOfWeek: normalizeDayOfWeek(ladder.dayOfWeek) || dayOfWeekForDate(ladder.startDate) || "monday",
+    dayOfWeekLabel: LADDER_DAYS.find((day) => day.value === normalizeDayOfWeek(ladder.dayOfWeek))?.label || "",
+    startTime: String(ladder.startTime || "").slice(0, 5),
+    playerGroupId: String(ladder.playerGroupId || "").trim(),
+    participationRequirement: clampNumber(ladder.participationRequirement, 10, 100, 50),
+    balanceMode: ladder.balanceMode === "season" ? "season" : "session",
+    movementMode: ladder.movementMode === "top2" ? "top2" : "top1",
+    status: ladder.status === "inactive" ? "inactive" : "active",
+    initialPositions: normalizeInitialPositions(ladder.initialPositions || ladder.initial_positions || {}),
+  })).filter((ladder) => ladder.id && ladder.name);
+}
+
+function ladderSummary(state, ladder) {
+  const sessions = (state.sessions || [])
+    .filter((session) => String(session.settings?.ladderId || "") === String(ladder.id))
+    .sort((a, b) => String(a.session_date || "").localeCompare(String(b.session_date || "")));
+  const completedSessions = sessions.filter((session) => session.status === "done");
+  const completedSessionIds = new Set(completedSessions.map((session) => String(session.id)));
+  const resultRows = (state.allPlayerResults || []).filter((row) => completedSessionIds.has(String(row.session_id || "")));
+  const matchRows = (state.allMatches || []).filter((row) => completedSessionIds.has(String(row.session_id || "")));
+  const rows = ladderStandingsRows(state, ladder, completedSessions, resultRows, matchRows);
+  const sessionById = new Map(completedSessions.map((session) => [String(session.id), session]));
+  const historyRows = resultRows
+    .slice()
+    .sort((first, second) => {
+      const firstSession = sessionById.get(String(first.session_id || ""));
+      const secondSession = sessionById.get(String(second.session_id || ""));
+      return String(secondSession?.session_date || "").localeCompare(String(firstSession?.session_date || "")) ||
+        Number(first.rank || 999) - Number(second.rank || 999) ||
+        String(first.display_name || "").localeCompare(String(second.display_name || ""));
+    })
+    .map((row) => {
+      const games = Number(row.games || 0) || Number(row.wins || 0) + Number(row.losses || 0);
+      const session = sessionById.get(String(row.session_id || ""));
+      return {
+        sessionId: String(row.session_id || ""),
+        sessionDate: session?.session_date || row.session_date || "",
+        playerId: String(row.player_id || ""),
+        displayName: row.display_name || "Player",
+        pointsFor: Number(row.points_for || 0),
+        winPct: games > 0 ? Number(row.wins || 0) / games : 0,
+        games,
+        wins: Number(row.wins || 0),
+        losses: Number(row.losses || 0),
+      };
+    });
+  const standingsRows = (completedSessions.length >= 4 ? rows.filter((row) => row.eligible) : rows)
+    .slice()
+    .sort(compareLadderStandingRows);
+  return {
+    sessions,
+    sessionCount: completedSessions.length,
+    eligibleCount: rows.filter((row) => row.eligible).length,
+    nextDate: sessions.length > 0 ? addDaysToIsoDate(sessions[sessions.length - 1].session_date, 7) : ladder.startDate,
+    rows,
+    historyRows,
+    standingsRows,
+  };
+}
+
+function ladderStandingsRows(state, ladder, sessions, resultRows, matchRows = []) {
+  const sessionCount = sessions.length;
+  const rosterIds = playerIdsForGroup(state, ladder.playerGroupId);
+  const statsByPlayer = new Map();
+  rosterIds.forEach((playerId, index) => {
+    const player = (state.players || []).find((item) => String(item.id) === String(playerId));
+    statsByPlayer.set(String(playerId), {
+      playerId: String(playerId),
+      displayName: player?.display_name || "Player",
+      seedIndex: index,
+      sessionsPlayed: 0,
+      matchesPlayed: 0,
+      wins: 0,
+      losses: 0,
+      pointsFor: 0,
+      pointDiff: 0,
+    });
+  });
+
+  resultRows.forEach((row) => {
+    const playerId = String(row.player_id || "");
+    if (!statsByPlayer.has(playerId)) return;
+    const stats = statsByPlayer.get(playerId);
+    stats.sessionsPlayed += 1;
+    stats.matchesPlayed += Number(row.games || 0);
+    stats.wins += Number(row.wins || 0);
+    stats.losses += Number(row.losses || 0);
+    stats.pointsFor += Number(row.points_for || 0);
+    stats.pointDiff += Number(row.point_diff || 0);
+  });
+
+  const order = ladderPositionOrder(rosterIds, sessions, resultRows, ladder, matchRows);
+  const positionByPlayer = new Map(order.map((playerId, index) => [String(playerId), index + 1]));
+  return [...statsByPlayer.values()]
+    .map((row) => {
+      const games = row.wins + row.losses || row.matchesPlayed;
+      const participationPct = sessionCount > 0 ? (row.sessionsPlayed / sessionCount) * 100 : 0;
+      return {
+        ...row,
+        position: positionByPlayer.get(String(row.playerId)) || row.seedIndex + 1,
+        winPct: games > 0 ? row.wins / games : 0,
+        avgPointDiff: games > 0 ? row.pointDiff / games : 0,
+        eligible: sessionCount < 4 || participationPct >= Number(ladder.participationRequirement || 50),
+      };
+    })
+    .sort((a, b) => a.position - b.position);
+}
+
+function ladderPositionOrder(rosterIds, sessions, resultRows, ladder, matchRows = []) {
+  const initialPositions = normalizeInitialPositions(ladder.initialPositions || {}, rosterIds);
+  const order = rosterIds
+    .map(String)
+    .sort((first, second) => {
+      const firstPosition = Number(initialPositions[first] || Number.MAX_SAFE_INTEGER);
+      const secondPosition = Number(initialPositions[second] || Number.MAX_SAFE_INTEGER);
+      return firstPosition - secondPosition || first.localeCompare(second);
+    });
+  const resultsBySession = resultRows.reduce((map, row) => {
+    const key = String(row.session_id || "");
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(row);
+    return map;
+  }, new Map());
+  const matchesBySession = matchRows.reduce((map, row) => {
+    const key = String(row.session_id || "");
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(row);
+    return map;
+  }, new Map());
+  const movementCount = ladder.movementMode === "top2" ? 2 : 1;
+  sessions.forEach((session) => {
+    const sessionMatches = matchesBySession.get(String(session.id)) || [];
+    const sessionResults = resultsBySession.get(String(session.id)) || [];
+    const sessionPlayerIds = playerIdsFromMatches(sessionMatches);
+    const participatingOrder = order.filter((playerId) => sessionPlayerIds.has(String(playerId)));
+    const courts = splitLadderIdsIntoCourts(participatingOrder);
+
+    courts.forEach((courtIds, courtIndex) => {
+      const rows = courtIds
+        .map((playerId) => sessionResults.find((row) => String(row.player_id || "") === String(playerId)))
+        .filter(Boolean)
+        .sort((first, second) => compareLadderResultRows(first, second, sessionMatches));
+      const topIds = courtIndex > 0 ? rows.slice(0, movementCount).map((row) => String(row.player_id || "")) : [];
+      const bottomIds = courtIndex < courts.length - 1 ? rows.slice(-movementCount).map((row) => String(row.player_id || "")) : [];
+      topIds.forEach((playerId) => movePlayerByStep(order, playerId, -Math.max(4, courts[courtIndex - 1]?.length || 4)));
+      bottomIds.reverse().forEach((playerId) => movePlayerByStep(order, playerId, Math.max(4, courts[courtIndex + 1]?.length || 4)));
+    });
+    if (sessions.length >= 4) {
+      const completedSessionIds = sessions.filter((item) => String(item.session_date || "") <= String(session.session_date || "")).map((item) => String(item.id));
+      order.forEach((playerId) => {
+        const playedCount = completedSessionIds.filter((sessionId) => (resultsBySession.get(sessionId) || []).some((row) => String(row.player_id || "") === String(playerId))).length;
+        const participationPct = completedSessionIds.length > 0 ? (playedCount / completedSessionIds.length) * 100 : 100;
+        if (participationPct < Number(ladder.participationRequirement || 50)) movePlayerByStep(order, playerId, 4);
+      });
+    }
+  });
+  return order;
+}
+
+function splitLadderIdsIntoCourts(playerIds = []) {
+  return splitLadderPlayersIntoCourts(playerIds.map((id) => ({ id }))).map((court) => court.map((player) => String(player.id)));
+}
+
+function splitLadderPlayersIntoCourts(players = []) {
+  const total = players.length;
+  const courtCount = Math.max(1, Math.floor(total / 4));
+  const baseSize = Math.floor(total / courtCount);
+  const extra = total % courtCount;
+  const courts = [];
+  let offset = 0;
+  for (let courtIndex = 0; courtIndex < courtCount; courtIndex += 1) {
+    const size = baseSize + (courtIndex < extra ? 1 : 0);
+    courts.push(players.slice(offset, offset + size));
+    offset += size;
+  }
+  return courts.filter((court) => court.length >= 4);
+}
+
+function compareLadderResultRows(first, second, matches = []) {
+  const firstPoints = Number(first.points_for || 0);
+  const secondPoints = Number(second.points_for || 0);
+  if (secondPoints !== firstPoints) return secondPoints - firstPoints;
+  const headToHead = headToHeadResult(String(first.player_id || ""), String(second.player_id || ""), matches);
+  if (headToHead !== 0) return -headToHead;
+  const firstWin = winPctForStanding(first);
+  const secondWin = winPctForStanding(second);
+  if (secondWin !== firstWin) return secondWin - firstWin;
+  const firstGames = Number(first.games || (Number(first.wins || 0) + Number(first.losses || 0)));
+  const secondGames = Number(second.games || (Number(second.wins || 0) + Number(second.losses || 0)));
+  const firstAvgDiff = firstGames > 0 ? Number(first.point_diff || 0) / firstGames : 0;
+  const secondAvgDiff = secondGames > 0 ? Number(second.point_diff || 0) / secondGames : 0;
+  if (secondAvgDiff !== firstAvgDiff) return secondAvgDiff - firstAvgDiff;
+  if (secondGames !== firstGames) return secondGames - firstGames;
+  return String(first.display_name || "").localeCompare(String(second.display_name || ""));
+}
+
+function headToHeadResult(firstPlayerId, secondPlayerId, matches = []) {
+  let firstWins = 0;
+  let secondWins = 0;
+  matches.forEach((match) => {
+    const team1Score = numericScore(match.team1_score);
+    const team2Score = numericScore(match.team2_score);
+    if (team1Score === null || team2Score === null || team1Score === team2Score) return;
+    const team1Ids = (match.team1_players || []).map((player) => String(player.id));
+    const team2Ids = (match.team2_players || []).map((player) => String(player.id));
+    const firstTeam = team1Ids.includes(firstPlayerId) ? 1 : team2Ids.includes(firstPlayerId) ? 2 : 0;
+    const secondTeam = team1Ids.includes(secondPlayerId) ? 1 : team2Ids.includes(secondPlayerId) ? 2 : 0;
+    if (!firstTeam || !secondTeam || firstTeam === secondTeam) return;
+    const winningTeam = team1Score > team2Score ? 1 : 2;
+    if (firstTeam === winningTeam) firstWins += 1;
+    if (secondTeam === winningTeam) secondWins += 1;
+  });
+  return firstWins - secondWins;
+}
+
+function numericScore(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function compareLadderStandingRows(first, second) {
+  if (second.pointsFor !== first.pointsFor) return second.pointsFor - first.pointsFor;
+  if (second.winPct !== first.winPct) return second.winPct - first.winPct;
+  if (second.avgPointDiff !== first.avgPointDiff) return second.avgPointDiff - first.avgPointDiff;
+  if (second.matchesPlayed !== first.matchesPlayed) return second.matchesPlayed - first.matchesPlayed;
+  return String(first.displayName || "").localeCompare(String(second.displayName || ""));
+}
+
+function movePlayerByStep(order, playerId, step) {
+  const index = order.findIndex((id) => String(id) === String(playerId));
+  if (index < 0) return;
+  const nextIndex = Math.max(0, Math.min(order.length - 1, index + step));
+  if (nextIndex === index) return;
+  const [item] = order.splice(index, 1);
+  order.splice(nextIndex, 0, item);
+}
+
+function playerIdsForGroup(state, groupId) {
+  const ids = new Set((state.playerGroupMembers || [])
+    .filter((row) => String(row.player_group_id || "") === String(groupId))
+    .map((row) => String(row.player_id || "")));
+  return activePlayers(state.players || [])
+    .filter((player) => ids.has(String(player.id)))
+    .sort((a, b) => compareNamesByFirstName(a.display_name, b.display_name))
+    .map((player) => String(player.id));
+}
+
+function normalizeIsoDate(value) {
+  const clean = String(value || "").slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(clean) ? clean : "";
+}
+
+function normalizeDayOfWeek(value) {
+  const clean = String(value || "").trim().toLowerCase();
+  return LADDER_DAYS.some((day) => day.value === clean) ? clean : "";
+}
+
+function dayOfWeekForDate(value) {
+  const date = new Date(`${String(value || "").slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  return LADDER_DAYS[date.getDay()]?.value || "";
+}
+
+function addDaysToIsoDate(value, days) {
+  if (!value) return "";
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  date.setDate(date.getDate() + Number(days || 0));
+  return date.toISOString().slice(0, 10);
+}
+
+function clampNumber(value, min, max, fallback) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.min(max, Math.max(min, numeric));
+}
+
+function normalizeInitialPositions(positions = {}, rosterIds = []) {
+  const source = positions && typeof positions === "object" ? positions : {};
+  const rosterSet = new Set((rosterIds || []).map(String));
+  const entries = Object.entries(source)
+    .map(([playerId, position]) => [String(playerId), Number(position)])
+    .filter(([playerId, position]) => (
+      Number.isInteger(position) &&
+      position > 0 &&
+      (rosterSet.size === 0 || rosterSet.has(playerId))
+    ))
+    .sort((first, second) => first[1] - second[1] || first[0].localeCompare(second[0]));
+  const normalized = {};
+  const used = new Set();
+  entries.forEach(([playerId, position]) => {
+    if (used.has(position)) return;
+    normalized[playerId] = position;
+    used.add(position);
+  });
+  let nextPosition = 1;
+  (rosterIds || []).map(String).forEach((playerId) => {
+    if (normalized[playerId]) return;
+    while (used.has(nextPosition)) nextPosition += 1;
+    normalized[playerId] = nextPosition;
+    used.add(nextPosition);
+  });
+  return normalized;
+}
+
+function positionsFromRows(rows = []) {
+  return rows.reduce((positions, row, index) => ({
+    ...positions,
+    [row.playerId]: Number(row.position || index + 1),
+  }), {});
+}
+
+function orderedRowsFromDraft(rows = [], positions = {}) {
+  return rows
+    .slice()
+    .sort((first, second) => {
+      const firstPosition = Number(positions[first.playerId] || first.position || first.seedIndex + 1);
+      const secondPosition = Number(positions[second.playerId] || second.position || second.seedIndex + 1);
+      return firstPosition - secondPosition || String(first.displayName || "").localeCompare(String(second.displayName || ""));
+    })
+    .map((row, index) => ({ ...row, position: index + 1 }));
+}
+
+function positionForPlayer(rows = [], playerId) {
+  const index = rows.findIndex((row) => String(row.playerId) === String(playerId));
+  return index >= 0 ? index + 1 : 1;
+}
+
+function movePlayerToPosition(rows = [], playerId, nextPosition) {
+  const orderedRows = orderedRowsFromDraft(rows, positionsFromRows(rows));
+  const currentIndex = orderedRows.findIndex((row) => String(row.playerId) === String(playerId));
+  if (currentIndex < 0) return orderedRows;
+  const boundedPosition = Math.min(orderedRows.length, Math.max(1, Number(nextPosition) || 1));
+  const nextRows = orderedRows.slice();
+  const [movedRow] = nextRows.splice(currentIndex, 1);
+  nextRows.splice(boundedPosition - 1, 0, movedRow);
+  return nextRows.map((row, index) => ({ ...row, position: index + 1 }));
+}
+
+function ladderPositionDraftError(positions = {}, playerCount = 0) {
+  const values = Object.values(positions).map(Number);
+  if (values.length !== playerCount) return "Every player needs a position.";
+  if (values.some((position) => !Number.isInteger(position) || position < 1 || position > playerCount)) {
+    return `Positions must be from 1 to ${playerCount}.`;
+  }
+  if (new Set(values).size !== values.length) return "Positions cannot use the same number twice.";
+  return "";
+}
+
 function newSessionForm(state) {
   return {
-    sessionName: `${state.group.name} Session`,
-    location: "",
+    sessionName: `${state.group.name} Match`,
+    mode: "daily_round_robin",
+    location: state.group.settings?.defaultLocation || "",
     sessionDate: new Date().toISOString().slice(0, 10),
     startsAt: timeInputValue(state.group.schedule_time),
     maxPlayers: 8,
     repeatsWeekly: false,
-    hostPlayerId: activePlayers(state.players)[0]?.id || "",
+    hostPlayerId: defaultHostPlayerId(state) || activePlayers(state.players)[0]?.id || "",
     cohostPlayerId: "",
     invitedGroupIds: [],
     smsEnabled: state.group.settings?.smsSendingEnabled === true,
   };
 }
 
+function defaultHostPlayerId(state) {
+  const savedHostId = String(state?.group?.settings?.defaultHostPlayerId || "").trim();
+  if (!savedHostId) return "";
+  return activePlayers(state?.players || []).some((player) => String(player.id) === savedHostId) ? savedHostId : "";
+}
+
 function sessionFormFromSession(state, session) {
   return {
-    sessionName: session.session_name || `${state.group.name} Session`,
+    sessionName: session.session_name || `${state.group.name} Match`,
+    mode: session.mode === "ladder" ? "ladder" : "daily_round_robin",
     location: session.location || "",
     sessionDate: session.session_date || new Date().toISOString().slice(0, 10),
     startsAt: timeInputValue(session.starts_at),
@@ -3100,6 +4217,7 @@ function sessionCourtRows(session, defaultCourts, count, currentCourts = []) {
 function normalizeSmsTemplates(templates = {}) {
   return {
     newPlayer: templates.newPlayer || DEFAULT_SMS_TEMPLATES.newPlayer,
+    ladderAdded: templates.ladderAdded || DEFAULT_SMS_TEMPLATES.ladderAdded,
     sessionInvite: templates.sessionInvite || DEFAULT_SMS_TEMPLATES.sessionInvite,
     sessionReminder: templates.sessionReminder || DEFAULT_SMS_TEMPLATES.sessionReminder,
     gameUpdate: templates.gameUpdate || DEFAULT_SMS_TEMPLATES.gameUpdate,
@@ -3109,7 +4227,7 @@ function normalizeSmsTemplates(templates = {}) {
 }
 
 function renderClientSmsTemplate(template, group, session, sessionPlayers = []) {
-  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next session";
+  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next match";
   const time = session?.starts_at ? formatTime(session.starts_at) : "TBD";
   const location = session?.location || "";
   const joinedCount = sessionPlayers.length > 0
@@ -3119,16 +4237,17 @@ function renderClientSmsTemplate(template, group, session, sessionPlayers = []) 
   const availableSpots = maxPlayers > 0 ? Math.max(0, maxPlayers - joinedCount) : "";
   const replacements = {
     group_name: group?.name || "Round Robin",
-    session_name: session?.session_name || `${group?.name || "Round Robin"} Session`,
+    session_name: session?.session_name || `${group?.name || "Round Robin"} Match`,
     date,
     time,
     location,
     location_line: location ? ` at ${location}` : "",
     public_link: playerRoundRobinUrl(group),
     player_name: "Player",
+    ladder_name: session?.settings?.ladderName || session?.settings?.ladderConfig?.name || "Ladder",
     joined_count: joinedCount,
     available_spots: availableSpots,
-    result_rankings: "Rankings will be inserted when the session is finished.",
+    result_rankings: "Rankings will be inserted when the match is finished.",
   };
 
   return String(template || "")
@@ -3142,7 +4261,7 @@ function smsSessionLabel(session) {
   return [
     formatDate(session.session_date) || "Date pending",
     session.starts_at ? formatTime(session.starts_at) : "",
-    session.session_name || "Session",
+    session.session_name || "Match",
     session.status ? `(${sessionStatusLabel(session.status)})` : "",
   ].filter(Boolean).join(" - ");
 }
@@ -3157,14 +4276,14 @@ function playerRoundRobinUrl(group) {
 }
 
 function exportSessionDuprCsv(state, session) {
-  const defaultEventName = session.session_name || `${state.group?.name || "PBCC"} Session`;
+  const defaultEventName = session.session_name || `${state.group?.name || "PBCC"} Match`;
   const eventName = window.prompt("DUPR event name", defaultEventName);
   if (eventName === null) return;
 
   const cleanEventName = String(eventName || "").trim() || defaultEventName;
   const rows = duprRowsForSession(state, session, cleanEventName);
   if (rows.length === 0) {
-    window.alert("No completed PBCC games with scores were found for this session.");
+    window.alert("No completed PBCC games with scores were found for this match.");
     return;
   }
 
@@ -3214,7 +4333,11 @@ function duprPlayerId(state, match, player) {
   const savedPlayer = (state.players || []).find((row) => String(row.id || "") === playerId);
   const sessionPlayer = allPlayersForSession(state, match.session_id)
     .find((row) => String(row.player_id || "") === playerId);
-  return player.duprId || player.dupr_id || savedPlayer?.dupr_id || sessionPlayer?.dupr_id || "";
+  return normalizeDuprId(player.duprId || player.dupr_id || savedPlayer?.dupr_id || sessionPlayer?.dupr_id);
+}
+
+function normalizeDuprId(value) {
+  return String(value || "").trim().toUpperCase();
 }
 
 function groupMatchesByRound(matches) {
@@ -3406,26 +4529,43 @@ function aggregatePlayerResultRows(rows = []) {
   };
 }
 
+function lastPlayedDate(rows = []) {
+  return rows
+    .map((row) => row.session_date)
+    .filter(Boolean)
+    .sort((a, b) => String(b).localeCompare(String(a)))[0] || "";
+}
+
 function noticeForAction(action, result) {
   if (action === "createSession") return `Generated ${result.session?.round_count || 0} rounds.`;
-  if (action === "createPlannedSession") return result.sms?.skipped ? "Session opened. Invite texts were not sent." : `Session opened. Texts sent: ${result.sms?.sent || 0}.`;
+  if (action === "createPlannedSession") return result.sms?.skipped ? "Match opened. Invite texts were not sent." : `Match opened. Texts sent: ${result.sms?.sent || 0}.`;
   if (action === "updatePlannedSession") {
-    if (result.sms?.skipped) return `Session saved. Added ${result.addedPlayers || 0} newly invited player${Number(result.addedPlayers || 0) === 1 ? "" : "s"}.`;
-    return `Session saved. Update texts sent: ${result.sms?.sent || 0}.`;
+    if (result.sms?.skipped) return `Match saved. Added ${result.addedPlayers || 0} newly invited player${Number(result.addedPlayers || 0) === 1 ? "" : "s"}.`;
+    return `Match saved. Update texts sent: ${result.sms?.sent || 0}.`;
   }
   if (action === "savePlayerGroup") return "Group saved.";
   if (action === "deletePlayerGroup") return "Group deleted.";
   if (action === "saveSmsSettings") return "SMS settings saved.";
+  if (action === "saveLadder") {
+    if (result.ladderTextSent) {
+      if (result.sms?.skipped) return `Ladder saved. Ladder Added texts were not sent: ${result.sms.reason || "SMS unavailable"}.`;
+      return `Ladder saved. Ladder Added texts sent: ${result.sms?.sent || 0}.`;
+    }
+    return "Ladder saved.";
+  }
+  if (action === "deleteLadder") return `Ladder deleted.${Number(result.sessionsDeleted || 0) > 0 ? ` Removed ${result.sessionsDeleted} unplayed match date${Number(result.sessionsDeleted || 0) === 1 ? "" : "s"}.` : ""}`;
+  if (action === "saveLadderPositions") return "Ladder positions saved.";
+  if (action === "createLadderMatch") return `Ladder match created for ${formatDate(result.sessionDate)}.`;
   if (action === "updateSessionPlayerStatus") return "Player status updated.";
   if (action === "addSessionPlayer") return "Player added and joined.";
-  if (action === "startSession") return "Session started.";
-  if (action === "startSessionAndGenerateFirstGame") return `Session started. Round ${result.roundNumber || 1} generated.`;
-  if (action === "deleteSession") return "Session deleted from active sessions.";
+  if (action === "startSession") return "Match started.";
+  if (action === "startSessionAndGenerateFirstGame") return `Match started. Round ${result.roundNumber || 1} generated.`;
+  if (action === "deleteSession") return "Match deleted from active matches.";
   if (action === "generateNextGame") return `Round ${result.roundNumber || ""} generated.`;
   if (action === "updateMatchScore") return "Score saved.";
   if (action === "updateMatchLineup") return "Lineup updated.";
   if (action === "completeSession") {
-    const base = result.sms?.skipped ? "Session completed. Result text was logged only." : `Session completed. Result texts sent: ${result.sms?.sent || 0}.`;
+    const base = result.sms?.skipped ? "Match completed. Result text was logged only." : `Match completed. Result texts sent: ${result.sms?.sent || 0}.`;
     return `${base}${weeklyRepeatNotice(result.weeklyRepeat)}`;
   }
   if (action === "sendBroadcastText") {
@@ -3451,16 +4591,16 @@ function noticeForAction(action, result) {
   if (action === "saveCourts") return "Courts saved.";
   if (action === "saveSettings") return "Settings saved.";
   if (action === "addSessionNewPlayer") {
-    if (result.sms?.skipped) return `Player added to this session and saved to PBCC Players. New Player text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
-    return `Player added to this session and saved to PBCC Players. New Player texts sent: ${result.sms?.sent || 0}.`;
+    if (result.sms?.skipped) return `Player added to this match and saved to PBCC Players. New Player text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
+    return `Player added to this match and saved to PBCC Players. New Player texts sent: ${result.sms?.sent || 0}.`;
   }
-  if (action === "masterResetRoundRobin") return `Master Reset complete. Deleted ${result.sessionsDeleted || 0} session${Number(result.sessionsDeleted || 0) === 1 ? "" : "s"} and all related play history.`;
+  if (action === "masterResetRoundRobin") return `Master Reset complete. Deleted ${result.sessionsDeleted || 0} regular/ladder match${Number(result.sessionsDeleted || 0) === 1 ? "" : "es"} and all related play history.`;
   return "Saved.";
 }
 
 function weeklyRepeatNotice(weeklyRepeat) {
   if (weeklyRepeat?.created) {
-    return ` Next weekly session opened for ${formatDate(weeklyRepeat.sessionDate)}.`;
+    return ` Next weekly match opened for ${formatDate(weeklyRepeat.sessionDate)}.`;
   }
   if (weeklyRepeat?.requested && weeklyRepeat?.skipped) {
     return ` Weekly repeat was not created: ${weeklyRepeat.reason || "unknown reason"}.`;

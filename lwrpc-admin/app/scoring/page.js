@@ -42,6 +42,7 @@ export default function ScoringPage() {
 
   const [matches, setMatches] = useState([]);
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
+  const [matchSearch, setMatchSearch] = useState("");
   const [showUnverifiedOnly, setShowUnverifiedOnly] = useState(false);
   const [emailSubject, setEmailSubject] = useState(SCORE_REMINDER_TEMPLATE.defaultSubject);
   const [emailTemplate, setEmailTemplate] = useState(SCORE_REMINDER_TEMPLATE.defaultBody);
@@ -217,11 +218,37 @@ export default function ScoringPage() {
     run();
   }, [checkAuth, loadMatches, loadTemplate]);
 
-  const visibleMatches = useMemo(() => {
-    if (!showUnverifiedOnly) return matches;
+  const searchableMatches = useMemo(() => {
+    const q = matchSearch.trim().toLowerCase();
 
-    return matches.filter((match) => match.score_status !== "verified");
-  }, [matches, showUnverifiedOnly]);
+    if (!q) return matches;
+
+    return matches.filter((match) => {
+      const text = [
+        match.home_team?.name,
+        match.away_team?.name,
+        match.leagues?.name,
+        match.divisions?.name,
+        match.locations?.name,
+        match.scheduled_date,
+        ...dateSearchValues(match.scheduled_date),
+        match.scheduled_time,
+        formatDisplayTime(match.scheduled_time, ""),
+        match.week_number,
+        match.status,
+        match.score_status,
+        scoreStatusLabel(match.score_status),
+      ].join(" ").toLowerCase();
+
+      return text.includes(q);
+    });
+  }, [matchSearch, matches]);
+
+  const visibleMatches = useMemo(() => {
+    if (!showUnverifiedOnly) return searchableMatches;
+
+    return searchableMatches.filter((match) => match.score_status !== "verified");
+  }, [searchableMatches, showUnverifiedOnly]);
 
   const selectedMatches = useMemo(() => {
     const selected = new Set(selectedMatchIds);
@@ -256,7 +283,7 @@ export default function ScoringPage() {
       return;
     }
 
-    const unverifiedIds = matches
+    const unverifiedIds = searchableMatches
       .filter((match) => match.score_status !== "verified")
       .map((match) => match.id);
 
@@ -459,46 +486,66 @@ export default function ScoringPage() {
               <p className="mt-1 text-sm text-slate-600">
                 Showing matches dated {today ? formatDate(today) : "today"} or earlier.
               </p>
+              <div className="mt-1 text-sm text-slate-500">
+                {visibleMatches.length} shown / {matches.length} total due matches
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={toggleUnverifiedFilter}
-                className={`rounded-xl px-4 py-3 font-semibold ${
-                  showUnverifiedOnly
-                    ? "bg-blue-700 text-white hover:bg-blue-800"
-                    : "bg-blue-100 text-blue-900 hover:bg-blue-200"
-                }`}
-              >
-                {showUnverifiedOnly ? "Showing Not Verified" : "Filter Not Verified"}
-              </button>
+            <div className="flex w-full flex-col gap-3 lg:w-auto lg:items-end">
+              <div className="w-full lg:min-w-[28rem]">
+                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
+                  Search / Filter
+                </label>
+                <input
+                  value={matchSearch}
+                  onChange={(event) => setMatchSearch(event.target.value)}
+                  placeholder="Teams, division, date, location..."
+                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold"
+                />
+                <div className="mt-1 text-xs font-semibold text-slate-500">
+                  Dates work as MM/DD/YYYY, M/D/YYYY, or YYYY-MM-DD.
+                </div>
+              </div>
 
-              <button
-                type="button"
-                onClick={toggleAllVisible}
-                className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300"
-              >
-                {allVisibleSelected ? "Clear Visible" : "Select Visible"}
-              </button>
+              <div className="flex flex-wrap gap-2 lg:justify-end">
+                <button
+                  type="button"
+                  onClick={toggleUnverifiedFilter}
+                  className={`rounded-xl px-4 py-3 font-semibold ${
+                    showUnverifiedOnly
+                      ? "bg-blue-700 text-white hover:bg-blue-800"
+                      : "bg-blue-100 text-blue-900 hover:bg-blue-200"
+                  }`}
+                >
+                  {showUnverifiedOnly ? "Showing Not Verified" : "Filter Not Verified"}
+                </button>
 
-              <button
-                type="button"
-                onClick={sendReminders}
-                disabled={sending || selectedMatches.length === 0}
-                className="rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                {sending ? "Sending..." : "Send Email Reminder"}
-              </button>
+                <button
+                  type="button"
+                  onClick={toggleAllVisible}
+                  className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300"
+                >
+                  {allVisibleSelected ? "Clear Visible" : "Select Visible"}
+                </button>
 
-              <button
-                type="button"
-                onClick={exportForDupr}
-                disabled={exportingScores}
-                className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-              >
-                {exportingScores ? "Exporting..." : "DUPR Export"}
-              </button>
+                <button
+                  type="button"
+                  onClick={sendReminders}
+                  disabled={sending || selectedMatches.length === 0}
+                  className="rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {sending ? "Sending..." : "Send Email Reminder"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={exportForDupr}
+                  disabled={exportingScores}
+                  className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                >
+                  {exportingScores ? "Exporting..." : "DUPR Export"}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -612,6 +659,24 @@ function compareScoringMatches(a, b) {
   if (divisionCompare !== 0) return divisionCompare;
 
   return (a.home_team?.name || "").localeCompare(b.home_team?.name || "");
+}
+
+function dateSearchValues(value) {
+  const text = String(value || "");
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (!match) return [formatDisplayDate(value, "")];
+
+  const [, year, month, day] = match;
+  const shortMonth = String(Number(month));
+  const shortDay = String(Number(day));
+
+  return [
+    `${month}/${day}/${year}`,
+    `${shortMonth}/${shortDay}/${year}`,
+    `${month}-${day}-${year}`,
+    `${shortMonth}-${shortDay}-${year}`,
+  ];
 }
 
 function duprRowsForMatch(match) {

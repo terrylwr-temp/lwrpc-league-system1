@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
-import { DEFAULT_SYSTEM_SETTINGS } from "../../../lib/systemSettings";
+import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
 
 const PLAYER_RECORD_RANGES = [
   { id: "currentMonth", label: "Current Month" },
@@ -39,13 +40,44 @@ export default function RoundRobinPlayerPage() {
   const [hostGameUpdateMessage, setHostGameUpdateMessage] = useState("");
   const [playerRecordRange, setPlayerRecordRange] = useState("all");
   const [showPartnerComparison, setShowPartnerComparison] = useState(false);
+  const [matchView, setMatchView] = useState("regular");
+  const [selectedLadderRanking, setSelectedLadderRanking] = useState(null);
+  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const regularUpcomingSessions = useMemo(
+    () => (state?.sessions || []).filter((session) => !isLadderSession(session)),
+    [state?.sessions]
+  );
+  const ladderUpcomingSessions = useMemo(
+    () => (state?.sessions || []).filter((session) => isLadderSession(session)),
+    [state?.sessions]
+  );
+  const regularHistorySessions = useMemo(
+    () => (state?.history?.sessions || []).filter((session) => !isLadderSession(session)),
+    [state?.history?.sessions]
+  );
+  const ladderHistorySessions = useMemo(
+    () => (state?.history?.sessions || []).filter((session) => isLadderSession(session)),
+    [state?.history?.sessions]
+  );
+  const hasRegularMatches = regularUpcomingSessions.length > 0 || regularHistorySessions.length > 0;
+  const hasLadderMatches = ladderUpcomingSessions.length > 0 || ladderHistorySessions.length > 0 || (state?.ladders || []).some((ladder) => Number(ladder.stats?.sessionsPlayed || 0) > 0);
   const visibleUpcomingSessions = useMemo(
-    () => filterSessionsForSearch(state?.sessions || [], sessionSearch),
-    [state?.sessions, sessionSearch]
+    () => {
+      const sessions = hasRegularMatches && hasLadderMatches
+        ? (matchView === "ladder" ? ladderUpcomingSessions : regularUpcomingSessions)
+        : hasLadderMatches ? ladderUpcomingSessions : regularUpcomingSessions;
+      return filterSessionsForSearch(sessions, sessionSearch);
+    },
+    [regularUpcomingSessions, ladderUpcomingSessions, sessionSearch, hasRegularMatches, hasLadderMatches, matchView]
   );
   const visiblePastSessions = useMemo(
-    () => filterSessionsForSearch(state?.history?.sessions || [], sessionSearch),
-    [state?.history?.sessions, sessionSearch]
+    () => {
+      const sessions = hasRegularMatches && hasLadderMatches
+        ? (matchView === "ladder" ? ladderHistorySessions : regularHistorySessions)
+        : hasLadderMatches ? ladderHistorySessions : regularHistorySessions;
+      return filterSessionsForSearch(sessions, sessionSearch);
+    },
+    [regularHistorySessions, ladderHistorySessions, sessionSearch, hasRegularMatches, hasLadderMatches, matchView]
   );
   const trimmedSessionSearch = sessionSearch.trim();
 
@@ -59,10 +91,56 @@ export default function RoundRobinPlayerPage() {
   }, [storageKey]);
 
   useEffect(() => {
+    async function loadSystemSettings() {
+      try {
+        const response = await fetch("/api/system-settings");
+        const result = await response.json().catch(() => ({}));
+        if (result.settings) setSystemSettings(mergeSystemSettings(result.settings));
+      } catch {
+        setSystemSettings(DEFAULT_SYSTEM_SETTINGS);
+      }
+    }
+
+    loadSystemSettings();
+  }, []);
+
+  useEffect(() => {
     if (!notice) return undefined;
     const timeout = window.setTimeout(() => setNotice(""), 12000);
     return () => window.clearTimeout(timeout);
   }, [notice]);
+
+  useEffect(() => {
+    if (!hasLadderMatches && matchView !== "regular") setMatchView("regular");
+    if (!hasRegularMatches && hasLadderMatches && matchView !== "ladder") setMatchView("ladder");
+  }, [hasRegularMatches, hasLadderMatches, matchView]);
+
+  useEffect(() => {
+    if (!hasLadderMatches && playerRecordRange === "ladders") setPlayerRecordRange("all");
+    if (!hasRegularMatches && hasLadderMatches && playerRecordRange !== "ladders") setPlayerRecordRange("ladders");
+  }, [hasRegularMatches, hasLadderMatches, playerRecordRange]);
+
+  function selectPlayerRecordRange(nextRange) {
+    if (nextRange === "ladders" && !hasLadderMatches) return;
+    if (nextRange !== "ladders" && !hasRegularMatches) return;
+    setPlayerRecordRange(nextRange);
+    if (nextRange === "ladders") {
+      setMatchView("ladder");
+    } else {
+      setMatchView("regular");
+    }
+  }
+
+  function selectMatchView(nextView) {
+    if (nextView === "ladder" && !hasLadderMatches) return;
+    if (nextView !== "ladder" && !hasRegularMatches) return;
+    setMatchView(nextView);
+    if (nextView === "ladder") {
+      setPlayerRecordRange("ladders");
+    } else if (playerRecordRange === "ladders") {
+      setPlayerRecordRange("all");
+    }
+  }
 
   useEffect(() => {
     if (!state) return;
@@ -92,7 +170,7 @@ export default function RoundRobinPlayerPage() {
     if (!response.ok || !result.success) {
       setState(null);
       if (!options.quiet) window.localStorage.removeItem(storageKey);
-      setError(result.error || "Unable to find your Round Robin sessions.");
+      setError(result.error || "Unable to find your Round Robin matches.");
       return null;
     }
 
@@ -100,6 +178,17 @@ export default function RoundRobinPlayerPage() {
     setPhone(formatPhoneInput(cleanPhone));
     setState(result);
     return result;
+  }
+
+  async function openLadderRanking(ladder) {
+    if (ladderRankingRows(ladder).length > 0) {
+      setSelectedLadderRanking(ladder);
+      return;
+    }
+
+    const refreshed = await loadPlayer(phone, { quiet: true });
+    const refreshedLadder = (refreshed?.ladders || []).find((item) => String(item.id || "") === String(ladder?.id || ""));
+    setSelectedLadderRanking(refreshedLadder || ladder);
   }
 
   async function updateStatus(sessionId, status) {
@@ -273,7 +362,7 @@ export default function RoundRobinPlayerPage() {
       setError("Enter the full phone number saved for you by the host.");
       return;
     }
-    if (!window.confirm(`Finish ${session.session_name || "this session"}? This will close scoring and text results if SMS is enabled.`)) return;
+    if (!window.confirm(`Finish ${session.session_name || "this match"}? This will close scoring and text results if SMS is enabled.`)) return;
 
     setActionLoading(`${session.id}-finish`);
     setError("");
@@ -296,19 +385,105 @@ export default function RoundRobinPlayerPage() {
     setActionLoading("");
 
     if (!response.ok || !result.success) {
-      setError(result.error || "Unable to finish this session.");
+      setError(result.error || "Unable to finish this match.");
       return;
     }
 
     await loadPlayer(cleanPhone, { quiet: true });
     setShowHistory(false);
     setSessionSearch("");
-    const finishNotice = result.sms?.skipped ? "Session finished. Result text was logged only." : `Session finished. Result texts sent: ${result.sms?.sent || 0}.`;
+    const finishNotice = result.sms?.skipped ? "Match finished. Result text was logged only." : `Match finished. Result texts sent: ${result.sms?.sent || 0}.`;
     setNotice(`${finishNotice}${weeklyRepeatNotice(result.weeklyRepeat)}`);
   }
 
   const groupKey = state?.group?.slug || id;
-  const clubName = state?.systemSettings?.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
+  const resolvedSystemSettings = state?.systemSettings || systemSettings;
+  const clubName = resolvedSystemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
+  const logoUrl = resolvedSystemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
+  const clubWebsite = resolvedSystemSettings.club_website || DEFAULT_SYSTEM_SETTINGS.club_website;
+
+  if (!state) {
+    return (
+      <main className="full-screen-main flex min-h-screen items-center justify-center bg-slate-100 p-4 text-slate-950 sm:p-6">
+        <div className="w-full max-w-md">
+          <div className="rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
+            <div className="text-center">
+              <a
+                href={clubWebsite}
+                target="_blank"
+                rel="noreferrer"
+                title={`Open ${clubName} website`}
+                className="inline-flex rounded-full focus:outline-none focus:ring-2 focus:ring-teal-500"
+              >
+                <Image
+                  src={logoUrl}
+                  alt={clubName}
+                  width={112}
+                  height={112}
+                  className="mx-auto h-20 w-20 rounded-full bg-white object-contain sm:h-24 sm:w-24"
+                  unoptimized
+                />
+              </a>
+              <h1 className="mt-4 text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
+                {clubName}
+                <span className="mt-1 block text-xl text-teal-700 sm:text-2xl">PBCourtCommand</span>
+              </h1>
+              <div className="mt-2 text-sm font-bold text-slate-500">Player Sign In</div>
+            </div>
+
+            {(error || notice) && (
+              <div className={`mt-5 rounded-xl px-4 py-3 text-sm font-bold ${
+                error ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"
+              }`}>
+                {error || notice}
+              </div>
+            )}
+
+            <form
+              className="mt-6"
+              onSubmit={(event) => {
+                event.preventDefault();
+                loadPlayer();
+              }}
+            >
+              <label className="block text-sm font-semibold text-slate-700">
+                Phone number
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(event) => setPhone(formatPhoneInput(event.target.value))}
+                  autoComplete="tel"
+                  className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 text-lg font-black text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-200"
+                  placeholder="941-555-1212"
+                />
+              </label>
+
+              <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                <input type="checkbox" checked={savePhone} onChange={(event) => setSavePhone(event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
+                Save on this device
+              </label>
+
+              <button
+                type="submit"
+                disabled={loading || !phone.trim()}
+                className="mt-6 w-full rounded-xl bg-teal-700 px-4 py-3 font-black text-white shadow-sm transition hover:bg-teal-800 disabled:bg-slate-300"
+              >
+                {loading ? "Signing in..." : "Sign In"}
+              </button>
+            </form>
+
+            <button
+              type="button"
+              onClick={openManagerSystem}
+              className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 transition hover:border-amber-300 hover:bg-amber-50 hover:text-slate-950"
+            >
+              Admin Setup
+            </button>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-6">
@@ -341,74 +516,51 @@ export default function RoundRobinPlayerPage() {
           </div>
         )}
 
-        {!state && (
-          <section className="mt-5 overflow-hidden rounded-lg border border-white/80 bg-white/95 shadow-[0_24px_70px_-42px_rgba(15,23,42,0.75)]">
-            <div className="h-2 bg-[linear-gradient(90deg,#0f766e,#2563eb,#f59e0b)]" />
-            <div className="p-5">
-              <h2 className="text-2xl font-black">Player Sign In</h2>
-              <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto] md:items-end">
-                <label className="block text-sm font-bold text-slate-600">
-                  Phone number
-                  <input
-                    type="tel"
-                    value={phone}
-                    onChange={(event) => setPhone(formatPhoneInput(event.target.value))}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter") loadPlayer();
-                    }}
-                    autoComplete="tel"
-                    className="mt-1 w-full rounded-lg border border-slate-300 px-4 py-3 text-lg font-black text-slate-950 shadow-inner outline-none ring-teal-400/30 focus:ring-4"
-                    placeholder="941-555-1212"
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={() => loadPlayer()}
-                  disabled={loading || !phone.trim()}
-                  className="w-full rounded-lg border border-teal-900 bg-teal-700 px-6 py-3 font-black text-white shadow-[0_14px_28px_-18px_rgba(15,118,110,0.9)] transition hover:-translate-y-0.5 hover:bg-teal-800 disabled:border-slate-300 disabled:bg-slate-300 md:w-auto"
-                >
-                  {loading ? "Loading..." : "Continue"}
-                </button>
-              </div>
-              <label className="mt-4 flex items-center gap-2 text-sm font-bold text-slate-700">
-                <input type="checkbox" checked={savePhone} onChange={(event) => setSavePhone(event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
-                Save on this device
-              </label>
-            </div>
-          </section>
-        )}
-
         {state && (
           <section className="mt-5 space-y-4">
             <PlayerHistorySummary
               history={state.history}
               player={state.player}
               range={playerRecordRange}
-              setRange={setPlayerRecordRange}
+              setRange={selectPlayerRecordRange}
+              ladders={state.ladders || []}
+              hasRegularMatches={hasRegularMatches}
+              hasLadderMatches={hasLadderMatches}
               onPartnerComparison={() => setShowPartnerComparison(true)}
+              onLadderRanking={openLadderRanking}
             />
 
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="min-w-0">
-                <h2 className="text-2xl font-black text-slate-950">{showHistory ? "All Sessions" : "Upcoming Sessions"}</h2>
+                <h2 className="text-2xl font-black text-slate-950">{showHistory ? "All Matches" : "Upcoming Matches"}</h2>
                 <label className="mt-2 block text-sm font-bold text-slate-600">
-                  Search Sessions
+                  Search Matches
                   <input
                     type="search"
                     value={sessionSearch}
                     onChange={(event) => setSessionSearch(event.target.value)}
                     className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-950 shadow-inner outline-none ring-teal-400/30 focus:ring-4"
-                    placeholder={showHistory ? "Search all sessions..." : "Search upcoming sessions..."}
+                    placeholder={showHistory ? "Search all matches..." : "Search upcoming matches..."}
                   />
                 </label>
               </div>
               <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap lg:justify-end">
+                {hasRegularMatches && hasLadderMatches && (
+                  <div className="inline-grid grid-cols-2 gap-1 rounded-lg border border-slate-300 bg-slate-100 p-1 text-xs font-black">
+                    <button type="button" onClick={() => selectMatchView("regular")} className={`rounded-md px-3 py-2 ${matchView === "regular" ? "bg-white text-slate-950 shadow-sm" : "text-slate-600 hover:bg-white"}`}>
+                      Regular Matches
+                    </button>
+                    <button type="button" onClick={() => selectMatchView("ladder")} className={`rounded-md px-3 py-2 ${matchView === "ladder" ? "bg-white text-slate-950 shadow-sm" : "text-slate-600 hover:bg-white"}`}>
+                      Ladder Matches
+                    </button>
+                  </div>
+                )}
                 <button
                   type="button"
                   onClick={() => setShowHistory((current) => !current)}
                   className="rounded-lg border border-slate-300 bg-slate-950 px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800"
                 >
-                  {showHistory ? "Hide Past Sessions" : `Past Sessions (${state.history?.sessions?.length || 0})`}
+                  {showHistory ? "Hide Past Matches" : `Past Matches (${state.history?.sessions?.length || 0})`}
                 </button>
                 <button type="button" onClick={() => loadPlayer()} disabled={loading} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-500 hover:bg-teal-50 disabled:bg-slate-100">
                   Refresh
@@ -428,8 +580,8 @@ export default function RoundRobinPlayerPage() {
             {visibleUpcomingSessions.length === 0 && (
               <div className="rounded-lg border border-dashed border-slate-300 bg-white/90 p-8 text-center font-semibold text-slate-500 shadow-sm">
                 {trimmedSessionSearch
-                  ? "No upcoming sessions match that search."
-                  : "No upcoming invited sessions are open for this phone number."}
+                  ? "No upcoming matches match that search."
+                  : "No upcoming invited matches are open for this phone number."}
               </div>
             )}
 
@@ -509,14 +661,25 @@ export default function RoundRobinPlayerPage() {
             onClose={() => setShowPartnerComparison(false)}
           />
         )}
+
+        {selectedLadderRanking && (
+          <LadderRankingModal
+            ladder={selectedLadderRanking}
+            player={state?.player}
+            onClose={() => setSelectedLadderRanking(null)}
+          />
+        )}
       </div>
     </main>
   );
 }
 
-function PlayerHistorySummary({ history, player, range, setRange, onPartnerComparison }) {
-  const filteredSessions = filterHistorySessions(history?.sessions || [], range);
-  const stats = aggregateHistorySessions(filteredSessions);
+function PlayerHistorySummary({ history, player, range, setRange, ladders = [], hasRegularMatches = true, hasLadderMatches = false, onPartnerComparison, onLadderRanking }) {
+  const showingLadders = hasLadderMatches && range === "ladders";
+  const regularSessions = (history?.sessions || []).filter((session) => !isLadderSession(session));
+  const filteredSessions = filterHistorySessions(regularSessions, range);
+  const stats = showingLadders ? aggregateLadderStats(ladders) : aggregateHistorySessions(filteredSessions);
+  const ladderRankings = showingLadders ? ladderRankingItems(ladders) : [];
 
   return (
     <section className="overflow-hidden rounded-lg border border-teal-700 bg-[linear-gradient(135deg,#0f766e_0%,#1d4ed8_72%,#f59e0b_130%)] text-white shadow-[0_24px_70px_-36px_rgba(15,23,42,0.95)]">
@@ -534,28 +697,67 @@ function PlayerHistorySummary({ history, player, range, setRange, onPartnerCompa
               </h2>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onPartnerComparison}
-            className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-teal-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-cyan-50"
-          >
-            Partner Comparison
-          </button>
-        </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-          {PLAYER_RECORD_RANGES.map((item) => (
+          {!showingLadders && hasRegularMatches && (
             <button
-              key={item.id}
               type="button"
-              onClick={() => setRange(item.id)}
-              className={`rounded-lg px-3 py-2 text-xs font-black shadow-sm ${range === item.id ? "bg-white text-teal-950" : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"}`}
+              onClick={onPartnerComparison}
+              className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-teal-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-cyan-50"
             >
-              {item.label}
+              Partner Comparison
             </button>
-          ))}
+          )}
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
-          <StatTile label="Sessions" value={stats.sessionsScored} />
+        <div className="mt-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-start">
+          {hasRegularMatches && (
+          <div className="rounded-lg border border-white/25 bg-white/10 p-2">
+            <div className="mb-2 text-xs font-black uppercase tracking-wide text-cyan-100">Regular Matches</div>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              {PLAYER_RECORD_RANGES.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setRange(item.id)}
+                  className={`rounded-lg px-3 py-2 text-xs font-black shadow-sm ${range === item.id ? "bg-white text-teal-950" : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          )}
+          {hasLadderMatches && (
+            <div className="rounded-lg border border-violet-200/50 bg-violet-500/20 p-2">
+              <div className="mb-2 text-xs font-black uppercase tracking-wide text-violet-100">Ladders</div>
+              <button
+                type="button"
+                onClick={() => setRange("ladders")}
+                className={`w-full rounded-lg px-3 py-2 text-xs font-black shadow-sm sm:w-auto ${showingLadders ? "bg-white text-violet-900" : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"}`}
+              >
+                Ladders
+              </button>
+            </div>
+          )}
+        </div>
+        {showingLadders && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-xs font-black text-white">
+            <span className="uppercase tracking-wide text-violet-100">Ranking</span>
+            {ladderRankings.length > 0 ? ladderRankings.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => onLadderRanking?.(item.ladder)}
+                className="rounded-md bg-white px-2 py-1 text-left text-violet-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-white"
+              >
+                {item.label}
+              </button>
+            )) : (
+              <span className="rounded-md bg-white/15 px-2 py-1 text-white ring-1 ring-white/25">-</span>
+            )}
+          </div>
+        )}
+        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
+          <StatTile label="Dates Played" value={stats.sessionsScored} />
+          <StatTile label="Last played" value={stats.lastPlayedDate ? formatDate(stats.lastPlayedDate) : "-"} />
           <StatTile label="Record" value={`${stats.wins || 0}-${stats.losses || 0}`} />
           <StatTile label="Win %" value={formatPercent(stats.winPct)} />
           <StatTile label="Point Diff" value={formatSignedNumber(stats.pointDiff || 0)} />
@@ -579,39 +781,217 @@ function playerInitials(name) {
   return parts.slice(0, 2).map((part) => part[0]?.toUpperCase() || "").join("") || "P";
 }
 
+function formatLadderPosition(ladder) {
+  if (!ladder?.position) return "-";
+  return ladder.positionCount ? `#${ladder.position} out of ${ladder.positionCount}` : `#${ladder.position}`;
+}
+
+function ladderRankingRows(ladder) {
+  const sourceRows = [
+    ...(Array.isArray(ladder?.rankings) ? ladder.rankings : []),
+    ...(Array.isArray(ladder?.rankingRows) ? ladder.rankingRows : []),
+    ...(Array.isArray(ladder?.standings) ? ladder.standings : []),
+    ...(Array.isArray(ladder?.rows) ? ladder.rows : []),
+  ];
+  const byPlayer = new Map();
+  sourceRows.forEach((row, index) => {
+    const normalized = normalizeLadderRankingRow(row, index);
+    if (!normalized.playerId && !normalized.displayName) return;
+    byPlayer.set(normalized.playerId || normalized.displayName, normalized);
+  });
+  return [...byPlayer.values()].sort((first, second) => Number(first.position || 9999) - Number(second.position || 9999) || String(first.displayName || "").localeCompare(String(second.displayName || "")));
+}
+
+function normalizeLadderRankingRow(row = {}, index = 0) {
+  const wins = Number(row.wins || 0);
+  const losses = Number(row.losses || 0);
+  const games = Number(row.matchesPlayed ?? row.games ?? (wins + losses));
+  const pointDiff = Number(row.pointDiff ?? row.point_diff ?? 0);
+  return {
+    playerId: String(row.playerId || row.player_id || row.id || ""),
+    displayName: row.displayName || row.display_name || row.name || "Player",
+    position: positiveNumber(row.position || row.rank) || index + 1,
+    sessionsPlayed: Number(row.sessionsPlayed ?? row.datesPlayed ?? row.sessions_scored ?? 0),
+    matchesPlayed: games,
+    wins,
+    losses,
+    pointsFor: Number(row.pointsFor ?? row.points_for ?? 0),
+    pointDiff,
+    winPct: Number(row.winPct ?? row.win_pct ?? (games > 0 ? wins / games : 0)),
+    avgPointDiff: Number(row.avgPointDiff ?? row.avg_point_diff ?? (games > 0 ? pointDiff / games : 0)),
+    eligible: row.eligible !== false,
+  };
+}
+
+function resultMetadata(row) {
+  const metadata = row?.metadata;
+  if (!metadata) return {};
+  if (typeof metadata === "string") {
+    try {
+      const parsed = JSON.parse(metadata);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
+}
+
+function positiveNumber(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
+function ladderPreviousPositionForResult(row) {
+  const metadata = resultMetadata(row);
+  return positiveNumber(metadata.ladderPreviousPosition ?? metadata.previousPosition);
+}
+
+function ladderPositionCountForResult(row, session = null) {
+  const metadata = resultMetadata(row);
+  return positiveNumber(metadata.ladderPositionCount ?? metadata.positionCount ?? session?.settings?.ladderPositionCount);
+}
+
+function formatLadderRank(position, count) {
+  const safePosition = positiveNumber(position);
+  if (!safePosition) return "-";
+  const safeCount = positiveNumber(count);
+  return safeCount ? `#${safePosition} out of ${safeCount}` : `#${safePosition}`;
+}
+
 function PastSessions({ history, sessions = null, searchTerm = "", onSelect }) {
   const sessionRows = sessions || history?.sessions || [];
   const hasSearch = Boolean(String(searchTerm || "").trim());
 
   return (
     <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)]">
-      <h2 className="text-xl font-black text-slate-950">Past Sessions</h2>
-      <p className="mt-1 text-sm font-bold text-slate-600">Click on a Session to see the Session Game Details.</p>
+      <h2 className="text-xl font-black text-slate-950">Past Matches</h2>
+      <p className="mt-1 text-sm font-bold text-slate-600">Click on a Match to see the Match Game Details.</p>
       <div className="mt-3 space-y-2">
-        {sessionRows.map((session) => (
+        {sessionRows.map((session) => {
+          const isLadder = isLadderSession(session);
+          return (
           <button
             key={session.id}
             type="button"
             onClick={() => onSelect(session)}
-            className="grid w-full grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-teal-400 hover:bg-white sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+            className={`grid w-full grid-cols-1 gap-3 rounded-lg border p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center ${isLadder ? "border-violet-200 bg-violet-50 hover:border-violet-400" : "border-slate-200 bg-slate-50 hover:border-teal-400"}`}
           >
             <span className="min-w-0">
-              <span className="block text-lg font-black text-slate-950">{formatSessionHeadlineWithYear(session)}</span>
-              <span className="mt-1 block text-sm font-bold text-slate-600">{session.session_name || "Round Robin Session"}</span>
+              <span className="block text-lg font-black text-slate-950">{formatSessionHeadlineWithYear(session)}{isLadder ? " - Ladder" : ""}</span>
+              <span className="mt-1 block text-sm font-bold text-slate-600">{session.session_name || "Round Robin Match"}</span>
               <span className="mt-1 block text-xs font-semibold text-slate-500">{session.location || "Location pending"}</span>
             </span>
             <span className="rounded-lg bg-teal-50 px-3 py-2 text-sm font-black text-teal-900 sm:text-right">
               {pastSessionResultLabel(session.playerResult)}
             </span>
           </button>
-        ))}
+          );
+        })}
         {sessionRows.length === 0 && (
           <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-6 text-center text-sm font-bold text-slate-500">
-            {hasSearch ? "No past sessions match that search." : "No completed past sessions are saved yet."}
+            {hasSearch ? "No past matches match that search." : "No completed past matches are saved yet."}
           </div>
         )}
       </div>
     </section>
+  );
+}
+
+function LadderRankingModal({ ladder, player, onClose }) {
+  const rows = ladderRankingRows(ladder);
+  const playerId = String(player?.id || "");
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
+      <div className="flex h-[100dvh] w-full max-w-4xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
+        <div className={`flex shrink-0 flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
+          <div className="min-w-0">
+            <div className={MODAL_EYEBROW_CHROME}>Ladder Rankings</div>
+            <h2 className="break-words text-xl font-black sm:text-2xl">{ladder?.name || "Ladder"}</h2>
+            <div className={MODAL_SUPPORTING_TEXT}>
+              Current ranking {ladder?.position ? formatLadderPosition(ladder) : ""}
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
+            Close
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+          <div className="overflow-hidden rounded-lg border border-slate-200">
+            <div className="bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">Current Rankings</div>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[48rem] text-sm">
+                <thead className="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-500">
+                  <tr>
+                    <th className="px-3 py-2">Rank</th>
+                    <th className="px-3 py-2">Player</th>
+                    <th className="px-3 py-2 text-right">Dates Played</th>
+                    <th className="px-3 py-2 text-right">Games</th>
+                    <th className="px-3 py-2 text-right">Record</th>
+                    <th className="px-3 py-2 text-right">Win %</th>
+                    <th className="px-3 py-2 text-right">Avg Diff</th>
+                    <th className="px-3 py-2 text-right">Points</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {rows.map((row) => {
+                    const highlighted = String(row.playerId || "") === playerId;
+                    return (
+                      <tr key={row.playerId} className={highlighted ? "border-y-2 border-violet-500 bg-violet-50 ring-2 ring-inset ring-violet-200" : "bg-white"}>
+                        <td className="px-3 py-2 font-black text-slate-950">#{row.position || "-"}</td>
+                        <td className="px-3 py-2 font-black text-slate-950">{row.displayName || "Player"}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-700">{row.sessionsPlayed || 0}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-700">{row.matchesPlayed || 0}</td>
+                        <td className="px-3 py-2 text-right font-black text-slate-950">{row.wins || 0}-{row.losses || 0}</td>
+                        <td className="px-3 py-2 text-right font-black text-violet-800">{formatPercent(row.winPct || 0)}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-700">{formatSignedDecimalNumber(row.avgPointDiff || 0)}</td>
+                        <td className="px-3 py-2 text-right font-bold text-slate-700">{row.pointsFor || 0}</td>
+                      </tr>
+                    );
+                  })}
+                  {rows.length === 0 && (
+                    <tr>
+                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={8}>No ladder rankings are available yet. Refresh the player screen and try again.</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <div className="grid grid-cols-1 gap-2 bg-white p-3 md:hidden">
+              {rows.map((row) => (
+                <LadderRankingMobileCard key={row.playerId} row={row} highlighted={String(row.playerId || "") === playerId} />
+              ))}
+              {rows.length === 0 && (
+                <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No ladder rankings are available yet. Refresh the player screen and try again.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LadderRankingMobileCard({ row, highlighted }) {
+  return (
+    <div className={`rounded-lg border p-3 shadow-sm ${highlighted ? "border-2 border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-slate-50"}`}>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <div className="text-xs font-black uppercase tracking-wide text-slate-500">Rank #{row.position || "-"}</div>
+          <div className="mt-1 break-words text-base font-black text-slate-950">{row.displayName || "Player"}</div>
+        </div>
+        <div className="rounded-md bg-white px-2 py-1 text-sm font-black text-violet-800 shadow-sm">
+          {formatPercent(row.winPct || 0)}
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+        <MobileStandingStat label="Dates" value={row.sessionsPlayed || 0} />
+        <MobileStandingStat label="Games" value={row.matchesPlayed || 0} />
+        <MobileStandingStat label="Record" value={`${row.wins || 0}-${row.losses || 0}`} />
+        <MobileStandingStat label="Avg Diff" value={formatSignedDecimalNumber(row.avgPointDiff || 0)} />
+      </div>
+    </div>
   );
 }
 
@@ -628,10 +1008,11 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
   const canRespond = session.hasPlayerResponse !== false && !isPlaying;
   const canStartSession = isPlaying || Number(session.joinedCount || 0) >= 4;
   const showSetupButtons = !(session.canManageSession && isPlaying);
+  const isLadder = isLadderSession(session);
 
   return (
-    <article className="overflow-hidden rounded-lg border border-white/80 bg-white/95 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)]">
-      <div className="h-2 bg-[linear-gradient(90deg,#0f766e,#2563eb,#f59e0b)]" />
+    <article className={`overflow-hidden rounded-lg border shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)] ${isLadder ? "border-violet-200 bg-violet-50/95" : "border-white/80 bg-white/95"}`}>
+      <div className={`h-2 ${isLadder ? "bg-[linear-gradient(90deg,#7c3aed,#a855f7,#f59e0b)]" : "bg-[linear-gradient(90deg,#0f766e,#2563eb,#f59e0b)]"}`} />
       <div className="grid grid-cols-1 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -646,9 +1027,14 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
                 {session.hostRole || "Host"}
               </span>
             )}
+            {isLadder && (
+              <span className="rounded-xl bg-violet-700 px-4 py-2 text-sm font-black uppercase tracking-wide text-white shadow-sm">
+                Ladder
+              </span>
+            )}
           </div>
           <div className="mt-2 break-words text-lg font-black text-slate-800 sm:text-xl">
-            {session.session_name || "Round Robin Session"}
+            {session.session_name || "Round Robin Match"}
           </div>
           <div className="mt-1 text-sm font-bold text-slate-600">
             {session.location || "Location pending"}
@@ -704,7 +1090,7 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
               disabled={!canStartSession}
               className="rounded-lg border border-slate-950 bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 disabled:border-slate-300 disabled:bg-slate-300 disabled:hover:translate-y-0"
             >
-              {isPlaying ? "Resume Session" : "Start Session"}
+              {isPlaying ? "Resume Match" : "Start Match"}
             </button>
           )}
           {session.canManageSession && !isPlaying && !canStartSession && (
@@ -719,7 +1105,7 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
               disabled={finishLoading}
               className="rounded-lg border border-emerald-800 bg-emerald-700 px-5 py-3 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-800 disabled:border-slate-300 disabled:bg-slate-300"
             >
-              {finishLoading ? "Finishing..." : "Finish Session"}
+              {finishLoading ? "Finishing..." : "Finish Match"}
             </button>
           )}
           {canRespond && status !== "joined" && (
@@ -762,9 +1148,9 @@ function SessionPlayersViewModal({ session, onClose }) {
       <div className="max-h-[94vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:max-h-[90vh]">
         <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
           <div className="min-w-0">
-            <div className={MODAL_EYEBROW_CHROME}>Session Players</div>
+            <div className={MODAL_EYEBROW_CHROME}>Match Players</div>
             <h2 className="break-words text-xl font-black sm:text-2xl">{formatSessionHeadlineWithYear(session)}</h2>
-            <div className={MODAL_SUPPORTING_TEXT}>{session.session_name || "Round Robin Session"}</div>
+            <div className={MODAL_SUPPORTING_TEXT}>{session.session_name || "Round Robin Match"}</div>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
             Close
@@ -783,7 +1169,7 @@ function SessionPlayersViewModal({ session, onClose }) {
           </div>
           {players.length === 0 && (
             <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-8 text-center text-sm font-bold text-slate-500">
-              No players are listed for this session yet.
+              No players are listed for this match yet.
             </div>
           )}
         </div>
@@ -800,6 +1186,7 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
   const players = sessionPlayersForStatusView(session.sessionPlayers || [], status);
   const statusActionLoading = actionLoading === "updateSessionPlayerStatus";
   const addPlayerLoading = actionLoading === "addSessionNewPlayer";
+  const canAddPlayer = !isLadderSession(session);
 
   async function addNewPlayer() {
     if (!newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10) return;
@@ -821,8 +1208,8 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
         <div className={`shrink-0 p-4 ${MODAL_HEADER_CHROME}`}>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <div className={MODAL_EYEBROW_CHROME}>Session Players</div>
-              <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Session"}</h2>
+              <div className={MODAL_EYEBROW_CHROME}>Match Players</div>
+              <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
               <div className={MODAL_SUPPORTING_TEXT}>
                 {formatSessionHeadline(session)}
               </div>
@@ -843,6 +1230,7 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
         </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-4">
 
+          {canAddPlayer && (
           <div className="mt-4">
             {!showAddPlayer ? (
               <button
@@ -894,12 +1282,18 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
               </div>
             )}
           </div>
+          )}
 
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
             {players.map((player) => (
               <div key={player.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-slate-100 px-3 py-3 last:border-b-0">
                 <div className="min-w-0">
                   <div className="font-black text-slate-950">{player.displayName}</div>
+                  {sessionPlayerLadderPositionText(player) && (
+                    <div className="mt-0.5 text-xs font-black text-violet-700">
+                      Current Position {sessionPlayerLadderPositionText(player)}
+                    </div>
+                  )}
                   <div className="mt-1 hidden text-xs font-semibold text-slate-500 sm:block">
                     {[player.email, player.phone].filter(Boolean).join(" / ") || "No contact saved"}
                   </div>
@@ -930,7 +1324,7 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
             ))}
             {players.length === 0 && (
               <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">
-                No {status} players for this session.
+                No {status} players for this match.
               </div>
             )}
           </div>
@@ -949,9 +1343,9 @@ function HostSessionFormModal({ state, session, form, setForm, toggleInvitedGrou
       <div className="flex h-[100dvh] w-full max-w-3xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:h-auto sm:max-h-[92vh] sm:rounded-lg">
         <div className={`flex shrink-0 flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
           <div className="min-w-0">
-            <div className={MODAL_EYEBROW_CHROME}>Session Setup</div>
-            <h2 className="break-words text-xl font-black sm:text-2xl">Edit Session</h2>
-            <div className={MODAL_SUPPORTING_TEXT}>{session.session_name || "Round Robin Session"}</div>
+            <div className={MODAL_EYEBROW_CHROME}>Match Setup</div>
+            <h2 className="break-words text-xl font-black sm:text-2xl">Edit Match</h2>
+            <div className={MODAL_SUPPORTING_TEXT}>{session.session_name || "Round Robin Match"}</div>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
             Cancel
@@ -959,7 +1353,7 @@ function HostSessionFormModal({ state, session, form, setForm, toggleInvitedGrou
         </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-4">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <ModalTextInput label="Session name" value={form.sessionName} onChange={(value) => setForm((current) => ({ ...current, sessionName: value }))} required />
+            <ModalTextInput label="Match name" value={form.sessionName} onChange={(value) => setForm((current) => ({ ...current, sessionName: value }))} required />
             <ModalTextInput label="Location" value={form.location} onChange={(value) => setForm((current) => ({ ...current, location: value }))} />
             <ModalTextInput label="Date" type="date" value={form.sessionDate} onChange={(value) => setForm((current) => ({ ...current, sessionDate: value }))} required />
             <ModalTextInput label="Start time" type="time" value={form.startsAt} onChange={(value) => setForm((current) => ({ ...current, startsAt: value }))} />
@@ -1020,7 +1414,7 @@ function HostSessionFormModal({ state, session, form, setForm, toggleInvitedGrou
             disabled={saving || !form.sessionName.trim() || !form.sessionDate || form.invitedGroupIds.length === 0}
             className="mt-4 w-full rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
           >
-            {saving ? "Saving..." : "Update Session"}
+            {saving ? "Saving..." : "Update Match"}
           </button>
         </div>
       </div>
@@ -1037,7 +1431,7 @@ function HostGameUpdateModal({ session, message, setMessage, actionLoading, onSe
         <div className={`flex shrink-0 flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
           <div className="min-w-0">
             <div className={MODAL_EYEBROW_CHROME}>Game Update Text</div>
-            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Round Robin Session"}</h2>
+            <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Round Robin Match"}</h2>
             <div className={MODAL_SUPPORTING_TEXT}>{formatSessionHeadline(session)}</div>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
@@ -1102,7 +1496,12 @@ function SessionPlayerStatusGroup({ label, tone, players }) {
       <div className="mt-3 space-y-2">
         {players.map((player) => (
           <div key={player.id || player.playerId || player.displayName} className="rounded-md bg-white px-3 py-2 text-sm font-black text-slate-900 shadow-sm">
-            {player.displayName || "Player"}
+            <div>{player.displayName || "Player"}</div>
+            {sessionPlayerLadderPositionText(player) && (
+              <div className="mt-0.5 text-xs font-black text-violet-700">
+                Current Position {sessionPlayerLadderPositionText(player)}
+              </div>
+            )}
           </div>
         ))}
         {players.length === 0 && (
@@ -1113,6 +1512,11 @@ function SessionPlayerStatusGroup({ label, tone, players }) {
       </div>
     </section>
   );
+}
+
+function sessionPlayerLadderPositionText(player) {
+  if (!player?.ladderPosition) return "";
+  return player.ladderPositionCount ? `#${player.ladderPosition} out of ${player.ladderPositionCount}` : `#${player.ladderPosition}`;
 }
 
 function sessionPlayersForStatusView(players, status) {
@@ -1145,7 +1549,7 @@ function hostPlayerCountForGroup(state, groupId) {
 
 function hostSessionFormFromSession(session) {
   return {
-    sessionName: session.session_name || "Round Robin Session",
+    sessionName: session.session_name || "Round Robin Match",
     location: session.location || "",
     sessionDate: session.session_date || new Date().toISOString().slice(0, 10),
     startsAt: timeInputValue(session.starts_at),
@@ -1160,14 +1564,14 @@ function hostSessionFormFromSession(session) {
 
 function hostNoticeForAction(action, result) {
   if (action === "updatePlannedSession") {
-    if (result.sms?.skipped) return `Session saved. Added ${result.addedPlayers || 0} newly invited player${Number(result.addedPlayers || 0) === 1 ? "" : "s"}.`;
-    return `Session saved. Update texts sent: ${result.sms?.sent || 0}.`;
+    if (result.sms?.skipped) return `Match saved. Added ${result.addedPlayers || 0} newly invited player${Number(result.addedPlayers || 0) === 1 ? "" : "s"}.`;
+    return `Match saved. Update texts sent: ${result.sms?.sent || 0}.`;
   }
   if (action === "updateSessionPlayerStatus") return "Player status updated.";
   if (action === "addSessionPlayer") return "Player added and joined.";
   if (action === "addSessionNewPlayer") {
-    if (result.sms?.skipped) return `Player added to this session and saved to PBCC Players. New Player text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
-    return `Player added to this session and saved to PBCC Players. New Player texts sent: ${result.sms?.sent || 0}.`;
+    if (result.sms?.skipped) return `Player added to this match and saved to PBCC Players. New Player text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
+    return `Player added to this match and saved to PBCC Players. New Player texts sent: ${result.sms?.sent || 0}.`;
   }
   if (action === "sendBroadcastText") {
     if (result.sms?.skipped) return `Game update text was not sent: ${result.sms.reason || "SMS unavailable"}.`;
@@ -1178,7 +1582,7 @@ function hostNoticeForAction(action, result) {
 
 function weeklyRepeatNotice(weeklyRepeat) {
   if (weeklyRepeat?.created) {
-    return ` Next weekly session opened for ${formatDate(weeklyRepeat.sessionDate)}.`;
+    return ` Next weekly match opened for ${formatDate(weeklyRepeat.sessionDate)}.`;
   }
   if (weeklyRepeat?.requested && weeklyRepeat?.skipped) {
     return ` Weekly repeat was not created: ${weeklyRepeat.reason || "unknown reason"}.`;
@@ -1193,7 +1597,7 @@ function normalizeHostSmsTemplates(templates = {}) {
 }
 
 function renderHostSmsTemplate(template, group, session, sessionPlayers = []) {
-  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next session";
+  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the next match";
   const time = session?.starts_at ? formatTime(session.starts_at) : "TBD";
   const location = session?.location || "";
   const joinedCount = sessionPlayersForStatusView(sessionPlayers, "joined").length;
@@ -1201,7 +1605,7 @@ function renderHostSmsTemplate(template, group, session, sessionPlayers = []) {
   const availableSpots = maxPlayers > 0 ? Math.max(0, maxPlayers - joinedCount) : "";
   const replacements = {
     group_name: group?.name || "PBCourtCommand",
-    session_name: session?.session_name || "Round Robin Session",
+    session_name: session?.session_name || "Round Robin Match",
     date,
     time,
     location,
@@ -1253,12 +1657,14 @@ function aggregateHistorySessions(sessions) {
   const totals = sessions.reduce((summary, session) => {
     const result = session.playerResult;
     if (!result) return summary;
+    const sessionDate = String(session.session_date || "");
     return {
       sessionsScored: summary.sessionsScored + 1,
       games: summary.games + Number(result.games || 0),
       wins: summary.wins + Number(result.wins || 0),
       losses: summary.losses + Number(result.losses || 0),
       pointDiff: summary.pointDiff + Number(result.point_diff || 0),
+      lastPlayedDate: sessionDate && sessionDate > summary.lastPlayedDate ? sessionDate : summary.lastPlayedDate,
     };
   }, {
     sessionsScored: 0,
@@ -1266,12 +1672,52 @@ function aggregateHistorySessions(sessions) {
     wins: 0,
     losses: 0,
     pointDiff: 0,
+    lastPlayedDate: "",
   });
 
   return {
     ...totals,
     winPct: totals.games > 0 ? totals.wins / totals.games : 0,
   };
+}
+
+function aggregateLadderStats(ladders = []) {
+  const totals = (ladders || []).reduce((summary, ladder) => {
+    const stats = ladder.stats || {};
+    const lastPlayedDate = String(ladder.lastPlayedDate || "");
+    const games = Number(stats.matchesPlayed || 0) || Number(stats.wins || 0) + Number(stats.losses || 0);
+    return {
+      sessionsScored: summary.sessionsScored + Number(stats.sessionsPlayed || 0),
+      games: summary.games + games,
+      wins: summary.wins + Number(stats.wins || 0),
+      losses: summary.losses + Number(stats.losses || 0),
+      pointDiff: summary.pointDiff + Number(stats.pointDiff || 0),
+      lastPlayedDate: lastPlayedDate && lastPlayedDate > summary.lastPlayedDate ? lastPlayedDate : summary.lastPlayedDate,
+    };
+  }, {
+    sessionsScored: 0,
+    games: 0,
+    wins: 0,
+    losses: 0,
+    pointDiff: 0,
+    lastPlayedDate: "",
+  });
+
+  const games = totals.wins + totals.losses || totals.games;
+  return {
+    ...totals,
+    winPct: games > 0 ? totals.wins / games : 0,
+  };
+}
+
+function ladderRankingItems(ladders = []) {
+  return (ladders || [])
+    .filter((ladder) => ladder.position && ladder.positionCount)
+    .map((ladder) => ({
+      id: ladder.id,
+      label: `${ladder.name}: ${formatLadderPosition(ladder)}`,
+      ladder,
+    }));
 }
 
 function partnerComparisonRows(history, player) {
@@ -1360,20 +1806,23 @@ function matchSideForPlayer(match, playerId) {
 
 function HistorySessionModal({ session, player, onClose }) {
   const [showMobileStandingsDetail, setShowMobileStandingsDetail] = useState(false);
+  const [showLadderHelp, setShowLadderHelp] = useState(false);
   const matches = session.matches || [];
+  const isLadder = isLadderSession(session);
   const highlightedPlayerId = String(session.playerResult?.player_id || player?.id || "");
   const playedPlayerIds = playerIdsFromMatches(matches);
   const roundGroups = groupMatchesByRound(matches);
   const standings = (session.standings || []).filter((row) => playedPlayerIds.size === 0 || playedPlayerIds.has(String(row.player_id || "")));
+  const standingsColSpan = isLadder ? 8 : 7;
 
   return (
     <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
       <div className="flex h-[100dvh] w-full max-w-4xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
         <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
           <div className="min-w-0">
-            <div className={MODAL_EYEBROW_CHROME}>Session Results</div>
+            <div className={MODAL_EYEBROW_CHROME}>Match Results</div>
             <h2 className="break-words text-xl font-black sm:text-2xl">{formatSessionHeadline(session)}</h2>
-            <div className={MODAL_SUPPORTING_TEXT}>{session.session_name || "Round Robin Session"}</div>
+            <div className={MODAL_SUPPORTING_TEXT}>{session.session_name || "Round Robin Match"}</div>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
             Close
@@ -1385,44 +1834,84 @@ function HistorySessionModal({ session, player, onClose }) {
           </div>
 
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
-            <div className="flex items-center justify-between gap-2 bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">
-              <span>Standings</span>
-              <button
-                type="button"
-                onClick={() => setShowMobileStandingsDetail((current) => !current)}
-                className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-black text-slate-800 shadow-sm md:hidden"
-              >
-                {showMobileStandingsDetail ? "Summary" : "Detail"}
-              </button>
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100 px-3 py-2 text-sm font-black text-slate-700">
+              <span>Match Standings</span>
+              <div className="flex items-center gap-2">
+                {isLadder && (
+                  <button
+                    type="button"
+                    onClick={() => setShowLadderHelp((current) => !current)}
+                    className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 bg-white text-sm font-black text-slate-700 shadow-sm hover:bg-slate-50"
+                    aria-label="Show ladder ranking rules"
+                  >
+                    ?
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowMobileStandingsDetail((current) => !current)}
+                  className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-black text-slate-800 shadow-sm md:hidden"
+                >
+                  {showMobileStandingsDetail ? "Summary" : "Detail"}
+                </button>
+              </div>
             </div>
+            {isLadder && showLadderHelp && (
+              <div className="border-t border-slate-200 bg-blue-50 px-3 py-3 text-sm font-semibold text-blue-950">
+                <div className="font-black">Ladder movement rules</div>
+                <div className="mt-1">
+                  {session.settings?.ladderConfig?.movementMode === "top2" ? "Top 2 move up and bottom 2 move down" : "Top 1 moves up and bottom 1 moves down"} on each court after the match. Middle players stay on the same court.
+                </div>
+                <div className="mt-1">
+                  Match-date ranking uses total points scored, then head-to-head if points are tied, then win percentage, average point differential, games played, and player name.
+                </div>
+                <div className="mt-1">
+                  Starting with session 4, players below the participation requirement drop one court for the next ladder date.
+                </div>
+              </div>
+            )}
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[48rem] text-sm">
+              <table className="w-full min-w-[740px] table-fixed text-xs sm:text-sm">
+                <colgroup>
+                  <col className="w-[8%]" />
+                  {isLadder && <col className="w-[14%]" />}
+                  <col className="w-[26%]" />
+                  <col className="w-[12%]" />
+                  <col className="w-[11%]" />
+                  <col className="w-[14%]" />
+                  <col className="w-[8%]" />
+                  <col className="w-[7%]" />
+                </colgroup>
                 <thead className="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-500">
                   <tr>
-                    <th className="px-3 py-2">Rank</th>
-                    <th className="px-3 py-2">Player</th>
-                    <th className="px-3 py-2 text-right">Record</th>
-                    <th className="px-3 py-2 text-right">Win %</th>
-                    <th className="px-3 py-2 text-right">Points</th>
-                    <th className="px-3 py-2 text-right">Diff</th>
-                    <th className="px-3 py-2 text-right">Byes</th>
+                    <th className="px-2 py-2">Rank</th>
+                    {isLadder && <th className="px-2 py-2">Rank Before</th>}
+                    <th className="px-2 py-2">Player</th>
+                    <th className="px-2 py-2 text-right">Record</th>
+                    <th className="px-2 py-2 text-right">Win %</th>
+                    <th className="px-2 py-2 text-right">Points</th>
+                    <th className="px-2 py-2 text-right">Diff</th>
+                    <th className="px-2 py-2 text-right">Byes</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {standings.map((row, index) => (
                     <tr key={row.id || `${row.session_id}-${row.player_id}`} className={String(row.player_id || "") === String(session.playerResult?.player_id || "") ? "border-y-2 border-teal-500 bg-teal-50 ring-2 ring-inset ring-teal-300" : "bg-white"}>
-                      <td className="px-3 py-2 font-black text-slate-950">#{index + 1}</td>
-                      <td className="px-3 py-2 font-bold text-slate-800">{row.display_name}</td>
-                      <td className="px-3 py-2 text-right font-black text-slate-950">{row.wins}-{row.losses}</td>
-                      <td className="px-3 py-2 text-right font-black text-teal-800">{formatPercent(winPctForStanding(row))}</td>
-                      <td className="px-3 py-2 text-right font-bold text-slate-700">{row.points_for}-{row.points_against}</td>
-                      <td className="px-3 py-2 text-right font-bold text-slate-700">{formatSignedNumber(row.point_diff || 0)}</td>
-                      <td className="px-3 py-2 text-right font-bold text-slate-700">{row.byes || 0}</td>
+                      <td className="px-2 py-2 font-black text-slate-950">#{index + 1}</td>
+                      {isLadder && (
+                        <td className="px-2 py-2 font-black text-blue-800">{formatLadderRank(ladderPreviousPositionForResult(row), ladderPositionCountForResult(row, session))}</td>
+                      )}
+                      <td className="truncate px-2 py-2 font-bold text-slate-800" title={row.display_name || "Player"}>{row.display_name}</td>
+                      <td className="px-2 py-2 text-right font-black text-slate-950">{row.wins}-{row.losses}</td>
+                      <td className="px-2 py-2 text-right font-black text-teal-800">{formatPercent(winPctForStanding(row))}</td>
+                      <td className="px-2 py-2 text-right font-bold text-slate-700">{row.points_for}-{row.points_against}</td>
+                      <td className="px-2 py-2 text-right font-bold text-slate-700">{formatSignedNumber(row.point_diff || 0)}</td>
+                      <td className="px-2 py-2 text-right font-bold text-slate-700">{row.byes || 0}</td>
                     </tr>
                   ))}
                   {standings.length === 0 && (
                     <tr>
-                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={7}>No standings have been saved for this session yet.</td>
+                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={standingsColSpan}>No standings have been saved for this match yet.</td>
                     </tr>
                   )}
                 </tbody>
@@ -1437,6 +1926,8 @@ function HistorySessionModal({ session, player, onClose }) {
                     row={row}
                     rank={index + 1}
                     highlighted={highlighted}
+                    isLadder={isLadder}
+                    ladderPositionCount={ladderPositionCountForResult(row, session)}
                   />
                 ) : (
                   <StandingMobileSummaryRow
@@ -1444,17 +1935,19 @@ function HistorySessionModal({ session, player, onClose }) {
                     row={row}
                     rank={index + 1}
                     highlighted={highlighted}
+                    isLadder={isLadder}
+                    ladderPositionCount={ladderPositionCountForResult(row, session)}
                   />
                 );
               })}
               {standings.length === 0 && (
-                <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No standings have been saved for this session yet.</div>
+                <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No standings have been saved for this match yet.</div>
               )}
             </div>
           </div>
 
           <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div className="text-sm font-black text-slate-700">Session Game Details</div>
+            <div className="text-sm font-black text-slate-700">Match Game Details</div>
             <div className="mt-3 space-y-3">
               {roundGroups.map((round) => {
                 const byes = roundByePlayers(round);
@@ -1506,7 +1999,7 @@ function HistorySessionModal({ session, player, onClose }) {
                 );
               })}
               {matches.length === 0 && (
-                <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No games were saved for this session.</div>
+                <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">No games were saved for this match.</div>
               )}
             </div>
           </div>
@@ -1531,7 +2024,7 @@ function PartnerComparisonModal({ history, player, range, onClose }) {
             <h2 className="break-words text-xl font-black sm:text-2xl">Partner Comparison</h2>
             <div className={MODAL_SUPPORTING_TEXT}>{player?.displayName || "Player"}</div>
             <div className="mt-2 inline-flex rounded-md bg-white/15 px-2 py-1 text-xs font-black uppercase tracking-wide text-cyan-50">
-              {rangeLabel} - {filteredSessions.length} session{filteredSessions.length === 1 ? "" : "s"}
+              {rangeLabel} - {filteredSessions.length} date{filteredSessions.length === 1 ? "" : "s"} played
             </div>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
@@ -1540,7 +2033,7 @@ function PartnerComparisonModal({ history, player, range, onClose }) {
         </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-4">
           <div className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2 text-sm font-black text-teal-950">
-            Partners are sorted by win percentage, then sessions, record, and point diff.
+            Partners are sorted by win percentage, then dates played, record, and point diff.
           </div>
 
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
@@ -1559,7 +2052,7 @@ function PartnerComparisonModal({ history, player, range, onClose }) {
                 <thead className="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-3 py-2">Partner</th>
-                    <th className="px-3 py-2 text-right">Sessions</th>
+                    <th className="px-3 py-2 text-right">Dates Played</th>
                     <th className="px-3 py-2 text-right">Record</th>
                     <th className="px-3 py-2 text-right">Win %</th>
                     <th className="px-3 py-2 text-right">Point Diff</th>
@@ -1627,7 +2120,7 @@ function PartnerComparisonCard({ row }) {
         </div>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-        <MobileStandingStat label="Sessions" value={row.sessions} />
+        <MobileStandingStat label="Dates Played" value={row.sessions} />
         <MobileStandingStat label="Record" value={`${row.wins}-${row.losses}`} />
         <MobileStandingStat label="Win %" value={formatPercent(row.winPct)} />
         <MobileStandingStat label="Point Diff" value={formatSignedNumber(row.pointDiff)} />
@@ -1644,9 +2137,9 @@ function statusClass(status) {
 }
 
 function statusNotice(status) {
-  if (status === "joined") return "You are joined for this session.";
-  if (status === "waitlist") return "The session is full, so you were added to the waitlist.";
-  if (status === "declined") return "You are marked as declined for this session.";
+  if (status === "joined") return "You are joined for this match.";
+  if (status === "waitlist") return "The match is full, so you were added to the waitlist.";
+  if (status === "declined") return "You are marked as declined for this match.";
   return "Your response was saved.";
 }
 
@@ -1675,6 +2168,10 @@ function filterSessionsForSearch(sessions, searchTerm) {
 
     return searchableText.includes(query);
   });
+}
+
+function isLadderSession(session) {
+  return Boolean(session?.settings?.ladderId) || session?.mode === "ladder";
 }
 
 function sessionDateSearchValues(value) {
@@ -1726,6 +2223,16 @@ function formatSessionHeadlineWithYear(session) {
   return `${dateText} at ${timeText}`;
 }
 
+function formatDate(value) {
+  if (!value) return "";
+  return new Date(`${value}T12:00:00`).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 function formatTime(value) {
   const [hourText, minuteText] = String(value || "").split(":");
   const hour = Number(hourText || 0);
@@ -1740,16 +2247,21 @@ function timeInputValue(value) {
 }
 
 function pastSessionResultLabel(result) {
-  if (!result) return "Session Rank - / Record: 0-0";
-  return `Session Rank ${result.rank || "-"} / Record: ${result.wins || 0}-${result.losses || 0}`;
+  if (!result) return "Match Rank - / Record: 0-0";
+  return `Match Rank ${result.rank || "-"} / Record: ${result.wins || 0}-${result.losses || 0}`;
 }
 
-function StandingMobileCard({ row, rank, highlighted }) {
+function StandingMobileCard({ row, rank, highlighted, isLadder = false, ladderPositionCount = null }) {
   return (
     <div className={`rounded-lg border p-3 shadow-sm ${highlighted ? "border-2 border-teal-500 bg-teal-50 ring-2 ring-teal-200" : "border-slate-200 bg-slate-50"}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-xs font-black uppercase tracking-wide text-slate-500">Rank #{rank}</div>
+          {isLadder && (
+            <div className="mt-1 inline-flex rounded-md bg-blue-100 px-2 py-1 text-xs font-black text-blue-800">
+              Before {formatLadderRank(ladderPreviousPositionForResult(row), ladderPositionCount)}
+            </div>
+          )}
           <div className="mt-1 break-words text-base font-black text-slate-950">{row.display_name}</div>
         </div>
         <div className="rounded-md bg-white px-2 py-1 text-sm font-black text-teal-800 shadow-sm">
@@ -1766,13 +2278,18 @@ function StandingMobileCard({ row, rank, highlighted }) {
   );
 }
 
-function StandingMobileSummaryRow({ row, rank, highlighted }) {
+function StandingMobileSummaryRow({ row, rank, highlighted, isLadder = false, ladderPositionCount = null }) {
   return (
     <div className={`flex min-h-11 items-center justify-between gap-3 rounded-lg border px-3 py-2 shadow-sm ${
       highlighted ? "border-2 border-teal-500 bg-teal-50 ring-2 ring-teal-200" : "border-slate-200 bg-slate-50"
     }`}>
       <div className="flex min-w-0 items-center gap-2">
         <span className="shrink-0 rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">#{rank}</span>
+        {isLadder && (
+          <span className="shrink-0 rounded-md bg-blue-100 px-2 py-1 text-xs font-black text-blue-800 shadow-sm">
+            Before {formatLadderRank(ladderPreviousPositionForResult(row), ladderPositionCount)}
+          </span>
+        )}
         <span className="truncate text-sm font-black text-slate-950">{row.display_name}</span>
       </div>
       <div className="shrink-0 rounded-md bg-white px-2 py-1 text-sm font-black text-teal-800 shadow-sm">
@@ -1914,6 +2431,12 @@ function formatPercent(value) {
 function formatSignedNumber(value) {
   const numeric = Number(value || 0);
   return numeric > 0 ? `+${numeric}` : String(numeric);
+}
+
+function formatSignedDecimalNumber(value, decimals = 2) {
+  const numeric = Number(value || 0);
+  const rounded = Number(numeric.toFixed(decimals));
+  return rounded > 0 ? `+${rounded}` : String(rounded);
 }
 
 function formatPhoneInput(value) {

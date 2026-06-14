@@ -51,19 +51,21 @@ export async function POST(req) {
 
     let access = { mode: "manager", sessionIds: null, preferredSessionId: hostSessionId || "" };
     if (eventCode) {
-      if (!isValidRoundRobinAdminCode(group, eventCode)) {
+      const codeAccessMode = roundRobinAdminAccessMode(group, eventCode);
+      if (!codeAccessMode) {
         return NextResponse.json(
           { success: false, error: "Incorrect manager code." },
           { status: 401 }
         );
       }
+      access = { mode: codeAccessMode, sessionIds: null, preferredSessionId: hostSessionId || "" };
     } else {
       access = await validateHostAccess(supabase, group, hostPhone, hostSessionId);
     }
 
     if (access.mode === "host" && access.sessionIds.length === 0) {
       return NextResponse.json(
-        { success: false, error: "No host sessions were found for that phone number." },
+        { success: false, error: "No host matches were found for that phone number." },
         { status: 401 }
       );
     }
@@ -101,7 +103,7 @@ export async function POST(req) {
         .eq("group_id", group.id)
         .order("created_at", { ascending: false })
         .limit(100),
-      access.mode === "manager" ? loadMemberDirectory(supabase) : { data: [], error: null },
+      access.mode !== "host" ? loadMemberDirectory(supabase) : { data: [], error: null },
     ]);
 
     const errors = [players.error, playerGroups.error, courts.error, sessions.error, log.error, members.error].filter(Boolean);
@@ -147,11 +149,11 @@ export async function POST(req) {
     if (allMatches.error) throw allMatches.error;
 
     const sessionDateById = new Map(sessionRows.map((session) => [String(session.id), session.session_date || null]));
-    const sessionNameById = new Map(sessionRows.map((session) => [String(session.id), session.session_name || "Session"]));
+    const sessionNameById = new Map(sessionRows.map((session) => [String(session.id), session.session_name || "Match"]));
     const resultsWithSessionContext = (allPlayerResults.data || []).map((row) => ({
       ...row,
       session_date: sessionDateById.get(String(row.session_id)) || null,
-      session_name: sessionNameById.get(String(row.session_id)) || "Session",
+      session_name: sessionNameById.get(String(row.session_id)) || "Match",
     }));
 
     const activeSession = chooseManagerSession(sessionRows, access.preferredSessionId);
@@ -291,6 +293,8 @@ function sessionSortValue(session) {
 function sanitizeGroup(group) {
   const safeGroup = { ...group };
   delete safeGroup.admin_code;
+  safeGroup.settings = { ...(safeGroup.settings || {}) };
+  delete safeGroup.settings.secondaryAdminCode;
   return safeGroup;
 }
 
@@ -314,7 +318,7 @@ async function validateHostAccess(supabase, group, hostPhone, preferredSessionId
 
   const sessionIds = (data || []).map((session) => session.id).filter(Boolean);
   if (preferredSessionId && !sessionIds.some((id) => String(id) === String(preferredSessionId))) {
-    const accessError = new Error("That session is not assigned to this host or co-host.");
+    const accessError = new Error("That match is not assigned to this host or co-host.");
     accessError.status = 401;
     throw accessError;
   }
@@ -357,10 +361,13 @@ async function findPlayerByPhone(supabase, groupId, phone) {
   return matches[0];
 }
 
-function isValidRoundRobinAdminCode(group, eventCode) {
+function roundRobinAdminAccessMode(group, eventCode) {
   const cleanCode = String(eventCode || "").trim();
   const overrideCode = String(process.env.ROUND_ROBIN_ADMIN_OVERRIDE_CODE || "").trim();
-  return String(group.admin_code || "") === cleanCode || (overrideCode && overrideCode === cleanCode);
+  if (!cleanCode) return "";
+  if (String(group.admin_code || "") === cleanCode || (overrideCode && overrideCode === cleanCode)) return "manager";
+  if (String(group.settings?.secondaryAdminCode || "").trim() === cleanCode) return "secondary";
+  return "";
 }
 
 function phonesMatch(savedPhone, cleanPhone) {

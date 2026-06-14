@@ -113,6 +113,7 @@ export function createNextRoundRobinRound({
   players = [],
   courts = [],
   existingMatches = [],
+  historyMatches = [],
   courtCount,
 } = {}) {
   const activePlayers = players
@@ -147,8 +148,11 @@ export function createNextRoundRobinRound({
   const previousCourts = Array.from({ length: resolvedCourtCount }, () => []);
   const previousPartnerPairs = new Set();
   const usedPartnerPairs = new Set();
+  const currentMatchIds = new Set(existingMatches.map((match) => String(match.id || "")).filter(Boolean));
+  const allHistoryMatches = [...(Array.isArray(historyMatches) ? historyMatches : []), ...existingMatches];
 
-  existingMatches.forEach((match) => {
+  allHistoryMatches.forEach((match) => {
+    const isCurrentMatch = currentMatchIds.has(String(match.id || "")) || existingMatches.includes(match);
     const courtIndex = Math.max(0, Number(match.court_number || match.courtNumber || 1) - 1);
     const team1 = normalizePlayerList(match.team1_players || match.team1 || []).map((player) => playersById.get(String(player.id))).filter((index) => index !== undefined);
     const team2 = normalizePlayerList(match.team2_players || match.team2 || []).map((player) => playersById.get(String(player.id))).filter((index) => index !== undefined);
@@ -156,7 +160,7 @@ export function createNextRoundRobinRound({
 
     byes.forEach((index) => {
       byeCounts[index] += 1;
-      if (Number(match.round_number || match.roundNumber || 0) === previousRoundNumber) previousByes.add(index);
+      if (isCurrentMatch && Number(match.round_number || match.roundNumber || 0) === previousRoundNumber) previousByes.add(index);
     });
 
     if (team1.length !== 2 || team2.length !== 2 || courtIndex >= resolvedCourtCount) return;
@@ -172,7 +176,7 @@ export function createNextRoundRobinRound({
     usedPartnerPairs.add(pairKey(team1[0], team1[1]));
     usedPartnerPairs.add(pairKey(team2[0], team2[1]));
 
-    if (Number(match.round_number || match.roundNumber || 0) === previousRoundNumber) {
+    if (isCurrentMatch && Number(match.round_number || match.roundNumber || 0) === previousRoundNumber) {
       previousPartnerPairs.add(pairKey(team1[0], team1[1]));
       previousPartnerPairs.add(pairKey(team2[0], team2[1]));
     }

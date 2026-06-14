@@ -44,13 +44,15 @@ export async function POST(req) {
       const result = await updatePlayerSessionStatus(supabase, group, player, body);
       const history = await loadPlayerHistory(supabase, group, player);
       const hostSetup = await loadHostSetupData(supabase, group, result.sessions);
-      return NextResponse.json({ success: true, group: sanitizeGroup(group), player: sanitizePlayer(player), systemSettings: sanitizeSystemSettings(systemSettings), history, ...hostSetup, ...result });
+      const ladders = await loadPlayerLadders(supabase, group, player);
+      return NextResponse.json({ success: true, group: sanitizeGroup(group), player: sanitizePlayer(player), systemSettings: sanitizeSystemSettings(systemSettings), history, ladders, ...hostSetup, ...result });
     }
 
     const sessions = await loadPlayerSessions(supabase, group, player);
     const history = await loadPlayerHistory(supabase, group, player);
     const hostSetup = await loadHostSetupData(supabase, group, sessions);
-    return NextResponse.json({ success: true, group: sanitizeGroup(group), player: sanitizePlayer(player), systemSettings: sanitizeSystemSettings(systemSettings), sessions, history, ...hostSetup });
+    const ladders = await loadPlayerLadders(supabase, group, player);
+    return NextResponse.json({ success: true, group: sanitizeGroup(group), player: sanitizePlayer(player), systemSettings: sanitizeSystemSettings(systemSettings), sessions, history, ladders, ...hostSetup });
   } catch (error) {
     return NextResponse.json(
       { success: false, error: error.message },
@@ -124,7 +126,7 @@ async function loadPlayerSessions(supabase, group, player) {
 
   const sessionsResult = await supabase
     .from("round_robin_sessions")
-    .select("id, session_name, location, session_date, starts_at, status, max_players, repeats_weekly, invited_group_ids, host_player_id, cohost_player_id, updated_at")
+    .select("id, session_name, location, session_date, starts_at, status, max_players, repeats_weekly, invited_group_ids, host_player_id, cohost_player_id, mode, settings, updated_at")
     .eq("group_id", group.id)
     .gte("session_date", today)
     .in("status", ["draft", "open", "playing"])
@@ -143,6 +145,7 @@ async function loadPlayerSessions(supabase, group, player) {
     .in("session_id", sessions.map((session) => session.id));
   if (sessionPlayerRowsResult.error) throw sessionPlayerRowsResult.error;
   const activeSessionPlayerRows = await filterActiveSessionPlayers(supabase, group.id, sessionPlayerRowsResult.data || []);
+  const ladderPositionsBySession = await loadLadderPositionMaps(supabase, group, sessions);
 
   const playerRowBySession = new Map(playerRows.map((row) => [String(row.session_id), row]));
   const sessionPlayersBySession = activeSessionPlayerRows.reduce((map, row) => {
@@ -166,6 +169,7 @@ async function loadPlayerSessions(supabase, group, player) {
     const playerRow = playerRowBySession.get(String(session.id));
     const maxPlayers = Number(session.max_players || 0);
     const canManageSession = isSessionHost(session, player.id);
+    const ladderPositionMap = ladderPositionsBySession.get(String(session.id)) || new Map();
     return {
       ...session,
       playerStatus: playerRow?.response_status || "invited",
@@ -176,9 +180,10 @@ async function loadPlayerSessions(supabase, group, player) {
       invitedCount: counts.invited,
       declinedCount: counts.declined,
       waitlistCount: counts.waitlist,
-      sessionPlayers: (sessionPlayersBySession.get(String(session.id)) || []).map((row) => sanitizeSessionPlayer(row, canManageSession)),
+      sessionPlayers: (sessionPlayersBySession.get(String(session.id)) || []).map((row) => sanitizeSessionPlayer(row, canManageSession, ladderPositionMap.get(String(row.player_id || "")))),
       maxPlayers,
       isFull: maxPlayers > 0 && counts.joined >= maxPlayers,
+      settings: sanitizeSessionSettings(session.settings),
     };
   });
 }
@@ -197,7 +202,7 @@ async function loadPlayerHistory(supabase, group, player) {
 
   const sessionsResult = await supabase
     .from("round_robin_sessions")
-    .select("id, session_name, location, session_date, starts_at, status, summary_text, round_count, updated_at")
+    .select("id, session_name, location, session_date, starts_at, status, summary_text, round_count, mode, settings, updated_at")
     .eq("group_id", group.id)
     .in("id", joinedSessionIds)
     .order("session_date", { ascending: false })
@@ -251,6 +256,7 @@ async function loadPlayerHistory(supabase, group, player) {
         playerResult: playerResultBySession.get(sessionId) || null,
         standings: (resultsBySession.get(sessionId) || []).filter((row) => playedIds.has(String(row.player_id || ""))),
         matches: matchesBySession.get(sessionId) || [],
+        settings: sanitizeSessionSettings(session.settings),
       };
     }),
   };
@@ -259,11 +265,11 @@ async function loadPlayerHistory(supabase, group, player) {
 async function updatePlayerSessionStatus(supabase, group, player, body) {
   const sessionId = String(body.sessionId || "").trim();
   const requestedStatus = body.status === "declined" ? "declined" : body.status === "joined" ? "joined" : "";
-  if (!sessionId || !requestedStatus) throw new Error("Session and response are required.");
+  if (!sessionId || !requestedStatus) throw new Error("Match and response are required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   if (["done", "cancelled"].includes(session.status)) {
-    const error = new Error("This session is no longer accepting responses.");
+    const error = new Error("This match is no longer accepting responses.");
     error.status = 409;
     throw error;
   }
@@ -272,7 +278,7 @@ async function updatePlayerSessionStatus(supabase, group, player, body) {
   const activeSessionPlayers = await filterActiveSessionPlayers(supabase, group.id, sessionPlayers);
   const target = sessionPlayers.find((row) => String(row.player_id || "") === String(player.id));
   if (!target) {
-    const error = new Error("You are not currently invited to this session.");
+    const error = new Error("You are not currently invited to this match.");
     error.status = 404;
     throw error;
   }
@@ -361,6 +367,201 @@ async function promoteWaitlistSpots(supabase, session) {
   return data || [];
 }
 
+async function loadPlayerLadders(supabase, group, player) {
+  const ladders = normalizeLadders(group.settings?.ladders || []).filter((ladder) => ladder.status !== "inactive");
+  if (ladders.length === 0) return [];
+
+  const ladderGroupIds = [...new Set(ladders.map((ladder) => ladder.playerGroupId).filter(Boolean))];
+  if (ladderGroupIds.length === 0) return [];
+
+  const membershipResult = await supabase
+    .from("round_robin_player_group_members")
+    .select("player_group_id, player_id")
+    .eq("player_id", player.id)
+    .in("player_group_id", ladderGroupIds);
+  if (membershipResult.error) throw membershipResult.error;
+
+  const playerGroupIds = new Set((membershipResult.data || []).map((row) => String(row.player_group_id)));
+  const relevantLadders = ladders.filter((ladder) => playerGroupIds.has(String(ladder.playerGroupId)));
+  if (relevantLadders.length === 0) return [];
+
+  const sessionsResult = await supabase
+    .from("round_robin_sessions")
+    .select("id, session_name, session_date, starts_at, status, settings")
+    .eq("group_id", group.id)
+    .eq("mode", "ladder")
+    .order("session_date", { ascending: true })
+    .order("starts_at", { ascending: true });
+  if (sessionsResult.error) throw sessionsResult.error;
+
+  const ladderSessions = sessionsResult.data || [];
+  const completedSessionIds = ladderSessions
+    .filter((session) => session.status === "done")
+    .map((session) => session.id);
+  const resultsResult = completedSessionIds.length > 0
+    ? await supabase
+      .from("round_robin_player_session_results")
+      .select("*")
+      .in("session_id", completedSessionIds)
+    : { data: [], error: null };
+  if (resultsResult.error) throw resultsResult.error;
+  const matchesResult = completedSessionIds.length > 0
+    ? await supabase
+      .from("round_robin_matches")
+      .select("*")
+      .in("session_id", completedSessionIds)
+    : { data: [], error: null };
+  if (matchesResult.error) throw matchesResult.error;
+
+  const groupMembersResult = await supabase
+    .from("round_robin_player_group_members")
+    .select("player_group_id, player_id")
+    .in("player_group_id", ladderGroupIds);
+  if (groupMembersResult.error) throw groupMembersResult.error;
+
+  const rosterIds = [...new Set((groupMembersResult.data || []).map((row) => row.player_id).filter(Boolean))];
+  const playersResult = rosterIds.length > 0
+    ? await supabase
+      .from("round_robin_players")
+      .select("id, display_name, is_active")
+      .eq("group_id", group.id)
+      .in("id", rosterIds)
+    : { data: [], error: null };
+  if (playersResult.error) throw playersResult.error;
+
+  return relevantLadders.map((ladder) => {
+    const sessionsForLadder = ladderSessions.filter((session) => String(session.settings?.ladderId || "") === String(ladder.id));
+    const completed = sessionsForLadder.filter((session) => session.status === "done");
+    const upcoming = sessionsForLadder.find((session) => ["draft", "open", "playing"].includes(session.status));
+    const completedIds = new Set(completed.map((session) => String(session.id)));
+    const results = (resultsResult.data || []).filter((row) => completedIds.has(String(row.session_id || "")));
+    const matches = (matchesResult.data || []).filter((row) => completedIds.has(String(row.session_id || "")));
+    const rows = ladderStandingsRows({
+      ladder,
+      sessions: completed,
+      results,
+      matches,
+      players: playersResult.data || [],
+      groupMembers: groupMembersResult.data || [],
+    });
+    const playerRow = rows.find((row) => String(row.playerId) === String(player.id)) || null;
+    const playerResultRows = results.filter((row) => String(row.player_id || "") === String(player.id));
+    const lastPlayedDate = playerResultRows
+      .map((row) => {
+        const session = completed.find((item) => String(item.id) === String(row.session_id || ""));
+        return session?.session_date || "";
+      })
+      .filter(Boolean)
+      .sort((a, b) => String(b).localeCompare(String(a)))[0] || "";
+    const rankingRows = rows.map(sanitizeLadderRankingRow);
+    return {
+      id: ladder.id,
+      name: ladder.name,
+      startDate: ladder.startDate,
+      endDate: ladder.endDate,
+      nextDate: upcoming?.session_date || nextLadderDate(sessionsForLadder, ladder),
+      nextTime: upcoming?.starts_at || ladder.startTime || "",
+      nextSessionName: upcoming?.session_name || "",
+      position: playerRow?.position || null,
+      positionCount: rows.length,
+      rankings: rankingRows,
+      rankingRows,
+      lastPlayedDate,
+      eligible: playerRow?.eligible ?? true,
+      stats: playerRow ? {
+        sessionsPlayed: playerRow.sessionsPlayed,
+        matchesPlayed: playerRow.matchesPlayed,
+        wins: playerRow.wins,
+        losses: playerRow.losses,
+        pointsFor: playerRow.pointsFor,
+        pointDiff: playerRow.pointDiff,
+        winPct: playerRow.winPct,
+        avgPointDiff: playerRow.avgPointDiff,
+      } : null,
+      sessionCount: completed.length,
+      participationRequirement: ladder.participationRequirement,
+      balanceMode: ladder.balanceMode,
+      movementMode: ladder.movementMode,
+    };
+  });
+}
+
+async function loadLadderPositionMaps(supabase, group, sessions = []) {
+  const ladderSessions = (sessions || []).filter((session) => session.mode === "ladder" || session.settings?.ladderId);
+  if (ladderSessions.length === 0) return new Map();
+
+  const visibleLadderIds = new Set(ladderSessions.map((session) => String(session.settings?.ladderId || "")).filter(Boolean));
+  const ladders = normalizeLadders(group.settings?.ladders || []).filter((ladder) => visibleLadderIds.has(String(ladder.id)));
+  if (ladders.length === 0) return new Map();
+
+  const ladderGroupIds = [...new Set(ladders.map((ladder) => ladder.playerGroupId).filter(Boolean))];
+  const completedSessionsResult = await supabase
+    .from("round_robin_sessions")
+    .select("id, session_date, status, settings")
+    .eq("group_id", group.id)
+    .eq("mode", "ladder")
+    .eq("status", "done")
+    .order("session_date", { ascending: true });
+  if (completedSessionsResult.error) throw completedSessionsResult.error;
+
+  const completedSessions = completedSessionsResult.data || [];
+  const completedSessionIds = completedSessions.map((session) => session.id).filter(Boolean);
+  const [resultsResult, groupMembersResult] = await Promise.all([
+    completedSessionIds.length > 0
+      ? supabase
+        .from("round_robin_player_session_results")
+        .select("*")
+        .in("session_id", completedSessionIds)
+      : { data: [], error: null },
+    supabase
+      .from("round_robin_player_group_members")
+      .select("player_group_id, player_id")
+      .in("player_group_id", ladderGroupIds),
+  ]);
+  if (resultsResult.error) throw resultsResult.error;
+  if (groupMembersResult.error) throw groupMembersResult.error;
+  const matchesResult = completedSessionIds.length > 0
+    ? await supabase
+      .from("round_robin_matches")
+      .select("*")
+      .in("session_id", completedSessionIds)
+    : { data: [], error: null };
+  if (matchesResult.error) throw matchesResult.error;
+
+  const rosterIds = [...new Set((groupMembersResult.data || []).map((row) => row.player_id).filter(Boolean))];
+  const playersResult = rosterIds.length > 0
+    ? await supabase
+      .from("round_robin_players")
+      .select("id, display_name, is_active")
+      .eq("group_id", group.id)
+      .in("id", rosterIds)
+    : { data: [], error: null };
+  if (playersResult.error) throw playersResult.error;
+
+  const positionsByLadder = new Map();
+  ladders.forEach((ladder) => {
+    const sessionsForLadder = completedSessions.filter((session) => String(session.settings?.ladderId || "") === String(ladder.id));
+    const completedIds = new Set(sessionsForLadder.map((session) => String(session.id)));
+    const rows = ladderStandingsRows({
+      ladder,
+      sessions: sessionsForLadder,
+      results: (resultsResult.data || []).filter((row) => completedIds.has(String(row.session_id || ""))),
+      matches: (matchesResult.data || []).filter((row) => completedIds.has(String(row.session_id || ""))),
+      players: playersResult.data || [],
+      groupMembers: groupMembersResult.data || [],
+    });
+    positionsByLadder.set(String(ladder.id), new Map(rows.map((row) => [String(row.playerId), {
+      position: row.position,
+      positionCount: rows.length,
+    }])));
+  });
+
+  return new Map(ladderSessions.map((session) => [
+    String(session.id),
+    positionsByLadder.get(String(session.settings?.ladderId || "")) || new Map(),
+  ]));
+}
+
 function sanitizeGroup(group) {
   return {
     id: group.id,
@@ -373,6 +574,17 @@ function sanitizeGroup(group) {
   };
 }
 
+function sanitizeSessionSettings(settings = {}) {
+  return {
+    ladderId: settings?.ladderId || "",
+    ladderName: settings?.ladderName || "",
+    ladderConfig: settings?.ladderConfig ? {
+      movementMode: settings.ladderConfig.movementMode === "top2" ? "top2" : "top1",
+      participationRequirement: Number(settings.ladderConfig.participationRequirement || 50),
+    } : null,
+  };
+}
+
 function sanitizePlayer(player) {
   return {
     id: player.id,
@@ -381,7 +593,7 @@ function sanitizePlayer(player) {
   };
 }
 
-function sanitizeSessionPlayer(player, includeContact = false) {
+function sanitizeSessionPlayer(player, includeContact = false, ladderPosition = null) {
   const payload = {
     id: player.id,
     playerId: player.player_id,
@@ -389,11 +601,32 @@ function sanitizeSessionPlayer(player, includeContact = false) {
     responseStatus: player.response_status || "invited",
     sortOrder: player.sort_order,
   };
+  if (ladderPosition?.position) {
+    payload.ladderPosition = ladderPosition.position;
+    payload.ladderPositionCount = ladderPosition.positionCount || null;
+  }
   if (includeContact) {
     payload.email = player.email || "";
     payload.phone = player.phone || "";
   }
   return payload;
+}
+
+function sanitizeLadderRankingRow(row) {
+  return {
+    playerId: row.playerId,
+    displayName: row.displayName,
+    position: row.position,
+    sessionsPlayed: row.sessionsPlayed,
+    matchesPlayed: row.matchesPlayed,
+    wins: row.wins,
+    losses: row.losses,
+    pointsFor: row.pointsFor,
+    pointDiff: row.pointDiff,
+    winPct: row.winPct,
+    avgPointDiff: row.avgPointDiff,
+    eligible: row.eligible,
+  };
 }
 
 async function loadHostSetupData(supabase, group, sessions = []) {
@@ -494,6 +727,239 @@ function groupRowsBySession(rows) {
     map.get(key).push(row);
     return map;
   }, new Map());
+}
+
+function normalizeLadders(ladders = []) {
+  return (Array.isArray(ladders) ? ladders : [])
+    .map((ladder) => ({
+      id: String(ladder.id || "").trim(),
+      name: String(ladder.name || "").trim(),
+      startDate: normalizeIsoDate(ladder.startDate),
+      endDate: normalizeIsoDate(ladder.endDate),
+      startTime: String(ladder.startTime || "").slice(0, 5),
+      playerGroupId: String(ladder.playerGroupId || "").trim(),
+      participationRequirement: Math.min(100, Math.max(10, Number(ladder.participationRequirement || 50))),
+      balanceMode: ladder.balanceMode === "season" ? "season" : "session",
+      movementMode: ladder.movementMode === "top2" ? "top2" : "top1",
+      status: ladder.status === "inactive" ? "inactive" : "active",
+      initialPositions: normalizeInitialPositions(ladder.initialPositions || ladder.initial_positions || {}),
+    }))
+    .filter((ladder) => ladder.id && ladder.name && ladder.playerGroupId);
+}
+
+function normalizeInitialPositions(positions = {}, rosterIds = []) {
+  const source = positions && typeof positions === "object" ? positions : {};
+  const rosterSet = new Set((rosterIds || []).map(String));
+  const entries = Object.entries(source)
+    .map(([playerId, position]) => [String(playerId), Number(position)])
+    .filter(([playerId, position]) => (
+      Number.isInteger(position) &&
+      position > 0 &&
+      (rosterSet.size === 0 || rosterSet.has(playerId))
+    ))
+    .sort((first, second) => first[1] - second[1] || first[0].localeCompare(second[0]));
+  const normalized = {};
+  const used = new Set();
+  entries.forEach(([playerId, position]) => {
+    if (used.has(position)) return;
+    normalized[playerId] = position;
+    used.add(position);
+  });
+  let nextPosition = 1;
+  (rosterIds || []).map(String).forEach((playerId) => {
+    if (normalized[playerId]) return;
+    while (used.has(nextPosition)) nextPosition += 1;
+    normalized[playerId] = nextPosition;
+    used.add(nextPosition);
+  });
+  return normalized;
+}
+
+function ladderStandingsRows({ ladder, sessions, results, matches = [], players, groupMembers }) {
+  const rosterIds = groupMembers
+    .filter((row) => String(row.player_group_id || "") === String(ladder.playerGroupId))
+    .map((row) => String(row.player_id || ""))
+    .filter(Boolean);
+  const activePlayers = (players || []).filter((player) => player.is_active !== false);
+  const playerById = new Map(activePlayers.map((player) => [String(player.id), player]));
+  const initialPositions = normalizeInitialPositions(ladder.initialPositions || {}, rosterIds);
+  const orderedRosterIds = [...new Set(rosterIds)]
+    .filter((playerId) => playerById.has(String(playerId)))
+    .sort((a, b) => {
+      const firstPosition = Number(initialPositions[a] || Number.MAX_SAFE_INTEGER);
+      const secondPosition = Number(initialPositions[b] || Number.MAX_SAFE_INTEGER);
+      return firstPosition - secondPosition || String(playerById.get(a)?.display_name || "").localeCompare(String(playerById.get(b)?.display_name || ""));
+    });
+  const statsByPlayer = new Map(orderedRosterIds.map((playerId, index) => [playerId, {
+    playerId,
+    displayName: playerById.get(playerId)?.display_name || "Player",
+    seedIndex: index,
+    sessionsPlayed: 0,
+    matchesPlayed: 0,
+    wins: 0,
+    losses: 0,
+    pointsFor: 0,
+    pointDiff: 0,
+  }]));
+
+  results.forEach((row) => {
+    const playerId = String(row.player_id || "");
+    if (!statsByPlayer.has(playerId)) return;
+    const stats = statsByPlayer.get(playerId);
+    stats.sessionsPlayed += 1;
+    stats.matchesPlayed += Number(row.games || 0);
+    stats.wins += Number(row.wins || 0);
+    stats.losses += Number(row.losses || 0);
+    stats.pointsFor += Number(row.points_for || 0);
+    stats.pointDiff += Number(row.point_diff || 0);
+  });
+
+  const order = ladderPositionOrder(orderedRosterIds, sessions, results, ladder, matches);
+  const positionByPlayer = new Map(order.map((playerId, index) => [String(playerId), index + 1]));
+  return [...statsByPlayer.values()].map((row) => {
+    const games = row.wins + row.losses || row.matchesPlayed;
+    const participationPct = sessions.length > 0 ? (row.sessionsPlayed / sessions.length) * 100 : 0;
+    return {
+      ...row,
+      position: positionByPlayer.get(String(row.playerId)) || row.seedIndex + 1,
+      winPct: games > 0 ? row.wins / games : 0,
+      avgPointDiff: games > 0 ? row.pointDiff / games : 0,
+      eligible: sessions.length < 4 || participationPct >= Number(ladder.participationRequirement || 50),
+    };
+  }).sort((a, b) => a.position - b.position);
+}
+
+function ladderPositionOrder(rosterIds, sessions, results, ladder, matches = []) {
+  const order = rosterIds.map(String);
+  const resultsBySession = groupRowsBySession(results);
+  const matchesBySession = groupRowsBySession(matches);
+  const movementCount = ladder.movementMode === "top2" ? 2 : 1;
+  sessions.forEach((session) => {
+    const sessionMatches = matchesBySession.get(String(session.id)) || [];
+    const sessionResults = resultsBySession.get(String(session.id)) || [];
+    const sessionPlayerIds = playerIdsFromMatches(sessionMatches);
+    const participatingOrder = order.filter((playerId) => sessionPlayerIds.has(String(playerId)));
+    const courts = splitLadderIdsIntoCourts(participatingOrder);
+
+    courts.forEach((courtIds, courtIndex) => {
+      const ranked = courtIds
+        .map((playerId) => sessionResults.find((row) => String(row.player_id || "") === String(playerId)))
+        .filter(Boolean)
+        .sort((first, second) => compareLadderResultRows(first, second, sessionMatches));
+      const topIds = courtIndex > 0 ? ranked.slice(0, movementCount).map((row) => String(row.player_id || "")) : [];
+      const bottomIds = courtIndex < courts.length - 1 ? ranked.slice(-movementCount).map((row) => String(row.player_id || "")) : [];
+      topIds.forEach((playerId) => movePlayerByStep(order, playerId, -Math.max(4, courts[courtIndex - 1]?.length || 4)));
+      bottomIds.reverse().forEach((playerId) => movePlayerByStep(order, playerId, Math.max(4, courts[courtIndex + 1]?.length || 4)));
+    });
+
+    if (sessions.length >= 4) {
+      const participationRequirement = Number(ladder.participationRequirement || 50);
+      const completedSessionIdsForDate = sessions.filter((item) => String(item.session_date || "") <= String(session.session_date || "")).map((item) => String(item.id));
+      order.forEach((playerId) => {
+        const playedCount = completedSessionIdsForDate.filter((sessionId) => (resultsBySession.get(sessionId) || []).some((row) => String(row.player_id || "") === String(playerId))).length;
+        const participationPct = completedSessionIdsForDate.length > 0 ? (playedCount / completedSessionIdsForDate.length) * 100 : 100;
+        if (participationPct < participationRequirement) movePlayerByStep(order, playerId, 4);
+      });
+    }
+  });
+  return order;
+}
+
+function splitLadderIdsIntoCourts(playerIds = []) {
+  return splitLadderPlayersIntoCourts(playerIds.map((id) => ({ id }))).map((court) => court.map((player) => String(player.id)));
+}
+
+function splitLadderPlayersIntoCourts(players = []) {
+  const total = players.length;
+  const courtCount = Math.max(1, Math.floor(total / 4));
+  const baseSize = Math.floor(total / courtCount);
+  const extra = total % courtCount;
+  const courts = [];
+  let offset = 0;
+  for (let courtIndex = 0; courtIndex < courtCount; courtIndex += 1) {
+    const size = baseSize + (courtIndex < extra ? 1 : 0);
+    courts.push(players.slice(offset, offset + size));
+    offset += size;
+  }
+  return courts.filter((court) => court.length >= 4);
+}
+
+function compareLadderResultRows(first, second, matches = []) {
+  const firstPoints = Number(first.points_for || 0);
+  const secondPoints = Number(second.points_for || 0);
+  if (secondPoints !== firstPoints) return secondPoints - firstPoints;
+  const headToHead = headToHeadResult(String(first.player_id || ""), String(second.player_id || ""), matches);
+  if (headToHead !== 0) return -headToHead;
+  const firstWin = winPctForResult(first);
+  const secondWin = winPctForResult(second);
+  if (secondWin !== firstWin) return secondWin - firstWin;
+  const firstGames = Number(first.games || (Number(first.wins || 0) + Number(first.losses || 0)));
+  const secondGames = Number(second.games || (Number(second.wins || 0) + Number(second.losses || 0)));
+  const firstAvgDiff = firstGames > 0 ? Number(first.point_diff || 0) / firstGames : 0;
+  const secondAvgDiff = secondGames > 0 ? Number(second.point_diff || 0) / secondGames : 0;
+  if (secondAvgDiff !== firstAvgDiff) return secondAvgDiff - firstAvgDiff;
+  if (secondGames !== firstGames) return secondGames - firstGames;
+  return String(first.display_name || "").localeCompare(String(second.display_name || ""));
+}
+
+function headToHeadResult(firstPlayerId, secondPlayerId, matches = []) {
+  let firstWins = 0;
+  let secondWins = 0;
+  matches.forEach((match) => {
+    const team1Score = numericScore(match.team1_score);
+    const team2Score = numericScore(match.team2_score);
+    if (team1Score === null || team2Score === null || team1Score === team2Score) return;
+    const team1Ids = (match.team1_players || []).map((player) => String(player.id));
+    const team2Ids = (match.team2_players || []).map((player) => String(player.id));
+    const firstTeam = team1Ids.includes(firstPlayerId) ? 1 : team2Ids.includes(firstPlayerId) ? 2 : 0;
+    const secondTeam = team1Ids.includes(secondPlayerId) ? 1 : team2Ids.includes(secondPlayerId) ? 2 : 0;
+    if (!firstTeam || !secondTeam || firstTeam === secondTeam) return;
+    const winningTeam = team1Score > team2Score ? 1 : 2;
+    if (firstTeam === winningTeam) firstWins += 1;
+    if (secondTeam === winningTeam) secondWins += 1;
+  });
+  return firstWins - secondWins;
+}
+
+function numericScore(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+function movePlayerByStep(order, playerId, step) {
+  const index = order.findIndex((id) => String(id) === String(playerId));
+  if (index < 0) return;
+  const nextIndex = Math.max(0, Math.min(order.length - 1, index + step));
+  if (nextIndex === index) return;
+  const [item] = order.splice(index, 1);
+  order.splice(nextIndex, 0, item);
+}
+
+function winPctForResult(row) {
+  const wins = Number(row?.wins || 0);
+  const losses = Number(row?.losses || 0);
+  const games = Number(row?.games || wins + losses);
+  return games > 0 ? wins / games : 0;
+}
+
+function nextLadderDate(sessions, ladder) {
+  const ordered = (sessions || []).slice().sort((a, b) => String(a.session_date || "").localeCompare(String(b.session_date || "")));
+  const latest = ordered[ordered.length - 1]?.session_date || "";
+  return latest ? addDaysToIsoDate(latest, 7) : ladder.startDate || "";
+}
+
+function addDaysToIsoDate(value, days) {
+  if (!value) return "";
+  const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return "";
+  date.setDate(date.getDate() + Number(days || 0));
+  return date.toISOString().slice(0, 10);
+}
+
+function normalizeIsoDate(value) {
+  const clean = String(value || "").slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(clean) ? clean : "";
 }
 
 function playerIdsFromMatches(matches = []) {
