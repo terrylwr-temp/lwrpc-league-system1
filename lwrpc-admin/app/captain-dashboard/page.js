@@ -2408,7 +2408,7 @@ export default function CaptainDashboardPage() {
                       event.stopPropagation();
                       openDivisionSchedule(team);
                     }}
-                    className="cursor-pointer rounded-xl bg-indigo-100 px-3 py-3 text-sm font-bold text-indigo-900 shadow-sm hover:bg-indigo-200"
+                    className="cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
                   >
                     Schedules/Standings
                   </button>
@@ -4496,10 +4496,10 @@ function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) 
       : "bg-blue-100 text-blue-900 hover:bg-blue-200",
     red: active
       ? "bg-red-700 text-white"
-      : "bg-red-100 text-red-900 hover:bg-red-200",
+      : "bg-blue-100 text-blue-900 hover:bg-blue-200",
     emerald: active
       ? "bg-emerald-700 text-white"
-      : "bg-emerald-100 text-emerald-950 hover:bg-emerald-200",
+      : "bg-blue-100 text-blue-900 hover:bg-blue-200",
   };
   const badgeClass = active ? "bg-white/20" : "bg-white";
 

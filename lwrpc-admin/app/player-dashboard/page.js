@@ -1194,7 +1194,6 @@ export default function PlayerDashboardPage() {
                   selectPanel("standings");
                 }}
                 onOpenTeamMatches={() => selectPanel("upcoming")}
-                activePanel={activePanel}
                 standingsCount={selectedDivisionStandings.length}
                 teamMatchesCount={upcomingMatchesBySelectedTeam.length}
               />
@@ -1644,7 +1643,6 @@ function TeamCard({
   onOpenStandings,
   onOpenDivisionStandings,
   onOpenTeamMatches,
-  activePanel,
   standingsCount,
   teamMatchesCount,
 }) {
@@ -1714,14 +1712,10 @@ function TeamCard({
             event.stopPropagation();
             onOpenDivisionStandings();
           }}
-          className={`w-full cursor-pointer rounded-xl px-3 py-3 text-sm font-bold shadow-sm ${
-            activePanel === "standings"
-              ? "bg-emerald-700 text-white hover:bg-emerald-800"
-              : "bg-emerald-100 text-emerald-950 hover:bg-emerald-200"
-          }`}
+          className="w-full cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
         >
           Division Standings
-          <span className={`ml-2 rounded-lg px-2 py-0.5 text-xs ${activePanel === "standings" ? "bg-white/20" : "bg-white"}`}>
+          <span className="ml-2 rounded-lg bg-white px-2 py-0.5 text-xs">
             {standingsCount}
           </span>
         </button>
@@ -1731,14 +1725,10 @@ function TeamCard({
             event.stopPropagation();
             onOpenTeamMatches();
           }}
-          className={`w-full cursor-pointer rounded-xl px-3 py-3 text-sm font-bold shadow-sm ${
-            activePanel === "upcoming"
-              ? "bg-slate-800 text-white hover:bg-slate-900"
-              : "bg-slate-100 text-slate-950 hover:bg-slate-200"
-          }`}
+          className="w-full cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
         >
           Team Matches
-          <span className={`ml-2 rounded-lg px-2 py-0.5 text-xs ${activePanel === "upcoming" ? "bg-white/20" : "bg-white"}`}>
+          <span className="ml-2 rounded-lg bg-white px-2 py-0.5 text-xs">
             {teamMatchesCount}
           </span>
         </button>
