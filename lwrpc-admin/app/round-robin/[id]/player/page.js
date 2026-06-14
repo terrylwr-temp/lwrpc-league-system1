@@ -31,7 +31,8 @@ export default function RoundRobinPlayerPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [showHistory, setShowHistory] = useState(false);
-  const [sessionSearch, setSessionSearch] = useState("");
+  const [upcomingSessionSearch, setUpcomingSessionSearch] = useState("");
+  const [pastSessionSearch, setPastSessionSearch] = useState("");
   const [selectedHistorySession, setSelectedHistorySession] = useState(null);
   const [selectedPlayersSession, setSelectedPlayersSession] = useState(null);
   const [hostEditingSession, setHostEditingSession] = useState(null);
@@ -67,20 +68,24 @@ export default function RoundRobinPlayerPage() {
       const sessions = hasRegularMatches && hasLadderMatches
         ? (matchView === "ladder" ? ladderUpcomingSessions : regularUpcomingSessions)
         : hasLadderMatches ? ladderUpcomingSessions : regularUpcomingSessions;
-      return filterSessionsForSearch(sessions, sessionSearch);
+      return filterSessionsForSearch(sessions, upcomingSessionSearch);
     },
-    [regularUpcomingSessions, ladderUpcomingSessions, sessionSearch, hasRegularMatches, hasLadderMatches, matchView]
+    [regularUpcomingSessions, ladderUpcomingSessions, upcomingSessionSearch, hasRegularMatches, hasLadderMatches, matchView]
   );
-  const visiblePastSessions = useMemo(
+  const selectedPastSessions = useMemo(
     () => {
-      const sessions = hasRegularMatches && hasLadderMatches
+      return hasRegularMatches && hasLadderMatches
         ? (matchView === "ladder" ? ladderHistorySessions : regularHistorySessions)
         : hasLadderMatches ? ladderHistorySessions : regularHistorySessions;
-      return filterSessionsForSearch(sessions, sessionSearch);
     },
-    [regularHistorySessions, ladderHistorySessions, sessionSearch, hasRegularMatches, hasLadderMatches, matchView]
+    [regularHistorySessions, ladderHistorySessions, hasRegularMatches, hasLadderMatches, matchView]
   );
-  const trimmedSessionSearch = sessionSearch.trim();
+  const visiblePastSessions = useMemo(
+    () => filterSessionsForSearch(selectedPastSessions, pastSessionSearch),
+    [selectedPastSessions, pastSessionSearch]
+  );
+  const activeSessionSearch = showHistory ? pastSessionSearch : upcomingSessionSearch;
+  const trimmedSessionSearch = activeSessionSearch.trim();
   const loginPhoneIsComplete = normalizePhone(phone).length === 10;
 
   useEffect(() => {
@@ -183,11 +188,6 @@ export default function RoundRobinPlayerPage() {
   }
 
   async function openLadderRanking(ladder) {
-    if (ladderRankingRows(ladder).length > 0) {
-      setSelectedLadderRanking(ladder);
-      return;
-    }
-
     const refreshed = await loadPlayer(phone, { quiet: true });
     const refreshedLadder = (refreshed?.ladders || []).find((item) => String(item.id || "") === String(ladder?.id || ""));
     setSelectedLadderRanking(refreshedLadder || ladder);
@@ -544,12 +544,15 @@ export default function RoundRobinPlayerPage() {
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="min-w-0">
                 <h2 className="text-2xl font-black text-slate-950">{showHistory ? "All Matches" : "Upcoming Matches"}</h2>
-                <label className="mt-2 block text-sm font-bold text-slate-600">
+                <label className={`mt-2 text-sm font-bold text-slate-600 ${showHistory ? "block" : "hidden md:block"}`}>
                   Search Matches
                   <input
                     type="search"
-                    value={sessionSearch}
-                    onChange={(event) => setSessionSearch(event.target.value)}
+                    value={showHistory ? pastSessionSearch : upcomingSessionSearch}
+                    onChange={(event) => {
+                      if (showHistory) setPastSessionSearch(event.target.value);
+                      else setUpcomingSessionSearch(event.target.value);
+                    }}
                     className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-950 shadow-inner outline-none ring-teal-400/30 focus:ring-4"
                     placeholder={showHistory ? "Search all matches..." : "Search upcoming matches..."}
                   />
@@ -571,7 +574,7 @@ export default function RoundRobinPlayerPage() {
                   onClick={() => setShowHistory((current) => !current)}
                   className="rounded-lg border border-slate-300 bg-slate-950 px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800"
                 >
-                  {showHistory ? "Hide Past Matches" : `Past Matches (${state.history?.sessions?.length || 0})`}
+                  {showHistory ? "Hide Past Matches" : `Past Matches (${selectedPastSessions.length})`}
                 </button>
               </div>
             </div>
@@ -842,12 +845,15 @@ function normalizeLadderRankingRow(row = {}, index = 0) {
   const wins = Number(row.wins || 0);
   const losses = Number(row.losses || 0);
   const games = Number(row.matchesPlayed ?? row.games ?? (wins + losses));
+  const sessionsPlayed = Number(row.sessionsPlayed ?? row.datesPlayed ?? row.sessions_scored ?? 0);
   const pointDiff = Number(row.pointDiff ?? row.point_diff ?? 0);
   return {
     playerId: String(row.playerId || row.player_id || row.id || ""),
     displayName: row.displayName || row.display_name || row.name || "Player",
     position: positiveNumber(row.position || row.rank) || index + 1,
-    sessionsPlayed: Number(row.sessionsPlayed ?? row.datesPlayed ?? row.sessions_scored ?? 0),
+    previousPosition: positiveNumber(row.previousPosition || row.previousRank || row.ladderPreviousPosition),
+    positionCount: positiveNumber(row.positionCount || row.ladderPositionCount),
+    sessionsPlayed: games > 0 ? sessionsPlayed : 0,
     matchesPlayed: games,
     wins,
     losses,
@@ -961,6 +967,7 @@ function LadderRankingModal({ ladder, player, onClose }) {
                 <thead className="bg-slate-50 text-left text-xs font-black uppercase tracking-wide text-slate-500">
                   <tr>
                     <th className="px-3 py-2">Rank</th>
+                    <th className="px-3 py-2">Previous Rank</th>
                     <th className="px-3 py-2">Player</th>
                     <th className="px-3 py-2 text-right">Dates Played</th>
                     <th className="px-3 py-2 text-right">Games</th>
@@ -976,6 +983,7 @@ function LadderRankingModal({ ladder, player, onClose }) {
                     return (
                       <tr key={row.playerId} className={highlighted ? "border-y-2 border-violet-500 bg-violet-50 ring-2 ring-inset ring-violet-200" : "bg-white"}>
                         <td className="px-3 py-2 font-black text-slate-950">#{row.position || "-"}</td>
+                        <td className="px-3 py-2 font-black text-blue-800">{formatLadderRank(row.previousPosition, row.positionCount)}</td>
                         <td className="px-3 py-2 font-black text-slate-950">{row.displayName || "Player"}</td>
                         <td className="px-3 py-2 text-right font-bold text-slate-700">{row.sessionsPlayed || 0}</td>
                         <td className="px-3 py-2 text-right font-bold text-slate-700">{row.matchesPlayed || 0}</td>
@@ -988,7 +996,7 @@ function LadderRankingModal({ ladder, player, onClose }) {
                   })}
                   {rows.length === 0 && (
                     <tr>
-                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={8}>No ladder rankings are available yet. Refresh the player screen and try again.</td>
+                      <td className="px-3 py-8 text-center text-sm font-bold text-slate-500" colSpan={9}>No ladder rankings are available yet. Refresh the player screen and try again.</td>
                     </tr>
                   )}
                 </tbody>
@@ -1010,23 +1018,38 @@ function LadderRankingModal({ ladder, player, onClose }) {
 }
 
 function LadderRankingMobileCard({ row, highlighted }) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
   return (
     <div className={`rounded-lg border p-3 shadow-sm ${highlighted ? "border-2 border-violet-500 bg-violet-50 ring-2 ring-violet-200" : "border-slate-200 bg-slate-50"}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-xs font-black uppercase tracking-wide text-slate-500">Rank #{row.position || "-"}</div>
+          <div className="mt-0.5 text-xs font-black uppercase tracking-wide text-blue-700">Prior {formatLadderRank(row.previousPosition, row.positionCount)}</div>
           <div className="mt-1 break-words text-base font-black text-slate-950">{row.displayName || "Player"}</div>
         </div>
-        <div className="rounded-md bg-white px-2 py-1 text-sm font-black text-violet-800 shadow-sm">
-          {formatPercent(row.winPct || 0)}
+        <div className="shrink-0 text-right">
+          <div className="rounded-md bg-white px-2 py-1 text-sm font-black text-violet-800 shadow-sm">
+            {formatPercent(row.winPct || 0)}
+          </div>
+          <div className="mt-1 text-xs font-black text-slate-700">{row.wins || 0}-{row.losses || 0}</div>
         </div>
       </div>
+      {detailsOpen && (
       <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
         <MobileStandingStat label="Dates" value={row.sessionsPlayed || 0} />
         <MobileStandingStat label="Games" value={row.matchesPlayed || 0} />
-        <MobileStandingStat label="Record" value={`${row.wins || 0}-${row.losses || 0}`} />
+        <MobileStandingStat label="Points" value={row.pointsFor || 0} />
         <MobileStandingStat label="Avg Diff" value={formatSignedDecimalNumber(row.avgPointDiff || 0)} />
       </div>
+      )}
+      <button
+        type="button"
+        onClick={() => setDetailsOpen((current) => !current)}
+        className="mt-3 w-full rounded-lg border border-violet-200 bg-white px-3 py-2 text-xs font-black text-violet-900 shadow-sm hover:bg-violet-50"
+        aria-expanded={detailsOpen}
+      >
+        {detailsOpen ? "Hide Details" : "Details"}
+      </button>
     </div>
   );
 }

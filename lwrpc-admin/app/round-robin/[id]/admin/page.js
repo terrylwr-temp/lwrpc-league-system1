@@ -69,6 +69,12 @@ const PLAYER_STATS_RANGES = [
   { id: "currentYear", label: "Current Year" },
   { id: "all", label: "All" },
 ];
+const PLAYER_STATS_MATCH_TYPES = [
+  { id: "regular", label: "Regular Matches" },
+  { id: "ladder", label: "Ladder Matches" },
+  { id: "all", label: "All" },
+];
+const PARTICIPATION_REQUIREMENT_HELP = "Percentage of games that must be played (after at least 4 dates scheduled) that a player will move down one ranking number per scheduled date.";
 const LADDER_DAYS = [
   { value: "sunday", label: "Sunday" },
   { value: "monday", label: "Monday" },
@@ -663,10 +669,12 @@ function SessionTab(props) {
   const [sessionSearch, setSessionSearch] = useState("");
   const [showPastSessions, setShowPastSessions] = useState(false);
   const [needDuprExportOnly, setNeedDuprExportOnly] = useState(false);
+  const [sessionMatchType, setSessionMatchType] = useState("all");
   const [playersModalSession, setPlayersModalSession] = useState(null);
   const [playersModalStatus, setPlayersModalStatus] = useState("joined");
   const [resultsModalSession, setResultsModalSession] = useState(null);
   const isEditingSession = Boolean(editingSessionId);
+  const showMatchTypeFilter = useMemo(() => hasRegularAndLadderSessions(state.sessions || []), [state.sessions]);
   const visibleSessionBase = useMemo(
     () => sessionsForMode(state.sessions || [], showPastSessions),
     [state.sessions, showPastSessions]
@@ -677,9 +685,13 @@ function SessionTab(props) {
       : visibleSessionBase,
     [needDuprExportOnly, showPastSessions, visibleSessionBase]
   );
+  const matchTypeFilteredSessions = useMemo(
+    () => filterSessionsByMatchType(visibleSessions, showMatchTypeFilter ? sessionMatchType : "all"),
+    [visibleSessions, showMatchTypeFilter, sessionMatchType]
+  );
   const filteredSessions = useMemo(
-    () => filterSessions(visibleSessions, sessionSearch, state),
-    [state, visibleSessions, sessionSearch]
+    () => filterSessions(matchTypeFilteredSessions, sessionSearch, state),
+    [state, matchTypeFilteredSessions, sessionSearch]
   );
 
   function toggleInvitedGroup(groupId) {
@@ -766,11 +778,14 @@ function SessionTab(props) {
         <SessionsPanel
           state={state}
           sessions={filteredSessions}
-          totalCount={visibleSessionBase.length}
+          totalCount={matchTypeFilteredSessions.length}
           showPastSessions={showPastSessions}
           setShowPastSessions={setPastView}
           needDuprExportOnly={needDuprExportOnly}
           setNeedDuprExportOnly={setNeedDuprExportOnly}
+          showMatchTypeFilter={showMatchTypeFilter}
+          sessionMatchType={sessionMatchType}
+          setSessionMatchType={setSessionMatchType}
           sessionSearch={sessionSearch}
           setSessionSearch={setSessionSearch}
           openAddSession={openAddSession}
@@ -918,6 +933,9 @@ function SessionsPanel(props) {
     setShowPastSessions,
     needDuprExportOnly,
     setNeedDuprExportOnly,
+    showMatchTypeFilter,
+    sessionMatchType,
+    setSessionMatchType,
     sessionSearch,
     setSessionSearch,
     openAddSession,
@@ -965,19 +983,35 @@ function SessionsPanel(props) {
               Past
             </button>
           </div>
+          {showMatchTypeFilter && (
+            <div className="grid grid-cols-3 gap-1.5 rounded-lg border border-blue-100 bg-blue-50 p-1.5 text-xs font-black">
+              {PLAYER_STATS_MATCH_TYPES.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setSessionMatchType(item.id)}
+                  className={`rounded-md px-2 py-2 shadow-sm ${sessionMatchType === item.id ? "bg-blue-700 text-white" : "bg-white text-blue-900 hover:bg-blue-100"}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      <label className="mt-3 block text-sm font-bold text-slate-600">
-        Search matches
-        <input
-          type="search"
-          value={sessionSearch}
-          onChange={(event) => setSessionSearch(event.target.value)}
-          placeholder="Name, location, date, status"
-          className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950 shadow-inner outline-none ring-teal-400/30 focus:ring-4"
-        />
-      </label>
+      <div className="mt-3">
+        <label className="block text-sm font-bold text-slate-600">
+          Search matches
+          <input
+            type="search"
+            value={sessionSearch}
+            onChange={(event) => setSessionSearch(event.target.value)}
+            placeholder="Name, location, date, status"
+            className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950 shadow-inner outline-none ring-teal-400/30 focus:ring-4"
+          />
+        </label>
+      </div>
 
       <div className="mt-3 space-y-2">
         {sessions.map((session) => (
@@ -2402,24 +2436,89 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
 
 function PlayerStatsModal({ state, player, onClose }) {
   const [range, setRange] = useState("currentMonth");
-  const rows = playerResultsForRange(state, player.id, range);
+  const [matchType, setMatchType] = useState("all");
+  const matchTypeAvailability = useMemo(() => playerStatsMatchTypeAvailability(state, player.id), [state, player.id]);
+  const showMatchTypeFilter = matchTypeAvailability.regular && matchTypeAvailability.ladder;
+  const effectiveMatchType = showMatchTypeFilter ? matchType : matchTypeAvailability.ladder && !matchTypeAvailability.regular ? "ladder" : matchTypeAvailability.regular && !matchTypeAvailability.ladder ? "regular" : "all";
+  const rows = playerResultsForRange(state, player.id, range, effectiveMatchType);
   const totals = aggregatePlayerResultRows(rows);
   const lastDatePlayed = lastPlayedDate(rows);
+  const matchTypeLabel = PLAYER_STATS_MATCH_TYPES.find((item) => item.id === effectiveMatchType)?.label || "All";
+  const rangeLabel = PLAYER_STATS_RANGES.find((item) => item.id === range)?.label || "Current Month";
+  const ladderRankLabels = useMemo(() => playerLadderRankLabels(state, player.id), [state, player.id]);
+  const showingOnlyLadderMatches = effectiveMatchType === "ladder";
+
+  useEffect(() => {
+    if (!showMatchTypeFilter && matchType !== "all") setMatchType("all");
+  }, [matchType, showMatchTypeFilter]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
-      <div className="my-2 max-h-[calc(100vh-1rem)] w-full max-w-5xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+      <style>{`
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+          .player-stats-print-area,
+          .player-stats-print-area * {
+            visibility: visible !important;
+          }
+          .player-stats-print-area {
+            position: absolute !important;
+            inset: 0 auto auto 0 !important;
+            width: 100% !important;
+            max-height: none !important;
+            overflow: visible !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+          }
+          .player-stats-print-scroll {
+            max-height: none !important;
+            overflow: visible !important;
+          }
+          .player-stats-print-hide {
+            display: none !important;
+          }
+        }
+      `}</style>
+      <div className="player-stats-print-area my-2 max-h-[calc(100vh-1rem)] w-full max-w-5xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
         <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
           <div>
             <div className={MODAL_EYEBROW_CHROME}>Saved Player Stats</div>
             <h2 className="text-2xl font-black">{player.display_name || "Player"}</h2>
+            {ladderRankLabels.length > 0 && (
+              <div className="mt-1 text-sm font-black text-white">{ladderRankLabels.join(" | ")}</div>
+            )}
+            <div className="mt-1 text-sm font-bold text-cyan-50">{matchTypeLabel} | {rangeLabel}</div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
-            Close
-          </button>
+          <div className="player-stats-print-hide flex flex-wrap gap-2">
+            <button type="button" onClick={() => window.print()} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
+              Print
+            </button>
+            <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100">
+              Close
+            </button>
+          </div>
         </div>
-        <div className="max-h-[calc(100vh-8rem)] overflow-y-auto p-4">
-          <div className="flex flex-wrap gap-2">
+        <div className="player-stats-print-scroll max-h-[calc(100vh-8rem)] overflow-y-auto p-4">
+          {showMatchTypeFilter && (
+            <div className="player-stats-print-hide rounded-lg border border-blue-100 bg-blue-50 p-2">
+              <div className="flex flex-wrap gap-2">
+                {PLAYER_STATS_MATCH_TYPES.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setMatchType(item.id)}
+                    className={`rounded-lg px-3 py-2 text-xs font-black shadow-sm ${matchType === item.id ? "bg-blue-700 text-white" : "bg-white text-blue-900 hover:bg-blue-100"}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="player-stats-print-hide mt-3 flex flex-wrap gap-2">
             {PLAYER_STATS_RANGES.map((item) => (
               <button
                 key={item.id}
@@ -2432,24 +2531,25 @@ function PlayerStatsModal({ state, player, onClose }) {
             ))}
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
-            <StatBox label="Dates Played" value={totals.sessions} />
-            <StatBox label="Last Date Played" value={lastDatePlayed ? formatDate(lastDatePlayed) : "-"} />
-            <StatBox label="Record" value={`${totals.wins}-${totals.losses}`} />
-            <StatBox label="Games" value={totals.games} />
-            <StatBox label="Win %" value={formatPercent(totals.winPct)} />
-            <StatBox label="Points" value={`${totals.pointsFor}-${totals.pointsAgainst}`} />
-            <StatBox label="Diff" value={formatSignedNumber(totals.pointDiff)} />
-            <StatBox label="Byes" value={totals.byes} />
+          <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+            <StatBox compact label="Dates Played" value={totals.sessions} />
+            <StatBox compact label="Last Date Played" value={lastDatePlayed ? formatDate(lastDatePlayed) : "-"} />
+            <StatBox compact label="Record" value={`${totals.wins}-${totals.losses}`} />
+            <StatBox compact label="Games" value={totals.games} />
+            <StatBox compact label="Win %" value={formatPercent(totals.winPct)} />
+            <StatBox compact label="Points" value={`${totals.pointsFor}-${totals.pointsAgainst}`} />
+            <StatBox compact label="Diff" value={formatSignedNumber(totals.pointDiff)} />
+            <StatBox compact label="Byes" value={totals.byes} />
           </div>
 
           <div className="mt-4 overflow-x-auto rounded-lg border border-slate-200">
-            <table className="w-full min-w-[720px] text-sm">
+            <table className={`w-full text-sm ${showingOnlyLadderMatches ? "min-w-[820px]" : "min-w-[720px]"}`}>
               <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
                 <tr>
                   <th className="px-3 py-2 text-left">Date</th>
                   <th className="px-3 py-2 text-left">Match</th>
-                  <th className="px-3 py-2 text-right">Match Rank</th>
+                  <th className="px-3 py-2 text-right">{showingOnlyLadderMatches ? "Rank" : "Match Rank"}</th>
+                  {showingOnlyLadderMatches && <th className="px-3 py-2 text-right">Prior Rank</th>}
                   <th className="px-3 py-2 text-right">Record</th>
                   <th className="px-3 py-2 text-right">Points</th>
                   <th className="px-3 py-2 text-right">Diff</th>
@@ -2462,6 +2562,9 @@ function PlayerStatsModal({ state, player, onClose }) {
                     <td className="px-3 py-2 font-bold text-slate-700">{formatDate(row.session_date)}</td>
                     <td className="px-3 py-2 font-black text-slate-950">{row.session_name || "Match"}</td>
                     <td className="px-3 py-2 text-right font-black text-slate-950">#{row.rank || "-"}</td>
+                    {showingOnlyLadderMatches && (
+                      <td className="px-3 py-2 text-right font-black text-blue-800">{previousLadderRankForResult(state, row)}</td>
+                    )}
                     <td className="px-3 py-2 text-right font-black text-slate-950">{row.wins || 0}-{row.losses || 0}</td>
                     <td className="px-3 py-2 text-right font-bold text-slate-700">{row.points_for || 0}-{row.points_against || 0}</td>
                     <td className="px-3 py-2 text-right font-bold text-slate-700">{formatSignedNumber(row.point_diff || 0)}</td>
@@ -2470,7 +2573,7 @@ function PlayerStatsModal({ state, player, onClose }) {
                 ))}
                 {rows.length === 0 && (
                   <tr>
-                    <td colSpan={7} className="px-3 py-8 text-center text-sm font-bold text-slate-500">No saved stats for this range.</td>
+                    <td colSpan={showingOnlyLadderMatches ? 8 : 7} className="px-3 py-8 text-center text-sm font-bold text-slate-500">No saved stats for this range.</td>
                   </tr>
                 )}
               </tbody>
@@ -2492,6 +2595,7 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
   const [positionDrafts, setPositionDrafts] = useState({});
   const [draggedLadderPlayer, setDraggedLadderPlayer] = useState(null);
   const [resultsSession, setResultsSession] = useState(null);
+  const [ladderHistoryPlayerFilters, setLadderHistoryPlayerFilters] = useState({});
   const activeGroups = (state.playerGroups || []).filter((group) => group.is_active !== false);
 
   useEffect(() => {
@@ -2597,6 +2701,13 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
     });
   }
 
+  function setLadderHistoryPlayerFilter(ladderId, playerId) {
+    setLadderHistoryPlayerFilters((current) => ({
+      ...current,
+      [String(ladderId || "")]: playerId,
+    }));
+  }
+
   function setPositionDraft(ladder, playerId, position) {
     const summary = ladderSummary(state, ladder);
     const rows = orderedRowsFromDraft(summary.rows, positionDrafts[ladder.id] || {});
@@ -2639,6 +2750,11 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
             const draftPositions = { ...positionsFromRows(summary.rows), ...(positionDrafts[ladder.id] || {}) };
             const orderedRows = orderedRowsFromDraft(summary.rows, draftPositions);
             const positionError = canEditPositions ? ladderPositionDraftError(draftPositions, orderedRows.length) : "";
+            const selectedHistoryPlayerId = ladderHistoryPlayerFilters[String(ladder.id)] || "all";
+            const historyPlayerOptions = historyPlayerOptionsForRows(summary.historyRows);
+            const visibleHistoryRows = selectedHistoryPlayerId === "all"
+              ? summary.historyRows
+              : summary.historyRows.filter((row) => String(row.playerId || "") === String(selectedHistoryPlayerId));
             return (
               <div key={ladder.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -2648,7 +2764,7 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                       {groupName} | {ladder.dayOfWeekLabel || ladder.dayOfWeek} {ladder.startTime || ""} | {ladder.participationRequirement}% participation
                     </div>
                     <div className="mt-1 text-xs font-black uppercase tracking-wide text-violet-700">
-                      Ranking: {rankingCriteriaSummary(ladder.rankingCriteria)}
+                      Ranking: {rankingCriteriaSummary(ladder.rankingCriteria)} | Movement: {ladderMovementLabel(ladder)}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -2658,22 +2774,21 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                     <button type="button" onClick={() => openCreateNextMatch(ladder)} disabled={actionLoading === "createLadderMatch"} className="rounded-lg bg-violet-700 px-3 py-2 text-xs font-black text-white hover:bg-violet-800 disabled:bg-slate-300">Create Next Match Date</button>
                   </div>
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-4">
-                  <StatBox label="Sessions" value={summary.sessionCount} />
+                <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-3">
+                  <StatBox label="Sessions/Dates Played" value={summary.sessionCount} />
                   <StatBox label="Eligible" value={summary.eligibleCount} />
-                  <StatBox label="Next Date" value={summary.nextDate ? formatDate(summary.nextDate) : "-"} />
-                  <StatBox label="Movement" value={ladder.movementMode === "top2" ? "Top 2 up, bottom 2 down" : "Top 1 up, bottom 1 down"} />
+                  <StatBox label="Next Date (Potential)" value={summary.nextDate ? formatDate(summary.nextDate) : "-"} />
                 </div>
                 {summary.sessions.length > 0 && (
                   <div className="mt-3 rounded-lg border border-violet-100 bg-white p-3">
-                    <div className="text-xs font-black uppercase tracking-wide text-violet-700">Matches</div>
+                    <div className="text-xs font-black uppercase tracking-wide text-violet-700">Matches - click on a match to see details</div>
                     <div className="mt-2 grid grid-cols-1 gap-2 md:grid-cols-2">
                       {summary.sessions.map((session) => (
                         <button
                           key={session.id}
                           type="button"
                           onClick={() => setResultsSession(session)}
-                          className="rounded-lg border border-violet-200 bg-violet-50 px-3 py-2 text-left text-sm font-bold text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-violet-400 hover:bg-white"
+                          className={`rounded-lg border px-3 py-2 text-left text-sm font-bold shadow-sm transition hover:-translate-y-0.5 ${ladderMatchButtonClass(session)}`}
                         >
                           <span className="block font-black text-slate-950">{formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}</span>
                           <span className="mt-0.5 block text-xs text-slate-500">{session.session_name || ladder.name} - {sessionStatusLabel(session.status)}</span>
@@ -2755,7 +2870,9 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                             </div>
                           </div>
                           <div className="mt-3 grid grid-cols-2 gap-2">
+                            <MobileStandingStat label="Previous Position" value={formatLadderRank(row.previousPosition, row.positionCount)} />
                             <MobileStandingStat label="Dates Played" value={row.sessionsPlayed} />
+                            <MobileStandingStat label="Last Played" value={row.lastPlayedDate ? formatDate(row.lastPlayedDate) : "-"} />
                             <MobileStandingStat label="Games Played" value={row.matchesPlayed} />
                             <MobileStandingStat label="Points" value={row.pointsFor || 0} />
                             <MobileStandingStat label="Win %" value={formatPercent(row.winPct)} />
@@ -2771,8 +2888,10 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                         <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
                           <tr>
                             <th className="px-3 py-2 text-left">Current Position</th>
+                            <th className="px-3 py-2 text-left">Previous Position</th>
                             <th className="px-3 py-2 text-left">Player</th>
                             <th className="px-3 py-2 text-right">Dates Played</th>
+                            <th className="px-3 py-2 text-left">Last Date Played</th>
                             <th className="px-3 py-2 text-right">Games Played</th>
                             <th className="px-3 py-2 text-right">Points</th>
                             <th className="px-3 py-2 text-right">Win %</th>
@@ -2808,6 +2927,7 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                                 </select>
                               ) : `#${row.position}`}
                             </td>
+                            <td className="px-3 py-2 font-black text-blue-800">{formatLadderRank(row.previousPosition, row.positionCount)}</td>
                             <td className="px-3 py-2 font-bold text-slate-700">
                               <span className="inline-flex items-center gap-2">
                                 {canEditPositions && <span className="rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-slate-500">Drag</span>}
@@ -2815,6 +2935,7 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                               </span>
                             </td>
                             <td className="px-3 py-2 text-right font-bold text-slate-700">{row.sessionsPlayed}</td>
+                            <td className="px-3 py-2 font-bold text-slate-700">{row.lastPlayedDate ? formatDate(row.lastPlayedDate) : "-"}</td>
                             <td className="px-3 py-2 text-right font-bold text-slate-700">{row.matchesPlayed}</td>
                             <td className="px-3 py-2 text-right font-black text-slate-950">{row.pointsFor || 0}</td>
                             <td className="px-3 py-2 text-right font-black text-slate-950">{formatPercent(row.winPct)}</td>
@@ -2823,7 +2944,7 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                         ))}
                         {orderedRows.length === 0 && (
                           <tr>
-                            <td colSpan={7} className="px-3 py-8 text-center text-sm font-bold text-slate-500">No players are assigned to this ladder group.</td>
+                            <td colSpan={9} className="px-3 py-8 text-center text-sm font-bold text-slate-500">No players are assigned to this ladder group.</td>
                           </tr>
                         )}
                         </tbody>
@@ -2831,13 +2952,30 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                     </div>
                     {summary.historyRows.length > 0 && (
                       <div className="border-t border-slate-200 bg-slate-50 p-3">
-                        <div className="text-sm font-black text-slate-950">Ladder History by Date</div>
+                        <div className="flex flex-wrap items-end justify-between gap-3">
+                          <div className="text-sm font-black text-slate-950">Ladder History by Date</div>
+                          <label className="block text-xs font-black uppercase tracking-wide text-slate-500">
+                            Player
+                            <select
+                              value={selectedHistoryPlayerId}
+                              onChange={(event) => setLadderHistoryPlayerFilter(ladder.id, event.target.value)}
+                              className="mt-1 w-full min-w-[12rem] rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-black normal-case tracking-normal text-slate-950 shadow-sm"
+                            >
+                              <option value="all">All Players</option>
+                              {historyPlayerOptions.map((option) => (
+                                <option key={option.playerId} value={option.playerId}>{option.displayName}</option>
+                              ))}
+                            </select>
+                          </label>
+                        </div>
                         <div className="mt-2 max-h-80 overflow-y-auto rounded-lg border border-slate-200 bg-white">
-                          <table className="w-full min-w-[720px] text-sm">
+                          <table className="w-full min-w-[940px] text-sm">
                             <thead className="bg-slate-100 text-xs font-black uppercase tracking-wide text-slate-500">
                               <tr>
                                 <th className="px-3 py-2 text-left">Date</th>
                                 <th className="px-3 py-2 text-left">Player</th>
+                                <th className="px-3 py-2 text-left">Previous Position</th>
+                                <th className="px-3 py-2 text-left">New Position</th>
                                 <th className="px-3 py-2 text-right">Points</th>
                                 <th className="px-3 py-2 text-right">Win %</th>
                                 <th className="px-3 py-2 text-right">Games</th>
@@ -2845,10 +2983,12 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                               </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                              {summary.historyRows.map((row) => (
+                              {visibleHistoryRows.map((row) => (
                                 <tr key={`${row.sessionId}-${row.playerId}`}>
                                   <td className="px-3 py-2 font-black text-slate-950">{formatDate(row.sessionDate)}</td>
                                   <td className="px-3 py-2 font-bold text-slate-700">{row.displayName}</td>
+                                  <td className="px-3 py-2 font-black text-blue-800">{formatLadderRank(row.previousPosition, row.positionCount)}</td>
+                                  <td className="px-3 py-2 font-black text-emerald-800">{formatLadderRank(row.newPosition, row.positionCount)}</td>
                                   <td className="px-3 py-2 text-right font-black text-slate-950">{row.pointsFor}</td>
                                   <td className="px-3 py-2 text-right font-black text-slate-950">{formatPercent(row.winPct)}</td>
                                   <td className="px-3 py-2 text-right font-bold text-slate-700">{row.games}</td>
@@ -2951,6 +3091,7 @@ function LadderFormModal({ form, setForm, activeGroups, actionLoading, hasStarte
   const saving = actionLoading === "saveLadder";
   const recalculating = actionLoading === "recalculateLadderRankings";
   const rankingCriteria = normalizeLadderRankingCriteria(form.rankingCriteria);
+  const [showParticipationHelp, setShowParticipationHelp] = useState(false);
 
   function setRankingCriterion(index, value) {
     setForm((current) => {
@@ -2994,7 +3135,19 @@ function LadderFormModal({ form, setForm, activeGroups, actionLoading, hasStarte
               </label>
               <TextInput label="Start time" type="time" value={form.startTime} onChange={(value) => setForm((current) => ({ ...current, startTime: value }))} />
               <label className="block text-sm font-bold text-slate-600">
-                Participation requirements
+                <span className="flex items-center gap-2">
+                  <span>Participation requirements</span>
+                  <button
+                    type="button"
+                    onClick={() => setShowParticipationHelp((current) => !current)}
+                    className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-violet-200 bg-violet-50 text-xs font-black text-violet-900 shadow-sm hover:bg-violet-100"
+                    aria-expanded={showParticipationHelp}
+                    aria-label="Participation requirements help"
+                    title={PARTICIPATION_REQUIREMENT_HELP}
+                  >
+                    ?
+                  </button>
+                </span>
                 <div className="relative mt-1">
                   <input
                     type="number"
@@ -3006,6 +3159,11 @@ function LadderFormModal({ form, setForm, activeGroups, actionLoading, hasStarte
                   />
                   <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm font-black text-slate-500">%</span>
                 </div>
+                {showParticipationHelp && (
+                  <div className="mt-2 rounded-lg border border-violet-100 bg-violet-50 px-3 py-2 text-xs font-bold leading-relaxed text-violet-950">
+                    {PARTICIPATION_REQUIREMENT_HELP}
+                  </div>
+                )}
               </label>
               <label className="block text-sm font-bold text-slate-600">
                 Balance Matchups
@@ -3072,11 +3230,11 @@ function LadderFormModal({ form, setForm, activeGroups, actionLoading, hasStarte
   );
 }
 
-function StatBox({ label, value }) {
+function StatBox({ label, value, compact = false }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-      <div className="text-xs font-black uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="mt-1 text-2xl font-black text-slate-950">{value}</div>
+    <div className={`min-w-0 rounded-lg border border-slate-200 bg-slate-50 ${compact ? "p-2" : "p-3"}`}>
+      <div className={`${compact ? "text-[10px]" : "text-xs"} font-black uppercase tracking-wide text-slate-500`}>{label}</div>
+      <div className={`mt-1 break-words font-black leading-tight text-slate-950 ${compact ? "text-lg" : "text-2xl"}`}>{value}</div>
     </div>
   );
 }
@@ -3597,6 +3755,17 @@ function isLadderSession(session) {
   return Boolean(session?.settings?.ladderId) || session?.mode === "ladder";
 }
 
+function hasRegularAndLadderSessions(sessions = []) {
+  const activeSessions = sessions.filter((session) => session.status !== "cancelled");
+  return activeSessions.some(isLadderSession) && activeSessions.some((session) => !isLadderSession(session));
+}
+
+function filterSessionsByMatchType(sessions = [], matchType = "all") {
+  if (matchType === "ladder") return sessions.filter(isLadderSession);
+  if (matchType === "regular") return sessions.filter((session) => !isLadderSession(session));
+  return sessions;
+}
+
 function sessionDuprExported(session) {
   return Boolean(session?.settings?.duprExportedAt || session?.settings?.duprExport?.exportedAt);
 }
@@ -3709,6 +3878,10 @@ function resultMetadata(row) {
   return typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
 }
 
+function resultRowHasScoredMatch(row) {
+  return Number(row?.games || 0) > 0 || Number(row?.wins || 0) > 0 || Number(row?.losses || 0) > 0;
+}
+
 function positiveNumber(value) {
   const numeric = Number(value);
   return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
@@ -3799,6 +3972,16 @@ function sessionLifecycleClass(status) {
 function sessionStatusLabel(status) {
   if (status === "done") return "Finished";
   return status || "";
+}
+
+function ladderMovementLabel(ladder) {
+  return ladder?.movementMode === "top2" ? "Top 2 up, bottom 2 down" : "Top 1 up, bottom 1 down";
+}
+
+function ladderMatchButtonClass(session) {
+  if (session?.status === "done") return "border-emerald-300 bg-emerald-50 text-emerald-950 hover:border-emerald-500 hover:bg-emerald-100";
+  if (session?.status === "cancelled") return "border-red-300 bg-red-50 text-red-950 hover:border-red-500 hover:bg-red-100";
+  return "border-violet-200 bg-violet-50 text-slate-800 hover:border-violet-400 hover:bg-white";
 }
 
 function compareNamesByFirstName(firstName, secondName) {
@@ -3955,6 +4138,7 @@ function ladderSummary(state, ladder) {
   const rows = ladderStandingsRows(state, ladder, completedSessions, resultRows, matchRows);
   const sessionById = new Map(completedSessions.map((session) => [String(session.id), session]));
   const historyRows = resultRows
+    .filter(resultRowHasScoredMatch)
     .slice()
     .sort((first, second) => {
       const firstSession = sessionById.get(String(first.session_id || ""));
@@ -3966,6 +4150,7 @@ function ladderSummary(state, ladder) {
     .map((row) => {
       const games = Number(row.games || 0) || Number(row.wins || 0) + Number(row.losses || 0);
       const session = sessionById.get(String(row.session_id || ""));
+      const metadata = resultMetadata(row);
       return {
         sessionId: String(row.session_id || ""),
         sessionDate: session?.session_date || row.session_date || "",
@@ -3976,6 +4161,9 @@ function ladderSummary(state, ladder) {
         games,
         wins: Number(row.wins || 0),
         losses: Number(row.losses || 0),
+        previousPosition: positiveNumber(metadata.ladderPreviousPosition ?? metadata.previousPosition),
+        newPosition: positiveNumber(metadata.ladderNewPosition ?? metadata.newPosition),
+        positionCount: positiveNumber(metadata.ladderPositionCount ?? metadata.positionCount),
       };
     });
   const standingsRows = (completedSessions.length >= 4 ? rows.filter((row) => row.eligible) : rows)
@@ -3994,6 +4182,7 @@ function ladderSummary(state, ladder) {
 
 function ladderStandingsRows(state, ladder, sessions, resultRows, matchRows = []) {
   const sessionCount = sessions.length;
+  const sessionById = new Map((sessions || []).map((session) => [String(session.id), session]));
   const rosterIds = playerIdsForGroup(state, ladder.playerGroupId);
   const statsByPlayer = new Map();
   rosterIds.forEach((playerId, index) => {
@@ -4008,19 +4197,30 @@ function ladderStandingsRows(state, ladder, sessions, resultRows, matchRows = []
       losses: 0,
       pointsFor: 0,
       pointDiff: 0,
+      previousPosition: null,
+      positionCount: null,
+      lastPlayedDate: "",
     });
   });
 
   resultRows.forEach((row) => {
     const playerId = String(row.player_id || "");
     if (!statsByPlayer.has(playerId)) return;
+    if (!resultRowHasScoredMatch(row)) return;
     const stats = statsByPlayer.get(playerId);
+    const sessionDate = sessionById.get(String(row.session_id || ""))?.session_date || "";
+    const metadata = resultMetadata(row);
     stats.sessionsPlayed += 1;
     stats.matchesPlayed += Number(row.games || 0);
     stats.wins += Number(row.wins || 0);
     stats.losses += Number(row.losses || 0);
     stats.pointsFor += Number(row.points_for || 0);
     stats.pointDiff += Number(row.point_diff || 0);
+    if (sessionDate && (!stats.lastPlayedDate || String(sessionDate) >= String(stats.lastPlayedDate))) {
+      stats.lastPlayedDate = sessionDate;
+      stats.previousPosition = positiveNumber(metadata.ladderPreviousPosition ?? metadata.previousPosition);
+      stats.positionCount = positiveNumber(metadata.ladderPositionCount ?? metadata.positionCount);
+    }
   });
 
   const order = ladderPositionOrder(rosterIds, sessions, resultRows, ladder, matchRows);
@@ -4032,6 +4232,7 @@ function ladderStandingsRows(state, ladder, sessions, resultRows, matchRows = []
       return {
         ...row,
         position: positionByPlayer.get(String(row.playerId)) || row.seedIndex + 1,
+        positionCount: row.positionCount || rosterIds.length,
         winPct: games > 0 ? row.wins / games : 0,
         avgPointDiff: games > 0 ? row.pointDiff / games : 0,
         eligible: sessionCount < 4 || participationPct >= Number(ladder.participationRequirement || 50),
@@ -4082,9 +4283,11 @@ function ladderPositionOrder(rosterIds, sessions, resultRows, ladder, matchRows 
     if (sessions.length >= 4) {
       const completedSessionIds = sessions.filter((item) => String(item.session_date || "") <= String(session.session_date || "")).map((item) => String(item.id));
       order.forEach((playerId) => {
-        const playedCount = completedSessionIds.filter((sessionId) => (resultsBySession.get(sessionId) || []).some((row) => String(row.player_id || "") === String(playerId))).length;
+        const playedCount = completedSessionIds.filter((sessionId) => (
+          resultsBySession.get(sessionId) || []
+        ).some((row) => String(row.player_id || "") === String(playerId) && resultRowHasScoredMatch(row))).length;
         const participationPct = completedSessionIds.length > 0 ? (playedCount / completedSessionIds.length) * 100 : 100;
-        if (participationPct < Number(ladder.participationRequirement || 50)) movePlayerByStep(order, playerId, 4);
+        if (participationPct < Number(ladder.participationRequirement || 50)) movePlayerByStep(order, playerId, 1);
       });
     }
   });
@@ -4561,13 +4764,96 @@ function playersForGroup(state, groupId) {
     .sort((a, b) => String(a.display_name || "").localeCompare(String(b.display_name || "")));
 }
 
-function playerResultsForRange(state, playerId, range) {
+function playerStatsMatchTypeAvailability(state, playerId) {
+  const sessionById = new Map((state.sessions || []).map((session) => [String(session.id || ""), session]));
+  const availability = { regular: false, ladder: false };
+
+  (state.allPlayerResults || [])
+    .filter((row) => String(row.player_id || "") === String(playerId))
+    .forEach((row) => {
+      const session = sessionById.get(String(row.session_id || ""));
+      if (isLadderSession(session)) availability.ladder = true;
+      else availability.regular = true;
+    });
+
+  const playerGroupIds = new Set((state.playerGroupMembers || [])
+    .filter((row) => String(row.player_id || "") === String(playerId))
+    .map((row) => String(row.player_group_id || "")));
+
+  if (playerGroupIds.size > 0) {
+    (state.sessions || []).forEach((session) => {
+      const sessionGroupIds = playerGroupIdsForSession(session);
+      if (!sessionGroupIds.some((groupId) => playerGroupIds.has(String(groupId)))) return;
+      if (isLadderSession(session)) availability.ladder = true;
+      else availability.regular = true;
+    });
+  }
+
+  return availability;
+}
+
+function playerGroupIdsForSession(session) {
+  const settings = session?.settings || {};
+  return [
+    ...(Array.isArray(session?.invited_group_ids) ? session.invited_group_ids : []),
+    ...(Array.isArray(settings.createdFromGroups) ? settings.createdFromGroups : []),
+    settings.playerGroupId,
+    settings.ladderConfig?.playerGroupId,
+  ].filter(Boolean).map(String);
+}
+
+function historyPlayerOptionsForRows(rows = []) {
+  const byPlayer = new Map();
+  rows.forEach((row) => {
+    const playerId = String(row.playerId || "");
+    if (!playerId || byPlayer.has(playerId)) return;
+    byPlayer.set(playerId, {
+      playerId,
+      displayName: row.displayName || "Player",
+    });
+  });
+  return [...byPlayer.values()].sort((first, second) => compareNamesByFirstName(first.displayName, second.displayName));
+}
+
+function playerLadderRankLabels(state, playerId) {
+  const ladders = normalizeLadderList(state.group?.settings?.ladders || []);
+  return ladders
+    .map((ladder) => {
+      const summary = ladderSummary(state, ladder);
+      const row = summary.rows.find((item) => String(item.playerId || "") === String(playerId));
+      if (!row) return "";
+      const rank = formatLadderRank(row.position, row.positionCount || summary.rows.length);
+      if (rank === "-") return "";
+      return summary.rows.length > 0 && ladders.length > 1
+        ? `${ladder.name}: Rank ${rank}`
+        : `Rank ${rank}`;
+    })
+    .filter(Boolean);
+}
+
+function previousLadderRankForResult(state, row) {
+  const session = (state.sessions || []).find((item) => String(item.id || "") === String(row.session_id || ""));
+  return formatLadderRank(
+    ladderPreviousPositionForResult(state, session, row),
+    ladderPositionCountForResult(state, session, row)
+  );
+}
+
+function playerResultsForRange(state, playerId, range, matchType = "all") {
   const today = new Date();
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth();
   const lastMonthDate = new Date(currentYear, currentMonth - 1, 1);
+  const sessionById = new Map((state.sessions || []).map((session) => [String(session.id || ""), session]));
   const rows = (state.allPlayerResults || [])
     .filter((row) => String(row.player_id || "") === String(playerId))
+    .filter(resultRowHasScoredMatch)
+    .filter((row) => {
+      if (matchType === "all") return true;
+      const session = sessionById.get(String(row.session_id || ""));
+      const ladder = isLadderSession(session);
+      return matchType === "ladder" ? ladder : !ladder;
+    })
     .filter((row) => {
       if (range === "all") return true;
       if (range === "currentSession") return String(row.session_id || "") === String(state.activeSessionId || "");

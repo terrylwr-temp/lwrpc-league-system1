@@ -2172,6 +2172,10 @@ function resultMetadata(row) {
   return typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
 }
 
+function resultRowHasScoredMatch(row) {
+  return Number(row?.games || 0) > 0 || Number(row?.wins || 0) > 0 || Number(row?.losses || 0) > 0;
+}
+
 async function loadResults(supabase, sessionId) {
   const { data, error } = await supabase
     .from("round_robin_player_session_results")
@@ -2433,9 +2437,11 @@ function ladderPositionOrderForRoster(rosterIds = [], sessions = [], resultRows 
       const participationRequirement = Number(ladder.participationRequirement || 50);
       const completedSessionIds = sessions.filter((item) => String(item.session_date || "") <= String(session.session_date || "")).map((item) => String(item.id));
       order.forEach((playerId) => {
-        const playedCount = completedSessionIds.filter((sessionId) => (resultsBySession.get(sessionId) || []).some((row) => String(row.player_id || "") === String(playerId))).length;
+        const playedCount = completedSessionIds.filter((sessionId) => (
+          resultsBySession.get(sessionId) || []
+        ).some((row) => String(row.player_id || "") === String(playerId) && resultRowHasScoredMatch(row))).length;
         const participationPct = completedSessionIds.length > 0 ? (playedCount / completedSessionIds.length) * 100 : 100;
-        if (participationPct < participationRequirement) movePlayerByStep(order, playerId, 4);
+        if (participationPct < participationRequirement) movePlayerByStep(order, playerId, 1);
       });
     }
   });

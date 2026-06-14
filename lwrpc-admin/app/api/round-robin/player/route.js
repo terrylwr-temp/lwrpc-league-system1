@@ -446,7 +446,9 @@ async function loadPlayerLadders(supabase, group, player) {
       groupMembers: groupMembersResult.data || [],
     });
     const playerRow = rows.find((row) => String(row.playerId) === String(player.id)) || null;
-    const playerResultRows = results.filter((row) => String(row.player_id || "") === String(player.id));
+    const playerResultRows = results
+      .filter((row) => String(row.player_id || "") === String(player.id))
+      .filter(resultRowHasScoredMatch);
     const lastPlayedDate = playerResultRows
       .map((row) => {
         const session = completed.find((item) => String(item.id) === String(row.session_id || ""));
@@ -615,12 +617,16 @@ function sanitizeSessionPlayer(player, includeContact = false, ladderPosition = 
 }
 
 function sanitizeLadderRankingRow(row) {
+  const matchesPlayed = Number(row.matchesPlayed || 0);
   return {
     playerId: row.playerId,
     displayName: row.displayName,
     position: row.position,
-    sessionsPlayed: row.sessionsPlayed,
-    matchesPlayed: row.matchesPlayed,
+    previousPosition: row.previousPosition,
+    positionCount: row.positionCount,
+    lastPlayedDate: row.lastPlayedDate,
+    sessionsPlayed: matchesPlayed > 0 ? row.sessionsPlayed : 0,
+    matchesPlayed,
     wins: row.wins,
     losses: row.losses,
     pointsFor: row.pointsFor,
@@ -778,7 +784,31 @@ function normalizeInitialPositions(positions = {}, rosterIds = []) {
   return normalized;
 }
 
+function resultRowHasScoredMatch(row) {
+  return Number(row?.games || 0) > 0 || Number(row?.wins || 0) > 0 || Number(row?.losses || 0) > 0;
+}
+
+function resultMetadata(row) {
+  const metadata = row?.metadata;
+  if (!metadata) return {};
+  if (typeof metadata === "string") {
+    try {
+      const parsed = JSON.parse(metadata);
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+  return typeof metadata === "object" && !Array.isArray(metadata) ? metadata : {};
+}
+
+function positiveNumber(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
+}
+
 function ladderStandingsRows({ ladder, sessions, results, matches = [], players, groupMembers }) {
+  const sessionById = new Map((sessions || []).map((session) => [String(session.id), session]));
   const rosterIds = groupMembers
     .filter((row) => String(row.player_group_id || "") === String(ladder.playerGroupId))
     .map((row) => String(row.player_id || ""))
@@ -803,18 +833,29 @@ function ladderStandingsRows({ ladder, sessions, results, matches = [], players,
     losses: 0,
     pointsFor: 0,
     pointDiff: 0,
+    previousPosition: null,
+    positionCount: null,
+    lastPlayedDate: "",
   }]));
 
   results.forEach((row) => {
     const playerId = String(row.player_id || "");
     if (!statsByPlayer.has(playerId)) return;
+    if (!resultRowHasScoredMatch(row)) return;
     const stats = statsByPlayer.get(playerId);
+    const sessionDate = sessionById.get(String(row.session_id || ""))?.session_date || "";
+    const metadata = resultMetadata(row);
     stats.sessionsPlayed += 1;
     stats.matchesPlayed += Number(row.games || 0);
     stats.wins += Number(row.wins || 0);
     stats.losses += Number(row.losses || 0);
     stats.pointsFor += Number(row.points_for || 0);
     stats.pointDiff += Number(row.point_diff || 0);
+    if (sessionDate && (!stats.lastPlayedDate || String(sessionDate) >= String(stats.lastPlayedDate))) {
+      stats.lastPlayedDate = sessionDate;
+      stats.previousPosition = positiveNumber(metadata.ladderPreviousPosition ?? metadata.previousPosition);
+      stats.positionCount = positiveNumber(metadata.ladderPositionCount ?? metadata.positionCount);
+    }
   });
 
   const order = ladderPositionOrder(orderedRosterIds, sessions, results, ladder, matches);
@@ -825,6 +866,7 @@ function ladderStandingsRows({ ladder, sessions, results, matches = [], players,
     return {
       ...row,
       position: positionByPlayer.get(String(row.playerId)) || row.seedIndex + 1,
+      positionCount: row.positionCount || orderedRosterIds.length,
       winPct: games > 0 ? row.wins / games : 0,
       avgPointDiff: games > 0 ? row.pointDiff / games : 0,
       eligible: sessions.length < 4 || participationPct >= Number(ladder.participationRequirement || 50),
@@ -859,9 +901,11 @@ function ladderPositionOrder(rosterIds, sessions, results, ladder, matches = [])
       const participationRequirement = Number(ladder.participationRequirement || 50);
       const completedSessionIdsForDate = sessions.filter((item) => String(item.session_date || "") <= String(session.session_date || "")).map((item) => String(item.id));
       order.forEach((playerId) => {
-        const playedCount = completedSessionIdsForDate.filter((sessionId) => (resultsBySession.get(sessionId) || []).some((row) => String(row.player_id || "") === String(playerId))).length;
+        const playedCount = completedSessionIdsForDate.filter((sessionId) => (
+          resultsBySession.get(sessionId) || []
+        ).some((row) => String(row.player_id || "") === String(playerId) && resultRowHasScoredMatch(row))).length;
         const participationPct = completedSessionIdsForDate.length > 0 ? (playedCount / completedSessionIdsForDate.length) * 100 : 100;
-        if (participationPct < participationRequirement) movePlayerByStep(order, playerId, 4);
+        if (participationPct < participationRequirement) movePlayerByStep(order, playerId, 1);
       });
     }
   });
