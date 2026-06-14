@@ -157,18 +157,18 @@ export default function TeamScheduleModal({
 
           <section className="min-h-0 overflow-auto bg-slate-50 p-3 sm:p-5">
             <div className="mb-3 overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-r from-blue-700 via-blue-800 to-emerald-700 p-4 text-white shadow-lg sm:mb-4 sm:p-5">
-              <div className="flex min-w-0 items-start justify-between gap-3">
-                <div className="min-w-0">
+              <div className="flex min-w-0 flex-col items-stretch gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+                <div className="min-w-0 sm:flex-1">
                   <div className="text-xs font-black uppercase tracking-wide text-blue-100">
                     Selected Team
                   </div>
-                  <div className="mt-1 truncate text-xl font-black sm:text-2xl">
+                  <div className="mt-1 break-words text-xl font-black sm:truncate sm:text-2xl">
                     {selectedTeam?.name || "Select a team"}
                   </div>
                 </div>
                 {selectedTeam && selectedTeamCaptainNames && (
                   <div
-                    className="max-w-[48%] shrink-0 truncate text-right text-[11px] font-bold leading-tight text-blue-100 sm:max-w-[42%] sm:text-xs"
+                    className="w-full min-w-0 text-left text-[11px] font-bold leading-tight text-blue-100 sm:max-w-[42%] sm:shrink-0 sm:truncate sm:text-right sm:text-xs"
                     title={`Captains: ${selectedTeamCaptainNames}`}
                   >
                     Captains: {selectedTeamCaptainNames}

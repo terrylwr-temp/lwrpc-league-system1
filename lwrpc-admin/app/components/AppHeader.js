@@ -13,6 +13,7 @@ import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from
 export default function AppHeader({
   title = "LWR PC League Management System",
   subtitle = "League Operations Dashboard",
+  hideSubtitleOnMobile = false,
   actions = null,
   welcomeAction = null,
 }) {
@@ -391,7 +392,7 @@ export default function AppHeader({
                 {title}
               </h1>
 
-              <p className="mt-1 text-sm font-medium text-slate-200">
+              <p className={`mt-1 text-sm font-medium text-slate-200 ${hideSubtitleOnMobile ? "hidden md:block" : ""}`}>
                 {subtitle}
               </p>
             </div>

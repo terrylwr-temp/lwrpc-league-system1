@@ -2013,6 +2013,7 @@ export default function CaptainDashboardPage() {
           <AppHeader
             title="Captain Dashboard"
             subtitle="Captain tools, match operations, and score verification."
+            hideSubtitleOnMobile
           />
 
           <div className="rounded-2xl bg-white p-8 text-slate-600 shadow">
@@ -2029,6 +2030,7 @@ export default function CaptainDashboardPage() {
         <AppHeader
           title="Captain Dashboard"
           subtitle="Captain tools, upcoming matches, score entry, and score verification."
+          hideSubtitleOnMobile
           welcomeAction={
             <button
               type="button"
@@ -2042,13 +2044,13 @@ export default function CaptainDashboardPage() {
             </button>
           }
           actions={
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-1">
+            <div className="grid grid-cols-2 gap-1.5 md:grid-cols-1 md:gap-2">
               <button
                 type="button"
                 onClick={() => {
                   if (confirmUnsavedChanges()) router.push("/reset-password");
                 }}
-                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-500"
+                className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-blue-500 md:rounded-xl md:px-4 md:py-2 md:text-sm"
               >
                 Change Password
               </button>
@@ -2064,7 +2066,7 @@ export default function CaptainDashboardPage() {
 
               <a
                 href="mailto:info@lwrpickleballclub.com"
-                className="rounded-xl bg-emerald-500 px-4 py-2 text-center text-sm font-bold text-white hover:bg-emerald-400"
+                className="rounded-lg bg-emerald-500 px-2.5 py-1.5 text-center text-xs font-bold text-white hover:bg-emerald-400 md:rounded-xl md:px-4 md:py-2 md:text-sm"
               >
                 Contact League
               </a>

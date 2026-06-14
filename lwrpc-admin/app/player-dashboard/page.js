@@ -1077,6 +1077,7 @@ export default function PlayerDashboardPage() {
         <AppHeader
           title="Player Dashboard"
           subtitle="Your league teams, standings, and match access."
+          hideSubtitleOnMobile
           welcomeAction={
             <button
               type="button"
@@ -1090,11 +1091,11 @@ export default function PlayerDashboardPage() {
             </button>
           }
           actions={
-            <div className="grid grid-cols-2 gap-2 md:grid-cols-1">
+            <div className="grid grid-cols-2 gap-1.5 md:grid-cols-1 md:gap-2">
               <button
                 type="button"
                 onClick={() => router.push("/reset-password")}
-                className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-500"
+                className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-blue-500 md:rounded-xl md:px-4 md:py-2 md:text-sm"
               >
                 Change Password
               </button>
@@ -1111,7 +1112,7 @@ export default function PlayerDashboardPage() {
 
               <a
                 href="mailto:info@lwrpickleballclub.com"
-                className="rounded-xl bg-emerald-500 px-4 py-2 text-center text-sm font-bold text-white hover:bg-emerald-400"
+                className="rounded-lg bg-emerald-500 px-2.5 py-1.5 text-center text-xs font-bold text-white hover:bg-emerald-400 md:rounded-xl md:px-4 md:py-2 md:text-sm"
               >
                 Contact League
               </a>
@@ -3003,11 +3004,20 @@ function PlayerHistoryRow({ row, memberId }) {
 }
 
 function PlayerHistoryMatchGroup({ group, memberId, ratingForMember }) {
-  const firstRow = group.rows[0];
+  const sortedRows = [...group.rows].sort((a, b) => {
+    const lineCompare = Number(a.line_number || 0) - Number(b.line_number || 0);
+    if (lineCompare !== 0) return lineCompare;
+
+    const aGameNumber = Math.min(...(a.line_games || []).map((game) => Number(game.game_number || 0)));
+    const bGameNumber = Math.min(...(b.line_games || []).map((game) => Number(game.game_number || 0)));
+
+    return (Number.isFinite(aGameNumber) ? aGameNumber : 0) - (Number.isFinite(bGameNumber) ? bGameNumber : 0);
+  });
+  const firstRow = sortedRows[0];
   const match = firstRow?.matches;
   const details = playerLineDetails(firstRow, memberId);
-  const lineCount = group.rows.length;
-  const gameCount = group.rows.reduce(
+  const lineCount = sortedRows.length;
+  const gameCount = sortedRows.reduce(
     (total, row) => total + formatGameScores(row, playerLineDetails(row, memberId).sideLabel, ratingForMember).length,
     0
   );
@@ -3041,7 +3051,7 @@ function PlayerHistoryMatchGroup({ group, memberId, ratingForMember }) {
       </div>
 
       <div className="divide-y divide-slate-200">
-        {group.rows.map((row) => (
+        {sortedRows.map((row) => (
           <PlayerHistoryLineWithScores
             key={row.id}
             row={row}
