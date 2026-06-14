@@ -886,7 +886,7 @@ async function createLadderMatch(supabase, group, body = {}) {
   const sessionDate = requestedSessionDate || await nextLadderSessionDate(supabase, group, ladder);
   const startsAt = String(body.startsAt || ladder.startTime || group.schedule_time || "").trim();
   const result = await createPlannedSession(supabase, group, {
-    sessionName: `${ladder.name} - ${formatIsoDateForLog(sessionDate)}`,
+    sessionName: ladder.name,
     location: group.settings?.defaultLocation || "",
     sessionDate,
     startsAt,
@@ -1956,8 +1956,9 @@ async function sendBroadcastText(supabase, group, body, access = null) {
   }
 
   const phones = players.map((player) => player.phone).filter(Boolean);
+  const messageGroup = session ? await loadSmsGroupForSession(supabase, group, session) : group;
   const renderedMessage = session
-    ? renderSmsTemplate(message, { group, session, ...sessionTextCounts(session, sessionPlayers) })
+    ? renderSmsTemplate(message, { group: messageGroup, session, ...sessionTextCounts(session, sessionPlayers) })
     : message;
   const sms = smsEnabled
     ? await sendSmsMessages({ phones, body: renderedMessage })
@@ -2335,6 +2336,31 @@ async function loadPlayersForGroups(supabase, groupId, invitedGroupIds) {
     .order("display_name", { ascending: true });
   if (playerResult.error) throw playerResult.error;
   return playerResult.data || [];
+}
+
+async function loadSmsGroupForSession(supabase, group, session) {
+  const invitedGroupIds = Array.isArray(session?.invited_group_ids)
+    ? session.invited_group_ids.map((id) => String(id)).filter(Boolean)
+    : [];
+  if (invitedGroupIds.length === 0) return group;
+
+  const { data, error } = await supabase
+    .from("round_robin_player_groups")
+    .select("id, name")
+    .eq("group_id", group.id)
+    .in("id", invitedGroupIds)
+    .order("name", { ascending: true });
+  if (error) throw error;
+
+  const groupNames = (data || [])
+    .map((row) => String(row.name || "").trim())
+    .filter(Boolean);
+  if (groupNames.length === 0) return group;
+
+  return {
+    ...group,
+    name: groupNames.join(", "),
+  };
 }
 
 async function loadSessionMatches(supabase, sessionId) {

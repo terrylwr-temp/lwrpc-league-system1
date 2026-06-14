@@ -319,8 +319,9 @@ export default function RoundRobinPlayerPage() {
 
   function openHostGameUpdate(session) {
     const templates = normalizeHostSmsTemplates(state?.smsTemplates || {});
+    const messageGroup = hostSmsGroupForSession(state, session);
     setHostGameUpdateSession(session);
-    setHostGameUpdateMessage(renderHostSmsTemplate(templates.gameUpdate, state?.group, session, session.sessionPlayers || []));
+    setHostGameUpdateMessage(renderHostSmsTemplate(templates.gameUpdate, messageGroup, session, session.sessionPlayers || []));
   }
 
   function closeHostGameUpdate() {
@@ -1642,6 +1643,23 @@ function weeklyRepeatNotice(weeklyRepeat) {
 function normalizeHostSmsTemplates(templates = {}) {
   return {
     gameUpdate: templates.gameUpdate || DEFAULT_HOST_SMS_TEMPLATES.gameUpdate,
+  };
+}
+
+function hostSmsGroupForSession(state, session) {
+  const invitedGroupIds = Array.isArray(session?.invited_group_ids)
+    ? session.invited_group_ids.map((id) => String(id))
+    : [];
+  const groupNames = (state?.playerGroups || [])
+    .filter((group) => invitedGroupIds.includes(String(group.id)))
+    .map((group) => String(group.name || "").trim())
+    .filter(Boolean);
+
+  if (groupNames.length === 0) return state?.group;
+
+  return {
+    ...(state?.group || {}),
+    name: groupNames.join(", "),
   };
 }
 
