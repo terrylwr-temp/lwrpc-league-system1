@@ -67,7 +67,28 @@ export default function TeamScheduleModal({
         </div>
 
         <div className="grid min-h-0 flex-1 grid-cols-1 md:grid-cols-[290px_minmax(0,1fr)]">
-          <aside className="max-h-52 overflow-auto border-b border-slate-200 bg-slate-100 p-3 sm:p-4 md:max-h-none md:border-b-0 md:border-r">
+          <aside className="border-b border-slate-200 bg-slate-100 p-3 sm:p-4 md:max-h-none md:overflow-auto md:border-b-0 md:border-r">
+            <label className="block md:hidden">
+              <span className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
+                Team Schedule
+              </span>
+              <select
+                value={selectedTeamId || ""}
+                onChange={(event) => {
+                  const team = teams.find((candidate) => String(candidate.id) === String(event.target.value));
+                  if (team) onSelectTeam?.(team);
+                }}
+                className="w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-bold text-slate-900 shadow-sm"
+                aria-label="Choose team schedule"
+              >
+                {teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.standing?.rank ? `#${team.standing.rank} ` : ""}{team.name} - {team.standing?.standings_points ?? 0} pts
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="hidden md:block">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
               <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
                 Teams sorted by Rank
@@ -130,6 +151,7 @@ export default function TeamScheduleModal({
                   )}
                 </button>
               ))}
+            </div>
             </div>
           </aside>
 

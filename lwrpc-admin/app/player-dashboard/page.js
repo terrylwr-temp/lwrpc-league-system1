@@ -75,6 +75,7 @@ export default function PlayerDashboardPage() {
   const [selectedPlayerTeamId, setSelectedPlayerTeamId] = useState("");
   const [showPreviousSeasonTeams, setShowPreviousSeasonTeams] = useState(false);
   const [showAllTeamMatches, setShowAllTeamMatches] = useState(false);
+  const [mobileStandingsView, setMobileStandingsView] = useState("summary");
   const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
   const [historyFilter, setHistoryFilter] = useState("all");
   const [pdfDocument, setPdfDocument] = useState(null);
@@ -875,6 +876,10 @@ export default function PlayerDashboardPage() {
       setSelectedPlayerTeamId(visibleTeams[0].id);
     }
 
+    if (panel === "standings") {
+      setMobileStandingsView("summary");
+    }
+
     scrollDashboardSectionIntoView(PLAYER_PANEL_SECTION_IDS[panel]);
   }
 
@@ -1249,6 +1254,30 @@ export default function PlayerDashboardPage() {
                   Top {selectedDivisionPlayoffTeamCount} teams highlighted for Playoffs/Championship Day. Click on Team Name to see detailed schedule/matches.
                 </div>
               )}
+              <div className="mb-3 inline-grid w-full grid-cols-2 overflow-hidden rounded-xl border border-slate-300 bg-white p-1 text-xs font-black shadow-sm">
+                <button
+                  type="button"
+                  onClick={() => setMobileStandingsView("summary")}
+                  className={`rounded-lg px-3 py-2 ${
+                    mobileStandingsView === "summary"
+                      ? "bg-emerald-700 text-white"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  Summary
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMobileStandingsView("detail")}
+                  className={`rounded-lg px-3 py-2 ${
+                    mobileStandingsView === "detail"
+                      ? "bg-emerald-700 text-white"
+                      : "text-slate-700 hover:bg-slate-100"
+                  }`}
+                >
+                  Details
+                </button>
+              </div>
               <div className="space-y-3">
                 {selectedDivisionStandings.map((row, index) => {
                   const displayRank = index + 1;
@@ -1277,12 +1306,14 @@ export default function PlayerDashboardPage() {
                         {row.standings_points} pts
                       </div>
                     </div>
-                    <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-semibold text-slate-700">
-                      <span className="rounded-lg bg-slate-50 px-3 py-2">W-L-T: {row.match_wins}-{row.match_losses}-{row.match_ties}</span>
-                      <span className="rounded-lg bg-slate-50 px-3 py-2">Games: {row.game_wins}-{row.game_losses}</span>
-                      <span className="rounded-lg bg-slate-50 px-3 py-2">PF: {row.points_for}</span>
-                      <span className="rounded-lg bg-slate-50 px-3 py-2">PA: {row.points_against}</span>
-                    </div>
+                    {mobileStandingsView === "detail" && (
+                      <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-semibold text-slate-700">
+                        <span className="rounded-lg bg-slate-50 px-3 py-2">W-L-T: {row.match_wins}-{row.match_losses}-{row.match_ties}</span>
+                        <span className="rounded-lg bg-slate-50 px-3 py-2">Games: {row.game_wins}-{row.game_losses}</span>
+                        <span className="rounded-lg bg-slate-50 px-3 py-2">PF: {row.points_for}</span>
+                        <span className="rounded-lg bg-slate-50 px-3 py-2">PA: {row.points_against}</span>
+                      </div>
+                    )}
                   </button>
                   );
                 })}
@@ -1798,6 +1829,7 @@ function TeamCard({
 }
 
 function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
+  const [mobileRosterView, setMobileRosterView] = useState("summary");
   const roster = team.roster || [];
   const seasonId = team.divisions?.leagues?.season_id;
   const ratingType = team.divisions?.rating_type || "dupr";
@@ -1821,27 +1853,57 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 shadow-sm hover:bg-slate-100"
           >
             Close
           </button>
         </div>
 
         <div className="overflow-auto p-3 sm:p-5">
+          <div className="mb-3 inline-grid w-full grid-cols-2 overflow-hidden rounded-xl border border-slate-300 bg-white p-1 text-xs font-black shadow-sm md:hidden">
+            <button
+              type="button"
+              onClick={() => setMobileRosterView("summary")}
+              className={`rounded-lg px-3 py-2 ${
+                mobileRosterView === "summary"
+                  ? "bg-blue-700 text-white"
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              Summary
+            </button>
+            <button
+              type="button"
+              onClick={() => setMobileRosterView("detail")}
+              className={`rounded-lg px-3 py-2 ${
+                mobileRosterView === "detail"
+                  ? "bg-blue-700 text-white"
+                  : "text-slate-700 hover:bg-slate-100"
+              }`}
+            >
+              Details
+            </button>
+          </div>
           <div className="space-y-2 md:hidden">
             {roster.map((player) => (
               <div key={player.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="font-black text-slate-950">{formatMemberName(player)}</div>
-                <div className="mt-1 text-sm font-bold text-blue-900">
-                  {ratingLabel}: {ratingForMember(player.id, seasonId, ratingType, player)}
-                </div>
-                <div className="mt-1 text-sm font-semibold text-slate-700">
-                  Record: {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
-                </div>
                 {!hidePlayerContacts && (
+                  <div className="mt-1 text-sm font-semibold text-slate-700">
+                    {formatPhoneNumberForStorage(player.phone) || "No phone on file"}
+                  </div>
+                )}
+                {mobileRosterView === "detail" && (
                   <>
-                    <div className="mt-1 break-words text-sm text-slate-700">{player.email || ""}</div>
-                    <div className="mt-1 text-sm text-slate-700">{formatPhoneNumberForStorage(player.phone) || ""}</div>
+                    <div className="mt-2 text-sm font-bold text-blue-900">
+                      {ratingLabel}: {ratingForMember(player.id, seasonId, ratingType, player)}
+                    </div>
+                    <div className="mt-1 text-sm font-semibold text-slate-700">
+                      Record: {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
+                    </div>
+                    {!hidePlayerContacts && (
+                      <div className="mt-1 break-words text-sm text-slate-700">{player.email || ""}</div>
+                    )}
                   </>
                 )}
               </div>
