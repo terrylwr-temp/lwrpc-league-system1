@@ -349,7 +349,7 @@ async function findPlayerByPhone(supabase, groupId, phone) {
 
   const matches = (data || []).filter((player) => phonesMatch(player.phone, cleanPhone));
   if (matches.length === 0) {
-    const notFound = new Error("That phone number was not found in this Round Robin group.");
+    const notFound = new Error("That phone number was not found in the PBCourtCommand system.");
     notFound.status = 404;
     throw notFound;
   }

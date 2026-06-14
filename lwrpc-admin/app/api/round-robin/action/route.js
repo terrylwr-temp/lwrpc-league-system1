@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendSmsMessages } from "../../../lib/notifications";
+import { compareLadderRowsByCriteria, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
 import { createNextRoundRobinRound, createRoundRobinSchedule, roundRobinPlayerLabel, roundRobinStandings, summaryTextForStandings } from "../../../lib/roundRobinSchedule";
 
 export const runtime = "nodejs";
@@ -24,6 +25,7 @@ const SECONDARY_ALLOWED_ACTIONS = new Set([
   "saveLadder",
   "deleteLadder",
   "saveLadderPositions",
+  "recalculateLadderRankings",
   "createLadderMatch",
 ]);
 
@@ -105,6 +107,11 @@ export async function POST(req) {
       return NextResponse.json({ success: true, ...result });
     }
 
+    if (action === "recalculateLadderRankings") {
+      const result = await recalculateLadderRankings(supabase, group, body);
+      return NextResponse.json({ success: true, ...result });
+    }
+
     if (action === "createLadderMatch") {
       const result = await createLadderMatch(supabase, group, body);
       return NextResponse.json({ success: true, ...result });
@@ -127,6 +134,11 @@ export async function POST(req) {
 
     if (action === "deleteSession") {
       const result = await deleteSession(supabase, group, body);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "markSessionDuprExported") {
+      const result = await markSessionDuprExported(supabase, group, body);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -800,6 +812,70 @@ async function saveLadderPositions(supabase, group, body = {}) {
   return { ladder: nextLadders.find((item) => item.id === ladderId), ladders: nextLadders, group: sanitizeActionGroup({ ...group, settings }) };
 }
 
+async function recalculateLadderRankings(supabase, group, body = {}) {
+  const requestedId = String(body.ladderId || body.ladder?.id || "").trim();
+  if (!requestedId) throw new Error("Ladder is required.");
+
+  const existingLadders = normalizeLadders(group.settings?.ladders || []);
+  const existing = existingLadders.find((item) => item.id === requestedId);
+  if (!existing) throw new Error("Ladder was not found.");
+
+  const requested = body.ladder && typeof body.ladder === "object"
+    ? normalizeLadder({ ...existing, ...body.ladder, id: requestedId }, { allowExistingId: true })
+    : existing;
+  if (!requested.name) throw new Error("Ladder name is required.");
+  if (!requested.startDate) throw new Error("Start date is required.");
+  if (!requested.playerGroupId) throw new Error("Player group is required.");
+
+  const ladderToSave = {
+    ...existing,
+    ...requested,
+    initialPositions: Object.keys(requested.initialPositions || {}).length > 0
+      ? requested.initialPositions
+      : existing.initialPositions || {},
+    updatedAt: new Date().toISOString(),
+  };
+  const nextLadders = existingLadders.map((item) => item.id === requestedId ? ladderToSave : item);
+  const settings = {
+    ...(group.settings || {}),
+    ladders: nextLadders,
+  };
+  const workingGroup = { ...group, settings };
+
+  const updateResult = await supabase
+    .from("round_robin_groups")
+    .update({ settings, updated_at: new Date().toISOString() })
+    .eq("id", group.id);
+  if (updateResult.error) throw updateResult.error;
+
+  const ladderSessions = (await loadLadderSessionsForGroup(supabase, workingGroup, ladderToSave))
+    .filter((session) => session.status === "done")
+    .sort(compareLadderSessions);
+  let resultsRecalculated = 0;
+
+  for (const session of ladderSessions) {
+    const rebuilt = await rebuildResults(supabase, workingGroup, session.id);
+    resultsRecalculated += rebuilt.length;
+  }
+
+  await rebuildLadderPositionMetadata(supabase, workingGroup, ladderToSave, ladderSessions);
+  await addLog(
+    supabase,
+    group.id,
+    null,
+    "setup",
+    `${ladderToSave.name} ladder rankings recalculated for ${ladderSessions.length} completed match${ladderSessions.length === 1 ? "" : "es"}.`
+  );
+
+  return {
+    ladder: ladderToSave,
+    ladders: nextLadders,
+    group: sanitizeActionGroup(workingGroup),
+    sessionsRecalculated: ladderSessions.length,
+    resultsRecalculated,
+  };
+}
+
 async function createLadderMatch(supabase, group, body = {}) {
   const ladderId = String(body.ladderId || "").trim();
   const ladder = normalizeLadders(group.settings?.ladders || []).find((item) => item.id === ladderId);
@@ -1322,6 +1398,38 @@ async function deleteSession(supabase, group, body) {
 
   await addLog(supabase, group.id, session.id, "session", `${session.session_name || "Match"} deleted from active matches.`);
   return { session: data };
+}
+
+async function markSessionDuprExported(supabase, group, body = {}) {
+  const sessionId = String(body.sessionId || "").trim();
+  if (!sessionId) throw new Error("Match is required.");
+
+  const session = await loadSessionForGroup(supabase, group.id, sessionId);
+  const exportedAt = new Date().toISOString();
+  const eventName = String(body.eventName || session.session_name || "DUPR Export").trim();
+  const rowCount = Math.max(0, Number(body.rowCount || 0));
+  const settings = {
+    ...(session.settings || {}),
+    duprExportedAt: exportedAt,
+    duprExport: {
+      ...(session.settings?.duprExport || {}),
+      exportedAt,
+      eventName,
+      rowCount,
+    },
+  };
+
+  const { data, error } = await supabase
+    .from("round_robin_sessions")
+    .update({ settings, updated_at: new Date().toISOString() })
+    .eq("id", session.id)
+    .eq("group_id", group.id)
+    .select("*")
+    .single();
+  if (error) throw error;
+
+  await addLog(supabase, group.id, session.id, "setup", `${session.session_name || "Match"} marked as exported to DUPR.`);
+  return { session: data, eventName, rowCount };
 }
 
 async function masterResetRoundRobin(supabase, group) {
@@ -1932,7 +2040,8 @@ async function rebuildResults(supabase, group, sessionId) {
     displayName: player.display_name,
   })));
   if (isLadderSession(session)) {
-    standings = sortLadderStandingsWithHeadToHead(standings, matches);
+    const ladder = await loadCurrentLadderForSession(supabase, group, session);
+    standings = sortLadderStandings(standings, matches, ladder);
   }
 
   const { data: existingResults, error: existingResultsError } = await supabase
@@ -1978,6 +2087,77 @@ async function rebuildResults(supabase, group, sessionId) {
   return data || [];
 }
 
+async function rebuildLadderPositionMetadata(supabase, group, ladder, sessions = []) {
+  const sessionIds = sessions.map((session) => session.id).filter(Boolean);
+  if (sessionIds.length === 0) return;
+
+  const rosterPlayers = await loadPlayersForGroups(supabase, group.id, [ladder.playerGroupId]);
+  const rosterIds = rosterPlayers.map((player) => String(player.id));
+  if (rosterIds.length === 0) return;
+
+  const [matchesResult, resultsResult] = await Promise.all([
+    supabase
+      .from("round_robin_matches")
+      .select("*")
+      .in("session_id", sessionIds)
+      .order("round_number", { ascending: true })
+      .order("court_number", { ascending: true }),
+    supabase
+      .from("round_robin_player_session_results")
+      .select("*")
+      .in("session_id", sessionIds),
+  ]);
+  if (matchesResult.error) throw matchesResult.error;
+  if (resultsResult.error) throw resultsResult.error;
+
+  const allMatches = matchesResult.data || [];
+  const allResults = resultsResult.data || [];
+  const updates = [];
+  sessions.forEach((session, index) => {
+    const priorSessions = sessions.slice(0, index);
+    const currentSessions = sessions.slice(0, index + 1);
+    const priorSessionIds = new Set(priorSessions.map((row) => String(row.id)));
+    const currentSessionIds = new Set(currentSessions.map((row) => String(row.id)));
+    const previousOrder = ladderPositionOrderForRoster(
+      rosterIds,
+      priorSessions,
+      allResults.filter((row) => priorSessionIds.has(String(row.session_id || ""))),
+      ladder,
+      allMatches.filter((row) => priorSessionIds.has(String(row.session_id || "")))
+    );
+    const nextOrder = ladderPositionOrderForRoster(
+      rosterIds,
+      currentSessions,
+      allResults.filter((row) => currentSessionIds.has(String(row.session_id || ""))),
+      ladder,
+      allMatches.filter((row) => currentSessionIds.has(String(row.session_id || "")))
+    );
+    allResults
+      .filter((row) => String(row.session_id || "") === String(session.id))
+      .filter((row) => Number(row.games || 0) > 0 || Number(row.byes || 0) > 0)
+      .forEach((row) => {
+        const playerId = String(row.player_id || "");
+        updates.push({
+          id: row.id,
+          metadata: {
+            ...resultMetadata(row),
+            ladderPreviousPosition: previousOrder.findIndex((id) => String(id) === playerId) + 1 || null,
+            ladderNewPosition: nextOrder.findIndex((id) => String(id) === playerId) + 1 || null,
+            ladderPositionCount: rosterIds.length,
+          },
+        });
+      });
+  });
+
+  await Promise.all(updates.map(async (row) => {
+    const { error } = await supabase
+      .from("round_robin_player_session_results")
+      .update({ metadata: row.metadata })
+      .eq("id", row.id);
+    if (error) throw error;
+  }));
+}
+
 function resultMetadata(row) {
   const metadata = row?.metadata;
   if (!metadata) return {};
@@ -2002,22 +2182,10 @@ async function loadResults(supabase, sessionId) {
   return data || [];
 }
 
-function sortLadderStandingsWithHeadToHead(standings = [], matches = []) {
+function sortLadderStandings(standings = [], matches = [], ladder = {}) {
   return standings
     .slice()
-    .sort((first, second) => {
-      if (Number(second.pointsFor || 0) !== Number(first.pointsFor || 0)) return Number(second.pointsFor || 0) - Number(first.pointsFor || 0);
-      const headToHead = headToHeadResult(String(first.playerId || ""), String(second.playerId || ""), matches);
-      if (headToHead !== 0) return -headToHead;
-      if (Number(second.winPct || 0) !== Number(first.winPct || 0)) return Number(second.winPct || 0) - Number(first.winPct || 0);
-      const firstGames = Number(first.games || (Number(first.wins || 0) + Number(first.losses || 0)));
-      const secondGames = Number(second.games || (Number(second.wins || 0) + Number(second.losses || 0)));
-      const firstAvgDiff = firstGames > 0 ? Number(first.pointDiff || 0) / firstGames : 0;
-      const secondAvgDiff = secondGames > 0 ? Number(second.pointDiff || 0) / secondGames : 0;
-      if (secondAvgDiff !== firstAvgDiff) return secondAvgDiff - firstAvgDiff;
-      if (secondGames !== firstGames) return secondGames - firstGames;
-      return String(first.displayName || "").localeCompare(String(second.displayName || ""));
-    })
+    .sort((first, second) => compareLadderRowsByCriteria(first, second, matches, ladder?.rankingCriteria))
     .map((row, index) => ({ ...row, rank: index + 1 }));
 }
 
@@ -2254,7 +2422,7 @@ function ladderPositionOrderForRoster(rosterIds = [], sessions = [], resultRows 
       const ranked = courtIds
         .map((playerId) => sessionResults.find((row) => String(row.player_id || "") === String(playerId)))
         .filter(Boolean)
-        .sort((first, second) => compareLadderSessionRows(first, second, sessionMatches));
+        .sort((first, second) => compareLadderRowsByCriteria(first, second, sessionMatches, ladder.rankingCriteria));
       const topIds = courtIndex > 0 ? ranked.slice(0, movementCount).map((row) => String(row.player_id || "")) : [];
       const bottomIds = courtIndex < courts.length - 1 ? ranked.slice(-movementCount).map((row) => String(row.player_id || "")) : [];
       topIds.forEach((playerId) => movePlayerByStep(order, playerId, -Math.max(4, courts[courtIndex - 1]?.length || 4)));
@@ -2277,48 +2445,6 @@ function ladderPositionOrderForRoster(rosterIds = [], sessions = [], resultRows 
 
 function splitLadderIdsIntoCourts(playerIds = []) {
   return splitLadderPlayersIntoCourts(playerIds.map((id) => ({ id }))).map((court) => court.map((player) => String(player.id)));
-}
-
-function compareLadderSessionRows(first, second, matches = []) {
-  const firstPoints = Number(first.points_for || 0);
-  const secondPoints = Number(second.points_for || 0);
-  if (secondPoints !== firstPoints) return secondPoints - firstPoints;
-  const headToHead = headToHeadResult(String(first.player_id || ""), String(second.player_id || ""), matches);
-  if (headToHead !== 0) return -headToHead;
-  const firstWinPct = winPctForResultRow(first);
-  const secondWinPct = winPctForResultRow(second);
-  if (secondWinPct !== firstWinPct) return secondWinPct - firstWinPct;
-  const firstGames = Number(first.games || (Number(first.wins || 0) + Number(first.losses || 0)));
-  const secondGames = Number(second.games || (Number(second.wins || 0) + Number(second.losses || 0)));
-  const firstAvgDiff = firstGames > 0 ? Number(first.point_diff || 0) / firstGames : 0;
-  const secondAvgDiff = secondGames > 0 ? Number(second.point_diff || 0) / secondGames : 0;
-  if (secondAvgDiff !== firstAvgDiff) return secondAvgDiff - firstAvgDiff;
-  if (secondGames !== firstGames) return secondGames - firstGames;
-  return String(first.display_name || "").localeCompare(String(second.display_name || ""));
-}
-
-function headToHeadResult(firstPlayerId, secondPlayerId, matches = []) {
-  let firstWins = 0;
-  let secondWins = 0;
-  matches.forEach((match) => {
-    const team1Score = normalizeScore(match.team1_score);
-    const team2Score = normalizeScore(match.team2_score);
-    if (team1Score === null || team2Score === null || team1Score === team2Score) return;
-    const team1Ids = (match.team1_players || []).map((player) => String(player.id));
-    const team2Ids = (match.team2_players || []).map((player) => String(player.id));
-    const firstTeam = team1Ids.includes(firstPlayerId) ? 1 : team2Ids.includes(firstPlayerId) ? 2 : 0;
-    const secondTeam = team1Ids.includes(secondPlayerId) ? 1 : team2Ids.includes(secondPlayerId) ? 2 : 0;
-    if (!firstTeam || !secondTeam || firstTeam === secondTeam) return;
-    const winningTeam = team1Score > team2Score ? 1 : 2;
-    if (firstTeam === winningTeam) firstWins += 1;
-    if (secondTeam === winningTeam) secondWins += 1;
-  });
-  return firstWins - secondWins;
-}
-
-function winPctForResultRow(row) {
-  const games = Number(row.games || 0) || (Number(row.wins || 0) + Number(row.losses || 0));
-  return games > 0 ? Number(row.wins || 0) / games : 0;
 }
 
 function sessionPlayerIdsFromMatches(matches = []) {
@@ -2405,7 +2531,7 @@ async function findPlayerByPhone(supabase, groupId, phone) {
 
   const matches = (data || []).filter((player) => phonesMatch(player.phone, cleanPhone));
   if (matches.length === 0) {
-    const notFound = new Error("That phone number was not found in this Round Robin group.");
+    const notFound = new Error("That phone number was not found in the PBCourtCommand system.");
     notFound.status = 404;
     throw notFound;
   }
@@ -2637,6 +2763,11 @@ async function loadLadderSessionsForGroup(supabase, group, ladder) {
   return (data || []).filter((session) => String(session.settings?.ladderId || "") === String(ladder.id));
 }
 
+function compareLadderSessions(first, second) {
+  return String(first.session_date || "").localeCompare(String(second.session_date || "")) ||
+    String(first.id || "").localeCompare(String(second.id || ""));
+}
+
 function normalizeLadders(ladders = []) {
   return (Array.isArray(ladders) ? ladders : [])
     .map((ladder) => normalizeLadder(ladder, { allowExistingId: true }))
@@ -2662,6 +2793,7 @@ function normalizeLadder(ladder = {}, options = {}) {
     participationRequirement,
     balanceMode: ladder.balanceMode === "season" ? "season" : "session",
     movementMode: ladder.movementMode === "top2" ? "top2" : "top1",
+    rankingCriteria: normalizeLadderRankingCriteria(ladder.rankingCriteria || ladder.ranking_criteria),
     status: ladder.status === "inactive" ? "inactive" : "active",
     initialPositions: normalizeInitialPositions(ladder.initialPositions || ladder.initial_positions || {}),
     updatedAt: new Date().toISOString(),

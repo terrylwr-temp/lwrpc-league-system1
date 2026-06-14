@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { APP_VERSION, COPYRIGHT_YEAR } from "../../../lib/version";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
 
@@ -80,6 +81,7 @@ export default function RoundRobinPlayerPage() {
     [regularHistorySessions, ladderHistorySessions, sessionSearch, hasRegularMatches, hasLadderMatches, matchView]
   );
   const trimmedSessionSearch = sessionSearch.trim();
+  const loginPhoneIsComplete = normalizePhone(phone).length === 10;
 
   useEffect(() => {
     const savedPhone = window.localStorage.getItem(storageKey) || "";
@@ -404,9 +406,10 @@ export default function RoundRobinPlayerPage() {
 
   if (!state) {
     return (
-      <main className="full-screen-main flex min-h-screen items-center justify-center bg-slate-100 p-4 text-slate-950 sm:p-6">
+      <main className="full-screen-main flex min-h-[100dvh] flex-col justify-between bg-slate-100 px-4 py-3 text-slate-950 sm:p-6">
+        <div className="flex min-h-0 flex-1 items-center justify-center">
         <div className="w-full max-w-md">
-          <div className="rounded-3xl bg-white p-6 shadow-2xl sm:p-8">
+          <div className="rounded-2xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-8">
             <div className="text-center">
               <a
                 href={clubWebsite}
@@ -420,22 +423,24 @@ export default function RoundRobinPlayerPage() {
                   alt={clubName}
                   width={112}
                   height={112}
-                  className="mx-auto h-20 w-20 rounded-full bg-white object-contain sm:h-24 sm:w-24"
+                  className="mx-auto h-16 w-16 rounded-full bg-white object-contain sm:h-24 sm:w-24"
                   unoptimized
                 />
               </a>
-              <h1 className="mt-4 text-2xl font-black leading-tight text-slate-900 sm:text-3xl">
-                {clubName}
-                <span className="mt-1 block text-xl text-teal-700 sm:text-2xl">PBCourtCommand</span>
+              <h1 className="mt-3 max-w-full break-words text-[2rem] font-black leading-tight text-slate-950 sm:mt-4 sm:text-4xl">
+                PBCourtCommand
               </h1>
-              <div className="mt-2 text-sm font-bold text-slate-500">Player Sign In</div>
+              <div className="mx-auto mt-3 h-1 w-16 rounded-full bg-teal-600" />
+              <div className="mx-auto mt-3 max-w-xs text-sm font-black uppercase leading-snug tracking-wide text-blue-700 sm:max-w-sm sm:text-base">
+                {clubName}
+              </div>
             </div>
 
             {(error || notice) && (
               <div className={`mt-5 rounded-xl px-4 py-3 text-sm font-bold ${
                 error ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"
               }`}>
-                {error || notice}
+                <FeedbackMessage message={error || notice} />
               </div>
             )}
 
@@ -443,6 +448,7 @@ export default function RoundRobinPlayerPage() {
               className="mt-6"
               onSubmit={(event) => {
                 event.preventDefault();
+                if (!loginPhoneIsComplete) return;
                 loadPlayer();
               }}
             >
@@ -453,19 +459,21 @@ export default function RoundRobinPlayerPage() {
                   value={phone}
                   onChange={(event) => setPhone(formatPhoneInput(event.target.value))}
                   autoComplete="tel"
+                  suppressHydrationWarning
                   className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 text-lg font-black text-slate-950 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-200"
                   placeholder="941-555-1212"
                 />
               </label>
 
               <label className="mt-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
-                <input type="checkbox" checked={savePhone} onChange={(event) => setSavePhone(event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
+                <input type="checkbox" checked={savePhone} onChange={(event) => setSavePhone(event.target.checked)} suppressHydrationWarning className="h-5 w-5 rounded border-slate-300 text-teal-700" />
                 Save on this device
               </label>
 
               <button
                 type="submit"
-                disabled={loading || !phone.trim()}
+                disabled={loading || !loginPhoneIsComplete}
+                suppressHydrationWarning
                 className="mt-6 w-full rounded-xl bg-teal-700 px-4 py-3 font-black text-white shadow-sm transition hover:bg-teal-800 disabled:bg-slate-300"
               >
                 {loading ? "Signing in..." : "Sign In"}
@@ -475,12 +483,18 @@ export default function RoundRobinPlayerPage() {
             <button
               type="button"
               onClick={openManagerSystem}
+              suppressHydrationWarning
               className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-700 transition hover:border-amber-300 hover:bg-amber-50 hover:text-slate-950"
             >
               Admin Setup
             </button>
           </div>
         </div>
+        </div>
+        <footer className="pt-3 text-center text-xs font-semibold leading-relaxed text-slate-500">
+          <div>{"\u00A9"} {COPYRIGHT_YEAR} {clubName}</div>
+          <div>Version {APP_VERSION}</div>
+        </footer>
       </main>
     );
   }
@@ -495,13 +509,10 @@ export default function RoundRobinPlayerPage() {
               <div className="text-xs font-black uppercase tracking-wide text-teal-200">{clubName}</div>
               <h1 className="break-words text-3xl font-black sm:text-4xl">PBCourtCommand</h1>
             </div>
-            <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
-              <button type="button" onClick={openManagerSystem} className="rounded-lg border border-amber-200/70 bg-amber-400 px-4 py-2 text-sm font-black text-slate-950 shadow-[0_10px_24px_-14px_rgba(245,158,11,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-lg">
-                Admin Setup
-              </button>
+            <div className="hidden gap-2 sm:flex sm:flex-wrap">
               {state && (
                 <button type="button" onClick={clearSavedPhone} className="rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg">
-                  Switch Player
+                  Sign Out
                 </button>
               )}
             </div>
@@ -512,7 +523,7 @@ export default function RoundRobinPlayerPage() {
           <div className={`mt-4 rounded-lg px-4 py-3 text-sm font-bold ${
             error ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"
           }`}>
-            {error || notice}
+            <FeedbackMessage message={error || notice} />
           </div>
         )}
 
@@ -561,9 +572,6 @@ export default function RoundRobinPlayerPage() {
                   className="rounded-lg border border-slate-300 bg-slate-950 px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800"
                 >
                   {showHistory ? "Hide Past Matches" : `Past Matches (${state.history?.sessions?.length || 0})`}
-                </button>
-                <button type="button" onClick={() => loadPlayer()} disabled={loading} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-800 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-500 hover:bg-teal-50 disabled:bg-slate-100">
-                  Refresh
                 </button>
               </div>
             </div>
@@ -675,6 +683,7 @@ export default function RoundRobinPlayerPage() {
 }
 
 function PlayerHistorySummary({ history, player, range, setRange, ladders = [], hasRegularMatches = true, hasLadderMatches = false, onPartnerComparison, onLadderRanking }) {
+  const [mobileExpanded, setMobileExpanded] = useState(false);
   const showingLadders = hasLadderMatches && range === "ladders";
   const regularSessions = (history?.sessions || []).filter((session) => !isLadderSession(session));
   const filteredSessions = filterHistorySessions(regularSessions, range);
@@ -697,73 +706,100 @@ function PlayerHistorySummary({ history, player, range, setRange, ladders = [], 
               </h2>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={() => setMobileExpanded((current) => !current)}
+            className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-teal-900 shadow-sm transition hover:bg-cyan-50 md:hidden"
+            aria-expanded={mobileExpanded}
+          >
+            {mobileExpanded ? "Hide Details" : "Show Details"}
+          </button>
           {!showingLadders && hasRegularMatches && (
             <button
               type="button"
               onClick={onPartnerComparison}
-              className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-teal-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-cyan-50"
+              className={`${mobileExpanded ? "block" : "hidden"} rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-teal-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-cyan-50 md:block`}
             >
               Partner Comparison
             </button>
           )}
         </div>
-        <div className="mt-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-start">
-          {hasRegularMatches && (
-          <div className="rounded-lg border border-white/25 bg-white/10 p-2">
-            <div className="mb-2 text-xs font-black uppercase tracking-wide text-cyan-100">Regular Matches</div>
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-              {PLAYER_RECORD_RANGES.map((item) => (
+        <div className={mobileExpanded ? "block" : "hidden md:block"}>
+          <div className="mt-3 flex flex-col gap-2 md:flex-row md:items-start md:justify-start">
+            {hasRegularMatches && (
+            <div className="rounded-lg border border-white/25 bg-white/10 p-2">
+              <div className="mb-2 text-xs font-black uppercase tracking-wide text-cyan-100">Regular Matches</div>
+              <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+                {PLAYER_RECORD_RANGES.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setRange(item.id)}
+                    className={`rounded-lg px-3 py-2 text-xs font-black shadow-sm ${range === item.id ? "bg-white text-teal-950" : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"}`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            )}
+            {hasLadderMatches && (
+              <div className="rounded-lg border border-violet-200/50 bg-violet-500/20 p-2">
+                <div className="mb-2 text-xs font-black uppercase tracking-wide text-violet-100">Ladders</div>
+                <button
+                  type="button"
+                  onClick={() => setRange("ladders")}
+                  className={`w-full rounded-lg px-3 py-2 text-xs font-black shadow-sm sm:w-auto ${showingLadders ? "bg-white text-violet-900" : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"}`}
+                >
+                  Ladders
+                </button>
+              </div>
+            )}
+          </div>
+          {showingLadders && (
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-xs font-black text-white">
+              <span className="uppercase tracking-wide text-violet-100">Ranking</span>
+              {ladderRankings.length > 0 ? ladderRankings.map((item) => (
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setRange(item.id)}
-                  className={`rounded-lg px-3 py-2 text-xs font-black shadow-sm ${range === item.id ? "bg-white text-teal-950" : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"}`}
+                  onClick={() => onLadderRanking?.(item.ladder)}
+                  className="rounded-md bg-white px-2 py-1 text-left text-violet-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-white"
                 >
                   {item.label}
                 </button>
-              ))}
-            </div>
-          </div>
-          )}
-          {hasLadderMatches && (
-            <div className="rounded-lg border border-violet-200/50 bg-violet-500/20 p-2">
-              <div className="mb-2 text-xs font-black uppercase tracking-wide text-violet-100">Ladders</div>
-              <button
-                type="button"
-                onClick={() => setRange("ladders")}
-                className={`w-full rounded-lg px-3 py-2 text-xs font-black shadow-sm sm:w-auto ${showingLadders ? "bg-white text-violet-900" : "bg-white/15 text-white ring-1 ring-white/25 hover:bg-white/25"}`}
-              >
-                Ladders
-              </button>
+              )) : (
+                <span className="rounded-md bg-white/15 px-2 py-1 text-white ring-1 ring-white/25">-</span>
+              )}
             </div>
           )}
-        </div>
-        {showingLadders && (
-          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-white/25 bg-white/10 px-3 py-2 text-xs font-black text-white">
-            <span className="uppercase tracking-wide text-violet-100">Ranking</span>
-            {ladderRankings.length > 0 ? ladderRankings.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => onLadderRanking?.(item.ladder)}
-                className="rounded-md bg-white px-2 py-1 text-left text-violet-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-violet-50 focus:outline-none focus:ring-2 focus:ring-white"
-              >
-                {item.label}
-              </button>
-            )) : (
-              <span className="rounded-md bg-white/15 px-2 py-1 text-white ring-1 ring-white/25">-</span>
-            )}
+          <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
+            <StatTile label="Dates Played" value={stats.sessionsScored} />
+            <StatTile label="Last played" value={stats.lastPlayedDate ? formatDate(stats.lastPlayedDate) : "-"} />
+            <StatTile label="Record" value={`${stats.wins || 0}-${stats.losses || 0}`} />
+            <StatTile label="Win %" value={formatPercent(stats.winPct)} />
+            <StatTile label="Point Diff" value={formatSignedNumber(stats.pointDiff || 0)} />
           </div>
-        )}
-        <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
-          <StatTile label="Dates Played" value={stats.sessionsScored} />
-          <StatTile label="Last played" value={stats.lastPlayedDate ? formatDate(stats.lastPlayedDate) : "-"} />
-          <StatTile label="Record" value={`${stats.wins || 0}-${stats.losses || 0}`} />
-          <StatTile label="Win %" value={formatPercent(stats.winPct)} />
-          <StatTile label="Point Diff" value={formatSignedNumber(stats.pointDiff || 0)} />
         </div>
       </div>
     </section>
+  );
+}
+
+function FeedbackMessage({ message }) {
+  const text = String(message || "");
+  const brand = "PBCourtCommand";
+  const brandIndex = text.indexOf(brand);
+  if (brandIndex === -1) return text;
+
+  return (
+    <>
+      {text.slice(0, brandIndex)}
+      <span className="rounded-md bg-white/80 px-1.5 py-0.5 font-black text-slate-950 shadow-sm ring-1 ring-current/10">
+        {brand}
+      </span>
+      {text.slice(brandIndex + brand.length)}
+    </>
   );
 }
 
@@ -866,7 +902,7 @@ function PastSessions({ history, sessions = null, searchTerm = "", onSelect }) {
   return (
     <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)]">
       <h2 className="text-xl font-black text-slate-950">Past Matches</h2>
-      <p className="mt-1 text-sm font-bold text-slate-600">Click on a Match to see the Match Game Details.</p>
+      <p className="mt-1 text-sm font-bold text-blue-700">Click on a Match to see the Match Game Details.</p>
       <div className="mt-3 space-y-2">
         {sessionRows.map((session) => {
           const isLadder = isLadderSession(session);

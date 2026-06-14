@@ -5,6 +5,15 @@ import { fileURLToPath } from "node:url";
 const appRoot = dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [
+      {
+        source: "/pbcc",
+        destination: "/pbcc/player",
+        permanent: false,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

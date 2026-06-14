@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { DEFAULT_LADDER_RANKING_CRITERIA, LADDER_RANKING_CRITERIA_OPTIONS, compareLadderRowsByCriteria, ladderRankingCriteriaLabel, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { roundRobinPlayerLabel } from "../../../lib/roundRobinSchedule";
 
@@ -661,6 +662,7 @@ function SessionTab(props) {
   const [sessionModalOpen, setSessionModalOpen] = useState(false);
   const [sessionSearch, setSessionSearch] = useState("");
   const [showPastSessions, setShowPastSessions] = useState(false);
+  const [needDuprExportOnly, setNeedDuprExportOnly] = useState(false);
   const [playersModalSession, setPlayersModalSession] = useState(null);
   const [playersModalStatus, setPlayersModalStatus] = useState("joined");
   const [resultsModalSession, setResultsModalSession] = useState(null);
@@ -669,9 +671,15 @@ function SessionTab(props) {
     () => sessionsForMode(state.sessions || [], showPastSessions),
     [state.sessions, showPastSessions]
   );
+  const visibleSessions = useMemo(
+    () => showPastSessions && needDuprExportOnly
+      ? visibleSessionBase.filter(needsDuprExport)
+      : visibleSessionBase,
+    [needDuprExportOnly, showPastSessions, visibleSessionBase]
+  );
   const filteredSessions = useMemo(
-    () => filterSessions(visibleSessionBase, sessionSearch, state),
-    [state, visibleSessionBase, sessionSearch]
+    () => filterSessions(visibleSessions, sessionSearch, state),
+    [state, visibleSessions, sessionSearch]
   );
 
   function toggleInvitedGroup(groupId) {
@@ -700,6 +708,7 @@ function SessionTab(props) {
       setSessionModalOpen(false);
       setEditingSessionId("");
       setShowPastSessions(false);
+      setNeedDuprExportOnly(false);
       setForm(newSessionForm(state));
     }
   }
@@ -736,6 +745,21 @@ function SessionTab(props) {
     await runAction("deleteSession", { sessionId: session.id });
   }
 
+  function setPastView(nextValue) {
+    setShowPastSessions(nextValue);
+    if (!nextValue) setNeedDuprExportOnly(false);
+  }
+
+  async function exportSessionDupr(session) {
+    const exported = exportSessionDuprCsv(state, session);
+    if (!exported) return;
+    await runAction("markSessionDuprExported", {
+      sessionId: session.id,
+      eventName: exported.eventName,
+      rowCount: exported.rowCount,
+    });
+  }
+
   return (
     <div className="mt-4 space-y-4">
       <section className="space-y-4">
@@ -744,7 +768,9 @@ function SessionTab(props) {
           sessions={filteredSessions}
           totalCount={visibleSessionBase.length}
           showPastSessions={showPastSessions}
-          setShowPastSessions={setShowPastSessions}
+          setShowPastSessions={setPastView}
+          needDuprExportOnly={needDuprExportOnly}
+          setNeedDuprExportOnly={setNeedDuprExportOnly}
           sessionSearch={sessionSearch}
           setSessionSearch={setSessionSearch}
           openAddSession={openAddSession}
@@ -754,7 +780,7 @@ function SessionTab(props) {
           openPlayersModal={openPlayersModal}
           openSessionResults={setResultsModalSession}
           deleteSession={deleteSession}
-          exportSessionDupr={(session) => exportSessionDuprCsv(state, session)}
+          exportSessionDupr={exportSessionDupr}
           runAction={runAction}
           actionLoading={actionLoading}
         />
@@ -890,6 +916,8 @@ function SessionsPanel(props) {
     totalCount,
     showPastSessions,
     setShowPastSessions,
+    needDuprExportOnly,
+    setNeedDuprExportOnly,
     sessionSearch,
     setSessionSearch,
     openAddSession,
@@ -916,6 +944,19 @@ function SessionsPanel(props) {
           <button type="button" onClick={openAddSession} className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800">
             Add Match
           </button>
+          {showPastSessions && (
+            <button
+              type="button"
+              onClick={() => setNeedDuprExportOnly((current) => !current)}
+              className={`rounded-lg border px-4 py-3 text-sm font-black shadow-sm ${
+                needDuprExportOnly
+                  ? "border-blue-700 bg-blue-700 text-white hover:bg-blue-800"
+                  : "border-blue-300 bg-blue-50 text-blue-900 hover:border-blue-500 hover:bg-blue-100"
+              }`}
+            >
+              Need DUPR Export
+            </button>
+          )}
           <div className="grid grid-cols-2 gap-2 rounded-lg border border-slate-300 bg-slate-100 p-1 text-xs font-black">
             <button type="button" onClick={() => setShowPastSessions(false)} className={`rounded-md px-3 py-2 ${showPastSessions ? "text-slate-600 hover:bg-white" : "bg-white text-slate-950 shadow-sm"}`}>
               Upcoming
@@ -1502,6 +1543,7 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
   const canShowResults = isPastSession(session);
   const canDuplicate = !isHostAccess && session.status === "done";
   const isLadder = isLadderSession(session);
+  const duprExported = sessionDuprExported(session);
   const stopActionClick = (event) => event.stopPropagation();
 
   return (
@@ -1527,6 +1569,13 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
             {isLadder && (
               <span className="rounded-md bg-violet-700 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-white">
                 Ladder
+              </span>
+            )}
+            {canShowResults && session.status === "done" && (
+              <span className={`rounded-md px-2 py-1 text-[11px] font-black uppercase tracking-wide ${
+                duprExported ? "bg-blue-100 text-blue-900" : "bg-amber-100 text-amber-900"
+              }`}>
+                DUPR {duprExported ? "\u2713 Exported" : "Needs Export"}
               </span>
             )}
           </div>
@@ -2478,6 +2527,13 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
     if (saved) closeLadderModal();
   }
 
+  async function recalculateLadderRankings(ladderForm = form) {
+    if (!ladderForm.id) return;
+    const label = ladderForm.name || "this ladder";
+    if (!window.confirm(`Recalculate all completed match rankings for ${label}?`)) return;
+    await runAction("recalculateLadderRankings", { ladderId: ladderForm.id, ladder: { ...ladderForm, format: "ladder" } });
+  }
+
   async function deleteLadder(ladder) {
     if (!window.confirm(`Delete ${ladder.name || "this ladder"}? If no games have been played, all match dates for this ladder will also be deleted.`)) return;
     await runAction("deleteLadder", { ladderId: ladder.id });
@@ -2590,6 +2646,9 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
                     <div className="text-lg font-black text-slate-950">{ladder.name}</div>
                     <div className="mt-1 text-xs font-bold text-slate-500">
                       {groupName} | {ladder.dayOfWeekLabel || ladder.dayOfWeek} {ladder.startTime || ""} | {ladder.participationRequirement}% participation
+                    </div>
+                    <div className="mt-1 text-xs font-black uppercase tracking-wide text-violet-700">
+                      Ranking: {rankingCriteriaSummary(ladder.rankingCriteria)}
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -2818,6 +2877,8 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
           setForm={setForm}
           activeGroups={activeGroups}
           actionLoading={actionLoading}
+          hasStartedMatches={ladderHasStarted(state, form.id)}
+          onRecalculate={() => recalculateLadderRankings(form)}
           onSave={saveLadder}
           onClose={closeLadderModal}
         />
@@ -2885,9 +2946,20 @@ function LadderMatchConfirmModal({ modal, actionLoading, onChange, onCreate, onC
   );
 }
 
-function LadderFormModal({ form, setForm, activeGroups, actionLoading, onSave, onClose }) {
+function LadderFormModal({ form, setForm, activeGroups, actionLoading, hasStartedMatches, onRecalculate, onSave, onClose }) {
   const isEditing = Boolean(form.id);
   const saving = actionLoading === "saveLadder";
+  const recalculating = actionLoading === "recalculateLadderRankings";
+  const rankingCriteria = normalizeLadderRankingCriteria(form.rankingCriteria);
+
+  function setRankingCriterion(index, value) {
+    setForm((current) => {
+      const nextCriteria = normalizeLadderRankingCriteria(current.rankingCriteria);
+      if (nextCriteria.some((item, itemIndex) => itemIndex !== index && item === value)) return current;
+      nextCriteria[index] = value;
+      return { ...current, rankingCriteria: normalizeLadderRankingCriteria(nextCriteria) };
+    });
+  }
 
   return (
     <ModalPortal>
@@ -2949,6 +3021,41 @@ function LadderFormModal({ form, setForm, activeGroups, actionLoading, onSave, o
                   <option value="top2">Top 2 up, bottom 2 down</option>
                 </select>
               </label>
+              <div className="md:col-span-2 rounded-lg border border-violet-100 bg-violet-50 p-3">
+                <div className="text-sm font-black uppercase tracking-wide text-violet-800">Ranking Calculations</div>
+                <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+                  {rankingCriteria.map((criterion, index) => (
+                    <label key={index} className="block text-sm font-bold text-slate-600">
+                      Calculation {index + 1}
+                      <select
+                        value={criterion}
+                        onChange={(event) => setRankingCriterion(index, event.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold"
+                      >
+                        {LADDER_RANKING_CRITERIA_OPTIONS.map((option) => (
+                          <option
+                            key={option.value}
+                            value={option.value}
+                            disabled={rankingCriteria.some((item, itemIndex) => itemIndex !== index && item === option.value)}
+                          >
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  ))}
+                </div>
+                {isEditing && hasStartedMatches && (
+                  <button
+                    type="button"
+                    onClick={onRecalculate}
+                    disabled={recalculating || !form.name.trim() || !form.startDate || !form.playerGroupId}
+                    className="mt-3 rounded-lg bg-violet-900 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-violet-800 disabled:bg-slate-300"
+                  >
+                    {recalculating ? "Recalculating..." : "Recalculate Prior Matches"}
+                  </button>
+                )}
+              </div>
             </div>
             <button
               type="button"
@@ -3490,6 +3597,14 @@ function isLadderSession(session) {
   return Boolean(session?.settings?.ladderId) || session?.mode === "ladder";
 }
 
+function sessionDuprExported(session) {
+  return Boolean(session?.settings?.duprExportedAt || session?.settings?.duprExport?.exportedAt);
+}
+
+function needsDuprExport(session) {
+  return isPastSession(session) && session.status === "done" && !sessionDuprExported(session);
+}
+
 function sortSessionsAscending(a, b) {
   return sessionSortValue(a).localeCompare(sessionSortValue(b));
 }
@@ -3753,6 +3868,19 @@ function groupNamesByIds(state, groupIds = []) {
     .map((group) => group.name);
 }
 
+function rankingCriteriaSummary(criteria) {
+  return normalizeLadderRankingCriteria(criteria).map(ladderRankingCriteriaLabel).join(", ");
+}
+
+function ladderHasStarted(state, ladderId) {
+  const cleanId = String(ladderId || "");
+  if (!cleanId) return false;
+  return (state.sessions || []).some((session) => (
+    String(session.settings?.ladderId || "") === cleanId &&
+    ["playing", "done"].includes(session.status)
+  ));
+}
+
 function normalizeSearchText(value) {
   if (Array.isArray(value)) return value.map(normalizeSearchText).join(" ").trim();
   return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
@@ -3772,6 +3900,7 @@ function emptyLadderForm(state) {
     participationRequirement: 50,
     balanceMode: "session",
     movementMode: "top1",
+    rankingCriteria: DEFAULT_LADDER_RANKING_CRITERIA,
     status: "active",
   };
 }
@@ -3789,6 +3918,7 @@ function ladderFormFromLadder(ladder) {
     participationRequirement: ladder.participationRequirement || 50,
     balanceMode: ladder.balanceMode || "session",
     movementMode: ladder.movementMode || "top1",
+    rankingCriteria: normalizeLadderRankingCriteria(ladder.rankingCriteria || ladder.ranking_criteria),
     status: ladder.status || "active",
     initialPositions: ladder.initialPositions || {},
   };
@@ -3808,6 +3938,7 @@ function normalizeLadderList(ladders = []) {
     participationRequirement: clampNumber(ladder.participationRequirement, 10, 100, 50),
     balanceMode: ladder.balanceMode === "season" ? "season" : "session",
     movementMode: ladder.movementMode === "top2" ? "top2" : "top1",
+    rankingCriteria: normalizeLadderRankingCriteria(ladder.rankingCriteria || ladder.ranking_criteria),
     status: ladder.status === "inactive" ? "inactive" : "active",
     initialPositions: normalizeInitialPositions(ladder.initialPositions || ladder.initial_positions || {}),
   })).filter((ladder) => ladder.id && ladder.name);
@@ -3849,7 +3980,7 @@ function ladderSummary(state, ladder) {
     });
   const standingsRows = (completedSessions.length >= 4 ? rows.filter((row) => row.eligible) : rows)
     .slice()
-    .sort(compareLadderStandingRows);
+    .sort((first, second) => compareLadderRowsByCriteria(first, second, matchRows, ladder.rankingCriteria));
   return {
     sessions,
     sessionCount: completedSessions.length,
@@ -3942,7 +4073,7 @@ function ladderPositionOrder(rosterIds, sessions, resultRows, ladder, matchRows 
       const rows = courtIds
         .map((playerId) => sessionResults.find((row) => String(row.player_id || "") === String(playerId)))
         .filter(Boolean)
-        .sort((first, second) => compareLadderResultRows(first, second, sessionMatches));
+        .sort((first, second) => compareLadderRowsByCriteria(first, second, sessionMatches, ladder.rankingCriteria));
       const topIds = courtIndex > 0 ? rows.slice(0, movementCount).map((row) => String(row.player_id || "")) : [];
       const bottomIds = courtIndex < courts.length - 1 ? rows.slice(-movementCount).map((row) => String(row.player_id || "")) : [];
       topIds.forEach((playerId) => movePlayerByStep(order, playerId, -Math.max(4, courts[courtIndex - 1]?.length || 4)));
@@ -3977,57 +4108,6 @@ function splitLadderPlayersIntoCourts(players = []) {
     offset += size;
   }
   return courts.filter((court) => court.length >= 4);
-}
-
-function compareLadderResultRows(first, second, matches = []) {
-  const firstPoints = Number(first.points_for || 0);
-  const secondPoints = Number(second.points_for || 0);
-  if (secondPoints !== firstPoints) return secondPoints - firstPoints;
-  const headToHead = headToHeadResult(String(first.player_id || ""), String(second.player_id || ""), matches);
-  if (headToHead !== 0) return -headToHead;
-  const firstWin = winPctForStanding(first);
-  const secondWin = winPctForStanding(second);
-  if (secondWin !== firstWin) return secondWin - firstWin;
-  const firstGames = Number(first.games || (Number(first.wins || 0) + Number(first.losses || 0)));
-  const secondGames = Number(second.games || (Number(second.wins || 0) + Number(second.losses || 0)));
-  const firstAvgDiff = firstGames > 0 ? Number(first.point_diff || 0) / firstGames : 0;
-  const secondAvgDiff = secondGames > 0 ? Number(second.point_diff || 0) / secondGames : 0;
-  if (secondAvgDiff !== firstAvgDiff) return secondAvgDiff - firstAvgDiff;
-  if (secondGames !== firstGames) return secondGames - firstGames;
-  return String(first.display_name || "").localeCompare(String(second.display_name || ""));
-}
-
-function headToHeadResult(firstPlayerId, secondPlayerId, matches = []) {
-  let firstWins = 0;
-  let secondWins = 0;
-  matches.forEach((match) => {
-    const team1Score = numericScore(match.team1_score);
-    const team2Score = numericScore(match.team2_score);
-    if (team1Score === null || team2Score === null || team1Score === team2Score) return;
-    const team1Ids = (match.team1_players || []).map((player) => String(player.id));
-    const team2Ids = (match.team2_players || []).map((player) => String(player.id));
-    const firstTeam = team1Ids.includes(firstPlayerId) ? 1 : team2Ids.includes(firstPlayerId) ? 2 : 0;
-    const secondTeam = team1Ids.includes(secondPlayerId) ? 1 : team2Ids.includes(secondPlayerId) ? 2 : 0;
-    if (!firstTeam || !secondTeam || firstTeam === secondTeam) return;
-    const winningTeam = team1Score > team2Score ? 1 : 2;
-    if (firstTeam === winningTeam) firstWins += 1;
-    if (secondTeam === winningTeam) secondWins += 1;
-  });
-  return firstWins - secondWins;
-}
-
-function numericScore(value) {
-  if (value === null || value === undefined || value === "") return null;
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
-}
-
-function compareLadderStandingRows(first, second) {
-  if (second.pointsFor !== first.pointsFor) return second.pointsFor - first.pointsFor;
-  if (second.winPct !== first.winPct) return second.winPct - first.winPct;
-  if (second.avgPointDiff !== first.avgPointDiff) return second.avgPointDiff - first.avgPointDiff;
-  if (second.matchesPlayed !== first.matchesPlayed) return second.matchesPlayed - first.matchesPlayed;
-  return String(first.displayName || "").localeCompare(String(second.displayName || ""));
 }
 
 function movePlayerByStep(order, playerId, step) {
@@ -4278,17 +4358,18 @@ function playerRoundRobinUrl(group) {
 function exportSessionDuprCsv(state, session) {
   const defaultEventName = session.session_name || `${state.group?.name || "PBCC"} Match`;
   const eventName = window.prompt("DUPR event name", defaultEventName);
-  if (eventName === null) return;
+  if (eventName === null) return null;
 
   const cleanEventName = String(eventName || "").trim() || defaultEventName;
   const rows = duprRowsForSession(state, session, cleanEventName);
   if (rows.length === 0) {
     window.alert("No completed PBCC games with scores were found for this match.");
-    return;
+    return null;
   }
 
   const csv = [DUPR_EXPORT_HEADERS, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
   downloadCsv(csv, `${slugify(defaultEventName)}-dupr-export.csv`);
+  return { eventName: cleanEventName, rowCount: rows.length };
 }
 
 function duprRowsForSession(state, session, eventName) {
@@ -4555,6 +4636,7 @@ function noticeForAction(action, result) {
   }
   if (action === "deleteLadder") return `Ladder deleted.${Number(result.sessionsDeleted || 0) > 0 ? ` Removed ${result.sessionsDeleted} unplayed match date${Number(result.sessionsDeleted || 0) === 1 ? "" : "s"}.` : ""}`;
   if (action === "saveLadderPositions") return "Ladder positions saved.";
+  if (action === "recalculateLadderRankings") return `Ladder rankings recalculated for ${result.sessionsRecalculated || 0} completed match${Number(result.sessionsRecalculated || 0) === 1 ? "" : "es"}.`;
   if (action === "createLadderMatch") return `Ladder match created for ${formatDate(result.sessionDate)}.`;
   if (action === "updateSessionPlayerStatus") return "Player status updated.";
   if (action === "addSessionPlayer") return "Player added and joined.";
@@ -4564,6 +4646,7 @@ function noticeForAction(action, result) {
   if (action === "generateNextGame") return `Round ${result.roundNumber || ""} generated.`;
   if (action === "updateMatchScore") return "Score saved.";
   if (action === "updateMatchLineup") return "Lineup updated.";
+  if (action === "markSessionDuprExported") return `DUPR Export marked complete for ${result.rowCount || 0} row${Number(result.rowCount || 0) === 1 ? "" : "s"}.`;
   if (action === "completeSession") {
     const base = result.sms?.skipped ? "Match completed. Result text was logged only." : `Match completed. Result texts sent: ${result.sms?.sent || 0}.`;
     return `${base}${weeklyRepeatNotice(result.weeklyRepeat)}`;

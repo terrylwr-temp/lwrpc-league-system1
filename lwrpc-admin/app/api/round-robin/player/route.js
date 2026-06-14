@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { compareLadderRowsByCriteria, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
 import { loadServerSystemSettings } from "../../../lib/serverEmailTemplates";
 
 export const runtime = "nodejs";
@@ -85,7 +86,7 @@ async function findPlayerByPhone(supabase, groupId, phone) {
     throw error;
   }
   if (cleanPhone.length < 10) {
-    const error = new Error("Enter the full 10-digit phone number saved for you by the host.");
+    const error = new Error("Enter a valid full 10-digit phone number.");
     error.status = 400;
     throw error;
   }
@@ -100,7 +101,7 @@ async function findPlayerByPhone(supabase, groupId, phone) {
 
   const matches = (data || []).filter((player) => phonesMatch(player.phone, cleanPhone));
   if (matches.length === 0) {
-    const notFound = new Error("That phone number was not found in this Round Robin group.");
+    const notFound = new Error("That phone number was not found in the PBCourtCommand system.");
     notFound.status = 404;
     throw notFound;
   }
@@ -581,6 +582,7 @@ function sanitizeSessionSettings(settings = {}) {
     ladderConfig: settings?.ladderConfig ? {
       movementMode: settings.ladderConfig.movementMode === "top2" ? "top2" : "top1",
       participationRequirement: Number(settings.ladderConfig.participationRequirement || 50),
+      rankingCriteria: normalizeLadderRankingCriteria(settings.ladderConfig.rankingCriteria || settings.ladderConfig.ranking_criteria),
     } : null,
   };
 }
@@ -741,6 +743,7 @@ function normalizeLadders(ladders = []) {
       participationRequirement: Math.min(100, Math.max(10, Number(ladder.participationRequirement || 50))),
       balanceMode: ladder.balanceMode === "season" ? "season" : "session",
       movementMode: ladder.movementMode === "top2" ? "top2" : "top1",
+      rankingCriteria: normalizeLadderRankingCriteria(ladder.rankingCriteria || ladder.ranking_criteria),
       status: ladder.status === "inactive" ? "inactive" : "active",
       initialPositions: normalizeInitialPositions(ladder.initialPositions || ladder.initial_positions || {}),
     }))
@@ -845,7 +848,7 @@ function ladderPositionOrder(rosterIds, sessions, results, ladder, matches = [])
       const ranked = courtIds
         .map((playerId) => sessionResults.find((row) => String(row.player_id || "") === String(playerId)))
         .filter(Boolean)
-        .sort((first, second) => compareLadderResultRows(first, second, sessionMatches));
+        .sort((first, second) => compareLadderRowsByCriteria(first, second, sessionMatches, ladder.rankingCriteria));
       const topIds = courtIndex > 0 ? ranked.slice(0, movementCount).map((row) => String(row.player_id || "")) : [];
       const bottomIds = courtIndex < courts.length - 1 ? ranked.slice(-movementCount).map((row) => String(row.player_id || "")) : [];
       topIds.forEach((playerId) => movePlayerByStep(order, playerId, -Math.max(4, courts[courtIndex - 1]?.length || 4)));
@@ -884,49 +887,6 @@ function splitLadderPlayersIntoCourts(players = []) {
   return courts.filter((court) => court.length >= 4);
 }
 
-function compareLadderResultRows(first, second, matches = []) {
-  const firstPoints = Number(first.points_for || 0);
-  const secondPoints = Number(second.points_for || 0);
-  if (secondPoints !== firstPoints) return secondPoints - firstPoints;
-  const headToHead = headToHeadResult(String(first.player_id || ""), String(second.player_id || ""), matches);
-  if (headToHead !== 0) return -headToHead;
-  const firstWin = winPctForResult(first);
-  const secondWin = winPctForResult(second);
-  if (secondWin !== firstWin) return secondWin - firstWin;
-  const firstGames = Number(first.games || (Number(first.wins || 0) + Number(first.losses || 0)));
-  const secondGames = Number(second.games || (Number(second.wins || 0) + Number(second.losses || 0)));
-  const firstAvgDiff = firstGames > 0 ? Number(first.point_diff || 0) / firstGames : 0;
-  const secondAvgDiff = secondGames > 0 ? Number(second.point_diff || 0) / secondGames : 0;
-  if (secondAvgDiff !== firstAvgDiff) return secondAvgDiff - firstAvgDiff;
-  if (secondGames !== firstGames) return secondGames - firstGames;
-  return String(first.display_name || "").localeCompare(String(second.display_name || ""));
-}
-
-function headToHeadResult(firstPlayerId, secondPlayerId, matches = []) {
-  let firstWins = 0;
-  let secondWins = 0;
-  matches.forEach((match) => {
-    const team1Score = numericScore(match.team1_score);
-    const team2Score = numericScore(match.team2_score);
-    if (team1Score === null || team2Score === null || team1Score === team2Score) return;
-    const team1Ids = (match.team1_players || []).map((player) => String(player.id));
-    const team2Ids = (match.team2_players || []).map((player) => String(player.id));
-    const firstTeam = team1Ids.includes(firstPlayerId) ? 1 : team2Ids.includes(firstPlayerId) ? 2 : 0;
-    const secondTeam = team1Ids.includes(secondPlayerId) ? 1 : team2Ids.includes(secondPlayerId) ? 2 : 0;
-    if (!firstTeam || !secondTeam || firstTeam === secondTeam) return;
-    const winningTeam = team1Score > team2Score ? 1 : 2;
-    if (firstTeam === winningTeam) firstWins += 1;
-    if (secondTeam === winningTeam) secondWins += 1;
-  });
-  return firstWins - secondWins;
-}
-
-function numericScore(value) {
-  if (value === null || value === undefined || value === "") return null;
-  const numeric = Number(value);
-  return Number.isFinite(numeric) ? numeric : null;
-}
-
 function movePlayerByStep(order, playerId, step) {
   const index = order.findIndex((id) => String(id) === String(playerId));
   if (index < 0) return;
@@ -934,13 +894,6 @@ function movePlayerByStep(order, playerId, step) {
   if (nextIndex === index) return;
   const [item] = order.splice(index, 1);
   order.splice(nextIndex, 0, item);
-}
-
-function winPctForResult(row) {
-  const wins = Number(row?.wins || 0);
-  const losses = Number(row?.losses || 0);
-  const games = Number(row?.games || wins + losses);
-  return games > 0 ? wins / games : 0;
 }
 
 function nextLadderDate(sessions, ladder) {

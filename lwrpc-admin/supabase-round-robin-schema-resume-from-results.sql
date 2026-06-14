@@ -11,6 +11,7 @@ create table if not exists public.round_robin_player_session_results (
   point_diff integer not null default 0,
   byes integer not null default 0,
   rank integer,
+  metadata jsonb not null default '{}'::jsonb,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   unique (session_id, player_id)
