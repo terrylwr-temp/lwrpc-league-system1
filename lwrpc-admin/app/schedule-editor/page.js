@@ -1051,11 +1051,37 @@ export default function ScheduleEditorPage() {
     return [...groups.values()];
   })();
 
+  const allMatchGroupsExpanded =
+    groupedFilteredMatches.length > 0 &&
+    groupedFilteredMatches.every((group) => collapsedMatchGroups[group.key] === false);
+
   function toggleMatchGroup(groupKey) {
     setCollapsedMatchGroups((current) => ({
       ...current,
       [groupKey]: current[groupKey] !== false ? false : true,
     }));
+  }
+
+  function toggleAllMatchGroups() {
+    setCollapsedMatchGroups((current) => {
+      const next = { ...current };
+      groupedFilteredMatches.forEach((group) => {
+        next[group.key] = allMatchGroupsExpanded;
+      });
+      return next;
+    });
+  }
+
+  function openProblemMatchGroups() {
+    setCollapsedMatchGroups((current) => {
+      const next = { ...current };
+      groupedFilteredMatches.forEach((group) => {
+        if (group.issueCount > 0) {
+          next[group.key] = false;
+        }
+      });
+      return next;
+    });
   }
 
   function renderScheduledMatch(match) {
@@ -1065,12 +1091,12 @@ export default function ScheduleEditorPage() {
     return (
       <div
         key={match.id}
-        className={`rounded-lg border px-3 py-2 transition-all ${
+        className={`rounded-lg px-3 py-2 transition-all ${
           matchHasScheduleIssue(match)
-            ? "border-red-300 bg-red-50 ring-1 ring-red-200"
+            ? "border-2 border-red-500 bg-red-50 ring-2 ring-red-200"
             : match.is_published
-            ? "border-green-200 bg-green-50"
-            : "border-amber-200 bg-amber-50"
+            ? "border border-green-200 bg-green-50"
+            : "border border-amber-200 bg-amber-50"
         }`}
       >
         <div className="grid grid-cols-1 gap-2 xl:grid-cols-[32px_minmax(320px,1.7fr)_135px_minmax(180px,1fr)_120px_210px] xl:items-center">
@@ -1478,21 +1504,34 @@ export default function ScheduleEditorPage() {
 
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
 
-            <h2 className="text-xl font-bold text-slate-900">
-              Scheduled Matches
-            </h2>
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="text-xl font-bold text-slate-900">
+                Scheduled Matches
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowMatchNotes((value) => !value)}
+                className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-300"
+              >
+                {showMatchNotes ? "Hide Notes" : "Show Notes"}
+              </button>
+            </div>
 
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-slate-500">
                 Draft matches appear in amber · Published matches appear in green
               </span>
-              <span className={`rounded-full px-3 py-1 text-xs font-black ${
+              <button
+                type="button"
+                onClick={openProblemMatchGroups}
+                disabled={problemMatchCount === 0}
+                className={`rounded-full px-3 py-1 text-xs font-black disabled:cursor-default ${
                 problemMatchCount > 0
-                  ? "bg-red-100 text-red-800"
+                  ? "bg-red-100 text-red-800 hover:bg-red-200"
                   : "bg-emerald-100 text-emerald-800"
               }`}>
                 {problemMatchCount} problem match{problemMatchCount === 1 ? "" : "es"}
-              </span>
+              </button>
             </div>
 
           </div>
@@ -1550,23 +1589,23 @@ export default function ScheduleEditorPage() {
                 Unpublish Selected
               </button>
 
+              <button
+                type="button"
+                onClick={toggleAllMatchGroups}
+                disabled={groupedFilteredMatches.length === 0}
+                className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-200 disabled:text-slate-500"
+              >
+                {allMatchGroupsExpanded ? "Collapse all" : "Expand all"}
+              </button>
+
             </div>
 
             <div className="text-sm font-semibold text-slate-600">
               {selectedMatchIds.length} selected
             </div>
-
-            <button
-              type="button"
-              onClick={() => setShowMatchNotes((value) => !value)}
-              className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-300"
-            >
-              {showMatchNotes ? "Hide Notes" : "Show Notes"}
-            </button>
           </div>
 
           <div className="space-y-3">
-
             {groupedFilteredMatches.map((group) => {
               const isCollapsed = collapsedMatchGroups[group.key] !== false;
 
