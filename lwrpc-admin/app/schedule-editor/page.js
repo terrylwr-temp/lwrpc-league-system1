@@ -8,6 +8,8 @@ import { formatDisplayDate, formatDisplayTimestampShort } from "../lib/dateTime"
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
 
+const COMPLETE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 export default function ScheduleEditorPage() {
   const router = useRouter();
 
@@ -37,6 +39,7 @@ export default function ScheduleEditorPage() {
   const [swapPrompt, setSwapPrompt] = useState(null);
   const [swapUpdating, setSwapUpdating] = useState(false);
   const [collapsedMatchGroups, setCollapsedMatchGroups] = useState({});
+  const [matchDateDrafts, setMatchDateDrafts] = useState({});
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -616,7 +619,7 @@ export default function ScheduleEditorPage() {
     const match = matches.find((row) => row.id === matchId);
     if (isMatchLocked(match)) {
       alert("This match is completed and verified. Use Reset Scores before changing schedule details.");
-      return;
+      return false;
     }
 
     const payload = {
@@ -631,10 +634,46 @@ export default function ScheduleEditorPage() {
 
     if (error) {
       alert(error.message);
+      return false;
+    }
+
+    await loadData();
+    return true;
+  }
+
+  function updateMatchDateDraft(matchId, value) {
+    setMatchDateDrafts((current) => ({
+      ...current,
+      [matchId]: value,
+    }));
+  }
+
+  function clearMatchDateDraft(matchId) {
+    setMatchDateDrafts((current) => {
+      if (!(matchId in current)) return current;
+      const next = { ...current };
+      delete next[matchId];
+      return next;
+    });
+  }
+
+  async function saveMatchDateDraft(match, inputValue) {
+    const draftValue = matchDateDrafts[match.id] ?? inputValue;
+    if (draftValue === undefined) return;
+
+    const currentValue = match.scheduled_date || "";
+    if (draftValue === currentValue) {
+      clearMatchDateDraft(match.id);
       return;
     }
 
-    loadData();
+    if (draftValue && !COMPLETE_DATE_PATTERN.test(draftValue)) {
+      alert("Enter the full date before saving this match.");
+      return;
+    }
+
+    const saved = await updateMatch(match.id, "scheduled_date", draftValue);
+    if (saved) clearMatchDateDraft(match.id);
   }
 
   async function deleteMatch(match) {
@@ -1072,8 +1111,14 @@ export default function ScheduleEditorPage() {
           <div className="grid grid-cols-1 gap-1.5">
             <input
               type="date"
-              value={match.scheduled_date || ""}
-              onChange={e => updateMatch(match.id, "scheduled_date", e.target.value)}
+              value={matchDateDrafts[match.id] ?? match.scheduled_date ?? ""}
+              onChange={e => updateMatchDateDraft(match.id, e.target.value)}
+              onBlur={e => saveMatchDateDraft(match, e.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  event.currentTarget.blur();
+                }
+              }}
               disabled={locked}
               className="w-full rounded-lg border border-slate-300 px-2 py-1.5 text-sm disabled:bg-slate-100 disabled:text-slate-500"
               aria-label="Match date"
