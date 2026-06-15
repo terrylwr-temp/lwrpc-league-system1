@@ -343,9 +343,7 @@ export default function AppHeader({
                 <div className="mt-5 text-center text-[11px] leading-relaxed text-slate-400">
                   {"\u{00A9}"} {COPYRIGHT_YEAR} {clubName}
                   <br />
-                  All rights reserved.
-                  <br />
-                  Version {APP_VERSION}
+                  All rights reserved. Version {APP_VERSION}
                 </div>
               </>
             ) : (
@@ -486,9 +484,7 @@ export default function AppHeader({
             <div className="mt-6 text-center text-[11px] leading-relaxed text-slate-400">
               {"\u{00A9}"} {COPYRIGHT_YEAR} {clubName}
               <br />
-              All rights reserved.
-              <br />
-              Version {APP_VERSION}
+              All rights reserved. Version {APP_VERSION}
             </div>
           </div>
         </div>
