@@ -941,7 +941,7 @@ function getAverageTeamRating() {
                 {canRequestCaptainChange && (
                   <a
                     href={captainChangeRequestHref()}
-                    className="inline-flex w-full items-center justify-center rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800 sm:w-auto"
+                    className="inline-flex w-full items-center justify-center rounded-xl bg-slate-200 px-4 py-2 text-sm font-bold text-slate-900 hover:bg-slate-300 sm:w-auto"
                   >
                     Change Captain/Co-Captain
                   </a>
@@ -1197,11 +1197,11 @@ function getAverageTeamRating() {
                         <div className="mt-2 space-y-2 break-words text-sm text-slate-600">
 
                           <div>
-                            Team Games:{" "}
+                            Games:{" "}
                             <span className="font-semibold">
                               {playerRosterRecord(member?.id).games}
                             </span>{" "}
-                            Team Record:{" "}
+                            Record:{" "}
                             <span className="font-semibold">
                               {playerRosterRecord(member?.id).record}
                             </span>

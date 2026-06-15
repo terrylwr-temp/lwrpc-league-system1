@@ -46,6 +46,18 @@ const PLAYER_PANEL_SECTION_IDS = {
   standings: "player-dashboard-division-standings",
   upcoming: "player-dashboard-team-matches",
 };
+const DASHBOARD_HEADER_BUTTON_3D =
+  "rounded-full border border-white/25 bg-gradient-to-b from-white to-slate-200 px-3 py-1 text-xs font-black text-slate-950 shadow-[0_4px_0_rgba(148,163,184,0.9),0_8px_14px_rgba(0,0,0,0.26)] transition hover:-translate-y-0.5 hover:from-white hover:to-blue-100 active:translate-y-1 active:shadow-[0_2px_0_rgba(148,163,184,0.9),0_4px_8px_rgba(0,0,0,0.22)]";
+const DASHBOARD_TEAM_TAB_BASE =
+  "relative shrink-0 cursor-pointer rounded-t-2xl border px-4 text-left transition duration-150 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 active:translate-y-1";
+const DASHBOARD_TEAM_TAB_SELECTED =
+  "z-10 border-emerald-500 border-b-emerald-900 bg-gradient-to-b from-emerald-700 to-blue-900 py-3 text-white shadow-[0_7px_0_#064e3b,0_13px_20px_rgba(15,23,42,0.26)] hover:from-emerald-600 hover:to-blue-800 active:shadow-[0_3px_0_#064e3b,0_6px_12px_rgba(15,23,42,0.22)]";
+const DASHBOARD_TEAM_TAB_UNSELECTED =
+  "border-slate-300 bg-gradient-to-b from-white to-slate-200 py-2 text-slate-800 shadow-[0_5px_0_#cbd5e1,0_10px_16px_rgba(15,23,42,0.14)] hover:border-blue-300 hover:from-blue-50 hover:to-blue-100 active:shadow-[0_2px_0_#cbd5e1,0_5px_10px_rgba(15,23,42,0.12)]";
+const DASHBOARD_ACTION_BUTTON_3D =
+  "w-full cursor-pointer rounded-xl border border-blue-300 bg-gradient-to-b from-white to-blue-100 px-3 py-3 text-sm font-black text-blue-950 shadow-[0_5px_0_#2563eb,0_10px_16px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:from-blue-50 hover:to-blue-200 active:translate-y-1 active:shadow-[0_2px_0_#2563eb,0_5px_10px_rgba(15,23,42,0.16)]";
+const DASHBOARD_EMERALD_BUTTON_3D =
+  "rounded-xl border border-emerald-300 bg-gradient-to-b from-white to-emerald-100 px-3 py-2 text-xs font-black text-emerald-950 shadow-[0_4px_0_#059669,0_8px_14px_rgba(15,23,42,0.16)] transition hover:-translate-y-0.5 hover:from-emerald-50 hover:to-emerald-200 active:translate-y-1 active:shadow-[0_2px_0_#059669,0_4px_8px_rgba(15,23,42,0.14)] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:bg-none disabled:text-slate-400 disabled:shadow-none disabled:hover:translate-y-0";
 
 function scrollDashboardSectionIntoView(sectionId) {
   if (!sectionId || typeof window === "undefined") return;
@@ -1185,10 +1197,10 @@ export default function PlayerDashboardPage() {
                   <button
                     type="button"
                     onClick={() => selectPanel("history")}
-                    className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-black shadow-sm transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-slate-950 active:translate-y-0 ${
+                    className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-black shadow-[0_4px_0_rgba(30,64,175,0.7),0_8px_14px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-slate-950 active:translate-y-1 active:shadow-[0_2px_0_rgba(30,64,175,0.7),0_4px_8px_rgba(0,0,0,0.22)] ${
                       activePanel === "history"
-                        ? "border-blue-300 bg-blue-600 text-white hover:bg-blue-500"
-                        : "border-blue-200 bg-blue-100 text-blue-950 hover:bg-blue-200"
+                        ? "border-blue-300 bg-gradient-to-b from-blue-500 to-blue-700 text-white hover:from-blue-400 hover:to-blue-600"
+                        : "border-blue-200 bg-gradient-to-b from-white to-blue-100 text-blue-950 hover:from-blue-50 hover:to-blue-200"
                     }`}
                   >
                     My Play History
@@ -1207,7 +1219,7 @@ export default function PlayerDashboardPage() {
                   <button
                     type="button"
                     onClick={() => setShowPreviousSeasonTeams((value) => !value)}
-                    className="rounded-full bg-white/10 px-3 py-1 text-xs font-black text-white hover:bg-white/20"
+                    className={DASHBOARD_HEADER_BUTTON_3D}
                   >
                     {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
                   </button>
@@ -1652,10 +1664,8 @@ function DashboardTeamSelector({ teams, selectedTeamId, onSelect }) {
                 role="tab"
                 aria-selected={selected}
                 onClick={() => onSelect(team.id)}
-                className={`relative shrink-0 cursor-pointer rounded-t-2xl border px-4 text-left shadow-sm transition-transform duration-150 hover:-translate-y-1 hover:shadow-md active:translate-y-0 ${
-                  selected
-                    ? "z-10 border-emerald-500 border-b-emerald-800 bg-gradient-to-r from-emerald-800 to-blue-800 py-3 text-white shadow-md"
-                    : "border-slate-200 bg-slate-100 py-2 text-slate-700 hover:border-blue-200 hover:bg-blue-50"
+                className={`${DASHBOARD_TEAM_TAB_BASE} ${
+                  selected ? DASHBOARD_TEAM_TAB_SELECTED : DASHBOARD_TEAM_TAB_UNSELECTED
                 }`}
               >
                 <div className="max-w-52 truncate text-sm font-black">{team.name}</div>
@@ -1788,7 +1798,7 @@ function TeamCard({
             event.stopPropagation();
             onOpenRoster(team);
           }}
-          className="w-full cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
+          className={DASHBOARD_ACTION_BUTTON_3D}
         >
           Team Roster
         </button>
@@ -1798,7 +1808,7 @@ function TeamCard({
             event.stopPropagation();
             onOpenDivisionStandings();
           }}
-          className="w-full cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
+          className={DASHBOARD_ACTION_BUTTON_3D}
         >
           Division Standings
           <span className="ml-2 rounded-lg bg-white px-2 py-0.5 text-xs">
@@ -1811,7 +1821,7 @@ function TeamCard({
             event.stopPropagation();
             onOpenTeamMatches();
           }}
-          className="w-full cursor-pointer rounded-xl bg-blue-100 px-3 py-3 text-sm font-bold text-blue-900 shadow-sm hover:bg-blue-200"
+          className={DASHBOARD_ACTION_BUTTON_3D}
         >
           Team Matches
           <span className="ml-2 rounded-lg bg-white px-2 py-0.5 text-xs">
@@ -1846,12 +1856,12 @@ function TeamCard({
             event.stopPropagation();
             onToggleDocuments();
           }}
-          className="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-blue-950 hover:bg-white/50"
+          className="flex w-full items-center justify-between px-4 py-3 text-left text-xs font-black uppercase tracking-wide text-blue-950 transition hover:-translate-y-0.5 hover:bg-white/50 active:translate-y-1"
         >
-          <span className="rounded-full bg-blue-700 px-3 py-1 text-white shadow-sm">
+          <span className="rounded-full border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-3 py-1 text-white shadow-[0_4px_0_#1e3a8a,0_8px_14px_rgba(15,23,42,0.18)]">
             League Documents
           </span>
-          <span className="rounded-full bg-white px-3 py-1 text-blue-900 shadow-sm">
+          <span className="rounded-full border border-slate-200 bg-gradient-to-b from-white to-slate-100 px-3 py-1 text-blue-900 shadow-[0_3px_0_#cbd5e1,0_6px_10px_rgba(15,23,42,0.14)]">
             {documentsOpen ? "Hide" : "Show"}
           </span>
         </button>
@@ -1870,7 +1880,7 @@ function TeamCard({
                     onOpenDocument(team, documentType);
                   }}
                   disabled={!hasDocument}
-                  className="rounded-xl bg-emerald-100 px-3 py-2 text-xs font-bold text-emerald-950 hover:bg-emerald-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                  className={DASHBOARD_EMERALD_BUTTON_3D}
                 >
                   {documentType.label}
                 </button>
