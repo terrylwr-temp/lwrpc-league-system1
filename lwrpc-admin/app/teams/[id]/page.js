@@ -1669,7 +1669,7 @@ function MobileTeamInfoToggle({ value, onChange, className = "" }) {
     <button
       type="button"
       onClick={() => onChange(isDetail ? "summary" : "detail")}
-      className={`rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50 ${className}`}
+      className={`rounded-xl border-2 border-slate-700 bg-white px-4 py-3 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50 ${className}`}
     >
       {isDetail ? "Team Detail" : "Team Summary"}
     </button>
