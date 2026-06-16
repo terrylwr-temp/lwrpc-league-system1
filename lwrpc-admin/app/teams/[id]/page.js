@@ -959,7 +959,7 @@ function getAverageTeamRating() {
             </div>
 
             <div className="flex w-full flex-col gap-3 sm:w-auto">
-              <RosterViewToggle value={teamInfoView} onChange={setTeamInfoView} className="md:hidden" />
+              <MobileTeamInfoToggle value={teamInfoView} onChange={setTeamInfoView} className="md:hidden" />
 
               <div className={`${teamInfoDetailView ? "" : "hidden"} rounded-xl bg-slate-900 p-4 text-white shadow-lg sm:min-w-40 md:block`}>
 
@@ -1129,7 +1129,7 @@ function getAverageTeamRating() {
                   type="button"
                   onClick={openAddPlayerModal}
                   disabled={!canModifyRoster}
-                  className={`${teamRosterDetailView ? "" : "hidden"} rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300 md:block`}
+                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   Add Player
                 </button>
@@ -1328,7 +1328,7 @@ function getAverageTeamRating() {
                 <button
                   type="button"
                   onClick={closeAddPlayerModal}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                  className="rounded-xl border-2 border-slate-700 bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50"
                 >
                   Close
                 </button>
@@ -1659,6 +1659,20 @@ function RosterViewToggle({ value, onChange, className = "" }) {
         </button>
       ))}
     </div>
+  );
+}
+
+function MobileTeamInfoToggle({ value, onChange, className = "" }) {
+  const isDetail = value === "detail";
+
+  return (
+    <button
+      type="button"
+      onClick={() => onChange(isDetail ? "summary" : "detail")}
+      className={`rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50 ${className}`}
+    >
+      {isDetail ? "Team Detail" : "Team Summary"}
+    </button>
   );
 }
 

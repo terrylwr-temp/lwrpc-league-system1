@@ -351,7 +351,8 @@ export default function RoundRobinAdminPage() {
     }));
   }
 
-  async function saveCurrentRoundScores(session = null) {
+  async function saveCurrentRoundScores(session = null, options = {}) {
+    const requireComplete = options.requireComplete === true;
     const matches = state?.matches || [];
     if (matches.length === 0) return { success: true };
 
@@ -366,8 +367,13 @@ export default function RoundRobinAdminPage() {
       const team2Score = pending.team2Score ?? match.team2_score ?? "";
       const team1Blank = String(team1Score).trim() === "";
       const team2Blank = String(team2Score).trim() === "";
-      if (team1Blank && team2Blank) continue;
       const courtLabel = match.court_name || `Court ${match.court_number || ""}`.trim();
+      if (team1Blank && team2Blank) {
+        if (requireComplete) {
+          return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: enter scores before continuing.` };
+        }
+        continue;
+      }
       if (team1Blank || team2Blank) {
         return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: enter both scores before continuing.` };
       }
@@ -1153,13 +1159,20 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }, [pendingRoundScroll, state?.matches]);
 
   async function primaryAction() {
-    if (isPlaying && !(await saveScoresForTopAction())) return;
+    if (isPlaying) {
+      setProgressMessage("Checking and saving current scores...");
+      try {
+        if (!(await saveScoresForTopAction())) return;
+      } finally {
+        setProgressMessage("");
+      }
+    }
     openStartModal(isPlaying ? "round" : "initial");
   }
 
   async function saveScoresForTopAction() {
     if (!saveCurrentRoundScores) return true;
-    const saved = await saveCurrentRoundScores(session);
+    const saved = await saveCurrentRoundScores(session, { requireComplete: true });
     if (saved?.success === false) {
       setScoreError(saved.error || "Check the scores before continuing.");
       return false;
@@ -1246,7 +1259,6 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }
 
   async function exitSession() {
-    if (!(await saveScoresForTopAction())) return;
     onExit?.();
   }
 
