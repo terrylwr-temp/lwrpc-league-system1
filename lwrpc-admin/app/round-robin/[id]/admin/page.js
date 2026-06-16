@@ -1147,6 +1147,9 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   const joinedPlayers = sessionPlayersForStatus(state, session.id, "joined");
   const joinedCount = joinedPlayers.length;
   const canStartSession = isPlaying || joinedCount >= 4;
+  const verifyPlayersRoundNumber = startModalMode === "round"
+    ? nextRoundNumberForSession(state, session.id)
+    : 1;
 
   useEffect(() => {
     if (!pendingRoundScroll) return;
@@ -1355,6 +1358,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
           checkedPlayerIds={startCheckedPlayerIds}
           togglePlayer={toggleStartPlayer}
           mode={startModalMode}
+          roundNumber={verifyPlayersRoundNumber}
           actionLoading={actionLoading}
           onClose={() => { setStartModalOpen(false); setStartCheckedPlayerIds([]); }}
           onStart={confirmStartSession}
@@ -2036,7 +2040,7 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
   );
 }
 
-function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checkedPlayerIds, togglePlayer, mode = "initial", actionLoading, onClose, onStart }) {
+function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checkedPlayerIds, togglePlayer, mode = "initial", roundNumber = 1, actionLoading, onClose, onStart }) {
   const checkedSet = new Set((checkedPlayerIds || []).map(String));
   const checkedCount = checkedSet.size;
   const courtLabel = `${courts.length} court${courts.length === 1 ? "" : "s"}`;
@@ -2066,7 +2070,7 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <div className="text-sm font-black text-blue-950">Verify Players</div>
+                  <div className="text-sm font-black text-blue-950">Verify Players - Round {roundNumber}</div>
                   <div className="mt-1 text-xs font-bold text-blue-800">
                     {initialMode ? "Uncheck anyone who did not show up." : "Uncheck anyone not playing this round."}
                   </div>
@@ -4255,6 +4259,16 @@ function scrollToRoundHeader(roundNumber) {
   const offset = 112;
   const top = element.getBoundingClientRect().top + window.scrollY - offset;
   window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
+function nextRoundNumberForSession(state, sessionId) {
+  const currentRoundNumber = Math.max(
+    0,
+    ...(state?.matches || [])
+      .filter((match) => String(match.session_id || "") === String(sessionId || ""))
+      .map((match) => Number(match.round_number || 0))
+  );
+  return currentRoundNumber + 1;
 }
 
 function sessionLifecycleClass(status) {
