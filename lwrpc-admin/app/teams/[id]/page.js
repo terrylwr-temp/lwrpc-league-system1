@@ -34,6 +34,7 @@ export default function TeamRosterPage() {
   const [addPlayerModalOpen, setAddPlayerModalOpen] = useState(false);
   const [expandedHistoryMemberId, setExpandedHistoryMemberId] = useState("");
   const [historyFilters, setHistoryFilters] = useState({});
+  const [rosterView, setRosterView] = useState("summary");
 
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -689,6 +690,7 @@ function getAverageTeamRating() {
   const canModifyRoster = hasRole(currentUser?.role, "captain") && (!rostersLocked || canAdministerLockedRoster);
   const isCaptainOnly = currentUser?.role === "captain";
   const canRequestCaptainChange = isCurrentTeamCaptainOrCoCaptain();
+  const rosterDetailView = rosterView === "detail";
 
   async function addPlayer() {
     if (!selectedMemberId) {
@@ -954,20 +956,24 @@ function getAverageTeamRating() {
 
             </div>
 
-            <div className="w-full rounded-xl bg-slate-900 p-4 text-white shadow-lg sm:w-auto sm:min-w-40">
+            <div className="flex w-full flex-col gap-3 sm:w-auto">
+              <RosterViewToggle value={rosterView} onChange={setRosterView} />
 
-              <div className="text-xs uppercase tracking-wide text-slate-300">
-                Active Players
+              <div className="rounded-xl bg-slate-900 p-4 text-white shadow-lg sm:min-w-40">
+
+                <div className="text-xs uppercase tracking-wide text-slate-300">
+                  Active Players
+                </div>
+
+                <div className="mt-1 text-3xl font-bold">
+                  {roster.length}
+                </div>
+
               </div>
-
-              <div className="mt-1 text-3xl font-bold">
-                {roster.length}
-              </div>
-
             </div>
-
           </div>
 
+          {rosterDetailView && (
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
 
             <Info
@@ -999,6 +1005,7 @@ function getAverageTeamRating() {
             />
 
           </div>
+          )}
 
         </div>
 
@@ -1116,14 +1123,16 @@ function getAverageTeamRating() {
               </h2>
 
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
-                <button
-                  type="button"
-                  onClick={openAddPlayerModal}
-                  disabled={!canModifyRoster}
-                  className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                >
-                  Add Player
-                </button>
+                {rosterDetailView && (
+                  <button
+                    type="button"
+                    onClick={openAddPlayerModal}
+                    disabled={!canModifyRoster}
+                    className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    Add Player
+                  </button>
+                )}
 
                 <div className="w-full rounded-xl bg-slate-900 px-5 py-3 text-white sm:w-auto">
                   <div className="text-xs uppercase tracking-wide text-slate-300">
@@ -1207,6 +1216,8 @@ function getAverageTeamRating() {
                             </span>
                           </div>
 
+                          {rosterDetailView && (
+                          <>
                           <div>
                             {getRatingLabel()}:
                             {" "}
@@ -1228,11 +1239,14 @@ function getAverageTeamRating() {
                               {membershipInfoLabel(member)}
                             </div>
                           )}
+                          </>
+                          )}
 
                         </div>
 
                       </div>
 
+                      {rosterDetailView && (
                       <div className="grid shrink-0 grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
                         <button
                           type="button"
@@ -1254,10 +1268,11 @@ function getAverageTeamRating() {
                           Remove
                         </button>
                       </div>
+                      )}
 
                     </div>
 
-                    {expandedHistoryMemberId === member?.id && (
+                    {rosterDetailView && expandedHistoryMemberId === member?.id && (
                       <PlayerHistoryPanel
                         memberId={member.id}
                         historyRows={historyRowsForMember(member.id)}
@@ -1618,6 +1633,32 @@ function Info({ label, value }) {
       <div className="mt-2 break-words text-base font-black leading-snug text-slate-950">
         {value}
       </div>
+    </div>
+  );
+}
+
+function RosterViewToggle({ value, onChange }) {
+  const options = [
+    { id: "summary", label: "Summary" },
+    { id: "detail", label: "Detail" },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-1 rounded-xl border border-slate-300 bg-white p-1 text-xs font-black shadow-sm">
+      {options.map((option) => (
+        <button
+          key={option.id}
+          type="button"
+          onClick={() => onChange(option.id)}
+          className={`rounded-lg px-3 py-2 ${
+            value === option.id
+              ? "bg-blue-700 text-white"
+              : "text-slate-700 hover:bg-slate-100"
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
     </div>
   );
 }

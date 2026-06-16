@@ -2200,7 +2200,6 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
       <div className="flex flex-col gap-2 bg-[linear-gradient(90deg,#0f3b36,#166b61)] px-3 py-2 text-white sm:flex-row sm:items-center sm:justify-between">
         <div className="font-black">{match.court_name || `Court ${match.court_number}`}</div>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:items-center">
-          <div className="rounded-md bg-white/15 px-2 py-1 text-xs font-black text-white ring-1 ring-white/20">{roundRobinScoringLabel(scoreRules)}</div>
           {matchHasSavedScore(match) && <div className="rounded-md bg-emerald-300 px-2 py-1 text-xs font-black text-emerald-950">Score Saved</div>}
         </div>
       </div>

@@ -670,6 +670,17 @@ export default function PlayerDashboardPage() {
     return Array.from({ length: upcomingMatchCount + upcomingByeCount });
   }, [byeWeeks, matches, selectedPlayerTeamId]);
 
+  const selectedCompletedTeamMatchCount = useMemo(() => {
+    if (!selectedPlayerTeamId) return 0;
+
+    return matches.filter(
+      (match) =>
+        match.status === "completed" &&
+        (String(match.home_team_id) === String(selectedPlayerTeamId) ||
+          String(match.away_team_id) === String(selectedPlayerTeamId))
+    ).length;
+  }, [matches, selectedPlayerTeamId]);
+
   const selectedTeamMatches = useMemo(() => {
     if (!selectedPlayerTeamId) return [];
 
@@ -1461,17 +1472,29 @@ export default function PlayerDashboardPage() {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-2 md:flex-row md:items-center">
+              <div className="grid w-full grid-cols-2 gap-2 rounded-xl border border-white/20 bg-white/10 p-1 text-xs font-black sm:w-auto md:text-sm">
                 <button
                   type="button"
-                  onClick={() => setShowAllTeamMatches((value) => !value)}
-                  className="rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-900 hover:bg-slate-100"
+                  onClick={() => setShowAllTeamMatches(false)}
+                  className={`rounded-lg px-3 py-2 text-center ${
+                    !showAllTeamMatches
+                      ? "bg-white text-slate-950 shadow-sm"
+                      : "text-white hover:bg-white/15"
+                  }`}
                 >
-                  {showAllTeamMatches ? "Upcoming Only" : "Show Completed Matches"}
+                  Upcoming Only ({upcomingMatchesBySelectedTeam.length})
                 </button>
-                <div className="rounded-xl bg-white/15 px-4 py-2 text-center text-sm font-bold text-white">
-                  {selectedTeamScheduleItems.length}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowAllTeamMatches(true)}
+                  className={`rounded-lg px-3 py-2 text-center ${
+                    showAllTeamMatches
+                      ? "bg-white text-slate-950 shadow-sm"
+                      : "text-white hover:bg-white/15"
+                  }`}
+                >
+                  Show Completed Matches ({selectedCompletedTeamMatchCount})
+                </button>
               </div>
             </div>
 
@@ -1952,10 +1975,17 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
           <div className="space-y-2 md:hidden">
             {roster.map((player) => {
               const phone = formatPhoneNumberForStorage(player.phone);
+              const playerName = formatMemberName(player);
               return (
                 <div key={player.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
                   <div className="break-words font-black text-slate-950">
-                    {formatMemberName(player)}
+                    {!hidePlayerContacts && player.email ? (
+                      <a href={`mailto:${player.email}`} className="text-blue-800 underline decoration-blue-300 underline-offset-2 hover:text-blue-950">
+                        {playerName}
+                      </a>
+                    ) : (
+                      playerName
+                    )}
                     {!hidePlayerContacts && (
                       <span className="font-semibold text-slate-700">
                         {" - "}
@@ -2004,7 +2034,13 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
               {roster.map((player) => (
                 <tr key={player.id} className="border-b border-slate-100 hover:bg-slate-50">
                   <td className="p-3 font-bold text-slate-900">
-                    {formatMemberName(player)}
+                    {!hidePlayerContacts && player.email ? (
+                      <a href={`mailto:${player.email}`} className="text-blue-800 underline decoration-blue-300 underline-offset-2 hover:text-blue-950">
+                        {formatMemberName(player)}
+                      </a>
+                    ) : (
+                      formatMemberName(player)
+                    )}
                   </td>
                   <td className="p-3 font-bold text-blue-900">
                     {ratingForMember(player.id, seasonId, ratingType, player)}
