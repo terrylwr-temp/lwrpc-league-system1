@@ -112,6 +112,15 @@ const DUPR_EXPORT_HEADERS = [
 const MODAL_HEADER_CHROME = "border-b border-teal-200/60 bg-[linear-gradient(135deg,#0f766e,#2563eb)] text-white shadow-[inset_0_-1px_0_rgba(255,255,255,0.18)]";
 const MODAL_EYEBROW_CHROME = "text-xs font-black uppercase tracking-wide text-cyan-100";
 const MODAL_SUPPORTING_TEXT = "mt-1 text-sm font-semibold text-blue-50/90";
+const DEFAULT_ROUND_ROBIN_SCORING = {
+  pointsToWin: 21,
+  winBy: 1,
+  scoreType: "standard",
+};
+const ROUND_ROBIN_SCORE_TYPE_OPTIONS = [
+  { value: "standard", label: "Standard" },
+  { value: "rally", label: "Rally" },
+];
 
 export default function RoundRobinAdminPage() {
   const { id } = useParams();
@@ -524,6 +533,7 @@ export default function RoundRobinAdminPage() {
             <ManagerRound
               key={round.roundNumber}
               round={round}
+              session={latestSession}
               runAction={runAction}
               actionLoading={actionLoading}
               swapSelection={swapSelection}
@@ -573,6 +583,7 @@ export default function RoundRobinAdminPage() {
             <ManagerRound
               key={round.roundNumber}
               round={round}
+              session={selectedSession}
               runAction={runAction}
               actionLoading={actionLoading}
               swapSelection={swapSelection}
@@ -891,6 +902,44 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
                 {activePlayers(state.players).map((player) => <option key={player.id} value={player.id}>{player.display_name}</option>)}
               </select>
             </label>
+          </div>
+
+          <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+            <h3 className="text-sm font-black text-blue-950">Match Scoring</h3>
+            <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <label className="block text-sm font-bold text-slate-600">
+                Game Points To
+                <input
+                  type="number"
+                  min="1"
+                  value={form.pointsToWin}
+                  onChange={(event) => setForm((current) => ({ ...current, pointsToWin: clampNumber(event.target.value, 1, 99, DEFAULT_ROUND_ROBIN_SCORING.pointsToWin) }))}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
+                />
+              </label>
+              <label className="block text-sm font-bold text-slate-600">
+                Win By
+                <input
+                  type="number"
+                  min="1"
+                  value={form.winBy}
+                  onChange={(event) => setForm((current) => ({ ...current, winBy: clampNumber(event.target.value, 1, 20, DEFAULT_ROUND_ROBIN_SCORING.winBy) }))}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
+                />
+              </label>
+              <label className="block text-sm font-bold text-slate-600">
+                Scoring Type
+                <select
+                  value={form.scoreType}
+                  onChange={(event) => setForm((current) => ({ ...current, scoreType: normalizeRoundRobinScoreType(event.target.value) }))}
+                  className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
+                >
+                  {ROUND_ROBIN_SCORE_TYPE_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
 
           <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
@@ -2008,7 +2057,8 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
   );
 }
 
-function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapSelection, isLadderMatch = false, onPendingScoreChange }) {
+function ManagerRound({ round, session = null, runAction, actionLoading, swapSelection, setSwapSelection, isLadderMatch = false, onPendingScoreChange }) {
+  const scoring = normalizeRoundRobinScoring(session?.settings?.scoring);
   const roundScored = round.matches.length > 0 && round.matches.every(matchHasSavedScore);
   const byeSlots = round.matches.flatMap((match) => slotPlayers(match, "bye"));
   const playersInRound = round.matches.flatMap((match) => [
@@ -2086,6 +2136,7 @@ function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapS
           <ScoreCourt
             key={match.id}
             match={match}
+            scoring={scoring}
             lineupLocked={roundScored}
             runAction={runAction}
             swapSelection={swapSelection}
@@ -2098,10 +2149,11 @@ function ManagerRound({ round, runAction, actionLoading, swapSelection, setSwapS
   );
 }
 
-function ScoreCourt({ match, lineupLocked = false, runAction, swapSelection, setSwapSelection, onPendingScoreChange }) {
+function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked = false, runAction, swapSelection, setSwapSelection, onPendingScoreChange }) {
   const [team1Score, setTeam1Score] = useState(match.team1_score ?? "");
   const [team2Score, setTeam2Score] = useState(match.team2_score ?? "");
   const team2ScoreRef = useRef(null);
+  const scoreRules = normalizeRoundRobinScoring(scoring);
 
   useEffect(() => {
     setTeam1Score(match.team1_score ?? "");
@@ -2109,6 +2161,11 @@ function ScoreCourt({ match, lineupLocked = false, runAction, swapSelection, set
   }, [match.team1_score, match.team2_score]);
 
   async function saveScore() {
+    const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, scoreRules);
+    if (scoreError) {
+      window.alert(scoreError);
+      return;
+    }
     await runAction("updateMatchScore", {
       matchId: match.id,
       team1Score,
@@ -2143,6 +2200,7 @@ function ScoreCourt({ match, lineupLocked = false, runAction, swapSelection, set
       <div className="flex flex-col gap-2 bg-[linear-gradient(90deg,#0f3b36,#166b61)] px-3 py-2 text-white sm:flex-row sm:items-center sm:justify-between">
         <div className="font-black">{match.court_name || `Court ${match.court_number}`}</div>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:items-center">
+          <div className="rounded-md bg-white/15 px-2 py-1 text-xs font-black text-white ring-1 ring-white/20">{roundRobinScoringLabel(scoreRules)}</div>
           {matchHasSavedScore(match) && <div className="rounded-md bg-emerald-300 px-2 py-1 text-xs font-black text-emerald-950">Score Saved</div>}
         </div>
       </div>
@@ -4531,6 +4589,41 @@ function clampNumber(value, min, max, fallback) {
   return Math.min(max, Math.max(min, numeric));
 }
 
+function normalizeRoundRobinScoreType(value) {
+  return String(value || "").trim().toLowerCase() === "rally" ? "rally" : "standard";
+}
+
+function normalizeRoundRobinScoring(settings = {}) {
+  const source = settings?.scoring && typeof settings.scoring === "object" ? settings.scoring : settings;
+  return {
+    pointsToWin: Math.round(clampNumber(source.pointsToWin ?? source.points_to_win, 1, 99, DEFAULT_ROUND_ROBIN_SCORING.pointsToWin)),
+    winBy: Math.round(clampNumber(source.winBy ?? source.win_by, 1, 20, DEFAULT_ROUND_ROBIN_SCORING.winBy)),
+    scoreType: normalizeRoundRobinScoreType(source.scoreType ?? source.score_type),
+  };
+}
+
+function roundRobinScoringLabel(settings = {}) {
+  const scoring = normalizeRoundRobinScoring(settings);
+  const scoreTypeLabel = scoring.scoreType === "rally" ? "Rally" : "Standard";
+  return `${scoreTypeLabel} to ${scoring.pointsToWin}, win by ${scoring.winBy}`;
+}
+
+function validateRoundRobinMatchScore(team1Score, team2Score, settings = {}) {
+  if (team1Score === "" || team1Score === null || team1Score === undefined || team2Score === "" || team2Score === null || team2Score === undefined) return "";
+  const score1 = Number(team1Score);
+  const score2 = Number(team2Score);
+  if (!Number.isInteger(score1) || !Number.isInteger(score2) || score1 < 0 || score2 < 0) return "Scores must be whole numbers.";
+  if (score1 === score2) return "Scores cannot be tied.";
+
+  const scoring = normalizeRoundRobinScoring(settings);
+  const highScore = Math.max(score1, score2);
+  const lowScore = Math.min(score1, score2);
+  if (highScore < scoring.pointsToWin) return `Score must be ${roundRobinScoringLabel(scoring)}. The winning score must be at least ${scoring.pointsToWin}.`;
+  if (scoring.winBy <= 1 && highScore !== scoring.pointsToWin) return `Score must be ${roundRobinScoringLabel(scoring)}. The winning score must be exactly ${scoring.pointsToWin}.`;
+  if (highScore - lowScore < scoring.winBy) return `Score must be ${roundRobinScoringLabel(scoring)}. The winner must win by at least ${scoring.winBy}.`;
+  return "";
+}
+
 function normalizeInitialPositions(positions = {}, rosterIds = []) {
   const source = positions && typeof positions === "object" ? positions : {};
   const rosterSet = new Set((rosterIds || []).map(String));
@@ -4604,6 +4697,7 @@ function ladderPositionDraftError(positions = {}, playerCount = 0) {
 }
 
 function newSessionForm(state) {
+  const scoring = normalizeRoundRobinScoring(state.group.settings?.defaultScoring);
   return {
     sessionName: `${state.group.name} Match`,
     mode: "daily_round_robin",
@@ -4617,6 +4711,9 @@ function newSessionForm(state) {
     invitedGroupIds: [],
     smsEnabled: state.group.settings?.smsSendingEnabled === true,
     reminderHoursBefore: 0,
+    pointsToWin: scoring.pointsToWin,
+    winBy: scoring.winBy,
+    scoreType: scoring.scoreType,
   };
 }
 
@@ -4627,6 +4724,7 @@ function defaultHostPlayerId(state) {
 }
 
 function sessionFormFromSession(state, session) {
+  const scoring = normalizeRoundRobinScoring(session.settings?.scoring);
   return {
     sessionName: session.session_name || `${state.group.name} Match`,
     mode: session.mode === "ladder" ? "ladder" : "daily_round_robin",
@@ -4640,6 +4738,9 @@ function sessionFormFromSession(state, session) {
     invitedGroupIds: Array.isArray(session.invited_group_ids) ? session.invited_group_ids : [],
     smsEnabled: false,
     reminderHoursBefore: clampNumber(session.settings?.reminderHoursBefore, 0, 168, 0),
+    pointsToWin: scoring.pointsToWin,
+    winBy: scoring.winBy,
+    scoreType: scoring.scoreType,
   };
 }
 
@@ -4747,6 +4848,7 @@ function exportSessionDuprCsv(state, session) {
 }
 
 function duprRowsForSession(state, session, eventName) {
+  const scoreType = duprScoreTypeForSession(session);
   return sessionMatchesForSession(state, session.id)
     .filter((match) => match.status === "complete" && matchHasSavedScore(match))
     .map((match) => {
@@ -4755,7 +4857,7 @@ function duprRowsForSession(state, session, eventName) {
 
       return [
         "D",
-        "SIDEOUT",
+        scoreType,
         eventName,
         csvDate(session.session_date || match.updated_at || match.created_at),
         duprPlayerName(team1[0]),
@@ -4771,6 +4873,10 @@ function duprRowsForSession(state, session, eventName) {
         "", "", "", "", "", "", "", "",
       ];
     });
+}
+
+function duprScoreTypeForSession(session) {
+  return normalizeRoundRobinScoring(session?.settings?.scoring).scoreType === "rally" ? "RALLY" : "SIDEOUT";
 }
 
 function duprTeamPlayers(players = []) {

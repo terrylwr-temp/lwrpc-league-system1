@@ -29,6 +29,11 @@ const SECONDARY_ALLOWED_ACTIONS = new Set([
   "recalculateLadderRankings",
   "createLadderMatch",
 ]);
+const DEFAULT_ROUND_ROBIN_SCORING = {
+  pointsToWin: 21,
+  winBy: 1,
+  scoreType: "standard",
+};
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
@@ -944,6 +949,7 @@ async function createSession(supabase, group, body) {
   if (courtsResult.error) throw courtsResult.error;
 
   const requestedCourtCount = Number(body.courtCount || 0);
+  const scoring = normalizeRoundRobinScoring(body);
   const schedule = createRoundRobinSchedule({
     players,
     courts: courtsResult.data || [],
@@ -963,6 +969,7 @@ async function createSession(supabase, group, body) {
     settings: {
       generatedAt: new Date().toISOString(),
       shuffle: body.shuffle !== false,
+      scoring,
     },
   };
 
@@ -1040,6 +1047,7 @@ async function createPlannedSession(supabase, group, body) {
 
   const now = new Date().toISOString();
   const isLadderMode = body.mode === "ladder";
+  const scoring = normalizeRoundRobinScoring(body);
   const ladderSettings = isLadderMode ? {
     ladderId: String(body.ladderId || "").trim(),
     ladderName: String(body.ladderName || "").trim(),
@@ -1064,6 +1072,7 @@ async function createPlannedSession(supabase, group, body) {
       createdFromGroups: invitedGroupIds,
       smsTemplates: normalizeSmsTemplates(group.settings?.smsTemplates || {}),
       reminderHoursBefore: normalizeReminderHours(body.reminderHoursBefore),
+      scoring,
       ...ladderSettings,
     },
     opened_at: now,
@@ -1129,6 +1138,10 @@ async function updatePlannedSession(supabase, group, body) {
 
   const now = new Date().toISOString();
   const isLadderMode = body.mode === "ladder";
+  const scoring = normalizeRoundRobinScoring({
+    ...(existingSession.settings?.scoring || {}),
+    ...body,
+  });
   const ladderSettings = isLadderMode ? {
     ladderId: String(body.ladderId || existingSession.settings?.ladderId || "").trim(),
     ladderName: String(body.ladderName || existingSession.settings?.ladderName || "").trim(),
@@ -1154,6 +1167,7 @@ async function updatePlannedSession(supabase, group, body) {
       createdFromGroups: invitedGroupIds,
       smsTemplates: normalizeSmsTemplates(group.settings?.smsTemplates || {}),
       reminderHoursBefore: normalizeReminderHours(body.reminderHoursBefore),
+      scoring,
       ...ladderSettings,
     },
     updated_at: now,
@@ -1710,6 +1724,9 @@ async function updateMatchScore(supabase, group, body) {
   const existing = await loadMatchForGroup(supabase, group.id, matchId);
   const team1Score = normalizeScore(body.team1Score);
   const team2Score = normalizeScore(body.team2Score);
+  const session = await loadSessionForGroup(supabase, group.id, existing.session_id);
+  const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, session.settings?.scoring);
+  if (scoreError) throw new Error(scoreError);
 
   const { data, error } = await supabase
     .from("round_robin_matches")
@@ -1965,6 +1982,7 @@ async function createNextWeeklySession(supabase, group, session, body) {
     mode: session.mode || group.mode,
     smsEnabled: true,
     publicUrl: body.publicUrl,
+    ...normalizeRoundRobinScoring(session.settings?.scoring),
   });
 
   await addLog(
@@ -2742,6 +2760,44 @@ function normalizeScore(value) {
   const parsed = Number(value);
   if (!Number.isInteger(parsed) || parsed < 0) throw new Error("Scores must be whole numbers.");
   return parsed;
+}
+
+function clampNumber(value, min, max, fallback) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.min(max, Math.max(min, numeric));
+}
+
+function normalizeRoundRobinScoreType(value) {
+  return String(value || "").trim().toLowerCase() === "rally" ? "rally" : "standard";
+}
+
+function normalizeRoundRobinScoring(settings = {}) {
+  const source = settings?.scoring && typeof settings.scoring === "object" ? settings.scoring : settings;
+  return {
+    pointsToWin: Math.round(clampNumber(source.pointsToWin ?? source.points_to_win, 1, 99, DEFAULT_ROUND_ROBIN_SCORING.pointsToWin)),
+    winBy: Math.round(clampNumber(source.winBy ?? source.win_by, 1, 20, DEFAULT_ROUND_ROBIN_SCORING.winBy)),
+    scoreType: normalizeRoundRobinScoreType(source.scoreType ?? source.score_type),
+  };
+}
+
+function roundRobinScoringLabel(settings = {}) {
+  const scoring = normalizeRoundRobinScoring(settings);
+  const scoreTypeLabel = scoring.scoreType === "rally" ? "Rally" : "Standard";
+  return `${scoreTypeLabel} to ${scoring.pointsToWin}, win by ${scoring.winBy}`;
+}
+
+function validateRoundRobinMatchScore(team1Score, team2Score, settings = {}) {
+  if (team1Score === null || team2Score === null) return "";
+  if (team1Score === team2Score) return "Scores cannot be tied.";
+
+  const scoring = normalizeRoundRobinScoring(settings);
+  const highScore = Math.max(team1Score, team2Score);
+  const lowScore = Math.min(team1Score, team2Score);
+  if (highScore < scoring.pointsToWin) return `Score must be ${roundRobinScoringLabel(scoring)}. The winning score must be at least ${scoring.pointsToWin}.`;
+  if (scoring.winBy <= 1 && highScore !== scoring.pointsToWin) return `Score must be ${roundRobinScoringLabel(scoring)}. The winning score must be exactly ${scoring.pointsToWin}.`;
+  if (highScore - lowScore < scoring.winBy) return `Score must be ${roundRobinScoringLabel(scoring)}. The winner must win by at least ${scoring.winBy}.`;
+  return "";
 }
 
 function suggestedCourtCount(playerCount) {
