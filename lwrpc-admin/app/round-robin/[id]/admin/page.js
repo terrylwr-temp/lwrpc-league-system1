@@ -351,12 +351,34 @@ export default function RoundRobinAdminPage() {
     }));
   }
 
-  async function saveCurrentRoundScores() {
+  async function saveCurrentRoundScores(session = null) {
     const matches = state?.matches || [];
-    if (matches.length === 0) return;
+    if (matches.length === 0) return { success: true };
+
+    const sessionMatches = matches.filter((match) => !session?.id || String(match.session_id || "") === String(session.id));
+    const roundNumber = Math.max(0, ...sessionMatches.map((match) => Number(match.round_number || 0)));
+    const matchesToCheck = roundNumber > 0 ? sessionMatches.filter((match) => Number(match.round_number || 0) === roundNumber) : sessionMatches;
+    const scoring = normalizeRoundRobinScoring(session?.settings?.scoring);
+
+    for (const match of matchesToCheck) {
+      const pending = pendingScores[match.id] || {};
+      const team1Score = pending.team1Score ?? match.team1_score ?? "";
+      const team2Score = pending.team2Score ?? match.team2_score ?? "";
+      const team1Blank = String(team1Score).trim() === "";
+      const team2Blank = String(team2Score).trim() === "";
+      if (team1Blank && team2Blank) continue;
+      const courtLabel = match.court_name || `Court ${match.court_number || ""}`.trim();
+      if (team1Blank || team2Blank) {
+        return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: enter both scores before continuing.` };
+      }
+      const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, scoring);
+      if (scoreError) {
+        return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: ${scoreError}` };
+      }
+    }
 
     const savedMatchIds = [];
-    for (const match of matches) {
+    for (const match of matchesToCheck) {
       const pending = pendingScores[match.id] || {};
       const team1Score = pending.team1Score ?? match.team1_score ?? "";
       const team2Score = pending.team2Score ?? match.team2_score ?? "";
@@ -368,6 +390,7 @@ export default function RoundRobinAdminPage() {
         team1Score,
         team2Score,
       }, { returnResult: true });
+      if (result?.success === false) return { success: false, error: result.error || "Unable to save scores." };
       if (result?.success !== false) savedMatchIds.push(match.id);
     }
 
@@ -378,6 +401,8 @@ export default function RoundRobinAdminPage() {
         return next;
       });
     }
+
+    return { success: true, savedMatchIds };
   }
 
   async function enterLiveSession(sessionId) {
@@ -1109,6 +1134,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   const [startCheckedPlayerIds, setStartCheckedPlayerIds] = useState([]);
   const [pendingRoundScroll, setPendingRoundScroll] = useState(null);
   const [progressMessage, setProgressMessage] = useState("");
+  const [scoreError, setScoreError] = useState("");
   const [sendResultsOnStatsOk, setSendResultsOnStatsOk] = useState(false);
   const isPlaying = session.status === "playing";
   const isClosed = ["done", "cancelled"].includes(session.status);
@@ -1127,7 +1153,18 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }, [pendingRoundScroll, state?.matches]);
 
   async function primaryAction() {
+    if (isPlaying && !(await saveScoresForTopAction())) return;
     openStartModal(isPlaying ? "round" : "initial");
+  }
+
+  async function saveScoresForTopAction() {
+    if (!saveCurrentRoundScores) return true;
+    const saved = await saveCurrentRoundScores(session);
+    if (saved?.success === false) {
+      setScoreError(saved.error || "Check the scores before continuing.");
+      return false;
+    }
+    return true;
   }
 
   function openStartModal(mode = "initial") {
@@ -1165,7 +1202,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
       ? "Starting match, saving attendance, and generating the first round..."
       : "Saving current scores and generating the next round...");
     try {
-      if (!isInitialStart && saveCurrentRoundScores) await saveCurrentRoundScores();
+      if (!isInitialStart && !(await saveScoresForTopAction())) return;
       const result = await runAction(
         isInitialStart ? "startSessionAndGenerateFirstGame" : "generateNextGame",
         {
@@ -1175,6 +1212,10 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
         },
         { returnResult: true }
       );
+      if (result?.success === false) {
+        setScoreError(result.error || "Unable to continue.");
+        return;
+      }
       if (result?.success !== false) {
         setStartModalOpen(false);
         setStartCheckedPlayerIds([]);
@@ -1186,11 +1227,15 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }
 
   async function finishSession() {
+    if (!(await saveScoresForTopAction())) return;
     if (!window.confirm(`Finish ${session.session_name || "this match"}? This will close scoring and save final results.`)) return;
     setProgressMessage("Saving scores and preparing final stats...");
     try {
-      if (saveCurrentRoundScores) await saveCurrentRoundScores();
       const completed = await runAction("completeSession", { sessionId: session.id, smsEnabled: false }, { returnResult: true });
+      if (completed?.success === false) {
+        setScoreError(completed.error || "Unable to finish this match.");
+        return;
+      }
       if (completed?.success !== false) {
         setSendResultsOnStatsOk(true);
         setStatsOpen(true);
@@ -1201,12 +1246,12 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }
 
   async function exitSession() {
-    if (saveCurrentRoundScores) await saveCurrentRoundScores();
+    if (!(await saveScoresForTopAction())) return;
     onExit?.();
   }
 
   async function openStats() {
-    if (saveCurrentRoundScores) await saveCurrentRoundScores();
+    if (!(await saveScoresForTopAction())) return;
     setStatsOpen(true);
   }
 
@@ -1248,7 +1293,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
           >
             {["generateNextGame", "startSessionAndGenerateFirstGame"].includes(actionLoading)
               ? "Working..."
-              : "Start Match"}
+              : isPlaying ? "Next Round" : "Start Match"}
           </button>
           <button
             type="button"
@@ -1304,6 +1349,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
         />
       )}
       {progressMessage && <ActionProgressModal message={progressMessage} />}
+      {scoreError && <ScoreErrorModal message={scoreError} onClose={() => setScoreError("")} />}
     </section>
   );
 }
@@ -1329,6 +1375,27 @@ function ActionProgressModal({ message }) {
           />
           <div className="mt-4 text-base font-black text-slate-950">Working on it...</div>
           <p className="mt-2 text-sm font-semibold leading-5 text-slate-600">{message}</p>
+        </div>
+      </div>
+    </ModalPortal>
+  );
+}
+
+function ScoreErrorModal({ message, onClose }) {
+  return (
+    <ModalPortal>
+      <div className="fixed inset-0 z-[10001] flex items-center justify-center bg-slate-950/60 p-4">
+        <div className="w-full max-w-sm rounded-lg border border-red-200 bg-white p-5 shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+          <div className="text-sm font-black uppercase tracking-wide text-red-700">Score Check</div>
+          <div className="mt-2 text-lg font-black text-slate-950">Check scores before continuing</div>
+          <p className="mt-3 text-sm font-semibold leading-5 text-slate-700">{message}</p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-5 w-full rounded-lg bg-red-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-red-800"
+          >
+            OK
+          </button>
         </div>
       </div>
     </ModalPortal>

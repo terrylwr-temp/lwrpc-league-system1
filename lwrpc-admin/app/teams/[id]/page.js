@@ -34,7 +34,8 @@ export default function TeamRosterPage() {
   const [addPlayerModalOpen, setAddPlayerModalOpen] = useState(false);
   const [expandedHistoryMemberId, setExpandedHistoryMemberId] = useState("");
   const [historyFilters, setHistoryFilters] = useState({});
-  const [rosterView, setRosterView] = useState("summary");
+  const [teamInfoView, setTeamInfoView] = useState("summary");
+  const [teamRosterView, setTeamRosterView] = useState("summary");
 
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -690,7 +691,8 @@ function getAverageTeamRating() {
   const canModifyRoster = hasRole(currentUser?.role, "captain") && (!rostersLocked || canAdministerLockedRoster);
   const isCaptainOnly = currentUser?.role === "captain";
   const canRequestCaptainChange = isCurrentTeamCaptainOrCoCaptain();
-  const rosterDetailView = rosterView === "detail";
+  const teamInfoDetailView = teamInfoView === "detail";
+  const teamRosterDetailView = teamRosterView === "detail";
 
   async function addPlayer() {
     if (!selectedMemberId) {
@@ -957,9 +959,9 @@ function getAverageTeamRating() {
             </div>
 
             <div className="flex w-full flex-col gap-3 sm:w-auto">
-              <RosterViewToggle value={rosterView} onChange={setRosterView} />
+              <RosterViewToggle value={teamInfoView} onChange={setTeamInfoView} className="md:hidden" />
 
-              <div className="rounded-xl bg-slate-900 p-4 text-white shadow-lg sm:min-w-40">
+              <div className={`${teamInfoDetailView ? "" : "hidden"} rounded-xl bg-slate-900 p-4 text-white shadow-lg sm:min-w-40 md:block`}>
 
                 <div className="text-xs uppercase tracking-wide text-slate-300">
                   Active Players
@@ -973,8 +975,7 @@ function getAverageTeamRating() {
             </div>
           </div>
 
-          {rosterDetailView && (
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          <div className={`${teamInfoDetailView ? "grid" : "hidden"} mt-4 grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 md:grid`}>
 
             <Info
               label="Division"
@@ -1005,7 +1006,6 @@ function getAverageTeamRating() {
             />
 
           </div>
-          )}
 
         </div>
 
@@ -1123,16 +1123,16 @@ function getAverageTeamRating() {
               </h2>
 
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
-                {rosterDetailView && (
-                  <button
-                    type="button"
-                    onClick={openAddPlayerModal}
-                    disabled={!canModifyRoster}
-                    className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                  >
-                    Add Player
-                  </button>
-                )}
+                <RosterViewToggle value={teamRosterView} onChange={setTeamRosterView} className="md:hidden" />
+
+                <button
+                  type="button"
+                  onClick={openAddPlayerModal}
+                  disabled={!canModifyRoster}
+                  className={`${teamRosterDetailView ? "" : "hidden"} rounded-xl bg-blue-700 px-5 py-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300 md:block`}
+                >
+                  Add Player
+                </button>
 
                 <div className="w-full rounded-xl bg-slate-900 px-5 py-3 text-white sm:w-auto">
                   <div className="text-xs uppercase tracking-wide text-slate-300">
@@ -1214,11 +1214,14 @@ function getAverageTeamRating() {
                             <span className="font-semibold">
                               {playerRosterRecord(member?.id).record}
                             </span>
+                            {"  "}
+                            DUPR Rating:{" "}
+                            <span className="font-semibold">
+                              {member ? getRatingDisplay(member) : "N/A"}
+                            </span>
                           </div>
 
-                          {rosterDetailView && (
-                          <>
-                          <div>
+                          <div className={`${teamRosterDetailView ? "" : "hidden"} md:block`}>
                             {getRatingLabel()}:
                             {" "}
                             <span className="font-semibold">
@@ -1235,19 +1238,16 @@ function getAverageTeamRating() {
                           </div>
 
                           {membershipRenewalNeedsAttention(member) && (
-                            <div className="font-black text-red-700">
+                            <div className={`${teamRosterDetailView ? "" : "hidden"} font-black text-red-700 md:block`}>
                               {membershipInfoLabel(member)}
                             </div>
-                          )}
-                          </>
                           )}
 
                         </div>
 
                       </div>
 
-                      {rosterDetailView && (
-                      <div className="grid shrink-0 grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+                      <div className={`${teamRosterDetailView ? "grid" : "hidden"} shrink-0 grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end md:flex`}>
                         <button
                           type="button"
                           onClick={() =>
@@ -1268,11 +1268,10 @@ function getAverageTeamRating() {
                           Remove
                         </button>
                       </div>
-                      )}
 
                     </div>
 
-                    {rosterDetailView && expandedHistoryMemberId === member?.id && (
+                    {expandedHistoryMemberId === member?.id && (
                       <PlayerHistoryPanel
                         memberId={member.id}
                         historyRows={historyRowsForMember(member.id)}
@@ -1637,14 +1636,14 @@ function Info({ label, value }) {
   );
 }
 
-function RosterViewToggle({ value, onChange }) {
+function RosterViewToggle({ value, onChange, className = "" }) {
   const options = [
     { id: "summary", label: "Summary" },
     { id: "detail", label: "Detail" },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-1 rounded-xl border border-slate-300 bg-white p-1 text-xs font-black shadow-sm">
+    <div className={`grid grid-cols-2 gap-1 rounded-xl border border-slate-300 bg-white p-1 text-xs font-black shadow-sm ${className}`}>
       {options.map((option) => (
         <button
           key={option.id}
