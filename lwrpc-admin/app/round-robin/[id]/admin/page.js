@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -1054,9 +1055,12 @@ function SessionsPanel(props) {
 function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScores = null, actionLoading, onExit = null, showExit = false, hostMode = false }) {
   const [statsOpen, setStatsOpen] = useState(false);
   const [startModalOpen, setStartModalOpen] = useState(false);
+  const [startModalMode, setStartModalMode] = useState("initial");
   const [startCourts, setStartCourts] = useState([]);
   const [startCheckedPlayerIds, setStartCheckedPlayerIds] = useState([]);
   const [pendingRoundScroll, setPendingRoundScroll] = useState(null);
+  const [progressMessage, setProgressMessage] = useState("");
+  const [sendResultsOnStatsOk, setSendResultsOnStatsOk] = useState(false);
   const isPlaying = session.status === "playing";
   const isClosed = ["done", "cancelled"].includes(session.status);
   const joinedPlayers = sessionPlayersForStatus(state, session.id, "joined");
@@ -1074,22 +1078,18 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }, [pendingRoundScroll, state?.matches]);
 
   async function primaryAction() {
-    if (isPlaying) {
-      if (saveCurrentRoundScores) await saveCurrentRoundScores();
-      const generated = await runAction("generateNextGame", { sessionId: session.id }, { returnResult: true });
-      if (generated?.roundNumber) {
-        setPendingRoundScroll(generated.roundNumber);
-      }
-      return;
-    }
-
-    openStartModal();
+    openStartModal(isPlaying ? "round" : "initial");
   }
 
-  function openStartModal() {
-    const checkedIds = joinedPlayers.map((player) => String(player.id));
+  function openStartModal(mode = "initial") {
+    const checkedIds = mode === "round"
+      ? defaultRoundSessionPlayerIds(state, session.id, joinedPlayers)
+      : joinedPlayers.map((player) => String(player.id));
+    setStartModalMode(mode);
     setStartCheckedPlayerIds(checkedIds);
-    setStartCourts(sessionCourtRows(session, state.courts, suggestedCourtCountForPlayers(checkedIds.length)));
+    setStartCourts(mode === "initial"
+      ? sessionCourtRows(session, state.courts, suggestedCourtCountForPlayers(checkedIds.length))
+      : []);
     setStartModalOpen(true);
   }
 
@@ -1103,29 +1103,52 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
       const next = current.includes(cleanPlayerId)
         ? current.filter((id) => id !== cleanPlayerId)
         : [...current, cleanPlayerId];
-      setStartCourts((currentCourts) => sessionCourtRows(session, state.courts, suggestedCourtCountForPlayers(next.length), currentCourts));
+      if (startModalMode === "initial") {
+        setStartCourts((currentCourts) => sessionCourtRows(session, state.courts, suggestedCourtCountForPlayers(next.length), currentCourts));
+      }
       return next;
     });
   }
 
   async function confirmStartSession() {
-    const started = await runAction("startSessionAndGenerateFirstGame", {
-      sessionId: session.id,
-      courtCount: startCourts.length,
-      sessionCourts: startCourts,
-      selectedSessionPlayerIds: startCheckedPlayerIds,
-    });
-    if (started) {
-      setStartModalOpen(false);
-      setStartCheckedPlayerIds([]);
+    const isInitialStart = startModalMode === "initial";
+    setProgressMessage(isInitialStart
+      ? "Starting match, saving attendance, and generating the first round..."
+      : "Saving current scores and generating the next round...");
+    try {
+      if (!isInitialStart && saveCurrentRoundScores) await saveCurrentRoundScores();
+      const result = await runAction(
+        isInitialStart ? "startSessionAndGenerateFirstGame" : "generateNextGame",
+        {
+          sessionId: session.id,
+          ...(isInitialStart ? { courtCount: startCourts.length, sessionCourts: startCourts } : {}),
+          selectedSessionPlayerIds: startCheckedPlayerIds,
+        },
+        { returnResult: true }
+      );
+      if (result?.success !== false) {
+        setStartModalOpen(false);
+        setStartCheckedPlayerIds([]);
+        if (result?.roundNumber) setPendingRoundScroll(result.roundNumber);
+      }
+    } finally {
+      setProgressMessage("");
     }
   }
 
   async function finishSession() {
     if (!window.confirm(`Finish ${session.session_name || "this match"}? This will close scoring and save final results.`)) return;
-    if (saveCurrentRoundScores) await saveCurrentRoundScores();
-    const completed = await runAction("completeSession", { sessionId: session.id, smsEnabled: true }, { returnResult: true });
-    if (completed?.success !== false) onExit?.();
+    setProgressMessage("Saving scores and preparing final stats...");
+    try {
+      if (saveCurrentRoundScores) await saveCurrentRoundScores();
+      const completed = await runAction("completeSession", { sessionId: session.id, smsEnabled: false }, { returnResult: true });
+      if (completed?.success !== false) {
+        setSendResultsOnStatsOk(true);
+        setStatsOpen(true);
+      }
+    } finally {
+      setProgressMessage("");
+    }
   }
 
   async function exitSession() {
@@ -1138,10 +1161,29 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
     setStatsOpen(true);
   }
 
+  async function sendResultsAndCloseStats() {
+    if (!sendResultsOnStatsOk) {
+      setStatsOpen(false);
+      return;
+    }
+
+    setProgressMessage("Sending result text to players...");
+    try {
+      const sent = await runAction("sendSessionResultsText", { sessionId: session.id, smsEnabled: true }, { returnResult: true });
+      if (sent?.success !== false) {
+        setSendResultsOnStatsOk(false);
+        setStatsOpen(false);
+        onExit?.();
+      }
+    } finally {
+      setProgressMessage("");
+    }
+  }
+
   return (
     <section className="sticky top-0 z-30 rounded-lg border border-teal-200 bg-teal-50/95 p-3 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] backdrop-blur sm:top-2 sm:p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="min-w-0">
+        <div className={`min-w-0 ${isPlaying ? "hidden sm:block" : ""}`}>
           <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Match</div>
           <h2 className="break-words text-lg font-black text-slate-950 sm:text-xl">{session.session_name || "Match"}</h2>
           <div className="mt-1 text-sm font-bold text-slate-600">
@@ -1157,7 +1199,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
           >
             {["generateNextGame", "startSessionAndGenerateFirstGame"].includes(actionLoading)
               ? "Working..."
-              : isPlaying ? "Next Round" : "Start Match"}
+              : "Start Match"}
           </button>
           <button
             type="button"
@@ -1186,7 +1228,18 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
           At least 4 joined players are required before this match can start. Current joined players: {joinedCount}.
         </div>
       )}
-      {statsOpen && <SessionStatsModal session={session} state={state} onClose={() => setStatsOpen(false)} />}
+      {statsOpen && (
+        <SessionStatsModal
+          session={session}
+          state={state}
+          onClose={() => {
+            setStatsOpen(false);
+            setSendResultsOnStatsOk(false);
+          }}
+          onConfirm={sendResultsOnStatsOk ? sendResultsAndCloseStats : null}
+          confirmLabel={sendResultsOnStatsOk ? "OK - Send Results" : "Close"}
+        />
+      )}
       {startModalOpen && (
         <StartSessionModal
           session={session}
@@ -1195,11 +1248,13 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
           joinedPlayers={joinedPlayers}
           checkedPlayerIds={startCheckedPlayerIds}
           togglePlayer={toggleStartPlayer}
+          mode={startModalMode}
           actionLoading={actionLoading}
           onClose={() => { setStartModalOpen(false); setStartCheckedPlayerIds([]); }}
           onStart={confirmStartSession}
         />
       )}
+      {progressMessage && <ActionProgressModal message={progressMessage} />}
     </section>
   );
 }
@@ -1211,7 +1266,27 @@ function ModalPortal({ children }) {
   return createPortal(children, document.body);
 }
 
-function SessionStatsModal({ session, state, onClose }) {
+function ActionProgressModal({ message }) {
+  return (
+    <ModalPortal>
+      <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-950/55 p-4">
+        <div className="w-full max-w-xs rounded-lg border border-white/70 bg-white p-5 text-center shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+          <Image
+            src="/favicon.ico"
+            alt="Working"
+            width={56}
+            height={56}
+            className="mx-auto h-14 w-14 animate-spin object-contain"
+          />
+          <div className="mt-4 text-base font-black text-slate-950">Working on it...</div>
+          <p className="mt-2 text-sm font-semibold leading-5 text-slate-600">{message}</p>
+        </div>
+      </div>
+    </ModalPortal>
+  );
+}
+
+function SessionStatsModal({ session, state, onClose, onConfirm = null, confirmLabel = "Close" }) {
   const [showMobileStatsDetail, setShowMobileStatsDetail] = useState(false);
   const matches = state?.matches || [];
   const latestRoundNumber = Math.max(0, ...matches.map((match) => Number(match.round_number || 0)));
@@ -1254,8 +1329,8 @@ function SessionStatsModal({ session, state, onClose }) {
             <div className={MODAL_EYEBROW_CHROME}>Current Game Stats</div>
             <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
           </div>
-          <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
-            Close
+          <button type="button" onClick={onConfirm || onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
+            {confirmLabel}
           </button>
         </div>
         <div className="max-h-[calc(100vh-6.5rem)] overflow-y-auto p-3 sm:max-h-[70vh] sm:p-4">
@@ -1833,10 +1908,12 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
   );
 }
 
-function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checkedPlayerIds, togglePlayer, actionLoading, onClose, onStart }) {
+function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checkedPlayerIds, togglePlayer, mode = "initial", actionLoading, onClose, onStart }) {
   const checkedSet = new Set((checkedPlayerIds || []).map(String));
   const checkedCount = checkedSet.size;
   const courtLabel = `${courts.length} court${courts.length === 1 ? "" : "s"}`;
+  const initialMode = mode === "initial";
+  const busy = ["startSessionAndGenerateFirstGame", "generateNextGame", "updateMatchScore"].includes(actionLoading);
 
   return (
     <ModalPortal>
@@ -1848,7 +1925,7 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
             <div className={MODAL_EYEBROW_CHROME}>Start Match</div>
             <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
             <div className={MODAL_SUPPORTING_TEXT}>
-              {checkedCount} checked players - {courtLabel} - {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
+              {checkedCount} checked players{initialMode ? ` - ${courtLabel}` : ""} - {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
             </div>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
@@ -1857,12 +1934,14 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
           </div>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-4">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+          <div className={`grid grid-cols-1 gap-4 ${initialMode ? "lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]" : ""}`}>
             <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <div className="text-sm font-black text-blue-950">Verify Players</div>
-                  <div className="mt-1 text-xs font-bold text-blue-800">Uncheck anyone who did not show up.</div>
+                  <div className="mt-1 text-xs font-bold text-blue-800">
+                    {initialMode ? "Uncheck anyone who did not show up." : "Uncheck anyone not playing this round."}
+                  </div>
                 </div>
                 <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-blue-900 shadow-sm">
                   {checkedCount} of {joinedPlayers.length}
@@ -1894,21 +1973,23 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
               </div>
             </div>
 
-          <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <div className="text-sm font-black text-slate-700">Confirm Courts</div>
-              </div>
-              <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">{courtLabel}</div>
-            </div>
-              <div className="mt-3 grid grid-cols-1 gap-3">
-                {courts.map((court, index) => (
-                  <div key={`start-court-${index}`}>
-                    <TextInput label={`Court ${index + 1}`} value={court.name} onChange={(value) => updateCourt(index, "name", value)} />
+            {initialMode && (
+              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <div className="text-sm font-black text-slate-700">Confirm Courts</div>
                   </div>
-                ))}
+                  <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">{courtLabel}</div>
+                </div>
+                <div className="mt-3 grid grid-cols-1 gap-3">
+                  {courts.map((court, index) => (
+                    <div key={`start-court-${index}`}>
+                      <TextInput label={`Court ${index + 1}`} value={court.name} onChange={(value) => updateCourt(index, "name", value)} />
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
           {checkedCount < 4 && (
             <div className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm font-black text-amber-900">
@@ -1917,8 +1998,8 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
           )}
         </div>
         <div className="sticky bottom-0 z-10 mt-auto shrink-0 border-t border-slate-200 bg-white p-3 shadow-[0_-16px_36px_-28px_rgba(15,23,42,0.9)] sm:p-4">
-          <button type="button" onClick={onStart} disabled={actionLoading === "startSessionAndGenerateFirstGame" || checkedCount < 4} className="w-full rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
-            {actionLoading === "startSessionAndGenerateFirstGame" ? "Starting..." : "Start and Generate First Game"}
+          <button type="button" onClick={onStart} disabled={busy || checkedCount < 4} className="w-full rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
+            {busy ? "Starting..." : initialMode ? "Start and Generate First Game" : "Start Match"}
           </button>
         </div>
       </div>
@@ -3997,6 +4078,25 @@ function playerIdsFromMatches(matches = []) {
   }, new Set());
 }
 
+function defaultRoundSessionPlayerIds(state, sessionId, joinedPlayers = []) {
+  const joinedRows = joinedPlayers || [];
+  const bySavedPlayerId = new Map(joinedRows
+    .map((player) => [String(player.player_id || player.id || ""), String(player.id || "")])
+    .filter(([savedPlayerId, sessionPlayerId]) => savedPlayerId && sessionPlayerId));
+  const matches = sessionMatchesForSession(state, sessionId);
+  const latestRoundNumber = Math.max(0, ...matches.map((match) => Number(match.round_number || 0)));
+
+  if (latestRoundNumber > 0) {
+    const latestPlayerIds = playerIdsFromMatches(matches.filter((match) => Number(match.round_number || 0) === latestRoundNumber));
+    const sessionPlayerIds = [...latestPlayerIds]
+      .map((playerId) => bySavedPlayerId.get(String(playerId)))
+      .filter(Boolean);
+    if (sessionPlayerIds.length > 0) return sessionPlayerIds;
+  }
+
+  return joinedRows.map((player) => String(player.id || "")).filter(Boolean);
+}
+
 function playerNames(players) {
   return (players || [])
     .map((player) => player.firstLabel || player.displayName || player.display_name || player.display_name_snapshot || "Player")
@@ -5005,8 +5105,11 @@ function noticeForAction(action, result) {
   if (action === "updateMatchLineup") return "Lineup updated.";
   if (action === "markSessionDuprExported") return `DUPR Export marked complete for ${result.rowCount || 0} row${Number(result.rowCount || 0) === 1 ? "" : "s"}.`;
   if (action === "completeSession") {
-    const base = result.sms?.skipped ? "Match completed. Result text was logged only." : `Match completed. Result texts sent: ${result.sms?.sent || 0}.`;
-    return `${base}${weeklyRepeatNotice(result.weeklyRepeat)}`;
+    return `Match completed. Review stats, then tap OK to text results.${weeklyRepeatNotice(result.weeklyRepeat)}`;
+  }
+  if (action === "sendSessionResultsText") {
+    if (result.sms?.skipped) return `Result text logged for ${result.recipients || 0} player${Number(result.recipients || 0) === 1 ? "" : "s"}. SMS is off.`;
+    return `Result texts sent: ${result.sms?.sent || 0}.`;
   }
   if (action === "sendBroadcastText") {
     if (result.sms?.skipped) return `Test text logged for ${result.recipients || 0} recipient${Number(result.recipients || 0) === 1 ? "" : "s"}. SMS is off.`;

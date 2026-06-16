@@ -17,6 +17,7 @@ const HOST_ALLOWED_ACTIONS = new Set([
   "updateMatchScore",
   "updateMatchLineup",
   "completeSession",
+  "sendSessionResultsText",
   "sendBroadcastText",
 ]);
 const SECONDARY_ALLOWED_ACTIONS = new Set([
@@ -190,6 +191,11 @@ export async function POST(req) {
 
     if (action === "completeSession") {
       const result = await completeSession(supabase, group, body);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "sendSessionResultsText") {
+      const result = await sendSessionResultsText(supabase, group, body);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -1563,8 +1569,13 @@ async function generateNextGame(supabase, group, body) {
   if (courtsResult.error) throw courtsResult.error;
 
   const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, sessionPlayersSnapshot);
-  const joinedPlayers = sessionPlayers
-    .filter((player) => player.response_status === "joined")
+  let joinedSessionPlayers = sessionPlayers.filter((player) => player.response_status === "joined");
+  if (Array.isArray(body.selectedSessionPlayerIds)) {
+    const selectedIds = new Set(body.selectedSessionPlayerIds.map((id) => String(id || "")).filter(Boolean));
+    joinedSessionPlayers = joinedSessionPlayers.filter((player) => selectedIds.has(String(player.id || "")));
+  }
+
+  const joinedPlayers = joinedSessionPlayers
     .map((player) => ({
       id: player.player_id,
       displayName: player.display_name,
@@ -1858,6 +1869,64 @@ async function completeSession(supabase, group, body) {
 
   await addLog(supabase, group.id, sessionId, "session", `Match completed. Result texts sent: ${sms.sent || 0}.`, { sms, weeklyRepeat });
   return { session: data, results, summaryText, sms, weeklyRepeat };
+}
+
+async function sendSessionResultsText(supabase, group, body) {
+  const sessionId = String(body.sessionId || "").trim();
+  if (!sessionId) throw new Error("Match is required.");
+
+  const session = await loadSessionForGroup(supabase, group.id, sessionId);
+  const results = await rebuildResults(supabase, group, sessionId);
+  const playedResults = results.filter((row) => Number(row.games || 0) > 0 || Number(row.byes || 0) > 0);
+  const standings = playedResults.map((row) => {
+    const metadata = resultMetadata(row);
+    return {
+      rank: row.rank,
+      displayName: row.display_name,
+      wins: row.wins,
+      losses: row.losses,
+      winPct: row.games > 0 ? row.wins / row.games : 0,
+      pointDiff: row.point_diff,
+      pointsFor: row.points_for,
+      pointsAgainst: row.points_against,
+      byes: row.byes,
+      previousPosition: metadata.ladderPreviousPosition ?? metadata.previousPosition ?? null,
+      newPosition: metadata.ladderNewPosition ?? metadata.newPosition ?? null,
+      positionCount: metadata.ladderPositionCount ?? metadata.positionCount ?? null,
+    };
+  });
+  const summaryText = summaryTextForStandings(group.name, session.session_date, standings);
+
+  const { error: summaryError } = await supabase
+    .from("round_robin_sessions")
+    .update({ summary_text: summaryText, updated_at: new Date().toISOString() })
+    .eq("id", sessionId);
+  if (summaryError) throw summaryError;
+
+  const smsEnabled = body.smsEnabled === true && group.settings?.smsSendingEnabled === true;
+  const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, sessionId));
+  const recipientPlayers = sessionPlayers.filter((player) => player.response_status === "joined");
+  let sms = smsDisabledResult(smsEnabled ? "" : body.smsEnabled ? "SMS disabled in settings" : "SMS disabled", recipientPlayers.length, recipientPlayers.filter((player) => player.phone).length);
+
+  if (smsEnabled) {
+    const resultMessage = renderSmsTemplate(
+      normalizeSmsTemplates(group.settings?.smsTemplates || {}).sessionResults,
+      {
+        group,
+        session,
+        publicUrl: body.publicUrl,
+        resultRankings: resultRankingsForSms(standings),
+        ...sessionTextCounts(session, sessionPlayers),
+      }
+    );
+    sms = await sendSmsMessages({
+      phones: recipientPlayers.map((player) => player.phone).filter(Boolean),
+      body: resultMessage,
+    });
+  }
+
+  await addLog(supabase, group.id, sessionId, "session", `Result texts sent after stats review: ${sms.sent || 0}.`, { sms });
+  return { results, summaryText, sms, recipients: recipientPlayers.length };
 }
 
 async function createNextWeeklySession(supabase, group, session, body) {

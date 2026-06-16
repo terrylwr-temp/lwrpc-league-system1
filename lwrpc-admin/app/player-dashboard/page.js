@@ -1950,29 +1950,35 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
             </button>
           </div>
           <div className="space-y-2 md:hidden">
-            {roster.map((player) => (
-              <div key={player.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
-                <div className="font-black text-slate-950">{formatMemberName(player)}</div>
-                {!hidePlayerContacts && (
-                  <div className="mt-1 text-sm font-semibold text-slate-700">
-                    {formatPhoneNumberForStorage(player.phone) || "No phone on file"}
-                  </div>
-                )}
-                {mobileRosterView === "detail" && (
-                  <>
-                    <div className="mt-2 text-sm font-bold text-blue-900">
-                      {ratingLabel}: {ratingForMember(player.id, seasonId, ratingType, player)}
-                    </div>
-                    <div className="mt-1 text-sm font-semibold text-slate-700">
-                      Record: {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
-                    </div>
+            {roster.map((player) => {
+              const phone = formatPhoneNumberForStorage(player.phone);
+              return (
+                <div key={player.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                  <div className="break-words font-black text-slate-950">
+                    {formatMemberName(player)}
                     {!hidePlayerContacts && (
-                      <div className="mt-1 break-words text-sm text-slate-700">{player.email || ""}</div>
+                      <span className="font-semibold text-slate-700">
+                        {" - "}
+                        {phone || "No phone on file"}
+                      </span>
                     )}
-                  </>
-                )}
-              </div>
-            ))}
+                  </div>
+                  {mobileRosterView === "detail" && (
+                    <>
+                      <div className="mt-2 text-sm font-bold text-blue-900">
+                        {ratingLabel}: {ratingForMember(player.id, seasonId, ratingType, player)}
+                      </div>
+                      <div className="mt-1 text-sm font-semibold text-slate-700">
+                        Record: {formatPlayerRecord(playerRecordForTeam(team.id, player.id))}
+                      </div>
+                      {!hidePlayerContacts && (
+                        <div className="mt-1 break-words text-sm text-slate-700">{player.email || ""}</div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
             {roster.length === 0 && (
               <div className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">
                 No roster players found.
