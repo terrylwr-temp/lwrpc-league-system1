@@ -120,6 +120,23 @@ function roundStandingsPoints(value) {
   return Math.round(Number(value || 0) * 100) / 100;
 }
 
+function resolveMatchWinningTeamId(matchRow, summary) {
+  const savedWinnerId = String(matchRow.winning_team_id || "");
+
+  if (savedWinnerId === String(matchRow.home_team_id || "")) return matchRow.home_team_id;
+  if (savedWinnerId === String(matchRow.away_team_id || "")) return matchRow.away_team_id;
+  if (summary.homeTeamWinPoints > summary.awayTeamWinPoints) return matchRow.home_team_id;
+  if (summary.awayTeamWinPoints > summary.homeTeamWinPoints) return matchRow.away_team_id;
+  if (summary.homeLineWins > summary.awayLineWins) return matchRow.home_team_id;
+  if (summary.awayLineWins > summary.homeLineWins) return matchRow.away_team_id;
+  if (summary.homeGameWins > summary.awayGameWins) return matchRow.home_team_id;
+  if (summary.awayGameWins > summary.homeGameWins) return matchRow.away_team_id;
+  if (summary.homePoints > summary.awayPoints) return matchRow.home_team_id;
+  if (summary.awayPoints > summary.homePoints) return matchRow.away_team_id;
+
+  return matchRow.home_team_id || matchRow.away_team_id || null;
+}
+
 function applyFinalByeAdjustments(rows, byes, publishedMatches) {
   if (!publishedScheduleIsFullyVerified(publishedMatches)) {
     return { rows, applied: false };
@@ -191,6 +208,7 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
       division_id,
       home_team_id,
       away_team_id,
+      winning_team_id,
       scheduled_date,
       scheduled_time,
       status,
@@ -269,6 +287,12 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
     const away = ensureTeam(matchRow.away_team_id);
     let homeTeamWinPoints = 0;
     let awayTeamWinPoints = 0;
+    let homeLineWins = 0;
+    let awayLineWins = 0;
+    let homeTotalGameWins = 0;
+    let awayTotalGameWins = 0;
+    let homeTotalPoints = 0;
+    let awayTotalPoints = 0;
     const matchGames = (matchRow.match_lines || []).flatMap((line) =>
       (line.line_games || []).map((game) => ({
         ...game,
@@ -316,19 +340,25 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
       home.game_losses += awayGameWins;
       away.game_wins += awayGameWins;
       away.game_losses += homeGameWins;
+      homeTotalGameWins += homeGameWins;
+      awayTotalGameWins += awayGameWins;
       home.points_for += homePoints;
       home.points_against += awayPoints;
       away.points_for += awayPoints;
       away.points_against += homePoints;
+      homeTotalPoints += homePoints;
+      awayTotalPoints += awayPoints;
 
       if (pointAwards.mode === "not_played") {
         // Reserved Picklebreaker points do not count as a played line win/loss.
       } else if (winningTeamId === matchRow.home_team_id) {
         home.line_wins += 1;
         away.line_losses += 1;
+        homeLineWins += 1;
       } else if (winningTeamId === matchRow.away_team_id) {
         away.line_wins += 1;
         home.line_losses += 1;
+        awayLineWins += 1;
       } else {
         home.line_ties += 1;
         away.line_ties += 1;
@@ -338,12 +368,16 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
       awayTeamWinPoints += Number(pointAwards.away || 0);
     });
 
-    const matchWinningTeamId =
-      homeTeamWinPoints > awayTeamWinPoints
-        ? matchRow.home_team_id
-        : awayTeamWinPoints > homeTeamWinPoints
-        ? matchRow.away_team_id
-        : null;
+    const matchWinningTeamId = resolveMatchWinningTeamId(matchRow, {
+      homeTeamWinPoints,
+      awayTeamWinPoints,
+      homeLineWins,
+      awayLineWins,
+      homeGameWins: homeTotalGameWins,
+      awayGameWins: awayTotalGameWins,
+      homePoints: homeTotalPoints,
+      awayPoints: awayTotalPoints,
+    });
 
     home.matches_played += 1;
     away.matches_played += 1;
@@ -364,11 +398,6 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
       home.home_losses += 1;
       away.recentResults.push("W");
       home.recentResults.push("L");
-    } else {
-      home.match_ties += 1;
-      away.match_ties += 1;
-      home.recentResults.push("T");
-      away.recentResults.push("T");
     }
 
     for (const line of matchRow.match_lines || []) {

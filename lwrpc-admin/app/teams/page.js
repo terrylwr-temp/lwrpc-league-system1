@@ -895,7 +895,7 @@ export default function TeamsPage() {
         .order("bye_date", { ascending: true }),
       supabase
         .from("team_standings")
-        .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
+        .select("team_id, rank, standings_points, match_wins, match_losses")
         .eq("division_id", team.division_id),
       seasonId
         ? supabase

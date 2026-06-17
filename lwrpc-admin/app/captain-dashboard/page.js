@@ -572,7 +572,7 @@ export default function CaptainDashboardPage() {
           .in("team_id", matchTeamIds),
         supabase
           .from("team_standings")
-          .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
+          .select("team_id, rank, standings_points, match_wins, match_losses")
           .in("team_id", matchTeamIds),
       ]);
 
@@ -857,7 +857,7 @@ export default function CaptainDashboardPage() {
   }
 
   function playerTeamRecord(teamId, memberId) {
-    const record = { wins: 0, losses: 0, ties: 0 };
+    const record = { wins: 0, losses: 0 };
 
     matches
       .filter(
@@ -872,7 +872,6 @@ export default function CaptainDashboardPage() {
           if (!side) return;
 
           if (!line.winning_team_id) {
-            record.ties += 1;
             return;
           }
 
@@ -1967,7 +1966,7 @@ export default function CaptainDashboardPage() {
           .order("bye_date", { ascending: true }),
         supabase
           .from("team_standings")
-          .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
+          .select("team_id, rank, standings_points, match_wins, match_losses")
           .eq("division_id", team.division_id),
         seasonId
           ? supabase
@@ -2461,8 +2460,8 @@ export default function CaptainDashboardPage() {
                     {standing?.standings_points ?? 0}
                   </span>
                   <span className="rounded-xl bg-white px-2 py-2 shadow-sm">
-                    <span className="block text-[11px] font-black uppercase leading-tight tracking-wide text-slate-700">W-L-T</span>
-                    {standing?.match_wins ?? 0}-{standing?.match_losses ?? 0}-{standing?.match_ties ?? 0}
+                    <span className="block text-[11px] font-black uppercase leading-tight tracking-wide text-slate-700">W-L</span>
+                    {standing?.match_wins ?? 0}-{standing?.match_losses ?? 0}
                   </span>
                 </div>
                 </div>
@@ -3814,16 +3813,14 @@ function playerLineSide(line, memberId) {
 function formatPlayerRecord(record) {
   const wins = Number(record?.wins || 0);
   const losses = Number(record?.losses || 0);
-  const ties = Number(record?.ties || 0);
-  return ties > 0 ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;
+  return `${wins}-${losses}`;
 }
 
 function formatStandingRecord(standing) {
   if (!standing) return "0-0";
   const wins = Number(standing.match_wins || 0);
   const losses = Number(standing.match_losses || 0);
-  const ties = Number(standing.match_ties || 0);
-  return ties > 0 ? `${wins}-${losses}-${ties}` : `${wins}-${losses}`;
+  return `${wins}-${losses}`;
 }
 
 function formatLocationAddress(location) {

@@ -655,10 +655,10 @@ function getAverageTeamRating() {
         } else {
           record.other += 1;
         }
-        record.record = `${record.wins}-${record.losses}-${record.other}`;
+        record.record = `${record.wins}-${record.losses}`;
         return record;
       },
-      { games: 0, wins: 0, losses: 0, other: 0, record: "0-0-0" }
+      { games: 0, wins: 0, losses: 0, other: 0, record: "0-0" }
     );
   }
 
@@ -1588,10 +1588,10 @@ function playerHistoryRecord(rows, memberId) {
       } else {
         record.other += 1;
       }
-      record.record = `${record.wins}-${record.losses}-${record.other}`;
+      record.record = `${record.wins}-${record.losses}`;
       return record;
     },
-    { games: 0, wins: 0, losses: 0, other: 0, record: "0-0-0" }
+    { games: 0, wins: 0, losses: 0, other: 0, record: "0-0" }
   );
 }
 

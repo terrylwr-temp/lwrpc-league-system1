@@ -187,7 +187,7 @@ export default function StandingsPage() {
     const selectedDivisionName =
       divisions.find((division) => String(division.id) === String(selectedDivision))?.name || "this division";
     const confirmation = prompt(
-      `This will recalculate match scores, W-L-T, points, and rankings for ${selectedDivisionName} using verified matches only.\n\nType REBUILD to continue.`
+      `This will recalculate match scores, W-L, points, and rankings for ${selectedDivisionName} using verified matches only.\n\nType REBUILD to continue.`
     );
 
     if (confirmation !== "REBUILD") return;
@@ -326,7 +326,7 @@ export default function StandingsPage() {
         .order("bye_date", { ascending: true }),
       supabase
         .from("team_standings")
-        .select("team_id, rank, standings_points, match_wins, match_losses, match_ties")
+        .select("team_id, rank, standings_points, match_wins, match_losses")
         .eq("division_id", team.division_id),
       seasonId
         ? supabase
@@ -519,7 +519,7 @@ if (loading) {
                   </div>
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
-                    <StandingStat label="W-L-T" value={`${team.match_wins}-${team.match_losses}-${team.match_ties}`} />
+                    <StandingStat label="W-L" value={`${team.match_wins}-${team.match_losses}`} />
                     {showByesColumn && (
                       <StandingStat label="Byes" value={team.bye_count || 0} />
                     )}
@@ -555,7 +555,7 @@ if (loading) {
                 </th>
 
                 <th className="p-3 text-left">
-                  W-L-T
+                  W-L
                 </th>
 
                 <th className="p-3 text-left">
@@ -637,8 +637,7 @@ if (loading) {
 
                   <td className="p-3">
                     {team.match_wins}-
-                    {team.match_losses}-
-                    {team.match_ties}
+                    {team.match_losses}
                   </td>
 
                   <td className="p-3">

@@ -593,9 +593,9 @@ function ScoreRow({ label, name, score, won }) {
 function formatTeamRecord(team) {
   const standing = team?.standing;
 
-  if (!standing) return "0-0-0";
+  if (!standing) return "0-0";
 
-  return `${standing.match_wins ?? 0}-${standing.match_losses ?? 0}-${standing.match_ties ?? 0}`;
+  return `${standing.match_wins ?? 0}-${standing.match_losses ?? 0}`;
 }
 
 function formatTeamSummary(team) {

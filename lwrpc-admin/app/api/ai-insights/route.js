@@ -213,7 +213,7 @@ async function loadInsightData(supabase) {
       .limit(8000),
     supabase
       .from("team_standings")
-      .select("id, team_id, division_id, match_wins, match_losses, match_ties, standings_points, rank, teams(id, name), divisions(id, name)")
+      .select("id, team_id, division_id, match_wins, match_losses, standings_points, rank, teams(id, name), divisions(id, name)")
       .limit(2000),
   ]);
 
