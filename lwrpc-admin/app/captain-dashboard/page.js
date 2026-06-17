@@ -919,6 +919,11 @@ export default function CaptainDashboardPage() {
     const flexScheduleAvailable = canShowFlexScheduleControl(match);
     const flexScheduleAllowed = canManageFlexSchedule(match);
     const selectedResult = selectedTeamMatchResult(match);
+    const hasAnyMatchScore =
+      match.home_score !== null &&
+      match.home_score !== undefined ||
+      match.away_score !== null &&
+      match.away_score !== undefined;
     const headingClass =
       selectedResult === "win"
         ? "bg-gradient-to-r from-emerald-700 to-green-700"
@@ -1009,7 +1014,7 @@ export default function CaptainDashboardPage() {
               </div>
             )}
 
-            <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
+            <div className={`mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 ${hasAnyMatchScore ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
               <div className="rounded-xl bg-slate-50 px-3 py-2">
                 <div className="text-xs font-black uppercase tracking-wide text-slate-500">Date / Time</div>
                 <div className="font-bold text-slate-900">{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</div>
@@ -1018,10 +1023,12 @@ export default function CaptainDashboardPage() {
                 <div className="text-xs font-black uppercase tracking-wide text-slate-500">Location</div>
                 <div className="font-bold text-slate-900">{match.locations?.name || "No Location"}</div>
               </div>
-              <div className="rounded-xl bg-slate-50 px-3 py-2">
-                <div className="text-xs font-black uppercase tracking-wide text-slate-500">Score Status</div>
-                <div className="font-bold text-slate-900">{formatScoreStatus(match)}</div>
-              </div>
+              {hasAnyMatchScore && (
+                <div className="rounded-xl bg-slate-50 px-3 py-2">
+                  <div className="text-xs font-black uppercase tracking-wide text-slate-500">Score Status</div>
+                  <div className="font-bold text-slate-900">{formatScoreStatus(match)}</div>
+                </div>
+              )}
             </div>
 
             <div className="mt-3 flex flex-wrap gap-2">
@@ -3358,6 +3365,11 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
   );
   const homeTeam = teamWithRoster(match.home_team_id);
   const awayTeam = teamWithRoster(match.away_team_id);
+  const hasAnyMatchScore =
+    match.home_score !== null &&
+    match.home_score !== undefined ||
+    match.away_score !== null &&
+    match.away_score !== undefined;
 
   function printScoreDetails() {
     window.localStorage.setItem(
@@ -3425,32 +3437,34 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
             />
           </div>
 
-          <div className="border-y border-slate-200 bg-slate-50 px-3 pb-3 sm:px-5 sm:pb-5">
-            <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-              <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                {formatScoreStatus(match)}
-              </div>
-              <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
-                <MatchScoreSummaryRow
-                  label="Home"
-                  name={match.home_team?.name || "Home"}
-                  score={match.home_score}
-                  won={String(match.winning_team_id || "") === String(match.home_team_id || "")}
-                  tone="home"
-                />
-                <div className="text-lg font-black text-slate-400">
-                  -
+          {hasAnyMatchScore && (
+            <div className="border-y border-slate-200 bg-slate-50 px-3 pb-3 sm:px-5 sm:pb-5">
+              <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  {formatScoreStatus(match)}
                 </div>
-                <MatchScoreSummaryRow
-                  label="Away"
-                  name={match.away_team?.name || "Away"}
-                  score={match.away_score}
-                  won={String(match.winning_team_id || "") === String(match.away_team_id || "")}
-                  tone="away"
-                />
+                <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+                  <MatchScoreSummaryRow
+                    label="Home"
+                    name={match.home_team?.name || "Home"}
+                    score={match.home_score}
+                    won={String(match.winning_team_id || "") === String(match.home_team_id || "")}
+                    tone="home"
+                  />
+                  <div className="text-lg font-black text-slate-400">
+                    -
+                  </div>
+                  <MatchScoreSummaryRow
+                    label="Away"
+                    name={match.away_team?.name || "Away"}
+                    score={match.away_score}
+                    won={String(match.winning_team_id || "") === String(match.away_team_id || "")}
+                    tone="away"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="p-3 sm:p-5">
             <div className="space-y-3">
