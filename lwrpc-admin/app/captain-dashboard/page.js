@@ -919,11 +919,7 @@ export default function CaptainDashboardPage() {
     const flexScheduleAvailable = canShowFlexScheduleControl(match);
     const flexScheduleAllowed = canManageFlexSchedule(match);
     const selectedResult = selectedTeamMatchResult(match);
-    const hasAnyMatchScore =
-      match.home_score !== null &&
-      match.home_score !== undefined ||
-      match.away_score !== null &&
-      match.away_score !== undefined;
+    const scoreHasBeenEntered = hasEnteredMatchScore(match);
     const headingClass =
       selectedResult === "win"
         ? "bg-gradient-to-r from-emerald-700 to-green-700"
@@ -1014,7 +1010,7 @@ export default function CaptainDashboardPage() {
               </div>
             )}
 
-            <div className={`mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 ${hasAnyMatchScore ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
+            <div className={`mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 ${scoreHasBeenEntered ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
               <div className="rounded-xl bg-slate-50 px-3 py-2">
                 <div className="text-xs font-black uppercase tracking-wide text-slate-500">Date / Time</div>
                 <div className="font-bold text-slate-900">{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</div>
@@ -1023,7 +1019,7 @@ export default function CaptainDashboardPage() {
                 <div className="text-xs font-black uppercase tracking-wide text-slate-500">Location</div>
                 <div className="font-bold text-slate-900">{match.locations?.name || "No Location"}</div>
               </div>
-              {hasAnyMatchScore && (
+              {scoreHasBeenEntered && (
                 <div className="rounded-xl bg-slate-50 px-3 py-2">
                   <div className="text-xs font-black uppercase tracking-wide text-slate-500">Score Status</div>
                   <div className="font-bold text-slate-900">{formatScoreStatus(match)}</div>
@@ -1095,7 +1091,7 @@ export default function CaptainDashboardPage() {
               </button>
             </div>
 
-            {match.status === "completed" && (
+            {match.status === "completed" && scoreHasBeenEntered && (
               <div className="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900">
                 Score: {match.home_score ?? 0} - {match.away_score ?? 0} · Winner: {match.winning_team?.name || "—"}
               </div>
@@ -3365,11 +3361,7 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
   );
   const homeTeam = teamWithRoster(match.home_team_id);
   const awayTeam = teamWithRoster(match.away_team_id);
-  const hasAnyMatchScore =
-    match.home_score !== null &&
-    match.home_score !== undefined ||
-    match.away_score !== null &&
-    match.away_score !== undefined;
+  const scoreHasBeenEntered = hasEnteredMatchScore(match);
 
   function printScoreDetails() {
     window.localStorage.setItem(
@@ -3437,7 +3429,7 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
             />
           </div>
 
-          {hasAnyMatchScore && (
+          {scoreHasBeenEntered && (
             <div className="border-y border-slate-200 bg-slate-50 px-3 pb-3 sm:px-5 sm:pb-5">
               <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
@@ -3628,6 +3620,12 @@ function formatScoreStatus(match) {
   return timestamp
     ? `${label} - ${formatDisplayTimestampShort(timestamp)}`
     : label;
+}
+
+function hasEnteredMatchScore(match) {
+  const status = match?.score_status || "not_entered";
+
+  return status !== "not_entered" || Boolean(match?.score_entered_at || match?.score_verified_at);
 }
 
 function localDateString() {

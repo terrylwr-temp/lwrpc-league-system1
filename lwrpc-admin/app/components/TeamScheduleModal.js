@@ -311,6 +311,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
   const selectedScore = isHome ? match.home_score : match.away_score;
   const opponentScore = isHome ? match.away_score : match.home_score;
   const hasScore = selectedScore !== null && selectedScore !== undefined && opponentScore !== null && opponentScore !== undefined;
+  const scoreHasBeenEntered = hasEnteredMatchScore(match);
   const showMatchDetails = hasScore && match.score_status === "verified";
   const verifiedCompleted = match.status === "completed" && match.score_status === "verified";
   const selectedTeamWon =
@@ -325,9 +326,6 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
     String(match.winning_team_id) !== String(selectedTeamId);
   const homeScore = match.home_score;
   const awayScore = match.away_score;
-  const hasAnyMatchScore =
-    homeScore !== null ||
-    awayScore !== null;
   const homeWon =
     String(match.winning_team_id || "") === String(match.home_team_id || "") ||
     (homeScore !== null && homeScore !== undefined && awayScore !== null && awayScore !== undefined && Number(homeScore) > Number(awayScore));
@@ -395,7 +393,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
           </div>
         </div>
 
-        {hasAnyMatchScore && (
+        {scoreHasBeenEntered && (
           <div className={compact ? "w-full rounded-xl border border-slate-200 bg-slate-50 p-3 md:w-56 md:justify-self-end" : "rounded-lg bg-slate-100 px-3 py-2 text-right"}>
             <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
               {formatScoreStatus(match)}
@@ -731,6 +729,12 @@ function formatScoreStatus(match) {
   return timestamp
     ? `${titleLabel} - ${formatDisplayTimestampShort(timestamp)}`
     : titleLabel;
+}
+
+function hasEnteredMatchScore(match) {
+  const status = match?.score_status || "not_entered";
+
+  return status !== "not_entered" || Boolean(match?.score_entered_at || match?.score_verified_at);
 }
 
 function formatDate(value) {
