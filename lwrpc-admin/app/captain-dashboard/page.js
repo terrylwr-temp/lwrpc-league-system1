@@ -2966,7 +2966,15 @@ function DivisionCaptainsModal({ data, onClose }) {
                 <tr key={`${row.teamName}:${row.role}:${row.member.id || row.member.email}`} className="even:bg-slate-50">
                   <td className="whitespace-nowrap border border-slate-300 p-3 font-semibold text-slate-950">{row.teamName}</td>
                   <td className="whitespace-nowrap border border-slate-300 p-3">{row.role}</td>
-                  <td className="whitespace-nowrap border border-slate-300 p-3">{formatMemberName(row.member)}</td>
+                  <td className="whitespace-nowrap border border-slate-300 p-3">
+                    {row.member.email ? (
+                      <a href={`mailto:${row.member.email}`} className="font-bold text-blue-800 underline decoration-blue-300 underline-offset-2 hover:text-blue-950">
+                        {formatMemberName(row.member)}
+                      </a>
+                    ) : (
+                      formatMemberName(row.member)
+                    )}
+                  </td>
                   <td className="whitespace-nowrap border border-slate-300 p-3">{row.member.email || ""}</td>
                   <td className="whitespace-nowrap border border-slate-300 p-3">{formatPhoneNumberForStorage(row.member.phone)}</td>
                 </tr>

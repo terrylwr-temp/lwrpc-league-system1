@@ -325,6 +325,9 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
     String(match.winning_team_id) !== String(selectedTeamId);
   const homeScore = match.home_score;
   const awayScore = match.away_score;
+  const hasAnyMatchScore =
+    homeScore !== null ||
+    awayScore !== null;
   const homeWon =
     String(match.winning_team_id || "") === String(match.home_team_id || "") ||
     (homeScore !== null && homeScore !== undefined && awayScore !== null && awayScore !== undefined && Number(homeScore) > Number(awayScore));
@@ -392,21 +395,23 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
           </div>
         </div>
 
-        <div className={compact ? "w-full rounded-xl border border-slate-200 bg-slate-50 p-3 md:w-56 md:justify-self-end" : "rounded-lg bg-slate-100 px-3 py-2 text-right"}>
-          <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
-            {formatScoreStatus(match)}
+        {hasAnyMatchScore && (
+          <div className={compact ? "w-full rounded-xl border border-slate-200 bg-slate-50 p-3 md:w-56 md:justify-self-end" : "rounded-lg bg-slate-100 px-3 py-2 text-right"}>
+            <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
+              {formatScoreStatus(match)}
+            </div>
+            {compact ? (
+              <div className="mt-2 space-y-1">
+                <ScoreRow label="Home" name={formatTeamName(match.home_team, "Home")} score={homeScore} won={homeWon} />
+                <ScoreRow label="Away" name={formatTeamName(match.away_team, "Away")} score={awayScore} won={awayWon} />
+              </div>
+            ) : (
+              <div className="mt-1 text-lg font-black text-slate-900">
+                {hasScore ? `${selectedScore}-${opponentScore}` : "No score"}
+              </div>
+            )}
           </div>
-          {compact ? (
-            <div className="mt-2 space-y-1">
-              <ScoreRow label="Home" name={formatTeamName(match.home_team, "Home")} score={homeScore} won={homeWon} />
-              <ScoreRow label="Away" name={formatTeamName(match.away_team, "Away")} score={awayScore} won={awayWon} />
-            </div>
-          ) : (
-            <div className="mt-1 text-lg font-black text-slate-900">
-              {hasScore ? `${selectedScore}-${opponentScore}` : "No score"}
-            </div>
-          )}
-        </div>
+        )}
       </div>
       </div>
 

@@ -370,16 +370,16 @@ export default function RoundRobinAdminPage() {
       const courtLabel = match.court_name || `Court ${match.court_number || ""}`.trim();
       if (team1Blank && team2Blank) {
         if (requireComplete) {
-          return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: enter scores before continuing.` };
+          return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: enter scores before continuing.`, targetMatchId: match.id };
         }
         continue;
       }
       if (team1Blank || team2Blank) {
-        return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: enter both scores before continuing.` };
+        return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: enter both scores before continuing.`, targetMatchId: match.id };
       }
       const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, scoring);
       if (scoreError) {
-        return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: ${scoreError}` };
+        return { success: false, error: `Round ${match.round_number || roundNumber} ${courtLabel}: ${scoreError}`, targetMatchId: match.id };
       }
     }
 
@@ -396,7 +396,7 @@ export default function RoundRobinAdminPage() {
         team1Score,
         team2Score,
       }, { returnResult: true });
-      if (result?.success === false) return { success: false, error: result.error || "Unable to save scores." };
+      if (result?.success === false) return { success: false, error: result.error || "Unable to save scores.", targetMatchId: match.id };
       if (result?.success !== false) savedMatchIds.push(match.id);
     }
 
@@ -1141,6 +1141,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   const [pendingRoundScroll, setPendingRoundScroll] = useState(null);
   const [progressMessage, setProgressMessage] = useState("");
   const [scoreError, setScoreError] = useState("");
+  const [scoreErrorMatchId, setScoreErrorMatchId] = useState("");
   const [sendResultsOnStatsOk, setSendResultsOnStatsOk] = useState(false);
   const isPlaying = session.status === "playing";
   const isClosed = ["done", "cancelled"].includes(session.status);
@@ -1178,6 +1179,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
     const saved = await saveCurrentRoundScores(session, { requireComplete: true });
     if (saved?.success === false) {
       setScoreError(saved.error || "Check the scores before continuing.");
+      setScoreErrorMatchId(saved.targetMatchId || "");
       return false;
     }
     return true;
@@ -1230,6 +1232,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
       );
       if (result?.success === false) {
         setScoreError(result.error || "Unable to continue.");
+        setScoreErrorMatchId("");
         return;
       }
       if (result?.success !== false) {
@@ -1250,6 +1253,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
       const completed = await runAction("completeSession", { sessionId: session.id, smsEnabled: false }, { returnResult: true });
       if (completed?.success === false) {
         setScoreError(completed.error || "Unable to finish this match.");
+        setScoreErrorMatchId("");
         return;
       }
       if (completed?.success !== false) {
@@ -1365,7 +1369,17 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
         />
       )}
       {progressMessage && <ActionProgressModal message={progressMessage} />}
-      {scoreError && <ScoreErrorModal message={scoreError} onClose={() => setScoreError("")} />}
+      {scoreError && (
+        <ScoreErrorModal
+          message={scoreError}
+          onClose={() => {
+            const targetMatchId = scoreErrorMatchId;
+            setScoreError("");
+            setScoreErrorMatchId("");
+            if (targetMatchId) window.setTimeout(() => scrollToMatchCard(targetMatchId), 50);
+          }}
+        />
+      )}
     </section>
   );
 }
@@ -2279,7 +2293,7 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-900/10 bg-white shadow-[0_18px_45px_-32px_rgba(15,23,42,0.9)]">
+    <div id={matchElementId(match.id)} className="scroll-mt-32 overflow-hidden rounded-lg border border-slate-900/10 bg-white shadow-[0_18px_45px_-32px_rgba(15,23,42,0.9)]">
       <div className="flex flex-col gap-2 bg-[linear-gradient(90deg,#0f3b36,#166b61)] px-3 py-2 text-white sm:flex-row sm:items-center sm:justify-between">
         <div className="font-black">{match.court_name || `Court ${match.court_number}`}</div>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:items-center">
@@ -4253,8 +4267,20 @@ function roundElementId(roundNumber) {
   return `live-round-${String(roundNumber || "").replace(/[^a-zA-Z0-9_-]/g, "-")}`;
 }
 
+function matchElementId(matchId) {
+  return `live-match-${String(matchId || "").replace(/[^a-zA-Z0-9_-]/g, "-")}`;
+}
+
 function scrollToRoundHeader(roundNumber) {
   const element = document.getElementById(roundElementId(roundNumber));
+  if (!element) return;
+  const offset = 112;
+  const top = element.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+}
+
+function scrollToMatchCard(matchId) {
+  const element = document.getElementById(matchElementId(matchId));
   if (!element) return;
   const offset = 112;
   const top = element.getBoundingClientRect().top + window.scrollY - offset;
