@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import PbccPwaRegister from "../../../components/PbccPwaRegister";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../../../lib/version";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
@@ -408,6 +409,7 @@ export default function RoundRobinPlayerPage() {
   if (!state) {
     return (
       <main className="full-screen-main flex min-h-[100dvh] flex-col justify-between bg-slate-100 px-4 py-3 text-slate-950 sm:p-6">
+        <PbccPwaRegister />
         <div className="flex min-h-0 flex-1 items-center justify-center">
         <div className="w-full max-w-md">
           <div className="rounded-2xl bg-white p-5 shadow-2xl sm:rounded-3xl sm:p-8">
@@ -502,6 +504,7 @@ export default function RoundRobinPlayerPage() {
 
   return (
     <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-6">
+      <PbccPwaRegister />
       <div className="w-full">
         <header className="overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_28px_80px_-44px_rgba(15,23,42,0.95)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
