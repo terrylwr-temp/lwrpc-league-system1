@@ -926,6 +926,16 @@ export default function CaptainDashboardPage() {
     const selectedResult = selectedTeamMatchResult(match);
     const scoreHasBeenEntered = hasEnteredMatchScore(match);
     const isMatchScheduled = Boolean(match.scheduled_date);
+    const needsScoreEntry = showSetup && canEnterScores && !scoreHasBeenEntered && !scoreButtonAction;
+    const completedWithScores = match.status === "completed" && scoreHasBeenEntered;
+    const homeWon = String(match.winning_team_id || "") === String(match.home_team_id || "");
+    const awayWon = String(match.winning_team_id || "") === String(match.away_team_id || "");
+    const resultPanelClass =
+      selectedResult === "win"
+        ? "border-emerald-200 bg-emerald-50 text-emerald-950"
+        : selectedResult === "loss"
+          ? "border-rose-200 bg-rose-50 text-rose-950"
+          : "border-blue-200 bg-blue-50 text-blue-950";
     const headingClass =
       selectedResult === "win"
         ? "bg-gradient-to-r from-emerald-700 to-green-700"
@@ -933,7 +943,7 @@ export default function CaptainDashboardPage() {
           ? "bg-gradient-to-r from-rose-700 to-red-700"
           : "bg-gradient-to-r from-blue-800 to-indigo-800";
     const scoreButtonClass =
-      scoreButtonTone === "red"
+      scoreButtonTone === "red" || needsScoreEntry
         ? "bg-red-700 hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
         : "bg-slate-900 hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300";
 
@@ -955,11 +965,9 @@ export default function CaptainDashboardPage() {
                   </span>
                 )}
               </div>
-              {showSetup && (
-                <div className="mt-2 text-lg font-black leading-tight text-white">
-                  {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
-                </div>
-              )}
+              <div className="mt-2 text-lg font-black leading-tight text-white">
+                {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+              </div>
               <div className="mt-1 text-lg font-black leading-tight text-white sm:text-xl">
                 {match.home_team?.name || "Home"} (H) vs {match.away_team?.name || "Away"} (A)
               </div>
@@ -1038,6 +1046,31 @@ export default function CaptainDashboardPage() {
               </div>
             )}
 
+            {completedWithScores && (
+              <div className={`mt-3 rounded-2xl border px-4 py-3 shadow-sm ${resultPanelClass}`}>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <div className="text-[11px] font-black uppercase tracking-wide opacity-70">
+                      Final Result
+                    </div>
+                    <div className="mt-1 text-2xl font-black leading-none">
+                      {match.home_score ?? 0} - {match.away_score ?? 0}
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 gap-2 text-sm font-black sm:min-w-80 sm:grid-cols-2">
+                    <div className={`rounded-xl px-3 py-2 ${homeWon ? "bg-white text-emerald-900 shadow-sm" : "bg-white/60 text-slate-700"}`}>
+                      <div className="text-[10px] uppercase tracking-wide opacity-70">Home {homeWon ? "Winner" : ""}</div>
+                      <div>{match.home_team?.name || "Home"}</div>
+                    </div>
+                    <div className={`rounded-xl px-3 py-2 ${awayWon ? "bg-white text-emerald-900 shadow-sm" : "bg-white/60 text-slate-700"}`}>
+                      <div className="text-[10px] uppercase tracking-wide opacity-70">Away {awayWon ? "Winner" : ""}</div>
+                      <div>{match.away_team?.name || "Away"}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="mt-3 flex flex-wrap gap-2">
               {showSetup && (
                 <button
@@ -1101,12 +1134,6 @@ export default function CaptainDashboardPage() {
                 {scoreButtonLabel}
               </button>
             </div>
-
-            {match.status === "completed" && scoreHasBeenEntered && (
-              <div className="mt-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-900">
-                Score: {match.home_score ?? 0} - {match.away_score ?? 0} · Winner: {match.winning_team?.name || "—"}
-              </div>
-            )}
 
             {match.score_disputed && (
               <div className="mt-2 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-900">
