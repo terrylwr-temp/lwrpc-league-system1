@@ -939,6 +939,11 @@ export default function CaptainDashboardPage() {
           <div className="text-xs font-black uppercase tracking-wide text-white/80">
             Week {match.week_number || "-"}
           </div>
+          {showSetup && (
+            <div className="mt-1 text-lg font-black text-white">
+              {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+            </div>
+          )}
           <div className="mt-1 text-lg font-black">
             {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
           </div>
