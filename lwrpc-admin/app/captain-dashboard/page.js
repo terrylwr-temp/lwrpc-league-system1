@@ -942,23 +942,37 @@ export default function CaptainDashboardPage() {
         key={match.id}
         className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
       >
-        <div className={`${headingClass} px-4 py-3 text-white`}>
-          <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-white/80">
-            <span>Week {match.week_number || "-"}</span>
-            <span>{match.locations?.name || "No Location"}</span>
-            {!isMatchScheduled && (
-              <span className="rounded-full bg-white px-2 py-1 text-[10px] font-black text-slate-950">
-                Not Scheduled
-              </span>
-            )}
-          </div>
-          {showSetup && (
-            <div className="mt-1 text-lg font-black text-white">
-              {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+        <div className={`${headingClass} px-4 py-4 text-white`}>
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(12rem,18rem)] md:items-start">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide">
+                <span className="rounded-full border border-white/25 bg-white/15 px-3 py-1 text-white shadow-sm">
+                  Week {match.week_number || "-"}
+                </span>
+                {!isMatchScheduled && (
+                  <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-slate-950 shadow-sm">
+                    Not Scheduled
+                  </span>
+                )}
+              </div>
+              {showSetup && (
+                <div className="mt-2 text-lg font-black leading-tight text-white">
+                  {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+                </div>
+              )}
+              <div className="mt-1 text-lg font-black leading-tight text-white sm:text-xl">
+                {match.home_team?.name || "Home"} (H) vs {match.away_team?.name || "Away"} (A)
+              </div>
             </div>
-          )}
-          <div className="mt-1 text-lg font-black">
-            {match.home_team?.name || "Home"} (H) vs {match.away_team?.name || "Away"} (A)
+
+            <div className="rounded-xl border border-white/25 bg-white/15 px-3 py-2 shadow-sm md:justify-self-end">
+              <div className="text-[10px] font-black uppercase tracking-wide text-white/75">
+                Location
+              </div>
+              <div className="mt-1 break-words text-base font-black leading-tight text-white sm:text-lg">
+                {match.locations?.name || "No Location"}
+              </div>
+            </div>
           </div>
         </div>
 
