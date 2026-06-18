@@ -914,11 +914,18 @@ export default function CaptainDashboardPage() {
       match.scheduled_date <= localDateString();
 
     const setupTeams = showSetup ? getCaptainTeamsForMatch(match) : [];
+    const matchSetupTeams = showSetup
+      ? [
+          { id: match.home_team_id, name: match.home_team?.name || "Home", side: "Home" },
+          { id: match.away_team_id, name: match.away_team?.name || "Away", side: "Away" },
+        ].filter((team) => team.id)
+      : [];
     const opposingEmails = showSetup ? opposingCaptainEmailsForMatch(match) : [];
     const flexScheduleAvailable = canShowFlexScheduleControl(match);
     const flexScheduleAllowed = canManageFlexSchedule(match);
     const selectedResult = selectedTeamMatchResult(match);
     const scoreHasBeenEntered = hasEnteredMatchScore(match);
+    const isMatchScheduled = Boolean(match.scheduled_date);
     const headingClass =
       selectedResult === "win"
         ? "bg-gradient-to-r from-emerald-700 to-green-700"
@@ -936,8 +943,14 @@ export default function CaptainDashboardPage() {
         className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
       >
         <div className={`${headingClass} px-4 py-3 text-white`}>
-          <div className="text-xs font-black uppercase tracking-wide text-white/80">
-            Week {match.week_number || "-"}
+          <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-white/80">
+            <span>Week {match.week_number || "-"}</span>
+            <span>{match.locations?.name || "No Location"}</span>
+            {!isMatchScheduled && (
+              <span className="rounded-full bg-white px-2 py-1 text-[10px] font-black text-slate-950">
+                Not Scheduled
+              </span>
+            )}
           </div>
           {showSetup && (
             <div className="mt-1 text-lg font-black text-white">
@@ -945,35 +958,21 @@ export default function CaptainDashboardPage() {
             </div>
           )}
           <div className="mt-1 text-lg font-black">
-            {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+            {match.home_team?.name || "Home"} (H) vs {match.away_team?.name || "Away"} (A)
           </div>
         </div>
 
         <div className="p-4">
           <div className="min-w-0">
-            <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
-              <span className="rounded-full bg-green-100 px-2 py-1 text-green-900">
-                Home: {match.home_team?.name || "Home"}
-              </span>
-
-              <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-900">
-                Away: {match.away_team?.name || "Away"}
-              </span>
-
-              <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
-                {match.status || "scheduled"}
-              </span>
-            </div>
-
-            {setupTeams.length > 0 && (
-              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
+            {matchSetupTeams.length > 0 && (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="text-xs font-black uppercase tracking-wide text-slate-500">
                       Match Setup
                     </div>
                     <div className="mt-1 flex flex-wrap gap-2">
-                      {setupTeams.map((team) => {
+                      {matchSetupTeams.map((team) => {
                         const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
                         const setupComplete = setupStatus?.complete === true;
 
@@ -982,54 +981,48 @@ export default function CaptainDashboardPage() {
                             key={team.id}
                             className={`text-xs font-bold ${setupComplete ? "text-green-700" : "text-amber-700"}`}
                           >
-                            {team.name}: {setupComplete ? "Setup Complete" : "Setup Pending"}
+                            {team.side} - {team.name}: {setupComplete ? "Setup Complete" : "Setup Pending"}
                           </span>
                         );
                       })}
                     </div>
                   </div>
 
-                  <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-                    {setupTeams.map((team) => {
-                      const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
-                      const setupComplete = setupStatus?.complete === true;
+                  {setupTeams.length > 0 && (
+                    <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+                      {setupTeams.map((team) => {
+                        const setupStatus = matchSetupStatus[matchSetupKey(match.id, team.id)];
+                        const setupComplete = setupStatus?.complete === true;
 
-                      return (
-                        <button
-                          key={team.id}
-                          type="button"
-                          onClick={() => openMatchSetup(match, team)}
-                          className={`w-full rounded-lg px-3 py-2 text-sm font-bold text-white sm:w-auto ${
-                            setupComplete
-                              ? "bg-blue-700 hover:bg-blue-800"
-                              : "bg-red-700 hover:bg-red-800"
-                          }`}
-                        >
-                          Match Setup
-                        </button>
-                      );
-                    })}
-                  </div>
+                        return (
+                          <button
+                            key={team.id}
+                            type="button"
+                            onClick={() => openMatchSetup(match, team)}
+                            className={`w-full rounded-lg px-3 py-2 text-sm font-bold text-white sm:w-auto ${
+                              setupComplete
+                                ? "bg-blue-700 hover:bg-blue-800"
+                                : "bg-red-700 hover:bg-red-800"
+                            }`}
+                          >
+                            Match Setup
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
-            <div className={`mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 ${scoreHasBeenEntered ? "md:grid-cols-3" : "md:grid-cols-2"}`}>
-              <div className="rounded-xl bg-slate-50 px-3 py-2">
-                <div className="text-xs font-black uppercase tracking-wide text-slate-500">Date / Time</div>
-                <div className="font-bold text-slate-900">{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 px-3 py-2">
-                <div className="text-xs font-black uppercase tracking-wide text-slate-500">Location</div>
-                <div className="font-bold text-slate-900">{match.locations?.name || "No Location"}</div>
-              </div>
-              {scoreHasBeenEntered && (
+            {scoreHasBeenEntered && (
+              <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700">
                 <div className="rounded-xl bg-slate-50 px-3 py-2">
                   <div className="text-xs font-black uppercase tracking-wide text-slate-500">Score Status</div>
                   <div className="font-bold text-slate-900">{formatScoreStatus(match)}</div>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
             <div className="mt-3 flex flex-wrap gap-2">
               {showSetup && (
