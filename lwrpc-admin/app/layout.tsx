@@ -1,5 +1,6 @@
 import "./globals.css";
 import BrowserTitle from "./components/BrowserTitle";
+import LmsPwaRegister from "./components/LmsPwaRegister";
 import SystemFooter from "./components/SystemFooter";
 
 export const metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <BrowserTitle />
+        <LmsPwaRegister />
         {children}
         <SystemFooter />
       </body>

@@ -7,6 +7,7 @@ import { supabase } from "../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { defaultDashboardForRole } from "../lib/permissions";
 import { passkeyErrorMessage } from "../lib/passkeyErrors";
+import LmsInstallButton from "../components/LmsInstallButton";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 
@@ -339,6 +340,8 @@ export default function LoginPage() {
             <p className="mt-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-center text-sm font-normal text-teal-900">
               First time logging in? Enter your email and click Forgot Password.
             </p>
+
+            <LmsInstallButton />
 
             {message && !isErrorMessage && !isSuccessMessage && (
               <div
