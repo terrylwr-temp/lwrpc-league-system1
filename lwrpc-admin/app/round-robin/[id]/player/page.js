@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import PbccInstallButton from "../../../components/PbccInstallButton";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../../../lib/version";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
@@ -491,6 +492,7 @@ export default function RoundRobinPlayerPage() {
             >
               Admin Setup
             </button>
+            <PbccInstallButton />
           </div>
         </div>
         </div>
@@ -1073,7 +1075,7 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
   const isLadder = isLadderSession(session);
 
   return (
-    <article className={`overflow-hidden rounded-lg border shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)] ${isLadder ? "border-violet-200 bg-violet-50/95" : "border-white/80 bg-white/95"}`}>
+    <article className={`overflow-hidden rounded-lg border-2 outline outline-2 outline-offset-2 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)] ${isLadder ? "border-violet-300 bg-violet-50/95 outline-violet-200/80" : "border-teal-700/35 bg-white/95 outline-slate-300/80"}`}>
       <div className={`h-2 ${isLadder ? "bg-[linear-gradient(90deg,#7c3aed,#a855f7,#f59e0b)]" : "bg-[linear-gradient(90deg,#0f766e,#2563eb,#f59e0b)]"}`} />
       <div className="grid grid-cols-1 gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
         <div>
