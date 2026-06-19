@@ -2206,7 +2206,9 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
   const awayScore = matchTeamScore(match, "away");
   const isVerifiedCompleted = match.status === "completed" && match.score_status === "verified";
   const hasVerifiedMatchScore = isVerifiedCompleted && homeScore !== null && awayScore !== null;
+  const hasCompletedMatchScore = match.status === "completed" && homeScore !== null && awayScore !== null;
   const hasScoreStatus = Boolean(match.score_status && match.score_status !== "not_entered");
+  const showScoreStatusBlock = hasScoreStatus || hasCompletedMatchScore;
   const selectedResult = selectedTeamMatchResult(match, selectedTeamId);
   const isMatchScheduled = Boolean(match.scheduled_date);
   const headingClass =
@@ -2228,11 +2230,6 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
               {!isMatchScheduled && (
                 <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-slate-950 shadow-sm">
                   Not Scheduled
-                </span>
-              )}
-              {hasVerifiedMatchScore && (
-                <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-slate-950 shadow-sm">
-                  Score: {homeScore} - {awayScore}
                 </span>
               )}
             </div>
@@ -2257,27 +2254,40 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
 
       <div className="p-4">
         <div className="min-w-0">
-          {hasScoreStatus && (
-            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
-              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-                <div>
+          {showScoreStatusBlock && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                {hasCompletedMatchScore && (
+                  <div className="rounded-xl border border-white bg-white px-4 py-3 shadow-sm">
+                    <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                      Final Score
+                    </div>
+                    <div className="mt-1 text-4xl font-black leading-none text-slate-950 sm:text-5xl">
+                      {homeScore} - {awayScore}
+                    </div>
+                    <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">
+                      Home - Away
+                    </div>
+                  </div>
+                )}
+                <div className={hasCompletedMatchScore ? "sm:text-right" : ""}>
                   <div className="text-xs font-black uppercase tracking-wide text-slate-500">
                     Score Status
                   </div>
-                  <div className="font-black text-slate-950">
-                    {formatMatchScoreStatus(match)}
+                  <div className="mt-1 font-black text-slate-950">
+                    {hasScoreStatus ? formatMatchScoreStatus(match) : "COMPLETED"}
                   </div>
+                  {hasVerifiedMatchScore && (
+                    <div className="mt-2 rounded-lg bg-emerald-100 px-3 py-2 text-xs font-black uppercase tracking-wide text-emerald-900">
+                      Winner: {winningTeamName(match)}
+                    </div>
+                  )}
                 </div>
-                {hasVerifiedMatchScore && (
-                  <div className="rounded-lg bg-emerald-100 px-3 py-2 text-xs font-black uppercase tracking-wide text-emerald-900">
-                    Winner: {winningTeamName(match)}
-                  </div>
-                )}
               </div>
             </div>
           )}
 
-          <div className={`flex flex-wrap gap-2 ${hasScoreStatus ? "mt-3" : ""}`}>
+          <div className={`flex flex-wrap gap-2 ${showScoreStatusBlock ? "mt-3" : ""}`}>
             <button
               type="button"
               onClick={() => onOpenDetails(match)}
