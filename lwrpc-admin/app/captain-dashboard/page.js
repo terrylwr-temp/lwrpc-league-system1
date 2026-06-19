@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
+import LmsInstallButton from "../components/LmsInstallButton";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
@@ -2588,6 +2589,7 @@ export default function CaptainDashboardPage() {
 
                   {documentsOpen && (
                     <div className="grid grid-cols-1 gap-2 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">
+                      <LmsInstallButton compact />
                       {LEAGUE_DOCUMENT_TYPES.map((documentType) => {
                         const hasDocument = Boolean(leagueDocumentPath(team.divisions?.leagues, documentType));
 

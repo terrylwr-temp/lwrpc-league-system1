@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
+import LmsInstallButton from "../components/LmsInstallButton";
 import TeamScheduleModal from "../components/TeamScheduleModal";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
@@ -1890,6 +1891,7 @@ function TeamCard({
 
         {documentsOpen && (
           <div className="grid grid-cols-1 gap-2 px-4 pb-4 sm:grid-cols-3">
+            <LmsInstallButton compact />
             {PLAYER_LEAGUE_DOCUMENT_TYPES.map((documentType) => {
               const hasDocument = Boolean(leagueDocumentPath(team.divisions?.leagues, documentType));
 
@@ -2204,7 +2206,9 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
   const awayScore = matchTeamScore(match, "away");
   const isVerifiedCompleted = match.status === "completed" && match.score_status === "verified";
   const hasVerifiedMatchScore = isVerifiedCompleted && homeScore !== null && awayScore !== null;
+  const hasScoreStatus = Boolean(match.score_status && match.score_status !== "not_entered");
   const selectedResult = selectedTeamMatchResult(match, selectedTeamId);
+  const isMatchScheduled = Boolean(match.scheduled_date);
   const headingClass =
     selectedResult === "win"
       ? "bg-gradient-to-r from-emerald-700 to-green-700"
@@ -2214,66 +2218,66 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
 
   return (
     <div className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-      <div className={`${headingClass} px-4 py-3 text-white`}>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+      <div className={`${headingClass} px-4 py-4 text-white`}>
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(12rem,18rem)] md:items-start">
           <div className="min-w-0">
-            <div className="text-xs font-black uppercase tracking-wide text-white/80">
-              Week {match.week_number || "-"}
+            <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide">
+              <span className="rounded-full border border-white/25 bg-white/15 px-3 py-1 text-white shadow-sm">
+                Week {match.week_number || "-"}
+              </span>
+              {!isMatchScheduled && (
+                <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-slate-950 shadow-sm">
+                  Not Scheduled
+                </span>
+              )}
+              {hasVerifiedMatchScore && (
+                <span className="rounded-full bg-white px-3 py-1 text-[10px] font-black text-slate-950 shadow-sm">
+                  Score: {homeScore} - {awayScore}
+                </span>
+              )}
             </div>
-            <div className="mt-1 text-lg font-black">
-              {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+            <div className="mt-2 text-lg font-black leading-tight text-white">
+              {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
+            </div>
+            <div className="mt-1 text-lg font-black leading-tight text-white sm:text-xl">
+              {match.home_team?.name || "Home"} (H) vs {match.away_team?.name || "Away"} (A)
             </div>
           </div>
-          {hasVerifiedMatchScore && (
-            <div className="w-fit rounded-xl bg-white/95 px-3 py-2 text-sm font-black text-slate-950 shadow-sm">
-              Score: {homeScore} - {awayScore} | Winner: {winningTeamName(match)}
+
+          <div className="rounded-xl border border-white/25 bg-white/15 px-3 py-2 shadow-sm md:justify-self-end">
+            <div className="text-[10px] font-black uppercase tracking-wide text-white/75">
+              Location
             </div>
-          )}
+            <div className="mt-1 break-words text-base font-black leading-tight text-white sm:text-lg">
+              {match.locations?.name || "No Location"}
+            </div>
+          </div>
         </div>
       </div>
 
       <div className="p-4">
         <div className="min-w-0">
-          <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
-            <span className="rounded-full bg-green-100 px-2 py-1 text-green-900">
-              Home: {match.home_team?.name || "Home"}
-            </span>
-            <span className="rounded-full bg-indigo-100 px-2 py-1 text-indigo-900">
-              Away: {match.away_team?.name || "Away"}
-            </span>
-            <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
-              {match.status || "scheduled"}
-            </span>
-          </div>
+          {hasScoreStatus && (
+            <div className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                    Score Status
+                  </div>
+                  <div className="font-black text-slate-950">
+                    {formatMatchScoreStatus(match)}
+                  </div>
+                </div>
+                {hasVerifiedMatchScore && (
+                  <div className="rounded-lg bg-emerald-100 px-3 py-2 text-xs font-black uppercase tracking-wide text-emerald-900">
+                    Winner: {winningTeamName(match)}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
-          <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
-            <div className="rounded-lg bg-slate-50 px-3 py-2">
-              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                Date / Time
-              </div>
-              <div className="font-black text-slate-950">
-                {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}
-              </div>
-            </div>
-            <div className="rounded-lg bg-slate-50 px-3 py-2">
-              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                Location
-              </div>
-              <div className="font-black text-slate-950">
-                {match.locations?.name || "No Location"}
-              </div>
-            </div>
-            <div className="rounded-lg bg-slate-50 px-3 py-2">
-              <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                Score Status
-              </div>
-              <div className="font-black text-slate-950">
-                {formatMatchScoreStatus(match)}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className={`flex flex-wrap gap-2 ${hasScoreStatus ? "mt-3" : ""}`}>
             <button
               type="button"
               onClick={() => onOpenDetails(match)}

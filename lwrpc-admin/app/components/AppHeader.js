@@ -5,7 +5,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
-import LmsInstallButton from "./LmsInstallButton";
 import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
@@ -395,9 +394,6 @@ export default function AppHeader({
                 {subtitle}
               </p>
 
-              <div className="mt-3 lg:hidden">
-                <LmsInstallButton compact />
-              </div>
             </div>
           </div>
 
@@ -475,10 +471,6 @@ export default function AppHeader({
 
             <div className="text-sm font-bold uppercase tracking-wide text-yellow-300">
               {systemName}
-            </div>
-
-            <div className="mt-4">
-              <LmsInstallButton compact />
             </div>
 
             <NavGroups mobile />
