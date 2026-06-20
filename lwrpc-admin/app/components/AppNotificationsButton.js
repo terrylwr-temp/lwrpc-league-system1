@@ -42,7 +42,7 @@ function buttonText(status) {
   return "App Notifications";
 }
 
-export default function AppNotificationsButton({ phone = "", groupId = "", compact = false }) {
+export default function AppNotificationsButton({ phone = "", groupId = "", compact = false, iconOnly = false }) {
   const [visible, setVisible] = useState(false);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
@@ -122,6 +122,30 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
   }
 
   if (!visible) return null;
+
+  if (iconOnly) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={enableNotifications}
+          disabled={status === "working" || status === "unsupported" || status === "blocked"}
+          aria-label={buttonText(status)}
+          title={buttonText(status)}
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 bg-white shadow-[0_10px_22px_-14px_rgba(20,184,166,0.95)] ring-1 ring-white/25 transition hover:-translate-y-0.5 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60 ${
+            status === "enabled" ? "border-emerald-300" : "border-teal-200"
+          }`}
+        >
+          <Image src="/favicon.ico" alt="" width={34} height={34} className="h-8 w-8 object-contain" />
+        </button>
+        {message && (
+          <div className="fixed inset-x-3 bottom-4 z-50 rounded-lg border border-emerald-200 bg-white px-4 py-3 text-center text-xs font-bold leading-relaxed text-slate-800 shadow-[0_18px_48px_-22px_rgba(15,23,42,0.95)]">
+            {message}
+          </div>
+        )}
+      </>
+    );
+  }
 
   return (
     <div className={compact ? "" : "mt-3"}>

@@ -511,14 +511,15 @@ export default function RoundRobinPlayerPage() {
       <div className="w-full">
         <header className="overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_28px_80px_-44px_rgba(15,23,42,0.95)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
-          <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-            <div className="min-w-0">
+          <div className="flex items-start justify-between gap-3 p-4 sm:items-center sm:p-5">
+            <div className="min-w-0 flex-1">
               <div className="text-xs font-black uppercase tracking-wide text-teal-200">{clubName}</div>
               <h1 className="break-words text-3xl font-black sm:text-4xl">PBCourtCommand</h1>
             </div>
-            <div className="hidden gap-2 sm:flex sm:flex-wrap">
+            <div className="flex shrink-0 items-center gap-2 sm:flex-wrap">
+              <AppNotificationsButton phone={phone} groupId={state.group?.id || id} iconOnly />
               {state && (
-                <button type="button" onClick={clearSavedPhone} className="rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg">
+                <button type="button" onClick={clearSavedPhone} className="hidden rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg sm:block">
                   Sign Out
                 </button>
               )}
@@ -547,9 +548,6 @@ export default function RoundRobinPlayerPage() {
               onPartnerComparison={() => setShowPartnerComparison(true)}
               onLadderRanking={openLadderRanking}
             />
-
-            <AppNotificationsButton phone={phone} groupId={state.group?.id || id} />
-
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="min-w-0">
                 <h2 className="text-2xl font-black text-slate-950">{showHistory ? "All Matches" : "Upcoming Matches"}</h2>
