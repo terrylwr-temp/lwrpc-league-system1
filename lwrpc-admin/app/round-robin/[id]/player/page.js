@@ -547,6 +547,7 @@ export default function RoundRobinPlayerPage() {
               hasLadderMatches={hasLadderMatches}
               onPartnerComparison={() => setShowPartnerComparison(true)}
               onLadderRanking={openLadderRanking}
+              onLogout={clearSavedPhone}
             />
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="min-w-0">
@@ -692,7 +693,7 @@ export default function RoundRobinPlayerPage() {
   );
 }
 
-function PlayerHistorySummary({ history, player, range, setRange, ladders = [], hasRegularMatches = true, hasLadderMatches = false, onPartnerComparison, onLadderRanking }) {
+function PlayerHistorySummary({ history, player, range, setRange, ladders = [], hasRegularMatches = true, hasLadderMatches = false, onPartnerComparison, onLadderRanking, onLogout }) {
   const [mobileExpanded, setMobileExpanded] = useState(false);
   const showingLadders = hasLadderMatches && range === "ladders";
   const regularSessions = (history?.sessions || []).filter((session) => !isLadderSession(session));
@@ -783,12 +784,20 @@ function PlayerHistorySummary({ history, player, range, setRange, ladders = [], 
               )}
             </div>
           )}
-          <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-5">
+          <div className="mt-3 grid grid-cols-2 gap-2 md:grid-cols-6">
             <StatTile label="Dates Played" value={stats.sessionsScored} />
             <StatTile label="Last played" value={stats.lastPlayedDate ? formatDate(stats.lastPlayedDate) : "-"} />
             <StatTile label="Record" value={`${stats.wins || 0}-${stats.losses || 0}`} />
             <StatTile label="Win %" value={formatPercent(stats.winPct)} />
             <StatTile label="Point Diff" value={formatSignedNumber(stats.pointDiff || 0)} />
+            <button
+              type="button"
+              onClick={onLogout}
+              className="min-w-0 rounded-lg border border-red-100 bg-white px-3 py-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-red-200 hover:bg-red-50 hover:shadow-md"
+            >
+              <div className="text-xs font-black uppercase tracking-wide text-red-600">Account</div>
+              <div className="mt-1 text-2xl font-black text-red-700">Logout</div>
+            </button>
           </div>
         </div>
       </div>
