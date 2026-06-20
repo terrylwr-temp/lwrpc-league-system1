@@ -1,26 +1,11 @@
+import { normalizeAppNotificationPhone, sendAppNotificationMessages } from "./appNotifications";
+
 function cleanList(values) {
   return [...new Set((values || []).map((value) => String(value || "").trim()).filter(Boolean))];
 }
 
 function normalizePhoneNumber(value) {
-  const text = String(value || "").trim();
-  if (!text) return "";
-
-  if (text.startsWith("+")) {
-    return `+${text.replace(/\D/g, "")}`;
-  }
-
-  const digits = text.replace(/\D/g, "");
-
-  if (digits.length === 10) {
-    return `+1${digits}`;
-  }
-
-  if (digits.length === 11 && digits.startsWith("1")) {
-    return `+${digits}`;
-  }
-
-  return digits ? `+${digits}` : "";
+  return normalizeAppNotificationPhone(value);
 }
 
 function twilioAuthHeader() {
@@ -33,7 +18,7 @@ function twilioFromPhoneNumber() {
   return normalizePhoneNumber(process.env.TWILIO_FROM_PHONE_NUMBER);
 }
 
-export async function sendSmsMessages({ phones, body }) {
+export async function sendSmsMessages({ phones, body, preferAppNotifications = false, appNotificationTitle, appNotificationUrl, appNotificationIcon }) {
   const recipients = cleanList(phones).map(normalizePhoneNumber).filter(Boolean);
 
   if (recipients.length === 0) {
@@ -44,11 +29,36 @@ export async function sendSmsMessages({ phones, body }) {
     return { skipped: true, reason: "No SMS body", sent: 0, results: [] };
   }
 
+  const appResult = preferAppNotifications
+    ? await sendAppNotificationMessages({
+        phones: recipients,
+        title: appNotificationTitle,
+        body,
+        url: appNotificationUrl,
+        icon: appNotificationIcon,
+      })
+    : { skipped: true, reason: "App Notifications disabled for this send", sent: 0, results: [], fallbackPhones: recipients };
+  const smsRecipients = appResult.skipped ? recipients : appResult.fallbackPhones || recipients;
+
+  if (smsRecipients.length === 0) {
+    return {
+      skipped: false,
+      sent: appResult.sent || 0,
+      smsSent: 0,
+      appSent: appResult.sent || 0,
+      app: appResult,
+      results: [],
+    };
+  }
+
   if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
     return {
-      skipped: true,
+      skipped: (appResult.sent || 0) === 0,
       reason: "Missing TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN",
-      sent: 0,
+      sent: appResult.sent || 0,
+      smsSent: 0,
+      appSent: appResult.sent || 0,
+      app: appResult,
       results: [],
     };
   }
@@ -57,9 +67,12 @@ export async function sendSmsMessages({ phones, body }) {
 
   if (!fromPhoneNumber && !process.env.TWILIO_MESSAGING_SERVICE_SID) {
     return {
-      skipped: true,
+      skipped: (appResult.sent || 0) === 0,
       reason: "Missing TWILIO_FROM_PHONE_NUMBER or TWILIO_MESSAGING_SERVICE_SID",
-      sent: 0,
+      sent: appResult.sent || 0,
+      smsSent: 0,
+      appSent: appResult.sent || 0,
+      app: appResult,
       results: [],
     };
   }
@@ -67,7 +80,7 @@ export async function sendSmsMessages({ phones, body }) {
   const url = `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`;
 
   const results = await Promise.all(
-    recipients.map(async (to) => {
+    smsRecipients.map(async (to) => {
       const payload = new URLSearchParams({
         To: to,
         Body: body,
@@ -101,7 +114,10 @@ export async function sendSmsMessages({ phones, body }) {
 
   return {
     skipped: false,
-    sent: results.filter((result) => result.ok).length,
+    sent: (appResult.sent || 0) + results.filter((result) => result.ok).length,
+    smsSent: results.filter((result) => result.ok).length,
+    appSent: appResult.sent || 0,
+    app: appResult,
     results,
   };
 }

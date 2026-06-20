@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { compareLadderRowsByCriteria, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
-import { sendSmsMessages } from "../../../lib/notifications";
+import { sendSmsMessages as sendSmsMessagesWithFallback } from "../../../lib/notifications";
 import { loadServerSystemSettings } from "../../../lib/serverEmailTemplates";
 
 export const runtime = "nodejs";
+
+function sendSmsMessages(options) {
+  return sendSmsMessagesWithFallback({
+    ...options,
+    preferAppNotifications: true,
+    appNotificationTitle: "PBCourtCommand",
+    appNotificationUrl: options?.appNotificationUrl || options?.publicUrl || "/pbcc/player",
+    appNotificationIcon: "/favicon.ico",
+  });
+}
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;

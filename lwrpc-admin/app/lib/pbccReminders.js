@@ -1,9 +1,19 @@
-import { sendSmsMessages } from "./notifications";
+import { sendSmsMessages as sendSmsMessagesWithFallback } from "./notifications";
 import { loadServerSystemSettings } from "./serverEmailTemplates";
 
 const DEFAULT_TIME_ZONE = "America/New_York";
 const PBCC_REMINDER_LOG_TYPE = "reminder";
 const PBCC_REMINDER_KIND = "pbcc_match_reminder";
+
+function sendSmsMessages(options) {
+  return sendSmsMessagesWithFallback({
+    ...options,
+    preferAppNotifications: true,
+    appNotificationTitle: "PBCourtCommand",
+    appNotificationUrl: options?.appNotificationUrl || options?.publicUrl || "/pbcc/player",
+    appNotificationIcon: "/favicon.ico",
+  });
+}
 
 function normalizeReminderHours(value) {
   const numeric = Number(value);

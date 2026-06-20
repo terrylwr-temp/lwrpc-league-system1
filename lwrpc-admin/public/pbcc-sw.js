@@ -1,9 +1,10 @@
-const CACHE_NAME = "pbcc-pwa-static-v2";
+const CACHE_NAME = "pbcc-pwa-static-v3";
 const STATIC_CACHE_PREFIX = "pbcc-pwa-static-";
 const PRECACHE_URLS = [
   "/pbcc-manifest.webmanifest",
   "/pbcc-icon-192.png",
   "/pbcc-icon-512.png",
+  "/favicon.ico",
 ];
 const STATIC_ASSET_PATTERN = /\.(?:css|js|png|jpg|jpeg|webp|svg|ico|woff2?|ttf)$/i;
 
@@ -56,6 +57,35 @@ self.addEventListener("fetch", (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(request, responseToCache));
         return networkResponse;
       });
+    })
+  );
+});
+
+self.addEventListener("push", (event) => {
+  const payload = event.data ? event.data.json() : {};
+  const title = payload.title || "PBCourtCommand";
+  const options = {
+    body: payload.body || "You have a new PBCourtCommand notification.",
+    icon: payload.icon || "/favicon.ico",
+    badge: payload.badge || "/favicon.ico",
+    tag: payload.tag || "pbcc-app-notification",
+    data: {
+      url: payload.url || "/pbcc/player",
+    },
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const targetUrl = new URL(event.notification.data?.url || "/pbcc/player", self.location.origin).href;
+
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+      const client = clients.find((item) => item.url === targetUrl);
+      if (client) return client.focus();
+      return self.clients.openWindow(targetUrl);
     })
   );
 });

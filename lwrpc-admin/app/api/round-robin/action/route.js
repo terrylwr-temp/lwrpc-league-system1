@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { sendSmsMessages } from "../../../lib/notifications";
+import { sendSmsMessages as sendSmsMessagesWithFallback } from "../../../lib/notifications";
 import { compareLadderRowsByCriteria, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
 import { createNextRoundRobinRound, createRoundRobinSchedule, roundRobinPlayerLabel, roundRobinStandings, summaryTextForStandings } from "../../../lib/roundRobinSchedule";
 
@@ -34,6 +34,16 @@ const DEFAULT_ROUND_ROBIN_SCORING = {
   winBy: 1,
   scoreType: "standard",
 };
+
+function sendSmsMessages(options) {
+  return sendSmsMessagesWithFallback({
+    ...options,
+    preferAppNotifications: true,
+    appNotificationTitle: "PBCourtCommand",
+    appNotificationUrl: options?.appNotificationUrl || options?.publicUrl || "/pbcc/player",
+    appNotificationIcon: "/favicon.ico",
+  });
+}
 
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;

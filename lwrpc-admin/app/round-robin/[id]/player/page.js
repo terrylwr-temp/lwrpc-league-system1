@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import AppNotificationsButton from "../../../components/AppNotificationsButton";
 import PbccInstallButton from "../../../components/PbccInstallButton";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../../../lib/version";
@@ -546,6 +547,8 @@ export default function RoundRobinPlayerPage() {
               onPartnerComparison={() => setShowPartnerComparison(true)}
               onLadderRanking={openLadderRanking}
             />
+
+            <AppNotificationsButton phone={phone} groupId={state.group?.id || id} />
 
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
               <div className="min-w-0">
