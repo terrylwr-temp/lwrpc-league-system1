@@ -2415,14 +2415,14 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
             <button
               type="button"
               onClick={printMatchResults}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
             >
               Print
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
             >
               Close
             </button>
@@ -2696,11 +2696,11 @@ function MatchTeamDetail({ label, team, standing, tone, onOpenRoster }) {
       <div className="mt-1 text-xl font-black">{team?.name || label}</div>
       <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-bold">
         <div className="rounded-xl bg-white px-3 py-2">
-          <div className="text-xs uppercase tracking-wide text-slate-500">Rank</div>
+          <div className="text-xs uppercase tracking-wide text-slate-500">Current Rank</div>
           #{standing?.rank || "N/A"}
         </div>
         <div className="rounded-xl bg-white px-3 py-2">
-          <div className="text-xs uppercase tracking-wide text-slate-500">Record</div>
+          <div className="text-xs uppercase tracking-wide text-slate-500">Current Record</div>
           {formatStandingRecord(standing)}
         </div>
       </div>

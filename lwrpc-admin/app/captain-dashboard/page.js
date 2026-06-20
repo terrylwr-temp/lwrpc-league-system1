@@ -79,6 +79,7 @@ export default function CaptainDashboardPage() {
   const [captainSectionDefaulted, setCaptainSectionDefaulted] = useState(false);
   const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
   const [loading, setLoading] = useState(true);
+  const [loadingSubtitle, setLoadingSubtitle] = useState("Loading Captain Dashboard...");
   const [setupMatch, setSetupMatch] = useState(null);
   const [setupTeam, setSetupTeam] = useState(null);
   const [setupRoster, setSetupRoster] = useState([]);
@@ -148,6 +149,7 @@ export default function CaptainDashboardPage() {
   }, []);
 
   const loadData = useCallback(async function loadData() {
+    setLoadingSubtitle("Loading Captain Dashboard...");
     setLoading(true);
 
     const startedAt = Date.now();
@@ -2117,7 +2119,7 @@ export default function CaptainDashboardPage() {
   }
 
   if (loading) {
-    return <LoadingScreen subtitle="Loading Captain Dashboard..." />;
+    return <LoadingScreen subtitle={loadingSubtitle} />;
   }
 
   if (!currentMember) {
@@ -2537,7 +2539,11 @@ export default function CaptainDashboardPage() {
                         return;
                       }
 
-                      if (confirmUnsavedChanges()) router.push(`/teams/${team.id}`);
+                      if (confirmUnsavedChanges()) {
+                        setLoadingSubtitle("Loading Team Roster...");
+                        setLoading(true);
+                        router.push(`/teams/${team.id}`);
+                      }
                     }}
                     className={DASHBOARD_ACTION_BUTTON_3D}
                   >
@@ -3057,7 +3063,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
           >
             Close
           </button>
@@ -3224,11 +3230,11 @@ function MatchTeamDetail({ label, team, tone, onOpenRoster }) {
       <div className="mt-1 text-xl font-black">{team?.name || label}</div>
       <div className="mt-3 grid grid-cols-2 gap-2 text-sm font-bold">
         <div className="rounded-xl bg-white px-3 py-2">
-          <div className="text-xs uppercase tracking-wide text-slate-500">Rank</div>
+          <div className="text-xs uppercase tracking-wide text-slate-500">Current Rank</div>
           #{standing?.rank || "N/A"}
         </div>
         <div className="rounded-xl bg-white px-3 py-2">
-          <div className="text-xs uppercase tracking-wide text-slate-500">Record</div>
+          <div className="text-xs uppercase tracking-wide text-slate-500">Current Record</div>
           {formatStandingRecord(standing)}
         </div>
       </div>
@@ -3439,14 +3445,14 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
             <button
               type="button"
               onClick={printScoreDetails}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
             >
               Print
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
             >
               Close
             </button>
