@@ -361,17 +361,16 @@ export default function LoginPage() {
             <div className="mt-3 grid grid-cols-3 gap-2">
               <button
                 type="button"
-                onClick={signInWithPasskey}
+                onClick={() => signInWithProvider("apple")}
                 disabled={loading}
-                aria-label="Sign in with passkey or fingerprint"
-                title="Passkey / Fingerprint"
-                className="flex min-h-14 flex-col items-center justify-center rounded-xl border border-blue-200 bg-blue-50 px-2 py-2 text-xs font-black text-blue-900 transition hover:border-blue-400 hover:bg-blue-100 disabled:opacity-50"
+                aria-label="Sign in with Apple"
+                title="Apple"
+                className="flex min-h-14 flex-col items-center justify-center rounded-xl border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50 hover:shadow-md disabled:opacity-50"
               >
-                <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3Z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 14v7M8 18h8M15 8h5v4h-2v2h-3" />
+                <svg aria-hidden="true" className="h-5 w-5 text-slate-950" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16.4 12.1c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.6.8-3.3.8-.7 0-1.8-.8-2.9-.8-1.5 0-2.9.9-3.7 2.2-1.6 2.8-.4 7 1.1 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.2-2.5 1.2-2.6 0 0-2.8-1.1-2.8-3.9ZM14.2 5.7c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.6.7-1 1.6-.9 2.6 1 .1 1.9-.5 2.5-1.2Z" />
                 </svg>
-                <span className="mt-1">Passkey</span>
+                <span className="mt-1">Apple</span>
               </button>
 
               <button
@@ -380,7 +379,7 @@ export default function LoginPage() {
                 disabled={loading}
                 aria-label="Sign in with Google"
                 title="Google"
-                className="flex min-h-14 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-2 py-2 text-xs font-black text-slate-800 transition hover:border-blue-300 hover:bg-slate-50 disabled:opacity-50"
+                className="flex min-h-14 flex-col items-center justify-center rounded-xl border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50 hover:shadow-md disabled:opacity-50"
               >
                 <span aria-hidden="true" className="flex h-5 w-5 items-center justify-center rounded-full border border-slate-200 bg-white text-base font-black text-blue-700">G</span>
                 <span className="mt-1">Google</span>
@@ -388,16 +387,17 @@ export default function LoginPage() {
 
               <button
                 type="button"
-                onClick={() => signInWithProvider("apple")}
+                onClick={signInWithPasskey}
                 disabled={loading}
-                aria-label="Sign in with Apple"
-                title="Apple"
-                className="flex min-h-14 flex-col items-center justify-center rounded-xl border border-slate-950 bg-slate-950 px-2 py-2 text-xs font-black text-white transition hover:bg-slate-800 disabled:opacity-50"
+                aria-label="Sign in with passkey or fingerprint"
+                title="Passkey / Fingerprint"
+                className="flex min-h-14 flex-col items-center justify-center rounded-xl border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-slate-50 hover:shadow-md disabled:opacity-50"
               >
-                <svg aria-hidden="true" className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M16.4 12.1c0-2.2 1.8-3.2 1.9-3.3-1-1.5-2.6-1.7-3.2-1.7-1.4-.1-2.6.8-3.3.8-.7 0-1.8-.8-2.9-.8-1.5 0-2.9.9-3.7 2.2-1.6 2.8-.4 7 1.1 9.3.8 1.1 1.7 2.4 2.9 2.3 1.2 0 1.6-.7 3-.7s1.8.7 3 .7c1.3 0 2.1-1.1 2.8-2.3.9-1.3 1.2-2.5 1.2-2.6 0 0-2.8-1.1-2.8-3.9ZM14.2 5.7c.6-.7 1-1.7.9-2.7-.9 0-1.9.6-2.5 1.3-.6.7-1 1.6-.9 2.6 1 .1 1.9-.5 2.5-1.2Z" />
+                <svg aria-hidden="true" className="h-5 w-5 text-blue-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3Z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 14v7M8 18h8M15 8h5v4h-2v2h-3" />
                 </svg>
-                <span className="mt-1">Apple</span>
+                <span className="mt-1">Passkey</span>
               </button>
             </div>
 
