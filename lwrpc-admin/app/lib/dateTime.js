@@ -45,6 +45,28 @@ export function formatDisplayDateWithWeekday(value, fallback = "-") {
   return `${displayDate} ${weekday}`;
 }
 
+export function formatDisplayDateWithLeadingWeekday(value, fallback = "-") {
+  if (!value) return fallback;
+
+  const displayDate = formatDisplayDate(value, fallback);
+  const text = String(value);
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const date = match
+    ? new Date(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12))
+    : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return displayDate;
+  }
+
+  const weekday = new Intl.DateTimeFormat("en-US", {
+    timeZone: APP_TIME_ZONE,
+    weekday: "long",
+  }).format(date);
+
+  return `${weekday} ${displayDate}`;
+}
+
 export function formatDisplayTime(value, fallback = "-") {
   if (!value) return fallback;
 

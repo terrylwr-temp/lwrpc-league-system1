@@ -7,7 +7,7 @@ import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
 import { requireRole, supabase } from "../lib/auth";
-import { formatDisplayDate, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
+import { formatDisplayDate, formatDisplayDateWithLeadingWeekday, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import TeamScheduleModal from "../components/TeamScheduleModal";
@@ -3125,7 +3125,7 @@ function MatchDetailsModal({ match, ratingForMember, teamWithRoster, onOpenRoste
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
             <div className="mt-2 flex flex-wrap gap-2 text-sm font-semibold text-slate-200">
-              <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
+              <span>{formatDisplayDateWithLeadingWeekday(match.scheduled_date, "Date TBD")} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
               {homeScore !== null && awayScore !== null && (
                 <span className="rounded-full bg-white/15 px-3 py-0.5 text-white">
                   Match Score: {homeScore}-{awayScore}
@@ -3432,7 +3432,7 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-200">
-              <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
+              <span>{formatDisplayDateWithLeadingWeekday(match.scheduled_date, "Date TBD")} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:justify-end">
