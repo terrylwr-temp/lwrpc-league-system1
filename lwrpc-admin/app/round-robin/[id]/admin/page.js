@@ -2398,6 +2398,7 @@ async function performSwap(first, second, runAction) {
 function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
   const [form, setForm] = useState(emptyPlayerForm());
   const [formBaseline, setFormBaseline] = useState(() => emptyPlayerForm());
+  const [playerModalOpen, setPlayerModalOpen] = useState(false);
   const [memberSearch, setMemberSearch] = useState("");
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
   const [playerSearch, setPlayerSearch] = useState("");
@@ -2417,9 +2418,27 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
   const formDirty = JSON.stringify(form) !== JSON.stringify(formBaseline);
 
   useEffect(() => {
-    setTabDirty?.("Players", JSON.stringify(form) !== JSON.stringify(formBaseline));
+    setTabDirty?.("Players", playerModalOpen && JSON.stringify(form) !== JSON.stringify(formBaseline));
     return () => setTabDirty?.("Players", false);
-  }, [form, formBaseline, setTabDirty]);
+  }, [form, formBaseline, playerModalOpen, setTabDirty]);
+
+  function resetPlayerForm() {
+    const emptyForm = emptyPlayerForm();
+    setForm(emptyForm);
+    setFormBaseline(emptyForm);
+    setMemberSearch("");
+    setMemberPickerOpen(false);
+  }
+
+  function openAddPlayer() {
+    resetPlayerForm();
+    setPlayerModalOpen(true);
+  }
+
+  function closePlayerModal() {
+    resetPlayerForm();
+    setPlayerModalOpen(false);
+  }
 
   function editPlayer(player) {
     const linkedMember = (state.members || []).find((member) => String(member.id) === String(player.member_id || ""));
@@ -2438,6 +2457,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
     setFormBaseline(nextForm);
     setMemberSearch(linkedMember ? memberLabel(linkedMember) : "");
     setMemberPickerOpen(false);
+    setPlayerModalOpen(true);
   }
 
   function chooseMember(memberId) {
@@ -2494,11 +2514,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
       },
     });
     if (saved) {
-      const emptyForm = emptyPlayerForm();
-      setForm(emptyForm);
-      setFormBaseline(emptyForm);
-      setMemberSearch("");
-      setMemberPickerOpen(false);
+      closePlayerModal();
     }
   }
 
@@ -2508,11 +2524,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
 
     const deleted = await runAction("deletePlayer", { playerId: player.id });
     if (deleted && String(form.id) === String(player.id)) {
-      const emptyForm = emptyPlayerForm();
-      setForm(emptyForm);
-      setFormBaseline(emptyForm);
-      setMemberSearch("");
-      setMemberPickerOpen(false);
+      closePlayerModal();
     }
   }
 
@@ -2534,84 +2546,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
   }
 
   return (
-    <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[26rem_minmax(0,1fr)]">
-      <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
-        <h2 className="text-xl font-black">{form.id ? "Edit Player" : "Add Player"}</h2>
-        <div className="mt-3 space-y-3">
-          <div className="relative">
-            <label className="block text-sm font-bold text-slate-600" htmlFor="round-robin-member-search">
-              Main member system
-            </label>
-            <div className="mt-1 flex gap-2">
-              <input
-                id="round-robin-member-search"
-                type="text"
-                value={memberSearch}
-                onChange={(event) => updateMemberSearch(event.target.value)}
-                onFocus={() => setMemberPickerOpen(true)}
-                onBlur={() => window.setTimeout(() => setMemberPickerOpen(false), 150)}
-                placeholder="Type first name to find an LMS member"
-                className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
-              />
-              {form.memberId && (
-                <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={clearMemberLink} className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-200">
-                  Clear
-                </button>
-              )}
-            </div>
-            {memberPickerOpen && (
-              <div className="absolute z-30 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-[0_18px_38px_-24px_rgba(15,23,42,0.85)]">
-                {memberOptions.length > 0 ? (
-                  memberOptions.map((member) => (
-                    <button
-                      key={member.id}
-                      type="button"
-                      onMouseDown={(event) => {
-                        event.preventDefault();
-                        chooseMember(member.id);
-                      }}
-                      className="block w-full border-b border-slate-100 px-3 py-2 text-left hover:bg-teal-50"
-                    >
-                      <span className="block text-sm font-black text-slate-950">{memberDisplayName(member)}</span>
-                      <span className="block text-xs font-semibold text-slate-500">{[member.email, member.phone].filter(Boolean).join(" / ") || "No contact in LMS"}</span>
-                    </button>
-                  ))
-                ) : (
-                  <div className="px-3 py-3 text-sm font-semibold text-slate-500">No LMS member matches. Use the manual fields below.</div>
-                )}
-              </div>
-            )}
-          </div>
-          <TextInput label="Name" value={form.displayName} onChange={(value) => setForm((current) => ({ ...current, displayName: value }))} required />
-          <TextInput label="DUPR ID" value={form.duprId} onChange={(value) => setForm((current) => ({ ...current, duprId: normalizeDuprId(value) }))} />
-          <TextInput label="Email" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
-          <TextInput label="Phone" type="tel" value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: formatPhoneInput(value) }))} required />
-          <TextInput label="Notes" value={form.notes} onChange={(value) => setForm((current) => ({ ...current, notes: value }))} />
-          <div>
-            <div className="text-sm font-bold text-slate-600">Player groups</div>
-            <div className="mt-1 grid grid-cols-1 gap-2">
-              {(state.playerGroups || []).filter((group) => group.is_active !== false).map((group) => (
-                <label key={group.id} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
-                  <input type="checkbox" checked={form.groupIds.includes(group.id)} onChange={() => togglePlayerGroup(group.id)} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
-                  {group.name}
-                </label>
-              ))}
-              {(state.playerGroups || []).length === 0 && <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">Create a group first, then assign players.</div>}
-            </div>
-          </div>
-          <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
-            <input type="checkbox" checked={form.isActive} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
-            Active
-          </label>
-          <div className="flex gap-2">
-            <button type="button" onClick={save} disabled={actionLoading === "savePlayer" || !form.displayName.trim() || normalizePhone(form.phone).length < 10} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
-              Save Player
-            </button>
-            {formDirty && <button type="button" onClick={() => { const emptyForm = emptyPlayerForm(); setForm(emptyForm); setFormBaseline(emptyForm); setMemberSearch(""); setMemberPickerOpen(false); }} className="rounded-lg bg-slate-100 px-4 py-3 font-black text-slate-700 hover:bg-slate-200">Cancel</button>}
-          </div>
-        </div>
-      </section>
-
+    <div className="mt-4 space-y-4">
       <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -2620,6 +2555,9 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
               Showing {filteredSavedPlayers.length} of {savedPlayers.length}
             </div>
           </div>
+          <button type="button" onClick={openAddPlayer} className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800">
+            Add Player
+          </button>
           <label className="min-w-0 flex-1 text-sm font-bold text-slate-600 sm:max-w-xs">
             Search players
             <input
@@ -2685,8 +2623,135 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
           </table>
         </div>
       </section>
+      {playerModalOpen && (
+        <PlayerFormModal
+          state={state}
+          form={form}
+          setForm={setForm}
+          formDirty={formDirty}
+          memberSearch={memberSearch}
+          memberPickerOpen={memberPickerOpen}
+          memberOptions={memberOptions}
+          actionLoading={actionLoading}
+          chooseMember={chooseMember}
+          updateMemberSearch={updateMemberSearch}
+          clearMemberLink={clearMemberLink}
+          setMemberPickerOpen={setMemberPickerOpen}
+          togglePlayerGroup={togglePlayerGroup}
+          save={save}
+          onClose={closePlayerModal}
+        />
+      )}
       {statsPlayer && <PlayerStatsModal state={state} player={statsPlayer} onClose={() => setStatsPlayer(null)} />}
     </div>
+  );
+}
+
+function PlayerFormModal({ state, form, setForm, formDirty, memberSearch, memberPickerOpen, memberOptions, actionLoading, chooseMember, updateMemberSearch, clearMemberLink, setMemberPickerOpen, togglePlayerGroup, save, onClose }) {
+  const saving = actionLoading === "savePlayer";
+  const canSave = !saving && form.displayName.trim() && normalizePhone(form.phone).length >= 10;
+
+  return (
+    <ModalPortal>
+      <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-3 sm:items-center sm:p-4">
+        <div className="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+          <div className={MODAL_HEADER_CHROME}>
+            <div className="flex items-start justify-between gap-3 p-4">
+              <div>
+                <div className={MODAL_EYEBROW_CHROME}>Saved Player</div>
+                <h2 className="text-2xl font-black">{form.id ? "Edit Player" : "Add Player"}</h2>
+                <p className={MODAL_SUPPORTING_TEXT}>Player detail entry for PBCourtCommand.</p>
+              </div>
+              <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white/15 px-3 py-2 text-sm font-black text-white hover:bg-white/25">
+                Close
+              </button>
+            </div>
+          </div>
+
+          <div className="max-h-[calc(92vh-88px)] overflow-y-auto p-4">
+            <div className="space-y-3">
+              <div className="relative">
+                <label className="block text-sm font-bold text-slate-600" htmlFor="round-robin-member-search">
+                  Main member system
+                </label>
+                <div className="mt-1 flex gap-2">
+                  <input
+                    id="round-robin-member-search"
+                    type="text"
+                    value={memberSearch}
+                    onChange={(event) => updateMemberSearch(event.target.value)}
+                    onFocus={() => setMemberPickerOpen(true)}
+                    onBlur={() => window.setTimeout(() => setMemberPickerOpen(false), 150)}
+                    placeholder="Type first name to find an LMS member"
+                    className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
+                  />
+                  {form.memberId && (
+                    <button type="button" onMouseDown={(event) => event.preventDefault()} onClick={clearMemberLink} className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-black text-slate-700 hover:bg-slate-200">
+                      Clear
+                    </button>
+                  )}
+                </div>
+                {memberPickerOpen && (
+                  <div className="absolute z-30 mt-1 max-h-72 w-full overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-[0_18px_38px_-24px_rgba(15,23,42,0.85)]">
+                    {memberOptions.length > 0 ? (
+                      memberOptions.map((member) => (
+                        <button
+                          key={member.id}
+                          type="button"
+                          onMouseDown={(event) => {
+                            event.preventDefault();
+                            chooseMember(member.id);
+                          }}
+                          className="block w-full border-b border-slate-100 px-3 py-2 text-left hover:bg-teal-50"
+                        >
+                          <span className="block text-sm font-black text-slate-950">{memberDisplayName(member)}</span>
+                          <span className="block text-xs font-semibold text-slate-500">{[member.email, member.phone].filter(Boolean).join(" / ") || "No contact in LMS"}</span>
+                        </button>
+                      ))
+                    ) : (
+                      <div className="px-3 py-3 text-sm font-semibold text-slate-500">No LMS member matches. Use the manual fields below.</div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <TextInput label="Name" value={form.displayName} onChange={(value) => setForm((current) => ({ ...current, displayName: value }))} required />
+              <TextInput label="DUPR ID" value={form.duprId} onChange={(value) => setForm((current) => ({ ...current, duprId: normalizeDuprId(value) }))} />
+              <TextInput label="Email" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
+              <TextInput label="Phone" type="tel" value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: formatPhoneInput(value) }))} required />
+              <TextInput label="Notes" value={form.notes} onChange={(value) => setForm((current) => ({ ...current, notes: value }))} />
+
+              <div>
+                <div className="text-sm font-bold text-slate-600">Player groups</div>
+                <div className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {(state.playerGroups || []).filter((group) => group.is_active !== false).map((group) => (
+                    <label key={group.id} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-bold text-slate-700">
+                      <input type="checkbox" checked={form.groupIds.includes(group.id)} onChange={() => togglePlayerGroup(group.id)} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
+                      {group.name}
+                    </label>
+                  ))}
+                  {(state.playerGroups || []).length === 0 && <div className="rounded-lg bg-amber-50 px-3 py-2 text-sm font-bold text-amber-800">Create a group first, then assign players.</div>}
+                </div>
+              </div>
+
+              <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
+                <input type="checkbox" checked={form.isActive} onChange={(event) => setForm((current) => ({ ...current, isActive: event.target.checked }))} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
+                Active
+              </label>
+
+              <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 pt-3">
+                <button type="button" onClick={onClose} className="rounded-lg bg-slate-100 px-4 py-3 font-black text-slate-700 hover:bg-slate-200">
+                  {formDirty ? "Cancel" : "Close"}
+                </button>
+                <button type="button" onClick={save} disabled={!canSave} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
+                  {saving ? "Saving..." : "Save Player"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ModalPortal>
   );
 }
 
