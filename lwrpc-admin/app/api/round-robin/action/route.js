@@ -1284,6 +1284,9 @@ async function updateSessionPlayerStatus(supabase, group, body) {
 
   const promotedPlayers = resolvedStatus === "declined" ? await promoteWaitlistSpots(supabase, session) : [];
   const promotionSms = await sendWaitlistPromotionTexts(group, session, promotedPlayers);
+  const directPromotionSms = target.response_status === "waitlist" && resolvedStatus === "joined"
+    ? await sendWaitlistPromotionTexts(group, session, [data])
+    : smsDisabledResult("No direct waitlist promotion", 0, 0);
   if (promotedPlayers.length > 0) {
     await addLog(
       supabase,
@@ -1294,7 +1297,7 @@ async function updateSessionPlayerStatus(supabase, group, body) {
       { promotionSms, promotedPlayers: promotedPlayers.length }
     );
   }
-  return { sessionPlayer: data, promotedPlayers, promotionSms };
+  return { sessionPlayer: data, promotedPlayers, promotionSms, directPromotionSms };
 }
 
 async function addSessionPlayer(supabase, group, body) {
@@ -1324,8 +1327,11 @@ async function addSessionPlayer(supabase, group, body) {
       .select("*")
       .single();
     if (error) throw error;
+    const directPromotionSms = existingPlayer.response_status === "waitlist"
+      ? await sendWaitlistPromotionTexts(group, session, [data])
+      : smsDisabledResult("No direct waitlist promotion", 0, 0);
     await addLog(supabase, group.id, session.id, "session", `${player.display_name} manually joined ${session.session_name || "Session"}.`);
-    return { sessionPlayer: data, mode: "updated" };
+    return { sessionPlayer: data, mode: "updated", directPromotionSms };
   }
 
   const nextSortOrder = currentPlayers.reduce((max, row) => Math.max(max, Number(row.sort_order || 0)), 0) + 1;

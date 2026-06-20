@@ -514,7 +514,7 @@ export default function RoundRobinPlayerPage() {
           <div className="flex items-start justify-between gap-3 p-4 sm:items-center sm:p-5">
             <div className="min-w-0 flex-1">
               <div className="text-xs font-black uppercase tracking-wide text-teal-200">{clubName}</div>
-              <h1 className="break-words text-3xl font-black sm:text-4xl">PBCourtCommand</h1>
+              <h1 className="whitespace-nowrap text-2xl font-black leading-tight sm:text-4xl">PBCourtCommand</h1>
             </div>
             <div className="flex shrink-0 items-center gap-2 sm:flex-wrap">
               <AppNotificationsButton phone={phone} groupId={state.group?.id || id} iconOnly />

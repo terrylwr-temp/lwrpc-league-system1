@@ -311,9 +311,10 @@ async function updatePlayerSessionStatus(supabase, group, player, body) {
   if (error) throw error;
 
   const promotedPlayers = resolvedStatus === "declined" ? await promoteWaitlistSpots(supabase, session) : [];
+  const hostResponseNotification = await sendHostResponseNotification(supabase, group, session, player, resolvedStatus);
   const promotionSms = await sendWaitlistPromotionTexts(group, session, promotedPlayers);
   const sessions = await loadPlayerSessions(supabase, group, player);
-  return { sessionPlayer: data, resolvedStatus, promotedPlayers: promotedPlayers.length, promotionSms, sessions };
+  return { sessionPlayer: data, resolvedStatus, promotedPlayers: promotedPlayers.length, promotionSms, hostResponseNotification, sessions };
 }
 
 async function loadSessionForGroup(supabase, groupId, sessionId) {
@@ -404,6 +405,56 @@ function waitlistPromotionSmsBody(group, session) {
   const time = session?.starts_at ? formatSessionTime(session.starts_at) : "TBD";
   const location = session?.location ? ` at ${session.location}` : "";
   return `${group?.name || "PBCourtCommand"}: A spot opened for ${session?.session_name || "your match"} on ${date} at ${time}${location}. You have been moved from Waitlist to Joined.`;
+}
+
+async function sendHostResponseNotification(supabase, group, session, player, resolvedStatus) {
+  const hostIds = [session.host_player_id, session.cohost_player_id]
+    .map((id) => String(id || "").trim())
+    .filter((id, index, values) => id && values.indexOf(id) === index && id !== String(player.id || ""));
+
+  if (hostIds.length === 0) {
+    return { skipped: true, reason: "No host or co-host recipients", sent: 0, results: [], recipientCount: 0, phoneCount: 0 };
+  }
+
+  const { data, error } = await supabase
+    .from("round_robin_players")
+    .select("id, display_name, phone")
+    .eq("group_id", group.id)
+    .eq("is_active", true)
+    .in("id", hostIds);
+  if (error) throw error;
+
+  const recipients = data || [];
+  const phones = recipients.map((recipient) => recipient.phone).filter(Boolean);
+
+  if (recipients.length === 0 || group.settings?.smsSendingEnabled !== true || phones.length === 0) {
+    return {
+      skipped: true,
+      reason: recipients.length === 0 ? "No active host or co-host recipients" : group.settings?.smsSendingEnabled === true ? "No host or co-host phone numbers" : "SMS disabled in settings",
+      sent: 0,
+      results: [],
+      recipientCount: recipients.length,
+      phoneCount: phones.length,
+    };
+  }
+
+  return sendSmsMessages({
+    phones,
+    body: hostResponseSmsBody(group, session, player, resolvedStatus),
+  });
+}
+
+function hostResponseSmsBody(group, session, player, resolvedStatus) {
+  const playerName = player?.display_name || player?.first_name || "A player";
+  const response = resolvedStatus === "declined"
+    ? "declined"
+    : resolvedStatus === "waitlist"
+      ? "accepted and was placed on the waitlist"
+      : "accepted";
+  const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the match date";
+  const time = session?.starts_at ? formatSessionTime(session.starts_at) : "TBD";
+  const location = session?.location ? ` at ${session.location}` : "";
+  return `${group?.name || "PBCourtCommand"}: ${playerName} ${response} ${session?.session_name || "your match"} on ${date} at ${time}${location}.`;
 }
 
 function formatSessionTime(value) {
