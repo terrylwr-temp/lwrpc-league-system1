@@ -1,9 +1,9 @@
-const CACHE_NAME = "pbcc-pwa-static-v6";
+const CACHE_NAME = "pbcc-pwa-static-v7";
 const STATIC_CACHE_PREFIX = "pbcc-pwa-static-";
 const PRECACHE_URLS = [
   "/pbcc-manifest.webmanifest",
-  "/pbcc-pickleball-safe-icon-192.png",
-  "/pbcc-pickleball-safe-icon-512.png",
+  "/pbcc-header-pickleball-icon-192.png",
+  "/pbcc-header-pickleball-icon-512.png",
   "/favicon.ico",
 ];
 const STATIC_ASSET_PATTERN = /\.(?:css|js|png|jpg|jpeg|webp|svg|ico|woff2?|ttf)$/i;
@@ -66,8 +66,8 @@ self.addEventListener("push", (event) => {
   const title = payload.title || "PBCourtCommand";
   const options = {
     body: payload.body || "You have a new PBCourtCommand notification.",
-    icon: payload.icon || "/pbcc-pickleball-safe-icon-192.png",
-    badge: payload.badge || "/pbcc-pickleball-safe-icon-192.png",
+    icon: payload.icon || "/pbcc-header-pickleball-icon-192.png",
+    badge: payload.badge || "/pbcc-header-pickleball-icon-192.png",
     tag: payload.tag || "pbcc-app-notification",
     data: {
       url: payload.url || "/pbcc/player",
