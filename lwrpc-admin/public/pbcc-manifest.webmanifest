@@ -9,16 +9,16 @@
   "theme_color": "#0f766e",
   "icons": [
     {
-      "src": "/pbcc-header-pickleball-icon-192.png",
+      "src": "/pbcc-header-pickleball-transparent-icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
-      "src": "/pbcc-header-pickleball-icon-512.png",
+      "src": "/pbcc-header-pickleball-transparent-icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ]
 }
