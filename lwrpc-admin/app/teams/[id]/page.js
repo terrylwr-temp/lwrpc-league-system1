@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
+import LoadingScreen from "../../components/LoadingScreen";
 import { requireRole, supabase } from "../../lib/auth";
 import { hasRole } from "../../lib/permissions";
 import { confirmDeleteAction } from "../../lib/confirmDelete";
@@ -894,13 +895,7 @@ function getAverageTeamRating() {
   }, [locations, members, roster, selectedLocationId]);
 
   if (!team) {
-    return (
-      <main className="min-h-screen bg-slate-100 p-6">
-        <div className="mx-auto max-w-6xl rounded-2xl bg-white p-6 shadow">
-          Loading team...
-        </div>
-      </main>
-    );
+    return <LoadingScreen subtitle="Loading Team Roster..." />;
   }
 
   return (
