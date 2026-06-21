@@ -16,6 +16,8 @@ export default function MatchesPage() {
   const [locations, setLocations] = useState([]);
   const [matches, setMatches] = useState([]);
 
+  const [matchFormOpen, setMatchFormOpen] = useState(false);
+  const [editingMatchId, setEditingMatchId] = useState(null);
   const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("");
   const [homeTeamId, setHomeTeamId] = useState("");
@@ -90,7 +92,7 @@ export default function MatchesPage() {
     setMatches(matchData || []);
   }, []);
 
-  async function createMatch(e) {
+  async function saveMatch(e) {
     e.preventDefault();
 
     if (!selectedLeague || !selectedDivision || !homeTeamId || !awayTeamId) {
@@ -113,24 +115,44 @@ export default function MatchesPage() {
       scheduled_time: scheduledTime || null,
       week_number: Number(weekNumber || 1),
       notes: notes || null,
-      status: "scheduled",
       updated_at: new Date().toISOString()
     };
 
-    const { data: createdMatch, error } = await supabase
-      .from("matches")
-      .insert(payload)
-      .select()
-      .single();
+    let createdMatch = null;
+    let error = null;
+
+    if (editingMatchId) {
+      const result = await supabase
+        .from("matches")
+        .update(payload)
+        .eq("id", editingMatchId);
+
+      error = result.error;
+    } else {
+      const result = await supabase
+        .from("matches")
+        .insert({
+          ...payload,
+          status: "scheduled",
+        })
+        .select()
+        .single();
+
+      createdMatch = result.data;
+      error = result.error;
+    }
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    await generateMatchLines(createdMatch.id, selectedDivision);
+    if (createdMatch) {
+      await generateMatchLines(createdMatch.id, selectedDivision);
+    }
 
     clearForm();
+    setMatchFormOpen(false);
     loadData();
   }
 
@@ -257,6 +279,7 @@ export default function MatchesPage() {
   }
 
   function clearForm() {
+    setEditingMatchId(null);
     setSelectedLeague("");
     setSelectedDivision("");
     setHomeTeamId("");
@@ -266,6 +289,30 @@ export default function MatchesPage() {
     setScheduledTime("");
     setWeekNumber("1");
     setNotes("");
+  }
+
+  function openCreateMatch() {
+    clearForm();
+    setMatchFormOpen(true);
+  }
+
+  function closeMatchForm() {
+    clearForm();
+    setMatchFormOpen(false);
+  }
+
+  function editMatch(match) {
+    setEditingMatchId(match.id);
+    setSelectedLeague(match.league_id || "");
+    setSelectedDivision(match.division_id || "");
+    setHomeTeamId(match.home_team_id || "");
+    setAwayTeamId(match.away_team_id || "");
+    setLocationId(match.location_id || "");
+    setScheduledDate(match.scheduled_date || "");
+    setScheduledTime(match.scheduled_time || "");
+    setWeekNumber(match.week_number == null ? "1" : String(match.week_number));
+    setNotes(match.notes || "");
+    setMatchFormOpen(true);
   }
 
   useEffect(() => {
@@ -328,15 +375,16 @@ export default function MatchesPage() {
           subtitle="Create league matches, makeup matches, rain dates, and manage match scheduling."
         />
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="space-y-6">
-            <div className="rounded-2xl bg-white p-6 shadow">
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Create Match
+        <div className="mt-6 grid grid-cols-1 gap-6">
+          {matchFormOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+          <div className="my-auto w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+              <div className="flex items-center justify-between gap-3 bg-slate-950 px-5 py-4 text-white">
+                <h2 className="text-xl font-bold text-white">
+                  {editingMatchId ? "Edit Match" : "Create Match"}
                 </h2>
 
-                <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
+                <div className="rounded-xl bg-white/10 px-5 py-3 text-white">
                   <div className="text-xs uppercase tracking-wide text-slate-300">
                     Matches
                   </div>
@@ -345,9 +393,17 @@ export default function MatchesPage() {
                     {matches.length}
                   </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={closeMatchForm}
+                  className="rounded-xl border border-white/30 bg-white px-4 py-2 text-sm font-black text-slate-950 hover:bg-slate-100"
+                >
+                  Close
+                </button>
               </div>
 
-              <form onSubmit={createMatch} className="space-y-4">
+              <form onSubmit={saveMatch} className="max-h-[calc(100dvh-7rem)] space-y-4 overflow-y-auto p-5">
                 <FieldLabel label="League" />
 
                 <select
@@ -487,22 +543,32 @@ export default function MatchesPage() {
                   type="submit"
                   className="w-full rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800"
                 >
-                  Create Match
+                  {editingMatchId ? "Save Match" : "Create Match"}
                 </button>
               </form>
             </div>
-
           </div>
+          )}
 
-          <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
+          <div className="rounded-2xl bg-white p-6 shadow">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
-                Scheduled Matches
-              </h2>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Scheduled Matches
+                </h2>
 
-              <div className="text-sm text-slate-500">
-                {filteredMatches.length} shown / {matches.length} total scheduled matches
+                <div className="mt-1 text-sm text-slate-500">
+                  {filteredMatches.length} shown / {matches.length} total scheduled matches
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={openCreateMatch}
+                className="rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-800"
+              >
+                Add Match
+              </button>
 
               <div className="flex w-full flex-col gap-2 md:w-auto md:min-w-[28rem] md:flex-row md:items-end">
                 <div className="min-w-0 flex-1">
@@ -588,6 +654,14 @@ export default function MatchesPage() {
                     </div>
 
                     <div className="flex shrink-0 flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => editMatch(match)}
+                        className="rounded-lg bg-blue-100 px-3 py-2 text-sm font-semibold text-blue-800 hover:bg-blue-200"
+                      >
+                        Edit
+                      </button>
+
                       <button
                         onClick={() =>
                           router.push(`/matches/${match.id}`)

@@ -32,6 +32,7 @@ export default function DivisionsPage() {
   const [copyingLeagueDivisions, setCopyingLeagueDivisions] = useState(false);
 
   const [editingId, setEditingId] = useState(null);
+  const [divisionFormOpen, setDivisionFormOpen] = useState(false);
 
   const [selectedLeague, setSelectedLeague] = useState("");
   const [name, setName] = useState("");
@@ -67,35 +68,38 @@ export default function DivisionsPage() {
 
   useUnsavedChangesWarning(
     Boolean(
-      editingId ||
-      selectedLeague ||
-      name.trim() ||
-      ratingType !== "dupr" ||
-      minDupr ||
-      maxDupr ||
-      teamDuprMax ||
-      sortOrder ||
-      playoffTeamCount ||
-      numberOfTeams !== "3" ||
-      teamType !== "gender_doubles" ||
-      secondaryNumberOfTeams ||
-      secondaryTeamType ||
-      defaultGameFormat ||
-      gamesPerTeam !== "3" ||
-      pointsToWin !== "11" ||
-      winBy !== "2" ||
-      picklebreakerEnabled ||
-      picklebreakerPoints !== "25" ||
-      picklebreakerWinPoints !== "1" ||
-      picklebreakerLossPoints !== "0" ||
-      lineNotes ||
-      scoreSheetTemplateId ||
-      standingsWinPoints !== "2" ||
-      standingsTiePoints !== "1" ||
-      standingsLossPoints !== "0" ||
-      tiebreak1 !== "standings_points" ||
-      tiebreak2 !== "line_wins" ||
-      tiebreak3 !== "point_differential"
+      divisionFormOpen &&
+      (
+        editingId ||
+        selectedLeague ||
+        name.trim() ||
+        ratingType !== "dupr" ||
+        minDupr ||
+        maxDupr ||
+        teamDuprMax ||
+        sortOrder ||
+        playoffTeamCount ||
+        numberOfTeams !== "3" ||
+        teamType !== "gender_doubles" ||
+        secondaryNumberOfTeams ||
+        secondaryTeamType ||
+        defaultGameFormat ||
+        gamesPerTeam !== "3" ||
+        pointsToWin !== "11" ||
+        winBy !== "2" ||
+        picklebreakerEnabled ||
+        picklebreakerPoints !== "25" ||
+        picklebreakerWinPoints !== "1" ||
+        picklebreakerLossPoints !== "0" ||
+        lineNotes ||
+        scoreSheetTemplateId ||
+        standingsWinPoints !== "2" ||
+        standingsTiePoints !== "1" ||
+        standingsLossPoints !== "0" ||
+        tiebreak1 !== "standings_points" ||
+        tiebreak2 !== "line_wins" ||
+        tiebreak3 !== "point_differential"
+      )
     ),
     "division"
   );
@@ -255,6 +259,7 @@ export default function DivisionsPage() {
     }
 
     clearForm();
+    setDivisionFormOpen(false);
     loadData();
   }
 
@@ -569,7 +574,17 @@ export default function DivisionsPage() {
 
     setLineNotes(division.line_notes || "");
     setScoreSheetTemplateId(division.score_sheet_template_id || "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setDivisionFormOpen(true);
+  }
+
+  function openCreateDivision() {
+    clearForm();
+    setDivisionFormOpen(true);
+  }
+
+  function closeDivisionForm() {
+    clearForm();
+    setDivisionFormOpen(false);
   }
 
   function clearForm() {
@@ -718,19 +733,29 @@ export default function DivisionsPage() {
           subtitle="Manage division rules, rating systems, match formats, standings rules, and line/game configurations."
         />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(420px,0.95fr)_minmax(0,1.55fr)] xl:grid-cols-[minmax(480px,0.9fr)_minmax(0,1.6fr)]">
-          <div className="rounded-2xl bg-white p-6 shadow">
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
+        <div className="grid grid-cols-1 gap-6">
+          {divisionFormOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+          <div className="my-auto w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between gap-3 bg-slate-950 px-5 py-4 text-white">
+              <h2 className="text-xl font-bold text-white">
                 {editingId ? "Edit Division" : "Create Division"}
               </h2>
 
-              <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
+              <div className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white">
                 {divisions.length} Divisions
               </div>
+
+              <button
+                type="button"
+                onClick={closeDivisionForm}
+                className="rounded-xl border border-white/30 bg-white px-4 py-2 text-sm font-black text-slate-950 hover:bg-slate-100"
+              >
+                Close
+              </button>
             </div>
 
-            <form onSubmit={saveDivision} className="space-y-5">
+            <form onSubmit={saveDivision} className="max-h-[calc(100dvh-7rem)] space-y-5 overflow-y-auto p-5">
               <Field label="League">
                 <select
                   value={selectedLeague}
@@ -962,7 +987,7 @@ export default function DivisionsPage() {
                 {editingId && (
                   <button
                     type="button"
-                    onClick={clearForm}
+                    onClick={closeDivisionForm}
                     className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300"
                   >
                     Cancel
@@ -971,14 +996,29 @@ export default function DivisionsPage() {
               </div>
             </form>
           </div>
+          </div>
+          )}
 
           <div className="rounded-2xl bg-white p-6 shadow">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
-                Current Divisions
-              </h2>
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">
+                  Current Divisions
+                </h2>
+                <div className="mt-1 text-sm font-semibold text-slate-500">
+                  {divisions.length} division{divisions.length === 1 ? "" : "s"}
+                </div>
+              </div>
 
               <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                <button
+                  type="button"
+                  onClick={openCreateDivision}
+                  className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
+                >
+                  Add Division
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setShowInactiveDivisions((value) => !value)}

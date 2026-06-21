@@ -12,38 +12,39 @@ import { roundRobinPlayerLabel } from "../../../lib/roundRobinSchedule";
 
 const TABS = ["Matches", "Ladders", "Players", "Groups", "Courts", "Settings", "SMS", "Log"];
 const SECONDARY_TABS = ["Ladders", "Players"];
+const ADMIN_TAB_IDLE_CLASS = "border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50";
 const TAB_TONES = {
   Matches: {
     active: "border-teal-700 bg-teal-600 text-white ring-2 ring-teal-200",
-    idle: "border-teal-200 bg-teal-50 text-teal-950 hover:border-teal-400 hover:bg-teal-100",
+    idle: ADMIN_TAB_IDLE_CLASS,
   },
   Players: {
     active: "border-blue-700 bg-blue-600 text-white ring-2 ring-blue-200",
-    idle: "border-blue-200 bg-blue-50 text-blue-950 hover:border-blue-400 hover:bg-blue-100",
+    idle: ADMIN_TAB_IDLE_CLASS,
   },
   Ladders: {
     active: "border-violet-700 bg-violet-600 text-white ring-2 ring-violet-200",
-    idle: "border-violet-200 bg-violet-50 text-violet-950 hover:border-violet-400 hover:bg-violet-100",
+    idle: ADMIN_TAB_IDLE_CLASS,
   },
   Groups: {
     active: "border-emerald-700 bg-emerald-600 text-white ring-2 ring-emerald-200",
-    idle: "border-emerald-200 bg-emerald-50 text-emerald-950 hover:border-emerald-400 hover:bg-emerald-100",
+    idle: ADMIN_TAB_IDLE_CLASS,
   },
   Courts: {
     active: "border-cyan-700 bg-cyan-600 text-white ring-2 ring-cyan-200",
-    idle: "border-cyan-200 bg-cyan-50 text-cyan-950 hover:border-cyan-400 hover:bg-cyan-100",
+    idle: ADMIN_TAB_IDLE_CLASS,
   },
   Settings: {
     active: "border-amber-600 bg-amber-400 text-slate-950 ring-2 ring-amber-200",
-    idle: "border-amber-200 bg-amber-50 text-amber-950 hover:border-amber-400 hover:bg-amber-100",
+    idle: ADMIN_TAB_IDLE_CLASS,
   },
   SMS: {
     active: "border-fuchsia-700 bg-fuchsia-600 text-white ring-2 ring-fuchsia-200",
-    idle: "border-fuchsia-200 bg-fuchsia-50 text-fuchsia-950 hover:border-fuchsia-400 hover:bg-fuchsia-100",
+    idle: ADMIN_TAB_IDLE_CLASS,
   },
   Log: {
     active: "border-slate-700 bg-slate-700 text-white ring-2 ring-slate-200",
-    idle: "border-slate-200 bg-slate-50 text-slate-800 hover:border-slate-400 hover:bg-slate-100",
+    idle: ADMIN_TAB_IDLE_CLASS,
   },
 };
 const DEFAULT_SMS_TEMPLATES = {
@@ -2548,17 +2549,17 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
   return (
     <div className="mt-4 space-y-4">
       <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div>
+        <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end lg:grid-cols-[1fr_auto_minmax(16rem,20rem)]">
+          <div className="min-w-0">
             <h2 className="text-xl font-black">Saved Players</h2>
             <div className="mt-1 text-xs font-bold text-slate-500">
               Showing {filteredSavedPlayers.length} of {savedPlayers.length}
             </div>
           </div>
-          <button type="button" onClick={openAddPlayer} className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800">
+          <button type="button" onClick={openAddPlayer} className="w-full rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 sm:w-auto">
             Add Player
           </button>
-          <label className="min-w-0 flex-1 text-sm font-bold text-slate-600 sm:max-w-xs">
+          <label className="min-w-0 text-sm font-bold text-slate-600 sm:col-span-2 lg:col-span-1">
             Search players
             <input
               type="search"
@@ -2653,22 +2654,22 @@ function PlayerFormModal({ state, form, setForm, formDirty, memberSearch, member
 
   return (
     <ModalPortal>
-      <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-3 sm:items-center sm:p-4">
-        <div className="max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+      <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-2 py-3 sm:items-center sm:p-4">
+        <div className="my-auto max-h-[calc(100dvh-1rem)] w-full max-w-2xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:max-h-[92vh]">
           <div className={MODAL_HEADER_CHROME}>
-            <div className="flex items-start justify-between gap-3 p-4">
+            <div className="flex items-start justify-between gap-3 p-3 sm:p-4">
               <div>
                 <div className={MODAL_EYEBROW_CHROME}>Saved Player</div>
-                <h2 className="text-2xl font-black">{form.id ? "Edit Player" : "Add Player"}</h2>
+                <h2 className="text-xl font-black sm:text-2xl">{form.id ? "Edit Player" : "Add Player"}</h2>
                 <p className={MODAL_SUPPORTING_TEXT}>Player detail entry for PBCourtCommand.</p>
               </div>
-              <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white/15 px-3 py-2 text-sm font-black text-white hover:bg-white/25">
+              <button type="button" onClick={onClose} className="rounded-lg border border-white/40 bg-white/15 px-3 py-2 text-xs font-black text-white hover:bg-white/25 sm:text-sm">
                 Close
               </button>
             </div>
           </div>
 
-          <div className="max-h-[calc(92vh-88px)] overflow-y-auto p-4">
+          <div className="max-h-[calc(100dvh-6rem)] overflow-y-auto p-3 sm:max-h-[calc(92vh-88px)] sm:p-4">
             <div className="space-y-3">
               <div className="relative">
                 <label className="block text-sm font-bold text-slate-600" htmlFor="round-robin-member-search">
@@ -2739,11 +2740,11 @@ function PlayerFormModal({ state, form, setForm, formDirty, memberSearch, member
                 Active
               </label>
 
-              <div className="flex flex-wrap justify-end gap-2 border-t border-slate-200 pt-3">
-                <button type="button" onClick={onClose} className="rounded-lg bg-slate-100 px-4 py-3 font-black text-slate-700 hover:bg-slate-200">
+              <div className="sticky bottom-0 -mx-3 grid grid-cols-2 gap-2 border-t border-slate-200 bg-white px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:-mx-4 sm:flex sm:flex-wrap sm:justify-end sm:px-4 sm:pb-0">
+                <button type="button" onClick={onClose} className="w-full rounded-lg bg-slate-100 px-3 py-3 text-sm font-black text-slate-700 hover:bg-slate-200 sm:w-auto sm:px-4">
                   {formDirty ? "Cancel" : "Close"}
                 </button>
-                <button type="button" onClick={save} disabled={!canSave} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
+                <button type="button" onClick={save} disabled={!canSave} className="w-full rounded-lg bg-teal-700 px-3 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300 sm:w-auto sm:px-4">
                   {saving ? "Saving..." : "Save Player"}
                 </button>
               </div>

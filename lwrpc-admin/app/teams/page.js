@@ -42,6 +42,7 @@ export default function TeamsPage() {
   const [copyingDivisionTeams, setCopyingDivisionTeams] = useState(false);
 
   const [editingTeamId, setEditingTeamId] = useState(null);
+  const [teamFormOpen, setTeamFormOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const [teamName, setTeamName] = useState("");
@@ -58,7 +59,7 @@ export default function TeamsPage() {
   const [notes, setNotes] = useState("");
 
   useUnsavedChangesWarning(
-    Boolean(editingTeamId || teamName.trim() || abbreviation.trim() || selectedLeague || selectedDivision || selectedLocation || captainId || coCaptain1Id || coCaptain2Id || clubProId || !teamActive || showAllCaptainCommunities || notes.trim()),
+    Boolean(teamFormOpen && (editingTeamId || teamName.trim() || abbreviation.trim() || selectedLeague || selectedDivision || selectedLocation || captainId || coCaptain1Id || coCaptain2Id || clubProId || !teamActive || showAllCaptainCommunities || notes.trim())),
     "team"
   );
 
@@ -463,9 +464,20 @@ export default function TeamsPage() {
     await upgradeMemberToClubPro(clubProId);
 
     resetForm();
+    setTeamFormOpen(false);
     await loadData();
 
     setIsSaving(false);
+  }
+
+  function openCreateTeam() {
+    resetForm();
+    setTeamFormOpen(true);
+  }
+
+  function closeTeamForm() {
+    resetForm();
+    setTeamFormOpen(false);
   }
 
   function resetForm() {
@@ -510,11 +522,7 @@ export default function TeamsPage() {
       captainIsOutsideHomeLocation(team.club_pro_member_id, team.home_location_id)
     );
     setNotes(team.notes || "");
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    setTeamFormOpen(true);
   }
 
   async function deleteTeam(team) {
@@ -536,7 +544,7 @@ export default function TeamsPage() {
     }
 
     if (editingTeamId === team.id) {
-      resetForm();
+      closeTeamForm();
     }
 
     loadData();
@@ -1024,12 +1032,14 @@ if (loading) {
           subtitle="Create teams, edit team information, assign captains, and manage rosters."
         />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6">
 
-          <div className="rounded-2xl bg-white p-6 shadow">
+          {teamFormOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+          <div className="my-auto w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
 
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-slate-900">
+            <div className="flex items-center justify-between gap-3 bg-slate-950 px-5 py-4 text-white">
+              <h2 className="text-xl font-bold text-white">
                 {editingTeamId ? "Edit Team" : "Create Team"}
               </h2>
 
@@ -1038,9 +1048,17 @@ if (loading) {
                   Editing
                 </div>
               )}
+
+              <button
+                type="button"
+                onClick={closeTeamForm}
+                className="rounded-xl border border-white/30 bg-white px-4 py-2 text-sm font-black text-slate-950 hover:bg-slate-100"
+              >
+                Close
+              </button>
             </div>
 
-            <form onSubmit={saveTeam} className="space-y-4">
+            <form onSubmit={saveTeam} className="max-h-[calc(100dvh-7rem)] space-y-4 overflow-y-auto p-5">
 
               <Field
                 label="Team Name"
@@ -1247,7 +1265,7 @@ if (loading) {
                 {editingTeamId && (
                   <button
                     type="button"
-                    onClick={resetForm}
+                    onClick={closeTeamForm}
                     className="w-full rounded-xl bg-slate-200 px-5 py-3 font-semibold text-slate-900 hover:bg-slate-300"
                   >
                     Cancel Edit
@@ -1258,13 +1276,25 @@ if (loading) {
 
             </form>
           </div>
+          </div>
+          )}
 
-          <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
+          <div className="rounded-2xl bg-white p-6 shadow">
             <div className="mb-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_12rem_11rem] xl:items-start">
               <div className="space-y-3">
-                <h2 className="text-xl font-bold text-slate-900">
-                  Teams
-                </h2>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Teams
+                  </h2>
+
+                  <button
+                    type="button"
+                    onClick={openCreateTeam}
+                    className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
+                  >
+                    Add Team
+                  </button>
+                </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row">
                   <input
