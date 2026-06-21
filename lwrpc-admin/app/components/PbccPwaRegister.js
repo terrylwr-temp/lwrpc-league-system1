@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const PBCC_PWA_VERSION = "pbcc-pickleball-20260621";
+const PBCC_PWA_VERSION = "pbcc-pickleball-full-20260621";
 
 const PBCC_HEAD_ELEMENTS = [
   { id: "pbcc-pwa-manifest", tag: "link", attrs: { rel: "manifest", href: `/pbcc-manifest.webmanifest?v=${PBCC_PWA_VERSION}` } },
@@ -10,7 +10,7 @@ const PBCC_HEAD_ELEMENTS = [
   { id: "pbcc-pwa-apple-capable", tag: "meta", attrs: { name: "apple-mobile-web-app-capable", content: "yes" } },
   { id: "pbcc-pwa-apple-title", tag: "meta", attrs: { name: "apple-mobile-web-app-title", content: "PBCourtCommand" } },
   { id: "pbcc-pwa-apple-status", tag: "meta", attrs: { name: "apple-mobile-web-app-status-bar-style", content: "default" } },
-  { id: "pbcc-pwa-apple-icon", tag: "link", attrs: { rel: "apple-touch-icon", href: `/pbcc-pickleball-icon-192.png?v=${PBCC_PWA_VERSION}` } },
+  { id: "pbcc-pwa-apple-icon", tag: "link", attrs: { rel: "apple-touch-icon", href: `/pbcc-pickleball-full-icon-192.png?v=${PBCC_PWA_VERSION}` } },
 ];
 
 function isPbccPath(pathname) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
-const PBCC_INSTALL_ICON = "/pbcc-pickleball-icon-192.png?v=pbcc-pickleball-20260621";
+const PBCC_INSTALL_ICON = "/pbcc-pickleball-full-icon-192.png?v=pbcc-pickleball-full-20260621";
 
 function deviceInstallSteps() {
   if (typeof navigator === "undefined") return "Use your browser menu and choose Add to Home Screen or Install App.";
