@@ -410,7 +410,7 @@ export default function RoundRobinPlayerPage() {
 
   if (!state) {
     return (
-      <main className="full-screen-main flex min-h-[100dvh] flex-col justify-between bg-slate-100 px-4 py-3 text-slate-950 sm:p-6">
+      <main className="full-screen-main pbcc-full-screen flex min-h-[100dvh] flex-col justify-between bg-slate-100 px-4 py-3 text-slate-950 sm:p-6">
         <PbccPwaRegister />
         <div className="flex min-h-0 flex-1 items-center justify-center">
         <div className="w-full max-w-md">
@@ -506,7 +506,7 @@ export default function RoundRobinPlayerPage() {
   }
 
   return (
-    <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-6">
+    <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-6">
       <PbccPwaRegister />
       <div className="w-full">
         <header className="overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_28px_80px_-44px_rgba(15,23,42,0.95)]">

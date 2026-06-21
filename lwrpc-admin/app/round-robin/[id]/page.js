@@ -116,7 +116,7 @@ export default function RoundRobinPublicPage() {
 
 function Shell({ title, subtitle, error, playerHref, adminHref, children }) {
   return (
-    <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_46%,#fff7e8_100%)] p-3 text-slate-950 sm:p-6">
+    <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_46%,#fff7e8_100%)] p-3 text-slate-950 sm:p-6">
       <PbccPwaRegister />
       <div className="w-full">
         <header className="mb-5 overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_28px_80px_-44px_rgba(15,23,42,0.95)]">

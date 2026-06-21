@@ -452,7 +452,7 @@ export default function RoundRobinAdminPage() {
 
   if (!state && requestedHostSessionId && !requestedManagerMode) {
     return (
-      <main className="full-screen-main flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-4 text-slate-950">
+      <main className="full-screen-main pbcc-full-screen flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-4 text-slate-950">
         <PbccPwaRegister />
         <div className="w-full max-w-lg overflow-hidden rounded-lg border border-white/80 bg-white/95 text-center shadow-[0_24px_70px_-42px_rgba(15,23,42,0.75)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
@@ -475,7 +475,7 @@ export default function RoundRobinAdminPage() {
 
   if (!state) {
     return (
-      <main className="full-screen-main flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#063a34_0%,#132d4b_58%,#5f4517_100%)] p-4 text-white">
+      <main className="full-screen-main pbcc-full-screen flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#063a34_0%,#132d4b_58%,#5f4517_100%)] p-4 text-white">
         <PbccPwaRegister />
         <div className="w-full max-w-lg overflow-hidden rounded-lg border border-white/15 bg-slate-950 shadow-[0_34px_90px_-46px_rgba(0,0,0,0.95)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
@@ -535,7 +535,7 @@ export default function RoundRobinAdminPage() {
 
   if (state.accessMode === "host") {
     return (
-      <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
+      <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
         <PbccPwaRegister />
         <div className="w-full space-y-4">
           {(error || notice) && (
@@ -586,7 +586,7 @@ export default function RoundRobinAdminPage() {
   if (liveSessionId && activeTab === "Matches") {
     const selectedSession = liveSession || latestSession;
     return (
-      <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
+      <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
         <PbccPwaRegister />
         <div className="w-full space-y-4">
           {(error || notice) && (
@@ -635,7 +635,7 @@ export default function RoundRobinAdminPage() {
   }
 
   return (
-    <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-5">
+    <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-5">
       <PbccPwaRegister />
       <div className="w-full">
         <header className="overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_26px_75px_-44px_rgba(15,23,42,0.95)]">
