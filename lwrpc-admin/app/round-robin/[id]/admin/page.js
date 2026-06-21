@@ -634,23 +634,23 @@ export default function RoundRobinAdminPage() {
   }
 
   return (
-    <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
+    <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-5">
       <PbccPwaRegister />
       <div className="w-full">
         <header className="overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_26px_75px_-44px_rgba(15,23,42,0.95)]">
-          <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
-          <div className="p-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="h-1.5 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)] sm:h-2" />
+          <div className="p-3 sm:p-5">
+          <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
             <div>
               <div className="text-xs font-black uppercase tracking-wide text-teal-200">{state.accessMode === "host" ? "PBCourtCommand Host" : "Administration Setup"}</div>
-              <h1 className="text-3xl font-black sm:text-4xl">PBCourtCommand</h1>
+              <h1 className="text-2xl font-black sm:text-4xl">PBCourtCommand</h1>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={goToPlayerView} className="rounded-lg border border-white/40 bg-white px-4 py-2 text-sm font-black text-slate-950 shadow-[0_10px_24px_-14px_rgba(255,255,255,0.9)] ring-1 ring-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-lg">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
+              <button type="button" onClick={goToPlayerView} className="rounded-lg border border-white/40 bg-white px-3 py-1.5 text-xs font-black text-slate-950 shadow-[0_10px_24px_-14px_rgba(255,255,255,0.9)] ring-1 ring-slate-950/10 transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-lg sm:px-4 sm:py-2 sm:text-sm">
                 Player View
               </button>
               {state.accessMode !== "secondary" && (
-                <button type="button" onClick={exitToDashboard} className="rounded-lg border border-teal-200/60 bg-teal-500 px-4 py-2 text-sm font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg">
+                <button type="button" onClick={exitToDashboard} className="rounded-lg border border-teal-200/60 bg-teal-500 px-3 py-1.5 text-xs font-black text-white shadow-[0_10px_24px_-14px_rgba(20,184,166,0.9)] ring-1 ring-white/20 transition hover:-translate-y-0.5 hover:bg-teal-400 hover:shadow-lg sm:px-4 sm:py-2 sm:text-sm">
                   Exit to LMS
                 </button>
               )}
@@ -659,13 +659,13 @@ export default function RoundRobinAdminPage() {
           </div>
         </header>
 
-        <div className="sticky top-0 z-20 mt-4 grid grid-cols-3 gap-2 rounded-xl border border-slate-300 bg-white/95 p-2 shadow-[0_18px_46px_-32px_rgba(15,23,42,0.9)] backdrop-blur sm:flex sm:flex-wrap">
+        <div className="sticky top-0 z-20 mt-2 grid grid-cols-4 gap-1 rounded-lg border border-slate-300 bg-white/95 p-1 shadow-[0_18px_46px_-32px_rgba(15,23,42,0.9)] backdrop-blur sm:mt-4 sm:flex sm:flex-wrap sm:gap-2 sm:rounded-xl sm:p-2">
           {visibleTabs.map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => changeActiveTab(tab)}
-              className={`rounded-lg border px-4 py-3 text-sm font-black shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+              className={`rounded-md border px-1.5 py-2 text-[11px] font-black leading-tight shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:rounded-lg sm:px-4 sm:py-3 sm:text-sm ${
                 activeTab === tab ? tabTone(tab).active : tabTone(tab).idle
               }`}
             >
@@ -1300,8 +1300,8 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   }
 
   return (
-    <section className="sticky top-0 z-30 rounded-lg border border-teal-200 bg-teal-50/95 p-3 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] backdrop-blur sm:top-2 sm:p-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <section className="sticky top-0 z-30 rounded-lg border border-teal-200 bg-teal-50/95 p-2 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.35)] backdrop-blur sm:top-2 sm:p-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
         <div className={`min-w-0 ${isPlaying ? "hidden sm:block" : ""}`}>
           <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Match</div>
           <h2 className="break-words text-lg font-black text-slate-950 sm:text-xl">{session.session_name || "Match"}</h2>
@@ -1309,12 +1309,12 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
             {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+        <div className="grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap sm:justify-end sm:gap-2">
           <button
             type="button"
             onClick={primaryAction}
             disabled={isClosed || !canStartSession || ["generateNextGame", "startSessionAndGenerateFirstGame"].includes(actionLoading)}
-            className="rounded-lg bg-blue-700 px-3 py-3 text-sm font-black text-white shadow-sm hover:bg-blue-800 disabled:bg-slate-300 sm:px-4"
+            className="rounded-lg bg-blue-700 px-2 py-2 text-xs font-black text-white shadow-sm hover:bg-blue-800 disabled:bg-slate-300 sm:px-4 sm:py-3 sm:text-sm"
           >
             {["generateNextGame", "startSessionAndGenerateFirstGame"].includes(actionLoading)
               ? "Working..."
@@ -1324,19 +1324,19 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
             type="button"
             onClick={finishSession}
             disabled={isClosed || actionLoading === "completeSession"}
-            className="rounded-lg bg-emerald-700 px-3 py-3 text-sm font-black text-white shadow-sm hover:bg-emerald-800 disabled:bg-slate-300 sm:px-4"
+            className="rounded-lg bg-emerald-700 px-2 py-2 text-xs font-black text-white shadow-sm hover:bg-emerald-800 disabled:bg-slate-300 sm:px-4 sm:py-3 sm:text-sm"
           >
             {actionLoading === "completeSession" ? "Finishing..." : "Finish Match"}
           </button>
           <button
             type="button"
             onClick={openStats}
-            className="rounded-lg border border-teal-300 bg-white px-3 py-3 text-sm font-black text-teal-900 shadow-sm hover:border-teal-500 hover:bg-white sm:px-4"
+            className="rounded-lg border border-teal-300 bg-white px-2 py-2 text-xs font-black text-teal-900 shadow-sm hover:border-teal-500 hover:bg-white sm:px-4 sm:py-3 sm:text-sm"
           >
             Stats
           </button>
           {(showExit || hostMode) && onExit && (
-            <button type="button" onClick={exitSession} className="rounded-lg border border-slate-300 bg-white px-3 py-3 text-sm font-black text-slate-800 shadow-sm hover:border-teal-500 hover:bg-teal-50 sm:px-4">
+            <button type="button" onClick={exitSession} className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-xs font-black text-slate-800 shadow-sm hover:border-teal-500 hover:bg-teal-50 sm:px-4 sm:py-3 sm:text-sm">
               Exit
             </button>
           )}
