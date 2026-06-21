@@ -11,9 +11,13 @@ const LMS_HEAD_ELEMENTS = [
   { id: "lms-pwa-apple-icon", tag: "link", attrs: { rel: "apple-touch-icon", href: "/lms-icon-192.png" } },
 ];
 
+function isPbccPath(pathname) {
+  return pathname.startsWith("/pbcc") || pathname.startsWith("/round-robin/rpro");
+}
+
 export default function LmsPwaRegister() {
   useEffect(() => {
-    if (typeof window === "undefined" || window.location.pathname.startsWith("/pbcc")) return undefined;
+    if (typeof window === "undefined" || isPbccPath(window.location.pathname)) return undefined;
 
     LMS_HEAD_ELEMENTS.forEach(({ id, tag, attrs }) => {
       let element = document.getElementById(id);

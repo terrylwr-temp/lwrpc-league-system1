@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+const PBCC_INSTALL_ICON = "/pbcc-pickleball-icon-192.png?v=pbcc-pickleball-20260621";
+
 function deviceInstallSteps() {
   if (typeof navigator === "undefined") return "Use your browser menu and choose Add to Home Screen or Install App.";
 
@@ -90,7 +92,7 @@ export default function PbccInstallButton() {
         onClick={installApp}
         className="mt-3 flex w-full items-center justify-center gap-3 rounded-xl border-2 border-teal-700 bg-teal-50 px-4 py-3 text-sm font-black text-teal-950 shadow-[0_12px_26px_-18px_rgba(15,118,110,0.95)] transition hover:-translate-y-0.5 hover:bg-teal-100 hover:shadow-md"
       >
-        <Image src="/pbcc-icon-192.png" alt="" width={32} height={32} className="h-8 w-8 rounded-lg bg-white object-contain shadow-sm" />
+        <Image src={PBCC_INSTALL_ICON} alt="" width={32} height={32} className="h-8 w-8 rounded-lg bg-white object-contain shadow-sm" />
         <span>{installed ? "PBCourtCommand Installed" : "Install PBCourtCommand"}</span>
       </button>
 
@@ -103,7 +105,7 @@ export default function PbccInstallButton() {
             </div>
             <div className="p-4">
               <div className="flex items-center gap-3 rounded-lg border border-teal-100 bg-teal-50 p-3">
-                <Image src="/pbcc-icon-192.png" alt="" width={48} height={48} className="h-12 w-12 rounded-xl bg-white object-contain shadow-sm" />
+                <Image src={PBCC_INSTALL_ICON} alt="" width={48} height={48} className="h-12 w-12 rounded-xl bg-white object-contain shadow-sm" />
                 <p className="text-sm font-bold leading-relaxed text-teal-950">{deviceInstallSteps()}</p>
               </div>
               <button
