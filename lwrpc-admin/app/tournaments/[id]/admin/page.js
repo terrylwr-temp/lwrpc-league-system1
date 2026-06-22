@@ -183,6 +183,7 @@ export default function TournamentAdminPage() {
     if (action === "deleteTournamentTeam") setNotice("Tournament team deleted.");
     if (action === "saveCourts") setNotice(`Saved ${result.courts || 0} court${Number(result.courts || 0) === 1 ? "" : "s"}.`);
     if (action === "resetMatches") setNotice("Tournament matches, standings, and activity log reset.");
+    if (action === "resetTournamentSystem") setNotice(`Tournament system reset. Deleted ${result.deleted?.matches || 0} match${Number(result.deleted?.matches || 0) === 1 ? "" : "es"}, ${result.deleted?.teams || 0} team${Number(result.deleted?.teams || 0) === 1 ? "" : "s"}, ${result.deleted?.divisions || 0} division${Number(result.deleted?.divisions || 0) === 1 ? "" : "s"}, and ${result.deleted?.logs || 0} log entr${Number(result.deleted?.logs || 0) === 1 ? "y" : "ies"}.`);
     if (action === "clearLog") setNotice("Activity log cleared.");
     if (action === "startTournament") setNotice("Tournament started and wait times reset.");
     if (action === "generateRoundRobin") setNotice(`Generated ${result.generated || 0} round robin match${Number(result.generated || 0) === 1 ? "" : "es"}.`);
@@ -1746,7 +1747,8 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
   );
 }
 function AdminSetupTab({ state, runAction, actionLoading }) {
-  const activeDivisions = useMemo(() => state.divisions.filter((division) => division.is_active), [state.divisions]);
+  const sortedDivisions = useMemo(() => sortDivisionsByName(state.divisions), [state.divisions]);
+  const activeDivisions = useMemo(() => sortedDivisions.filter((division) => division.is_active), [sortedDivisions]);
   const teamCounts = useMemo(() => teamCountsByDivision(state.teams), [state.teams]);
   const [selectedDivisionIds, setSelectedDivisionIds] = useState(() => activeDivisions.map((division) => division.id));
   const [showInactiveDivisions, setShowInactiveDivisions] = useState(false);
@@ -1838,8 +1840,8 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
   }
 
   const savedCourtNames = courtLabels.map((label, index) => label.trim() || `Court ${index + 1}`).join(",");
-  const visibleDivisions = showInactiveDivisions ? state.divisions : state.divisions.filter((division) => division.is_active);
-  const hiddenInactiveDivisionCount = state.divisions.filter((division) => !division.is_active).length;
+  const visibleDivisions = showInactiveDivisions ? sortedDivisions : sortedDivisions.filter((division) => division.is_active);
+  const hiddenInactiveDivisionCount = sortedDivisions.filter((division) => !division.is_active).length;
   const selectedDivisionNames = activeDivisions
     .filter((division) => selectedDivisionIds.includes(division.id))
     .map((division) => division.name)
@@ -2290,6 +2292,32 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           className="mt-4 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Save Entry Code
+        </button>
+      </div>
+
+      <div className="rounded-2xl border border-red-400/40 bg-red-950/40 p-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h3 className="text-xl font-black text-red-100">Danger Area</h3>
+            <p className="mt-3 text-sm font-semibold leading-6 text-red-100">
+              Reset the entire tournament system only after all matches have been exported and recorded. This deletes all tournament history, divisions, teams, standings data, and logs for this tournament.
+            </p>
+          </div>
+          <span className="w-fit rounded-full border border-red-300/40 bg-red-700/40 px-3 py-1 text-xs font-black uppercase text-red-100">Permanent</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            if (confirmTypedAction("Reset the entire tournament system? Confirm that all matches have been exported and recorded before continuing. This deletes all history, divisions, teams, standings data, and logs for this tournament.", "RESET TOURNAMENT")) {
+              runAction("resetTournamentSystem").then((completed) => {
+                window.alert(completed ? "Tournament system reset completed." : "Tournament system reset was not completed.");
+              });
+            }
+          }}
+          disabled={Boolean(actionLoading)}
+          className="mt-4 rounded-xl bg-red-700 px-4 py-3 text-sm font-black text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Reset Entire Tournament System
         </button>
       </div>
     </section>
@@ -4056,6 +4084,13 @@ function confirmTypedAction(message, requiredWord) {
     return false;
   }
   return true;
+}
+
+function sortDivisionsByName(divisions = []) {
+  return [...(divisions || [])].sort((a, b) =>
+    String(a?.name || "").localeCompare(String(b?.name || ""), undefined, { sensitivity: "base", numeric: true }) ||
+    Number(a?.sort_order || 0) - Number(b?.sort_order || 0)
+  );
 }
 
 function onlyDigits(value) {

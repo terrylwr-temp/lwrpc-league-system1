@@ -135,6 +135,11 @@ export async function POST(req) {
       return NextResponse.json({ success: true, ...result });
     }
 
+    if (action === "resetTournamentSystem") {
+      const result = await resetTournamentSystem(supabase, tournament);
+      return NextResponse.json({ success: true, ...result });
+    }
+
     if (action === "clearLog") {
       const result = await clearTournamentLog(supabase, tournament);
       return NextResponse.json({ success: true, ...result });
@@ -1433,6 +1438,104 @@ async function resetTournamentMatches(supabase, tournament) {
 
   await clearTournamentLog(supabase, tournament);
   return { reset: true };
+}
+
+async function resetTournamentSystem(supabase, tournament) {
+  const now = new Date().toISOString();
+  const { data: teams, error: teamsError } = await supabase
+    .from("tournament_teams")
+    .select("id")
+    .eq("tournament_id", tournament.id);
+  if (teamsError) throw teamsError;
+
+  const teamIds = (teams || []).map((team) => team.id).filter(Boolean);
+  const [
+    matchCount,
+    teamCount,
+    divisionCount,
+    contactCount,
+    logCount,
+  ] = await Promise.all([
+    countTournamentRows(supabase, "tournament_matches", tournament.id),
+    countTournamentRows(supabase, "tournament_teams", tournament.id),
+    countTournamentRows(supabase, "tournament_divisions", tournament.id),
+    countTournamentContacts(supabase, teamIds),
+    countTournamentRows(supabase, "tournament_activity_log", tournament.id),
+  ]);
+
+  const { error: courtResetError } = await supabase
+    .from("tournament_courts")
+    .update({ current_match_id: null, updated_at: now })
+    .eq("tournament_id", tournament.id);
+  if (courtResetError) throw courtResetError;
+
+  const { error: matchDeleteError } = await supabase
+    .from("tournament_matches")
+    .delete()
+    .eq("tournament_id", tournament.id);
+  if (matchDeleteError) throw matchDeleteError;
+
+  if (teamIds.length > 0) {
+    const { error: contactDeleteError } = await supabase
+      .from("tournament_team_contacts")
+      .delete()
+      .in("tournament_team_id", teamIds);
+    if (contactDeleteError) throw contactDeleteError;
+  }
+
+  const { error: teamDeleteError } = await supabase
+    .from("tournament_teams")
+    .delete()
+    .eq("tournament_id", tournament.id);
+  if (teamDeleteError) throw teamDeleteError;
+
+  const { error: divisionDeleteError } = await supabase
+    .from("tournament_divisions")
+    .delete()
+    .eq("tournament_id", tournament.id);
+  if (divisionDeleteError) throw divisionDeleteError;
+
+  const { error: logDeleteError } = await supabase
+    .from("tournament_activity_log")
+    .delete()
+    .eq("tournament_id", tournament.id);
+  if (logDeleteError) throw logDeleteError;
+
+  const { error: tournamentUpdateError } = await supabase
+    .from("tournaments")
+    .update({ updated_at: now })
+    .eq("id", tournament.id);
+  if (tournamentUpdateError) throw tournamentUpdateError;
+
+  return {
+    reset: true,
+    deleted: {
+      matches: matchCount,
+      teams: teamCount,
+      divisions: divisionCount,
+      contacts: contactCount,
+      logs: logCount,
+    },
+  };
+}
+
+async function countTournamentRows(supabase, table, tournamentId) {
+  const { count, error } = await supabase
+    .from(table)
+    .select("id", { count: "exact", head: true })
+    .eq("tournament_id", tournamentId);
+  if (error) throw error;
+  return Number(count || 0);
+}
+
+async function countTournamentContacts(supabase, teamIds) {
+  if (!teamIds.length) return 0;
+  const { count, error } = await supabase
+    .from("tournament_team_contacts")
+    .select("id", { count: "exact", head: true })
+    .in("tournament_team_id", teamIds);
+  if (error) throw error;
+  return Number(count || 0);
 }
 
 async function clearTournamentLog(supabase, tournament) {
