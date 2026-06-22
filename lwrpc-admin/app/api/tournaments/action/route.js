@@ -877,10 +877,20 @@ async function updateTournamentTeam(supabase, tournament, body) {
       throw new Error(isElimination ? "Standings is required." : "Regular Season Standing is required.");
     }
 
+    const divisionId = String(body.divisionId || existing.division_id || "").trim();
+    if (!divisionId) throw new Error("Select the tournament division.");
+
+    const { data: division, error: divisionError } = await supabase
+      .from("tournament_divisions")
+      .select("id, name, is_active")
+      .eq("id", divisionId)
+      .eq("tournament_id", tournament.id)
+      .single();
+    if (divisionError) throw divisionError;
+    if (division.is_active === false) throw new Error("Select an active tournament division.");
+
     payload.name = String(body.name || existing.name || "").trim() || existing.name;
-    payload.division_id = isElimination
-      ? String(body.divisionId || existing.division_id || "").trim()
-      : existing.division_id;
+    payload.division_id = division.id;
     payload.line_number = isElimination ? 1 : Number(body.lineNumber || existing.line_number || 1);
     payload.seed = String(standing);
     payload.player_1_name = String(body.player1Name || "").trim() || null;

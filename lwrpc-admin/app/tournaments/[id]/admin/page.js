@@ -1124,7 +1124,7 @@ function StandingTeamModal({ team, matches, onClose, setResultMatch, runAction, 
 function TeamsTab({ state, setState, runAction, actionLoading }) {
   const isElimination = isEliminationTournament(state.tournament.settings) || isRoundRobinTop4Tournament(state.tournament.settings);
   const contactsByTeam = useMemo(() => groupBy(state.contacts || [], "tournament_team_id"), [state.contacts]);
-  const activeDivisions = useMemo(() => state.divisions.filter((division) => division.is_active), [state.divisions]);
+  const activeDivisions = useMemo(() => sortDivisionsByName(state.divisions.filter((division) => division.is_active)), [state.divisions]);
   const activeDivisionIds = useMemo(() => new Set(activeDivisions.map((division) => String(division.id))), [activeDivisions]);
   const divisionsById = useMemo(() => Object.fromEntries(activeDivisions.map((division) => [division.id, division])), [activeDivisions]);
   const divisionOrder = useMemo(() => activeDivisions.map((division) => division.name), [activeDivisions]);
@@ -1507,7 +1507,7 @@ function PlayerCheckInModal({ prompt, onClose, onConfirm, onSendCheckInText, onS
 function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSendTestText, saving, deleting, sendingTestText, mode = "edit" }) {
   const isAddMode = mode === "add";
   const isElimination = isEliminationTournament(state.tournament.settings) || isRoundRobinTop4Tournament(state.tournament.settings);
-  const activeDivisions = useMemo(() => state.divisions.filter((division) => division.is_active !== false), [state.divisions]);
+  const activeDivisions = useMemo(() => sortDivisionsByName(state.divisions.filter((division) => division.is_active !== false)), [state.divisions]);
   const sourceTeams = useMemo(() => state.sourceTeams || [], [state.sourceTeams]);
   const sourceTeamOptions = useMemo(() => sortedSourceTeams(sourceTeams), [sourceTeams]);
   const sourceRosters = useMemo(() => state.sourceRosters || [], [state.sourceRosters]);
@@ -1531,12 +1531,12 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
       normalizeName(division.name) === normalizeName(selectedDivisionName)
     );
   }, [form.divisionId, state.divisions, state.leagueDivisions]);
-  const divisionTeamMax = Number(isElimination ? selectedLeagueDivision?.team_dupr_max : selectedSourceTeam?.divisions?.team_dupr_max);
+  const divisionTeamMax = Number(selectedLeagueDivision?.team_dupr_max || selectedSourceTeam?.divisions?.team_dupr_max);
   const hasDivisionTeamMax = Number.isFinite(divisionTeamMax) && divisionTeamMax > 0;
   const exceedsDivisionTeamMax = hasDivisionTeamMax && teamTotal !== "" && Number(teamTotal) > divisionTeamMax;
   const duplicateTeamLine = !isElimination && duplicateTournamentTeamLine(state.teams, team.id, form.name, form.lineNumber);
   const selectedTournamentDivision = useMemo(() => {
-    if (isElimination) {
+    if (isElimination || !isAddMode) {
       return activeDivisions.find((division) => String(division.id) === String(form.divisionId));
     }
 
@@ -1544,9 +1544,10 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
     return (state.divisions || []).find((division) =>
       division.is_active !== false && normalizeName(division.name) === normalizeName(sourceDivisionName)
     );
-  }, [activeDivisions, form.divisionId, isElimination, selectedSourceTeam, state.divisions]);
+  }, [activeDivisions, form.divisionId, isAddMode, isElimination, selectedSourceTeam, state.divisions]);
   const missingTournamentDivision = isAddMode && !isElimination && form.sourceTeamId && !selectedTournamentDivision;
   const addValidationMessages = isAddMode ? addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, divisionTeamMax, isElimination) : [];
+  const missingDivision = !String(form.divisionId || "").trim() && (isElimination || !isAddMode);
   const missingStanding = !String(form.regularSeasonStanding || "").trim();
   const invalidStanding = !missingStanding && (!Number.isFinite(Number(form.regularSeasonStanding)) || Number(form.regularSeasonStanding) < 1);
 
@@ -1614,7 +1615,7 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
-          {isElimination ? (
+          {(isElimination || !isAddMode) ? (
             <label className="text-sm font-black text-blue-200 md:col-span-2">
               Division
               <select value={form.divisionId} onChange={(event) => updateForm("divisionId", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
@@ -1710,6 +1711,11 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
               This Main System Team does not match an active tournament division.
             </div>
           )}
+          {missingDivision && (
+            <div className="w-full rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
+              Tournament Division is required.
+            </div>
+          )}
           {(missingStanding || invalidStanding) && (
             <div className="w-full rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
               {isElimination ? "Standings is required." : "Regular Season Standing is required."}
@@ -1722,7 +1728,7 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
           ))}
           <button
             type="button"
-            disabled={saving || !form.name.trim() || (isAddMode && (isElimination ? !form.divisionId : !form.sourceTeamId)) || missingStanding || invalidStanding || exceedsDivisionTeamMax || duplicateTeamLine || missingTournamentDivision || addValidationMessages.length > 0}
+            disabled={saving || !form.name.trim() || (isAddMode && (isElimination ? !form.divisionId : !form.sourceTeamId)) || missingDivision || missingStanding || invalidStanding || exceedsDivisionTeamMax || duplicateTeamLine || missingTournamentDivision || addValidationMessages.length > 0}
             onClick={() => onSave(teamSavePayload(team, form))}
             className="rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
