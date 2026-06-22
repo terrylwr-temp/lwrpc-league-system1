@@ -985,17 +985,21 @@ async function createRoundRobinTournamentTeam(supabase, tournament, body) {
     .single();
   if (sourceTeamError) throw sourceTeamError;
 
-  const sourceDivisionName = sourceTeam.divisions?.name || "";
   const { data: divisions, error: divisionsError } = await supabase
     .from("tournament_divisions")
     .select("id, name, is_active")
     .eq("tournament_id", tournament.id);
   if (divisionsError) throw divisionsError;
 
-  const division = (divisions || []).find((item) =>
+  const selectedDivisionId = String(body.divisionId || "").trim();
+  const sourceDivisionName = sourceTeam.divisions?.name || "";
+  const sourceMatchedDivision = (divisions || []).find((item) =>
     item.is_active !== false && normalizeName(item.name) === normalizeName(sourceDivisionName)
   );
-  if (!division) throw new Error(`No active tournament division matches ${sourceDivisionName || "that team division"}.`);
+  const division = selectedDivisionId
+    ? (divisions || []).find((item) => item.is_active !== false && String(item.id) === selectedDivisionId)
+    : sourceMatchedDivision;
+  if (!division) throw new Error("Select an active tournament division.");
 
   const name = String(body.name || sourceTeam.name || "").trim();
   const lineNumber = Number(body.lineNumber);
@@ -1027,13 +1031,7 @@ async function createRoundRobinTournamentTeam(supabase, tournament, body) {
     throw error;
   }
 
-  const maxRating = Number(sourceTeam.divisions?.team_dupr_max);
-  const player1Rating = Number(body.player1Rating || 0);
-  const player2Rating = Number(body.player2Rating || 0);
-  const teamTotalRating = [player1Rating, player2Rating].reduce((sum, rating) => Number.isFinite(rating) ? sum + rating : sum, 0);
-  if (Number.isFinite(maxRating) && maxRating > 0 && teamTotalRating > maxRating) {
-    throw new Error("The players' total rating must be at or below the Division Team Max.");
-  }
+  await verifyTournamentDivisionTeamMax(supabase, tournament, division.id, body.player1Rating, body.player2Rating);
 
   const { data: tournamentTeams, error: teamsError } = await supabase
     .from("tournament_teams")

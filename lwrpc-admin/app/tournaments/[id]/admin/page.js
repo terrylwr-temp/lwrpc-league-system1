@@ -1535,19 +1535,11 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
   const hasDivisionTeamMax = Number.isFinite(divisionTeamMax) && divisionTeamMax > 0;
   const exceedsDivisionTeamMax = hasDivisionTeamMax && teamTotal !== "" && Number(teamTotal) > divisionTeamMax;
   const duplicateTeamLine = !isElimination && duplicateTournamentTeamLine(state.teams, team.id, form.name, form.lineNumber);
-  const selectedTournamentDivision = useMemo(() => {
-    if (isElimination || !isAddMode) {
-      return activeDivisions.find((division) => String(division.id) === String(form.divisionId));
-    }
-
-    const sourceDivisionName = selectedSourceTeam?.divisions?.name || "";
-    return (state.divisions || []).find((division) =>
-      division.is_active !== false && normalizeName(division.name) === normalizeName(sourceDivisionName)
-    );
-  }, [activeDivisions, form.divisionId, isAddMode, isElimination, selectedSourceTeam, state.divisions]);
-  const missingTournamentDivision = isAddMode && !isElimination && form.sourceTeamId && !selectedTournamentDivision;
+  const selectedTournamentDivision = useMemo(() =>
+    activeDivisions.find((division) => String(division.id) === String(form.divisionId)),
+  [activeDivisions, form.divisionId]);
   const addValidationMessages = isAddMode ? addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, divisionTeamMax, isElimination) : [];
-  const missingDivision = !String(form.divisionId || "").trim() && (isElimination || !isAddMode);
+  const missingDivision = !String(form.divisionId || "").trim();
   const missingStanding = !String(form.regularSeasonStanding || "").trim();
   const invalidStanding = !missingStanding && (!Number.isFinite(Number(form.regularSeasonStanding)) || Number(form.regularSeasonStanding) < 1);
 
@@ -1557,9 +1549,11 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
 
   function selectSourceTeam(sourceTeamId) {
     const sourceTeam = sourceTeamOptions.find((item) => String(item.id) === String(sourceTeamId));
+    const matchedDivision = sourceTeam ? tournamentDivisionForSourceTeam(sourceTeam, activeDivisions) : null;
     setForm((current) => ({
       ...current,
       sourceTeamId,
+      divisionId: matchedDivision?.id || current.divisionId,
       name: sourceTeam ? sourceTeam.name : current.name,
       player1MemberId: "",
       player1Name: "",
@@ -1597,7 +1591,7 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-2xl font-black">{isAddMode ? "Add Team" : "Edit Team"}</h2>
-            <p className="mt-1 text-sm font-semibold text-blue-200">{isAddMode ? selectedTournamentDivision?.name || (isElimination ? "Select Division" : "Select Main System Team") : team.name}</p>
+            <p className="mt-1 text-sm font-semibold text-blue-200">{isAddMode ? selectedTournamentDivision?.name || (isElimination ? "Select Division" : "Select Team and Division") : team.name}</p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs font-black">
               {selectedTournamentDivision && (
                 <span className="rounded-full bg-cyan-400/20 px-3 py-1 text-cyan-100">
@@ -1615,18 +1609,8 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
-          {(isElimination || !isAddMode) ? (
-            <label className="text-sm font-black text-blue-200 md:col-span-2">
-              Division
-              <select value={form.divisionId} onChange={(event) => updateForm("divisionId", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
-                <option value="">Select division...</option>
-                {activeDivisions.map((division) => (
-                  <option key={division.id} value={division.id}>{division.name}</option>
-                ))}
-              </select>
-            </label>
-          ) : (
-            <label className={`text-sm font-black text-blue-200 ${isAddMode ? "md:col-span-2" : ""}`}>
+          {!isElimination && isAddMode && (
+            <label className="text-sm font-black text-blue-200">
               Main System Team
               <select value={form.sourceTeamId} onChange={(event) => selectSourceTeam(event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
                 <option value="">Select team...</option>
@@ -1636,6 +1620,15 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
               </select>
             </label>
           )}
+          <label className={`text-sm font-black text-blue-200 ${isElimination || !isAddMode ? "md:col-span-2" : ""}`}>
+            Division
+            <select value={form.divisionId} onChange={(event) => updateForm("divisionId", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white">
+              <option value="">Select division...</option>
+              {activeDivisions.map((division) => (
+                <option key={division.id} value={division.id}>{division.name}</option>
+              ))}
+            </select>
+          </label>
           <label className="text-sm font-black text-blue-200">
             Team Name
             <input value={form.name} onChange={(event) => updateForm("name", event.target.value)} className="mt-2 w-full rounded-xl border border-blue-300/30 bg-slate-950 px-4 py-3 text-white" />
@@ -1706,11 +1699,6 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
               A tournament team already exists with this Team Name and Line #.
             </div>
           )}
-          {missingTournamentDivision && (
-            <div className="w-full rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
-              This Main System Team does not match an active tournament division.
-            </div>
-          )}
           {missingDivision && (
             <div className="w-full rounded-xl border border-rose-300/30 bg-rose-950/60 px-4 py-3 text-sm font-black text-rose-100">
               Tournament Division is required.
@@ -1728,7 +1716,7 @@ function TeamEditModal({ team, state, contacts, onClose, onSave, onDelete, onSen
           ))}
           <button
             type="button"
-            disabled={saving || !form.name.trim() || (isAddMode && (isElimination ? !form.divisionId : !form.sourceTeamId)) || missingDivision || missingStanding || invalidStanding || exceedsDivisionTeamMax || duplicateTeamLine || missingTournamentDivision || addValidationMessages.length > 0}
+            disabled={saving || !form.name.trim() || (isAddMode && !isElimination && !form.sourceTeamId) || missingDivision || missingStanding || invalidStanding || exceedsDivisionTeamMax || duplicateTeamLine || addValidationMessages.length > 0}
             onClick={() => onSave(teamSavePayload(team, form))}
             className="rounded-xl bg-cyan-500 px-5 py-3 text-sm font-black text-white hover:bg-cyan-400 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -2991,7 +2979,7 @@ function addTeamValidationMessages(state, form, selectedSourceTeam, teamTotal, d
   const player2Id = String(form.player2MemberId || "");
   const lineNumber = Number(form.lineNumber);
 
-  if (isElimination && !String(form.divisionId || "").trim()) {
+  if (!String(form.divisionId || "").trim()) {
     messages.push("Division is required.");
   }
 
@@ -3287,6 +3275,13 @@ function sortedSourceTeams(sourceTeams) {
   return [...(sourceTeams || [])].sort((a, b) =>
     String(a.divisions?.name || "").localeCompare(String(b.divisions?.name || "")) ||
     String(a.name || "").localeCompare(String(b.name || ""))
+  );
+}
+
+function tournamentDivisionForSourceTeam(sourceTeam, tournamentDivisions = []) {
+  const sourceDivisionName = sourceTeam?.divisions?.name || "";
+  return (tournamentDivisions || []).find((division) =>
+    division.is_active !== false && normalizeName(division.name) === normalizeName(sourceDivisionName)
   );
 }
 
