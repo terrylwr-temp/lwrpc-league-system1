@@ -3892,10 +3892,15 @@ function SettingsTab({ state, runAction, actionLoading, setTabDirty }) {
 
 function SmsTab({ state, latestSession, runAction, actionLoading }) {
   const smsSessions = useMemo(() => [...(state.sessions || [])].sort(sortSessionsDescending), [state.sessions]);
+  const activePlayerGroups = useMemo(() => (state.playerGroups || []).filter((group) => group.is_active !== false), [state.playerGroups]);
   const initialSessionId = String(latestSession?.id || smsSessions[0]?.id || "");
+  const initialLaunchGroupId = String(activePlayerGroups[0]?.id || "");
   const [selectedSessionId, setSelectedSessionId] = useState(initialSessionId);
+  const [selectedLaunchGroupId, setSelectedLaunchGroupId] = useState(initialLaunchGroupId);
   const selectedSmsSession = smsSessions.find((session) => String(session.id || "") === String(selectedSessionId)) || null;
+  const selectedLaunchGroup = activePlayerGroups.find((group) => String(group.id || "") === String(selectedLaunchGroupId)) || null;
   const selectedSessionPlayers = activeSessionPlayersForSession(state, selectedSmsSession?.id);
+  const launchGroupPlayers = selectedLaunchGroup ? playersForGroup(state, selectedLaunchGroup.id) : [];
   const [templates, setTemplates] = useState(() => normalizeSmsTemplates(state.group.settings?.smsTemplates));
   const [message, setMessage] = useState(() => renderClientSmsTemplate(normalizeSmsTemplates(state.group.settings?.smsTemplates).gameUpdate, state.group, selectedSmsSession, selectedSessionPlayers));
   const [smsEnabled, setSmsEnabled] = useState(state.group.settings?.smsSendingEnabled === true);
@@ -3914,6 +3919,11 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
     if (selectedSessionId && smsSessions.some((session) => String(session.id || "") === String(selectedSessionId))) return;
     setSelectedSessionId(initialSessionId);
   }, [initialSessionId, selectedSessionId, smsSessions]);
+
+  useEffect(() => {
+    if (selectedLaunchGroupId && activePlayerGroups.some((group) => String(group.id || "") === String(selectedLaunchGroupId))) return;
+    setSelectedLaunchGroupId(initialLaunchGroupId);
+  }, [activePlayerGroups, initialLaunchGroupId, selectedLaunchGroupId]);
 
   function setTemplate(key, value) {
     setTemplates((current) => ({ ...current, [key]: value }));
@@ -3957,6 +3967,19 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
     await runAction("sendBroadcastText", { sessionId: selectedSmsSession?.id, message, smsEnabled, recipientScope });
   }
 
+  async function sendGroupLaunchText() {
+    if (!selectedLaunchGroup || launchGroupPlayers.length === 0) return;
+    const verb = smsEnabled ? "Send" : "Log";
+    const playerText = `${launchGroupPlayers.length} active saved player${launchGroupPlayers.length === 1 ? "" : "s"}`;
+    if (!window.confirm(`${verb} the New Player text to ${playerText} in ${selectedLaunchGroup.name}? This is not tied to a match.`)) return;
+
+    await runAction("sendGroupNewPlayerText", {
+      playerGroupId: selectedLaunchGroup.id,
+      smsEnabled,
+      publicUrl: playerRoundRobinUrl(state.group),
+    });
+  }
+
   async function sendTemplateTest(key) {
     await runAction("sendTestTemplateText", {
       sessionId: selectedSmsSession?.id,
@@ -3971,7 +3994,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
     <section className="mt-4 w-full rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
       <h2 className="text-xl font-black">Text Players</h2>
       <p className="mt-1 text-sm font-semibold text-slate-500">
-        Push notifications can be added later with app install/browser permission support. This first version uses the existing Twilio SMS path.
+        PBCC texts use PBCourtCommand app notifications when available, then Twilio SMS fallback. Match texts use the selected match recipients; New Player texts are sent when active saved players are added and can be sent to every active saved player in a selected group for launch.
       </p>
       <div className="mt-3 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(16rem,1fr)_minmax(16rem,1fr)_auto] lg:items-end">
         <label className="block text-sm font-bold text-slate-600">
@@ -4031,6 +4054,32 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
             Select a match before sending or logging texts.
           </div>
         )}
+      </div>
+      <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(16rem,1fr)_auto] lg:items-end">
+          <label className="block text-sm font-bold text-blue-900">
+            Launch New Player text to group
+            <select value={selectedLaunchGroupId} onChange={(event) => setSelectedLaunchGroupId(event.target.value)} className="mt-1 w-full rounded-lg border border-blue-200 bg-white px-3 py-2 font-semibold text-slate-950">
+              <option value="">Select active group</option>
+              {activePlayerGroups.map((group) => (
+                <option key={group.id} value={group.id}>
+                  {group.name} ({playerCountForGroup(state, group.id)} active)
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={sendGroupLaunchText}
+            disabled={actionLoading === "sendGroupNewPlayerText" || !selectedLaunchGroup || launchGroupPlayers.length === 0}
+            className="rounded-lg bg-blue-700 px-4 py-3 font-black text-white shadow-sm hover:bg-blue-800 disabled:bg-slate-300"
+          >
+            {actionLoading === "sendGroupNewPlayerText" ? "Sending..." : smsEnabled ? "Send New Player Text" : "Log New Player Text"}
+          </button>
+        </div>
+        <p className="mt-2 text-xs font-bold text-blue-900">
+          Uses the New Player template and sends one personalized text per active saved player in the selected group. This does not require or update a match.
+        </p>
       </div>
       <div className="mt-5 rounded-lg border border-slate-200 bg-slate-50 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -5414,6 +5463,15 @@ function noticeForAction(action, result) {
   if (action === "sendSessionReminderText") {
     if (result.sms?.skipped) return `Pending reminder logged for ${result.recipients || 0} player${Number(result.recipients || 0) === 1 ? "" : "s"}. SMS is off.`;
     return `Pending reminder sent to ${result.sms?.sent || 0} player${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`;
+  }
+  if (action === "sendGroupNewPlayerText") {
+    if (result.sms?.skipped) {
+      if (result.sms?.reason === "SMS disabled in settings" || result.sms?.reason === "SMS disabled for this action") {
+        return `New Player launch text logged for ${result.recipients || 0} active saved player${Number(result.recipients || 0) === 1 ? "" : "s"}. SMS is off.`;
+      }
+      return `New Player launch text was not sent: ${result.sms?.reason || "SMS unavailable"}.`;
+    }
+    return `New Player launch text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`;
   }
   if (action === "sendTestTemplateText") {
     if (result.sms?.skipped) return "Test template text logged. SMS is off.";

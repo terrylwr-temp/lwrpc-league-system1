@@ -224,6 +224,11 @@ export async function POST(req) {
       return NextResponse.json({ success: true, ...result });
     }
 
+    if (action === "sendGroupNewPlayerText") {
+      const result = await sendGroupNewPlayerText(supabase, group, body);
+      return NextResponse.json({ success: true, ...result });
+    }
+
     if (action === "sendTestTemplateText") {
       const result = await sendTestTemplateText(supabase, group, body);
       return NextResponse.json({ success: true, ...result });
@@ -2139,6 +2144,82 @@ async function sendSessionReminderText(supabase, group, body) {
   );
 
   return { sms, recipients: pendingPlayers.length, phoneRecipients: phones.length };
+}
+
+async function sendGroupNewPlayerText(supabase, group, body) {
+  const playerGroupId = String(body.playerGroupId || "").trim();
+  if (!playerGroupId) throw new Error("Player group is required.");
+
+  const groupResult = await supabase
+    .from("round_robin_player_groups")
+    .select("id, name")
+    .eq("id", playerGroupId)
+    .eq("group_id", group.id)
+    .eq("is_active", true)
+    .single();
+  if (groupResult.error) throw groupResult.error;
+
+  const playerGroup = groupResult.data;
+  const players = await loadPlayersForGroups(supabase, group.id, [playerGroup.id]);
+  const phones = players.map((player) => player.phone).filter(Boolean);
+  const smsEnabled = body.smsEnabled === true && group.settings?.smsSendingEnabled === true;
+  const template = normalizeSmsTemplates(group.settings?.smsTemplates || {}).newPlayer;
+  let sms = smsDisabledResult(
+    players.length === 0
+      ? "No active saved players in selected group"
+      : smsEnabled ? "" : body.smsEnabled ? "SMS disabled in settings" : "SMS disabled for this action",
+    players.length,
+    phones.length
+  );
+
+  if (smsEnabled && players.length > 0) {
+    const results = [];
+    for (const player of players) {
+      if (!player.phone) continue;
+      const result = await sendSmsMessages({
+        phones: [player.phone],
+        publicUrl: body.publicUrl,
+        body: renderSmsTemplate(template, {
+          group,
+          publicUrl: body.publicUrl,
+          playerName: player.display_name || "Player",
+        }),
+      });
+      results.push({ playerId: player.id, ...result });
+    }
+
+    sms = {
+      skipped: false,
+      sent: results.reduce((total, result) => total + Number(result.sent || 0), 0),
+      smsSent: results.reduce((total, result) => total + Number(result.smsSent || 0), 0),
+      appSent: results.reduce((total, result) => total + Number(result.appSent || 0), 0),
+      results,
+      recipientCount: players.length,
+      phoneCount: phones.length,
+    };
+
+    if (phones.length === 0) sms = smsDisabledResult("No phone numbers", players.length, 0);
+  }
+
+  await addLog(
+    supabase,
+    group.id,
+    null,
+    "sms",
+    sms.skipped
+      ? smsEnabled
+        ? `New Player launch text was not sent for ${playerGroup.name || "selected group"}: ${sms.reason || "SMS unavailable"}.`
+        : `New Player launch text logged for ${players.length} active saved player${players.length === 1 ? "" : "s"} in ${playerGroup.name || "selected group"}. SMS is off.`
+      : `New Player launch text sent to ${sms.sent || 0} recipient${Number(sms.sent || 0) === 1 ? "" : "s"} in ${playerGroup.name || "selected group"}.`,
+    { sms, recipientScope: "newPlayerGroup", recipientCount: players.length, phoneCount: phones.length, playerGroupId: playerGroup.id }
+  );
+
+  return {
+    sms,
+    recipients: players.length,
+    phoneRecipients: phones.length,
+    playerGroup,
+  };
 }
 
 async function rebuildResults(supabase, group, sessionId) {
