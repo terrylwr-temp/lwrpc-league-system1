@@ -232,8 +232,8 @@ export async function runPbccMatchReminders(supabase, { dryRun = false, now = ne
     if (sentReminderKeys.has(key)) continue;
 
     const sessionPlayers = playersBySession.get(String(session.id)) || [];
-    const joinedPlayers = sessionPlayers.filter((player) => player.response_status === "joined");
-    const phones = joinedPlayers.map((player) => player.phone).filter(Boolean);
+    const reminderPlayers = sessionPlayers.filter((player) => ["joined", "invited"].includes(player.response_status));
+    const phones = reminderPlayers.map((player) => player.phone).filter(Boolean);
     const counts = sessionTextCounts(session, sessionPlayers);
     const resultBase = {
       group: group.name,
@@ -243,6 +243,8 @@ export async function runPbccMatchReminders(supabase, { dryRun = false, now = ne
       startsAt: session.starts_at,
       hoursBefore,
       recipients: phones.length,
+      joinedRecipients: reminderPlayers.filter((player) => player.response_status === "joined").length,
+      invitedRecipients: reminderPlayers.filter((player) => player.response_status === "invited").length,
     };
 
     if (group.settings?.smsSendingEnabled !== true) {
@@ -251,7 +253,7 @@ export async function runPbccMatchReminders(supabase, { dryRun = false, now = ne
     }
 
     if (phones.length === 0) {
-      results.push({ ...resultBase, skipped: true, reason: "No joined players with phone numbers" });
+      results.push({ ...resultBase, skipped: true, reason: "No joined or pending invited players with phone numbers" });
       continue;
     }
 
@@ -281,6 +283,8 @@ export async function runPbccMatchReminders(supabase, { dryRun = false, now = ne
         reminderKey: key,
         reminderHoursBefore: hoursBefore,
         recipientCount: phones.length,
+        joinedRecipientCount: reminderPlayers.filter((player) => player.response_status === "joined").length,
+        invitedRecipientCount: reminderPlayers.filter((player) => player.response_status === "invited").length,
         sent,
         sms,
       },

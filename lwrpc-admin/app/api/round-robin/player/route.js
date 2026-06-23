@@ -440,21 +440,19 @@ async function sendHostResponseNotification(supabase, group, session, player, re
 
   return sendSmsMessages({
     phones,
-    body: hostResponseSmsBody(group, session, player, resolvedStatus),
+    body: hostResponseSmsBody(session, player, resolvedStatus),
   });
 }
 
-function hostResponseSmsBody(group, session, player, resolvedStatus) {
+function hostResponseSmsBody(session, player, resolvedStatus) {
   const playerName = player?.display_name || player?.first_name || "A player";
   const response = resolvedStatus === "declined"
     ? "declined"
     : resolvedStatus === "waitlist"
-      ? "accepted and was placed on the waitlist"
-      : "accepted";
+      ? "joined the waitlist for"
+      : "joined";
   const date = session?.session_date ? new Date(`${session.session_date}T12:00:00`).toLocaleDateString("en-US") : "the match date";
-  const time = session?.starts_at ? formatSessionTime(session.starts_at) : "TBD";
-  const location = session?.location ? ` at ${session.location}` : "";
-  return `${group?.name || "PBCourtCommand"}: ${playerName} ${response} ${session?.session_name || "your match"} on ${date} at ${time}${location}.`;
+  return `${playerName} has ${response} ${session?.session_name || "your match"} on ${date}.`;
 }
 
 function formatSessionTime(value) {
