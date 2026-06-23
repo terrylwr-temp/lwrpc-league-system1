@@ -270,31 +270,31 @@ export default function TeamScheduleModal({
 
 function ScheduleByeCard({ bye }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-amber-200 bg-amber-50 shadow-sm">
-      <div className="h-1 bg-amber-500" />
+    <div className="overflow-hidden rounded-2xl border border-yellow-300 bg-yellow-50 shadow-sm">
+      <div className="h-1 bg-yellow-400" />
       <div className="p-3 sm:p-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <div className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-black text-amber-950 sm:text-sm">
+              <div className="inline-flex rounded-full bg-white/80 px-3 py-1 text-xs font-black text-slate-950 sm:text-sm">
                 {formatDate(bye.bye_date)}
               </div>
-              <div className="inline-flex rounded-full bg-amber-500 px-3 py-1 text-xs font-black uppercase tracking-wide text-white sm:text-sm">
+              <div className="inline-flex rounded-full bg-yellow-300 px-3 py-1 text-xs font-black uppercase tracking-wide text-yellow-950 sm:text-sm">
                 BYE WEEK
               </div>
               <div className="inline-flex rounded-full bg-slate-900 px-3 py-1 text-xs font-black text-white sm:text-sm">
                 Week {bye.week_number || "-"}
               </div>
             </div>
-            <div className="mt-2 text-base font-black text-amber-950 sm:text-lg">
+            <div className="mt-2 text-base font-black text-slate-950 sm:text-lg">
               {bye.teams?.name || "Team"} has no match scheduled
             </div>
-            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold text-amber-900">
+            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold text-yellow-900">
               <span>{bye.divisions?.name || "Division"}</span>
             </div>
           </div>
 
-          <div className="rounded-xl bg-white px-3 py-2 text-sm font-black uppercase tracking-wide text-amber-900 shadow-sm">
+          <div className="rounded-xl bg-white px-3 py-2 text-sm font-black uppercase tracking-wide text-yellow-900 shadow-sm">
             No Match Scheduled
           </div>
         </div>

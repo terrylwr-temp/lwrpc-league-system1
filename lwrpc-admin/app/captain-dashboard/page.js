@@ -4787,10 +4787,10 @@ function byeCard(bye) {
   return (
     <div
       key={`bye-${bye.id}`}
-      className="overflow-hidden rounded-2xl border border-amber-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+      className="overflow-hidden rounded-2xl border border-yellow-300 bg-yellow-50 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
     >
-      <div className="bg-gradient-to-r from-amber-700 to-orange-700 px-4 py-3 text-white">
-        <div className="text-xs font-black uppercase tracking-wide text-white/80">
+      <div className="bg-gradient-to-r from-yellow-300 to-amber-400 px-4 py-3 text-slate-950">
+        <div className="text-xs font-black uppercase tracking-wide text-slate-700">
           Week {bye.week_number || "-"}
         </div>
         <div className="mt-1 text-lg font-black">
@@ -4801,33 +4801,33 @@ function byeCard(bye) {
       <div className="p-4">
         <div className="min-w-0">
           <div className="flex flex-wrap gap-2 text-xs font-bold uppercase tracking-wide">
-            <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-950">
+            <span className="rounded-full bg-yellow-300 px-2 py-1 text-yellow-950">
               BYE WEEK
             </span>
             <span className="rounded-full bg-slate-100 px-2 py-1 text-slate-700">
               No Match Scheduled
             </span>
-            <span className="rounded-full bg-orange-100 px-2 py-1 text-orange-900">
+            <span className="rounded-full bg-amber-100 px-2 py-1 text-amber-950">
               Week {bye.week_number || "-"}
             </span>
           </div>
 
           <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700 md:grid-cols-3">
-            <div className="rounded-xl bg-slate-50 px-3 py-2">
+            <div className="rounded-xl bg-white/80 px-3 py-2">
               <div className="text-xs font-black uppercase tracking-wide text-slate-500">Date</div>
               <div className="font-bold text-slate-900">{formatDate(bye.bye_date)}</div>
             </div>
-            <div className="rounded-xl bg-slate-50 px-3 py-2">
+            <div className="rounded-xl bg-white/80 px-3 py-2">
               <div className="text-xs font-black uppercase tracking-wide text-slate-500">Division</div>
               <div className="font-bold text-slate-900">{bye.divisions?.name || "No Division"}</div>
             </div>
-            <div className="rounded-xl bg-slate-50 px-3 py-2">
+            <div className="rounded-xl bg-white/80 px-3 py-2">
               <div className="text-xs font-black uppercase tracking-wide text-slate-500">Status</div>
               <div className="font-bold text-slate-900">BYE WEEK</div>
             </div>
           </div>
 
-          <div className="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm font-black text-amber-950">
+          <div className="mt-3 rounded-lg bg-yellow-100 px-3 py-2 text-sm font-black text-yellow-950">
             {bye.teams?.name || "Team"} has no match scheduled.
           </div>
         </div>
