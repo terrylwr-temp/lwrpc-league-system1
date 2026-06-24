@@ -1117,7 +1117,7 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
             <button
               type="button"
               onClick={() => onPlayers(session)}
-              className="rounded-lg bg-teal-50 px-3 py-2 text-left text-teal-900 shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-100 focus:outline-none focus:ring-2 focus:ring-teal-300"
+              className="rounded-lg border border-teal-700 bg-teal-700 px-4 py-2 text-left text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-teal-800 focus:outline-none focus:ring-2 focus:ring-teal-300"
             >
               {availableSpots === null
                 ? `${session.joinedCount} joined`

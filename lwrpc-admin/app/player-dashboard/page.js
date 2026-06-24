@@ -2549,11 +2549,8 @@ function MatchLineResult({ line, match, ratingForMember }) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 md:justify-end">
-          <div className="rounded-full bg-slate-100 px-4 py-2 text-sm font-black text-slate-950">
-            Team Points: {teamPointsText}
-          </div>
           <div className={`rounded-full px-4 py-2 text-sm font-black ${winnerClass}`}>
-            {winnerName}
+            Winner: {winnerName} Points: {teamPointsText}
           </div>
         </div>
       </div>
