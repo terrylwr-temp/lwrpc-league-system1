@@ -115,17 +115,31 @@ export default function TournamentPlayerPage() {
 
       {selectedPlayer && (
         <div className="mt-4 space-y-4">
-          <div className="rounded-2xl bg-white p-5 shadow">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-2xl font-black text-slate-950">{selectedPlayer.name}</h2>
-              <span className="rounded-full bg-blue-100 px-4 py-2 text-sm font-black text-blue-900">
-                Record: {playerRecord.w}-{playerRecord.l}
-              </span>
+          <div className="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-lg shadow-blue-950/10 ring-1 ring-blue-100">
+            <div className="border-l-8 border-emerald-400 bg-gradient-to-r from-slate-950 via-blue-900 to-emerald-800 p-5 text-white">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-black uppercase tracking-wide text-emerald-200">Selected Player</div>
+                  <h2 className="mt-1 break-words text-3xl font-black leading-tight">{selectedPlayer.name}</h2>
+                </div>
+                <span className="rounded-full border border-amber-200 bg-amber-300 px-4 py-2 text-sm font-black text-slate-950 shadow-sm">
+                  Record: {playerRecord.w}-{playerRecord.l}
+                </span>
+              </div>
             </div>
-            <div className="mt-2 grid grid-cols-1 gap-2 text-sm font-semibold text-slate-700 md:grid-cols-3">
-              <div className="rounded-xl bg-slate-50 px-3 py-2">Team: {selectedPlayer.team}</div>
-              <div className="rounded-xl bg-slate-50 px-3 py-2">Division: {selectedPlayer.division}</div>
-              <div className="rounded-xl bg-slate-50 px-3 py-2">Line: {selectedPlayer.line}</div>
+            <div className="grid grid-cols-1 gap-px bg-blue-100 text-sm font-semibold md:grid-cols-3">
+              <div className="bg-blue-50 px-4 py-3">
+                <div className="text-[11px] font-black uppercase tracking-wide text-blue-700">Team</div>
+                <div className="mt-1 text-base font-black text-blue-950">{selectedPlayer.team}</div>
+              </div>
+              <div className="bg-emerald-50 px-4 py-3">
+                <div className="text-[11px] font-black uppercase tracking-wide text-emerald-700">Division</div>
+                <div className="mt-1 text-base font-black text-emerald-950">{selectedPlayer.division}</div>
+              </div>
+              <div className="bg-amber-50 px-4 py-3">
+                <div className="text-[11px] font-black uppercase tracking-wide text-amber-700">Line</div>
+                <div className="mt-1 text-base font-black text-amber-950">{selectedPlayer.line}</div>
+              </div>
             </div>
           </div>
 
