@@ -6,11 +6,13 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
+import { supabase } from "../../../lib/auth";
 import { DEFAULT_LADDER_RANKING_CRITERIA, LADDER_RANKING_CRITERIA_OPTIONS, compareLadderRowsByCriteria, ladderRankingCriteriaLabel, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { roundRobinPlayerLabel } from "../../../lib/roundRobinSchedule";
 
 const TABS = ["Matches", "Ladders", "Players", "Groups", "Courts", "Settings", "SMS", "Log"];
+const CLUB_PRO_TABS = ["Matches", "Ladders", "Players", "Groups", "Courts"];
 const SECONDARY_TABS = ["Ladders", "Players"];
 const ADMIN_TAB_IDLE_CLASS = "border-slate-300 bg-white text-slate-800 hover:border-slate-400 hover:bg-slate-50";
 const TAB_TONES = {
@@ -128,13 +130,15 @@ export default function RoundRobinAdminPage() {
   const { id } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const storageKey = `lwrpc-round-robin-code-${id}`;
   const hostPhoneStorageKey = `lwrpc-round-robin-host-phone-${id}`;
   const hostSessionStorageKey = `lwrpc-round-robin-host-session-${id}`;
   const playerPhoneStorageKey = `lwrpc-round-robin-player-phone-${id}`;
   const requestedHostSessionId = searchParams.get("hostSessionId") || "";
   const requestedManagerMode = searchParams.get("manager") === "1";
-  const [eventCode, setEventCode] = useState("");
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [authMessage, setAuthMessage] = useState("");
   const [hostPhone, setHostPhone] = useState("");
   const [state, setState] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -152,8 +156,6 @@ export default function RoundRobinAdminPage() {
     if (requestedManagerMode) {
       window.sessionStorage.removeItem(hostPhoneStorageKey);
       window.sessionStorage.removeItem(hostSessionStorageKey);
-      window.sessionStorage.removeItem(storageKey);
-      setEventCode("");
       setHostPhone("");
       setState(null);
       return;
@@ -176,11 +178,7 @@ export default function RoundRobinAdminPage() {
       return;
     }
 
-    const cachedCode = window.sessionStorage.getItem(storageKey) || "";
-    if (cachedCode) {
-      setEventCode(cachedCode);
-      unlock(cachedCode);
-    }
+    unlock("", { silent: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, requestedHostSessionId, requestedManagerMode, playerPhoneStorageKey]);
 
@@ -201,10 +199,12 @@ export default function RoundRobinAdminPage() {
   }, [dirtyTabs]);
 
   useEffect(() => {
-    if (state?.accessMode === "secondary" && !SECONDARY_TABS.includes(activeTab)) {
-      setActiveTab("Ladders");
+    if (!state) return;
+    const nextVisibleTabs = visibleTabsForAccess(state);
+    if (!nextVisibleTabs.includes(activeTab)) {
+      setActiveTab(nextVisibleTabs[0] || "Matches");
     }
-  }, [activeTab, state?.accessMode]);
+  }, [activeTab, state]);
 
   const setTabDirty = useCallback((tab, isDirty) => {
     setDirtyTabs((current) => {
@@ -232,10 +232,21 @@ export default function RoundRobinAdminPage() {
     router.push(roundRobinPath(groupKey, "player"));
   }
 
-  async function unlock(code = eventCode, preferredSessionId = liveSessionId) {
-    const cleanCode = String(code || "").trim();
-    if (!cleanCode) {
-      setError("Enter the manager code.");
+  async function lmsAuthHeaders() {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token || "";
+    if (!token) return null;
+
+    return {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    };
+  }
+
+  async function unlock(preferredSessionId = liveSessionId, options = {}) {
+    const headers = await lmsAuthHeaders();
+    if (!headers) {
+      if (!options.silent) setError("Sign in with your LMS account to open Admin Setup.");
       return;
     }
 
@@ -245,10 +256,9 @@ export default function RoundRobinAdminPage() {
 
     const response = await fetch("/api/round-robin/admin", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         groupId: id,
-        eventCode: cleanCode,
         ...(preferredSessionId ? { hostSessionId: preferredSessionId } : {}),
       }),
     });
@@ -257,16 +267,40 @@ export default function RoundRobinAdminPage() {
     setHostUnlocking(false);
 
     if (!response.ok || !result.success) {
-      window.sessionStorage.removeItem(storageKey);
       setState(null);
       setError(result.error || "Unable to unlock Admin Setup.");
       return;
     }
 
-    window.sessionStorage.setItem(storageKey, cleanCode);
-    setEventCode(cleanCode);
-    if (result.accessMode === "secondary") setActiveTab("Ladders");
+    setAuthMessage("");
     setState(result);
+  }
+
+  async function loginWithLms(event) {
+    event.preventDefault();
+    const email = loginEmail.trim();
+    if (!email || !loginPassword) {
+      setAuthMessage("Enter your LMS email address and password.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setAuthMessage("Signing in...");
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email,
+      password: loginPassword,
+    });
+
+    if (signInError) {
+      setLoading(false);
+      setAuthMessage(signInError.message);
+      return;
+    }
+
+    setAuthMessage("");
+    await unlock(liveSessionId);
   }
 
   async function unlockHost(nextPhone = hostPhone, nextSessionId = requestedHostSessionId || window.sessionStorage.getItem(hostSessionStorageKey) || "") {
@@ -300,14 +334,12 @@ export default function RoundRobinAdminPage() {
     window.sessionStorage.setItem(hostPhoneStorageKey, cleanPhone);
     window.sessionStorage.setItem(hostSessionStorageKey, result.hostSessionId || cleanSessionId);
     setHostPhone(cleanPhone);
-    setEventCode("");
     setActiveTab("Matches");
     setState(result);
   }
 
   async function runAction(action, payload = {}, options = {}) {
     const isHostAccess = state?.accessMode === "host";
-    const cleanCode = String(eventCode || window.sessionStorage.getItem(storageKey) || "").trim();
     const cleanHostPhone = String(hostPhone || window.sessionStorage.getItem(hostPhoneStorageKey) || "").trim();
     const cleanHostSessionId = String(payload.sessionId || state?.hostSessionId || window.sessionStorage.getItem(hostSessionStorageKey) || "").trim();
     const preferredSessionId = String(payload.sessionId || liveSessionId || "").trim();
@@ -315,12 +347,19 @@ export default function RoundRobinAdminPage() {
     setError("");
     setNotice("");
 
+    const headers = isHostAccess ? { "Content-Type": "application/json" } : await lmsAuthHeaders();
+    if (!headers) {
+      setActionLoading("");
+      setError("Sign in with your LMS account to continue.");
+      return options.returnResult ? { success: false, error: "Sign in with your LMS account to continue." } : false;
+    }
+
     const response = await fetch("/api/round-robin/action", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({
         groupId: id,
-        ...(isHostAccess ? { hostPhone: cleanHostPhone, hostSessionId: cleanHostSessionId } : { eventCode: cleanCode }),
+        ...(isHostAccess ? { hostPhone: cleanHostPhone, hostSessionId: cleanHostSessionId } : {}),
         publicUrl: playerRoundRobinUrl(state?.group),
         action,
         ...payload,
@@ -337,7 +376,7 @@ export default function RoundRobinAdminPage() {
     if (isHostAccess) {
       await unlockHost(cleanHostPhone, cleanHostSessionId);
     } else {
-      await unlock(cleanCode, preferredSessionId);
+      await unlock(preferredSessionId);
     }
     setNotice(noticeForAction(action, result));
     return options.returnResult ? result : true;
@@ -418,8 +457,7 @@ export default function RoundRobinAdminPage() {
     if (!nextSessionId) return;
     setActiveTab("Matches");
     setSwapSelection([]);
-    const cleanCode = String(eventCode || window.sessionStorage.getItem(storageKey) || "").trim();
-    if (cleanCode) await unlock(cleanCode, nextSessionId);
+    await unlock(nextSessionId);
     setLiveSessionId(nextSessionId);
   }
 
@@ -434,11 +472,9 @@ export default function RoundRobinAdminPage() {
   function exitToDashboard() {
     if (!canLeaveCurrentTab()) return;
     if (!window.confirm("Exit to LMS? Your PBCC admin access will be closed.")) return;
-    window.sessionStorage.removeItem(storageKey);
     window.sessionStorage.removeItem(hostPhoneStorageKey);
     window.sessionStorage.removeItem(hostSessionStorageKey);
     setState(null);
-    setEventCode("");
     setHostPhone("");
     setLiveSessionId("");
     router.push("/");
@@ -483,41 +519,71 @@ export default function RoundRobinAdminPage() {
             <div className="text-xs font-black uppercase tracking-wide text-teal-200">PBCourtCommand</div>
             <h1 className="mt-1 text-3xl font-black">Admin Setup</h1>
             <p className="mt-2 text-sm font-semibold text-teal-100">
-              Public schedule and results do not require this code. Player contacts, setup, scoring, and texts do.
+              Sign in with your LMS account to manage your authorized PBCourtCommand areas.
             </p>
           </div>
           <div className="p-6" suppressHydrationWarning>
-            <input
-              type="text"
-              suppressHydrationWarning
-              autoComplete="off"
-              autoCorrect="off"
-              spellCheck={false}
-              data-lpignore="true"
-              data-1p-ignore="true"
-              data-bwignore="true"
-              data-form-type="other"
-              value={eventCode}
-              onChange={(event) => {
-                setEventCode(event.target.value);
-                setError("");
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") unlock();
-              }}
-              className="w-full rounded-lg border border-teal-300/30 bg-slate-900 px-4 py-4 text-center text-2xl font-black tracking-[0.35em] text-white outline-none ring-teal-400/40 focus:ring-4"
-              style={{ WebkitTextSecurity: "disc" }}
-              placeholder="Code"
-            />
-            {error && <div className="mt-3 rounded-lg bg-red-950/70 p-3 text-sm font-bold text-red-100">{error}</div>}
-            <button
-              type="button"
-              onClick={() => unlock()}
-              disabled={loading || !eventCode.trim()}
-              className="mt-4 w-full rounded-lg bg-teal-500 px-5 py-4 font-black text-white shadow-sm hover:bg-teal-400 disabled:cursor-not-allowed disabled:bg-slate-700"
-            >
-              {loading ? "Unlocking..." : "Unlock Admin Setup"}
-            </button>
+            <form onSubmit={loginWithLms} className="space-y-4">
+              <div>
+                <label className="text-sm font-black text-teal-100">Email Address</label>
+                <input
+                  type="email"
+                  value={loginEmail}
+                  onChange={(event) => {
+                    setLoginEmail(event.target.value);
+                    setAuthMessage("");
+                    setError("");
+                  }}
+                  autoComplete="email"
+                  className="mt-1 w-full rounded-lg border border-teal-300/30 bg-slate-900 px-4 py-3 text-white outline-none ring-teal-400/40 placeholder:text-slate-500 focus:ring-4"
+                  required
+                />
+              </div>
+              <div>
+                <div className="flex items-center justify-between gap-3">
+                  <label className="text-sm font-black text-teal-100">Password</label>
+                  <Link className="text-xs font-bold text-teal-200 hover:text-white" href="/login">
+                    Forgot Password?
+                  </Link>
+                </div>
+                <div className="relative mt-1">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={loginPassword}
+                    onChange={(event) => {
+                      setLoginPassword(event.target.value);
+                      setAuthMessage("");
+                      setError("");
+                    }}
+                    autoComplete="current-password"
+                    className="w-full rounded-lg border border-teal-300/30 bg-slate-900 py-3 pl-4 pr-20 text-white outline-none ring-teal-400/40 placeholder:text-slate-500 focus:ring-4"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((current) => !current)}
+                    className="absolute inset-y-1 right-1 rounded-md px-3 text-xs font-black text-teal-100 hover:bg-white/10"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
+              </div>
+              {(error || authMessage) && (
+                <div className={`rounded-lg p-3 text-sm font-bold ${error ? "bg-red-950/70 text-red-100" : "bg-blue-950/70 text-blue-100"}`}>
+                  {error || authMessage}
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={loading || !loginEmail.trim() || !loginPassword}
+                className="w-full rounded-lg bg-teal-500 px-5 py-4 font-black text-white shadow-sm hover:bg-teal-400 disabled:cursor-not-allowed disabled:bg-slate-700"
+              >
+                {loading ? "Signing In..." : "Sign In"}
+              </button>
+            </form>
+            <p className="mt-4 rounded-lg border border-teal-300/20 bg-teal-950/40 px-4 py-3 text-center text-sm font-semibold text-teal-100">
+              Use the same email and password you use for the LMS.
+            </p>
             <Link className="mt-4 block text-center text-sm font-bold text-teal-200 hover:text-white" href={roundRobinPath(id, "player")}>
               Back to Player View
             </Link>
@@ -531,7 +597,7 @@ export default function RoundRobinAdminPage() {
   const latestSession = (state.sessions || []).find((session) => String(session.id) === String(state.activeSessionId || "")) || state.sessions?.[0] || null;
   const liveSession = liveSessionId ? (state.sessions || []).find((session) => String(session.id || "") === String(liveSessionId)) : null;
   const rounds = groupMatchesByRound(state.matches || []);
-  const visibleTabs = state.accessMode === "host" ? ["Matches"] : state.accessMode === "secondary" ? SECONDARY_TABS : TABS;
+  const visibleTabs = visibleTabsForAccess(state);
 
   if (state.accessMode === "host") {
     return (
@@ -643,7 +709,7 @@ export default function RoundRobinAdminPage() {
           <div className="p-3 sm:p-5">
           <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
             <div>
-              <div className="text-xs font-black uppercase tracking-wide text-teal-200">{state.accessMode === "host" ? "PBCourtCommand Host" : "Administration Setup"}</div>
+              <div className="text-xs font-black uppercase tracking-wide text-teal-200">{state.accessMode === "host" ? "PBCourtCommand Host" : adminAccessLabel(state)}</div>
               <h1 className="text-2xl font-black sm:text-4xl">PBCourtCommand</h1>
             </div>
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
@@ -1551,6 +1617,19 @@ function SessionStatsModal({ session, state, onClose, onConfirm = null, confirmL
 
 function tabTone(tab) {
   return TAB_TONES[tab] || TAB_TONES.Log;
+}
+
+function visibleTabsForAccess(state) {
+  if (!state) return TABS;
+  if (state.accessMode === "host") return ["Matches"];
+  if (state.accessMode === "secondary") return SECONDARY_TABS;
+  if (state.role === "club_pro") return CLUB_PRO_TABS;
+  return TABS;
+}
+
+function adminAccessLabel(state) {
+  if (state?.role === "club_pro") return "Club Pro Access";
+  return "Administration Setup";
 }
 
 function AdminStandingMobileSummaryRow({ row, rank }) {
@@ -3795,7 +3874,6 @@ function CourtsTab({ state, runAction, actionLoading, setTabDirty }) {
 function SettingsTab({ state, runAction, actionLoading, setTabDirty }) {
   const [form, setForm] = useState({
     name: state.group.name || "",
-    adminCode: "",
     mode: state.group.mode || "daily_round_robin",
     scheduleDay: state.group.schedule_day || "",
     scheduleTime: state.group.schedule_time || "",
@@ -3803,7 +3881,6 @@ function SettingsTab({ state, runAction, actionLoading, setTabDirty }) {
     defaultRounds: Number(state.group.settings?.defaultRounds || 6),
     defaultLocation: state.group.settings?.defaultLocation || "",
     defaultHostPlayerId: defaultHostPlayerId(state),
-    secondaryCode: "",
   });
   const [formBaseline, setFormBaseline] = useState(form);
   const sessionCount = state.sessions?.length || 0;
@@ -3855,8 +3932,9 @@ function SettingsTab({ state, runAction, actionLoading, setTabDirty }) {
               {activeDefaultHostPlayers.map((player) => <option key={player.id} value={player.id}>{player.display_name}</option>)}
             </select>
           </label>
-          <TextInput label="New manager code" value={form.adminCode} onChange={(value) => setForm((current) => ({ ...current, adminCode: value }))} placeholder="Leave blank to keep current" />
-          <TextInput label="Secondary Code" value={form.secondaryCode} onChange={(value) => setForm((current) => ({ ...current, secondaryCode: value }))} placeholder="Leave blank to keep current" />
+          <div className="rounded-lg border border-teal-200 bg-teal-50 px-4 py-3 text-sm font-semibold text-teal-900 md:col-span-2">
+            Admin Setup access uses LMS League Manager or Commissioner login credentials.
+          </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
           <button type="button" onClick={async () => { const saved = await runAction("saveSettings", form); if (saved) setFormBaseline(form); }} disabled={actionLoading === "saveSettings" || !form.name.trim()} className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">

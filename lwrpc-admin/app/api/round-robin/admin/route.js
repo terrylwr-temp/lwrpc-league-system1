@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { hasRole } from "../../../lib/permissions";
+import { highestRoleForMembers, memberEmailResolution } from "../../../lib/memberLookup";
 
 export const runtime = "nodejs";
 
@@ -23,15 +25,31 @@ function adminClient() {
   });
 }
 
+function anonClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error("Supabase anon credentials are not configured.");
+  }
+
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
     const groupId = String(body.groupId || "").trim();
-    const eventCode = String(body.eventCode || "").trim();
     const hostPhone = String(body.hostPhone || "").trim();
     const hostSessionId = String(body.hostSessionId || "").trim();
+    const hasAuthToken = Boolean((req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim());
 
-    if (!groupId || (!eventCode && !hostPhone)) {
+    if (!groupId || (!hostPhone && !hasAuthToken)) {
       return NextResponse.json(
         { success: false, error: "Round Robin group and manager access are required." },
         { status: 400 }
@@ -49,18 +67,12 @@ export async function POST(req) {
       );
     }
 
-    let access = { mode: "manager", sessionIds: null, preferredSessionId: hostSessionId || "" };
-    if (eventCode) {
-      const codeAccessMode = roundRobinAdminAccessMode(group, eventCode);
-      if (!codeAccessMode) {
-        return NextResponse.json(
-          { success: false, error: "Incorrect manager code." },
-          { status: 401 }
-        );
-      }
-      access = { mode: codeAccessMode, sessionIds: null, preferredSessionId: hostSessionId || "" };
-    } else {
+    let access = { mode: "manager", role: null, sessionIds: null, preferredSessionId: hostSessionId || "" };
+    if (hostPhone) {
       access = await validateHostAccess(supabase, group, hostPhone, hostSessionId);
+    } else {
+      const lmsAccess = await requireLmsAdmin(req, supabase);
+      access = { mode: "manager", role: lmsAccess.role, sessionIds: null, preferredSessionId: hostSessionId || "" };
     }
 
     if (access.mode === "host" && access.sessionIds.length === 0) {
@@ -162,6 +174,7 @@ export async function POST(req) {
     return NextResponse.json({
       success: true,
       accessMode: access.mode,
+      role: access.role || null,
       hostPlayer: access.hostPlayer ? sanitizeHostPlayer(access.hostPlayer) : null,
       hostSessionId: access.preferredSessionId || activeSession?.id || null,
       group: sanitizeGroup(group),
@@ -184,6 +197,45 @@ export async function POST(req) {
       { status: error.status || 500 }
     );
   }
+}
+
+async function requireLmsAdmin(req, supabase) {
+  const authHeader = req.headers.get("authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+
+  if (!token) {
+    const error = new Error("Sign in with your LMS account to open Admin Setup.");
+    error.status = 401;
+    throw error;
+  }
+
+  const authSupabase = anonClient();
+  const { data: userData, error: userError } = await authSupabase.auth.getUser(token);
+
+  if (userError || !userData?.user?.email) {
+    const error = new Error("Sign in with your LMS account to open Admin Setup.");
+    error.status = 401;
+    throw error;
+  }
+
+  const { data: memberRows, error: memberError } = await supabase
+    .from("members")
+    .select("id, email, is_active_member, created_at, user_roles(role)")
+    .eq("email", userData.user.email)
+    .order("created_at", { ascending: true });
+
+  if (memberError) throw memberError;
+
+  const { activeMembers } = memberEmailResolution(memberRows);
+  const role = highestRoleForMembers(activeMembers.length > 0 ? activeMembers : memberRows);
+
+  if (!hasRole(role, "club_pro")) {
+    const error = new Error("Only Club Pros, League Managers, and Commissioners can open PBCourtCommand Admin Setup.");
+    error.status = 403;
+    throw error;
+  }
+
+  return { user: userData.user, role };
 }
 
 async function loadGroup(supabase, identifier) {
@@ -359,15 +411,6 @@ async function findPlayerByPhone(supabase, groupId, phone) {
     throw duplicate;
   }
   return matches[0];
-}
-
-function roundRobinAdminAccessMode(group, eventCode) {
-  const cleanCode = String(eventCode || "").trim();
-  const overrideCode = String(process.env.ROUND_ROBIN_ADMIN_OVERRIDE_CODE || "").trim();
-  if (!cleanCode) return "";
-  if (String(group.admin_code || "") === cleanCode || (overrideCode && overrideCode === cleanCode)) return "manager";
-  if (String(group.settings?.secondaryAdminCode || "").trim() === cleanCode) return "secondary";
-  return "";
 }
 
 function phonesMatch(savedPhone, cleanPhone) {

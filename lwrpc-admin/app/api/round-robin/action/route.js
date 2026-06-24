@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendSmsMessages as sendSmsMessagesWithFallback } from "../../../lib/notifications";
+import { hasRole } from "../../../lib/permissions";
+import { highestRoleForMembers, memberEmailResolution } from "../../../lib/memberLookup";
 import { compareLadderRowsByCriteria, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
 import { createNextRoundRobinRound, createRoundRobinSchedule, roundRobinPlayerLabel, roundRobinStandings, summaryTextForStandings } from "../../../lib/roundRobinSchedule";
 
@@ -20,14 +22,34 @@ const HOST_ALLOWED_ACTIONS = new Set([
   "sendSessionResultsText",
   "sendBroadcastText",
 ]);
-const SECONDARY_ALLOWED_ACTIONS = new Set([
+const CLUB_PRO_ALLOWED_ACTIONS = new Set([
   "savePlayer",
   "deletePlayer",
+  "savePlayerGroup",
+  "deletePlayerGroup",
+  "saveCourts",
   "saveLadder",
   "deleteLadder",
   "saveLadderPositions",
   "recalculateLadderRankings",
   "createLadderMatch",
+  "createSession",
+  "createPlannedSession",
+  "updatePlannedSession",
+  "deleteSession",
+  "markSessionDuprExported",
+  "updateSessionPlayerStatus",
+  "addSessionPlayer",
+  "addSessionNewPlayer",
+  "startSession",
+  "startSessionAndGenerateFirstGame",
+  "generateNextGame",
+  "updateMatchScore",
+  "updateMatchLineup",
+  "completeSession",
+  "sendSessionResultsText",
+  "sendBroadcastText",
+  "sendSessionReminderText",
 ]);
 const DEFAULT_ROUND_ROBIN_SCORING = {
   pointsToWin: 21,
@@ -65,12 +87,28 @@ function adminClient() {
   });
 }
 
+function anonClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error("Supabase anon credentials are not configured.");
+  }
+
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  });
+}
+
 export async function POST(req) {
   try {
     const body = await req.json().catch(() => ({}));
     const supabase = adminClient();
     const action = String(body.action || "");
-    const access = await validateRoundRobinAccess(supabase, body, action);
+    const access = await validateRoundRobinAccess(supabase, req, body, action);
     const group = access.group;
 
     if (action === "saveSettings") {
@@ -246,14 +284,13 @@ export async function POST(req) {
   }
 }
 
-async function validateRoundRobinAccess(supabase, body, action) {
+async function validateRoundRobinAccess(supabase, req, body, action) {
   const identifier = body.groupId;
-  const eventCode = body.eventCode;
   const cleanIdentifier = String(identifier || "").trim();
-  const cleanCode = String(eventCode || "").trim();
+  const hasAuthToken = Boolean((req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "").trim());
 
-  if (!cleanIdentifier || (!cleanCode && !body.hostPhone)) {
-    const error = new Error("Round Robin group and manager code are required.");
+  if (!cleanIdentifier || (!body.hostPhone && !hasAuthToken)) {
+    const error = new Error("Round Robin group and manager access are required.");
     error.status = 400;
     throw error;
   }
@@ -265,21 +302,9 @@ async function validateRoundRobinAccess(supabase, body, action) {
 
   if (error) throw error;
 
-  if (cleanCode) {
-    const codeAccessMode = roundRobinAdminAccessMode(data, cleanCode);
-    if (!codeAccessMode) {
-      const codeError = new Error("Incorrect manager code.");
-      codeError.status = 401;
-      throw codeError;
-    }
-
-    if (codeAccessMode === "secondary" && !SECONDARY_ALLOWED_ACTIONS.has(action)) {
-      const scopeError = new Error("Secondary code access can only manage Ladders and Players.");
-      scopeError.status = 403;
-      throw scopeError;
-    }
-
-    return { mode: codeAccessMode, group: data };
+  if (!body.hostPhone) {
+    const lmsAccess = await requireLmsAdmin(req, supabase, action);
+    return { mode: "manager", group: data, role: lmsAccess.role };
   }
 
   if (!HOST_ALLOWED_ACTIONS.has(action)) {
@@ -304,6 +329,51 @@ async function validateRoundRobinAccess(supabase, body, action) {
   }
 
   return { mode: "host", group: data, hostPlayer, hostSession };
+}
+
+async function requireLmsAdmin(req, supabase, action) {
+  const authHeader = req.headers.get("authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+
+  if (!token) {
+    const error = new Error("Sign in with your LMS account to continue.");
+    error.status = 401;
+    throw error;
+  }
+
+  const authSupabase = anonClient();
+  const { data: userData, error: userError } = await authSupabase.auth.getUser(token);
+
+  if (userError || !userData?.user?.email) {
+    const error = new Error("Sign in with your LMS account to continue.");
+    error.status = 401;
+    throw error;
+  }
+
+  const { data: memberRows, error: memberError } = await supabase
+    .from("members")
+    .select("id, email, is_active_member, created_at, user_roles(role)")
+    .eq("email", userData.user.email)
+    .order("created_at", { ascending: true });
+
+  if (memberError) throw memberError;
+
+  const { activeMembers } = memberEmailResolution(memberRows);
+  const role = highestRoleForMembers(activeMembers.length > 0 ? activeMembers : memberRows);
+
+  if (!hasRole(role, "club_pro")) {
+    const error = new Error("Only Club Pros, League Managers, and Commissioners can manage PBCourtCommand Admin Setup.");
+    error.status = 403;
+    throw error;
+  }
+
+  if (!hasRole(role, "league_manager") && !CLUB_PRO_ALLOWED_ACTIONS.has(action)) {
+    const error = new Error("Club Pro access can manage Matches, Ladders, Players, Groups, and Courts only.");
+    error.status = 403;
+    throw error;
+  }
+
+  return { user: userData.user, role };
 }
 
 function sanitizeActionGroup(group = {}) {
@@ -3158,15 +3228,6 @@ function formatIsoDateForLog(value) {
   const date = new Date(`${String(value).slice(0, 10)}T12:00:00`);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString("en-US");
-}
-
-function roundRobinAdminAccessMode(group, eventCode) {
-  const cleanCode = String(eventCode || "").trim();
-  const overrideCode = String(process.env.ROUND_ROBIN_ADMIN_OVERRIDE_CODE || "").trim();
-  if (!cleanCode) return "";
-  if (String(group.admin_code || "") === cleanCode || (overrideCode && overrideCode === cleanCode)) return "manager";
-  if (String(group.settings?.secondaryAdminCode || "").trim() === cleanCode) return "secondary";
-  return "";
 }
 
 function phonesMatch(savedPhone, cleanPhone) {
