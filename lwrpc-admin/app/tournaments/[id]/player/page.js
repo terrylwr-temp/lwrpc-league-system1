@@ -116,7 +116,7 @@ export default function TournamentPlayerPage() {
       {selectedPlayer && (
         <div className="mt-4 space-y-4">
           <div className="overflow-hidden rounded-2xl border border-blue-200 bg-white shadow-lg shadow-blue-950/10 ring-1 ring-blue-100">
-            <div className="border-l-8 border-emerald-400 bg-gradient-to-r from-slate-950 via-blue-900 to-emerald-800 p-5 text-white">
+            <div className="border-b-4 border-emerald-400 bg-gradient-to-r from-slate-950 via-blue-900 to-emerald-800 p-5 text-white">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-xs font-black uppercase tracking-wide text-emerald-200">Selected Player</div>

@@ -12,10 +12,42 @@ import {
   loadPublicTournament,
   scoreDisplay,
   standingsByDivision,
+  tournamentDivisionColors,
   tournamentDisplayName,
   tournamentFormatLabel,
   tournamentStandingLabel,
 } from "../../../lib/tournaments";
+
+const STANDINGS_DIVISION_STYLES = [
+  {
+    card: "border-blue-300 bg-blue-50/80 shadow-blue-950/10 ring-blue-100",
+    header: "bg-blue-900 text-white",
+    badge: "bg-blue-100 text-blue-950",
+    tableHead: "bg-blue-100 text-blue-900",
+    row: "border-blue-100",
+  },
+  {
+    card: "border-emerald-300 bg-emerald-50/80 shadow-emerald-950/10 ring-emerald-100",
+    header: "bg-emerald-900 text-white",
+    badge: "bg-emerald-100 text-emerald-950",
+    tableHead: "bg-emerald-100 text-emerald-900",
+    row: "border-emerald-100",
+  },
+  {
+    card: "border-amber-300 bg-amber-50/80 shadow-amber-950/10 ring-amber-100",
+    header: "bg-amber-800 text-white",
+    badge: "bg-amber-100 text-amber-950",
+    tableHead: "bg-amber-100 text-amber-900",
+    row: "border-amber-100",
+  },
+  {
+    card: "border-rose-300 bg-rose-50/80 shadow-rose-950/10 ring-rose-100",
+    header: "bg-rose-900 text-white",
+    badge: "bg-rose-100 text-rose-950",
+    tableHead: "bg-rose-100 text-rose-900",
+    row: "border-rose-100",
+  },
+];
 
 export default function TournamentStandingsPage() {
   const { id } = useParams();
@@ -68,39 +100,52 @@ export default function TournamentStandingsPage() {
       ) : (
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {Object.entries(standings).map(([division, rows]) => (
-              <div key={division} className="rounded-2xl bg-white p-5 shadow">
-                <h2 className="text-2xl font-black text-slate-950">{division}</h2>
-                <div className="mt-4 overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="text-left text-xs uppercase tracking-wide text-slate-500">
-                      <tr>
-                        <th className="py-2">Rank</th>
-                        <th>Team</th>
-                        <th>W</th>
-                        <th>L</th>
-                        <th>PF</th>
-                        <th>PA</th>
-                        <th>Diff</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {rows.map((row, index) => (
-                        <tr key={row.team} className="border-t border-slate-100">
-                          <td className="py-3 font-black">{index + 1}</td>
-                          <td className="font-bold">{tournamentStandingLabel(row)}</td>
-                          <td>{row.w}</td>
-                          <td>{row.l}</td>
-                          <td>{row.pf}</td>
-                          <td>{row.pa}</td>
-                          <td>{row.pf - row.pa}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+            {Object.entries(standings).map(([division, rows]) => {
+              const colors = tournamentDivisionColors(division);
+              const style = STANDINGS_DIVISION_STYLES[Math.abs([...division].reduce((sum, char) => sum + char.charCodeAt(0), 0)) % STANDINGS_DIVISION_STYLES.length];
+
+              return (
+                <div key={division} className={`overflow-hidden rounded-2xl border shadow-lg ring-1 ${style.card}`}>
+                  <div className={`flex flex-wrap items-center justify-between gap-3 border-l-8 px-5 py-4 ${colors.border} ${style.header}`}>
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-wide text-white/70">Division Standings</div>
+                      <h2 className="mt-1 text-2xl font-black leading-tight text-white">{division}</h2>
+                    </div>
+                    <span className={`rounded-full px-3 py-1.5 text-sm font-black ${style.badge}`}>{rows.length} teams</span>
+                  </div>
+                  <div className="p-4">
+                    <div className="overflow-x-auto rounded-xl border border-white/80 bg-white shadow-sm">
+                      <table className="w-full text-sm">
+                        <thead className={`text-left text-xs uppercase tracking-wide ${style.tableHead}`}>
+                          <tr>
+                            <th className="px-3 py-3">Rank</th>
+                            <th className="px-3 py-3">Team</th>
+                            <th className="px-3 py-3">W</th>
+                            <th className="px-3 py-3">L</th>
+                            <th className="px-3 py-3">PF</th>
+                            <th className="px-3 py-3">PA</th>
+                            <th className="px-3 py-3">Diff</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map((row, index) => (
+                            <tr key={row.team} className={`border-t ${style.row}`}>
+                              <td className="px-3 py-3 font-black text-slate-950">{index + 1}</td>
+                              <td className="px-3 py-3 font-bold text-slate-900">{tournamentStandingLabel(row)}</td>
+                              <td className="px-3 py-3 font-semibold text-slate-800">{row.w}</td>
+                              <td className="px-3 py-3 font-semibold text-slate-800">{row.l}</td>
+                              <td className="px-3 py-3 font-semibold text-slate-800">{row.pf}</td>
+                              <td className="px-3 py-3 font-semibold text-slate-800">{row.pa}</td>
+                              <td className="px-3 py-3 font-black text-slate-950">{row.pf - row.pa}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           {isTop4 && bracketDivisions.length > 0 && <PublicBracket bracketDivisions={bracketDivisions} settings={state.tournament.settings} />}
         </div>
