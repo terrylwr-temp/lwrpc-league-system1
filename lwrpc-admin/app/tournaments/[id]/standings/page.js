@@ -12,7 +12,6 @@ import {
   loadPublicTournament,
   scoreDisplay,
   standingsByDivision,
-  tournamentDivisionColors,
   tournamentDisplayName,
   tournamentFormatLabel,
   tournamentStandingLabel,
@@ -22,6 +21,7 @@ const STANDINGS_DIVISION_STYLES = [
   {
     card: "border-blue-300 bg-blue-50/80 shadow-blue-950/10 ring-blue-100",
     header: "bg-blue-900 text-white",
+    accent: "border-blue-400",
     badge: "bg-blue-100 text-blue-950",
     tableHead: "bg-blue-100 text-blue-900",
     row: "border-blue-100",
@@ -29,6 +29,7 @@ const STANDINGS_DIVISION_STYLES = [
   {
     card: "border-emerald-300 bg-emerald-50/80 shadow-emerald-950/10 ring-emerald-100",
     header: "bg-emerald-900 text-white",
+    accent: "border-emerald-400",
     badge: "bg-emerald-100 text-emerald-950",
     tableHead: "bg-emerald-100 text-emerald-900",
     row: "border-emerald-100",
@@ -36,6 +37,7 @@ const STANDINGS_DIVISION_STYLES = [
   {
     card: "border-amber-300 bg-amber-50/80 shadow-amber-950/10 ring-amber-100",
     header: "bg-amber-800 text-white",
+    accent: "border-amber-300",
     badge: "bg-amber-100 text-amber-950",
     tableHead: "bg-amber-100 text-amber-900",
     row: "border-amber-100",
@@ -43,6 +45,7 @@ const STANDINGS_DIVISION_STYLES = [
   {
     card: "border-rose-300 bg-rose-50/80 shadow-rose-950/10 ring-rose-100",
     header: "bg-rose-900 text-white",
+    accent: "border-rose-400",
     badge: "bg-rose-100 text-rose-950",
     tableHead: "bg-rose-100 text-rose-900",
     row: "border-rose-100",
@@ -101,12 +104,11 @@ export default function TournamentStandingsPage() {
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {Object.entries(standings).map(([division, rows]) => {
-              const colors = tournamentDivisionColors(division);
               const style = STANDINGS_DIVISION_STYLES[Math.abs([...division].reduce((sum, char) => sum + char.charCodeAt(0), 0)) % STANDINGS_DIVISION_STYLES.length];
 
               return (
                 <div key={division} className={`overflow-hidden rounded-2xl border shadow-lg ring-1 ${style.card}`}>
-                  <div className={`flex flex-wrap items-center justify-between gap-3 border-l-8 px-5 py-4 ${colors.border} ${style.header}`}>
+                  <div className={`flex flex-wrap items-center justify-between gap-3 border-b-4 px-5 py-4 ${style.accent} ${style.header}`}>
                     <div>
                       <div className="text-xs font-black uppercase tracking-wide text-white/70">Division Standings</div>
                       <h2 className="mt-1 text-2xl font-black leading-tight text-white">{division}</h2>
