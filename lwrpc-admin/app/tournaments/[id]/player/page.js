@@ -150,14 +150,19 @@ export default function TournamentPlayerPage() {
           <div className="rounded-2xl bg-white p-5 shadow">
             <h2 className="text-xl font-black text-slate-950">Matches</h2>
             <div className="mt-3 space-y-2">
-              {playerMatches.map((match) => (
-                <div key={match.id} className={`rounded-xl border p-3 text-sm font-semibold ${playerMatchOutcomeClass(match, selectedTeamId)}`}>
-                  <div className="font-black text-slate-950">{match.home_team?.name} vs {match.away_team?.name}</div>
-                  <div className="mt-1 text-slate-600">
-                    {displayStatus(match.status)}{match.court?.name ? ` - Court ${match.court.name}` : ""}{playerMatchScoreSummary(match)}
+              {playerMatches.map((match) => {
+                const outcome = playerMatchOutcome(match, selectedTeamId);
+                const outcomeTextClass = outcome === "neutral" ? "text-slate-600" : "text-white";
+
+                return (
+                  <div key={match.id} className={`rounded-xl border p-3 text-sm font-semibold ${playerMatchOutcomeClass(outcome)}`}>
+                    <div className={`font-black ${outcome === "neutral" ? "text-slate-950" : "text-white"}`}>{match.home_team?.name} vs {match.away_team?.name}</div>
+                    <div className={`mt-1 ${outcomeTextClass}`}>
+                      {displayStatus(match.status)}{match.court?.name ? ` - Court ${match.court.name}` : ""}{playerMatchScoreSummary(match)}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
               {playerMatches.length === 0 && <div className="text-sm font-semibold text-slate-500">No matches found for this player.</div>}
             </div>
           </div>
@@ -247,28 +252,30 @@ function winnerNameFromScore(match) {
   return homeScore > awayScore ? match.home_team?.name || "Home" : match.away_team?.name || "Away";
 }
 
-function playerMatchOutcomeClass(match, teamId) {
+function playerMatchOutcome(match, teamId) {
   if (match.status !== "done" || match.result_type === "not_played") {
-    return "border-slate-200 bg-slate-50";
+    return "neutral";
   }
 
   const winnerId = String(match.winner_team_id || "");
   if (winnerId) {
-    return winnerId === String(teamId)
-      ? "border-2 border-emerald-800 bg-emerald-200"
-      : "border-2 border-rose-800 bg-rose-200";
+    return winnerId === String(teamId) ? "win" : "loss";
   }
 
   const isHome = String(match.home_team_id || "") === String(teamId);
   const teamScore = Number(isHome ? match.home_score : match.away_score);
   const opponentScore = Number(isHome ? match.away_score : match.home_score);
   if (!Number.isFinite(teamScore) || !Number.isFinite(opponentScore) || teamScore === opponentScore) {
-    return "border-slate-200 bg-slate-50";
+    return "neutral";
   }
 
-  return teamScore > opponentScore
-    ? "border-2 border-emerald-800 bg-emerald-200"
-    : "border-2 border-rose-800 bg-rose-200";
+  return teamScore > opponentScore ? "win" : "loss";
+}
+
+function playerMatchOutcomeClass(outcome) {
+  if (outcome === "win") return "border-2 border-green-800 bg-green-700 shadow-sm";
+  if (outcome === "loss") return "border-2 border-red-800 bg-red-700 shadow-sm";
+  return "border-slate-200 bg-slate-50";
 }
 
 function Shell({ title, error = "", children, systemSettings = DEFAULT_SYSTEM_SETTINGS }) {
