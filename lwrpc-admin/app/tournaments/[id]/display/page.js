@@ -162,9 +162,13 @@ export default function TournamentDisplayPage() {
                     <div className="text-5xl font-black leading-none text-slate-950 sm:text-6xl md:text-7xl">{courtName(court)}</div>
                   </div>
                   {match && (
-                    <div className="flex max-w-[58%] flex-wrap justify-end gap-1.5 text-[11px] font-bold uppercase tracking-wide sm:gap-2 sm:text-xs">
-                      <span className={`rounded-full px-3 py-1 ${colors.publicBadge}`}>{match.division?.name || "Division"}</span>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">{matchLineLabel(match)}</span>
+                    <div className="flex max-w-[62%] flex-wrap justify-end gap-2 text-[11px] font-black uppercase tracking-wide sm:text-xs">
+                      <span className={`inline-flex items-center rounded-lg border border-white/90 px-3 py-1.5 shadow-sm ring-1 ring-slate-900/10 ${colors.publicBadge}`}>
+                        {match.division?.name || "Division"}
+                      </span>
+                      <span className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-white shadow-sm ring-1 ring-white/40">
+                        {matchLineLabel(match)}
+                      </span>
                     </div>
                   )}
                 </div>
