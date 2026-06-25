@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import PbccFooter from "../../../components/PbccFooter";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
 import { supabase } from "../../../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../../lib/email";
@@ -552,31 +553,35 @@ export default function RoundRobinAdminPage() {
 
   if (!state && requestedHostSessionId && !requestedManagerMode) {
     return (
-      <main className="full-screen-main pbcc-full-screen flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-4 text-slate-950">
+      <main className="full-screen-main pbcc-full-screen flex min-h-screen flex-col bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-4 text-slate-950">
         <PbccPwaRegister />
-        <div className="w-full max-w-lg overflow-hidden rounded-lg border border-white/80 bg-white/95 text-center shadow-[0_24px_70px_-42px_rgba(15,23,42,0.75)]">
-          <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
-          <div className="p-6">
-            <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Match</div>
-            <h1 className="mt-1 text-2xl font-black text-slate-950">{hostUnlocking || loading ? "Opening match..." : "Live match access"}</h1>
-            <p className="mt-2 text-sm font-semibold text-slate-600">
-              {error || "Verifying your saved player phone and opening the assigned live match."}
-            </p>
-            {error && (
-              <button type="button" onClick={() => router.push(roundRobinPath(id, "player"))} className="mt-4 rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800">
-                Back to Player Screen
-              </button>
-            )}
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-lg overflow-hidden rounded-lg border border-white/80 bg-white/95 text-center shadow-[0_24px_70px_-42px_rgba(15,23,42,0.75)]">
+            <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
+            <div className="p-6">
+              <div className="text-xs font-black uppercase tracking-wide text-teal-700">Live Match</div>
+              <h1 className="mt-1 text-2xl font-black text-slate-950">{hostUnlocking || loading ? "Opening match..." : "Live match access"}</h1>
+              <p className="mt-2 text-sm font-semibold text-slate-600">
+                {error || "Verifying your saved player phone and opening the assigned live match."}
+              </p>
+              {error && (
+                <button type="button" onClick={() => router.push(roundRobinPath(id, "player"))} className="mt-4 rounded-lg bg-slate-950 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-slate-800">
+                  Back to Player Screen
+                </button>
+              )}
+            </div>
           </div>
         </div>
+        <PbccFooter />
       </main>
     );
   }
 
   if (!state) {
     return (
-      <main className="full-screen-main pbcc-full-screen flex min-h-screen items-center justify-center bg-[linear-gradient(135deg,#063a34_0%,#132d4b_58%,#5f4517_100%)] p-4 text-white">
+      <main className="full-screen-main pbcc-full-screen flex min-h-screen flex-col bg-[linear-gradient(135deg,#063a34_0%,#132d4b_58%,#5f4517_100%)] p-4 text-white">
         <PbccPwaRegister />
+        <div className="flex flex-1 items-center justify-center">
         <div className="w-full max-w-lg overflow-hidden rounded-lg border border-white/15 bg-slate-950 shadow-[0_34px_90px_-46px_rgba(0,0,0,0.95)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
           <div className="border-b border-teal-300/20 bg-slate-900 px-6 py-5">
@@ -658,6 +663,8 @@ export default function RoundRobinAdminPage() {
             </Link>
           </div>
         </div>
+        </div>
+        <PbccFooter />
       </main>
     );
   }
@@ -670,9 +677,9 @@ export default function RoundRobinAdminPage() {
 
   if (state.accessMode === "host") {
     return (
-      <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
+      <main className="full-screen-main pbcc-full-screen flex min-h-screen flex-col bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
         <PbccPwaRegister />
-        <div className="w-full space-y-4">
+        <div className="w-full flex-1 space-y-4">
           {(error || notice) && (
             <div className={`rounded-lg px-4 py-3 text-sm font-bold ${
               error ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"
@@ -714,6 +721,7 @@ export default function RoundRobinAdminPage() {
             />
           ))}
         </div>
+        <PbccFooter />
       </main>
     );
   }
@@ -721,9 +729,9 @@ export default function RoundRobinAdminPage() {
   if (liveSessionId && activeTab === "Matches") {
     const selectedSession = liveSession || latestSession;
     return (
-      <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
+      <main className="full-screen-main pbcc-full-screen flex min-h-screen flex-col bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-3 text-slate-950 sm:p-5">
         <PbccPwaRegister />
-        <div className="w-full space-y-4">
+        <div className="w-full flex-1 space-y-4">
           {(error || notice) && (
             <div className={`rounded-lg px-4 py-3 text-sm font-bold ${
               error ? "bg-red-50 text-red-800" : "bg-emerald-50 text-emerald-800"
@@ -765,14 +773,15 @@ export default function RoundRobinAdminPage() {
             />
           ))}
         </div>
+        <PbccFooter />
       </main>
     );
   }
 
   return (
-    <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-5">
+    <main className="full-screen-main pbcc-full-screen flex min-h-screen flex-col bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-5">
       <PbccPwaRegister />
-      <div className="w-full">
+      <div className="w-full flex-1">
         <header className="overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_26px_75px_-44px_rgba(15,23,42,0.95)]">
           <div className="h-1.5 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)] sm:h-2" />
           <div className="p-3 sm:p-5">
@@ -838,6 +847,7 @@ export default function RoundRobinAdminPage() {
         {activeTab === "SMS" && <SmsTab state={state} latestSession={latestSession} runAction={runAction} actionLoading={actionLoading} />}
         {activeTab === "Log" && <LogTab state={state} />}
       </div>
+      <PbccFooter />
     </main>
   );
 }
@@ -938,7 +948,11 @@ function SessionTab(props) {
   }
 
   async function deleteSession(session) {
-    if (!window.confirm(`Delete ${session.session_name || "this match"}? It will be removed from active matches and kept as cancelled history.`)) return;
+    const hasPlayedGames = sessionHasPlayedGames(state, session.id);
+    const message = hasPlayedGames
+      ? `Delete ${session.session_name || "this match"}? It will be removed from active matches and kept as cancelled history because games were played.`
+      : `Delete ${session.session_name || "this match"}? No games have been played, so it will be permanently removed.`;
+    if (!window.confirm(message)) return;
     await runAction("deleteSession", { sessionId: session.id });
   }
 
@@ -2016,6 +2030,7 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
   const canDuplicate = !isHostAccess && session.status === "done";
   const isLadder = isLadderSession(session);
   const duprExported = sessionDuprExported(session);
+  const canDeletePastUnplayed = canShowResults && !isHostAccess && !sessionHasPlayedGames(state, session.id);
   const spotsOpen = session.max_players ? Math.max(0, Number(session.max_players || 0) - joined) : null;
   const stopActionClick = (event) => event.stopPropagation();
 
@@ -2075,6 +2090,11 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
           )}
           {!isHostAccess && !isStarted && (
             <button type="button" onClick={(event) => { stopActionClick(event); deleteSession(session); }} disabled={actionLoading === "deleteSession" || session.status === "cancelled"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 shadow-sm hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">
+              Delete
+            </button>
+          )}
+          {canDeletePastUnplayed && (
+            <button type="button" onClick={(event) => { stopActionClick(event); deleteSession(session); }} disabled={actionLoading === "deleteSession"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 shadow-sm hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">
               Delete
             </button>
           )}
@@ -4492,7 +4512,11 @@ function resultMetadata(row) {
 }
 
 function resultRowHasScoredMatch(row) {
-  return Number(row?.games || 0) > 0 || Number(row?.wins || 0) > 0 || Number(row?.losses || 0) > 0;
+  return Number(row?.games || 0) > 0 ||
+    Number(row?.wins || 0) > 0 ||
+    Number(row?.losses || 0) > 0 ||
+    Number(row?.points_for || 0) > 0 ||
+    Number(row?.points_against || 0) > 0;
 }
 
 function positiveNumber(value) {
@@ -5422,6 +5446,16 @@ function matchHasSavedScore(match) {
     && match.team2_score !== undefined;
 }
 
+function sessionHasPlayedGames(state, sessionId) {
+  return sessionMatchesForSession(state, sessionId).some((match) => (
+    match.status === "complete" ||
+    (match.team1_score !== null && match.team1_score !== undefined) ||
+    (match.team2_score !== null && match.team2_score !== undefined)
+  )) || (state.allPlayerResults || state.results || [])
+    .filter((row) => String(row.session_id || "") === String(sessionId))
+    .some(resultRowHasScoredMatch);
+}
+
 function cloneMatch(match) {
   return {
     ...match,
@@ -5700,7 +5734,7 @@ function noticeForAction(action, result) {
   if (action === "addSessionPlayer") return "Player added and joined.";
   if (action === "startSession") return "Match started.";
   if (action === "startSessionAndGenerateFirstGame") return `Match started. Round ${result.roundNumber || 1} generated.`;
-  if (action === "deleteSession") return "Match deleted from active matches.";
+  if (action === "deleteSession") return result.deleteMode === "deleted" ? "Match permanently deleted." : "Match removed from active matches and kept in history.";
   if (action === "generateNextGame") return `Round ${result.roundNumber || ""} generated.`;
   if (action === "updateMatchScore") return "Score saved.";
   if (action === "updateMatchLineup") return "Lineup updated.";

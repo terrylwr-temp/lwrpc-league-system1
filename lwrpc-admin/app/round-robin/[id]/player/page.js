@@ -4,9 +4,9 @@ import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import AppNotificationsButton from "../../../components/AppNotificationsButton";
+import PbccFooter from "../../../components/PbccFooter";
 import PbccInstallButton from "../../../components/PbccInstallButton";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
-import { APP_VERSION, COPYRIGHT_YEAR } from "../../../lib/version";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
 
@@ -497,18 +497,15 @@ export default function RoundRobinPlayerPage() {
           </div>
         </div>
         </div>
-        <footer className="pt-3 text-center text-xs font-semibold leading-relaxed text-slate-500">
-          <div>{"\u00A9"} {COPYRIGHT_YEAR} {clubName}</div>
-          <div>Version {APP_VERSION}</div>
-        </footer>
+        <PbccFooter clubName={clubName} />
       </main>
     );
   }
 
   return (
-    <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-6">
+    <main className="full-screen-main pbcc-full-screen flex min-h-screen flex-col bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-2 text-slate-950 sm:p-6">
       <PbccPwaRegister />
-      <div className="w-full">
+      <div className="w-full flex-1">
         <header className="overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_28px_80px_-44px_rgba(15,23,42,0.95)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
           <div className="flex items-start justify-between gap-3 p-4 sm:items-center sm:p-5">
@@ -689,6 +686,7 @@ export default function RoundRobinPlayerPage() {
           />
         )}
       </div>
+      <PbccFooter clubName={clubName} />
     </main>
   );
 }

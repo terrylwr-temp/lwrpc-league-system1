@@ -1518,6 +1518,28 @@ async function deleteSession(supabase, group, body) {
   if (!sessionId) throw new Error("Match is required.");
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
+  const hasPlayedGames = await sessionHasPlayedGames(supabase, session.id);
+
+  if (!hasPlayedGames) {
+    const logDelete = await supabase
+      .from("round_robin_activity_log")
+      .delete()
+      .eq("group_id", group.id)
+      .eq("session_id", session.id);
+    if (logDelete.error) throw logDelete.error;
+
+    const sessionDelete = await supabase
+      .from("round_robin_sessions")
+      .delete()
+      .eq("id", session.id)
+      .eq("group_id", group.id)
+      .select("id")
+      .single();
+    if (sessionDelete.error) throw sessionDelete.error;
+
+    return { sessionId: session.id, deleteMode: "deleted" };
+  }
+
   const { data, error } = await supabase
     .from("round_robin_sessions")
     .update({
@@ -1530,8 +1552,35 @@ async function deleteSession(supabase, group, body) {
     .single();
   if (error) throw error;
 
-  await addLog(supabase, group.id, session.id, "session", `${session.session_name || "Match"} deleted from active matches.`);
-  return { session: data };
+  await addLog(supabase, group.id, session.id, "session", `${session.session_name || "Match"} removed from active matches and kept in history because games were played.`);
+  return { session: data, deleteMode: "cancelled" };
+}
+
+async function sessionHasPlayedGames(supabase, sessionId) {
+  const [matchesResult, resultsResult] = await Promise.all([
+    supabase
+      .from("round_robin_matches")
+      .select("id, team1_score, team2_score, status")
+      .eq("session_id", sessionId),
+    supabase
+      .from("round_robin_player_session_results")
+      .select("id, games, wins, losses, points_for, points_against")
+      .eq("session_id", sessionId),
+  ]);
+  if (matchesResult.error) throw matchesResult.error;
+  if (resultsResult.error) throw resultsResult.error;
+
+  return (matchesResult.data || []).some((match) => (
+    match.status === "complete" ||
+    match.team1_score !== null ||
+    match.team2_score !== null
+  )) || (resultsResult.data || []).some((row) => (
+    Number(row.games || 0) > 0 ||
+    Number(row.wins || 0) > 0 ||
+    Number(row.losses || 0) > 0 ||
+    Number(row.points_for || 0) > 0 ||
+    Number(row.points_against || 0) > 0
+  ));
 }
 
 async function markSessionDuprExported(supabase, group, body = {}) {

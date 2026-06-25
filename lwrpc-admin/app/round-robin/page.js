@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppHeader from "../components/AppHeader";
+import PbccFooter from "../components/PbccFooter";
 import { loadPublicRoundRobinGroups, roundRobinModeLabel, roundRobinPath } from "../lib/roundRobins";
 
 export default function RoundRobinGroupsPage() {
@@ -18,8 +19,8 @@ export default function RoundRobinGroupsPage() {
   }, []);
 
   return (
-    <main className="full-screen-main min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-4 text-slate-950 sm:p-6">
-      <div className="w-full">
+    <main className="full-screen-main flex min-h-screen flex-col bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_48%,#fff7e8_100%)] p-4 text-slate-950 sm:p-6">
+      <div className="w-full flex-1">
         <AppHeader
           title="PBCourtCommand"
           subtitle="Nightly round robin groups, ladder sessions, lineups, scores, and results."
@@ -71,6 +72,7 @@ export default function RoundRobinGroupsPage() {
           </div>
         </div>
       </div>
+      <PbccFooter />
     </main>
   );
 }

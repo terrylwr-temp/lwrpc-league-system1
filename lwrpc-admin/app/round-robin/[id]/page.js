@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import PbccFooter from "../../components/PbccFooter";
 import PbccPwaRegister from "../../components/PbccPwaRegister";
 import { loadPublicRoundRobin, roundRobinDisplayName, roundRobinModeLabel, roundRobinPath } from "../../lib/roundRobins";
 
@@ -116,9 +117,9 @@ export default function RoundRobinPublicPage() {
 
 function Shell({ title, subtitle, error, playerHref, adminHref, children }) {
   return (
-    <main className="full-screen-main pbcc-full-screen min-h-screen bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_46%,#fff7e8_100%)] p-3 text-slate-950 sm:p-6">
+    <main className="full-screen-main pbcc-full-screen flex min-h-screen flex-col bg-[linear-gradient(135deg,#e8f7f1_0%,#f7fbff_46%,#fff7e8_100%)] p-3 text-slate-950 sm:p-6">
       <PbccPwaRegister />
-      <div className="w-full">
+      <div className="w-full flex-1">
         <header className="mb-5 overflow-hidden rounded-lg border border-teal-900/10 bg-slate-950 text-white shadow-[0_28px_80px_-44px_rgba(15,23,42,0.95)]">
           <div className="h-2 bg-[linear-gradient(90deg,#14b8a6,#38bdf8,#f59e0b)]" />
           <div className="p-5">
@@ -145,6 +146,7 @@ function Shell({ title, subtitle, error, playerHref, adminHref, children }) {
         </header>
         {error ? <div className="rounded-lg bg-red-50 p-4 font-bold text-red-800">{error}</div> : children}
       </div>
+      <PbccFooter />
     </main>
   );
 }
