@@ -1484,6 +1484,15 @@ export default function DashboardPage() {
 }
 
 function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onToggle }) {
+  const [expandedStandingGroupId, setExpandedStandingGroupId] = useState("");
+
+  useEffect(() => {
+    if (!expandedStandingGroupId) return;
+    if (!analytics.standingsLeaderGroups.some((group) => group.id === expandedStandingGroupId)) {
+      setExpandedStandingGroupId("");
+    }
+  }, [analytics.standingsLeaderGroups, expandedStandingGroupId]);
+
   return (
     <div className="border-t border-slate-200 bg-slate-50 p-4 md:p-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -1643,9 +1652,14 @@ function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onTo
           </span>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+        <div className="mt-4 space-y-2">
           {chartsReady && analytics.standingsLeaderGroups.map((group) => (
-            <StandingsLeaderGroupChart key={group.id} group={group} />
+            <StandingsLeaderGroupRow
+              key={group.id}
+              group={group}
+              expanded={expandedStandingGroupId === group.id}
+              onToggle={() => setExpandedStandingGroupId((current) => current === group.id ? "" : group.id)}
+            />
           ))}
           {!chartsReady && (
             <EmptyChartState label="Charts loading..." />
@@ -1727,11 +1741,43 @@ function SeasonProgressPie({ completed, remaining, percentage }) {
   );
 }
 
+function StandingsLeaderGroupRow({ group, expanded, onToggle }) {
+  return (
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={expanded}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition hover:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        <div className="min-w-0">
+          <div className="truncate text-xs font-black uppercase tracking-wide text-blue-700">{group.league}</div>
+          <div className="mt-1 truncate text-base font-black text-slate-950">{group.division}</div>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <span className="rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600 shadow-sm">
+            {group.leaders.length}
+          </span>
+          <span className="flex size-8 items-center justify-center rounded-full bg-slate-900 text-lg font-black leading-none text-white">
+            {expanded ? "\u2212" : "+"}
+          </span>
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="border-t border-slate-200 bg-white p-4">
+          <StandingsLeaderGroupChart group={group} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function StandingsLeaderGroupChart({ group }) {
   const height = Math.max(170, group.leaders.length * 48 + 68);
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <div>
       <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="truncate text-xs font-black uppercase tracking-wide text-blue-700">{group.league}</div>
