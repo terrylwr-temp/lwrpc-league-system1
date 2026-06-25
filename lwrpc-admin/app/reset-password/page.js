@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { passkeyErrorMessage } from "../lib/passkeyErrors";
@@ -16,6 +16,13 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [passkeyMessage, setPasskeyMessage] = useState("");
   const [passkeyLoading, setPasskeyLoading] = useState(false);
+  const [returnTo, setReturnTo] = useState("");
+  const returnLabel = returnTo ? "Return to Admin Setup" : "Return to Login";
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setReturnTo(safeInternalReturnPath(params.get("returnTo")));
+  }, []);
 
   async function updatePassword(e) {
     e.preventDefault();
@@ -40,7 +47,7 @@ export default function ResetPasswordPage() {
 
     setPassword("");
     setConfirmPassword("");
-    setMessage("Password updated. You can register a passkey / fingerprint below, or return to login when you are done.");
+    setMessage(`Password updated. You can register a passkey / fingerprint below, or ${returnTo ? "return to Admin Setup" : "return to login"} when you are done.`);
     setLoading(false);
   }
 
@@ -162,10 +169,10 @@ export default function ResetPasswordPage() {
 
           <button
             type="button"
-            onClick={() => router.push("/login")}
+            onClick={() => router.push(returnTo || "/login")}
             className="mt-5 w-full rounded-xl border border-slate-300 px-5 py-3 font-bold text-slate-700 transition hover:bg-slate-50"
           >
-            Return to Login
+            {returnLabel}
           </button>
         </div>
 
@@ -179,4 +186,17 @@ export default function ResetPasswordPage() {
       </div>
     </main>
   );
+}
+
+function safeInternalReturnPath(value) {
+  const text = String(value || "").trim();
+  if (!text || !text.startsWith("/") || text.startsWith("//")) return "";
+
+  try {
+    const url = new URL(text, "https://league.lwrpickleballclub.com");
+    if (url.origin !== "https://league.lwrpickleballclub.com") return "";
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return "";
+  }
 }

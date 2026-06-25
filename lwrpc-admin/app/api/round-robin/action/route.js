@@ -56,6 +56,7 @@ const DEFAULT_ROUND_ROBIN_SCORING = {
   winBy: 1,
   scoreType: "standard",
 };
+const WEEKDAY_VALUES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
 function sendSmsMessages(options) {
   return sendSmsMessagesWithFallback({
@@ -1133,6 +1134,9 @@ async function createPlannedSession(supabase, group, body) {
   const now = new Date().toISOString();
   const isLadderMode = body.mode === "ladder";
   const scoring = normalizeRoundRobinScoring(body);
+  const repeatsWeekly = Boolean(body.repeatsWeekly);
+  const sessionDate = body.sessionDate || new Date().toISOString().slice(0, 10);
+  const startsAt = String(body.startsAt || "").trim() || group.schedule_time || null;
   const ladderSettings = isLadderMode ? {
     ladderId: String(body.ladderId || "").trim(),
     ladderName: String(body.ladderName || "").trim(),
@@ -1142,10 +1146,10 @@ async function createPlannedSession(supabase, group, body) {
     group_id: group.id,
     session_name: sessionName,
     location: String(body.location || group.settings?.defaultLocation || "").trim() || null,
-    session_date: body.sessionDate || new Date().toISOString().slice(0, 10),
-    starts_at: String(body.startsAt || "").trim() || group.schedule_time || null,
+    session_date: sessionDate,
+    starts_at: startsAt,
     max_players: maxPlayers,
-    repeats_weekly: Boolean(body.repeatsWeekly),
+    repeats_weekly: repeatsWeekly,
     host_player_id: body.hostPlayerId || group.settings?.defaultHostPlayerId || null,
     cohost_player_id: body.cohostPlayerId || null,
     invited_group_ids: invitedGroupIds,
@@ -1157,6 +1161,7 @@ async function createPlannedSession(supabase, group, body) {
       createdFromGroups: invitedGroupIds,
       smsTemplates: normalizeSmsTemplates(group.settings?.smsTemplates || {}),
       reminderHoursBefore: normalizeReminderHours(body.reminderHoursBefore),
+      repeatSchedule: repeatsWeekly ? normalizeRepeatSchedule(body.repeatSchedule, { sessionDate, startsAt }) : [],
       scoring,
       ...ladderSettings,
     },
@@ -1223,6 +1228,9 @@ async function updatePlannedSession(supabase, group, body) {
 
   const now = new Date().toISOString();
   const isLadderMode = body.mode === "ladder";
+  const repeatsWeekly = Boolean(body.repeatsWeekly);
+  const sessionDate = body.sessionDate || existingSession.session_date || new Date().toISOString().slice(0, 10);
+  const startsAt = String(body.startsAt || "").trim() || null;
   const scoring = normalizeRoundRobinScoring({
     ...(existingSession.settings?.scoring || {}),
     ...body,
@@ -1239,10 +1247,10 @@ async function updatePlannedSession(supabase, group, body) {
   const sessionPayload = {
     session_name: sessionName,
     location: String(body.location || "").trim() || null,
-    session_date: body.sessionDate || existingSession.session_date || new Date().toISOString().slice(0, 10),
-    starts_at: String(body.startsAt || "").trim() || null,
+    session_date: sessionDate,
+    starts_at: startsAt,
     max_players: maxPlayers,
-    repeats_weekly: Boolean(body.repeatsWeekly),
+    repeats_weekly: repeatsWeekly,
     host_player_id: body.hostPlayerId || null,
     cohost_player_id: body.cohostPlayerId || null,
     invited_group_ids: invitedGroupIds,
@@ -1252,6 +1260,7 @@ async function updatePlannedSession(supabase, group, body) {
       createdFromGroups: invitedGroupIds,
       smsTemplates: normalizeSmsTemplates(group.settings?.smsTemplates || {}),
       reminderHoursBefore: normalizeReminderHours(body.reminderHoursBefore),
+      repeatSchedule: repeatsWeekly ? normalizeRepeatSchedule(body.repeatSchedule, { sessionDate, startsAt }) : [],
       scoring,
       ...ladderSettings,
     },
@@ -2038,7 +2047,13 @@ async function sendSessionResultsText(supabase, group, body) {
 }
 
 async function createNextWeeklySession(supabase, group, session, body) {
-  const nextDate = addDaysToIsoDate(session.session_date, 7);
+  const repeatSchedule = normalizeRepeatSchedule(session.settings?.repeatSchedule, {
+    sessionDate: session.session_date,
+    startsAt: session.starts_at,
+  });
+  const nextRepeat = repeatSchedule.length > 0 ? nextRepeatScheduleAfter(session.session_date, repeatSchedule) : null;
+  const nextDate = nextRepeat?.sessionDate || addDaysToIsoDate(session.session_date, 7);
+  const nextStartsAt = nextRepeat?.startsAt ?? (session.starts_at || "");
   const invitedGroupIds = [...new Set([
     ...(Array.isArray(session.invited_group_ids) ? session.invited_group_ids : []),
     ...(Array.isArray(session.settings?.createdFromGroups) ? session.settings.createdFromGroups : []),
@@ -2055,7 +2070,7 @@ async function createNextWeeklySession(supabase, group, session, body) {
     .limit(10);
   if (duplicateResult.error) throw duplicateResult.error;
 
-  const existingRepeat = (duplicateResult.data || []).find((row) => String(row.starts_at || "") === String(session.starts_at || ""));
+  const existingRepeat = (duplicateResult.data || []).find((row) => String(row.starts_at || "") === String(nextStartsAt || ""));
   if (existingRepeat) {
     return { requested: true, created: false, skipped: true, reason: "Next weekly session already exists", sessionId: existingRepeat.id, sessionDate: nextDate };
   }
@@ -2064,9 +2079,10 @@ async function createNextWeeklySession(supabase, group, session, body) {
     sessionName: session.session_name || "Round Robin Match",
     location: session.location || "",
     sessionDate: nextDate,
-    startsAt: session.starts_at || "",
+    startsAt: nextStartsAt,
     maxPlayers: session.max_players || 8,
     repeatsWeekly: true,
+    repeatSchedule,
     hostPlayerId: session.host_player_id || "",
     cohostPlayerId: session.cohost_player_id || "",
     invitedGroupIds,
@@ -3168,6 +3184,51 @@ function normalizeReminderHours(value) {
   return Math.min(168, Math.max(0, Math.round(numeric)));
 }
 
+function normalizeRepeatSchedule(schedule = [], session = {}) {
+  if (!Array.isArray(schedule)) return [];
+  const normalized = schedule
+    .map((item) => ({
+      dayOfWeek: normalizeDayOfWeek(item?.dayOfWeek),
+      startsAt: String(item?.startsAt || session.starts_at || session.startsAt || "").slice(0, 5),
+    }))
+    .filter((item) => item.dayOfWeek);
+  const byDay = new Map();
+  normalized.forEach((item) => {
+    if (!byDay.has(item.dayOfWeek)) byDay.set(item.dayOfWeek, item);
+  });
+  return [...byDay.values()].sort((first, second) => (
+    WEEKDAY_VALUES.indexOf(first.dayOfWeek) - WEEKDAY_VALUES.indexOf(second.dayOfWeek)
+  ));
+}
+
+function nextRepeatScheduleAfter(sessionDate, repeatSchedule = []) {
+  const afterDate = normalizeIsoDate(sessionDate);
+  if (!afterDate || repeatSchedule.length === 0) return null;
+
+  const candidates = normalizeRepeatSchedule(repeatSchedule)
+    .map((item) => ({
+      ...item,
+      sessionDate: nextDateForWeekdayAfter(afterDate, item.dayOfWeek),
+    }))
+    .filter((item) => item.sessionDate)
+    .sort((first, second) => (
+      String(first.sessionDate).localeCompare(String(second.sessionDate)) ||
+      String(first.startsAt || "").localeCompare(String(second.startsAt || ""))
+    ));
+
+  return candidates[0] || null;
+}
+
+function nextDateForWeekdayAfter(sessionDate, dayOfWeek) {
+  const dayAfter = addDaysToIsoDate(sessionDate, 1);
+  const startDayIndex = WEEKDAY_VALUES.indexOf(dayOfWeekForDate(dayAfter));
+  const targetDayIndex = WEEKDAY_VALUES.indexOf(normalizeDayOfWeek(dayOfWeek));
+  if (!dayAfter || startDayIndex < 0 || targetDayIndex < 0) return "";
+
+  const daysUntilTarget = (targetDayIndex - startDayIndex + 7) % 7;
+  return addDaysToIsoDate(dayAfter, daysUntilTarget);
+}
+
 function normalizeInitialPositions(positions = {}, rosterIds = []) {
   const source = positions && typeof positions === "object" ? positions : {};
   const rosterSet = new Set((rosterIds || []).map(String));
@@ -3209,14 +3270,13 @@ function normalizeIsoDate(value) {
 
 function normalizeDayOfWeek(value) {
   const clean = String(value || "").trim().toLowerCase();
-  const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-  return days.includes(clean) ? clean : "";
+  return WEEKDAY_VALUES.includes(clean) ? clean : "";
 }
 
 function dayOfWeekForDate(value) {
   const date = new Date(`${String(value || "").slice(0, 10)}T12:00:00`);
   if (Number.isNaN(date.getTime())) return "";
-  return ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"][date.getDay()];
+  return WEEKDAY_VALUES[date.getDay()];
 }
 
 function isWeeklyRepeatEnabled(value) {

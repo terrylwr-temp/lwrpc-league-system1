@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
 import { supabase } from "../../../lib/auth";
+import { isValidEmailAddress, normalizeEmailAddress } from "../../../lib/email";
 import { DEFAULT_LADDER_RANKING_CRITERIA, LADDER_RANKING_CRITERIA_OPTIONS, compareLadderRowsByCriteria, ladderRankingCriteriaLabel, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { roundRobinPlayerLabel } from "../../../lib/roundRobinSchedule";
@@ -303,6 +304,69 @@ export default function RoundRobinAdminPage() {
     await unlock(liveSessionId);
   }
 
+  async function forgotPassword() {
+    const normalizedEmail = normalizeEmailAddress(loginEmail);
+
+    if (!normalizedEmail) {
+      setAuthMessage("Enter your LMS email address first, then click Forgot Password.");
+      return;
+    }
+
+    if (!isValidEmailAddress(normalizedEmail)) {
+      setAuthMessage("Please enter a valid email address, such as name@example.com.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setLoginEmail(normalizedEmail);
+    setAuthMessage("Checking member email...");
+
+    const memberCheck = await fetch("/api/member-password-reset-check", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: normalizedEmail,
+        returnTo: roundRobinPath(id, "admin"),
+      }),
+    });
+
+    const memberCheckResult = await memberCheck.json().catch(() => ({}));
+
+    if (!memberCheck.ok || !memberCheckResult.success) {
+      setAuthMessage(memberCheckResult.error || "Unable to verify that email address.");
+      setLoading(false);
+      return;
+    }
+
+    if (memberCheckResult.verification !== "complete") {
+      setAuthMessage("Unable to verify that email address right now. Please contact league support.");
+      setLoading(false);
+      return;
+    }
+
+    if (!memberCheckResult.memberExists) {
+      setAuthMessage("That email address is not linked to a league member record. Please contact league support to confirm your account email.");
+      setLoading(false);
+      return;
+    }
+
+    if (!memberCheckResult.isActiveMember) {
+      setAuthMessage("That member record is currently inactive. Please contact league support before resetting your password.");
+      setLoading(false);
+      return;
+    }
+
+    setAuthMessage(
+      memberCheckResult.emailType === "invite"
+        ? "Account setup email sent. Please check your inbox, spam, and promotions folders."
+        : "Password reset email sent. Please check your inbox."
+    );
+    setLoading(false);
+  }
+
   async function unlockHost(nextPhone = hostPhone, nextSessionId = requestedHostSessionId || window.sessionStorage.getItem(hostSessionStorageKey) || "") {
     const cleanPhone = String(nextPhone || window.sessionStorage.getItem(hostPhoneStorageKey) || window.localStorage.getItem(playerPhoneStorageKey) || "").trim();
     const cleanSessionId = String(nextSessionId || "").trim();
@@ -542,9 +606,14 @@ export default function RoundRobinAdminPage() {
               <div>
                 <div className="flex items-center justify-between gap-3">
                   <label className="text-sm font-black text-teal-100">Password</label>
-                  <Link className="text-xs font-bold text-teal-200 hover:text-white" href="/login">
+                  <button
+                    type="button"
+                    onClick={forgotPassword}
+                    disabled={loading}
+                    className="text-xs font-bold text-teal-200 hover:text-white disabled:opacity-50"
+                  >
                     Forgot Password?
-                  </Link>
+                  </button>
                 </div>
                 <div className="relative mt-1">
                   <input
@@ -973,11 +1042,19 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
             <TextInput label="Match name" value={form.sessionName} onChange={(value) => setForm((current) => ({ ...current, sessionName: value }))} />
             <TextInput label="Location" value={form.location} onChange={(value) => setForm((current) => ({ ...current, location: value }))} />
-            <TextInput label="Date" type="date" value={form.sessionDate} onChange={(value) => setForm((current) => ({ ...current, sessionDate: value }))} />
-            <TextInput label="Start time" type="time" value={form.startsAt} onChange={(value) => setForm((current) => ({ ...current, startsAt: value }))} />
+            <TextInput label="Date" type="date" value={form.sessionDate} onChange={(value) => setForm((current) => ({
+              ...current,
+              sessionDate: value,
+              repeatSchedule: current.repeatsWeekly ? current.repeatSchedule : defaultRepeatSchedule(value, current.startsAt),
+            }))} />
+            <TextInput label="Start time" type="time" value={form.startsAt} onChange={(value) => setForm((current) => ({
+              ...current,
+              startsAt: value,
+              repeatSchedule: current.repeatsWeekly ? current.repeatSchedule : defaultRepeatSchedule(current.sessionDate, value),
+            }))} />
             <TextInput label="Max players" type="number" value={form.maxPlayers} onChange={(value) => setForm((current) => ({ ...current, maxPlayers: Number(value) }))} />
             <label className="block text-sm font-bold text-slate-600">
-              Text reminder hours before match
+              Default reminder sent hours before match
               <input
                 type="number"
                 min="0"
@@ -989,9 +1066,51 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
               <span className="mt-1 block text-xs font-bold text-slate-500">Use 0 for no reminder.</span>
             </label>
             <label className="flex items-center gap-2 text-sm font-bold text-slate-700">
-              <input type="checkbox" checked={form.repeatsWeekly} onChange={(event) => setForm((current) => ({ ...current, repeatsWeekly: event.target.checked }))} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
+              <input type="checkbox" checked={form.repeatsWeekly} onChange={(event) => setForm((current) => ({
+                ...current,
+                repeatsWeekly: event.target.checked,
+                repeatSchedule: event.target.checked && normalizeRepeatSchedule(current.repeatSchedule).length === 0
+                  ? defaultRepeatSchedule(current.sessionDate, current.startsAt)
+                  : current.repeatSchedule,
+              }))} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
               Repeats weekly
             </label>
+            {form.repeatsWeekly && (
+              <div className="rounded-lg border border-teal-100 bg-teal-50 p-3 md:col-span-2">
+                <div className="text-sm font-black text-teal-950">Repeat schedule</div>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {LADDER_DAYS.map((day) => {
+                    const repeatItem = repeatScheduleItem(form.repeatSchedule, day.value);
+                    return (
+                      <div key={day.value} className="flex items-center gap-2 rounded-lg border border-teal-100 bg-white px-3 py-2">
+                        <label className="flex min-w-28 items-center gap-2 text-sm font-bold text-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={Boolean(repeatItem)}
+                            onChange={(event) => setForm((current) => ({
+                              ...current,
+                              repeatSchedule: updateRepeatScheduleDay(current.repeatSchedule, day.value, event.target.checked, current.startsAt),
+                            }))}
+                            className="h-5 w-5 rounded border-slate-300 text-teal-700"
+                          />
+                          {day.label}
+                        </label>
+                        <input
+                          type="time"
+                          value={repeatItem?.startsAt || timeInputValue(form.startsAt)}
+                          onChange={(event) => setForm((current) => ({
+                            ...current,
+                            repeatSchedule: updateRepeatScheduleTime(current.repeatSchedule, day.value, event.target.value),
+                          }))}
+                          disabled={!repeatItem}
+                          className="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-950 disabled:bg-slate-100 disabled:text-slate-400"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <label className="block text-sm font-bold text-slate-600">
               Host
               <select value={form.hostPlayerId} onChange={(event) => setForm((current) => ({ ...current, hostPlayerId: event.target.value }))} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold">
@@ -2752,7 +2871,7 @@ function PlayerFormModal({ state, form, setForm, formDirty, memberSearch, member
             <div className="space-y-3">
               <div className="relative">
                 <label className="block text-sm font-bold text-slate-600" htmlFor="round-robin-member-search">
-                  Main member system
+                  LWR Pickleball Club Member
                 </label>
                 <div className="mt-1 flex gap-2">
                   <input
@@ -3476,7 +3595,7 @@ function LadderMatchConfirmModal({ modal, actionLoading, onChange, onCreate, onC
               <TextInput label="Match date" type="date" value={modal.sessionDate || ""} onChange={(value) => onChange("sessionDate", value)} required />
               <TextInput label="Start time" type="time" value={modal.startsAt || ""} onChange={(value) => onChange("startsAt", value)} />
               <label className="block text-sm font-bold text-slate-600 sm:col-span-2">
-                Text reminder hours before match
+                Default reminder sent hours before match
                 <input
                   type="number"
                   min="0"
@@ -3569,7 +3688,7 @@ function LadderFormModal({ form, setForm, activeGroups, activePlayers, actionLoa
                 </select>
               </label>
               <label className="block text-sm font-bold text-slate-600">
-                Default Text reminder hours before match
+                Default reminder sent hours before match
                 <input
                   type="number"
                   min="0"
@@ -5015,14 +5134,17 @@ function ladderPositionDraftError(positions = {}, playerCount = 0) {
 
 function newSessionForm(state) {
   const scoring = normalizeRoundRobinScoring(state.group.settings?.defaultScoring);
+  const sessionDate = new Date().toISOString().slice(0, 10);
+  const startsAt = timeInputValue(state.group.schedule_time);
   return {
     sessionName: `${state.group.name} Match`,
     mode: "daily_round_robin",
     location: state.group.settings?.defaultLocation || "",
-    sessionDate: new Date().toISOString().slice(0, 10),
-    startsAt: timeInputValue(state.group.schedule_time),
+    sessionDate,
+    startsAt,
     maxPlayers: 8,
     repeatsWeekly: false,
+    repeatSchedule: defaultRepeatSchedule(sessionDate, startsAt),
     hostPlayerId: defaultHostPlayerId(state) || activePlayers(state.players)[0]?.id || "",
     cohostPlayerId: "",
     invitedGroupIds: [],
@@ -5050,6 +5172,7 @@ function sessionFormFromSession(state, session) {
     startsAt: timeInputValue(session.starts_at),
     maxPlayers: Number(session.max_players || 8),
     repeatsWeekly: Boolean(session.repeats_weekly),
+    repeatSchedule: normalizeRepeatSchedule(session.settings?.repeatSchedule, session),
     hostPlayerId: session.host_player_id || "",
     cohostPlayerId: session.cohost_player_id || "",
     invitedGroupIds: Array.isArray(session.invited_group_ids) ? session.invited_group_ids : [],
@@ -5059,6 +5182,61 @@ function sessionFormFromSession(state, session) {
     winBy: scoring.winBy,
     scoreType: scoring.scoreType,
   };
+}
+
+function normalizeRepeatSchedule(schedule = [], session = {}) {
+  const source = Array.isArray(schedule) ? schedule : [];
+  const normalized = source
+    .map((item) => ({
+      dayOfWeek: normalizeDayOfWeek(item?.dayOfWeek),
+      startsAt: timeInputValue(item?.startsAt || session.starts_at || session.startsAt || ""),
+    }))
+    .filter((item) => item.dayOfWeek);
+
+  if (normalized.length > 0) return sortRepeatSchedule(dedupeRepeatSchedule(normalized));
+  return defaultRepeatSchedule(session.session_date || session.sessionDate, session.starts_at || session.startsAt);
+}
+
+function defaultRepeatSchedule(sessionDate, startsAt) {
+  const dayOfWeek = dayOfWeekForDate(sessionDate);
+  return dayOfWeek ? [{ dayOfWeek, startsAt: timeInputValue(startsAt) }] : [];
+}
+
+function repeatScheduleItem(schedule = [], dayOfWeek) {
+  return normalizeRepeatSchedule(schedule).find((item) => item.dayOfWeek === dayOfWeek) || null;
+}
+
+function updateRepeatScheduleDay(schedule = [], dayOfWeek, checked, startsAt) {
+  const cleanDay = normalizeDayOfWeek(dayOfWeek);
+  if (!cleanDay) return normalizeRepeatSchedule(schedule);
+
+  const normalized = normalizeRepeatSchedule(schedule);
+  if (!checked) return normalized.filter((item) => item.dayOfWeek !== cleanDay);
+  if (normalized.some((item) => item.dayOfWeek === cleanDay)) return normalized;
+  return sortRepeatSchedule([...normalized, { dayOfWeek: cleanDay, startsAt: timeInputValue(startsAt) }]);
+}
+
+function updateRepeatScheduleTime(schedule = [], dayOfWeek, startsAt) {
+  const cleanDay = normalizeDayOfWeek(dayOfWeek);
+  return sortRepeatSchedule(normalizeRepeatSchedule(schedule).map((item) => (
+    item.dayOfWeek === cleanDay ? { ...item, startsAt: timeInputValue(startsAt) } : item
+  )));
+}
+
+function dedupeRepeatSchedule(schedule = []) {
+  const byDay = new Map();
+  schedule.forEach((item) => {
+    if (!item.dayOfWeek || byDay.has(item.dayOfWeek)) return;
+    byDay.set(item.dayOfWeek, item);
+  });
+  return [...byDay.values()];
+}
+
+function sortRepeatSchedule(schedule = []) {
+  return schedule.slice().sort((first, second) => (
+    LADDER_DAYS.findIndex((day) => day.value === first.dayOfWeek) -
+    LADDER_DAYS.findIndex((day) => day.value === second.dayOfWeek)
+  ));
 }
 
 function activeCourts(courts = []) {

@@ -8,8 +8,9 @@ const RESET_REDIRECT_URL = "https://league.lwrpickleballclub.com/reset-password"
 
 export async function POST(req) {
   try {
-    const { email } = await req.json();
+    const { email, returnTo } = await req.json();
     const normalizedEmail = normalizeEmailAddress(email);
+    const redirectTo = resetRedirectUrl(returnTo);
 
     if (!isValidEmailAddress(normalizedEmail)) {
       return NextResponse.json(
@@ -92,7 +93,7 @@ export async function POST(req) {
       const { error: resetError } = await adminSupabase.auth.resetPasswordForEmail(
         normalizedEmail,
         {
-          redirectTo: RESET_REDIRECT_URL,
+          redirectTo,
         }
       );
 
@@ -129,7 +130,7 @@ export async function POST(req) {
 
     const { data: invited, error: inviteError } =
       await adminSupabase.auth.admin.inviteUserByEmail(normalizedEmail, {
-        redirectTo: RESET_REDIRECT_URL,
+        redirectTo,
       });
 
     if (inviteError) {
@@ -172,6 +173,31 @@ export async function POST(req) {
       },
       { status: 500 }
     );
+  }
+}
+
+function resetRedirectUrl(returnTo) {
+  const url = new URL(RESET_REDIRECT_URL);
+  const safeReturnTo = safeInternalReturnPath(returnTo);
+
+  if (safeReturnTo) {
+    url.searchParams.set("returnTo", safeReturnTo);
+  }
+
+  return url.toString();
+}
+
+function safeInternalReturnPath(value) {
+  const text = String(value || "").trim();
+  if (!text || !text.startsWith("/") || text.startsWith("//")) return "";
+
+  try {
+    const base = new URL(RESET_REDIRECT_URL);
+    const url = new URL(text, base);
+    if (url.origin !== base.origin) return "";
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return "";
   }
 }
 
