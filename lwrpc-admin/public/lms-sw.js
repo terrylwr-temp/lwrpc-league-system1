@@ -1,11 +1,11 @@
-const CACHE_NAME = "lms-pwa-static-v1";
+const CACHE_NAME = "lms-pwa-static-v2";
 const STATIC_CACHE_PREFIX = "lms-pwa-static-";
 const PRECACHE_URLS = [
   "/lms-manifest.webmanifest",
   "/lms-icon-192.png",
   "/lms-icon-512.png",
 ];
-const STATIC_ASSET_PATTERN = /\.(?:css|js|png|jpg|jpeg|webp|svg|ico|woff2?|ttf)$/i;
+const STATIC_ASSET_PATTERN = /\.(?:png|jpg|jpeg|webp|svg|ico|woff2?|ttf)$/i;
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -34,11 +34,11 @@ self.addEventListener("fetch", (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/api/")) return;
+  if (url.pathname.startsWith("/_next/")) return;
   if (request.mode === "navigate") return;
 
   const shouldCache =
     PRECACHE_URLS.includes(url.pathname) ||
-    url.pathname.startsWith("/_next/static/") ||
     STATIC_ASSET_PATTERN.test(url.pathname);
 
   if (!shouldCache) return;

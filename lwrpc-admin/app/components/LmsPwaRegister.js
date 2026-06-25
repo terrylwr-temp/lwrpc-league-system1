@@ -10,6 +10,7 @@ const LMS_HEAD_ELEMENTS = [
   { id: "lms-pwa-apple-status", tag: "meta", attrs: { name: "apple-mobile-web-app-status-bar-style", content: "default" } },
   { id: "lms-pwa-apple-icon", tag: "link", attrs: { rel: "apple-touch-icon", href: "/lms-icon-192.png" } },
 ];
+const IS_DEVELOPMENT = process.env.NODE_ENV !== "production";
 
 function isPbccPath(pathname) {
   return pathname.startsWith("/pbcc") || pathname.startsWith("/round-robin/rpro");
@@ -31,7 +32,29 @@ export default function LmsPwaRegister() {
     });
 
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/lms-sw.js", { scope: "/" }).catch(console.error);
+      if (IS_DEVELOPMENT) {
+        navigator.serviceWorker.getRegistrations()
+          .then((registrations) => Promise.all(
+            registrations
+              .filter((registration) => registration.scope === `${window.location.origin}/`)
+              .map((registration) => registration.unregister())
+          ))
+          .catch(console.error);
+
+        if ("caches" in window) {
+          window.caches.keys()
+            .then((keys) => Promise.all(
+              keys
+                .filter((key) => key.startsWith("lms-pwa-static-"))
+                .map((key) => window.caches.delete(key))
+            ))
+            .catch(console.error);
+        }
+      } else {
+        navigator.serviceWorker.register("/lms-sw.js", { scope: "/", updateViaCache: "none" })
+          .then((registration) => registration.update())
+          .catch(console.error);
+      }
     }
 
     return () => {

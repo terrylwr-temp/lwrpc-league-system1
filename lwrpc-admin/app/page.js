@@ -2,6 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Line,
+  LineChart,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 import AppHeader from "./components/AppHeader";
 import { requireRole, supabase } from "./lib/auth";
 import { formatDisplayTimestampShort } from "./lib/dateTime";
@@ -78,6 +91,12 @@ export default function DashboardPage() {
   const [checkingSetupReminders, setCheckingSetupReminders] = useState(false);
   const [sendingSetupReminders, setSendingSetupReminders] = useState(false);
   const [hideSetupRemindersToday, setHideSetupRemindersToday] = useState(false);
+  const [leagueAnalyticsExpanded, setLeagueAnalyticsExpanded] = useState(false);
+  const [chartsReady, setChartsReady] = useState(false);
+
+  useEffect(() => {
+    setChartsReady(true);
+  }, []);
   const loadDashboardCounts = useCallback(async function loadDashboardCounts() {
     setDashboardCounts(null);
 
@@ -112,6 +131,8 @@ export default function DashboardPage() {
       pendingVerificationCount,
       gamesPlayedCount,
       matchesPlayedCount,
+      scopedMatches,
+      scopedStandings,
     ] = await Promise.all([
       countScopedMatches(leagueData, (query) =>
         query
@@ -127,6 +148,8 @@ export default function DashboardPage() {
       countScopedMatches(leagueData, (query) =>
         query.eq("score_status", "verified")
       ),
+      loadScopedMatchData(leagueData),
+      loadScopedStandingsData(leagueData),
     ]);
 
     const rosterAssignmentCount = scopedRosterData.length;
@@ -144,6 +167,13 @@ export default function DashboardPage() {
       matchesPlayed: matchesPlayedCount,
       averageRosterCount: averageRosterCount(scopedTeams, scopedRosterData),
       averageTeamDupr: averageTeamDupr(scopedTeams, scopedRosterData, scopedRatingData),
+      executive: buildExecutiveAnalytics({
+        teams: scopedTeams,
+        rosterRows: scopedRosterData,
+        ratingRows: scopedRatingData,
+        matches: scopedMatches,
+        standings: scopedStandings,
+      }),
     });
   }, [dashboardFilter, dashboardScope]);
 
@@ -771,6 +801,7 @@ export default function DashboardPage() {
     { label: "Average Team DUPR Rating", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Average roster DUPR by ${scopeHelper.toLowerCase()} team`, tone: "emerald" },
     { label: "Pending Verification", value: formatCount(dashboardCounts?.pendingVerification), helper: "Matches awaiting score review", tone: "amber" },
   ];
+  const executiveAnalytics = dashboardCounts?.executive || emptyExecutiveAnalytics();
 
   const sections = [
     {
@@ -1003,6 +1034,14 @@ export default function DashboardPage() {
               <Status key={card.label} {...card} />
             ))}
           </div>
+
+          <ExecutiveDashboard
+            analytics={executiveAnalytics}
+            scopeLabel={scopeHelper}
+            chartsReady={chartsReady}
+            expanded={leagueAnalyticsExpanded}
+            onToggle={() => setLeagueAnalyticsExpanded((current) => !current)}
+          />
         </section>
 
         <div className="mt-6 space-y-6">
@@ -1443,6 +1482,255 @@ export default function DashboardPage() {
   );
 }
 
+function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onToggle }) {
+  return (
+    <div className="border-t border-slate-200 bg-slate-50 p-4 md:p-6">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <div>
+          <div className="text-xs font-black uppercase tracking-wide text-blue-700">
+            Executive Dashboard
+          </div>
+          <h3 className="mt-1 text-2xl font-black text-slate-950">
+            League Analytics
+          </h3>
+          <p className="mt-1 text-sm font-semibold text-slate-600">
+            Charts, progress, standings leaders, and division-level trend views for {scopeLabel.toLowerCase()} operations.
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-wide text-slate-600 shadow-sm ring-1 ring-slate-200">
+            {scopeLabel}
+          </div>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-expanded={expanded}
+            className="rounded-full bg-slate-950 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-blue-800"
+          >
+            {expanded ? "Hide Analytics" : "Show Analytics"}
+          </button>
+        </div>
+      </div>
+
+      {!expanded && (
+        <div className="mt-4 rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-5 text-sm font-semibold text-slate-600">
+          League Analytics is collapsed by default. Expand it when you want charts and standings leaders for the selected dashboard scope.
+        </div>
+      )}
+
+      {expanded && (
+        <>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[20rem_minmax(0,1fr)]">
+        <ChartPanel title="Match Progress" helper={`${analytics.completedMatches} of ${analytics.scheduledMatches} scheduled matches complete`}>
+          {chartsReady ? (
+            <CompletionRadialChart value={analytics.matchCompletionPercentage} />
+          ) : (
+            <StaticCompletionProgress value={analytics.matchCompletionPercentage} />
+          )}
+        </ChartPanel>
+
+        <ChartPanel title="Matches By Week" helper="Scheduled and completed match volume by week">
+          {!chartsReady ? (
+            <EmptyChartState label="Charts loading..." />
+          ) : analytics.matchesByWeek.length ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <LineChart data={analytics.matchesByWeek} margin={{ top: 10, right: 18, left: -18, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="week" tick={{ fontSize: 11, fontWeight: 700 }} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fontWeight: 700 }} />
+                <Tooltip contentStyle={chartTooltipStyle} />
+                <Line type="monotone" dataKey="scheduled" name="Scheduled" stroke="#2563eb" strokeWidth={3} dot={{ r: 3 }} />
+                <Line type="monotone" dataKey="completed" name="Completed" stroke="#059669" strokeWidth={3} dot={{ r: 3 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyChartState label="No matches in this scope." />
+          )}
+        </ChartPanel>
+      </div>
+
+      <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <ChartPanel title="Teams By Division" helper="Active teams in each selected division">
+          {!chartsReady ? (
+            <EmptyChartState label="Charts loading..." />
+          ) : analytics.teamsByDivision.length ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={analytics.teamsByDivision} margin={{ top: 10, right: 18, left: -18, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="division" tick={{ fontSize: 11, fontWeight: 700 }} interval={0} angle={-15} textAnchor="end" height={55} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fontWeight: 700 }} />
+                <Tooltip contentStyle={chartTooltipStyle} />
+                <Bar dataKey="teams" name="Teams" fill="#0f766e" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyChartState label="No teams in this scope." />
+          )}
+        </ChartPanel>
+
+        <ChartPanel title="Players By Division" helper="Unique rostered players in each selected division">
+          {!chartsReady ? (
+            <EmptyChartState label="Charts loading..." />
+          ) : analytics.playersByDivision.length ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={analytics.playersByDivision} margin={{ top: 10, right: 18, left: -18, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="division" tick={{ fontSize: 11, fontWeight: 700 }} interval={0} angle={-15} textAnchor="end" height={55} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fontWeight: 700 }} />
+                <Tooltip contentStyle={chartTooltipStyle} />
+                <Bar dataKey="players" name="Players" fill="#2563eb" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyChartState label="No rostered players in this scope." />
+          )}
+        </ChartPanel>
+
+        <ChartPanel title="Rating Distribution By Division" helper="Rostered players grouped by season rating bands">
+          {!chartsReady ? (
+            <EmptyChartState label="Charts loading..." />
+          ) : analytics.ratingDistributionByDivision.length ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analytics.ratingDistributionByDivision} margin={{ top: 10, right: 18, left: -18, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="division" tick={{ fontSize: 11, fontWeight: 700 }} interval={0} angle={-15} textAnchor="end" height={55} />
+                <YAxis allowDecimals={false} tick={{ fontSize: 11, fontWeight: 700 }} />
+                <Tooltip contentStyle={chartTooltipStyle} />
+                <Bar dataKey="Under 3.0" stackId="ratings" fill="#38bdf8" />
+                <Bar dataKey="3.0-3.49" stackId="ratings" fill="#2563eb" />
+                <Bar dataKey="3.5-3.99" stackId="ratings" fill="#059669" />
+                <Bar dataKey="4.0+" stackId="ratings" fill="#f59e0b" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyChartState label="No season ratings in this scope." />
+          )}
+        </ChartPanel>
+
+        <ChartPanel title="Matches By Location" helper="Top scheduled match locations">
+          {!chartsReady ? (
+            <EmptyChartState label="Charts loading..." />
+          ) : analytics.matchesByLocation.length ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analytics.matchesByLocation} layout="vertical" margin={{ top: 10, right: 18, left: 28, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fontWeight: 700 }} />
+                <YAxis type="category" dataKey="location" width={110} tick={{ fontSize: 11, fontWeight: 700 }} />
+                <Tooltip contentStyle={chartTooltipStyle} />
+                <Bar dataKey="matches" name="Matches" fill="#7c3aed" radius={[0, 8, 8, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <EmptyChartState label="No locations in this scope." />
+          )}
+        </ChartPanel>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h4 className="text-lg font-black text-slate-950">Standings Leaders</h4>
+            <p className="mt-1 text-sm font-semibold text-slate-600">Top ranked teams from the selected standings scope.</p>
+          </div>
+          <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-800">
+            Leaders
+          </span>
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {analytics.standingsLeaders.map((leader) => (
+            <div key={leader.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="text-xs font-black uppercase tracking-wide text-blue-700">Rank #{leader.rank}</div>
+                  <div className="mt-1 truncate text-base font-black text-slate-950">{leader.team}</div>
+                </div>
+                <div className="rounded-lg bg-white px-3 py-2 text-sm font-black text-slate-800 shadow-sm">
+                  {leader.record}
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-bold text-slate-600">
+                <div className="rounded-lg bg-white px-3 py-2">Pts {formatDecimal(leader.points, 1)}</div>
+                <div className="rounded-lg bg-white px-3 py-2">Diff {formatCount(leader.differential)}</div>
+              </div>
+            </div>
+          ))}
+          {analytics.standingsLeaders.length === 0 && (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm font-bold text-slate-500 md:col-span-2 xl:col-span-3">
+              No standings leaders are available for this scope.
+            </div>
+          )}
+        </div>
+      </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+const chartTooltipStyle = {
+  borderRadius: "12px",
+  border: "1px solid #cbd5e1",
+  boxShadow: "0 12px 30px -20px rgba(15,23,42,0.75)",
+  fontWeight: 700,
+};
+
+function ChartPanel({ title, helper, children }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="mb-3">
+        <h4 className="text-lg font-black text-slate-950">{title}</h4>
+        <p className="mt-1 text-sm font-semibold text-slate-600">{helper}</p>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function CompletionRadialChart({ value }) {
+  const chartValue = Math.max(0, Math.min(100, Number(value || 0)));
+
+  return (
+    <div className="relative h-[280px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <RadialBarChart innerRadius="68%" outerRadius="94%" data={[{ name: "Completion", value: chartValue }]} startAngle={90} endAngle={-270}>
+          <RadialBar dataKey="value" cornerRadius={12} fill="#059669" background={{ fill: "#e2e8f0" }} />
+          <Tooltip contentStyle={chartTooltipStyle} />
+        </RadialBarChart>
+      </ResponsiveContainer>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <div className="text-4xl font-black text-slate-950">{chartValue}%</div>
+        <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">Complete</div>
+      </div>
+    </div>
+  );
+}
+
+function StaticCompletionProgress({ value }) {
+  const chartValue = Math.max(0, Math.min(100, Number(value || 0)));
+
+  return (
+    <div className="flex h-[280px] items-center justify-center">
+      <div className="w-full max-w-52 rounded-2xl border border-slate-200 bg-slate-50 p-5 text-center">
+        <div className="text-4xl font-black text-slate-950">{chartValue}%</div>
+        <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">Complete</div>
+        <div className="mt-4 h-3 overflow-hidden rounded-full bg-slate-200">
+          <div className="h-full rounded-full bg-emerald-600" style={{ width: `${chartValue}%` }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptyChartState({ label }) {
+  return (
+    <div className="flex h-[280px] items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 text-center text-sm font-bold text-slate-500">
+      {label}
+    </div>
+  );
+}
+
 function dashboardFilterLabel(dashboardFilter, filterOptions, dashboardScope) {
   const [filterType, filterId] = String(dashboardFilter || "scope").split(":");
 
@@ -1567,12 +1855,16 @@ async function loadTeamsForDashboard() {
     .from("teams")
     .select(`
       id,
+      name,
+      division_id,
       is_active,
       divisions (
         id,
+        name,
         league_id,
         leagues (
           id,
+          name,
           season_id
         )
       )
@@ -1584,6 +1876,81 @@ async function loadTeamsForDashboard() {
   }
 
   return (data || []).filter((team) => team.is_active !== false);
+}
+
+async function loadScopedMatchData(scopeData) {
+  if (!scopeData.leagueIds.length) return [];
+
+  let query = supabase
+    .from("matches")
+    .select(`
+      id,
+      league_id,
+      division_id,
+      location_id,
+      week_number,
+      scheduled_date,
+      status,
+      score_status,
+      locations (
+        id,
+        name
+      )
+    `)
+    .in("league_id", scopeData.leagueIds)
+    .order("scheduled_date", { ascending: true });
+
+  if (scopeData.divisionIds.length > 0) {
+    query = query.in("division_id", scopeData.divisionIds);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Unable to load executive dashboard matches", error);
+    return [];
+  }
+
+  return data || [];
+}
+
+async function loadScopedStandingsData(scopeData) {
+  if (!scopeData.leagueIds.length) return [];
+
+  let query = supabase
+    .from("team_standings")
+    .select(`
+      id,
+      league_id,
+      division_id,
+      team_id,
+      rank,
+      match_wins,
+      match_losses,
+      match_ties,
+      standings_points,
+      point_differential,
+      teams (
+        id,
+        name,
+        is_active
+      )
+    `)
+    .in("league_id", scopeData.leagueIds)
+    .order("rank", { ascending: true });
+
+  if (scopeData.divisionIds.length > 0) {
+    query = query.in("division_id", scopeData.divisionIds);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Unable to load executive dashboard standings", error);
+    return [];
+  }
+
+  return (data || []).filter((row) => row.teams?.is_active !== false);
 }
 
 async function countScopedMatches(scopeData, applyFilters) {
@@ -1667,6 +2034,182 @@ async function loadScopedRatingData(seasonIds) {
   }
 
   return data || [];
+}
+
+function emptyExecutiveAnalytics() {
+  return {
+    totalTeams: 0,
+    totalRosteredPlayers: 0,
+    averagePlayerRating: null,
+    minPlayerRating: null,
+    maxPlayerRating: null,
+    scheduledMatches: 0,
+    completedMatches: 0,
+    remainingMatches: 0,
+    matchCompletionPercentage: 0,
+    matchesByWeek: [],
+    teamsByDivision: [],
+    playersByDivision: [],
+    ratingDistributionByDivision: [],
+    matchesByLocation: [],
+    standingsLeaders: [],
+  };
+}
+
+function buildExecutiveAnalytics({ teams = [], rosterRows = [], ratingRows = [], matches = [], standings = [] }) {
+  const analytics = emptyExecutiveAnalytics();
+  const teamById = new Map(teams.map((team) => [String(team.id), team]));
+  const ratingsByMemberSeason = new Map();
+
+  ratingRows.forEach((rating) => {
+    const value = Number(rating.season_dupr_rating);
+    if (!Number.isFinite(value)) return;
+    ratingsByMemberSeason.set(memberSeasonKey(rating.member_id, rating.season_id), value);
+  });
+
+  const rosteredMembers = new Set();
+  const ratingKeys = new Set();
+  const ratingValues = [];
+  const teamsByDivision = new Map();
+  const playersByDivision = new Map();
+  const ratingsByDivision = new Map();
+
+  teams.forEach((team) => {
+    const divisionName = dashboardDivisionName(team);
+    const current = teamsByDivision.get(divisionName) || 0;
+    teamsByDivision.set(divisionName, current + 1);
+  });
+
+  rosterRows.forEach((row) => {
+    const team = teamById.get(String(row.team_id || ""));
+    if (!team) return;
+
+    const memberId = String(row.member_id || "");
+    if (!memberId) return;
+
+    const divisionName = dashboardDivisionName(team);
+    const seasonId = team.divisions?.leagues?.season_id || "";
+    const rating = ratingsByMemberSeason.get(memberSeasonKey(memberId, seasonId));
+
+    rosteredMembers.add(memberId);
+    if (!playersByDivision.has(divisionName)) playersByDivision.set(divisionName, new Set());
+    playersByDivision.get(divisionName).add(memberId);
+
+    if (rating !== undefined) {
+      const ratingKey = memberSeasonKey(memberId, seasonId);
+      if (!ratingKeys.has(ratingKey)) {
+        ratingKeys.add(ratingKey);
+        ratingValues.push(rating);
+      }
+
+      const divisionRatingKey = `${divisionName}:${memberId}:${seasonId}`;
+      if (!ratingsByDivision.has(divisionName)) ratingsByDivision.set(divisionName, new Map());
+      ratingsByDivision.get(divisionName).set(divisionRatingKey, rating);
+    }
+  });
+
+  const scheduledMatches = matches.filter((match) => Boolean(match.scheduled_date));
+  const completedMatches = matches.filter(isCompletedMatch);
+  const matchesByWeek = new Map();
+  const matchesByLocation = new Map();
+
+  matches.forEach((match) => {
+    const weekLabel = matchWeekLabel(match);
+    const week = matchesByWeek.get(weekLabel) || { week: weekLabel, scheduled: 0, completed: 0 };
+    week.scheduled += 1;
+    if (isCompletedMatch(match)) week.completed += 1;
+    matchesByWeek.set(weekLabel, week);
+
+    const locationName = match.locations?.name || "No Location";
+    matchesByLocation.set(locationName, (matchesByLocation.get(locationName) || 0) + 1);
+  });
+
+  analytics.totalTeams = teams.length;
+  analytics.totalRosteredPlayers = rosteredMembers.size;
+  analytics.averagePlayerRating = averageValue(ratingValues);
+  analytics.minPlayerRating = ratingValues.length ? Math.min(...ratingValues) : null;
+  analytics.maxPlayerRating = ratingValues.length ? Math.max(...ratingValues) : null;
+  analytics.scheduledMatches = scheduledMatches.length;
+  analytics.completedMatches = completedMatches.length;
+  analytics.remainingMatches = Math.max(0, scheduledMatches.length - completedMatches.length);
+  analytics.matchCompletionPercentage = scheduledMatches.length
+    ? Math.round((completedMatches.length / scheduledMatches.length) * 100)
+    : 0;
+  analytics.matchesByWeek = Array.from(matchesByWeek.values()).sort(compareWeekLabels);
+  analytics.teamsByDivision = mapToChartRows(teamsByDivision, "division", "teams");
+  analytics.playersByDivision = Array.from(playersByDivision.entries())
+    .map(([division, players]) => ({ division, players: players.size }))
+    .sort((a, b) => b.players - a.players || a.division.localeCompare(b.division));
+  analytics.ratingDistributionByDivision = Array.from(ratingsByDivision.entries())
+    .map(([division, ratings]) => ratingDistributionRow(division, Array.from(ratings.values())))
+    .sort((a, b) => a.division.localeCompare(b.division));
+  analytics.matchesByLocation = mapToChartRows(matchesByLocation, "location", "matches").slice(0, 8);
+  analytics.standingsLeaders = standings
+    .filter((row) => Number(row.rank || 0) > 0)
+    .sort((a, b) => Number(a.rank || 999) - Number(b.rank || 999))
+    .slice(0, 6)
+    .map((row) => ({
+      id: row.id || `${row.division_id}:${row.team_id}`,
+      team: row.teams?.name || "Team",
+      rank: Number(row.rank || 0),
+      record: `${Number(row.match_wins || 0)}-${Number(row.match_losses || 0)}${Number(row.match_ties || 0) ? `-${Number(row.match_ties || 0)}` : ""}`,
+      points: Number(row.standings_points || 0),
+      differential: Number(row.point_differential || 0),
+    }));
+
+  return analytics;
+}
+
+function isCompletedMatch(match) {
+  return match?.score_status === "verified" || match?.status === "completed";
+}
+
+function dashboardDivisionName(team) {
+  return team?.divisions?.name || "Unassigned";
+}
+
+function averageValue(values) {
+  if (!values.length) return null;
+  return values.reduce((sum, value) => sum + value, 0) / values.length;
+}
+
+function matchWeekLabel(match) {
+  const weekNumber = Number(match.week_number || 0);
+  if (weekNumber > 0) return `Week ${weekNumber}`;
+  if (!match.scheduled_date) return "No Date";
+  return `Week of ${match.scheduled_date.slice(5)}`;
+}
+
+function compareWeekLabels(a, b) {
+  const aNumber = Number(String(a.week || "").replace(/\D/g, ""));
+  const bNumber = Number(String(b.week || "").replace(/\D/g, ""));
+  if (Number.isFinite(aNumber) && Number.isFinite(bNumber) && aNumber !== bNumber) return aNumber - bNumber;
+  return String(a.week || "").localeCompare(String(b.week || ""));
+}
+
+function mapToChartRows(map, nameKey, valueKey) {
+  return Array.from(map.entries())
+    .map(([name, value]) => ({ [nameKey]: name, [valueKey]: value }))
+    .sort((a, b) => b[valueKey] - a[valueKey] || String(a[nameKey]).localeCompare(String(b[nameKey])));
+}
+
+function ratingDistributionRow(division, ratings) {
+  const row = {
+    division,
+    "Under 3.0": 0,
+    "3.0-3.49": 0,
+    "3.5-3.99": 0,
+    "4.0+": 0,
+  };
+
+  ratings.forEach((rating) => {
+    if (rating < 3) row["Under 3.0"] += 1;
+    else if (rating < 3.5) row["3.0-3.49"] += 1;
+    else if (rating < 4) row["3.5-3.99"] += 1;
+    else row["4.0+"] += 1;
+  });
+
+  return row;
 }
 
 function formatCount(value) {

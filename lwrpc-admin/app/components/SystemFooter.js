@@ -6,9 +6,11 @@ import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSetti
 
 export default function SystemFooter() {
   const [settings, setSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const [footerVersion, setFooterVersion] = useState("");
 
   useEffect(() => {
     let isMounted = true;
+    setFooterVersion(APP_VERSION);
 
     async function loadSettings() {
       try {
@@ -32,7 +34,7 @@ export default function SystemFooter() {
 
   return (
     <footer className="system-footer mt-auto border-t border-slate-200 bg-white px-4 py-3 text-center text-xs font-semibold text-slate-500 print:hidden">
-      {"\u00A9"} {COPYRIGHT_YEAR} {clubName}. All rights reserved. Version {APP_VERSION}.
+      {"\u00A9"} {COPYRIGHT_YEAR} {clubName}. All rights reserved. Version {footerVersion || ""}.
     </footer>
   );
 }
