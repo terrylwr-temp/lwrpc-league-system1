@@ -1778,17 +1778,7 @@ function StandingsLeaderGroupChart({ group }) {
 
   return (
     <div>
-      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0">
-          <div className="truncate text-xs font-black uppercase tracking-wide text-blue-700">{group.league}</div>
-          <h5 className="mt-1 break-words text-base font-black text-slate-950">{group.division}</h5>
-        </div>
-        <div className="w-fit rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600 shadow-sm">
-          Top {group.leaders.length}
-        </div>
-      </div>
-
-      <div className="mt-3 h-[var(--leader-chart-height)]" style={{ "--leader-chart-height": `${height}px` }}>
+      <div className="h-[var(--leader-chart-height)]" style={{ "--leader-chart-height": `${height}px` }}>
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={group.leaders} layout="vertical" margin={{ top: 8, right: 24, left: 18, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
