@@ -93,6 +93,7 @@ export default function DashboardPage() {
   const [sendingSetupReminders, setSendingSetupReminders] = useState(false);
   const [hideSetupRemindersToday, setHideSetupRemindersToday] = useState(false);
   const [leagueAnalyticsExpanded, setLeagueAnalyticsExpanded] = useState(false);
+  const [pendingVerificationModalOpen, setPendingVerificationModalOpen] = useState(false);
   const [chartsReady, setChartsReady] = useState(false);
 
   useEffect(() => {
@@ -129,7 +130,7 @@ export default function DashboardPage() {
       matchesThisWeekCount,
       scopedRosterData,
       scopedRatingData,
-      pendingVerificationCount,
+      pendingVerificationMatches,
       gamesPlayedCount,
       matchesPlayedCount,
       scopedMatches,
@@ -142,9 +143,7 @@ export default function DashboardPage() {
       ),
       loadScopedRosterData(scopedTeamIds),
       loadScopedRatingData(scopedSeasonIds),
-      countScopedMatches(leagueData, (query) =>
-        query.eq("score_status", "pending_verification")
-      ),
+      loadScopedPendingVerificationMatches(leagueData),
       countScopedPlayedGames(leagueData),
       countScopedMatches(leagueData, (query) =>
         query.eq("score_status", "verified")
@@ -163,7 +162,8 @@ export default function DashboardPage() {
       playersOnTeamsUnique: uniqueRosterPlayerCount,
       teams: teamsCount,
       matchesThisWeek: matchesThisWeekCount,
-      pendingVerification: pendingVerificationCount,
+      pendingVerification: pendingVerificationMatches.length,
+      pendingVerificationMatches,
       gamesPlayed: gamesPlayedCount,
       matchesPlayed: matchesPlayedCount,
       averageRosterCount: averageRosterCount(scopedTeams, scopedRosterData),
@@ -800,7 +800,15 @@ export default function DashboardPage() {
       ),
     },
     { label: "Average Team DUPR Rating", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Average roster DUPR by ${scopeHelper.toLowerCase()} team`, tone: "emerald" },
-    { label: "Pending Verification", value: formatCount(dashboardCounts?.pendingVerification), helper: "Matches awaiting score review", tone: "amber" },
+    {
+      label: "Pending Verification",
+      value: formatCount(dashboardCounts?.pendingVerification),
+      helper: "Matches awaiting score review",
+      tone: "amber",
+      onClick: Number(dashboardCounts?.pendingVerification || 0) > 0
+        ? () => setPendingVerificationModalOpen(true)
+        : null,
+    },
   ];
   const executiveAnalytics = dashboardCounts?.executive || emptyExecutiveAnalytics();
 
@@ -1044,6 +1052,15 @@ export default function DashboardPage() {
             onToggle={() => setLeagueAnalyticsExpanded((current) => !current)}
           />
         </section>
+
+        {pendingVerificationModalOpen && (
+          <PendingVerificationModal
+            matches={dashboardCounts?.pendingVerificationMatches || []}
+            scopeLabel={scopeHelper}
+            onClose={() => setPendingVerificationModalOpen(false)}
+            onOpenMatch={(matchId) => router.push(`/matches/${matchId}`)}
+          />
+        )}
 
         <div className="mt-6 space-y-6">
           {sections.map((section) => (
@@ -2003,6 +2020,60 @@ async function loadScopedMatchData(scopeData) {
   return data || [];
 }
 
+async function loadScopedPendingVerificationMatches(scopeData) {
+  if (!scopeData.leagueIds.length) return [];
+
+  let query = supabase
+    .from("matches")
+    .select(`
+      id,
+      league_id,
+      division_id,
+      week_number,
+      scheduled_date,
+      scheduled_time,
+      status,
+      score_status,
+      home_team:teams!matches_home_team_id_fkey (
+        id,
+        name
+      ),
+      away_team:teams!matches_away_team_id_fkey (
+        id,
+        name
+      ),
+      leagues (
+        id,
+        name
+      ),
+      divisions (
+        id,
+        name
+      ),
+      locations (
+        id,
+        name
+      )
+    `)
+    .in("league_id", scopeData.leagueIds)
+    .eq("score_status", "pending_verification")
+    .order("scheduled_date", { ascending: true })
+    .order("scheduled_time", { ascending: true });
+
+  if (scopeData.divisionIds.length > 0) {
+    query = query.in("division_id", scopeData.divisionIds);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("Unable to load pending verification matches", error);
+    return [];
+  }
+
+  return data || [];
+}
+
 async function loadScopedStandingsData(scopeData) {
   if (!scopeData.leagueIds.length) return [];
 
@@ -2455,6 +2526,98 @@ function localDateValue(date) {
   return `${year}-${month}-${day}`;
 }
 
+function PendingVerificationModal({ matches, scopeLabel, onClose, onOpenMatch }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+      <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-amber-200">
+              Pending Verification
+            </div>
+            <h2 className="mt-1 text-2xl font-black">Matches Awaiting Review</h2>
+            <p className="mt-1 text-sm font-semibold text-slate-200">
+              {matches.length} match{matches.length === 1 ? "" : "es"} in {scopeLabel.toLowerCase()}.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-black text-white hover:bg-white/20"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="overflow-y-auto p-4">
+          {matches.length > 0 ? (
+            <div className="space-y-3">
+              {matches.map((match) => (
+                <div key={match.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="text-xs font-black uppercase tracking-wide text-blue-700">
+                        {match.leagues?.name || "League"} / {match.divisions?.name || "Division"}
+                      </div>
+                      <h3 className="mt-1 break-words text-lg font-black text-slate-950">
+                        {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+                      </h3>
+                      <div className="mt-2 flex flex-wrap gap-2 text-xs font-bold text-slate-600">
+                        <span className="rounded-full bg-white px-3 py-1 shadow-sm">
+                          {dashboardMatchDate(match.scheduled_date)}
+                        </span>
+                        <span className="rounded-full bg-white px-3 py-1 shadow-sm">
+                          {dashboardMatchTime(match.scheduled_time)}
+                        </span>
+                        <span className="rounded-full bg-white px-3 py-1 shadow-sm">
+                          Week {Number(match.week_number || 0) || "N/A"}
+                        </span>
+                        <span className="rounded-full bg-white px-3 py-1 shadow-sm">
+                          {match.locations?.name || "No Location"}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onOpenMatch(match.id)}
+                      className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-blue-800"
+                    >
+                      Open Match
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
+              No matches are pending verification in this scope.
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function dashboardMatchDate(value) {
+  if (!value) return "No Date";
+  const date = new Date(`${value}T12:00:00`);
+  return Number.isNaN(date.getTime())
+    ? value
+    : date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function dashboardMatchTime(value) {
+  if (!value) return "Time TBD";
+  const [hoursText, minutesText] = String(value).split(":");
+  const hours = Number(hoursText);
+  const minutes = Number(minutesText || 0);
+  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return value;
+  const date = new Date();
+  date.setHours(hours, minutes, 0, 0);
+  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
 function MetricCard({ label, value, helper, tone, action }) {
   const tones = {
     slate: "bg-slate-900 text-white",
@@ -2558,16 +2721,15 @@ async function listPdfFiles(bucket, prefix = "", depth = 0) {
   return { files, error: null };
 }
 
-function Status({ label, value, helper, action, tone }) {
+function Status({ label, value, helper, action, tone, onClick }) {
   const tones = {
     slate: "bg-slate-900 text-white",
     blue: "bg-blue-700 text-white",
     emerald: "bg-emerald-600 text-white",
     amber: "bg-amber-400 text-slate-950",
   };
-
-  return (
-    <div className={`rounded-2xl p-4 shadow-sm ${tones[tone] || tones.slate}`}>
+  const content = (
+    <>
       <div className="text-xs font-black uppercase tracking-wide opacity-75">
         {label}
       </div>
@@ -2582,6 +2744,27 @@ function Status({ label, value, helper, action, tone }) {
         </div>
       )}
       {action}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={`rounded-2xl p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${tones[tone] || tones.slate}`}
+      >
+        {content}
+        <div className="mt-3 text-[10px] font-black uppercase tracking-wide opacity-80">
+          Click for match detail
+        </div>
+      </button>
+    );
+  }
+
+  return (
+    <div className={`rounded-2xl p-4 shadow-sm ${tones[tone] || tones.slate}`}>
+      {content}
     </div>
   );
 }
