@@ -208,7 +208,7 @@ function PublicShell({ title, error = "", children, adminHref = "", systemSettin
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
 
   return (
-    <main className="full-screen-main min-h-screen bg-slate-950 p-2 text-white sm:p-3">
+    <main className="full-screen-main show-system-footer min-h-screen bg-slate-950 p-2 text-white sm:p-3">
       <div className="w-full">
         <div className="mb-4 rounded-2xl border border-white/10 bg-white/10 p-4 shadow sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

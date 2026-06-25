@@ -31,10 +31,14 @@ export default function SystemFooter() {
   }, []);
 
   const clubName = settings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
+  const footerText = `\u00A9 ${COPYRIGHT_YEAR} ${clubName} · Version ${footerVersion || ""}`;
 
   return (
-    <footer className="system-footer mt-auto border-t border-slate-200 bg-white px-4 py-3 text-center text-xs font-semibold text-slate-500 print:hidden">
-      {"\u00A9"} {COPYRIGHT_YEAR} {clubName}. All rights reserved. Version {footerVersion || ""}.
-    </footer>
+    <>
+      <div aria-hidden="true" className="system-footer-spacer h-8 shrink-0 print:hidden" />
+      <footer className="system-footer fixed inset-x-0 bottom-0 z-40 flex h-8 items-center justify-center border-t border-slate-200/80 bg-white/95 px-3 text-center text-[10px] font-semibold text-slate-500 shadow-[0_-4px_14px_-12px_rgba(15,23,42,0.55)] backdrop-blur print:hidden sm:text-xs">
+        <div className="max-w-full truncate">{footerText}</div>
+      </footer>
+    </>
   );
 }

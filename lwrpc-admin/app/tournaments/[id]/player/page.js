@@ -297,7 +297,7 @@ function Shell({ title, error = "", children, systemSettings = DEFAULT_SYSTEM_SE
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
 
   return (
-    <main className="full-screen-main min-h-screen bg-slate-100 p-3 sm:p-6">
+    <main className="full-screen-main show-system-footer min-h-screen bg-slate-100 p-3 sm:p-6">
       <div className="mx-auto w-full max-w-7xl">
         <div className="mb-5 rounded-2xl bg-slate-900 p-4 text-white shadow sm:p-5">
           <div className="flex min-w-0 items-center gap-3 sm:gap-4">

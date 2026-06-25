@@ -15,7 +15,7 @@
   }
 
   body:not(:has(main.full-screen-main)) .system-footer {
-    padding-left: calc(var(--sidebar-width) + 1rem);
+    left: var(--sidebar-width);
   }
 }
 
@@ -39,6 +39,9 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-body:has(main.pbcc-full-screen) .system-footer {
+body:has(main.full-screen-main):not(:has(main.show-system-footer)) .system-footer,
+body:has(main.full-screen-main):not(:has(main.show-system-footer)) .system-footer-spacer,
+body:has(main.pbcc-full-screen) .system-footer,
+body:has(main.pbcc-full-screen) .system-footer-spacer {
   display: none;
 }

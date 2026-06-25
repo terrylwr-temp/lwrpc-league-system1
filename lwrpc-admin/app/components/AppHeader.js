@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { hasRole, roleLabel } from "../lib/permissions";
 import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
-import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 
@@ -340,11 +339,6 @@ export default function AppHeader({
                   Logout
                 </button>
 
-                <div className="mt-5 text-center text-[11px] leading-relaxed text-slate-400">
-                  {"\u{00A9}"} {COPYRIGHT_YEAR} {clubName}
-                  <br />
-                  All rights reserved. Version {APP_VERSION}
-                </div>
               </>
             ) : (
               <div className="space-y-2">
@@ -482,11 +476,6 @@ export default function AppHeader({
               Logout
             </button>
 
-            <div className="mt-6 text-center text-[11px] leading-relaxed text-slate-400">
-              {"\u{00A9}"} {COPYRIGHT_YEAR} {clubName}
-              <br />
-              All rights reserved. Version {APP_VERSION}
-            </div>
           </div>
         </div>
       )}

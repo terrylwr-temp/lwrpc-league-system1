@@ -265,7 +265,7 @@ function PublicBracketTeam({ name, sourceLabel = "", score = "", winner, elimina
 
 function Shell({ title, error = "", children }) {
   return (
-    <main className="full-screen-main min-h-screen bg-slate-100 p-3 sm:p-6">
+    <main className="full-screen-main show-system-footer min-h-screen bg-slate-100 p-3 sm:p-6">
       <div className="mx-auto w-full max-w-[1600px]">
         <div className="mb-5 rounded-2xl bg-slate-900 p-4 text-white shadow sm:p-5">
           <div className="text-xs font-black uppercase tracking-wide text-blue-200">Current Standings</div>

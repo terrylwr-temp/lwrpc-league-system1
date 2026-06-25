@@ -278,7 +278,7 @@ export default function TournamentAdminPage() {
   const tournamentKey = state.tournament.slug || id;
 
   return (
-    <main className="full-screen-main min-h-screen bg-[#07111f] text-white">
+    <main className="full-screen-main show-system-footer min-h-screen bg-[#07111f] text-white">
       <div className="mx-auto w-full max-w-[1800px] p-2 sm:p-4 xl:p-5">
         <DirectorHeader
           state={state}

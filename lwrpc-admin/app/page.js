@@ -6,10 +6,11 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Cell,
   Line,
   LineChart,
-  RadialBar,
-  RadialBarChart,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -1522,9 +1523,13 @@ function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onTo
         <>
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-[20rem_minmax(0,1fr)]">
-        <ChartPanel title="Match Progress" helper={`${analytics.completedMatches} of ${analytics.scheduledMatches} scheduled matches complete`}>
+        <ChartPanel title="Seasons Progress" helper={`${analytics.completedMatches} of ${analytics.scheduledMatches} scheduled matches complete`}>
           {chartsReady ? (
-            <CompletionRadialChart value={analytics.matchCompletionPercentage} />
+            <SeasonProgressPie
+              completed={analytics.completedMatches}
+              remaining={analytics.remainingMatches}
+              percentage={analytics.matchCompletionPercentage}
+            />
           ) : (
             <StaticCompletionProgress value={analytics.matchCompletionPercentage} />
           )}
@@ -1631,33 +1636,22 @@ function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onTo
         <div className="flex items-center justify-between gap-3">
           <div>
             <h4 className="text-lg font-black text-slate-950">Standings Leaders</h4>
-            <p className="mt-1 text-sm font-semibold text-slate-600">Top ranked teams from the selected standings scope.</p>
+            <p className="mt-1 text-sm font-semibold text-slate-600">Top ranked teams sorted by league and division.</p>
           </div>
           <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-800">
-            Leaders
+            By Division
           </span>
         </div>
 
-        <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {analytics.standingsLeaders.map((leader) => (
-            <div key={leader.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <div className="text-xs font-black uppercase tracking-wide text-blue-700">Rank #{leader.rank}</div>
-                  <div className="mt-1 truncate text-base font-black text-slate-950">{leader.team}</div>
-                </div>
-                <div className="rounded-lg bg-white px-3 py-2 text-sm font-black text-slate-800 shadow-sm">
-                  {leader.record}
-                </div>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-xs font-bold text-slate-600">
-                <div className="rounded-lg bg-white px-3 py-2">Pts {formatDecimal(leader.points, 1)}</div>
-                <div className="rounded-lg bg-white px-3 py-2">Diff {formatCount(leader.differential)}</div>
-              </div>
-            </div>
+        <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-2">
+          {chartsReady && analytics.standingsLeaderGroups.map((group) => (
+            <StandingsLeaderGroupChart key={group.id} group={group} />
           ))}
-          {analytics.standingsLeaders.length === 0 && (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm font-bold text-slate-500 md:col-span-2 xl:col-span-3">
+          {!chartsReady && (
+            <EmptyChartState label="Charts loading..." />
+          )}
+          {chartsReady && analytics.standingsLeaderGroups.length === 0 && (
+            <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm font-bold text-slate-500 xl:col-span-2">
               No standings leaders are available for this scope.
             </div>
           )}
@@ -1688,20 +1682,79 @@ function ChartPanel({ title, helper, children }) {
   );
 }
 
-function CompletionRadialChart({ value }) {
-  const chartValue = Math.max(0, Math.min(100, Number(value || 0)));
+function SeasonProgressPie({ completed, remaining, percentage }) {
+  const chartValue = Math.max(0, Math.min(100, Number(percentage || 0)));
+  const completedCount = Math.max(0, Number(completed || 0));
+  const remainingCount = Math.max(0, Number(remaining || 0));
+  const data = completedCount + remainingCount > 0
+    ? [
+        { name: "Completed", value: completedCount, fill: "#059669" },
+        { name: "Remaining", value: remainingCount, fill: "#e2e8f0" },
+      ]
+    : [{ name: "No Matches", value: 1, fill: "#e2e8f0" }];
 
   return (
     <div className="relative h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
-        <RadialBarChart innerRadius="68%" outerRadius="94%" data={[{ name: "Completion", value: chartValue }]} startAngle={90} endAngle={-270}>
-          <RadialBar dataKey="value" cornerRadius={12} fill="#059669" background={{ fill: "#e2e8f0" }} />
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius="58%"
+            outerRadius="86%"
+            paddingAngle={completedCount && remainingCount ? 3 : 0}
+            startAngle={90}
+            endAngle={-270}
+            stroke="#ffffff"
+            strokeWidth={4}
+          >
+            {data.map((entry) => (
+              <Cell key={entry.name} fill={entry.fill} />
+            ))}
+          </Pie>
           <Tooltip contentStyle={chartTooltipStyle} />
-        </RadialBarChart>
+        </PieChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
         <div className="text-4xl font-black text-slate-950">{chartValue}%</div>
         <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">Complete</div>
+        <div className="mt-2 text-[11px] font-bold text-slate-500">
+          {formatCount(completedCount)} done / {formatCount(remainingCount)} left
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StandingsLeaderGroupChart({ group }) {
+  const height = Math.max(170, group.leaders.length * 48 + 68);
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="truncate text-xs font-black uppercase tracking-wide text-blue-700">{group.league}</div>
+          <h5 className="mt-1 break-words text-base font-black text-slate-950">{group.division}</h5>
+        </div>
+        <div className="w-fit rounded-full bg-white px-3 py-1 text-xs font-black text-slate-600 shadow-sm">
+          Top {group.leaders.length}
+        </div>
+      </div>
+
+      <div className="mt-3 h-[var(--leader-chart-height)]" style={{ "--leader-chart-height": `${height}px` }}>
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={group.leaders} layout="vertical" margin={{ top: 8, right: 24, left: 18, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <XAxis type="number" allowDecimals tick={{ fontSize: 11, fontWeight: 700 }} />
+            <YAxis type="category" dataKey="chartLabel" width={132} tick={{ fontSize: 11, fontWeight: 800 }} />
+            <Tooltip contentStyle={chartTooltipStyle} formatter={(value, name, item) => [
+              name === "Standings Points" ? formatDecimal(value, 1) : formatCount(value),
+              `${name} (${item?.payload?.record || "0-0"})`,
+            ]} />
+            <Bar dataKey="chartValue" name={group.metricLabel} fill="#2563eb" minPointSize={4} radius={[0, 8, 8, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );
@@ -1934,6 +1987,14 @@ async function loadScopedStandingsData(scopeData) {
         id,
         name,
         is_active
+      ),
+      leagues (
+        id,
+        name
+      ),
+      divisions (
+        id,
+        name
       )
     `)
     .in("league_id", scopeData.leagueIds)
@@ -2053,6 +2114,7 @@ function emptyExecutiveAnalytics() {
     ratingDistributionByDivision: [],
     matchesByLocation: [],
     standingsLeaders: [],
+    standingsLeaderGroups: [],
   };
 }
 
@@ -2156,8 +2218,59 @@ function buildExecutiveAnalytics({ teams = [], rosterRows = [], ratingRows = [],
       points: Number(row.standings_points || 0),
       differential: Number(row.point_differential || 0),
     }));
+  analytics.standingsLeaderGroups = standingsLeaderGroups(standings);
 
   return analytics;
+}
+
+function standingsLeaderGroups(standings = []) {
+  const groups = new Map();
+
+  standings
+    .filter((row) => Number(row.rank || 0) > 0)
+    .forEach((row) => {
+      const league = row.leagues?.name || "League";
+      const division = row.divisions?.name || "Division";
+      const id = `${row.league_id || league}:${row.division_id || division}`;
+
+      if (!groups.has(id)) {
+        groups.set(id, {
+          id,
+          league,
+          division,
+          leaders: [],
+        });
+      }
+
+      groups.get(id).leaders.push({
+        id: row.id || `${row.division_id}:${row.team_id}`,
+        team: row.teams?.name || "Team",
+        rank: Number(row.rank || 0),
+        record: `${Number(row.match_wins || 0)}-${Number(row.match_losses || 0)}${Number(row.match_ties || 0) ? `-${Number(row.match_ties || 0)}` : ""}`,
+        points: Number(row.standings_points || 0),
+        wins: Number(row.match_wins || 0),
+        differential: Number(row.point_differential || 0),
+      });
+    });
+
+  return Array.from(groups.values())
+    .map((group) => {
+      const leaders = group.leaders
+        .sort((a, b) => a.rank - b.rank || b.points - a.points || b.differential - a.differential || a.team.localeCompare(b.team))
+        .slice(0, 5);
+      const usesPoints = leaders.some((leader) => leader.points !== 0);
+
+      return {
+        ...group,
+        metricLabel: usesPoints ? "Standings Points" : "Match Wins",
+        leaders: leaders.map((leader) => ({
+          ...leader,
+          chartLabel: `#${leader.rank} ${leader.team}`,
+          chartValue: usesPoints ? leader.points : leader.wins,
+        })),
+      };
+    })
+    .sort((a, b) => a.league.localeCompare(b.league) || a.division.localeCompare(b.division));
 }
 
 function isCompletedMatch(match) {

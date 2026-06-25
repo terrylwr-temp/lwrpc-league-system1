@@ -5,7 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_SYSTEM_SETTINGS } from "../../lib/systemSettings";
 import { loadPublicTournament, tournamentDisplayName, tournamentPlayers } from "../../lib/tournaments";
-import { APP_VERSION, COPYRIGHT_YEAR } from "../../lib/version";
 
 export default function TournamentLandingPage() {
   const { id } = useParams();
@@ -35,7 +34,7 @@ export default function TournamentLandingPage() {
   }
 
   return (
-    <main className="full-screen-main flex min-h-screen items-center justify-center bg-slate-950 p-4 text-white">
+    <main className="full-screen-main show-system-footer flex min-h-screen items-center justify-center bg-slate-950 p-4 text-white">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(20,184,166,0.18),transparent_32%),radial-gradient(circle_at_top_right,rgba(37,99,235,0.2),transparent_34%)]" />
       <div className="relative w-full max-w-xl">
         <div className="rounded-2xl border border-white/10 bg-slate-900/90 p-6 text-center shadow-2xl sm:p-8">
@@ -114,12 +113,6 @@ export default function TournamentLandingPage() {
               </button>
             </div>
           )}
-
-          <div className="mt-6 border-t border-white/10 pt-4 text-center text-xs font-semibold leading-5 text-slate-400">
-            {"\u00A9"} {COPYRIGHT_YEAR} {DEFAULT_SYSTEM_SETTINGS.club_name}. All rights reserved.
-            <br />
-            Version {APP_VERSION}
-          </div>
         </div>
       </div>
     </main>
