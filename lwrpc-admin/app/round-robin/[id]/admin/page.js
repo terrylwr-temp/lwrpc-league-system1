@@ -2285,6 +2285,8 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
   const courtLabel = `${courts.length} court${courts.length === 1 ? "" : "s"}`;
   const initialMode = mode === "initial";
   const busy = ["startSessionAndGenerateFirstGame", "generateNextGame", "updateMatchScore"].includes(actionLoading);
+  const scoring = normalizeRoundRobinScoring(session?.settings?.scoring);
+  const scoringTypeLabel = scoring.scoreType === "rally" ? "Rally" : "Standard";
 
   return (
     <ModalPortal>
@@ -2345,19 +2347,45 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
             </div>
 
             {initialMode && (
-              <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <div className="text-sm font-black text-slate-700">Confirm Courts</div>
-                  </div>
-                  <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">{courtLabel}</div>
-                </div>
-                <div className="mt-3 grid grid-cols-1 gap-3">
-                  {courts.map((court, index) => (
-                    <div key={`start-court-${index}`}>
-                      <TextInput label={`Court ${index + 1}`} value={court.name} onChange={(value) => updateCourt(index, "name", value)} />
+              <div className="space-y-4">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-black text-slate-700">Confirm Courts</div>
                     </div>
-                  ))}
+                    <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">{courtLabel}</div>
+                  </div>
+                  <div className="mt-3 grid grid-cols-1 gap-3">
+                    {courts.map((court, index) => (
+                      <div key={`start-court-${index}`}>
+                        <TextInput label={`Court ${index + 1}`} value={court.name} onChange={(value) => updateCourt(index, "name", value)} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <div className="text-sm font-black text-emerald-950">Match Scoring</div>
+                      <div className="mt-1 text-xs font-bold text-emerald-800">Confirm the scoring format before live play starts.</div>
+                    </div>
+                    <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-emerald-800 shadow-sm">{roundRobinScoringLabel(scoring)}</div>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-black text-emerald-950">
+                    <div className="rounded-lg bg-white px-2 py-3 shadow-sm">
+                      <div className="uppercase tracking-wide text-emerald-700">Game points to</div>
+                      <div className="mt-1 text-lg text-slate-950">{scoring.pointsToWin}</div>
+                    </div>
+                    <div className="rounded-lg bg-white px-2 py-3 shadow-sm">
+                      <div className="uppercase tracking-wide text-emerald-700">Win by</div>
+                      <div className="mt-1 text-lg text-slate-950">{scoring.winBy}</div>
+                    </div>
+                    <div className="rounded-lg bg-white px-2 py-3 shadow-sm">
+                      <div className="uppercase tracking-wide text-emerald-700">Score type</div>
+                      <div className="mt-1 text-lg text-slate-950">{scoringTypeLabel}</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
