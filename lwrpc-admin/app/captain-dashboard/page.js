@@ -2217,9 +2217,10 @@ export default function CaptainDashboardPage() {
     );
   }
 
+  const setupDivisionRulesText = setupMatch && setupTeam ? setupDivisionRulesNotes() : "";
   const setupDivisionRulesNotice =
     setupDivisionNotesMatchId && String(setupDivisionNotesMatchId) === String(setupMatch?.id)
-      ? setupDivisionRulesNotes()
+      ? setupDivisionRulesText
       : "";
 
   return (
@@ -2316,9 +2317,20 @@ export default function CaptainDashboardPage() {
 
             <div className="overflow-y-auto p-4 sm:p-6">
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-950">
-                <span className="font-bold">Doubles Team Maximum:</span>{" "}
-                {setupTeam.divisions?.team_dupr_max ?? "None"} ({setupRatingLabel()})
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-950">
+                  <span className="font-bold">Doubles Team Maximum:</span>{" "}
+                  {setupTeam.divisions?.team_dupr_max ?? "None"} ({setupRatingLabel()})
+                </div>
+                {setupDivisionRulesText && (
+                  <button
+                    type="button"
+                    onClick={() => setSetupDivisionNotesMatchId(setupMatch.id)}
+                    className="rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-bold text-blue-900 shadow-sm hover:border-blue-300 hover:bg-blue-50"
+                  >
+                    Notes
+                  </button>
+                )}
               </div>
               <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 md:grid">
                 <button
