@@ -704,7 +704,6 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
                     <h3 className="break-words text-lg font-black">{group.name}</h3>
                     <span className={`rounded-full px-3 py-1 text-xs font-black ${colors.badge}`}>{group.pending} pending</span>
                   </div>
-                  <div className="mt-4 text-3xl font-black">{group.completionPercent}%</div>
                   <div className="text-sm font-semibold text-blue-100">{group.heat}</div>
                   <div className={`mt-1 text-sm font-semibold ${colors.accent}`}>Progress: {group.progressPercent}% - Avg Rest: {group.averageRestMinutes} min</div>
                 </div>
