@@ -1865,40 +1865,66 @@ function AdminGameResultCard({ match }) {
           Final
         </div>
       </div>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-stretch">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-stretch">
         <AdminGameTeamPanel
           players={match.team1_players}
           score={match.team1_score}
-          tone="teal"
           isWinner={isWinningScore(match.team1_score, match.team2_score)}
         />
-        <div className="flex items-center justify-center text-xs font-black uppercase tracking-wide text-slate-400">vs</div>
+        <div className="text-center text-xs font-black uppercase tracking-wide text-slate-400">vs</div>
         <AdminGameTeamPanel
           players={match.team2_players}
           score={match.team2_score}
-          tone="blue"
           isWinner={isWinningScore(match.team2_score, match.team1_score)}
+          align="right"
         />
       </div>
     </div>
   );
 }
 
-function AdminGameTeamPanel({ players, score, tone, isWinner }) {
-  const toneClass = tone === "blue"
-    ? "border-blue-200 bg-blue-50 text-blue-950"
-    : "border-teal-200 bg-teal-50 text-teal-950";
-
+function AdminGameTeamPanel({ players, score, isWinner, align = "left" }) {
   return (
-    <div className={`flex min-w-0 items-center justify-between gap-2 rounded-lg border px-2.5 py-2 font-bold shadow-sm ${toneClass}`}>
-      <div className="min-w-0 break-words text-sm">{playerNames(players)}</div>
-      <div className={`shrink-0 rounded-lg px-2.5 py-1.5 text-center shadow-[0_10px_18px_-14px_rgba(15,23,42,0.9)] ${
-        isWinner ? "bg-teal-700 text-white" : "bg-slate-950 text-white"
-      }`}>
-        <div className="text-[10px] font-black uppercase tracking-wide opacity-80">Score</div>
-        <div className="text-xl font-black leading-none">{formatGameScore(score)}</div>
+    <div className={`rounded-lg border px-2.5 py-2 shadow-[0_10px_18px_-16px_rgba(15,23,42,0.95)] ${
+      isWinner ? "border-2 border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200" : "border-slate-200 bg-white"
+    }`}>
+      <div className={`mb-2 flex ${align === "right" ? "justify-start md:justify-end" : "justify-start"}`}>
+        <span className={`rounded-md px-2 py-1 text-[10px] font-black uppercase tracking-wide shadow-sm ${isWinner ? "bg-emerald-700 text-white" : "invisible bg-slate-200 text-slate-700"}`}>
+          Winner
+        </span>
+      </div>
+      <div className={`flex items-center justify-between gap-2 ${align === "right" ? "md:flex-row-reverse" : ""}`}>
+        <AdminPlayerNameList players={players} align={align} />
+        <div className={`shrink-0 rounded-lg px-2.5 py-1.5 text-center shadow-[0_10px_18px_-14px_rgba(15,23,42,0.9)] ${
+          isWinner ? "bg-emerald-700 text-white" : "bg-slate-950 text-white"
+        }`}>
+          <div className="text-[10px] font-black uppercase tracking-wide opacity-80">Score</div>
+          <div className="text-xl font-black leading-none">{formatGameScore(score)}</div>
+        </div>
       </div>
     </div>
+  );
+}
+
+function AdminPlayerNameList({ players, align = "left" }) {
+  const list = players || [];
+  const containerClass = `flex flex-wrap gap-2 ${align === "right" ? "justify-start md:justify-end" : "justify-start"}`;
+
+  if (list.length === 0) {
+    return <span className="font-black text-slate-500">Team</span>;
+  }
+
+  return (
+    <span className={containerClass}>
+      {list.map((player, index) => (
+        <span
+          key={`${player.id || player.player_id || "player"}-${index}`}
+          className="rounded-md border border-slate-200 bg-white px-2 py-1 text-sm font-black text-slate-800 shadow-sm"
+        >
+          {player.firstLabel || player.displayName || player.display_name || player.display_name_snapshot || "Player"}
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -1921,7 +1947,7 @@ function SessionResultsModal({ state, session, onClose }) {
         <div className="h-full max-h-screen w-full max-w-5xl overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-2 sm:h-auto sm:max-h-[calc(100vh-1rem)] sm:rounded-lg">
           <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
             <div className="min-w-0">
-              <div className={MODAL_EYEBROW_CHROME}>Past Match Results</div>
+              <div className={MODAL_EYEBROW_CHROME}>Match Results</div>
               <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
               <div className={MODAL_SUPPORTING_TEXT}>
                 {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}{session.location ? ` - ${session.location}` : ""}
@@ -2021,7 +2047,7 @@ function SessionResultsModal({ state, session, onClose }) {
             </div>
 
             <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
-              <div className="text-sm font-black text-slate-700">Rounds</div>
+              <div className="text-sm font-black text-slate-700">Match Game Details</div>
               <div className="mt-3 space-y-3">
                 {roundGroups.map((round) => {
                   const byes = roundByePlayers(round);
@@ -2034,8 +2060,8 @@ function SessionResultsModal({ state, session, onClose }) {
                         </div>
                       </div>
                       {byes.length > 0 && (
-                        <div className="border-b border-amber-200 bg-amber-50 px-3 py-2 text-sm font-black text-amber-900">
-                          Bye: {playerNames(byes)}
+                        <div className="border-b border-amber-200 bg-amber-50 px-3 py-2 text-sm font-bold text-amber-950">
+                          <span className="font-black">Bye:</span> {playerNames(byes)}
                         </div>
                       )}
                       <div className="grid grid-cols-1 gap-3 p-3">

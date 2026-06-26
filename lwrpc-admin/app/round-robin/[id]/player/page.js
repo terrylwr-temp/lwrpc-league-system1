@@ -2393,13 +2393,11 @@ function GameTeamScorePanel({ players, score, isWinner, highlightedPlayerId, ali
     <div className={`rounded-lg border px-2.5 py-2 shadow-[0_10px_18px_-16px_rgba(15,23,42,0.95)] ${
       isWinner ? "border-2 border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200" : "border-slate-200 bg-white"
     }`}>
-      {isWinner && (
-        <div className={`mb-2 flex ${align === "right" ? "justify-start md:justify-end" : "justify-start"}`}>
-          <span className="rounded-md bg-emerald-700 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-sm">
-            Winner
-          </span>
-        </div>
-      )}
+      <div className={`mb-2 flex ${align === "right" ? "justify-start md:justify-end" : "justify-start"}`}>
+        <span className={`rounded-md px-2 py-1 text-[10px] font-black uppercase tracking-wide shadow-sm ${isWinner ? "bg-emerald-700 text-white" : "invisible bg-slate-200 text-slate-700"}`}>
+          Winner
+        </span>
+      </div>
       <div className={`flex items-center justify-between gap-2 ${align === "right" ? "md:flex-row-reverse" : ""}`}>
         <PlayerNameList players={players} highlightedPlayerId={highlightedPlayerId} align={align} />
         <div className={`shrink-0 rounded-lg px-2.5 py-1.5 text-center shadow-[0_10px_18px_-14px_rgba(15,23,42,0.9)] ${

@@ -2043,6 +2043,7 @@ async function sendSessionResultsText(supabase, group, body) {
 
   const session = await loadSessionForGroup(supabase, group.id, sessionId);
   const results = await rebuildResults(supabase, group, sessionId);
+  const isLadder = isLadderSession(session);
   const playedResults = results.filter((row) => Number(row.games || 0) > 0 || Number(row.byes || 0) > 0);
   const standings = playedResults.map((row) => {
     const metadata = resultMetadata(row);
@@ -2056,9 +2057,9 @@ async function sendSessionResultsText(supabase, group, body) {
       pointsFor: row.points_for,
       pointsAgainst: row.points_against,
       byes: row.byes,
-      previousPosition: metadata.ladderPreviousPosition ?? metadata.previousPosition ?? null,
-      newPosition: metadata.ladderNewPosition ?? metadata.newPosition ?? null,
-      positionCount: metadata.ladderPositionCount ?? metadata.positionCount ?? null,
+      previousPosition: isLadder ? metadata.ladderPreviousPosition ?? metadata.previousPosition ?? null : null,
+      newPosition: isLadder ? metadata.ladderNewPosition ?? metadata.newPosition ?? null : null,
+      positionCount: isLadder ? metadata.ladderPositionCount ?? metadata.positionCount ?? null : null,
     };
   });
   const summaryText = summaryTextForStandings(group.name, session.session_date, standings);
@@ -3130,13 +3131,13 @@ function sessionTextCounts(session, sessionPlayers = []) {
 
 function resultRankingsForSms(standings = []) {
   if (!standings.length) return "Results pending.";
-  return standings.map((row) => {
+  return standings.map((row, index) => {
     const diff = Number(row.pointDiff || 0);
     const diffText = diff > 0 ? `+${diff}` : String(diff);
     const positionText = row.previousPosition && row.newPosition
       ? `, Position #${row.previousPosition} -> #${row.newPosition} out of ${row.positionCount || "?"}`
       : "";
-    return `${row.rank}. ${row.displayName || "Player"} ${row.wins || 0}-${row.losses || 0}, PF ${row.pointsFor || 0}, PA ${row.pointsAgainst || 0}, Diff ${diffText}, Byes ${row.byes || 0}${positionText}`;
+    return `${index + 1}. ${row.displayName || "Player"}: ${row.wins || 0}-${row.losses || 0}, Points ${row.pointsFor || 0}-${row.pointsAgainst || 0}, Diff ${diffText}, Byes ${row.byes || 0}${positionText}`;
   }).join("\n");
 }
 
