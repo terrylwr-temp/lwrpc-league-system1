@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
@@ -30,6 +30,7 @@ import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
 import { buildActiveDivisionOptions } from "../lib/divisionOptions";
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
+const CAPTAIN_MATCH_SETUP_NOTES_STORAGE_PREFIX = "lwrpc-captain-match-setup-notes-seen";
 const CAPTAIN_SECTION_IDS = {
   upcoming: "captain-dashboard-upcoming-matches",
   completed: "captain-dashboard-completed-matches",
@@ -86,6 +87,7 @@ export default function CaptainDashboardPage() {
   const [setupLineups, setSetupLineups] = useState([]);
   const [setupRatings, setSetupRatings] = useState([]);
   const [setupDirty, setSetupDirty] = useState(false);
+  const [setupDivisionNotesMatchId, setSetupDivisionNotesMatchId] = useState(null);
   const [savingSetup, setSavingSetup] = useState(false);
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
@@ -105,6 +107,7 @@ export default function CaptainDashboardPage() {
   const [flexScheduleTime, setFlexScheduleTime] = useState("");
   const [savingFlexSchedule, setSavingFlexSchedule] = useState(false);
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const seenSetupDivisionNotesRef = useRef(new Set());
 
   useUnsavedChangesWarning(Boolean(setupMatch && setupDirty), "match setup");
 
@@ -252,6 +255,7 @@ export default function CaptainDashboardPage() {
           win_by,
           default_game_format,
           rating_type,
+          line_notes,
           team_dupr_max,
           score_sheet_template_id,
           score_sheet_templates (
@@ -387,6 +391,7 @@ export default function CaptainDashboardPage() {
           win_by,
           default_game_format,
           rating_type,
+          line_notes,
           team_dupr_max,
           score_sheet_template_id,
           score_sheet_templates (
@@ -1378,7 +1383,83 @@ export default function CaptainDashboardPage() {
     return emailSent + smsSent > 0;
   }
 
+  function setupDivisionRulesNotes(match = setupMatch, team = setupTeam) {
+    return String(team?.divisions?.line_notes || match?.divisions?.line_notes || "").trim();
+  }
+
+  function setupDivisionNotesSeenKey(matchId) {
+    return `${CAPTAIN_MATCH_SETUP_NOTES_STORAGE_PREFIX}:${matchId}`;
+  }
+
+  function hasSeenSetupDivisionNotes(matchId) {
+    if (!matchId) return true;
+
+    const key = setupDivisionNotesSeenKey(matchId);
+
+    if (seenSetupDivisionNotesRef.current.has(key)) {
+      return true;
+    }
+
+    try {
+      return typeof window !== "undefined" && window.localStorage.getItem(key) === "1";
+    } catch {
+      return false;
+    }
+  }
+
+  function markSetupDivisionNotesSeen(matchId) {
+    if (!matchId) return;
+
+    const key = setupDivisionNotesSeenKey(matchId);
+    seenSetupDivisionNotesRef.current.add(key);
+
+    try {
+      if (typeof window !== "undefined") {
+        window.localStorage.setItem(key, "1");
+      }
+    } catch {
+      // In-memory tracking still prevents repeat popups during this visit.
+    }
+  }
+
+  function queueSetupDivisionNotesNotice(match, team) {
+    if (!match?.id || !setupDivisionRulesNotes(match, team) || hasSeenSetupDivisionNotes(match.id)) {
+      return;
+    }
+
+    if (typeof window === "undefined" || typeof window.requestAnimationFrame !== "function") {
+      setSetupDivisionNotesMatchId(match.id);
+      return;
+    }
+
+    window.requestAnimationFrame(() => {
+      setSetupDivisionNotesMatchId(match.id);
+    });
+  }
+
+  function dismissSetupDivisionNotesNotice() {
+    markSetupDivisionNotesSeen(setupDivisionNotesMatchId);
+    setSetupDivisionNotesMatchId(null);
+  }
+
+  function resetMatchSetup() {
+    setSetupMatch(null);
+    setSetupTeam(null);
+    setSetupRoster([]);
+    setSetupLineups([]);
+    setSetupRatings([]);
+    setSetupDirty(false);
+    setSetupDivisionNotesMatchId(null);
+  }
+
+  function closeMatchSetup() {
+    if (!confirmUnsavedChanges()) return;
+
+    resetMatchSetup();
+  }
+
   async function openMatchSetup(match, team) {
+    setSetupDivisionNotesMatchId(null);
     setSetupMatch(match);
     setSetupTeam(team);
     setSetupDirty(false);
@@ -1447,6 +1528,7 @@ export default function CaptainDashboardPage() {
       })
     );
 
+    queueSetupDivisionNotesNotice(match, team);
   }
 
   async function openMatchScoreSheet(match) {
@@ -1711,12 +1793,7 @@ export default function CaptainDashboardPage() {
       return false;
     });
 
-    setSetupMatch(null);
-    setSetupTeam(null);
-    setSetupRoster([]);
-    setSetupLineups([]);
-    setSetupRatings([]);
-    setSetupDirty(false);
+    resetMatchSetup();
       alert(notificationSent ? "Match setup saved and opponent captain notification sent." : "Match setup saved, but the opponent notification could not be sent.");
   }
 
@@ -2140,6 +2217,11 @@ export default function CaptainDashboardPage() {
     );
   }
 
+  const setupDivisionRulesNotice =
+    setupDivisionNotesMatchId && String(setupDivisionNotesMatchId) === String(setupMatch?.id)
+      ? setupDivisionRulesNotes()
+      : "";
+
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
       <div className="mx-auto max-w-7xl">
@@ -2250,15 +2332,7 @@ export default function CaptainDashboardPage() {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    if (!confirmUnsavedChanges()) return;
-
-                    setSetupMatch(null);
-                    setSetupTeam(null);
-                    setSetupRoster([]);
-                    setSetupLineups([]);
-                    setSetupDirty(false);
-                  }}
+                  onClick={closeMatchSetup}
                   className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-300 sm:py-2"
                 >
                   Close
@@ -2329,15 +2403,7 @@ export default function CaptainDashboardPage() {
 
               <button
                 type="button"
-                onClick={() => {
-                  if (!confirmUnsavedChanges()) return;
-
-                  setSetupMatch(null);
-                  setSetupTeam(null);
-                  setSetupRoster([]);
-                  setSetupLineups([]);
-                  setSetupDirty(false);
-                }}
+                onClick={closeMatchSetup}
                 className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-semibold text-slate-900 hover:bg-slate-300"
               >
                 Close
@@ -2345,6 +2411,27 @@ export default function CaptainDashboardPage() {
             </div>
             </div>
           </div>
+          {setupDivisionRulesNotice && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/55 p-4">
+              <div className="w-full max-w-xl rounded-2xl border border-blue-200 bg-white p-5 text-slate-900 shadow-2xl">
+                <div className="text-xs font-black uppercase tracking-wide text-blue-700">
+                  Additional Division Rules / Notes
+                </div>
+                <div className="mt-3 max-h-[55vh] overflow-y-auto whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-800">
+                  {setupDivisionRulesNotice}
+                </div>
+                <div className="mt-5 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={dismissSetupDivisionNotesNotice}
+                    className="rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-blue-800"
+                  >
+                    OK
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           </div>
         )}
 
