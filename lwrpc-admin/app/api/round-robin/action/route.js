@@ -2071,7 +2071,9 @@ async function sendSessionResultsText(supabase, group, body) {
 
   const smsEnabled = body.smsEnabled === true && group.settings?.smsSendingEnabled === true;
   const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, sessionId));
-  const recipientPlayers = sessionPlayers.filter((player) => player.response_status === "joined");
+  const recipientPlayers = body.recipientPlayerId
+    ? await loadSingleResultRecipient(supabase, group.id, body.recipientPlayerId)
+    : sessionPlayers.filter((player) => player.response_status === "joined");
   let sms = smsDisabledResult(smsEnabled ? "" : body.smsEnabled ? "SMS disabled in settings" : "SMS disabled", recipientPlayers.length, recipientPlayers.filter((player) => player.phone).length);
 
   if (smsEnabled) {
@@ -2091,8 +2093,31 @@ async function sendSessionResultsText(supabase, group, body) {
     });
   }
 
-  await addLog(supabase, group.id, sessionId, "session", `Result texts sent after stats review: ${sms.sent || 0}.`, { sms });
+  await addLog(supabase, group.id, sessionId, "session", `Result texts sent after stats review: ${sms.sent || 0}.`, { sms, recipientScope: body.recipientPlayerId ? "player" : "joined", recipientPlayerId: body.recipientPlayerId || null });
   return { results, summaryText, sms, recipients: recipientPlayers.length };
+}
+
+async function loadSingleResultRecipient(supabase, groupId, playerId) {
+  const cleanPlayerId = String(playerId || "").trim();
+  if (!cleanPlayerId) throw new Error("Select one saved player.");
+
+  const { data, error } = await supabase
+    .from("round_robin_players")
+    .select("id, display_name, phone")
+    .eq("group_id", groupId)
+    .eq("id", cleanPlayerId)
+    .eq("is_active", true)
+    .single();
+  if (error) throw error;
+  if (!data) throw new Error("Selected player was not found.");
+
+  return [{
+    player_id: data.id,
+    id: data.id,
+    display_name: data.display_name,
+    phone: data.phone || "",
+    response_status: "selected",
+  }];
 }
 
 async function createNextWeeklySession(supabase, group, session, body) {
@@ -2166,7 +2191,7 @@ async function sendBroadcastText(supabase, group, body, access = null) {
 
   const recipientScope = access?.mode === "host"
     ? "joined"
-    : ["joined", "invited", "session", "all"].includes(body.recipientScope) ? body.recipientScope : "joined";
+    : ["joined", "invited", "session", "player", "all"].includes(body.recipientScope) ? body.recipientScope : "joined";
   const smsEnabled = body.smsEnabled === true && group.settings?.smsSendingEnabled === true;
   let logSessionId = null;
   let session = null;
@@ -2178,14 +2203,16 @@ async function sendBroadcastText(supabase, group, body, access = null) {
     logSessionId = session.id;
   }
 
-  if (!logSessionId && recipientScope !== "all") {
+  if (!logSessionId && !["all", "player"].includes(recipientScope)) {
     throw new Error("A match is required for that recipient group.");
   }
   if (access?.mode === "host" && !logSessionId) {
     throw new Error("A match is required for host text updates.");
   }
 
-  if (recipientScope === "all" || !logSessionId) {
+  if (recipientScope === "player") {
+    players = await loadSingleResultRecipient(supabase, group.id, body.recipientPlayerId);
+  } else if (recipientScope === "all" || !logSessionId) {
     players = await loadActivePlayers(supabase, group.id);
   } else {
     sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, await loadSessionPlayers(supabase, logSessionId));

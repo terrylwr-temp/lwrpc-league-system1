@@ -931,7 +931,7 @@ function PastSessions({ history, sessions = null, searchTerm = "", onSelect }) {
             key={session.id}
             type="button"
             onClick={() => onSelect(session)}
-            className={`grid w-full grid-cols-1 gap-3 rounded-lg border p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center ${isLadder ? "border-violet-200 bg-violet-50 hover:border-violet-400" : "border-slate-200 bg-slate-50 hover:border-teal-400"}`}
+            className={`grid w-full grid-cols-1 gap-3 rounded-lg border-2 p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center ${isLadder ? "border-violet-400 bg-violet-50 hover:border-violet-600" : "border-slate-400 bg-white hover:border-teal-600"}`}
           >
             <span className="min-w-0">
               <span className="block text-lg font-black text-slate-950">{formatSessionHeadlineWithYear(session)}{isLadder ? " - Ladder" : ""}</span>
@@ -2391,12 +2391,19 @@ function MobileStandingStat({ label, value }) {
 function GameTeamScorePanel({ players, score, isWinner, highlightedPlayerId, align = "left" }) {
   return (
     <div className={`rounded-lg border px-2.5 py-2 shadow-[0_10px_18px_-16px_rgba(15,23,42,0.95)] ${
-      isWinner ? "border-teal-300 bg-teal-50" : "border-slate-200 bg-white"
+      isWinner ? "border-2 border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200" : "border-slate-200 bg-white"
     }`}>
+      {isWinner && (
+        <div className={`mb-2 flex ${align === "right" ? "justify-start md:justify-end" : "justify-start"}`}>
+          <span className="rounded-md bg-emerald-700 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-sm">
+            Winner
+          </span>
+        </div>
+      )}
       <div className={`flex items-center justify-between gap-2 ${align === "right" ? "md:flex-row-reverse" : ""}`}>
         <PlayerNameList players={players} highlightedPlayerId={highlightedPlayerId} align={align} />
         <div className={`shrink-0 rounded-lg px-2.5 py-1.5 text-center shadow-[0_10px_18px_-14px_rgba(15,23,42,0.9)] ${
-          isWinner ? "bg-teal-700 text-white" : "bg-slate-950 text-white"
+          isWinner ? "bg-emerald-700 text-white" : "bg-slate-950 text-white"
         }`}>
           <div className="text-[10px] font-black uppercase tracking-wide opacity-80">Score</div>
           <div className="text-xl font-black leading-none">{formatGameScore(score)}</div>

@@ -9,6 +9,7 @@ import PbccFooter from "../../../components/PbccFooter";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
 import { supabase } from "../../../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../../lib/email";
+import { passkeyErrorMessage } from "../../../lib/passkeyErrors";
 import { DEFAULT_LADDER_RANKING_CRITERIA, LADDER_RANKING_CRITERIA_OPTIONS, compareLadderRowsByCriteria, ladderRankingCriteriaLabel, normalizeLadderRankingCriteria } from "../../../lib/roundRobinLadderRankings";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { roundRobinPlayerLabel } from "../../../lib/roundRobinSchedule";
@@ -298,6 +299,28 @@ export default function RoundRobinAdminPage() {
     if (signInError) {
       setLoading(false);
       setAuthMessage(signInError.message);
+      return;
+    }
+
+    setAuthMessage("");
+    await unlock(liveSessionId);
+  }
+
+  async function signInWithPasskey() {
+    if (!supabase.auth.signInWithPasskey) {
+      setAuthMessage("Passkey / fingerprint sign in is not available in this browser yet.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setAuthMessage("Opening passkey / fingerprint sign in...");
+
+    const { error: signInError } = await supabase.auth.signInWithPasskey();
+
+    if (signInError) {
+      setLoading(false);
+      setAuthMessage(passkeyErrorMessage(signInError, "sign in"));
       return;
     }
 
@@ -655,6 +678,20 @@ export default function RoundRobinAdminPage() {
                 {loading ? "Signing In..." : "Sign In"}
               </button>
             </form>
+            <button
+              type="button"
+              onClick={signInWithPasskey}
+              disabled={loading}
+              aria-label="Sign in with passkey or fingerprint"
+              title="Passkey / Fingerprint"
+              className="mt-3 flex min-h-14 w-full items-center justify-center gap-3 rounded-lg border border-teal-200 bg-white px-4 py-3 text-sm font-black text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:border-teal-100 hover:bg-teal-50 hover:shadow-md disabled:opacity-50"
+            >
+              <svg aria-hidden="true" className="h-5 w-5 text-teal-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 11a3 3 0 1 0-3-3 3 3 0 0 0 3 3Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 14v7M8 18h8M15 8h5v4h-2v2h-3" />
+              </svg>
+              <span>Sign In with Passkey / Fingerprint</span>
+            </button>
             <p className="mt-4 rounded-lg border border-teal-300/20 bg-teal-950/40 px-4 py-3 text-center text-sm font-semibold text-teal-100">
               Use the same email and password you use for the LMS.
             </p>
@@ -2045,7 +2082,7 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
           openSessionResults(session);
         }
       } : undefined}
-      className={`rounded-lg border p-3 ${canShowResults ? `cursor-pointer transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md ${isLadder ? "hover:border-violet-400" : "hover:border-teal-400"}` : ""} ${isEditing ? "border-teal-500 bg-teal-50" : isLadder ? "border-violet-200 bg-violet-50" : "border-slate-200 bg-slate-50"}`}
+      className={`rounded-lg border-2 p-3 shadow-sm ${canShowResults ? `cursor-pointer transition hover:-translate-y-0.5 hover:bg-white hover:shadow-md ${isLadder ? "hover:border-violet-600" : "hover:border-teal-600"}` : ""} ${isEditing ? "border-teal-600 bg-teal-50 ring-2 ring-teal-200" : isLadder ? "border-violet-400 bg-violet-50" : "border-slate-400 bg-white"}`}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
@@ -4146,10 +4183,12 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
   const selectedLaunchGroup = activePlayerGroups.find((group) => String(group.id || "") === String(selectedLaunchGroupId)) || null;
   const selectedSessionPlayers = activeSessionPlayersForSession(state, selectedSmsSession?.id);
   const launchGroupPlayers = selectedLaunchGroup ? playersForGroup(state, selectedLaunchGroup.id) : [];
+  const onePlayerOptions = useMemo(() => activePlayers(state.players || []).sort((a, b) => compareNamesByFirstName(a.display_name, b.display_name)), [state.players]);
   const [templates, setTemplates] = useState(() => normalizeSmsTemplates(state.group.settings?.smsTemplates));
   const [message, setMessage] = useState(() => renderClientSmsTemplate(normalizeSmsTemplates(state.group.settings?.smsTemplates).gameUpdate, state.group, selectedSmsSession, selectedSessionPlayers));
   const [smsEnabled, setSmsEnabled] = useState(state.group.settings?.smsSendingEnabled === true);
   const [recipientScope, setRecipientScope] = useState("joined");
+  const [singleRecipientPlayerId, setSingleRecipientPlayerId] = useState("");
   const [selectedTemplateKey, setSelectedTemplateKey] = useState("gameUpdate");
   const [testPhone, setTestPhone] = useState("");
   const selectedTemplate = SMS_TEMPLATE_OPTIONS.find((template) => template.key === selectedTemplateKey) || SMS_TEMPLATE_OPTIONS[0];
@@ -4209,7 +4248,20 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
       return;
     }
 
-    await runAction("sendBroadcastText", { sessionId: selectedSmsSession?.id, message, smsEnabled, recipientScope });
+    if (recipientScope === "player" && !singleRecipientPlayerId) return;
+
+    if (selectedTemplateKey === "sessionResults") {
+      if (!selectedSmsSession) return;
+      await runAction("sendSessionResultsText", {
+        sessionId: selectedSmsSession.id,
+        smsEnabled,
+        publicUrl: playerRoundRobinUrl(state.group),
+        recipientPlayerId: recipientScope === "player" ? singleRecipientPlayerId : "",
+      });
+      return;
+    }
+
+    await runAction("sendBroadcastText", { sessionId: selectedSmsSession?.id, message, smsEnabled, recipientScope, recipientPlayerId: singleRecipientPlayerId });
   }
 
   async function sendGroupLaunchText() {
@@ -4259,6 +4311,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
             <option value="joined">Current joined players</option>
             <option value="invited">All invited players not joined/declined</option>
             <option value="session">All match players except declined</option>
+            <option value="player">One saved player</option>
             <option value="all">All saved active players</option>
           </select>
           {isPendingReminder && (
@@ -4267,6 +4320,19 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
             </span>
           )}
         </label>
+        {recipientScope === "player" && (
+          <label className="block text-sm font-bold text-slate-600 lg:col-span-2">
+            Saved player
+            <select value={singleRecipientPlayerId} onChange={(event) => setSingleRecipientPlayerId(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold">
+              <option value="">Select one player</option>
+              {onePlayerOptions.map((player) => (
+                <option key={player.id} value={player.id}>
+                  {player.display_name}{player.phone ? ` - ${player.phone}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <label className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-sm font-black text-slate-700">
           <input type="checkbox" checked={smsEnabled} onChange={(event) => toggleSmsSending(event.target.checked)} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
           SMS sending enabled
@@ -4289,7 +4355,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
         <button
           type="button"
           onClick={sendSelectedText}
-          disabled={["sendBroadcastText", "sendSessionReminderText"].includes(actionLoading) || !message.trim() || !selectedSmsSession}
+          disabled={["sendBroadcastText", "sendSessionReminderText", "sendSessionResultsText"].includes(actionLoading) || !message.trim() || !selectedSmsSession || (!isPendingReminder && recipientScope === "player" && !singleRecipientPlayerId)}
           className="rounded-lg bg-teal-700 px-4 py-3 font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
         >
           {smsEnabled ? `Send ${selectedTemplate.label}` : `Log ${selectedTemplate.label}`}
@@ -4685,9 +4751,9 @@ function ladderMovementLabel(ladder) {
 }
 
 function ladderMatchButtonClass(session) {
-  if (session?.status === "done") return "border-emerald-300 bg-emerald-50 text-emerald-950 hover:border-emerald-500 hover:bg-emerald-100";
-  if (session?.status === "cancelled") return "border-red-300 bg-red-50 text-red-950 hover:border-red-500 hover:bg-red-100";
-  return "border-violet-200 bg-violet-50 text-slate-800 hover:border-violet-400 hover:bg-white";
+  if (session?.status === "done") return "border-2 border-emerald-500 bg-emerald-50 text-emerald-950 hover:border-emerald-700 hover:bg-emerald-100";
+  if (session?.status === "cancelled") return "border-2 border-red-500 bg-red-50 text-red-950 hover:border-red-700 hover:bg-red-100";
+  return "border-2 border-violet-400 bg-violet-50 text-slate-800 hover:border-violet-600 hover:bg-white";
 }
 
 function compareNamesByFirstName(firstName, secondName) {
