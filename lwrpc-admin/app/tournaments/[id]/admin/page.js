@@ -5,6 +5,13 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import {
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
+import {
   bracketByDivision,
   bracketMatchesById,
   bracketSingleGameScore,
@@ -637,6 +644,7 @@ function CourtCard({ court, match, selectedPendingId, actionLoading, runAction, 
 }
 
 function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
+  const [chartsReady, setChartsReady] = useState(false);
   const bracketDetails = useMemo(() => bracketMatchesById(state.matches, state.teams, state.divisions, state.tournament.settings), [state.divisions, state.matches, state.teams, state.tournament.settings]);
   const matches = useMemo(() => applyBracketMatchDetails(state.matches, bracketDetails), [bracketDetails, state.matches]);
   const busyTeamIds = useMemo(() => busyTeams(matches), [matches]);
@@ -644,6 +652,10 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
   const queueStatus = useMemo(() => tournamentQueueStatus(matches, state.courts), [matches, state.courts]);
   const insights = useMemo(() => schedulingInsights(matches, state.courts), [matches, state.courts]);
   const queueRows = useMemo(() => matchQueueMetrics(pendingMatches, matches, busyTeamIds), [busyTeamIds, pendingMatches, matches]);
+
+  useEffect(() => {
+    setChartsReady(true);
+  }, []);
 
   return (
     <section className="mt-5 space-y-5">
@@ -686,13 +698,28 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
 
             return (
             <div key={group.name} className={`rounded-xl border border-blue-300/20 border-l-4 ${colors.border} ${colors.panel} p-4`}>
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-black">{group.name}</h3>
-                <span className={`rounded-full px-3 py-1 text-xs font-black ${colors.badge}`}>{group.pending} pending</span>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="break-words text-lg font-black">{group.name}</h3>
+                    <span className={`rounded-full px-3 py-1 text-xs font-black ${colors.badge}`}>{group.pending} pending</span>
+                  </div>
+                  <div className="mt-4 text-3xl font-black">{group.completionPercent}%</div>
+                  <div className="text-sm font-semibold text-blue-100">{group.heat}</div>
+                  <div className={`mt-1 text-sm font-semibold ${colors.accent}`}>Progress: {group.progressPercent}% - Avg Rest: {group.averageRestMinutes} min</div>
+                </div>
+                <div className="w-28 shrink-0 sm:w-32">
+                  {chartsReady ? (
+                    <TournamentDivisionProgressDonut
+                      completed={group.completed}
+                      remaining={Math.max(0, group.total - group.completed)}
+                      percentage={group.completionPercent}
+                    />
+                  ) : (
+                    <div className="h-28 rounded-xl bg-white/10" />
+                  )}
+                </div>
               </div>
-              <div className="mt-4 text-3xl font-black">{group.completionPercent}%</div>
-              <div className="text-sm font-semibold text-blue-100">{group.heat}</div>
-              <div className={`mt-1 text-sm font-semibold ${colors.accent}`}>Progress: {group.progressPercent}% - Avg Rest: {group.averageRestMinutes} min</div>
             </div>
             );
           })}
@@ -750,6 +777,57 @@ function StatusMetric({ label, value }) {
     <div className="rounded-xl border border-blue-300/10 bg-white/5 p-4">
       <div className="text-3xl font-black text-white">{value}</div>
       <div className="text-sm font-semibold text-blue-200">{label}</div>
+    </div>
+  );
+}
+
+const tournamentChartTooltipStyle = {
+  borderRadius: "12px",
+  border: "1px solid #164e63",
+  background: "#0f172a",
+  color: "#ffffff",
+  boxShadow: "0 12px 30px -20px rgba(15,23,42,0.75)",
+  fontWeight: 700,
+};
+
+function TournamentDivisionProgressDonut({ completed, remaining, percentage }) {
+  const chartValue = Math.max(0, Math.min(100, Number(percentage || 0)));
+  const completedCount = Math.max(0, Number(completed || 0));
+  const remainingCount = Math.max(0, Number(remaining || 0));
+  const data = completedCount + remainingCount > 0
+    ? [
+        { name: "Completed", value: completedCount, fill: "#22c55e" },
+        { name: "Remaining", value: remainingCount, fill: "#1e3a8a" },
+      ]
+    : [{ name: "No Matches", value: 1, fill: "#1e3a8a" }];
+
+  return (
+    <div className="relative h-28 sm:h-32">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius="58%"
+            outerRadius="86%"
+            paddingAngle={completedCount && remainingCount ? 3 : 0}
+            startAngle={90}
+            endAngle={-270}
+            stroke="#0f172a"
+            strokeWidth={3}
+          >
+            {data.map((entry) => (
+              <Cell key={entry.name} fill={entry.fill} />
+            ))}
+          </Pie>
+          <Tooltip contentStyle={tournamentChartTooltipStyle} />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <div className="text-xl font-black text-white">{chartValue}%</div>
+        <div className="text-[9px] font-black uppercase tracking-wide text-blue-100">Done</div>
+      </div>
     </div>
   );
 }
