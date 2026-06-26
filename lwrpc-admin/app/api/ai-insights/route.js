@@ -284,6 +284,8 @@ function buildInsightSnapshot(data) {
       if (complete < expectedLines) {
         lineupNeeds.push({
           matchId: match.id,
+          divisionId: match.division_id,
+          division: match.divisions?.name || "Division",
           date: match.scheduled_date,
           match: matchName(match),
           team: team.teamName,
@@ -397,6 +399,33 @@ function buildInsightSnapshot(data) {
     { label: "Lineup Gaps Next 14 Days", value: lineupNeeds.length, tone: lineupNeeds.length ? "amber" : "emerald" },
     { label: "Rating/Member Cleanup Items", value: cleanupSuggestions.length, tone: cleanupSuggestions.length ? "amber" : "emerald" },
   ];
+  const divisionSchedulingInsights = data.divisions
+    .filter((division) => division.is_active !== false && division.leagues?.seasons?.is_active !== false)
+    .map((division) => {
+      const divisionId = String(division.id || "");
+      const divisionMatches = publishedMatches.filter((match) => String(match.division_id || "") === divisionId);
+      const scheduledMatches = divisionMatches.filter((match) => Boolean(match.scheduled_date));
+      const completedMatches = scheduledMatches.filter(isCompletedMatch);
+      const remainingMatches = Math.max(0, scheduledMatches.length - completedMatches.length);
+      const completionPercentage = scheduledMatches.length
+        ? Math.round((completedMatches.length / scheduledMatches.length) * 100)
+        : 0;
+
+      return {
+        id: division.id,
+        division: division.name || "Division",
+        league: division.leagues?.name || "League",
+        season: division.leagues?.seasons?.name || "Season",
+        scheduledMatches: scheduledMatches.length,
+        completedMatches: completedMatches.length,
+        remainingMatches,
+        completionPercentage,
+        overdueScoreMatches: overdueScoreMatches.filter((match) => String(match.division_id || "") === divisionId).length,
+        pendingVerification: pendingVerification.filter((match) => String(match.division_id || "") === divisionId).length,
+        lineupGaps: lineupNeeds.filter((item) => String(item.divisionId || "") === divisionId).length,
+      };
+    })
+    .sort((a, b) => a.league.localeCompare(b.league) || a.division.localeCompare(b.division));
 
   return {
     generatedAt: new Date().toISOString(),
@@ -409,6 +438,7 @@ function buildInsightSnapshot(data) {
       verifiedCompleted: verifiedCompleted.length,
     },
     weekly,
+    divisionSchedulingInsights,
     overdueScoreMatches: overdueScoreMatches.slice(0, 12).map((match) => ({
       id: match.id,
       date: match.scheduled_date,
@@ -427,6 +457,10 @@ function buildInsightSnapshot(data) {
       ...anomalies.slice(0, 20).map((item) => `${item.title}: ${item.detail}`),
     ],
   };
+}
+
+function isCompletedMatch(match) {
+  return match?.score_status === "verified" || match?.status === "completed";
 }
 
 function localAskAnswer(question, snapshot) {

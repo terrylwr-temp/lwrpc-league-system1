@@ -1137,12 +1137,17 @@ export default function DivisionsPage() {
                               <div className="text-lg font-bold text-slate-900">
                                 {division.name}
                               </div>
-                              <div className={`mt-2 inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
-                                division.is_active === false
-                                  ? "bg-slate-200 text-slate-700"
-                                  : "bg-emerald-100 text-emerald-800"
-                              }`}>
-                                {division.is_active === false ? "Inactive" : "Active"}
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
+                                  division.is_active === false
+                                    ? "bg-slate-200 text-slate-700"
+                                    : "bg-emerald-100 text-emerald-800"
+                                }`}>
+                                  {division.is_active === false ? "Inactive" : "Active"}
+                                </span>
+                                <span className="inline-flex rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-800">
+                                  Season: {division.leagues?.seasons?.name || "—"}
+                                </span>
                               </div>
                             </div>
 
@@ -1200,8 +1205,8 @@ export default function DivisionsPage() {
                           </div>
 
                           <div className="min-w-0">
-                            <div className="mt-1 text-sm text-slate-600">
-                              <span className="font-semibold text-slate-700">Season:</span>{" "}
+                            <div className="mt-1 text-sm font-bold text-slate-900">
+                              <span>Season:</span>{" "}
                               {division.leagues?.seasons?.name || "—"}
                             </div>
 

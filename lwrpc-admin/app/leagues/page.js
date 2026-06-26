@@ -532,7 +532,7 @@ export default function LeaguesPage() {
                     </div>
 
                     <div className="min-w-0">
-                      <div className="mt-1 text-sm text-slate-600">
+                      <div className="mt-1 text-sm font-bold text-slate-900">
                         Season: {league.seasons?.name || "—"}
                       </div>
                       <div className="mt-2 flex flex-wrap gap-2">

@@ -2,6 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import AppHeader from "../components/AppHeader";
 import LoadingScreen from "../components/LoadingScreen";
 import { requireRole, supabase } from "../lib/auth";
@@ -25,6 +32,11 @@ export default function AiInsightsPage() {
   const [answerMeta, setAnswerMeta] = useState(null);
   const [loadingSnapshot, setLoadingSnapshot] = useState(false);
   const [asking, setAsking] = useState(false);
+  const [chartsReady, setChartsReady] = useState(false);
+
+  useEffect(() => {
+    setChartsReady(true);
+  }, []);
 
   const fetchWithToken = useCallback(async function fetchWithToken(path, options = {}) {
     const { data } = await supabase.auth.getSession();
@@ -261,6 +273,12 @@ export default function AiInsightsPage() {
           )}
         </section>
 
+        <SchedulingInsightsPanel
+          items={snapshot?.divisionSchedulingInsights || []}
+          chartsReady={chartsReady}
+          loading={loadingSnapshot}
+        />
+
         <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
           <InsightPanel
             title="Score And Standings Anomalies"
@@ -292,6 +310,13 @@ export default function AiInsightsPage() {
   );
 }
 
+const chartTooltipStyle = {
+  borderRadius: "12px",
+  border: "1px solid #cbd5e1",
+  boxShadow: "0 12px 30px -20px rgba(15,23,42,0.75)",
+  fontWeight: 700,
+};
+
 function MiniMetric({ label, value, tone = "slate" }) {
   const toneClass = tone === "red"
     ? "text-red-700"
@@ -319,6 +344,111 @@ function HealthCard({ item }) {
     <div className={`rounded-2xl border p-4 shadow-sm ${toneClass}`}>
       <div className="text-xs font-black uppercase tracking-wide opacity-75">{item.label}</div>
       <div className="mt-2 text-3xl font-black">{item.value}</div>
+    </div>
+  );
+}
+
+function SchedulingInsightsPanel({ items, chartsReady, loading }) {
+  return (
+    <section className="mb-5 overflow-hidden rounded-2xl border border-white/80 bg-white shadow-[0_18px_46px_-34px_rgba(15,23,42,0.8)]">
+      <div className="border-b border-slate-200 bg-slate-50 px-4 py-3">
+        <h2 className="text-lg font-black text-slate-950">AI Scheduling Insights</h2>
+        <p className="mt-1 text-sm font-semibold text-slate-600">
+          Division progress, score follow-up, verification, and lineup gaps from the current operations snapshot.
+        </p>
+      </div>
+      <div className="p-3">
+        {items.length > 0 ? (
+          <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
+            {items.map((item) => (
+              <DivisionSchedulingCard key={item.id || `${item.league}-${item.division}`} item={item} chartsReady={chartsReady} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-8 text-center text-sm font-bold text-slate-500">
+            {loading ? "Loading division scheduling insights..." : "No active division scheduling insights are available."}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function DivisionSchedulingCard({ item, chartsReady }) {
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <div className="text-xs font-black uppercase tracking-wide text-blue-700">{item.league || "League"}</div>
+          <h3 className="mt-1 break-words text-lg font-black text-slate-950">{item.division || "Division"}</h3>
+          <div className="mt-1 text-xs font-bold text-slate-500">{item.season || "Season"}</div>
+        </div>
+        <div className="w-full sm:w-36">
+          {chartsReady ? (
+            <DivisionSchedulingPie
+              completed={item.completedMatches}
+              remaining={item.remainingMatches}
+              percentage={item.completionPercentage}
+            />
+          ) : (
+            <div className="flex h-36 items-center justify-center rounded-xl bg-slate-50 text-xs font-black text-slate-500">
+              Charts loading...
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-2">
+        <MiniMetric label="Scheduled" value={item.scheduledMatches ?? 0} />
+        <MiniMetric label="Complete" value={`${item.completionPercentage ?? 0}%`} tone={(item.completionPercentage || 0) >= 80 ? "emerald" : "slate"} />
+        <MiniMetric label="Score Follow-Up" value={item.overdueScoreMatches ?? 0} tone={item.overdueScoreMatches ? "red" : "emerald"} />
+        <MiniMetric label="Lineup Gaps" value={item.lineupGaps ?? 0} tone={item.lineupGaps ? "red" : "emerald"} />
+      </div>
+      <div className="mt-2">
+        <MiniMetric label="Pending Verification" value={item.pendingVerification ?? 0} tone={item.pendingVerification ? "red" : "emerald"} />
+      </div>
+    </div>
+  );
+}
+
+function DivisionSchedulingPie({ completed, remaining, percentage }) {
+  const chartValue = Math.max(0, Math.min(100, Number(percentage || 0)));
+  const completedCount = Math.max(0, Number(completed || 0));
+  const remainingCount = Math.max(0, Number(remaining || 0));
+  const data = completedCount + remainingCount > 0
+    ? [
+        { name: "Completed", value: completedCount, fill: "#059669" },
+        { name: "Remaining", value: remainingCount, fill: "#e2e8f0" },
+      ]
+    : [{ name: "No Matches", value: 1, fill: "#e2e8f0" }];
+
+  return (
+    <div className="relative h-36">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="value"
+            nameKey="name"
+            innerRadius="58%"
+            outerRadius="86%"
+            paddingAngle={completedCount && remainingCount ? 3 : 0}
+            startAngle={90}
+            endAngle={-270}
+            stroke="#ffffff"
+            strokeWidth={3}
+          >
+            {data.map((entry) => (
+              <Cell key={entry.name} fill={entry.fill} />
+            ))}
+          </Pie>
+          <Tooltip contentStyle={chartTooltipStyle} />
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+        <div className="text-2xl font-black text-slate-950">{chartValue}%</div>
+        <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">Complete</div>
+      </div>
     </div>
   );
 }

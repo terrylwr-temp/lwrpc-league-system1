@@ -1759,6 +1759,7 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
   const [courtLabels, setCourtLabels] = useState(() => courtLabelsFromCourts(state.courts));
   const [courtCount, setCourtCount] = useState(Math.max(1, state.courts.length || 1));
   const [startCourtNumber, setStartCourtNumber] = useState("");
+  const [matchControlHelpOpen, setMatchControlHelpOpen] = useState(false);
 
   useEffect(() => {
     setSelectedDivisionIds(activeDivisions.map((division) => division.id));
@@ -1980,7 +1981,18 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
       </div>
 
       <div className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
-        <h3 className="text-xl font-black">{currentFormatLabel} Divisions</h3>
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="text-xl font-black">{currentFormatLabel} Divisions</h3>
+          <button
+            type="button"
+            onClick={() => setMatchControlHelpOpen(true)}
+            title="Match setup button help"
+            aria-label="Match setup button help"
+            className="flex size-9 shrink-0 items-center justify-center rounded-full border border-cyan-300/60 bg-cyan-500 text-lg font-black text-white shadow-sm hover:bg-cyan-400"
+          >
+            ?
+          </button>
+        </div>
         <p className="mt-3 text-sm font-semibold text-blue-100">
           Select which active divisions to generate. Inactive divisions are hidden from standings and not shown here.
         </p>
@@ -2314,6 +2326,46 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           Reset Entire Tournament System
         </button>
       </div>
+      {matchControlHelpOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-blue-300/30 bg-slate-950 p-5 text-white shadow-2xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="text-xs font-black uppercase tracking-wide text-cyan-200">Admin Setup Help</div>
+                <h3 className="mt-1 text-2xl font-black">Match Control Buttons</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMatchControlHelpOpen(false)}
+                className="rounded-xl border border-blue-300/40 bg-blue-950 px-3 py-2 text-sm font-black text-white hover:bg-blue-900"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="mt-5 space-y-3">
+              <div className="rounded-xl border border-amber-300/30 bg-amber-400/10 p-4">
+                <div className="font-black text-amber-100">Generate Selected Round Robin</div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-amber-50">
+                  Creates the match list for the selected active divisions. It replaces existing generated matches in those selected divisions, then creates pending matches where each team plays the other teams in the same division/line.
+                </p>
+              </div>
+              <div className="rounded-xl border border-rose-300/30 bg-rose-500/10 p-4">
+                <div className="font-black text-rose-100">Reset Matches</div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-rose-50">
+                  Deletes all tournament matches, clears current court assignments, and clears the tournament activity log. It does not delete the tournament, divisions, teams, players, or courts.
+                </p>
+              </div>
+              <div className="rounded-xl border border-cyan-300/30 bg-cyan-500/10 p-4">
+                <div className="font-black text-cyan-100">Start Tournament / Reset Wait Times</div>
+                <p className="mt-2 text-sm font-semibold leading-6 text-cyan-50">
+                  Does not generate matches. It puts all non-completed matches back into pending, clears court assignments and assignment/completion timestamps, and resets the queue/wait-time clock to now.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
