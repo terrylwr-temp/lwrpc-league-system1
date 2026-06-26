@@ -705,7 +705,7 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
                     <span className={`rounded-full px-3 py-1 text-xs font-black ${colors.badge}`}>{group.pending} pending</span>
                   </div>
                   <div className="text-sm font-semibold text-blue-100">{group.heat}</div>
-                  <div className={`mt-1 text-sm font-semibold ${colors.accent}`}>Progress: {group.progressPercent}% - Avg Rest: {group.averageRestMinutes} min</div>
+                  <div className={`mt-1 text-sm font-semibold ${colors.accent}`}>Avg Rest: {group.averageRestMinutes} min</div>
                 </div>
                 <div className="w-28 shrink-0 sm:w-32">
                   {chartsReady ? (
