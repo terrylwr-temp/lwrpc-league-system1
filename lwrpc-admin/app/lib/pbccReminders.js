@@ -4,6 +4,7 @@ import { loadServerSystemSettings } from "./serverEmailTemplates";
 const DEFAULT_TIME_ZONE = "America/New_York";
 const PBCC_REMINDER_LOG_TYPE = "reminder";
 const PBCC_REMINDER_KIND = "pbcc_match_reminder";
+const PBCC_PUSH_FALLBACK_SMS_SUFFIX = "To receive PBCourtCommand app notifications instead of texts, open the system and tap the pickleball icon in the top right and make sure your phone allows app notifications.";
 
 function sendSmsMessages(options) {
   return sendSmsMessagesWithFallback({
@@ -12,6 +13,7 @@ function sendSmsMessages(options) {
     appNotificationTitle: "PBCourtCommand",
     appNotificationUrl: options?.appNotificationUrl || options?.publicUrl || "/pbcc/player",
     appNotificationIcon: "/favicon.ico",
+    fallbackSmsSuffix: options?.fallbackSmsSuffix || PBCC_PUSH_FALLBACK_SMS_SUFFIX,
   });
 }
 

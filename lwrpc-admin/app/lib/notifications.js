@@ -18,7 +18,15 @@ function twilioFromPhoneNumber() {
   return normalizePhoneNumber(process.env.TWILIO_FROM_PHONE_NUMBER);
 }
 
-export async function sendSmsMessages({ phones, body, preferAppNotifications = false, appNotificationTitle, appNotificationUrl, appNotificationIcon }) {
+function appendSmsSuffix(body, suffix) {
+  const cleanBody = String(body || "").trim();
+  const cleanSuffix = String(suffix || "").trim();
+  if (!cleanSuffix) return cleanBody;
+  if (cleanBody.includes(cleanSuffix)) return cleanBody;
+  return `${cleanBody}\n\n${cleanSuffix}`.trim();
+}
+
+export async function sendSmsMessages({ phones, body, preferAppNotifications = false, appNotificationTitle, appNotificationUrl, appNotificationIcon, fallbackSmsSuffix = "" }) {
   const recipients = cleanList(phones).map(normalizePhoneNumber).filter(Boolean);
 
   if (recipients.length === 0) {
@@ -39,6 +47,9 @@ export async function sendSmsMessages({ phones, body, preferAppNotifications = f
       })
     : { skipped: true, reason: "App Notifications disabled for this send", sent: 0, results: [], fallbackPhones: recipients };
   const smsRecipients = appResult.skipped ? recipients : appResult.fallbackPhones || recipients;
+  const smsBody = preferAppNotifications && smsRecipients.length > 0
+    ? appendSmsSuffix(body, fallbackSmsSuffix)
+    : body;
 
   if (smsRecipients.length === 0) {
     return {
@@ -83,7 +94,7 @@ export async function sendSmsMessages({ phones, body, preferAppNotifications = f
     smsRecipients.map(async (to) => {
       const payload = new URLSearchParams({
         To: to,
-        Body: body,
+        Body: smsBody,
       });
 
       if (process.env.TWILIO_MESSAGING_SERVICE_SID) {

@@ -56,6 +56,7 @@ const DEFAULT_ROUND_ROBIN_SCORING = {
   winBy: 1,
   scoreType: "standard",
 };
+const PBCC_PUSH_FALLBACK_SMS_SUFFIX = "To receive PBCourtCommand app notifications instead of texts, open the system and tap the pickleball icon in the top right and make sure your phone allows app notifications.";
 const WEEKDAY_VALUES = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
 function sendSmsMessages(options) {
@@ -65,6 +66,7 @@ function sendSmsMessages(options) {
     appNotificationTitle: "PBCourtCommand",
     appNotificationUrl: options?.appNotificationUrl || options?.publicUrl || "/pbcc/player",
     appNotificationIcon: "/favicon.ico",
+    fallbackSmsSuffix: options?.fallbackSmsSuffix || PBCC_PUSH_FALLBACK_SMS_SUFFIX,
   });
 }
 

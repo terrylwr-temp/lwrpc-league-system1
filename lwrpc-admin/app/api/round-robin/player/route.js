@@ -6,6 +6,8 @@ import { loadServerSystemSettings } from "../../../lib/serverEmailTemplates";
 
 export const runtime = "nodejs";
 
+const PBCC_PUSH_FALLBACK_SMS_SUFFIX = "To receive PBCourtCommand app notifications instead of texts, open the system and tap the pickleball icon in the top right and make sure your phone allows app notifications.";
+
 function sendSmsMessages(options) {
   return sendSmsMessagesWithFallback({
     ...options,
@@ -13,6 +15,7 @@ function sendSmsMessages(options) {
     appNotificationTitle: "PBCourtCommand",
     appNotificationUrl: options?.appNotificationUrl || options?.publicUrl || "/pbcc/player",
     appNotificationIcon: "/favicon.ico",
+    fallbackSmsSuffix: options?.fallbackSmsSuffix || PBCC_PUSH_FALLBACK_SMS_SUFFIX,
   });
 }
 
