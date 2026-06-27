@@ -1655,10 +1655,30 @@ export default function CaptainDashboardPage() {
       .join("");
   }
 
-  function setupPlayerEmailRecipients() {
+  function setupPlayerEmailRecipients({ includeAllTeamPlayers = false } = {}) {
+    if (includeAllTeamPlayers) {
+      return uniqueSetupPlayerEmails(setupRoster);
+    }
+
+    const selectedMemberIds = new Set(
+      setupLineups
+        .flatMap((lineup) => [
+          lineup.player_1_member_id,
+          lineup.player_2_member_id,
+        ])
+        .filter(Boolean)
+        .map(String)
+    );
+
+    return uniqueSetupPlayerEmails(
+      setupRoster.filter((row) => selectedMemberIds.has(String(row.member_id)))
+    );
+  }
+
+  function uniqueSetupPlayerEmails(rosterRows) {
     return [
       ...new Set(
-        setupRoster
+        rosterRows
           .map((row) => String(row.members?.email || "").trim())
           .filter(Boolean)
       ),
@@ -1948,12 +1968,13 @@ export default function CaptainDashboardPage() {
     const emails = setupPlayerEmailRecipients();
 
     if (emails.length === 0) {
-      alert("No player email addresses were found for this team.");
+      alert("No email addresses were found for the players listed on this match setup.");
       return;
     }
 
     setSetupPlayerEmailConfirm({
       emails,
+      emailAllPlayers: false,
       matchLabel: `${setupMatch.home_team?.name || "Home"} vs ${setupMatch.away_team?.name || "Away"}`,
       teamName: setupTeam.name || "Team",
     });
@@ -1962,11 +1983,13 @@ export default function CaptainDashboardPage() {
   async function emailMatchSetupPlayers() {
     if (!setupMatch || !setupTeam) return;
 
-    const emails = setupPlayerEmailRecipients();
+    const emails = setupPlayerEmailRecipients({
+      includeAllTeamPlayers: setupPlayerEmailConfirm?.emailAllPlayers === true,
+    });
 
     if (emails.length === 0) {
       setSetupPlayerEmailConfirm(null);
-      alert("No player email addresses were found for this team.");
+      alert("No email addresses were found for the players listed on this match setup.");
       return;
     }
 
@@ -2578,15 +2601,32 @@ export default function CaptainDashboardPage() {
                 </h3>
                 <div className="mt-3 space-y-2 text-sm font-semibold leading-6 text-slate-700">
                   <p>
-                    This will email the match setup for <strong>{setupPlayerEmailConfirm.teamName}</strong> in <strong>{setupPlayerEmailConfirm.matchLabel}</strong> to {setupPlayerEmailConfirm.emails.length} player email address{setupPlayerEmailConfirm.emails.length === 1 ? "" : "es"}.
+                    This will email the match setup for <strong>{setupPlayerEmailConfirm.teamName}</strong> in <strong>{setupPlayerEmailConfirm.matchLabel}</strong> to {setupPlayerEmailConfirm.emails.length} {setupPlayerEmailConfirm.emailAllPlayers ? "team-player" : "listed-player"} email address{setupPlayerEmailConfirm.emails.length === 1 ? "" : "es"}.
                   </p>
                   <p>
                     The email will include the match information, the setup teams, and captain contact information for both teams.
                   </p>
                   <p>
-                    Each unique player email address will receive one email, even if a player is listed on more than one match setup team. Text messages will not be sent.
+                    {setupPlayerEmailConfirm.emailAllPlayers ? "All team players with email addresses will be emailed." : "Only players listed on this Match Setup screen will be emailed."} Each unique player email address will receive one email, even if a player is listed on more than one match setup team. Text messages will not be sent.
                   </p>
                 </div>
+                <label className="mt-4 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-bold text-emerald-950">
+                  <input
+                    type="checkbox"
+                    checked={setupPlayerEmailConfirm.emailAllPlayers === true}
+                    onChange={(event) => {
+                      const emailAllPlayers = event.target.checked;
+                      setSetupPlayerEmailConfirm((current) => ({
+                        ...current,
+                        emailAllPlayers,
+                        emails: setupPlayerEmailRecipients({ includeAllTeamPlayers: emailAllPlayers }),
+                      }));
+                    }}
+                    disabled={emailingSetupPlayers}
+                    className="mt-1 h-4 w-4 rounded border-emerald-300 text-emerald-700 focus:ring-emerald-700"
+                  />
+                  <span>Email All Players on the Team</span>
+                </label>
                 <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
                   <button
                     type="button"
