@@ -3142,7 +3142,7 @@ function PlayerHistoryRow({ row, memberId }) {
         >
           {details.result}
         </span>
-        <span className="font-bold text-slate-900">
+        <span className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-black uppercase tracking-wide text-blue-900 shadow-sm">
           {formatDate(match?.scheduled_date)}
         </span>
         <span className="font-semibold text-slate-900">
@@ -3183,10 +3183,10 @@ function PlayerHistoryMatchGroup({ group, memberId, ratingForMember }) {
           Match
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-black text-white">
+          <span className="rounded-lg border border-amber-200 bg-amber-300 px-3 py-1 text-sm font-black uppercase tracking-wide text-slate-950 shadow-sm">
             {formatDate(match?.scheduled_date)}
           </span>
-          <span className="font-bold text-white">
+          <span className="text-base font-bold leading-tight text-white sm:text-lg">
             {details.playerTeamName} vs {details.opponentName}
           </span>
           <span className="rounded-full bg-amber-400 px-2 py-0.5 text-xs font-black uppercase text-slate-950">
