@@ -105,41 +105,28 @@ export default function TournamentDisplayPage() {
   const tournamentKey = state.tournament.slug || state.tournament.id;
   const isTop4 = isRoundRobinTop4Tournament(state.tournament.settings);
 
+  const displayControls = (
+    <TournamentDisplayControls
+      view={view}
+      rotating={rotating}
+      setView={setView}
+      setRotating={setRotating}
+      tournamentKey={tournamentKey}
+    />
+  );
+
   return (
-    <PublicShell title={tournamentDisplayName(state.tournament)} adminHref={`/tourney/${tournamentKey}/admin`} systemSettings={systemSettings}>
-      <div className="sticky top-0 z-30 mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-xl backdrop-blur sm:flex sm:flex-wrap">
-        <button
-          type="button"
-          onClick={() => setRotating((value) => !value)}
-          className={`rounded-xl px-3 py-3 text-sm font-black sm:px-4 sm:py-2 ${rotating ? "bg-rose-600 text-white" : "bg-emerald-500 text-white"}`}
-        >
-          {rotating ? "Stop Rotations" : "Start Rotations"}
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("courtsDetail")}
-          className={`rounded-xl px-3 py-3 text-sm font-black sm:px-4 sm:py-2 ${view === "courtsDetail" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
-        >
-          Court Detail
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("courtsSimple")}
-          className={`rounded-xl px-3 py-3 text-sm font-black sm:px-4 sm:py-2 ${view === "courtsSimple" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
-        >
-          Courts Only
-        </button>
-        <button
-          type="button"
-          onClick={() => setView("standings")}
-          className={`rounded-xl px-3 py-3 text-sm font-black sm:px-4 sm:py-2 ${view === "standings" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
-        >
-          Current Standings
-        </button>
-        <Link className="rounded-xl bg-amber-400 px-3 py-3 text-center text-sm font-black text-slate-950 sm:px-4 sm:py-2" href={`/tourney/${tournamentKey}/player`}>
-          Player View
-        </Link>
-      </div>
+    <PublicShell
+      title={tournamentDisplayName(state.tournament)}
+      adminHref={`/tourney/${tournamentKey}/admin`}
+      systemSettings={systemSettings}
+      headerActions={view !== "standings" ? displayControls : null}
+    >
+      {view === "standings" && (
+        <div className="sticky top-0 z-30 mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-xl backdrop-blur sm:flex sm:flex-wrap">
+          {displayControls}
+        </div>
+      )}
 
       {view === "standings" ? (
         isEliminationTournament(state.tournament.settings) ? (
@@ -214,6 +201,46 @@ export default function TournamentDisplayPage() {
   );
 }
 
+function TournamentDisplayControls({ view, rotating, setView, setRotating, tournamentKey }) {
+  const controlClass = "rounded-xl px-3 py-3 text-center text-sm font-black sm:px-4 sm:py-2";
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setRotating((value) => !value)}
+        className={`${controlClass} ${rotating ? "bg-rose-600 text-white" : "bg-emerald-500 text-white"}`}
+      >
+        {rotating ? "Stop Rotations" : "Start Rotations"}
+      </button>
+      <button
+        type="button"
+        onClick={() => setView("courtsDetail")}
+        className={`${controlClass} ${view === "courtsDetail" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+      >
+        Court Detail
+      </button>
+      <button
+        type="button"
+        onClick={() => setView("courtsSimple")}
+        className={`${controlClass} ${view === "courtsSimple" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+      >
+        Courts Only
+      </button>
+      <button
+        type="button"
+        onClick={() => setView("standings")}
+        className={`${controlClass} ${view === "standings" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+      >
+        Current Standings
+      </button>
+      <Link className={`${controlClass} bg-amber-400 text-slate-950 hover:bg-amber-300`} href={`/tourney/${tournamentKey}/player`}>
+        Player View
+      </Link>
+    </>
+  );
+}
+
 function TournamentDisplayQueueSummary({ queueStatus, insights }) {
   return (
     <div className="mb-3 overflow-x-auto rounded-2xl border border-white/10 bg-slate-900/90 p-3 shadow">
@@ -237,7 +264,7 @@ function TournamentDisplayQueueSummary({ queueStatus, insights }) {
   );
 }
 
-function PublicShell({ title, error = "", children, adminHref = "", systemSettings = DEFAULT_SYSTEM_SETTINGS }) {
+function PublicShell({ title, error = "", children, adminHref = "", systemSettings = DEFAULT_SYSTEM_SETTINGS, headerActions = null }) {
   const logoUrl = systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
 
@@ -260,10 +287,15 @@ function PublicShell({ title, error = "", children, adminHref = "", systemSettin
                 <h1 className="mt-1 break-words text-2xl font-black leading-tight sm:text-3xl md:text-4xl">{title}</h1>
               </div>
             </div>
-            {adminHref && (
-              <Link href={adminHref} className="w-full rounded-xl bg-amber-400 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-amber-300 sm:w-fit sm:py-2">
-                Main System
-              </Link>
+            {(headerActions || adminHref) && (
+              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+                {headerActions}
+                {adminHref && (
+                  <Link href={adminHref} className="rounded-xl bg-amber-400 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-amber-300 sm:py-2">
+                    Main System
+                  </Link>
+                )}
+              </div>
             )}
           </div>
         </div>
