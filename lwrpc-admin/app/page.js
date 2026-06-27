@@ -49,8 +49,7 @@ export default function DashboardPage() {
   const [ready, setReady] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState("");
   const [dashboardCounts, setDashboardCounts] = useState(null);
-  const [dashboardScope, setDashboardScope] = useState("active");
-  const [dashboardFilter, setDashboardFilter] = useState("scope");
+  const [dashboardFilter, setDashboardFilter] = useState("active");
   const [dashboardRosterCountMode, setDashboardRosterCountMode] = useState("assignments");
   const [dashboardGamesPlayedMode, setDashboardGamesPlayedMode] = useState("games");
   const [dashboardFilterOptions, setDashboardFilterOptions] = useState({
@@ -107,7 +106,7 @@ export default function DashboardPage() {
 
     const [membersCount, leagueData, teamData] = await Promise.all([
       countRows("members"),
-      loadDashboardLeagues(today, dashboardScope, dashboardFilter),
+      loadDashboardLeagues(today, dashboardFilter),
       loadTeamsForDashboard(),
     ]);
 
@@ -176,7 +175,7 @@ export default function DashboardPage() {
         standings: scopedStandings,
       }),
     });
-  }, [dashboardFilter, dashboardScope]);
+  }, [dashboardFilter]);
 
   const loadDashboardFilterOptions = useCallback(async function loadDashboardFilterOptions() {
     const [{ data: seasonData }, { data: leagueData }, { data: divisionData }] = await Promise.all([
@@ -713,7 +712,7 @@ export default function DashboardPage() {
   }
 
   const scopeHelper =
-    dashboardFilterLabel(dashboardFilter, dashboardFilterOptions, dashboardScope);
+    dashboardFilterLabel(dashboardFilter, dashboardFilterOptions);
   const playersOnTeamsCount =
     dashboardRosterCountMode === "unique"
       ? dashboardCounts?.playersOnTeamsUnique
@@ -973,7 +972,8 @@ export default function DashboardPage() {
                     onChange={(event) => setDashboardFilter(event.target.value)}
                     className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm"
                   >
-                    <option value="scope">Use Active / Current Toggle</option>
+                    <option value="active">Active Seasons</option>
+                    <option value="current">Not Active (Current Entries)</option>
                     <option value="all">All Seasons</option>
                     <optgroup label="Seasons">
                       {dashboardFilterOptions.seasons.map((season) => (
@@ -998,36 +998,6 @@ export default function DashboardPage() {
                     </optgroup>
                   </select>
                 </label>
-
-                <div className="flex rounded-2xl bg-white/10 p-1 ring-1 ring-white/15">
-                  <button
-                    type="button"
-                    onClick={() => setDashboardScope("active")}
-                    className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
-                      dashboardScope === "active"
-                        ? "bg-white text-slate-950"
-                        : "text-blue-100 hover:bg-white/10"
-                    }`}
-                  >
-                    Active Season
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setDashboardScope("current")}
-                    className={`rounded-xl px-3 py-2 text-xs font-black uppercase tracking-wide transition ${
-                      dashboardScope === "current"
-                        ? "bg-white text-slate-950"
-                        : "text-blue-100 hover:bg-white/10"
-                    }`}
-                  >
-                    Not Active (Current Entries)
-                  </button>
-                </div>
-                {dashboardFilter !== "scope" && (
-                  <div className="max-w-sm text-right text-[11px] font-bold text-blue-100">
-                    Active / Current only applies when the dashboard scope uses the toggle.
-                  </div>
-                )}
               </div>
             </div>
           </div>
@@ -1524,9 +1494,14 @@ function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onTo
             Charts, progress, standings leaders, and division-level trend views for {scopeLabel.toLowerCase()} operations.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="rounded-full bg-white px-4 py-2 text-xs font-black uppercase tracking-wide text-slate-600 shadow-sm ring-1 ring-slate-200">
-            {scopeLabel}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <div className="min-w-64 rounded-xl border border-blue-200 bg-white px-5 py-3 shadow-sm ring-1 ring-slate-200">
+            <div className="text-xs font-black uppercase tracking-wide text-blue-700">
+              Dashboard Scope
+            </div>
+            <div className="mt-1 text-xl font-black leading-tight text-slate-950">
+              {scopeLabel}
+            </div>
           </div>
           <button
             type="button"
@@ -1837,13 +1812,12 @@ function EmptyChartState({ label }) {
   );
 }
 
-function dashboardFilterLabel(dashboardFilter, filterOptions, dashboardScope) {
-  const [filterType, filterId] = String(dashboardFilter || "scope").split(":");
+function dashboardFilterLabel(dashboardFilter, filterOptions) {
+  const [filterType, filterId] = String(dashboardFilter || "active").split(":");
 
-  if (filterType === "all") return "All-season";
-  if (filterType === "scope") {
-    return dashboardScope === "current" ? "Current-entry" : "Active-season";
-  }
+  if (filterType === "active") return "Active Seasons";
+  if (filterType === "current") return "Not Active (Current Entries)";
+  if (filterType === "all") return "All Seasons";
 
   const optionLists = {
     season: filterOptions?.seasons || [],
@@ -1875,7 +1849,7 @@ async function countRows(tableName, applyFilters) {
   return count ?? 0;
 }
 
-async function loadDashboardLeagues(today, dashboardScope, dashboardFilter) {
+async function loadDashboardLeagues(today, dashboardFilter) {
   const [{ data, error }, { data: divisionData, error: divisionError }] = await Promise.all([
     supabase
       .from("leagues")
@@ -1900,7 +1874,7 @@ async function loadDashboardLeagues(today, dashboardScope, dashboardFilter) {
 
   const allLeagues = data || [];
   const allDivisions = divisionData || [];
-  const [filterType, filterId] = String(dashboardFilter || "scope").split(":");
+  const [filterType, filterId] = String(dashboardFilter || "active").split(":");
 
   if (filterType === "all") {
     return {
@@ -1942,7 +1916,7 @@ async function loadDashboardLeagues(today, dashboardScope, dashboardFilter) {
   }
 
   const scopedLeagues = allLeagues.filter((league) => {
-    if (dashboardScope === "current") return true;
+    if (filterType === "current") return true;
 
     const season = league.seasons;
     if (!season?.start_date || !season?.end_date) return false;
