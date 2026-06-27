@@ -90,6 +90,7 @@ export default function CaptainDashboardPage() {
   const [setupDivisionNotesMatchId, setSetupDivisionNotesMatchId] = useState(null);
   const [savingSetup, setSavingSetup] = useState(false);
   const [emailingSetupPlayers, setEmailingSetupPlayers] = useState(false);
+  const [setupPlayerEmailConfirm, setSetupPlayerEmailConfirm] = useState(null);
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
   const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
@@ -1452,6 +1453,7 @@ export default function CaptainDashboardPage() {
     setSetupDirty(false);
     setSetupDivisionNotesMatchId(null);
     setEmailingSetupPlayers(false);
+    setSetupPlayerEmailConfirm(null);
   }
 
   function closeMatchSetup() {
@@ -1651,6 +1653,16 @@ export default function CaptainDashboardPage() {
         ].join(" ");
       })
       .join("");
+  }
+
+  function setupPlayerEmailRecipients() {
+    return [
+      ...new Set(
+        setupRoster
+          .map((row) => String(row.members?.email || "").trim())
+          .filter(Boolean)
+      ),
+    ];
   }
 
   function setupLineWarning(lineup) {
@@ -1915,7 +1927,7 @@ export default function CaptainDashboardPage() {
     return emailSent + smsSent > 0;
   }
 
-  async function emailMatchSetupPlayers() {
+  function requestEmailMatchSetupPlayers() {
     if (!setupMatch || !setupTeam) return;
 
     const validationIssues = setupValidationIssues();
@@ -1933,15 +1945,27 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    const emails = [
-      ...new Set(
-        setupRoster
-          .map((row) => String(row.members?.email || "").trim())
-          .filter(Boolean)
-      ),
-    ];
+    const emails = setupPlayerEmailRecipients();
 
     if (emails.length === 0) {
+      alert("No player email addresses were found for this team.");
+      return;
+    }
+
+    setSetupPlayerEmailConfirm({
+      emails,
+      matchLabel: `${setupMatch.home_team?.name || "Home"} vs ${setupMatch.away_team?.name || "Away"}`,
+      teamName: setupTeam.name || "Team",
+    });
+  }
+
+  async function emailMatchSetupPlayers() {
+    if (!setupMatch || !setupTeam) return;
+
+    const emails = setupPlayerEmailRecipients();
+
+    if (emails.length === 0) {
+      setSetupPlayerEmailConfirm(null);
       alert("No player email addresses were found for this team.");
       return;
     }
@@ -2007,6 +2031,7 @@ export default function CaptainDashboardPage() {
       return;
     }
 
+    setSetupPlayerEmailConfirm(null);
     alert(`Match setup emailed to ${emailSent} player${emailSent === 1 ? "" : "s"}.`);
   }
 
@@ -2445,7 +2470,7 @@ export default function CaptainDashboardPage() {
 
                 <button
                   type="button"
-                  onClick={emailMatchSetupPlayers}
+                  onClick={requestEmailMatchSetupPlayers}
                   disabled={savingSetup || emailingSetupPlayers}
                   className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50 sm:py-2"
                 >
@@ -2525,7 +2550,7 @@ export default function CaptainDashboardPage() {
 
               <button
                 type="button"
-                onClick={emailMatchSetupPlayers}
+                onClick={requestEmailMatchSetupPlayers}
                 disabled={savingSetup || emailingSetupPlayers}
                 className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
               >
@@ -2542,6 +2567,47 @@ export default function CaptainDashboardPage() {
             </div>
             </div>
           </div>
+          {setupPlayerEmailConfirm && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/55 p-4">
+              <div className="w-full max-w-lg rounded-2xl border border-emerald-200 bg-white p-5 text-slate-900 shadow-2xl">
+                <div className="text-xs font-black uppercase tracking-wide text-emerald-700">
+                  Email Players
+                </div>
+                <h3 className="mt-2 text-xl font-black text-slate-950">
+                  Send Match Setup to Players?
+                </h3>
+                <div className="mt-3 space-y-2 text-sm font-semibold leading-6 text-slate-700">
+                  <p>
+                    This will email the match setup for <strong>{setupPlayerEmailConfirm.teamName}</strong> in <strong>{setupPlayerEmailConfirm.matchLabel}</strong> to {setupPlayerEmailConfirm.emails.length} player email address{setupPlayerEmailConfirm.emails.length === 1 ? "" : "es"}.
+                  </p>
+                  <p>
+                    The email will include the match information, the setup teams, and captain contact information for both teams.
+                  </p>
+                  <p>
+                    Each unique player email address will receive one email, even if a player is listed on more than one match setup team. Text messages will not be sent.
+                  </p>
+                </div>
+                <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setSetupPlayerEmailConfirm(null)}
+                    disabled={emailingSetupPlayers}
+                    className="rounded-xl bg-slate-200 px-5 py-2.5 text-sm font-bold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={emailMatchSetupPlayers}
+                    disabled={emailingSetupPlayers}
+                    className="rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-bold text-white hover:bg-emerald-800 disabled:opacity-50"
+                  >
+                    {emailingSetupPlayers ? "Emailing..." : "Send Email"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
           {setupDivisionRulesNotice && (
             <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/55 p-4">
               <div className="w-full max-w-xl rounded-2xl border border-blue-200 bg-white p-5 text-slate-900 shadow-2xl">
