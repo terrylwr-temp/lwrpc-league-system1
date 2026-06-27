@@ -89,6 +89,7 @@ export default function CaptainDashboardPage() {
   const [setupDirty, setSetupDirty] = useState(false);
   const [setupDivisionNotesMatchId, setSetupDivisionNotesMatchId] = useState(null);
   const [savingSetup, setSavingSetup] = useState(false);
+  const [emailingSetupPlayers, setEmailingSetupPlayers] = useState(false);
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
   const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
@@ -1450,6 +1451,7 @@ export default function CaptainDashboardPage() {
     setSetupRatings([]);
     setSetupDirty(false);
     setSetupDivisionNotesMatchId(null);
+    setEmailingSetupPlayers(false);
   }
 
   function closeMatchSetup() {
@@ -1468,7 +1470,7 @@ export default function CaptainDashboardPage() {
       await Promise.all([
         supabase
           .from("team_members")
-          .select("*, members(id, first_name, last_name, self_rating, dupr_id)")
+          .select("*, members(id, first_name, last_name, email, phone, notification_preference, self_rating, dupr_id)")
           .eq("team_id", team.id)
           .order("members(last_name)", { ascending: true }),
         supabase
@@ -1632,6 +1634,23 @@ export default function CaptainDashboardPage() {
         : Number(rating).toFixed(2);
 
     return `${escapeHtml(formatMemberName(member))} (${escapeHtml(setupRatingLabel())}: ${escapeHtml(ratingText)})`;
+  }
+
+  function setupLineupsHtml() {
+    return setupLineups
+      .map((lineup) => {
+        const player1 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_1_member_id))?.members;
+        const player2 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_2_member_id))?.members;
+        const teamRating = setupTeamRating(lineup);
+
+        return [
+          `<li><strong>${matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)}:</strong>`,
+          `${setupEmailPlayerLabel(player1)} / ${setupEmailPlayerLabel(player2)}`,
+          `<strong>Team Rating:</strong> ${teamRating === null ? "NR" : escapeHtml(teamRating.toFixed(2))}`,
+          "</li>",
+        ].join(" ");
+      })
+      .join("");
   }
 
   function setupLineWarning(lineup) {
@@ -1853,20 +1872,7 @@ export default function CaptainDashboardPage() {
             : setupMatch.home_team_id
         )
       ];
-    const htmlLineups = setupLineups
-      .map((lineup) => {
-        const player1 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_1_member_id))?.members;
-        const player2 = setupRoster.find((row) => String(row.member_id) === String(lineup.player_2_member_id))?.members;
-        const teamRating = setupTeamRating(lineup);
-
-        return [
-          `<li><strong>${matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)}:</strong>`,
-          `${setupEmailPlayerLabel(player1)} / ${setupEmailPlayerLabel(player2)}`,
-          `<strong>Team Rating:</strong> ${teamRating === null ? "NR" : escapeHtml(teamRating.toFixed(2))}`,
-          "</li>",
-        ].join(" ");
-      })
-      .join("");
+    const htmlLineups = setupLineupsHtml();
     const template = await loadClientEmailTemplate(EMAIL_TEMPLATE_KEYS.matchSetupSaved);
     const rendered = renderEmailTemplate(template, {
       setup_team: setupTeam.name || "Team",
@@ -1907,6 +1913,101 @@ export default function CaptainDashboardPage() {
     const smsSent = Number(result?.sms?.sent || 0);
 
     return emailSent + smsSent > 0;
+  }
+
+  async function emailMatchSetupPlayers() {
+    if (!setupMatch || !setupTeam) return;
+
+    const validationIssues = setupValidationIssues();
+
+    if (validationIssues.length > 0) {
+      alert(
+        [
+          "Player email cannot be sent yet.",
+          "",
+          ...validationIssues.map((issue) => `- ${issue}`),
+          "",
+          "Complete every doubles team and clear all lineup warnings before emailing players.",
+        ].join("\n")
+      );
+      return;
+    }
+
+    const emails = [
+      ...new Set(
+        setupRoster
+          .map((row) => String(row.members?.email || "").trim())
+          .filter(Boolean)
+      ),
+    ];
+
+    if (emails.length === 0) {
+      alert("No player email addresses were found for this team.");
+      return;
+    }
+
+    const opponentTeam =
+      String(setupMatch.home_team_id) === String(setupTeam.id)
+        ? setupMatch.away_team
+        : setupMatch.home_team;
+    const template = await loadClientEmailTemplate(EMAIL_TEMPLATE_KEYS.matchSetupPlayers);
+    const rendered = renderEmailTemplate(template, {
+      setup_team: setupTeam.name || "Team",
+      opponent_team: opponentTeam?.name || "Opponent",
+      home_team: setupMatch.home_team?.name || "Home",
+      away_team: setupMatch.away_team?.name || "Away",
+      match_date: formatEmailDate(setupMatch.scheduled_date),
+      match_time: formatDisplayTime(setupMatch.scheduled_time, "Time TBD"),
+      league: setupTeam.divisions?.leagues?.name || setupMatch.divisions?.leagues?.name || "League",
+      division: setupTeam.divisions?.name || setupMatch.divisions?.name || "Division",
+      location: setupMatch.locations?.name || "Location TBD",
+      lineup_list: setupLineupsHtml(),
+      home_captain_contacts: teamCaptainContactsWithPhoneHtml(setupMatch.home_team, "Home captain contact not listed."),
+      away_captain_contacts: teamCaptainContactsWithPhoneHtml(setupMatch.away_team, "Away captain contact not listed."),
+      league_site_url: systemSettings.league_site_url,
+      main_email: systemSettings.main_email,
+    });
+
+    setEmailingSetupPlayers(true);
+
+    let response;
+    let result;
+
+    try {
+      response = await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          emails,
+          phones: [],
+          subject: rendered.subject,
+          text: rendered.text,
+          html: rendered.html,
+          smsBody: "",
+        }),
+      });
+      result = await response.json().catch(() => null);
+    } catch (error) {
+      setEmailingSetupPlayers(false);
+      alert(error.message || "Player emails could not be sent.");
+      return;
+    }
+
+    setEmailingSetupPlayers(false);
+
+    if (!response.ok || !result?.success) {
+      alert(result?.error || "Player emails could not be sent.");
+      return;
+    }
+
+    const emailSent = Number(result?.email?.sent || 0);
+
+    if (emailSent === 0) {
+      alert(result?.email?.reason || "No player emails were sent.");
+      return;
+    }
+
+    alert(`Match setup emailed to ${emailSent} player${emailSent === 1 ? "" : "s"}.`);
   }
 
   async function displayDivisionCaptains(team) {
@@ -2332,14 +2433,23 @@ export default function CaptainDashboardPage() {
                   </button>
                 )}
               </div>
-              <div className="hidden grid-cols-1 gap-2 sm:grid-cols-2 md:grid">
+              <div className="hidden grid-cols-1 gap-2 sm:grid-cols-3 md:grid">
                 <button
                   type="button"
                   onClick={saveMatchSetup}
-                  disabled={savingSetup}
+                  disabled={savingSetup || emailingSetupPlayers}
                   className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50 sm:py-2"
                 >
                   {savingSetup ? "Saving..." : "Save Match Setup"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={emailMatchSetupPlayers}
+                  disabled={savingSetup || emailingSetupPlayers}
+                  className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50 sm:py-2"
+                >
+                  {emailingSetupPlayers ? "Emailing..." : "Email Players"}
                 </button>
 
                 <button
@@ -2403,14 +2513,23 @@ export default function CaptainDashboardPage() {
                 );
               })}
             </div>
-            <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 md:hidden">
+            <div className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-3 md:hidden">
               <button
                 type="button"
                 onClick={saveMatchSetup}
-                disabled={savingSetup}
+                disabled={savingSetup || emailingSetupPlayers}
                 className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
               >
                 {savingSetup ? "Saving..." : "Save Match Setup"}
+              </button>
+
+              <button
+                type="button"
+                onClick={emailMatchSetupPlayers}
+                disabled={savingSetup || emailingSetupPlayers}
+                className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
+              >
+                {emailingSetupPlayers ? "Emailing..." : "Email Players"}
               </button>
 
               <button
@@ -4063,6 +4182,37 @@ function teamCaptainContactsHtml(team) {
   });
 
   return lines.length > 0 ? lines.join("<br />") : "Home captain contact not listed.";
+}
+
+function teamCaptainContactsWithPhoneHtml(team, fallback = "Captain contact not listed.") {
+  const contacts = [
+    { label: "Captain", member: team?.captain },
+    { label: "Co-Captain 1", member: team?.co_captain_1 },
+    { label: "Co-Captain 2", member: team?.co_captain_2 },
+  ].filter(({ member }) => member);
+  const seen = new Set();
+  const lines = [];
+
+  contacts.forEach(({ label, member }) => {
+    const key = member.email || member.phone || member.id;
+
+    if (!key || seen.has(key)) return;
+
+    seen.add(key);
+
+    const name = formatMemberName(member);
+    const email = String(member.email || "").trim();
+    const phone = formatPhoneNumberForStorage(member.phone);
+    const details = [
+      email ? `<${email}>` : "",
+      phone,
+    ].filter(Boolean);
+    const contactText = details.length > 0 ? `${name} ${details.join(" / ")}` : name;
+
+    lines.push(`${escapeHtml(label)}: ${escapeHtml(contactText)}`);
+  });
+
+  return lines.length > 0 ? lines.join("<br />") : escapeHtml(fallback);
 }
 
 function formatMemberName(member) {

@@ -3,6 +3,7 @@ import { DEFAULT_SYSTEM_SETTINGS, cachedSystemSettings } from "./systemSettings"
 export const EMAIL_TEMPLATE_KEYS = {
   scoreReminder: "score_reminder",
   matchSetupSaved: "match_setup_saved",
+  matchSetupPlayers: "match_setup_players",
   scoreSubmitted: "score_submitted",
   scoreValidated: "score_validated",
   scoreChanged: "score_changed",
@@ -54,6 +55,37 @@ export const EMAIL_TEMPLATES = [
   </p>
   <ul>{{lineup_list}}</ul>
   <p>{{opponent_setup_status}}</p>
+  <hr />
+  <p style="font-size: 12px; color: #666;">LWRPC League Management System</p>
+</div>`,
+  },
+  {
+    key: EMAIL_TEMPLATE_KEYS.matchSetupPlayers,
+    label: "Match Setup - Players",
+    description: "Sent from the Match Setup popup to all roster players on the setup team.",
+    placeholders: withCommonPlaceholders(["{{setup_team}}", "{{opponent_team}}", "{{home_team}}", "{{away_team}}", "{{match_date}}", "{{match_time}}", "{{league}}", "{{division}}", "{{location}}", "{{lineup_list}}", "{{home_captain_contacts}}", "{{away_captain_contacts}}"]),
+    defaultSubject: "Match Setup: {{setup_team}} vs {{opponent_team}}",
+    defaultBody: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
+  <h2>Match Setup</h2>
+  <p>Players,</p>
+  <p><strong>{{setup_team}}</strong> has entered the match setup for this match.</p>
+  <p>
+    <strong>League:</strong> {{league}}<br />
+    <strong>Division:</strong> {{division}}<br />
+    <strong>Match:</strong> {{home_team}} vs {{away_team}}<br />
+    <strong>Date:</strong> {{match_date}} at {{match_time}}<br />
+    <strong>Location:</strong> {{location}}
+  </p>
+  <p><strong>{{setup_team}} Match Setup:</strong></p>
+  <ul>{{lineup_list}}</ul>
+  <p>
+    <strong>{{home_team}} Captain Contacts:</strong><br />
+    {{home_captain_contacts}}
+  </p>
+  <p>
+    <strong>{{away_team}} Captain Contacts:</strong><br />
+    {{away_captain_contacts}}
+  </p>
   <hr />
   <p style="font-size: 12px; color: #666;">LWRPC League Management System</p>
 </div>`,
@@ -311,7 +343,7 @@ export function sampleTemplateValues() {
     captain_contacts: "Captain: Jane Captain <jane@example.com><br />Co-Captain 1: Pat Partner <pat@example.com>",
     division: "3.5 Mixed",
     home_team: "Lakewood Ranch Dinkers",
-    home_captain_contacts: "Captain: Jane Captain &lt;jane@example.com&gt;<br />Co-Captain 1: Pat Partner &lt;pat@example.com&gt;",
+    home_captain_contacts: "Captain: Jane Captain &lt;jane@example.com&gt; / 941-555-0101<br />Co-Captain 1: Pat Partner &lt;pat@example.com&gt; / 941-555-0102",
     league: "Spring League",
     lineup_list: "<li><strong>Team 1:</strong> Alex Player (DUPR: 3.72) / Morgan Player (DUPR: 3.51) <strong>Team Rating:</strong> 7.23</li><li><strong>Team 2:</strong> Casey Player (DUPR: 3.44) / Taylor Player (DUPR: 3.33) <strong>Team Rating:</strong> 6.77</li>",
     location: "Lakewood Ranch Country Club",
@@ -321,6 +353,7 @@ export function sampleTemplateValues() {
     matches: "<ul><li><strong>06/04/2026 at 6:00 PM</strong>: Lakewood Ranch Dinkers vs River Strand Aces (3.5 Mixed, score status: not entered)</li></ul>",
     opponent_setup_status: "Please log into the Captain Dashboard and enter your match setup if you have not already done so.",
     opponent_team: "River Strand Aces",
+    away_captain_contacts: "Captain: Ava Away &lt;ava@example.com&gt; / 941-555-0140<br />Co-Captain 1: Drew Doubles &lt;drew@example.com&gt; / 941-555-0141",
     player_name: "Sam Sample",
     previous_match_date: "06/03/2026 Wednesday",
     previous_match_time: "5:30 PM",
