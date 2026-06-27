@@ -89,6 +89,14 @@ export default function TournamentDisplayPage() {
         .map((match) => [String(match.court_id), match])
     );
   }, [state]);
+  const queueStatus = useMemo(
+    () => tournamentDisplayQueueStatus(state?.matches || []),
+    [state]
+  );
+  const queueInsights = useMemo(
+    () => tournamentDisplayQueueInsights(state?.matches || [], state?.courts || []),
+    [state]
+  );
 
   if (loading) return <PublicShell title="Loading Tournament..." />;
   if (error) return <PublicShell title="Tournament Display" error={error} />;
@@ -149,48 +157,51 @@ export default function TournamentDisplayPage() {
           </div>
         )
       ) : (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-          {state.courts.map((court) => {
-            const match = playingMatchesByCourtId[String(court.id)];
-            const colors = match ? tournamentDivisionColors(match.division?.name) : null;
+        <>
+          <TournamentDisplayQueueSummary queueStatus={queueStatus} insights={queueInsights} />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+            {state.courts.map((court) => {
+              const match = playingMatchesByCourtId[String(court.id)];
+              const colors = match ? tournamentDivisionColors(match.division?.name) : null;
 
-            return (
-              <div key={court.id} className={`rounded-2xl border-l-8 p-4 shadow sm:p-5 ${match ? `${colors.border} bg-white` : "border-l-slate-400 bg-slate-50"}`}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <div className="text-xs font-black uppercase tracking-wide text-slate-500">Court</div>
-                    <div className="text-5xl font-black leading-none text-slate-950 sm:text-6xl md:text-7xl">{courtName(court)}</div>
-                  </div>
-                  {match && (
-                    <div className="flex max-w-[62%] flex-wrap justify-end gap-2 text-[11px] font-black uppercase tracking-wide sm:text-xs">
-                      <span className={`inline-flex items-center rounded-lg border border-white/90 px-3 py-1.5 shadow-sm ring-1 ring-slate-900/10 ${colors.publicBadge}`}>
-                        {match.division?.name || "Division"}
-                      </span>
-                      <span className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-white shadow-sm ring-1 ring-white/40">
-                        {matchLineLabel(match)}
-                      </span>
+              return (
+                <div key={court.id} className={`rounded-2xl border-l-8 p-4 shadow sm:p-5 ${match ? `${colors.border} bg-white` : "border-l-slate-400 bg-slate-50"}`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <div className="text-xs font-black uppercase tracking-wide text-slate-500">Court</div>
+                      <div className="text-5xl font-black leading-none text-slate-950 sm:text-6xl md:text-7xl">{courtName(court)}</div>
                     </div>
-                  )}
-                </div>
-                {match ? (
-                  <>
-                    <h2 className="mt-2 text-xl font-black leading-tight text-slate-950 sm:text-2xl">
-                      {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
-                    </h2>
-                    {view === "courtsDetail" && (
-                      <div className="mt-4 grid grid-cols-1 gap-2 text-sm font-semibold text-slate-700">
-                        <TeamPlayers team={match.home_team} />
-                        <TeamPlayers team={match.away_team} />
+                    {match && (
+                      <div className="flex max-w-[62%] flex-wrap justify-end gap-2 text-[11px] font-black uppercase tracking-wide sm:text-xs">
+                        <span className={`inline-flex items-center rounded-lg border border-white/90 px-3 py-1.5 shadow-sm ring-1 ring-slate-900/10 ${colors.publicBadge}`}>
+                          {match.division?.name || "Division"}
+                        </span>
+                        <span className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-white shadow-sm ring-1 ring-white/40">
+                          {matchLineLabel(match)}
+                        </span>
                       </div>
                     )}
-                  </>
-                ) : (
-                  <div className="mt-8 text-3xl font-black text-emerald-700">Open</div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  </div>
+                  {match ? (
+                    <>
+                      <h2 className="mt-2 text-xl font-black leading-tight text-slate-950 sm:text-2xl">
+                        {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+                      </h2>
+                      {view === "courtsDetail" && (
+                        <div className="mt-4 grid grid-cols-1 gap-2 text-sm font-semibold text-slate-700">
+                          <TeamPlayers team={match.home_team} />
+                          <TeamPlayers team={match.away_team} />
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="mt-8 text-3xl font-black text-emerald-700">Open</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
       {selectedStandingTeam && (
         <StandingTeamDetailModal
@@ -200,6 +211,29 @@ export default function TournamentDisplayPage() {
         />
       )}
     </PublicShell>
+  );
+}
+
+function TournamentDisplayQueueSummary({ queueStatus, insights }) {
+  return (
+    <div className="mb-3 overflow-x-auto rounded-2xl border border-white/10 bg-slate-900/90 p-3 shadow">
+      <div className="flex min-w-[760px] items-center gap-4">
+        <div className="shrink-0 rounded-full bg-amber-400/25 px-4 py-2 text-sm font-black text-amber-100">
+          Estimated Finish: {insights.finishTime} | Avg Game Length: {formatDurationMinutes(insights.averageMatchMinutes)}
+        </div>
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <div className="shrink-0 text-sm font-black text-blue-100">
+            Tournament Completion: {queueStatus.completionPercent}%
+          </div>
+          <div className="h-5 min-w-0 flex-1 overflow-hidden rounded-full border border-blue-300/20 bg-slate-950">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500"
+              style={{ width: `${queueStatus.completionPercent}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -499,6 +533,55 @@ function matchesForStandingTeam(matches, team) {
       statusOrder(a.status) - statusOrder(b.status) ||
       Number(a.created_order || 0) - Number(b.created_order || 0)
     );
+}
+
+function tournamentDisplayQueueStatus(matches) {
+  const total = (matches || []).length;
+  const completed = (matches || []).filter((match) => match.status === "done").length;
+
+  return {
+    total,
+    completed,
+    remaining: Math.max(0, total - completed),
+    completionPercent: total > 0 ? Math.round((completed / total) * 100) : 0,
+  };
+}
+
+function tournamentDisplayQueueInsights(matches, courts) {
+  const averageMatchMinutes = averageCompletedMatchMinutes(matches);
+  const remaining = (matches || []).filter((match) => match.status !== "done").length;
+  const courtCount = Math.max(1, (courts || []).length);
+  const wavesRemaining = Math.max(1, Math.ceil(remaining / courtCount));
+  const finishDate = new Date(Date.now() + wavesRemaining * averageMatchMinutes * 60000);
+
+  return {
+    averageMatchMinutes,
+    finishTime: finishDate.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }),
+  };
+}
+
+function averageCompletedMatchMinutes(matches) {
+  const durations = (matches || [])
+    .filter((match) => match.status === "done" && match.assigned_at && match.completed_at)
+    .map((match) => {
+      const minutes = Math.round((new Date(match.completed_at).getTime() - new Date(match.assigned_at).getTime()) / 60000);
+      return minutes >= 5 && minutes <= 180 ? minutes : null;
+    })
+    .filter((minutes) => minutes !== null);
+
+  return durations.length > 0
+    ? Math.round(durations.reduce((sum, value) => sum + value, 0) / durations.length)
+    : 25;
+}
+
+function formatDurationMinutes(value) {
+  const totalMinutes = Number(value);
+  if (!Number.isFinite(totalMinutes) || totalMinutes < 0) return "0 min";
+  const roundedMinutes = Math.round(totalMinutes);
+  const hours = Math.floor(roundedMinutes / 60);
+  const minutes = roundedMinutes % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${minutes} min`;
 }
 
 function completedMatchCounts(matches) {
