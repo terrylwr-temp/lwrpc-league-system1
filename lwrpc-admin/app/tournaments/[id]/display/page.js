@@ -120,14 +120,8 @@ export default function TournamentDisplayPage() {
       title={tournamentDisplayName(state.tournament)}
       adminHref={`/tourney/${tournamentKey}/admin`}
       systemSettings={systemSettings}
-      headerActions={view !== "standings" ? displayControls : null}
+      headerActions={displayControls}
     >
-      {view === "standings" && (
-        <div className="sticky top-0 z-30 mb-4 grid grid-cols-2 gap-2 rounded-2xl border border-white/10 bg-slate-950/95 p-2 shadow-xl backdrop-blur sm:flex sm:flex-wrap">
-          {displayControls}
-        </div>
-      )}
-
       {view === "standings" ? (
         isEliminationTournament(state.tournament.settings) ? (
           <DisplayBracket bracketDivisions={bracketDivisions} settings={state.tournament.settings} />
@@ -202,42 +196,49 @@ export default function TournamentDisplayPage() {
 }
 
 function TournamentDisplayControls({ view, rotating, setView, setRotating, tournamentKey }) {
-  const controlClass = "rounded-xl px-3 py-3 text-center text-sm font-black sm:px-4 sm:py-2";
+  const controlClass = "rounded-xl px-2 py-2 text-center text-xs font-black sm:px-4 sm:text-sm";
 
   return (
-    <>
-      <button
-        type="button"
-        onClick={() => setRotating((value) => !value)}
-        className={`${controlClass} ${rotating ? "bg-rose-600 text-white" : "bg-emerald-500 text-white"}`}
-      >
-        {rotating ? "Stop Rotations" : "Start Rotations"}
-      </button>
-      <button
-        type="button"
-        onClick={() => setView("courtsDetail")}
-        className={`${controlClass} ${view === "courtsDetail" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
-      >
-        Court Detail
-      </button>
-      <button
-        type="button"
-        onClick={() => setView("courtsSimple")}
-        className={`${controlClass} ${view === "courtsSimple" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
-      >
-        Courts Only
-      </button>
-      <button
-        type="button"
-        onClick={() => setView("standings")}
-        className={`${controlClass} ${view === "standings" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
-      >
-        Current Standings
-      </button>
-      <Link className={`${controlClass} bg-amber-400 text-slate-950 hover:bg-amber-300`} href={`/tourney/${tournamentKey}/player`}>
-        Player View
-      </Link>
-    </>
+    <div className="grid w-full gap-2 sm:min-w-[520px] sm:max-w-[680px]">
+      <div className="grid grid-cols-3 gap-2">
+        <button
+          type="button"
+          onClick={() => setView("courtsDetail")}
+          className={`${controlClass} ${view === "courtsDetail" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+        >
+          Court Detail
+        </button>
+        <button
+          type="button"
+          onClick={() => setView("courtsSimple")}
+          className={`${controlClass} ${view === "courtsSimple" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+        >
+          Courts Only
+        </button>
+        <button
+          type="button"
+          onClick={() => setView("standings")}
+          className={`${controlClass} ${view === "standings" ? "bg-blue-700 text-white" : "bg-white text-slate-800"}`}
+        >
+          Current Standings
+        </button>
+      </div>
+      <div className="grid grid-cols-3 gap-2">
+        <button
+          type="button"
+          onClick={() => setRotating((value) => !value)}
+          className={`${controlClass} ${rotating ? "bg-rose-600 text-white" : "bg-emerald-500 text-white"}`}
+        >
+          {rotating ? "Stop Rotations" : "Start Rotations"}
+        </button>
+        <Link className={`${controlClass} bg-amber-400 text-slate-950 hover:bg-amber-300`} href={`/tourney/${tournamentKey}/player`}>
+          Player View
+        </Link>
+        <Link className={`${controlClass} bg-amber-400 text-slate-950 hover:bg-amber-300`} href={`/tourney/${tournamentKey}/admin`}>
+          Main System
+        </Link>
+      </div>
+    </div>
   );
 }
 
@@ -271,8 +272,8 @@ function PublicShell({ title, error = "", children, adminHref = "", systemSettin
   return (
     <main className="full-screen-main show-system-footer min-h-screen bg-slate-950 p-2 text-white sm:p-3">
       <div className="w-full">
-        <div className="mb-4 rounded-2xl border border-white/10 bg-white/10 p-4 shadow sm:p-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="sticky top-0 z-40 mb-4 rounded-2xl border border-white/10 bg-slate-950/95 p-3 shadow-xl backdrop-blur sm:p-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
             <div className="flex min-w-0 items-center gap-3 sm:gap-4">
               <Image
                 src={logoUrl}
@@ -288,9 +289,9 @@ function PublicShell({ title, error = "", children, adminHref = "", systemSettin
               </div>
             </div>
             {(headerActions || adminHref) && (
-              <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:justify-end">
+              <div className="w-full lg:w-auto">
                 {headerActions}
-                {adminHref && (
+                {!headerActions && adminHref && (
                   <Link href={adminHref} className="rounded-xl bg-amber-400 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-amber-300 sm:py-2">
                     Main System
                   </Link>
