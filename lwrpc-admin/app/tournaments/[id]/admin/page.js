@@ -659,26 +659,19 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
 
   return (
     <section className="mt-5 space-y-5">
-      <div className="flex items-center justify-between gap-3">
+      <div>
         <h2 className="text-2xl font-black">Tournament Status Dashboard</h2>
-        <span className="rounded-full bg-amber-400/25 px-4 py-2 text-sm font-black text-amber-100">{queueStatus.remaining} remaining</span>
       </div>
 
       <div className="rounded-2xl border border-blue-300/20 bg-blue-950/70 p-4">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
           <StatusMetric label="Total Matches" value={queueStatus.total} />
           <StatusMetric label="Completed" value={queueStatus.completed} />
+          <StatusMetric label="Remaining" value={queueStatus.remaining} />
           <StatusMetric label="On Court" value={queueStatus.onCourt} />
           <StatusMetric label="In Queue" value={queueStatus.inQueue} />
           <StatusMetric label="Ready Now" value={queueStatus.readyNow} />
           <StatusMetric label="Blocked" value={queueStatus.blocked} />
-        </div>
-        <div className="mt-4 text-sm font-semibold text-blue-100">Tournament Completion: {queueStatus.completionPercent}%</div>
-        <div className="mt-2 h-5 overflow-hidden rounded-full border border-blue-300/20 bg-slate-900">
-          <div
-            className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500"
-            style={{ width: `${queueStatus.completionPercent}%` }}
-          />
         </div>
       </div>
 
@@ -692,6 +685,15 @@ function QueueTab({ state, setSelectedPendingId, setActiveTab }) {
         <p className="mt-3 text-sm font-semibold text-blue-100">
           Based on current completed match pace, average match length is about {insights.averageMatchMinutes} minutes. Queue priority favors division and line groups with lower completion progress, available teams, and stronger rest balance.
         </p>
+        <div className="mt-4 rounded-xl border border-cyan-300/20 bg-slate-950/40 p-4">
+          <div className="text-sm font-semibold text-blue-100">Tournament Completion: {queueStatus.completionPercent}%</div>
+          <div className="mt-2 h-5 overflow-hidden rounded-full border border-blue-300/20 bg-slate-900">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500"
+              style={{ width: `${queueStatus.completionPercent}%` }}
+            />
+          </div>
+        </div>
         <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-3">
           {insights.groups.map((group) => {
             const colors = tournamentDivisionColors(group.name);
