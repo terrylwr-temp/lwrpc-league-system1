@@ -1495,11 +1495,11 @@ function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onTo
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <div className="min-w-64 rounded-xl border border-blue-200 bg-white px-5 py-3 shadow-sm ring-1 ring-slate-200">
-            <div className="text-xs font-black uppercase tracking-wide text-blue-700">
+          <div className="min-w-64 rounded-xl border border-blue-700 bg-slate-900 px-5 py-3 text-white shadow-sm ring-1 ring-slate-950/10">
+            <div className="text-xs font-black uppercase tracking-wide text-blue-200">
               Dashboard Scope
             </div>
-            <div className="mt-1 text-xl font-black leading-tight text-slate-950">
+            <div className="mt-1 text-xl font-black leading-tight text-white">
               {scopeLabel}
             </div>
           </div>

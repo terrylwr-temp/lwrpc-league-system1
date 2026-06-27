@@ -4968,10 +4968,36 @@ function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) 
 }
 
 function DashboardTeamSelector({ teams, teamStats, selectedTeamId, onSelect }) {
+  const scrollerRef = useRef(null);
+  const [scrollHints, setScrollHints] = useState({ left: false, right: false });
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return undefined;
+
+    function updateScrollHints() {
+      const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+
+      setScrollHints({
+        left: scroller.scrollLeft > 4,
+        right: scroller.scrollLeft < maxScrollLeft - 4,
+      });
+    }
+
+    updateScrollHints();
+    scroller.addEventListener("scroll", updateScrollHints, { passive: true });
+    window.addEventListener("resize", updateScrollHints);
+
+    return () => {
+      scroller.removeEventListener("scroll", updateScrollHints);
+      window.removeEventListener("resize", updateScrollHints);
+    };
+  }, [teams.length]);
+
   return (
     <div className="relative -mb-4">
-      <div className="overflow-x-auto px-2 pt-1" role="tablist" aria-label="Select team">
-        <div className="flex min-w-max items-end gap-1 pr-12">
+      <div ref={scrollerRef} className="overflow-x-auto px-2 pt-1" role="tablist" aria-label="Select team">
+        <div className="flex min-w-max items-end gap-1 pl-10 pr-10 md:pl-0 md:pr-12">
           {teams.map((team) => {
             const selected = String(team.id) === String(selectedTeamId);
             const standing = teamStats?.[team.id]?.standing || null;
@@ -4996,16 +5022,29 @@ function DashboardTeamSelector({ teams, teamStats, selectedTeamId, onSelect }) {
           })}
         </div>
       </div>
-      {teams.length > 2 && (
-        <div
-          className="pointer-events-none absolute inset-y-1 right-0 flex w-14 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent pr-2 md:hidden"
-          aria-hidden="true"
-        >
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 shadow ring-1 ring-slate-200">
-            <span className="h-2.5 w-2.5 rotate-45 border-r-2 border-t-2 border-slate-700" />
-          </span>
-        </div>
+      {scrollHints.left && (
+        <TeamScrollHint side="left" />
       )}
+      {scrollHints.right && (
+        <TeamScrollHint side="right" />
+      )}
+    </div>
+  );
+}
+
+function TeamScrollHint({ side }) {
+  const isLeft = side === "left";
+
+  return (
+    <div
+      className={`pointer-events-none absolute inset-y-1 ${isLeft ? "left-0 justify-start bg-gradient-to-r pl-2" : "right-0 justify-end bg-gradient-to-l pr-2"} flex w-14 items-center from-white via-white/90 to-transparent md:hidden`}
+      aria-hidden="true"
+    >
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white/95 shadow ring-1 ring-slate-200">
+        <span
+          className={`h-2.5 w-2.5 rotate-45 border-slate-700 ${isLeft ? "border-b-2 border-l-2" : "border-r-2 border-t-2"}`}
+        />
+      </span>
     </div>
   );
 }
