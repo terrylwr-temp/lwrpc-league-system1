@@ -695,6 +695,14 @@ function getAverageTeamRating() {
   const teamInfoDetailView = teamInfoView === "detail";
   const teamRosterDetailView = teamRosterView === "detail";
 
+  function changeTeamRosterView(nextView) {
+    setTeamRosterView(nextView);
+
+    if (nextView === "summary") {
+      setExpandedHistoryMemberId("");
+    }
+  }
+
   async function addPlayer() {
     if (!selectedMemberId) {
       alert("Select a player");
@@ -1118,7 +1126,7 @@ function getAverageTeamRating() {
               </h2>
 
               <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center sm:justify-end">
-                <RosterViewToggle value={teamRosterView} onChange={setTeamRosterView} className="md:hidden" />
+                <RosterViewToggle value={teamRosterView} onChange={changeTeamRosterView} className="md:hidden" />
 
                 <button
                   type="button"

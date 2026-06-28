@@ -2464,8 +2464,7 @@ export default function CaptainDashboardPage() {
               </div>
             </div>
 
-            <div className="overflow-y-auto p-4 sm:p-6">
-            <div className="sticky top-0 z-20 -mx-4 -mt-4 mb-4 border-b border-slate-200 bg-white/95 px-4 py-2 shadow-sm backdrop-blur sm:-mx-6 sm:-mt-6 sm:px-6">
+            <div className="shrink-0 border-b border-slate-200 bg-white px-4 py-2 shadow-sm sm:px-6">
               <div className="flex flex-wrap items-center justify-end gap-2">
                 <button
                   type="button"
@@ -2495,6 +2494,7 @@ export default function CaptainDashboardPage() {
               </div>
             </div>
 
+            <div className="overflow-y-auto p-4 sm:p-6">
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-950">
@@ -2567,7 +2567,7 @@ export default function CaptainDashboardPage() {
             </div>
           </div>
           {setupPlayerEmailConfirm && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/55 p-4">
+            <div className="absolute inset-0 z-40 flex items-center justify-center bg-slate-950/55 p-4">
               <div className="w-full max-w-lg rounded-2xl border border-emerald-200 bg-white p-5 text-slate-900 shadow-2xl">
                 <div className="text-xs font-black uppercase tracking-wide text-emerald-700">
                   Email Players
@@ -2625,7 +2625,7 @@ export default function CaptainDashboardPage() {
             </div>
           )}
           {setupDivisionRulesNotice && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-slate-950/55 p-4">
+            <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-950/55 p-4">
               <div className="w-full max-w-xl rounded-2xl border border-blue-200 bg-white p-5 text-slate-900 shadow-2xl">
                 <div className="text-xs font-black uppercase tracking-wide text-blue-700">
                   Additional Division Rules / Notes
