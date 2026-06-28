@@ -1247,7 +1247,7 @@ export default function PlayerDashboardPage() {
             </div>
           </div>
 
-          <div className="space-y-4 p-4 md:p-5">
+          <div className="space-y-4 px-4 pb-4 pt-2 md:px-5 md:pb-5 md:pt-3">
             {visibleTeams.length > 1 && (
               <DashboardTeamSelector
                 teams={visibleTeams}

@@ -2772,7 +2772,7 @@ export default function CaptainDashboardPage() {
             </div>
           </div>
 
-          <div className="space-y-4 p-4 md:p-6">
+          <div className="space-y-4 px-4 pb-4 pt-2 md:px-6 md:pb-6 md:pt-3">
             {visibleTeams.length > 1 && (
               <DashboardTeamSelector
                 teams={visibleTeams}
