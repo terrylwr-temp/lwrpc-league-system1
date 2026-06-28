@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 export function buildMiniStandingsLeaders(standings = [], selectedTeam = null) {
   const divisionId = selectedTeam?.division_id || selectedTeam?.divisions?.id;
 
@@ -31,8 +33,7 @@ export function buildMiniStandingsLeaders(standings = [], selectedTeam = null) {
       b.points - a.points ||
       b.differential - a.differential ||
       a.team.localeCompare(b.team)
-    )
-    .slice(0, 5);
+    );
 
   const usesPoints = leaders.some((leader) => leader.points !== 0);
 
@@ -47,25 +48,47 @@ export function buildMiniStandingsLeaders(standings = [], selectedTeam = null) {
 }
 
 export default function MiniStandingsLeaders({ leaders, metricLabel, divisionName, selectedTeamId }) {
-  if (!leaders?.length) return null;
+  const [mobileChartOpen, setMobileChartOpen] = useState(false);
+  const [includeAllTeams, setIncludeAllTeams] = useState(false);
+  const availableLeaders = leaders || [];
+  const displayedLeaders = includeAllTeams ? availableLeaders : availableLeaders.slice(0, 5);
 
-  const maxValue = Math.max(1, ...leaders.map((leader) => Number(leader.chartValue || 0)));
+  if (!availableLeaders.length) return null;
+
+  const maxValue = Math.max(1, ...displayedLeaders.map((leader) => Number(leader.chartValue || 0)));
 
   return (
     <div className="border-t border-emerald-100 bg-white px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div>
-          <div className="text-xs font-black uppercase tracking-wide text-emerald-700">
-            Standings Leaders
-          </div>
-          <div className="text-[11px] font-bold text-slate-500">
-            {divisionName || "Division"} / {metricLabel}
-          </div>
+        <div className="text-xs font-black uppercase tracking-wide text-emerald-700">
+          {divisionName || "Division"} / {metricLabel}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIncludeAllTeams((current) => !current)}
+            className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide transition ${
+              includeAllTeams
+                ? "border-emerald-600 bg-emerald-600 text-white"
+                : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+            }`}
+            aria-pressed={includeAllTeams}
+          >
+            Include all Teams
+          </button>
+          <button
+            type="button"
+            onClick={() => setMobileChartOpen((current) => !current)}
+            className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 sm:hidden"
+            aria-expanded={mobileChartOpen}
+          >
+            {mobileChartOpen ? "Hide Chart" : "View Chart"}
+          </button>
         </div>
       </div>
 
-      <div className="mt-2 space-y-1.5">
-        {leaders.map((leader) => {
+      <div className={`${mobileChartOpen ? "block" : "hidden"} mt-2 space-y-1.5 sm:block`}>
+        {displayedLeaders.map((leader) => {
           const selected = String(leader.teamId || "") === String(selectedTeamId || "");
           const width = Math.max(7, Math.round((Number(leader.chartValue || 0) / maxValue) * 100));
 
