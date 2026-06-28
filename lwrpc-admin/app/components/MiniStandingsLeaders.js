@@ -60,7 +60,7 @@ export default function MiniStandingsLeaders({ leaders, metricLabel, divisionNam
   return (
     <div className="border-t border-emerald-100 bg-white px-4 py-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex min-w-0 flex-1">
+        <div className="hidden min-w-0 flex-1 sm:flex">
           <div className="inline-flex max-w-full items-center rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-emerald-800 shadow-sm">
             <span className="truncate">{divisionName || "Division"} / {metricLabel}</span>
           </div>
@@ -68,8 +68,16 @@ export default function MiniStandingsLeaders({ leaders, metricLabel, divisionNam
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={() => setMobileChartOpen((current) => !current)}
+            className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 sm:hidden"
+            aria-expanded={mobileChartOpen}
+          >
+            {mobileChartOpen ? "Hide Chart" : "View Chart"}
+          </button>
+          <button
+            type="button"
             onClick={() => setIncludeAllTeams((current) => !current)}
-            className={`rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide transition ${
+            className={`${mobileChartOpen ? "inline-flex" : "hidden"} rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide transition sm:inline-flex ${
               includeAllTeams
                 ? "border-emerald-600 bg-emerald-600 text-white"
                 : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
@@ -77,14 +85,6 @@ export default function MiniStandingsLeaders({ leaders, metricLabel, divisionNam
             aria-pressed={includeAllTeams}
           >
             Include all Teams
-          </button>
-          <button
-            type="button"
-            onClick={() => setMobileChartOpen((current) => !current)}
-            className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 sm:hidden"
-            aria-expanded={mobileChartOpen}
-          >
-            {mobileChartOpen ? "Hide Chart" : "View Chart"}
           </button>
         </div>
       </div>
