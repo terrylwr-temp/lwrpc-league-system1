@@ -72,7 +72,7 @@ export default function MiniStandingsLeaders({ leaders, metricLabel, divisionNam
             className="rounded-full border border-slate-300 bg-white px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700 shadow-sm transition hover:border-slate-400 hover:bg-slate-50 sm:hidden"
             aria-expanded={mobileChartOpen}
           >
-            {mobileChartOpen ? "Hide Chart" : "View Chart"}
+            {mobileChartOpen ? "Hide Chart" : "View Standings Chart"}
           </button>
           <button
             type="button"
