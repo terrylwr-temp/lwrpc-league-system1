@@ -691,9 +691,12 @@ export default function CaptainDashboardPage() {
   }, [currentMemberId, matches]);
 
   const visibleTeams = useMemo(() => {
-    return showPreviousSeasonTeams
+    const sourceTeams = showPreviousSeasonTeams
       ? teams
       : teams.filter((team) => team.is_active !== false);
+    return [...sourceTeams].sort((a, b) =>
+      String(a.name || "").localeCompare(String(b.name || ""))
+    );
   }, [showPreviousSeasonTeams, teams]);
 
   useEffect(() => {
@@ -2770,7 +2773,18 @@ export default function CaptainDashboardPage() {
                 <div className={`p-4 ${selected ? "bg-gradient-to-r from-emerald-800 to-blue-800 text-white" : "bg-white text-slate-950"}`}>
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <div>
-                    <div className="text-lg font-black">{team.name}</div>
+                    <div className={`inline-flex max-w-full flex-col rounded-xl border px-3 py-2 shadow-sm ${
+                      selected ? "border-white/30 bg-white text-slate-950" : "border-slate-200 bg-slate-50 text-slate-950"
+                    }`}>
+                      <div className={`text-[10px] font-black uppercase leading-tight tracking-wide ${
+                        selected ? "text-emerald-700" : "text-slate-500"
+                      }`}>
+                        Selected Team
+                      </div>
+                      <div className="break-words text-xl font-black leading-tight">
+                        {team.name}
+                      </div>
+                    </div>
                     <div className={`mt-1 text-sm font-semibold ${selected ? "text-blue-100" : "text-slate-600"}`}>
                       {team.divisions?.leagues?.name || "League"} / {team.divisions?.name || "Division"}
                     </div>
