@@ -2776,11 +2776,6 @@ export default function CaptainDashboardPage() {
                     <div className={`inline-flex max-w-full flex-col rounded-xl border px-3 py-2 shadow-sm ${
                       selected ? "border-white/30 bg-white text-slate-950" : "border-slate-200 bg-slate-50 text-slate-950"
                     }`}>
-                      <div className={`text-[10px] font-black uppercase leading-tight tracking-wide ${
-                        selected ? "text-emerald-700" : "text-slate-500"
-                      }`}>
-                        Selected Team
-                      </div>
                       <div className="break-words text-xl font-black leading-tight">
                         {team.name}
                       </div>
