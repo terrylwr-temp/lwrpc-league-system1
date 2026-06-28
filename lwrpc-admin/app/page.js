@@ -1507,7 +1507,11 @@ function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onTo
             type="button"
             onClick={onToggle}
             aria-expanded={expanded}
-            className="rounded-full bg-slate-950 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-sm transition hover:bg-blue-800"
+            className={`rounded-full px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-sm transition ${
+              expanded
+                ? "bg-slate-950 hover:bg-blue-800"
+                : "bg-emerald-700 hover:bg-emerald-800"
+            }`}
           >
             {expanded ? "Hide Analytics" : "Show Analytics"}
           </button>

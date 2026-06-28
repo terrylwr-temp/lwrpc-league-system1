@@ -927,7 +927,7 @@ function getAverageTeamRating() {
                 router.back();
               }
             }}
-            className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 sm:w-auto sm:py-2"
+            className="w-full rounded-xl border-2 border-slate-700 bg-slate-200 px-4 py-3 font-semibold text-slate-950 shadow-sm hover:bg-slate-300 sm:w-auto sm:py-2"
           >
             {isCaptainOnly ? "Back to Dashboard" : "Back"}
           </button>
