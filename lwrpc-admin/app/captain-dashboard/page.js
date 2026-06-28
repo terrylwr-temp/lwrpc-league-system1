@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
+import MiniStandingsLeaders, { buildMiniStandingsLeaders } from "../components/MiniStandingsLeaders";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayDateWithLeadingWeekday, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
@@ -71,6 +72,7 @@ export default function CaptainDashboardPage() {
   const [matches, setMatches] = useState([]);
   const [byeWeeks, setByeWeeks] = useState([]);
   const [teamStats, setTeamStats] = useState({});
+  const [divisionStandings, setDivisionStandings] = useState([]);
   const [teamRosters, setTeamRosters] = useState({});
   const [captainRatings, setCaptainRatings] = useState([]);
   const [matchSetupStatus, setMatchSetupStatus] = useState({});
@@ -339,6 +341,7 @@ export default function CaptainDashboardPage() {
       setMatches([]);
       setByeWeeks([]);
       setTeamStats({});
+      setDivisionStandings([]);
       router.push("/standings");
       finishLoading(startedAt, setLoading);
       return;
@@ -582,8 +585,24 @@ export default function CaptainDashboardPage() {
           .in("team_id", matchTeamIds),
         supabase
           .from("team_standings")
-          .select("team_id, rank, standings_points, match_wins, match_losses")
-          .in("team_id", matchTeamIds),
+          .select(`
+            id,
+            team_id,
+            division_id,
+            rank,
+            standings_points,
+            match_wins,
+            match_losses,
+            match_ties,
+            point_differential,
+            teams (
+              id,
+              name,
+              is_active
+            )
+          `)
+          .in("division_id", divisionIds.length > 0 ? divisionIds : ["00000000-0000-0000-0000-000000000000"])
+          .order("rank", { ascending: true }),
       ]);
 
     if (rosterError) {
@@ -629,6 +648,7 @@ export default function CaptainDashboardPage() {
     });
 
     setTeamStats(nextTeamStats);
+    setDivisionStandings(standingsRows || []);
     setTeamRosters(
       Object.fromEntries(
         Object.entries(nextTeamRosters).map(([teamId, roster]) => [
@@ -719,6 +739,11 @@ export default function CaptainDashboardPage() {
   }, [selectedCaptainTeamId, visibleTeams]);
 
   const selectedTeamId = selectedCaptainTeam?.id || "";
+  const selectedDivisionStandingsLeaders = useMemo(
+    () => buildMiniStandingsLeaders(divisionStandings, selectedCaptainTeam),
+    [divisionStandings, selectedCaptainTeam]
+  );
+
   function selectCaptainTeam(teamId) {
     setSelectedCaptainTeamId(teamId);
     writeDashboardTeamSelection(
@@ -2881,6 +2906,13 @@ export default function CaptainDashboardPage() {
                     Division Captains
                   </button>
                 </div>
+
+                <MiniStandingsLeaders
+                  leaders={selectedDivisionStandingsLeaders.leaders}
+                  metricLabel={selectedDivisionStandingsLeaders.metricLabel}
+                  divisionName={team.divisions?.name || "Division"}
+                  selectedTeamId={team.id}
+                />
 
                 <div className="border-t border-blue-100 bg-gradient-to-r from-blue-50 via-cyan-50 to-slate-50">
                   <button

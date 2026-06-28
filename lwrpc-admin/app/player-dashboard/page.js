@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
+import MiniStandingsLeaders, { buildMiniStandingsLeaders } from "../components/MiniStandingsLeaders";
 import TeamScheduleModal from "../components/TeamScheduleModal";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDateWithLeadingWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
@@ -762,6 +763,10 @@ export default function PlayerDashboardPage() {
 
     return sortStandingsByDivisionRules(visibleRows, selectedStandingsTeam.divisions);
   }, [selectedStandingsTeam, standings]);
+  const selectedDivisionStandingsLeaders = useMemo(
+    () => buildMiniStandingsLeaders(selectedDivisionStandings, selectedStandingsTeam),
+    [selectedDivisionStandings, selectedStandingsTeam]
+  );
 
   const selectedDivisionPlayoffTeamCount = Number(
     selectedStandingsTeam?.divisions?.playoff_team_count || 0
@@ -1201,7 +1206,7 @@ export default function PlayerDashboardPage() {
           <div className="bg-slate-950 px-4 py-5 text-white md:px-6">
             <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
               <div>
-                <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
+                <div className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-300/15 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-100 shadow-sm">
                   {formatMemberName(member) || "Player"}
                 </div>
                 <h2 className="mt-1 text-2xl font-black">My Teams</h2>
@@ -1279,6 +1284,8 @@ export default function PlayerDashboardPage() {
                 onOpenTeamMatches={() => selectPanel("upcoming")}
                 standingsCount={selectedDivisionStandings.length}
                 teamMatchesCount={upcomingMatchesBySelectedTeam.length}
+                standingsLeaders={selectedDivisionStandingsLeaders.leaders}
+                standingsMetricLabel={selectedDivisionStandingsLeaders.metricLabel}
               />
             )}
 
@@ -1806,6 +1813,8 @@ function TeamCard({
   onOpenTeamMatches,
   standingsCount,
   teamMatchesCount,
+  standingsLeaders,
+  standingsMetricLabel,
 }) {
   const standing = team.standing;
   const captainContacts = teamCaptainContacts(team);
@@ -1920,6 +1929,14 @@ function TeamCard({
           ))}
         </div>
       )}
+
+      <MiniStandingsLeaders
+        leaders={standingsLeaders}
+        metricLabel={standingsMetricLabel}
+        divisionName={team.divisions?.name || "Division"}
+        selectedTeamId={team.id}
+      />
+
       <div className="border-t border-blue-100 bg-gradient-to-r from-blue-50 via-cyan-50 to-slate-50">
         <button
           type="button"
