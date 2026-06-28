@@ -482,6 +482,13 @@ if (loading) {
             </div>
           )}
 
+          <DivisionStandingsBarGraph
+            standings={filteredStandings}
+            divisionName={selectedDivisionRow?.name || "Division"}
+            leagueName={selectedDivisionRow?.leagues?.name || "League"}
+            isPlayoffTeam={isPlayoffTeam}
+          />
+
           <div className="space-y-3 p-3 md:hidden">
             {filteredStandings.map((team, index) => {
               const displayRank = index + 1;
@@ -737,6 +744,61 @@ function StandingStat({ label, value, mono = false }) {
       </div>
       <div className={`mt-1 font-black text-slate-900 ${mono ? "font-mono" : ""}`}>
         {value}
+      </div>
+    </div>
+  );
+}
+
+function DivisionStandingsBarGraph({ standings, divisionName, leagueName, isPlayoffTeam }) {
+  if (!standings.length) return null;
+
+  const maxPoints = Math.max(
+    1,
+    ...standings.map((team) => Number(team.standings_points || 0))
+  );
+
+  return (
+    <div className="border-b border-slate-200 bg-slate-50 px-4 py-4 md:px-5">
+      <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-base font-black text-slate-950">
+            Division Standings
+          </h3>
+          <p className="mt-0.5 text-xs font-bold uppercase tracking-wide text-slate-500">
+            {leagueName} / {divisionName} / Standings Points
+          </p>
+        </div>
+        <span className="inline-flex w-fit rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-blue-800">
+          Full Division
+        </span>
+      </div>
+
+      <div className="space-y-2">
+        {standings.map((team, index) => {
+          const points = Number(team.standings_points || 0);
+          const width = Math.max(6, Math.round((points / maxPoints) * 100));
+          const playoffTeam = isPlayoffTeam(team);
+
+          return (
+            <div
+              key={team.id || team.team_id}
+              className="grid grid-cols-[minmax(7.5rem,12rem)_1fr_auto] items-center gap-2 text-xs sm:grid-cols-[minmax(10rem,16rem)_1fr_auto]"
+            >
+              <div className={`truncate font-black ${playoffTeam ? "text-emerald-800" : "text-slate-700"}`}>
+                #{index + 1} {team.teams?.name || "Team"}
+              </div>
+              <div className="h-4 overflow-hidden rounded-full bg-white shadow-inner ring-1 ring-slate-200">
+                <div
+                  className={`h-full rounded-full ${playoffTeam ? "bg-emerald-600" : "bg-blue-700"}`}
+                  style={{ width: `${width}%` }}
+                />
+              </div>
+              <div className="min-w-12 text-right font-black text-slate-950">
+                {formatStandingNumber(points)}
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
