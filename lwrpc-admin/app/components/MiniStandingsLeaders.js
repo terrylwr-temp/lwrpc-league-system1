@@ -47,7 +47,7 @@ export function buildMiniStandingsLeaders(standings = [], selectedTeam = null) {
   };
 }
 
-export default function MiniStandingsLeaders({ leaders, metricLabel, divisionName, selectedTeamId }) {
+export default function MiniStandingsLeaders({ leaders, metricLabel, divisionName, selectedTeamId, framed = false }) {
   const [mobileChartOpen, setMobileChartOpen] = useState(false);
   const [includeAllTeams, setIncludeAllTeams] = useState(false);
   const availableLeaders = leaders || [];
@@ -58,7 +58,11 @@ export default function MiniStandingsLeaders({ leaders, metricLabel, divisionNam
   const maxValue = Math.max(1, ...displayedLeaders.map((leader) => Number(leader.chartValue || 0)));
 
   return (
-    <div className="border-t border-emerald-100 bg-white px-4 py-3">
+    <div className={`bg-white px-4 py-3 ${
+      framed
+        ? "mx-4 mb-4 overflow-hidden rounded-xl border-2 border-emerald-200 shadow-sm ring-1 ring-emerald-100"
+        : "border-t border-emerald-100"
+    }`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="hidden min-w-0 flex-1 sm:flex">
           <div className="inline-flex max-w-full items-center rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-emerald-800 shadow-sm">

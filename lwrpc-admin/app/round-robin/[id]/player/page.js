@@ -593,6 +593,10 @@ export default function RoundRobinPlayerPage() {
               />
             )}
 
+            {showHistory && (
+              <h2 className="text-2xl font-black text-slate-950">Upcoming Matches</h2>
+            )}
+
             {visibleUpcomingSessions.length === 0 && (
               <div className="rounded-lg border border-dashed border-slate-300 bg-white/90 p-8 text-center font-semibold text-slate-500 shadow-sm">
                 {trimmedSessionSearch
@@ -2405,7 +2409,6 @@ function GameTeamScorePanel({ players, score, isWinner, highlightedPlayerId, ali
         <div className={`shrink-0 rounded-lg px-2.5 py-1.5 text-center shadow-[0_10px_18px_-14px_rgba(15,23,42,0.9)] ${
           isWinner ? "bg-emerald-700 text-white" : "bg-slate-950 text-white"
         }`}>
-          <div className="text-[10px] font-black uppercase tracking-wide opacity-80">Score</div>
           <div className="text-xl font-black leading-none">{formatGameScore(score)}</div>
         </div>
       </div>

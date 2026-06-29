@@ -1915,6 +1915,7 @@ function TeamCard({
         metricLabel={standingsMetricLabel}
         divisionName={team.divisions?.name || "Division"}
         selectedTeamId={team.id}
+        framed
       />
 
       {captainContacts.length > 0 && (
@@ -1925,7 +1926,7 @@ function TeamCard({
               href={contact.email ? `mailto:${contact.email}` : undefined}
               title={contact.email ? `Send an email to ${contact.name || contact.label}.` : "No email address on file."}
               onClick={(event) => event.stopPropagation()}
-              className={`rounded-xl bg-white px-3 py-2 shadow-sm transition ${
+              className={`flex min-h-[4.75rem] flex-col justify-center rounded-xl bg-white px-3 py-2 shadow-sm transition ${
                 contact.email ? "hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md" : "cursor-default"
               }`}
             >
