@@ -547,7 +547,7 @@ export default function RoundRobinPlayerPage() {
               onLogout={clearSavedPhone}
             />
             <div className="grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-              <div className="min-w-0">
+              <div className="order-2 min-w-0 lg:order-1">
                 <h2 className="text-2xl font-black text-slate-950">{showHistory ? "All Matches" : "Upcoming Matches"}</h2>
                 <label className={`mt-2 text-sm font-bold text-slate-600 ${showHistory ? "block" : "hidden md:block"}`}>
                   Search Matches
@@ -563,7 +563,7 @@ export default function RoundRobinPlayerPage() {
                   />
                 </label>
               </div>
-              <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap lg:justify-end">
+              <div className="order-1 grid grid-cols-1 gap-2 sm:flex sm:flex-wrap lg:order-2 lg:justify-end">
                 {hasRegularMatches && hasLadderMatches && (
                   <div className="inline-grid grid-cols-2 gap-1 rounded-lg border border-slate-300 bg-slate-100 p-1 text-xs font-black">
                     <button type="button" onClick={() => selectMatchView("regular")} className={`rounded-md px-3 py-2 ${matchView === "regular" ? "bg-white text-slate-950 shadow-sm" : "text-slate-600 hover:bg-white"}`}>
@@ -577,7 +577,7 @@ export default function RoundRobinPlayerPage() {
                 <button
                   type="button"
                   onClick={() => setShowHistory((current) => !current)}
-                  className="rounded-lg border border-slate-300 bg-slate-950 px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800"
+                  className="order-first rounded-lg border border-slate-300 bg-slate-950 px-4 py-2 text-sm font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-800 lg:order-none"
                 >
                   {showHistory ? "Hide Past Matches" : `Past Matches (${selectedPastSessions.length})`}
                 </button>
@@ -920,7 +920,7 @@ function PastSessions({ history, sessions = null, searchTerm = "", onSelect }) {
   const hasSearch = Boolean(String(searchTerm || "").trim());
 
   return (
-    <section className="rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)]">
+    <section className="rounded-xl border-2 border-teal-600 bg-white p-4 shadow-[0_22px_60px_-42px_rgba(15,23,42,0.8)] ring-4 ring-teal-100/80">
       <h2 className="text-xl font-black text-slate-950">Past Matches</h2>
       <p className="mt-1 text-sm font-bold text-blue-700">Click on a Match to see the Match Game Details.</p>
       <div className="mt-3 space-y-2">

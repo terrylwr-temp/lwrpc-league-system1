@@ -1910,6 +1910,13 @@ function TeamCard({
         </button>
       </div>
 
+      <MiniStandingsLeaders
+        leaders={standingsLeaders}
+        metricLabel={standingsMetricLabel}
+        divisionName={team.divisions?.name || "Division"}
+        selectedTeamId={team.id}
+      />
+
       {captainContacts.length > 0 && (
         <div className={`grid grid-cols-1 gap-2 px-4 pb-4 text-xs text-slate-600 sm:grid-cols-3 ${selected ? "bg-blue-50" : "bg-white"}`}>
           {captainContacts.map((contact) => (
@@ -1929,13 +1936,6 @@ function TeamCard({
           ))}
         </div>
       )}
-
-      <MiniStandingsLeaders
-        leaders={standingsLeaders}
-        metricLabel={standingsMetricLabel}
-        divisionName={team.divisions?.name || "Division"}
-        selectedTeamId={team.id}
-      />
 
       <div className="border-t border-blue-100 bg-gradient-to-r from-blue-50 via-cyan-50 to-slate-50">
         <button
