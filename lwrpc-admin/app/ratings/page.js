@@ -9,7 +9,7 @@ import { confirmDeleteAction } from "../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 const PAGE_SIZE = 100;
-const RATING_SELECT = "id, member_id, season_id, dupr_doubles_rating, season_dupr_rating, season_primetime_rating, notes";
+const RATING_SELECT = "id, member_id, season_id, dupr_doubles_rating, dupr_reliability_rating, season_dupr_rating, season_primetime_rating, notes";
 
 export default function RatingsPage() {
   const router = useRouter();
@@ -188,6 +188,7 @@ export default function RatingsPage() {
         member_id: memberId,
         season_id: selectedSeason,
         dupr_doubles_rating: null,
+        dupr_reliability_rating: null,
         season_dupr_rating: null,
         season_primetime_rating: null,
         notes: null,
@@ -463,6 +464,14 @@ export default function RatingsPage() {
     return rating === null ? null : rating.toFixed(3);
   }
 
+  function parseReliabilityRating(value) {
+    const text = normalizeText(value);
+    if (!text) return null;
+
+    const rating = parseRating(text);
+    return rating === null ? null : rating;
+  }
+
   async function handleRatingsImportFile(event) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -491,11 +500,12 @@ export default function RatingsPage() {
       const name = normalizeText(findCsvValue(row, ["name", "member name", "player", "player name"]));
       const duprId = normalizeText(findCsvValue(row, ["dupr id", "duprid", "dupr", "dupr number"]));
       const duprDoublesRating = parseDuprDoublesRating(findCsvValue(row, ["doubles rating", "doubles", "dupr doubles", "dupr doubles rating", "doubles dupr", "rating"]));
+      const duprReliabilityRating = parseReliabilityRating(findCsvValue(row, ["doublesReliability", "doubles reliability", "doubles reliability rating", "reliability", "reliability rating", "dupr reliability"]));
       const ageRating = parseRating(findAgeBasedRatingValue(row));
       const lookupName = name || `${firstName} ${lastName}`.trim();
       const member = (email && byEmail[email]) || byName[normalizeName(lookupName)] || null;
 
-      const hasRating = duprDoublesRating !== null || ageRating !== null;
+      const hasRating = duprDoublesRating !== null || duprReliabilityRating !== null || ageRating !== null;
 
       return {
         rowNumber: index + 1,
@@ -504,13 +514,14 @@ export default function RatingsPage() {
           ? "No matching member by email or name."
           : hasRating
             ? "Matched member."
-            : "Matched member, but no numeric rating was found in this CSV row.",
+            : "Matched member, but no numeric rating or reliability was found in this CSV row.",
         memberId: member?.id || null,
         memberName: member ? memberFullName(member) : lookupName,
         email,
         duprId,
         shouldUpdateDuprId: Boolean(member && duprId && !member.dupr_id),
         duprDoublesRating,
+        duprReliabilityRating,
         ageRating,
       };
     });
@@ -568,6 +579,7 @@ export default function RatingsPage() {
         };
 
         if (row.duprDoublesRating !== null) payload.dupr_doubles_rating = row.duprDoublesRating;
+        if (row.duprReliabilityRating !== null) payload.dupr_reliability_rating = row.duprReliabilityRating;
         if (row.ageRating !== null) payload.season_primetime_rating = row.ageRating;
         const existing = existingByMember[row.memberId];
 
@@ -580,6 +592,7 @@ export default function RatingsPage() {
             member_id: row.memberId,
             season_id: selectedSeason,
             dupr_doubles_rating: row.duprDoublesRating,
+            dupr_reliability_rating: row.duprReliabilityRating,
             season_dupr_rating: null,
             season_primetime_rating: row.ageRating,
             updated_at: now,
@@ -655,6 +668,7 @@ export default function RatingsPage() {
     sourceRows.forEach((sourceRow) => {
       const payload = {
         dupr_doubles_rating: sourceRow.dupr_doubles_rating,
+        dupr_reliability_rating: sourceRow.dupr_reliability_rating,
         season_dupr_rating: sourceRow.season_dupr_rating,
         season_primetime_rating: sourceRow.season_primetime_rating,
         updated_at: now,
@@ -712,8 +726,25 @@ export default function RatingsPage() {
       return;
     }
 
+    const reliabilityThresholdText = window.prompt(
+      "Reliability Rating threshold for NR-style cleanup?\n\nEnter 0 or leave blank to ignore Reliability Rating.",
+      "0"
+    );
+
+    if (reliabilityThresholdText === null) return;
+
+    const reliabilityThreshold = parseReliabilityThreshold(reliabilityThresholdText);
+
+    if (reliabilityThreshold === null) {
+      alert("Enter a valid reliability number, or 0 to ignore Reliability Rating.");
+      return;
+    }
+
+    const reliabilityRuleText = reliabilityThreshold > 0
+      ? `Reliability Rating values of ${reliabilityThreshold} or below also use the NR rule.`
+      : "Reliability Rating will not change the cleanup rule.";
     const ok = confirm(
-      `Clean ratings for ${selectedSeasonLabel()}?\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.`
+      `Clean ratings for ${selectedSeasonLabel()}?\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.\n\n${reliabilityRuleText}`
     );
 
     if (!ok) return;
@@ -778,7 +809,12 @@ export default function RatingsPage() {
     members.forEach((member) => {
       const existing = rowsByMemberId[String(member.id)];
       const rawValue = existing?.dupr_doubles_rating;
-      const cleanedValue = cleanedSeasonDuprRating(rawValue, maxRatingByMemberId[String(member.id)]);
+      const cleanedValue = cleanedSeasonDuprRating(
+        rawValue,
+        maxRatingByMemberId[String(member.id)],
+        existing?.dupr_reliability_rating,
+        reliabilityThreshold
+      );
 
       if (cleanedValue === null) {
         skippedCount += 1;
@@ -801,6 +837,7 @@ export default function RatingsPage() {
           member_id: member.id,
           season_id: selectedSeason,
           dupr_doubles_rating: null,
+          dupr_reliability_rating: null,
           season_primetime_rating: null,
           ...payload,
         });
@@ -829,7 +866,7 @@ export default function RatingsPage() {
 
     await loadRatings(selectedSeason);
     await loadAllRatings();
-    setRatingImportStatus(`Cleaned ${cleanedCount} Season DUPR rating(s). Skipped ${skippedCount} player(s) without a numeric DUPR Doubles Rating or usable NR team range.`);
+    setRatingImportStatus(`Cleaned ${cleanedCount} Season DUPR rating(s). Skipped ${skippedCount} player(s) without a numeric DUPR Doubles Rating or usable NR team range.${reliabilityThreshold > 0 ? ` Reliability threshold applied at ${reliabilityThreshold} or below.` : ""}`);
     setIsCleaningRatings(false);
   }
 
@@ -928,7 +965,7 @@ export default function RatingsPage() {
         result = String(a.dupr_id || "").localeCompare(String(b.dupr_id || "")) || compareMemberName(a, b);
       }
 
-      if (["dupr_doubles_rating", "season_dupr_rating", "season_primetime_rating"].includes(memberSort.field)) {
+      if (["dupr_doubles_rating", "dupr_reliability_rating", "season_dupr_rating", "season_primetime_rating"].includes(memberSort.field)) {
         result = compareRatingValues(a, b, memberSort.field) || compareMemberName(a, b);
       }
 
@@ -1143,7 +1180,7 @@ function goToPage(value) {
                 Ratings Import
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Import a CSV with member name/email, DUPR ID, doubles rating, and age-based rating for the selected season.
+                Import a CSV with member name/email, DUPR ID, doubles rating, reliability rating, and age-based rating for the selected season.
               </p>
               <p className="mt-1 text-xs text-slate-500">
                 DUPR IDs are only written when the member does not already have one.
@@ -1265,6 +1302,7 @@ function goToPage(value) {
                     <th className="p-3 text-left">Email</th>
                     <th className="p-3 text-left">DUPR ID</th>
                     <th className="p-3 text-left">DUPR Doubles</th>
+                    <th className="p-3 text-left">Reliability</th>
                     <th className="p-3 text-left">Age-Based</th>
                     <th className="p-3 text-left">Message</th>
                   </tr>
@@ -1284,6 +1322,7 @@ function goToPage(value) {
                       <td className="p-3">{row.email}</td>
                       <td className="p-3">{row.duprId}{row.shouldUpdateDuprId ? " (will update)" : ""}</td>
                       <td className="p-3">{row.duprDoublesRating ?? ""}</td>
+                      <td className="p-3">{row.duprReliabilityRating ?? ""}</td>
                       <td className="p-3">{row.ageRating ?? ""}</td>
                       <td className="p-3 text-slate-600">{row.message}</td>
                     </tr>
@@ -1396,6 +1435,14 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("dupr_doubles_rating")}
                   />
                 </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("dupr_reliability_rating", memberSort)} data-sort-indicator={sortIndicator("dupr_reliability_rating")}>
+                  <SortHeader
+                    active={memberSort.field === "dupr_reliability_rating"}
+                    direction={memberSort.direction}
+                    label="Reliability Rating"
+                    onClick={() => toggleMemberSort("dupr_reliability_rating")}
+                  />
+                </th>
                 <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("season_dupr_rating", memberSort)} data-sort-indicator={sortIndicator("season_dupr_rating")}>
                   <SortHeader
                     active={memberSort.field === "season_dupr_rating"}
@@ -1504,6 +1551,26 @@ function goToPage(value) {
 
                     <td className="px-4 py-4">
                       <input
+                        key={`${member.id}-${selectedSeason}-dupr-reliability`}
+                        type="number"
+                        step="0.01"
+                        defaultValue={getRating(member.id, "dupr_reliability_rating")}
+                        onBlur={(e) => {
+                          const cleanValue = normalizeRatingInput("dupr_reliability_rating", e.target.value);
+                          e.target.value = cleanValue ?? "";
+                          updateRating(
+                            member.id,
+                            "dupr_reliability_rating",
+                            e.target.value
+                          );
+                        }}
+                        className="w-32 rounded-xl border border-slate-300 px-3 py-2"
+                        placeholder="60"
+                      />
+                    </td>
+
+                    <td className="px-4 py-4">
+                      <input
                         key={`${member.id}-${selectedSeason}-season-dupr`}
                         type="number"
                         step="0.01"
@@ -1564,7 +1631,7 @@ function goToPage(value) {
               {pagedMembers.length === 0 && (
                 <tr>
                   <td
-                    colSpan="7"
+                    colSpan="8"
                     className="px-4 py-10 text-center text-slate-500"
                   >
                     No players found.
@@ -1747,17 +1814,35 @@ function splitCsvLine(line) {
   return values;
 }
 
-function cleanedSeasonDuprRating(rawValue, highestMaxRating) {
+function parseReliabilityThreshold(value) {
+  const text = String(value || "").trim();
+  if (!text) return 0;
+
+  const threshold = Number(text);
+  if (Number.isNaN(threshold) || threshold < 0) return null;
+
+  return threshold;
+}
+
+function cleanedSeasonDuprRating(rawValue, highestMaxRating, reliabilityValue = null, reliabilityThreshold = 0) {
   const text = String(rawValue ?? "").trim();
+  const reliabilityNumber = Number(reliabilityValue);
+  const hasLowReliability =
+    Number(reliabilityThreshold || 0) > 0 &&
+    reliabilityValue !== null &&
+    reliabilityValue !== undefined &&
+    String(reliabilityValue).trim() !== "" &&
+    !Number.isNaN(reliabilityNumber) &&
+    reliabilityNumber <= Number(reliabilityThreshold);
 
-  if (!text) return null;
-
-  if (text.toUpperCase() === "NR") {
+  if (hasLowReliability || text.toUpperCase() === "NR") {
     const maxRating = Number(highestMaxRating);
     if (Number.isNaN(maxRating) || maxRating <= 0) return null;
 
     return truncateToTenth(maxRating - 0.5);
   }
+
+  if (!text) return null;
 
   const numberValue = Number(text);
   if (Number.isNaN(numberValue)) return null;
