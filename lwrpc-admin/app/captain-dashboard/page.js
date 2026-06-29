@@ -2912,6 +2912,7 @@ export default function CaptainDashboardPage() {
                   metricLabel={selectedDivisionStandingsLeaders.metricLabel}
                   divisionName={team.divisions?.name || "Division"}
                   selectedTeamId={team.id}
+                  framed
                 />
 
                 <div className="border-t border-blue-100 bg-gradient-to-r from-blue-50 via-cyan-50 to-slate-50">
