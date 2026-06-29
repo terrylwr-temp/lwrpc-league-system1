@@ -2390,15 +2390,17 @@ function MobileStandingStat({ label, value }) {
 
 function GameTeamScorePanel({ players, score, isWinner, highlightedPlayerId, align = "left" }) {
   return (
-    <div className={`rounded-lg border px-2.5 py-2 shadow-[0_10px_18px_-16px_rgba(15,23,42,0.95)] ${
+    <div className={`relative flex h-full min-h-[4.75rem] items-center rounded-lg border px-2.5 py-2 shadow-[0_10px_18px_-16px_rgba(15,23,42,0.95)] ${
       isWinner ? "border-2 border-emerald-500 bg-emerald-50 ring-2 ring-emerald-200" : "border-slate-200 bg-white"
     }`}>
-      <div className={`mb-2 flex ${align === "right" ? "justify-start md:justify-end" : "justify-start"}`}>
-        <span className={`rounded-md px-2 py-1 text-[10px] font-black uppercase tracking-wide shadow-sm ${isWinner ? "bg-emerald-700 text-white" : "invisible bg-slate-200 text-slate-700"}`}>
+      {isWinner && (
+        <div className={`absolute -top-2 ${align === "right" ? "left-2 md:left-auto md:right-2" : "left-2"}`}>
+          <span className="rounded-md bg-emerald-700 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-white shadow-sm">
           Winner
-        </span>
-      </div>
-      <div className={`flex items-center justify-between gap-2 ${align === "right" ? "md:flex-row-reverse" : ""}`}>
+          </span>
+        </div>
+      )}
+      <div className={`flex w-full items-center justify-between gap-2 ${align === "right" ? "md:flex-row-reverse" : ""}`}>
         <PlayerNameList players={players} highlightedPlayerId={highlightedPlayerId} align={align} />
         <div className={`shrink-0 rounded-lg px-2.5 py-1.5 text-center shadow-[0_10px_18px_-14px_rgba(15,23,42,0.9)] ${
           isWinner ? "bg-emerald-700 text-white" : "bg-slate-950 text-white"
