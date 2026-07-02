@@ -105,7 +105,7 @@ export default function DashboardPage() {
     const { start, end } = currentWeekDateRange();
 
     const [membersCount, leagueData, teamData] = await Promise.all([
-      countRows("members"),
+      countActiveMembers(),
       loadDashboardLeagues(today, dashboardFilter),
       loadTeamsForDashboard(),
     ]);
@@ -719,7 +719,7 @@ export default function DashboardPage() {
       : dashboardCounts?.playersOnTeamsAssignments;
 
   const metricCards = [
-    { label: "Members", value: formatCount(dashboardCounts?.members), helper: "Member records", tone: "slate" },
+    { label: "Members", value: formatCount(dashboardCounts?.members), helper: "Active members", tone: "slate" },
     {
       label: "Players On Teams",
       value: formatCount(playersOnTeamsCount),
@@ -1851,6 +1851,12 @@ async function countRows(tableName, applyFilters) {
   }
 
   return count ?? 0;
+}
+
+async function countActiveMembers() {
+  return countRows("members", (query) =>
+    query.or("is_active_member.eq.true,is_active_member.is.null")
+  );
 }
 
 async function loadDashboardLeagues(today, dashboardFilter) {
