@@ -25,6 +25,7 @@ export default function LeaguesPage() {
   const [selectedSeason, setSelectedSeason] = useState("");
   const [flexLeague, setFlexLeague] = useState(false);
   const [rostersLocked, setRostersLocked] = useState(false);
+  const [onlyHomeCommunityPlayers, setOnlyHomeCommunityPlayers] = useState(false);
   const [matchSetupReminderDaysBefore, setMatchSetupReminderDaysBefore] = useState("2");
   const [documentBucket, setDocumentBucket] = useState(DEFAULT_LEAGUE_DOCUMENT_BUCKET);
   const [documentPrefix, setDocumentPrefix] = useState(DEFAULT_LEAGUE_DOCUMENT_PREFIX);
@@ -37,7 +38,7 @@ export default function LeaguesPage() {
   const [hydrated, setHydrated] = useState(false);
 
   useUnsavedChangesWarning(
-    Boolean(editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || flexLeague || rostersLocked || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean)),
+    Boolean(editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || flexLeague || rostersLocked || onlyHomeCommunityPlayers || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean)),
     "league"
   );
 
@@ -83,6 +84,7 @@ export default function LeaguesPage() {
       season_id: selectedSeason,
       flex_league: flexLeague,
       rosters_locked: rostersLocked,
+      only_home_community_players: onlyHomeCommunityPlayers,
       match_setup_reminder_days_before: Number(matchSetupReminderDaysBefore || 0),
       league_document_bucket: documentBucket.trim() || null,
       ...leagueDocumentPayload(leagueDocuments),
@@ -164,6 +166,7 @@ export default function LeaguesPage() {
     setSelectedSeason(league.season_id || "");
     setFlexLeague(league.flex_league === true);
     setRostersLocked(league.rosters_locked === true);
+    setOnlyHomeCommunityPlayers(league.only_home_community_players === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
     setDocumentBucket(league.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET);
     setLeagueDocuments(
@@ -183,6 +186,7 @@ export default function LeaguesPage() {
     setSelectedSeason("");
     setFlexLeague(league.flex_league === true);
     setRostersLocked(league.rosters_locked === true);
+    setOnlyHomeCommunityPlayers(league.only_home_community_players === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
     setDocumentBucket(league.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET);
     setLeagueDocuments(
@@ -203,6 +207,7 @@ export default function LeaguesPage() {
     setSelectedSeason("");
     setFlexLeague(false);
     setRostersLocked(false);
+    setOnlyHomeCommunityPlayers(false);
     setMatchSetupReminderDaysBefore("2");
     setDocumentBucket(DEFAULT_LEAGUE_DOCUMENT_BUCKET);
     setDocumentPrefix(DEFAULT_LEAGUE_DOCUMENT_PREFIX);
@@ -357,6 +362,21 @@ export default function LeaguesPage() {
                   Lock team rosters
                   <span className="mt-1 block text-xs font-normal text-slate-500">
                     When locked, captains and co-captains cannot open or modify team rosters. League Managers and Commissioners can still manage rosters. When unlocked, roster adds still require eligible season ratings.
+                  </span>
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={onlyHomeCommunityPlayers}
+                  onChange={(e) => setOnlyHomeCommunityPlayers(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  Only allow players from home community
+                  <span className="mt-1 block text-xs font-normal text-slate-500">
+                    When checked, captains, co-captains, and club pros can only add roster players from the team&apos;s home community. League Managers and Commissioners can still choose any player home location.
                   </span>
                 </span>
               </label>
@@ -550,6 +570,11 @@ export default function LeaguesPage() {
                         }`}>
                           Rosters {league.rosters_locked ? "Locked" : "Open"}
                         </span>
+                        {league.only_home_community_players === true && (
+                          <span className="rounded-full bg-teal-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-teal-800">
+                            Home Community Only
+                          </span>
+                        )}
                         {league.flex_league === true && (
                           <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-800">
                             Flex League

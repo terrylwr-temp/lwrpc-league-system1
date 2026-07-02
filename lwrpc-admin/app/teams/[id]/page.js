@@ -65,6 +65,7 @@ export default function TeamRosterPage() {
             name,
             abbreviation,
             season_id,
+            only_home_community_players,
             seasons (
               id,
               name,
@@ -711,6 +712,13 @@ function getAverageTeamRating() {
   const rostersLocked = team?.divisions?.leagues?.rosters_locked === true;
   const canAdministerLockedRoster = hasRole(currentUser?.role, "league_manager");
   const canModifyRoster = hasRole(currentUser?.role, "captain") && (!rostersLocked || canAdministerLockedRoster);
+  const onlyHomeCommunityPlayers = team?.divisions?.leagues?.only_home_community_players === true;
+  const canOverrideHomeCommunityRestriction = hasRole(currentUser?.role, "league_manager");
+  const homeCommunityRestrictionApplies = onlyHomeCommunityPlayers && !canOverrideHomeCommunityRestriction;
+  const homeCommunityLocationLocked = homeCommunityRestrictionApplies && Boolean(team?.home_location_id);
+  const effectiveSelectedLocationId = homeCommunityRestrictionApplies
+    ? team?.home_location_id || ""
+    : selectedLocationId;
   const isCaptainOnly = currentUser?.role === "captain";
   const canRequestCaptainChange = isCurrentTeamCaptainOrCoCaptain();
   const teamInfoDetailView = teamInfoView === "detail";
@@ -737,6 +745,20 @@ function getAverageTeamRating() {
     if (!member) {
       alert("Player not found");
       return;
+    }
+
+    if (homeCommunityRestrictionApplies) {
+      const selectedLocation = locations.find(
+        (location) => String(location.id) === String(team?.home_location_id || "")
+      );
+      const memberLocationMatches =
+        String(member.location_id || "") === String(team?.home_location_id || "") ||
+        normalizeLocationName(member.club_location) === normalizeLocationName(selectedLocation?.name);
+
+      if (!memberLocationMatches) {
+        alert(`${formatMemberName(member)} is not from this team's home community and cannot be added to this roster.`);
+        return;
+      }
     }
 
     if (!memberHasDuprId(member)) {
@@ -888,16 +910,28 @@ function getAverageTeamRating() {
     router.push(isCaptainOnly ? "/captain-dashboard" : "/teams");
   }, [canAdministerLockedRoster, currentUser, isCaptainOnly, rostersLocked, router, team]);
 
+  useEffect(() => {
+    if (!homeCommunityRestrictionApplies) return;
+
+    const homeLocationId = team?.home_location_id || "";
+    if (String(selectedLocationId || "") === String(homeLocationId)) return;
+
+    setSelectedLocationId(homeLocationId);
+    setSelectedMemberId("");
+  }, [homeCommunityRestrictionApplies, selectedLocationId, team?.home_location_id]);
+
   const availableMembers = useMemo(() => {
+    if (homeCommunityRestrictionApplies && !team?.home_location_id) return [];
+
     const selectedLocation = locations.find(
-      (location) => String(location.id) === String(selectedLocationId)
+      (location) => String(location.id) === String(effectiveSelectedLocationId)
     );
 
     return members
       .filter(member => {
-        if (selectedLocationId) {
+        if (effectiveSelectedLocationId) {
           const memberLocationMatches =
-            String(member.location_id || "") === String(selectedLocationId) ||
+            String(member.location_id || "") === String(effectiveSelectedLocationId) ||
             normalizeLocationName(member.club_location) === normalizeLocationName(selectedLocation?.name);
 
           if (!memberLocationMatches) {
@@ -921,7 +955,7 @@ function getAverageTeamRating() {
         return (a.first_name || "")
           .localeCompare(b.first_name || "");
       });
-  }, [locations, members, roster, selectedLocationId]);
+  }, [effectiveSelectedLocationId, homeCommunityRestrictionApplies, locations, members, roster, team?.home_location_id]);
 
   if (!team) {
     return <LoadingScreen subtitle="Loading Team Roster..." />;
@@ -1064,12 +1098,13 @@ function getAverageTeamRating() {
                 </label>
 
                 <select
-                  value={selectedLocationId ?? ""}
+                  value={effectiveSelectedLocationId ?? ""}
                   onChange={e => {
                     setSelectedLocationId(e.target.value);
                     setSelectedMemberId("");
                   }}
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                  disabled={homeCommunityLocationLocked}
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-600"
                 >
                   <option value="">
                     All Locations
@@ -1086,7 +1121,9 @@ function getAverageTeamRating() {
                 </select>
 
                 <p className="mt-2 text-xs text-slate-500">
-                  Defaults to the team&apos;s home location but can be overridden.
+                  {homeCommunityRestrictionApplies
+                    ? "This league only allows players from the team's home community. League Managers and Commissioners can override this filter."
+                    : "Defaults to the team's home location but can be overridden."}
                 </p>
 
               </div>
@@ -1374,12 +1411,13 @@ function getAverageTeamRating() {
                   </label>
 
                   <select
-                    value={selectedLocationId ?? ""}
+                    value={effectiveSelectedLocationId ?? ""}
                     onChange={e => {
                       setSelectedLocationId(e.target.value);
                       setSelectedMemberId("");
                     }}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                    disabled={homeCommunityLocationLocked}
+                    className="w-full rounded-xl border border-slate-300 px-4 py-3 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-600"
                   >
                     <option value="">
                       All Locations
@@ -1396,7 +1434,9 @@ function getAverageTeamRating() {
                   </select>
 
                   <p className="mt-2 text-xs text-slate-500">
-                    Defaults to the team&apos;s home location but can be overridden.
+                    {homeCommunityRestrictionApplies
+                      ? "This league only allows players from the team's home community. League Managers and Commissioners can override this filter."
+                      : "Defaults to the team's home location but can be overridden."}
                   </p>
 
                 </div>
