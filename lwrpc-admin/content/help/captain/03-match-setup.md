@@ -28,7 +28,3 @@ After Match Setup is saved, use **Email Players** to send the lineup to selected
 Use **Match Score Sheet** from the upcoming match card to preview, download, or print the paper score sheet for the match.
 
 ![Match score sheet](/help/captain/screenshots/match-scoresheet.png "Match score sheet")
-
-## Screenshot support
-
-Help articles can include screenshots with standard markdown image syntax. Place screenshot files under `public/help/captain/screenshots` and reference them with `/help/captain/screenshots/file-name.png`.

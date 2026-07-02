@@ -9,6 +9,12 @@ description: Start here for the Captain Dashboard and weekly league workflow.
 
 Use the Captain Dashboard to manage your assigned teams, prepare match setup teams, review roster details, enter scores, and verify submitted results.
 
+## Signing in
+
+Use your email address and password from the LMS login screen. If this is your first time signing in, enter your email address and use **Forgot Password** to create your password. You can also use a Passkey system instead of passwords if you'd like to use that option.
+
+![Initial login screen](/help/captain/screenshots/initial-login-screen.png "Initial login screen")
+
 ![Captain Dashboard overview](/help/captain/screenshots/captain-dashboard.png "Captain Dashboard overview")
 
 ## Weekly workflow
@@ -24,12 +30,6 @@ Use the Captain Dashboard to manage your assigned teams, prepare match setup tea
 The dashboard groups matches into upcoming, completed, and pending verification sections. Team tabs across the top let you switch between captain assignments without leaving the page.
 
 ![Upcoming matches](/help/captain/screenshots/upcoming-matches.png "Upcoming matches")
-
-## Signing in
-
-Use your email address and password from the LMS login screen. If this is your first time signing in, enter your email address and use **Forgot Password** to create your password.
-
-![Initial login screen](/help/captain/screenshots/initial-login-screen.png "Initial login screen")
 
 ## Division information
 

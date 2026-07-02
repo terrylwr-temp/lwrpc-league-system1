@@ -7,7 +7,7 @@ description: Enter match scores, assign actual players, and submit scores for ve
 
 # Entering Scores
 
-Open **Enter Match Scores** from a match card when you are allowed to enter or correct scores.
+Open **Enter Match Scores** from a match card when you are able to enter or correct scores. This normally is available starting the day of the scheduled match.
 
 ![Enter Match Scores](/help/captain/screenshots/enter-match-scores.png "Enter Match Scores")
 
