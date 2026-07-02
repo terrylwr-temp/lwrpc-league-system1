@@ -17,7 +17,6 @@ import {
   LEAGUE_DOCUMENT_TYPES,
   leagueDocumentPath,
 } from "../lib/leagueDocuments";
-import { GUIDE_DOCUMENT_TYPES, guidePdfDocument } from "../lib/dashboardGuides";
 import { specialGameStatus } from "../lib/playHistory";
 import {
   DEFAULT_SCORE_SHEET_RULES,
@@ -65,7 +64,6 @@ function scrollDashboardSectionIntoView(sectionId) {
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
-  const captainGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "captain_guide_pdf");
 
   const [currentMember, setCurrentMember] = useState(null);
   const [teams, setTeams] = useState([]);
@@ -2444,10 +2442,7 @@ export default function CaptainDashboardPage() {
           welcomeAction={
             <button
               type="button"
-              onClick={async () => {
-                const document = await guidePdfDocument(supabase, captainGuide);
-                if (document) setPdfDocument(document);
-              }}
+              onClick={() => router.push("/help/captain")}
               className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
             >
               Captains Guide
