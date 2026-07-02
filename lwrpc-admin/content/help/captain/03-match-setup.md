@@ -25,6 +25,6 @@ After Match Setup is saved, use **Email Players** to send the lineup to selected
 
 ## Match score sheets
 
-Use **Match Score Sheet** from the upcoming match card to preview, download, or print the paper score sheet for the match.
+Use **Match Score Sheet** from the upcoming match card to preview, download, or print the paper score sheet for the match. This will include all player names/ratings of both teams Match Setup. This should be used to record the match scores and then for the score entry document. 
 
 ![Match score sheet](/help/captain/screenshots/match-scoresheet.png "Match score sheet")
