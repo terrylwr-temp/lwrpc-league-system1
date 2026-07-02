@@ -8,7 +8,7 @@ import { requireRole, supabase } from "../../lib/auth";
 import { hasRole } from "../../lib/permissions";
 import { confirmDeleteAction } from "../../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
-import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../../lib/emailTemplates";
+import { EMAIL_TEMPLATE_KEYS, escapeHtml, getEmailTemplateConfig, renderEmailTemplate } from "../../lib/emailTemplates";
 import {
   filterHistoryRows,
   formatDate,
@@ -474,7 +474,7 @@ export default function TeamRosterPage() {
     return "Eligible";
   }
 
-  function captainAlertDetails() {
+  function captainAlertDetailsHtml() {
     const captains = [
       ["Captain", team?.captain],
       ["Co-Captain 1", team?.co_captain_1],
@@ -486,10 +486,18 @@ export default function TeamRosterPage() {
       .map(([label, member]) => ({
         label,
         name: formatMemberName(member) || "Unknown",
-        email: member.email || "No email on file",
+        email: String(member.email || "").trim(),
       }))
-      .map((captain) => `${captain.label}: ${captain.name} <${captain.email}>`)
-      .join("\n") || "No captain listed";
+      .map((captain) => {
+        const name = escapeHtml(captain.name);
+
+        if (!captain.email) {
+          return `${escapeHtml(captain.label)}: ${name} (No email on file)`;
+        }
+
+        return `${escapeHtml(captain.label)}: <a href="${escapeHtml(`mailto:${captain.email}`)}">${name}</a>`;
+      })
+      .join("<br />") || "No captain listed";
   }
 
   function isCurrentTeamCaptainOrCoCaptain() {
@@ -536,7 +544,7 @@ export default function TeamRosterPage() {
       reason,
       rating_type: getRatingLabel(),
       rating_range: ratingRangeLabel(),
-      captain_contacts: captainAlertDetails().replaceAll("\n", "<br />"),
+      captain_contacts: captainAlertDetailsHtml(),
     });
 
     const response = await fetch("/api/notifications", {
@@ -756,12 +764,7 @@ function getAverageTeamRating() {
     }
 
     if (missingRating) {
-      await sendRatingCheckAlert(member, `Blocked roster add; no ${getRatingLabel()} entered`).catch((alertError) => {
-        console.warn("Roster rating check alert failed.", alertError);
-        alert("This player cannot be added because their rating is missing, and the rating check email could not be sent. Please notify the league manually.");
-      });
-      alert(`${member.first_name} ${member.last_name} does not have a ${getRatingLabel()} entered for this season and cannot be added to this roster.`);
-      return;
+      alert(`${formatMemberName(member)} does not have a ${getRatingLabel()} entered for this season. They will be added to this roster, and a rating check email will be sent to info@lwrpickleballclub.com.`);
     }
 
     const alreadyOnRoster = roster.find(
