@@ -15,6 +15,8 @@ Use your email address and password from the LMS login screen. If this is your f
 
 ![Initial login screen](/help/captain/screenshots/initial-login-screen.png "Initial login screen")
 
+## Captain Dashboard
+
 ![Captain Dashboard overview](/help/captain/screenshots/captain-dashboard.png "Captain Dashboard overview")
 
 ## Weekly workflow
@@ -29,13 +31,25 @@ Use your email address and password from the LMS login screen. If this is your f
 
 The dashboard groups matches into upcoming, completed, and pending verification sections. Team tabs across the top let you switch between captain assignments without leaving the page.
 
+## Upcoming Matches
+
 ![Upcoming matches](/help/captain/screenshots/upcoming-matches.png "Upcoming matches")
 
-## Division information
+## Completed Matches and Pending Score Verification
+
+See Score Entry option on the Search/Category section to the left.
+
+## Manage Rosters
+
+See Team Rosters option on the Search/Category section to the left.
+
+## Schedules/Standings
 
 Use **Schedules/Standings** to review division schedules, standings, and completed match details. Use **Division Captains** to view captain contacts for teams in the division.
 
 ![Schedules and standings](/help/captain/screenshots/schedules-standings.png "Schedules and standings")
+
+## Division Captains
 
 ![Division Captains button](/help/captain/screenshots/division-captains.png "Division Captains button")
 
