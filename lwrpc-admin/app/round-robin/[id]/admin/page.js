@@ -2204,10 +2204,8 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
     if (!newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10) return;
     const result = await runAction("addSessionNewPlayer", {
       sessionId: session.id,
-      player: {
-        displayName: newPlayerName,
-        phone: newPlayerPhone,
-      },
+      displayName: newPlayerName,
+      phone: newPlayerPhone,
     });
     if (result) {
       setNewPlayerName("");

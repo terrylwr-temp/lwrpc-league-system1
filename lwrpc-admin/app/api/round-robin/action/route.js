@@ -1444,8 +1444,16 @@ async function addSessionPlayer(supabase, group, body) {
 
 async function addSessionNewPlayer(supabase, group, body) {
   const sessionId = String(body.sessionId || "").trim();
-  const displayName = String(body.displayName || body.playerName || "").trim();
-  const cleanPhone = normalizePhone(body.phone);
+  const playerInput = body.player && typeof body.player === "object" ? body.player : {};
+  const displayName = String(
+    body.displayName ||
+    body.playerName ||
+    playerInput.displayName ||
+    playerInput.display_name ||
+    playerInput.name ||
+    ""
+  ).trim();
+  const cleanPhone = normalizePhone(body.phone || playerInput.phone);
   if (!sessionId) throw new Error("Match is required.");
   if (!displayName) throw new Error("Player name is required.");
   if (!cleanPhone || cleanPhone.length < 10) throw new Error("Enter a full 10-digit phone number.");
@@ -1466,7 +1474,7 @@ async function addSessionNewPlayer(supabase, group, body) {
     group_id: group.id,
     display_name: displayName,
     first_name: displayName.split(/\s+/)[0] || null,
-    dupr_id: normalizeDuprId(body.duprId || body.dupr_id) || null,
+    dupr_id: normalizeDuprId(body.duprId || body.dupr_id || playerInput.duprId || playerInput.dupr_id) || null,
     phone: formatPhoneInput(cleanPhone),
     is_active: true,
     updated_at: new Date().toISOString(),
