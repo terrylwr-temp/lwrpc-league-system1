@@ -140,10 +140,10 @@ export default function MatchDetailPage() {
           uses_saved_match_lineups,
           score_required
         ),
-        home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name),
-        home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name),
-        away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name),
-        away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name)
+        home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
+        home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
+        away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, self_rating),
+        away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, self_rating)
       `)
       .eq("match_id", id)
       .order("line_number", { ascending: true });
@@ -249,8 +249,8 @@ export default function MatchDetailPage() {
       .from("match_lineups")
       .select(`
         *,
-        player_1:members!match_lineups_player_1_member_id_fkey(id, first_name, last_name),
-        player_2:members!match_lineups_player_2_member_id_fkey(id, first_name, last_name)
+        player_1:members!match_lineups_player_1_member_id_fkey(id, first_name, last_name, self_rating),
+        player_2:members!match_lineups_player_2_member_id_fkey(id, first_name, last_name, self_rating)
       `)
       .eq("match_id", id)
       .order("line_number", { ascending: true });
@@ -313,6 +313,26 @@ export default function MatchDetailPage() {
     if (ratingType === "primetime") return ratingRow?.season_primetime_rating ?? null;
     if (ratingType === "self_rating") return member.self_rating ?? null;
     return ratingRow?.season_dupr_rating ?? null;
+  }
+
+  function memberHasValidRating(member) {
+    const rating = memberRating(member);
+    return rating !== null && rating !== undefined && rating !== "" && Number.isFinite(Number(rating));
+  }
+
+  function rosterRowHasValidRating(row) {
+    return memberHasValidRating(row?.members);
+  }
+
+  function savedLineupHasValidRatings(lineup) {
+    return memberHasValidRating(lineup?.player_1) && memberHasValidRating(lineup?.player_2);
+  }
+
+  function ratingNeededPlayerNames(players) {
+    return players
+      .filter((player) => player && !memberHasValidRating(player))
+      .map((player) => `${player.first_name || ""} ${player.last_name || ""}`.trim())
+      .filter(Boolean);
   }
 
   function rosterOptionLabel(row) {
@@ -494,6 +514,17 @@ export default function MatchDetailPage() {
       warnings.push("A player is selected twice in this game.");
     }
 
+    const ratingNeededNames = ratingNeededPlayerNames([
+      line.home_player_1,
+      line.home_player_2,
+      line.away_player_1,
+      line.away_player_2,
+    ]);
+
+    if (ratingNeededNames.length > 0) {
+      warnings.push(`${[...new Set(ratingNeededNames)].join(", ")} need a valid ${ratingLabel()} rating before scores can be submitted.`);
+    }
+
     const overLimitNames = isPicklebreakerLine(line)
       ? []
       : [
@@ -589,6 +620,14 @@ export default function MatchDetailPage() {
 
     clearScoreValidationIssuesForLineIds(lineIdsToUpdate);
 
+    const roster = field.startsWith("home_") ? homeRoster : awayRoster;
+    const selectedRosterRow = roster.find((row) => String(row.members?.id) === String(value));
+
+    if (value && selectedRosterRow && !rosterRowHasValidRating(selectedRosterRow)) {
+      alert(`${rosterOptionName(selectedRosterRow)} needs a valid ${ratingLabel()} rating before they can be entered as an actual player.`);
+      return;
+    }
+
     const { error } = await supabase
       .from("match_lines")
       .update({
@@ -602,7 +641,6 @@ export default function MatchDetailPage() {
       return;
     }
 
-    const roster = field.startsWith("home_") ? homeRoster : awayRoster;
     const selectedMember = roster.find((row) => String(row.members?.id) === String(value))?.members || null;
     const playerObjectField = field.replace(/_id$/, "");
 
@@ -629,6 +667,12 @@ export default function MatchDetailPage() {
 
     const lineup = matchLineups.find((item) => item.id === lineupId);
     if (!lineup) return;
+
+    if (!savedLineupHasValidRatings(lineup)) {
+      const names = ratingNeededPlayerNames([lineup.player_1, lineup.player_2]);
+      alert(`${names.join(" and ") || "This saved match setup team"} need a valid ${ratingLabel()} rating before they can be entered as actual players.`);
+      return;
+    }
 
     if (lineIsNotPlayedPicklebreaker(line)) {
       alert("This Picklebreaker is not played because the regular game-line team points are not tied.");
@@ -1612,7 +1656,7 @@ export default function MatchDetailPage() {
                   <TeamPlayers
                     title={match.home_team?.name || "Home Team"}
                     teamRating={teamDuprRating(line.home_player_1, line.home_player_2)}
-                    savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.home_team_id))}
+                    savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.home_team_id) && savedLineupHasValidRatings(lineup))}
                     useSavedLineups={line.division_lines?.uses_saved_match_lineups !== false}
                     roster={homeRoster}
                     line={line}
@@ -1621,13 +1665,14 @@ export default function MatchDetailPage() {
                     updateLinePlayer={updateLinePlayer}
                     applySavedLineup={(lineupId) => applySavedLineup(line, "home", lineupId)}
                     rosterOptionName={rosterOptionLabel}
+                    rosterOptionDisabled={(player) => !rosterRowHasValidRating(player)}
                     disabled={lineEntryDisabled}
                   />
 
                   <TeamPlayers
                     title={match.away_team?.name || "Away Team"}
                     teamRating={teamDuprRating(line.away_player_1, line.away_player_2)}
-                    savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.away_team_id))}
+                    savedLineups={matchLineups.filter((lineup) => String(lineup.team_id) === String(match.away_team_id) && savedLineupHasValidRatings(lineup))}
                     useSavedLineups={line.division_lines?.uses_saved_match_lineups !== false}
                     roster={awayRoster}
                     line={line}
@@ -1636,6 +1681,7 @@ export default function MatchDetailPage() {
                     updateLinePlayer={updateLinePlayer}
                     applySavedLineup={(lineupId) => applySavedLineup(line, "away", lineupId)}
                     rosterOptionName={rosterOptionLabel}
+                    rosterOptionDisabled={(player) => !rosterRowHasValidRating(player)}
                     disabled={lineEntryDisabled}
                   />
                 </div>
@@ -1895,6 +1941,7 @@ function TeamPlayers({
   updateLinePlayer,
   applySavedLineup,
   rosterOptionName,
+  rosterOptionDisabled = () => false,
   disabled = false,
 }) {
   function selectedPlayerFor(field) {
@@ -1920,6 +1967,15 @@ function TeamPlayers({
 
   const selectedPlayer1 = selectedPlayerFor(player1Field);
   const selectedPlayer2 = selectedPlayerFor(player2Field);
+  const selectedPlayerIds = new Set(
+    [line[player1Field], line[player2Field]]
+      .filter(Boolean)
+      .map(String)
+  );
+  const rosterOptions = roster.filter((player) =>
+    !rosterOptionDisabled(player) ||
+    selectedPlayerIds.has(String(player.members?.id || ""))
+  );
 
   return (
     <div className="rounded-lg border border-slate-200 bg-white p-2">
@@ -1963,11 +2019,20 @@ function TeamPlayers({
             <option value={selectedPlayer1.id}>{selectedPlayer1.label}</option>
           )}
 
-          {roster.map((player) => (
-            <option key={player.members?.id} value={player.members?.id}>
-              {rosterOptionName(player)}
-            </option>
-          ))}
+          {rosterOptions.map((player) => {
+            const optionDisabled = rosterOptionDisabled(player);
+
+            return (
+              <option
+                key={player.members?.id}
+                value={player.members?.id}
+                disabled={optionDisabled}
+              >
+                {rosterOptionName(player)}
+                {optionDisabled ? " - Rating Needed" : ""}
+              </option>
+            );
+          })}
         </select>
 
         <select
@@ -1981,11 +2046,20 @@ function TeamPlayers({
             <option value={selectedPlayer2.id}>{selectedPlayer2.label}</option>
           )}
 
-          {roster.map((player) => (
-            <option key={player.members?.id} value={player.members?.id}>
-              {rosterOptionName(player)}
-            </option>
-          ))}
+          {rosterOptions.map((player) => {
+            const optionDisabled = rosterOptionDisabled(player);
+
+            return (
+              <option
+                key={player.members?.id}
+                value={player.members?.id}
+                disabled={optionDisabled}
+              >
+                {rosterOptionName(player)}
+                {optionDisabled ? " - Rating Needed" : ""}
+              </option>
+            );
+          })}
         </select>
       </div>
 

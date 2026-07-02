@@ -1624,6 +1624,15 @@ export default function CaptainDashboardPage() {
     return ratingRow?.season_dupr_rating ?? null;
   }
 
+  function setupMemberHasValidRating(member) {
+    const rating = setupMemberRating(member);
+    return rating !== null && rating !== undefined && rating !== "" && Number.isFinite(Number(rating));
+  }
+
+  function setupRosterRowHasValidRating(row) {
+    return setupMemberHasValidRating(row?.members);
+  }
+
   function setupRosterLabel(row) {
     const member = row.members;
     const rating = setupMemberRating(member);
@@ -1633,6 +1642,19 @@ export default function CaptainDashboardPage() {
         : Number(rating).toFixed(2);
 
     return `${member?.last_name || ""}, ${member?.first_name || ""} (${setupRatingLabel()}: ${ratingText})`;
+  }
+
+  function setupRosterOptionLabel(row) {
+    return setupRosterRowHasValidRating(row)
+      ? setupRosterLabel(row)
+      : `${setupRosterLabel(row)} - Rating Needed`;
+  }
+
+  function setupRosterOptionsFor(selectedMemberId) {
+    return setupRoster.filter((row) =>
+      setupRosterRowHasValidRating(row) ||
+      String(row.member_id || "") === String(selectedMemberId || "")
+    );
   }
 
   function setupRatingLabel() {
@@ -1776,6 +1798,18 @@ export default function CaptainDashboardPage() {
   function setupLineIssue(lineup) {
     if (!lineup.player_1_member_id || !lineup.player_2_member_id) {
       return `${matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)} needs two players before match setup can be saved.`;
+    }
+
+    const invalidRatingPlayers = [
+      setupRoster.find((row) => String(row.member_id) === String(lineup.player_1_member_id))?.members,
+      setupRoster.find((row) => String(row.member_id) === String(lineup.player_2_member_id))?.members,
+    ]
+      .filter((member) => member && !setupMemberHasValidRating(member))
+      .map(formatMemberName)
+      .filter(Boolean);
+
+    if (invalidRatingPlayers.length > 0) {
+      return `${invalidRatingPlayers.join(" and ")} need a valid ${setupRatingLabel()} rating before match setup can be saved.`;
     }
 
     return setupDuplicateWarning(lineup) || setupLineWarning(lineup);
@@ -2562,9 +2596,13 @@ export default function CaptainDashboardPage() {
                         className="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm sm:py-2"
                       >
                         <option value="">Select Player 1</option>
-                        {setupRoster.map((row) => (
-                          <option key={row.member_id} value={row.member_id}>
-                            {setupRosterLabel(row)}
+                        {setupRosterOptionsFor(lineup.player_1_member_id).map((row) => (
+                          <option
+                            key={row.member_id}
+                            value={row.member_id}
+                            disabled={!setupRosterRowHasValidRating(row)}
+                          >
+                            {setupRosterOptionLabel(row)}
                           </option>
                         ))}
                       </select>
@@ -2575,9 +2613,13 @@ export default function CaptainDashboardPage() {
                         className="w-full rounded-lg border border-slate-300 px-3 py-3 text-sm sm:py-2"
                       >
                         <option value="">Select Player 2</option>
-                        {setupRoster.map((row) => (
-                          <option key={row.member_id} value={row.member_id}>
-                            {setupRosterLabel(row)}
+                        {setupRosterOptionsFor(lineup.player_2_member_id).map((row) => (
+                          <option
+                            key={row.member_id}
+                            value={row.member_id}
+                            disabled={!setupRosterRowHasValidRating(row)}
+                          >
+                            {setupRosterOptionLabel(row)}
                           </option>
                         ))}
                       </select>

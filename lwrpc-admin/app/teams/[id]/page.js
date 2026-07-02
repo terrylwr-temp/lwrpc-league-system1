@@ -416,6 +416,15 @@ export default function TeamRosterPage() {
     return rating.toFixed(2);
   }
 
+  function memberHasDuprId(member) {
+    return Boolean(String(member?.dupr_id || "").trim());
+  }
+
+  function getAddPlayerRatingDisplay(member) {
+    if (!memberHasDuprId(member)) return "No DUPR ID";
+    return getRatingDisplay(member);
+  }
+
   function hasNrDuprDoublesRating(member) {
     const ratingRow = getSeasonRating(member.id);
     const rawRating = ratingRow?.dupr_doubles_rating;
@@ -447,6 +456,10 @@ export default function TeamRosterPage() {
   }
 
   function playerRatingEligibility(member) {
+    if (!memberHasDuprId(member)) {
+      return "Not Eligible";
+    }
+
     const playerRating = getPlayerRating(member);
     const minRating = team?.divisions?.min_dupr;
     const maxRating = team?.divisions?.max_dupr;
@@ -726,6 +739,11 @@ function getAverageTeamRating() {
       return;
     }
 
+    if (!memberHasDuprId(member)) {
+      alert(`${formatMemberName(member)} does not have a DUPR ID and cannot be added to this roster.`);
+      return;
+    }
+
     const playerRating = getPlayerRating(member);
     const missingRating =
       playerRating === null ||
@@ -764,7 +782,7 @@ function getAverageTeamRating() {
     }
 
     if (missingRating) {
-      alert(`${formatMemberName(member)} does not have a ${getRatingLabel()} entered for this season. They will be added to this roster, and a rating check email will be sent to info@lwrpickleballclub.com.`);
+      alert(`${formatMemberName(member)} does not have a ${getRatingLabel()} entered for this season. They will be added to this roster, and a rating check email will be sent to info@lwrpickleballclub.com. We will send you an email with their updated rating when that is entered.`);
     }
 
     const alreadyOnRoster = roster.find(
@@ -1095,7 +1113,7 @@ function getAverageTeamRating() {
                     >
                       {member.last_name}, {member.first_name}
                       {" - "}
-                      {getRatingLabel()}: {getRatingDisplay(member)}
+                      {getRatingLabel()}: {getAddPlayerRatingDisplay(member)}
                       {" - "}
                       {playerRatingEligibility(member)}
                     </option>
@@ -1405,7 +1423,7 @@ function getAverageTeamRating() {
                       >
                         {member.last_name}, {member.first_name}
                         {" - "}
-                        {getRatingLabel()}: {getRatingDisplay(member)}
+                        {getRatingLabel()}: {getAddPlayerRatingDisplay(member)}
                         {" - "}
                         {playerRatingEligibility(member)}
                       </option>
