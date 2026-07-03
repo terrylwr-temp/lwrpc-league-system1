@@ -1699,9 +1699,13 @@ async function startSession(supabase, group, body) {
 
   const sessionCourts = sanitizeSessionCourts(body.sessionCourts);
   const courtCount = sessionCourts.length || Number(body.courtCount || suggestedCourtCount(joinedPlayers.length));
+  const requestedScoring = body.scoring && typeof body.scoring === "object"
+    ? normalizeRoundRobinScoring(body.scoring)
+    : null;
   const settings = {
     ...(session.settings || {}),
     sessionCourts,
+    ...(requestedScoring ? { scoring: requestedScoring } : {}),
   };
   const { data, error } = await supabase
     .from("round_robin_sessions")

@@ -27,7 +27,7 @@ Use your regular email address that you used when signing up for your Club membe
 
 ## Navigation
 
-The dashboard groups matches into upcoming, completed, and pending verification sections. Team tabs across the top let you switch between captain assignments without leaving the page. In the very top header, you are able to **change your password** or look up your current club **membership** information. You are also able to email the League with any questions you may have with the **Contact League** button.
+Manage everything from one central Captain dashboard. Matches are categorized by Upcoming, Completed, and Pending Verification status. Quickly toggle between your captain assignments using the top team tabs. Need to update your account or get help? Use the top header to **change your password**, view your **club membership** info, or click **Contact League** to email support.
 
 ## Upcoming Matches
 

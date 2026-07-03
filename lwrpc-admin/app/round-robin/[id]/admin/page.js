@@ -1381,6 +1381,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   const [startModalMode, setStartModalMode] = useState("initial");
   const [startCourts, setStartCourts] = useState([]);
   const [startCheckedPlayerIds, setStartCheckedPlayerIds] = useState([]);
+  const [startScoring, setStartScoring] = useState(DEFAULT_ROUND_ROBIN_SCORING);
   const [pendingRoundScroll, setPendingRoundScroll] = useState(null);
   const [progressMessage, setProgressMessage] = useState("");
   const [scoreError, setScoreError] = useState("");
@@ -1437,6 +1438,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
     setStartCourts(mode === "initial"
       ? sessionCourtRows(session, state.courts, suggestedCourtCountForPlayers(checkedIds.length))
       : []);
+    setStartScoring(normalizeRoundRobinScoring(session?.settings?.scoring));
     setStartModalOpen(true);
   }
 
@@ -1468,7 +1470,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
         isInitialStart ? "startSessionAndGenerateFirstGame" : "generateNextGame",
         {
           sessionId: session.id,
-          ...(isInitialStart ? { courtCount: startCourts.length, sessionCourts: startCourts } : {}),
+          ...(isInitialStart ? { courtCount: startCourts.length, sessionCourts: startCourts, scoring: startScoring } : {}),
           selectedSessionPlayerIds: startCheckedPlayerIds,
         },
         { returnResult: true }
@@ -1481,6 +1483,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
       if (result?.success !== false) {
         setStartModalOpen(false);
         setStartCheckedPlayerIds([]);
+        setStartScoring(DEFAULT_ROUND_ROBIN_SCORING);
         if (result?.roundNumber) setPendingRoundScroll(result.roundNumber);
       }
     } finally {
@@ -1601,13 +1604,15 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
           session={session}
           courts={startCourts}
           updateCourt={updateStartCourt}
+          scoring={startScoring}
+          setScoring={setStartScoring}
           joinedPlayers={joinedPlayers}
           checkedPlayerIds={startCheckedPlayerIds}
           togglePlayer={toggleStartPlayer}
           mode={startModalMode}
           roundNumber={verifyPlayersRoundNumber}
           actionLoading={actionLoading}
-          onClose={() => { setStartModalOpen(false); setStartCheckedPlayerIds([]); }}
+          onClose={() => { setStartModalOpen(false); setStartCheckedPlayerIds([]); setStartScoring(DEFAULT_ROUND_ROBIN_SCORING); }}
           onStart={confirmStartSession}
         />
       )}
@@ -2340,14 +2345,27 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
   );
 }
 
-function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checkedPlayerIds, togglePlayer, mode = "initial", roundNumber = 1, actionLoading, onClose, onStart }) {
+function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft, setScoring, joinedPlayers, checkedPlayerIds, togglePlayer, mode = "initial", roundNumber = 1, actionLoading, onClose, onStart }) {
   const checkedSet = new Set((checkedPlayerIds || []).map(String));
   const checkedCount = checkedSet.size;
   const courtLabel = `${courts.length} court${courts.length === 1 ? "" : "s"}`;
   const initialMode = mode === "initial";
   const busy = ["startSessionAndGenerateFirstGame", "generateNextGame", "updateMatchScore"].includes(actionLoading);
-  const scoring = normalizeRoundRobinScoring(session?.settings?.scoring);
-  const scoringTypeLabel = scoring.scoreType === "rally" ? "Rally" : "Standard";
+  const scoring = normalizeRoundRobinScoring(scoringDraft || session?.settings?.scoring);
+
+  function updateScoring(field, value) {
+    if (!setScoring) return;
+    setScoring((current) => {
+      const currentScoring = normalizeRoundRobinScoring(current);
+      if (field === "pointsToWin") {
+        return { ...currentScoring, pointsToWin: Math.round(clampNumber(value, 1, 99, DEFAULT_ROUND_ROBIN_SCORING.pointsToWin)) };
+      }
+      if (field === "winBy") {
+        return { ...currentScoring, winBy: Math.round(clampNumber(value, 1, 20, DEFAULT_ROUND_ROBIN_SCORING.winBy)) };
+      }
+      return { ...currentScoring, scoreType: normalizeRoundRobinScoreType(value) };
+    });
+  }
 
   return (
     <ModalPortal>
@@ -2433,19 +2451,41 @@ function StartSessionModal({ session, courts, updateCourt, joinedPlayers, checke
                     </div>
                     <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-emerald-800 shadow-sm">{roundRobinScoringLabel(scoring)}</div>
                   </div>
-                  <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-black text-emerald-950">
-                    <div className="rounded-lg bg-white px-2 py-3 shadow-sm">
-                      <div className="uppercase tracking-wide text-emerald-700">Game points to</div>
-                      <div className="mt-1 text-lg text-slate-950">{scoring.pointsToWin}</div>
-                    </div>
-                    <div className="rounded-lg bg-white px-2 py-3 shadow-sm">
-                      <div className="uppercase tracking-wide text-emerald-700">Win by</div>
-                      <div className="mt-1 text-lg text-slate-950">{scoring.winBy}</div>
-                    </div>
-                    <div className="rounded-lg bg-white px-2 py-3 shadow-sm">
-                      <div className="uppercase tracking-wide text-emerald-700">Score type</div>
-                      <div className="mt-1 text-lg text-slate-950">{scoringTypeLabel}</div>
-                    </div>
+                  <div className="mt-3 grid grid-cols-1 gap-3 text-sm font-bold text-emerald-950 sm:grid-cols-3">
+                    <label className="block rounded-lg bg-white px-3 py-3 shadow-sm">
+                      <span className="text-xs font-black uppercase tracking-wide text-emerald-700">Game points to</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="99"
+                        value={scoring.pointsToWin}
+                        onChange={(event) => updateScoring("pointsToWin", event.target.value)}
+                        className="mt-2 w-full rounded-lg border border-emerald-200 px-3 py-2 text-base font-black text-slate-950 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      />
+                    </label>
+                    <label className="block rounded-lg bg-white px-3 py-3 shadow-sm">
+                      <span className="text-xs font-black uppercase tracking-wide text-emerald-700">Win by</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={scoring.winBy}
+                        onChange={(event) => updateScoring("winBy", event.target.value)}
+                        className="mt-2 w-full rounded-lg border border-emerald-200 px-3 py-2 text-base font-black text-slate-950 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      />
+                    </label>
+                    <label className="block rounded-lg bg-white px-3 py-3 shadow-sm">
+                      <span className="text-xs font-black uppercase tracking-wide text-emerald-700">Score type</span>
+                      <select
+                        value={scoring.scoreType}
+                        onChange={(event) => updateScoring("scoreType", event.target.value)}
+                        className="mt-2 w-full rounded-lg border border-emerald-200 px-3 py-2 text-base font-black text-slate-950 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                      >
+                        {ROUND_ROBIN_SCORE_TYPE_OPTIONS.map((option) => (
+                          <option key={option.value} value={option.value}>{option.label}</option>
+                        ))}
+                      </select>
+                    </label>
                   </div>
                 </div>
               </div>
