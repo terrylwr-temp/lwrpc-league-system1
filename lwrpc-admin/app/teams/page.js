@@ -1282,20 +1282,12 @@ if (loading) {
           )}
 
           <div className="rounded-2xl bg-white p-6 shadow">
-            <div className="mb-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_12rem_11rem] xl:items-start">
+            <div className="mb-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(17rem,24rem)] xl:items-start">
               <div className="space-y-3">
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <h2 className="text-xl font-bold text-slate-900">
                     Teams
                   </h2>
-
-                  <button
-                    type="button"
-                    onClick={openCreateTeam}
-                    className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-bold text-white hover:bg-blue-800"
-                  >
-                    Add Team
-                  </button>
                 </div>
 
                 <div className="flex flex-col gap-2 sm:flex-row">
@@ -1318,42 +1310,54 @@ if (loading) {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-                  <div className="text-xs uppercase tracking-wide text-slate-300">
-                    Teams
-                  </div>
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={openCreateTeam}
+                    className="min-h-12 rounded-xl bg-blue-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-blue-800"
+                  >
+                    Add Team
+                  </button>
 
-                  <div className="text-2xl font-bold">
-                    {filteredTeams.length}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={openCopyDivisionTeams}
+                    className="min-h-12 rounded-xl bg-blue-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-blue-800"
+                  >
+                    Copy Division Teams
+                  </button>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={openCopyDivisionTeams}
-                  className="w-full rounded-xl bg-emerald-100 px-4 py-3 font-semibold text-emerald-900 hover:bg-emerald-200"
-                >
-                  Copy Division Teams
-                </button>
-              </div>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(8rem,0.75fr)_minmax(0,1fr)]">
+                  <div className="rounded-xl bg-slate-900 px-4 py-3 text-white">
+                    <div className="text-xs font-black uppercase tracking-wide text-slate-300">
+                      Teams
+                    </div>
 
-              <div className="space-y-2">
-                <button
-                  type="button"
-                  onClick={expandAllGroups}
-                  className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
-                >
-                  Expand All
-                </button>
+                    <div className="text-2xl font-black">
+                      {filteredTeams.length}
+                    </div>
+                  </div>
 
-                <button
-                  type="button"
-                  onClick={collapseAllGroups}
-                  className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-800 hover:bg-slate-300"
-                >
-                  Collapse All
-                </button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={expandAllGroups}
+                      className="min-h-12 rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-800 hover:bg-slate-300"
+                    >
+                      Expand All
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={collapseAllGroups}
+                      className="min-h-12 rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-800 hover:bg-slate-300"
+                    >
+                      Collapse All
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
