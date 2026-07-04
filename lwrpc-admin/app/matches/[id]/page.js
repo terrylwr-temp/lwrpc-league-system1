@@ -880,6 +880,7 @@ export default function MatchDetailPage() {
     const numericValue = String(value).replace(/\D/g, "");
     const normalizedValue =
       field === "game_status" ? value || "completed" : numericValue === "" ? null : Number(numericValue);
+    const forfeitedGame = field === "game_status" && isForfeitStatus(normalizedValue);
 
     setScoreDirty(true);
     clearScoreValidationIssuesForGame(gameId);
@@ -890,12 +891,19 @@ export default function MatchDetailPage() {
           ? {
               ...game,
               [field]: normalizedValue,
+              ...(forfeitedGame ? { home_score: 0, away_score: 0 } : {}),
             }
           : game
       )
     );
 
     await queueGameUpdate(gameId, field, normalizedValue);
+    if (forfeitedGame) {
+      await Promise.all([
+        queueGameUpdate(gameId, "home_score", 0),
+        queueGameUpdate(gameId, "away_score", 0),
+      ]);
+    }
   }
 
   function gameStatusOptions() {

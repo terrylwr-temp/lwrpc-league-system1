@@ -2890,21 +2890,6 @@ export default function CaptainDashboardPage() {
                       {team.divisions?.leagues?.name || "League"} / {team.divisions?.name || "Division"}
                     </div>
                   </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        if (confirmUnsavedChanges()) {
-                          openDivisionSchedule(team);
-                        }
-                      }}
-                      className="cursor-pointer rounded-xl border border-blue-300 bg-gradient-to-b from-sky-400 to-blue-800 px-4 py-2 text-xs font-black uppercase tracking-wide text-white shadow-[0_5px_0_#1e3a8a,0_10px_18px_rgba(15,23,42,0.25)] transition hover:-translate-y-0.5 hover:from-sky-300 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.22)]"
-                    >
-                      Rank {standing?.rank ? `#${standing.rank}` : "N/A"}
-                    </button>
-                  </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs font-bold text-slate-700">

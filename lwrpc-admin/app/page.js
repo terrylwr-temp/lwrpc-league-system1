@@ -819,7 +819,9 @@ export default function DashboardPage() {
         { title: "Members", desc: "Search, edit, and review member records.", path: "/members", code: "MB", tone: "slate" },
         { title: "Season Ratings", desc: "Update DUPR and PrimeTime ratings.", path: "/ratings", code: "RT", tone: "amber" },
         { title: "Teams & Rosters", desc: "Create teams and manage rosters.", path: "/teams", code: "TR", tone: "emerald" },
-        { title: "User Roles", desc: "Manage role-based access permissions.", path: "/users", code: "UR", tone: "blue" },
+        ...(currentUserRole === "commissioner"
+          ? [{ title: "User Roles", desc: "Manage role-based access permissions.", path: "/users", code: "UR", tone: "blue" }]
+          : []),
       ],
     },
     {

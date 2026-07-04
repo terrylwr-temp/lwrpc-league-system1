@@ -10,11 +10,15 @@ export const ROLE_CAPABILITIES = [
     roles: ["captain", "club_pro", "league_manager", "commissioner"],
   },
   {
-    label: "Admin dashboard, members, ratings, scheduling, scoring, setup",
+    label: "Special Result match completion",
     roles: ["league_manager", "commissioner"],
   },
   {
-    label: "User role management, Club Setup",
+    label: "Admin dashboard, members, ratings, scheduling, scoring operations, and League Setup pages (Seasons, Leagues, Divisions, Locations, Schedule Settings, Score Sheets, Email Options)",
+    roles: ["league_manager", "commissioner"],
+  },
+  {
+    label: "User role management and all System Setup / Club Setup options",
     roles: ["commissioner"],
   },
 ];
@@ -30,7 +34,7 @@ export default function RoleCapabilityModal({ onClose }) {
             </div>
             <h2 className="mt-1 text-2xl font-black">Role Capability Matrix</h2>
             <p className="mt-1 text-sm font-semibold text-slate-300">
-              Higher roles include the capabilities of lower roles. Commissioners are the only users who can manage user roles and Club Setup.
+              Higher roles include the capabilities of lower roles.
             </p>
           </div>
 
