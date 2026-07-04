@@ -67,6 +67,7 @@ export default function MatchDetailPage() {
     awayScore: "",
     notes: "",
   });
+  const [showMatchNotes, setShowMatchNotes] = useState(false);
   const pendingGameUpdatesRef = useRef(new Map());
   const scoreValidationSubmittingRef = useRef(false);
 
@@ -1823,6 +1824,18 @@ export default function MatchDetailPage() {
           </div>
 
           {match.notes && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => setShowMatchNotes((value) => !value)}
+                className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-black uppercase tracking-wide text-amber-900 hover:bg-amber-100"
+              >
+                {showMatchNotes ? "Hide Match Notes" : "Show Match Notes"}
+              </button>
+            </div>
+          )}
+
+          {match.notes && showMatchNotes && (
             <div className="mt-4 rounded-xl bg-amber-50 p-3 text-amber-900">
               <div className="font-semibold">Match Notes</div>
               <div className="mt-1 text-sm">{match.notes}</div>

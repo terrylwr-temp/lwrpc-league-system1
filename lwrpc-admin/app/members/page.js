@@ -118,6 +118,7 @@ export default function MembersPage() {
     const memberRows = data || [];
     const memberIdSet = new Set(memberRows.map((member) => String(member.id)));
     let teamsByMemberId = {};
+    let allTeamsByMemberId = {};
 
     if (memberIdSet.size > 0) {
       const { rows: teamRows, error: teamError } = await loadAllMemberTeamRows();
@@ -130,6 +131,11 @@ export default function MembersPage() {
 
       teamsByMemberId = (teamRows || []).reduce((byMember, row) => {
         if (!memberIdSet.has(String(row.member_id))) return byMember;
+        if (!allTeamsByMemberId[row.member_id]) allTeamsByMemberId[row.member_id] = [];
+        allTeamsByMemberId[row.member_id].push({
+          ...row.teams,
+          roster_role: memberTeamRole(row.member_id, row.teams),
+        });
         if (!byMember[row.member_id]) byMember[row.member_id] = [];
         if (row.teams?.is_active !== false) {
           byMember[row.member_id].push({
@@ -139,12 +145,26 @@ export default function MembersPage() {
         }
         return byMember;
       }, {});
+
+      teamsByMemberId = Object.fromEntries(
+        Object.entries(teamsByMemberId).map(([memberId, teams]) => [
+          memberId,
+          sortMemberTeams(teams),
+        ])
+      );
+      allTeamsByMemberId = Object.fromEntries(
+        Object.entries(allTeamsByMemberId).map(([memberId, teams]) => [
+          memberId,
+          sortMemberTeams(teams),
+        ])
+      );
     }
 
     setMembers(
       memberRows.map((member) => ({
         ...member,
         teams: teamsByMemberId[member.id] || [],
+        all_teams: allTeamsByMemberId[member.id] || teamsByMemberId[member.id] || [],
       }))
     );
     setSeasons(seasonData || []);
@@ -1036,7 +1056,7 @@ export default function MembersPage() {
                         }}
                         className="h-9 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white hover:bg-emerald-800"
                       >
-                        Teams ({member.teams?.length || 0})
+                        Teams ({activeTeamCount(member)})
                       </button>
 
                       <button
@@ -1095,7 +1115,7 @@ export default function MembersPage() {
                     onClick={() => openMemberTeams(member)}
                     className="h-10 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white hover:bg-emerald-800"
                   >
-                    Teams ({member.teams?.length || 0})
+                    Teams ({activeTeamCount(member)})
                   </button>
 
                   <button
@@ -1378,6 +1398,44 @@ function memberTeamRole(memberId, team) {
   }
 
   return "Player";
+}
+
+function memberTeamRoleCode(memberId, team) {
+  const role = memberTeamRole(memberId, team);
+  if (role === "Captain") return "C";
+  if (role === "Co-Captain") return "CC";
+  return "";
+}
+
+function activeTeamCount(member) {
+  return (member.teams || []).filter((team) => team?.is_active !== false).length;
+}
+
+function sortMemberTeams(teams) {
+  return [...(teams || [])].sort((a, b) => {
+    const seasonCompare = String(teamSeasonName(b) || "").localeCompare(
+      String(teamSeasonName(a) || ""),
+      undefined,
+      { numeric: true, sensitivity: "base" }
+    );
+    if (seasonCompare !== 0) return seasonCompare;
+
+    const divisionCompare = String(a?.divisions?.name || "").localeCompare(
+      String(b?.divisions?.name || ""),
+      undefined,
+      { numeric: true, sensitivity: "base" }
+    );
+    if (divisionCompare !== 0) return divisionCompare;
+
+    return String(a?.name || "").localeCompare(String(b?.name || ""), undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  });
+}
+
+function teamSeasonName(team) {
+  return team?.divisions?.leagues?.seasons?.name || "Season TBD";
 }
 
 function memberRole(member) {
@@ -1812,6 +1870,9 @@ function AddMemberModal({ form, locations, saving, onChange, onClose, onSave }) 
 
 function MemberTeamsModal({ member, onClose }) {
   const teams = member.teams || [];
+  const allTeams = member.all_teams || teams;
+  const [showInactiveTeams, setShowInactiveTeams] = useState(false);
+  const displayedTeams = showInactiveTeams ? allTeams : teams;
   const memberName =
     `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
     member.email ||
@@ -1827,23 +1888,71 @@ function MemberTeamsModal({ member, onClose }) {
             </div>
             <h2 className="mt-1 text-2xl font-black">{memberName}</h2>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
-          >
-            Close
-          </button>
+          <div className="flex flex-wrap gap-2 md:justify-end">
+            <button
+              type="button"
+              onClick={() => setShowInactiveTeams((value) => !value)}
+              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-emerald-400"
+            >
+              {showInactiveTeams ? "Show Current Teams" : "Show Inactive Teams"}
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Close
+            </button>
+          </div>
         </div>
 
         <div className="max-h-[68vh] overflow-auto p-5">
-          {teams.length === 0 ? (
+          {displayedTeams.length === 0 ? (
             <div className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">
-              This member is not currently on any teams.
+              {showInactiveTeams
+                ? "This member has no team history."
+                : "This member is not currently on any active teams."}
+            </div>
+          ) : showInactiveTeams ? (
+            <div className="divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">
+              {displayedTeams.map((team, index) => {
+                const roleCode = memberTeamRoleCode(member.id, team);
+
+                return (
+                  <div
+                    key={team.id || `${member.id}:team-history:${index}`}
+                    className="grid grid-cols-1 gap-1 px-3 py-2 text-sm sm:grid-cols-[8rem_minmax(0,1.4fr)_minmax(0,1fr)_auto] sm:items-center"
+                  >
+                    <div className="font-bold text-slate-600">
+                      {teamSeasonName(team)}
+                    </div>
+                    <div className="min-w-0 font-black text-slate-950">
+                      {team.name || "Unnamed Team"}
+                    </div>
+                    <div className="min-w-0 font-semibold text-slate-600">
+                      {team.divisions?.name || "Division TBD"}
+                    </div>
+                    <div className="flex flex-wrap gap-2 sm:justify-end">
+                      {roleCode && (
+                        <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[11px] font-black text-blue-900">
+                          {roleCode}
+                        </span>
+                      )}
+                      <span className={`rounded-full px-2 py-0.5 text-[11px] font-black uppercase tracking-wide ${
+                        team.is_active === false
+                          ? "bg-slate-200 text-slate-700"
+                          : "bg-emerald-100 text-emerald-900"
+                      }`}>
+                        {team.is_active === false ? "Inactive" : "Active"}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <div className="space-y-3">
-              {teams.map((team, index) => {
+              {displayedTeams.map((team, index) => {
                 const teamRole = team.roster_role || memberTeamRole(member.id, team);
 
                 return (
