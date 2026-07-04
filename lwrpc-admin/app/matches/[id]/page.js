@@ -432,6 +432,8 @@ export default function MatchDetailPage() {
   }, []);
 
   const displayedLines = useMemo(() => getDisplayedLines(lines), [getDisplayedLines, lines]);
+  const specialResultAllowed = hasRole(currentUserRole, "league_manager");
+  const activeScoreEntryMode = specialResultAllowed ? scoreEntryMode : "normal";
 
   function canEditScoreEntry() {
     if (!canManageScores()) return false;
@@ -630,7 +632,7 @@ export default function MatchDetailPage() {
     };
   }, [match, specialResult]);
 
-  const displayedMatchScore = scoreEntryMode === "special"
+  const displayedMatchScore = activeScoreEntryMode === "special"
     ? {
         homeWins: specialResultPreview.hasScore ? specialResultPreview.homeScore : match?.home_score ?? 0,
         awayWins: specialResultPreview.hasScore ? specialResultPreview.awayScore : match?.away_score ?? 0,
@@ -647,6 +649,11 @@ export default function MatchDetailPage() {
   }
 
   function updateSpecialResult(field, value) {
+    if (!specialResultAllowed) {
+      alert("Only League Managers and Commissioners can enter special match results.");
+      return;
+    }
+
     if (!canEditScoreEntry()) {
       alert("Only the captain or co-captain who submitted these pending scores can make corrections.");
       return;
@@ -667,6 +674,10 @@ export default function MatchDetailPage() {
 
   function selectScoreEntryMode(mode) {
     if (mode === scoreEntryMode) return;
+    if (mode === "special" && !specialResultAllowed) {
+      alert("Only League Managers and Commissioners can enter special match results.");
+      return;
+    }
     if (!canEditScoreEntry() && mode !== scoreEntryMode) return;
     setScoreDirty(true);
     setScoreEntryMode(mode);
@@ -1213,7 +1224,7 @@ export default function MatchDetailPage() {
 
     const scoringOperationsOverride = isScoringOperationsOverride();
 
-    if (scoreEntryMode === "special") {
+    if (activeScoreEntryMode === "special") {
       await completeSpecialMatch(scoringOperationsOverride);
       return;
     }
@@ -1303,6 +1314,11 @@ export default function MatchDetailPage() {
   }
 
   async function completeSpecialMatch(scoringOperationsOverride) {
+    if (!specialResultAllowed) {
+      alert("Only League Managers and Commissioners can enter special match results.");
+      return;
+    }
+
     if (match.score_status === "pending_verification" && !scoringOperationsOverride) {
       if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
     }
@@ -1654,7 +1670,7 @@ export default function MatchDetailPage() {
 
   const scoreReviewAllowed = canReviewSubmittedScores();
   const scoreEntryEditable = canEditScoreEntry();
-  const submitScoreLabel = scoreEntryMode === "special"
+  const submitScoreLabel = activeScoreEntryMode === "special"
     ? isScoringOperationsOverride()
       ? "Submit/Verify Special Result"
       : "Submit Special Result"
@@ -1740,7 +1756,7 @@ export default function MatchDetailPage() {
           </div>
         )}
 
-        {scoreEntryMode === "normal" && (sameGameDuplicateLineIds.length > 0 || overLineLimitPlayerIds.length > 0) && (
+        {activeScoreEntryMode === "normal" && (sameGameDuplicateLineIds.length > 0 || overLineLimitPlayerIds.length > 0) && (
           <div className="mb-4 rounded-2xl border-2 border-red-600 bg-red-100 p-4 text-red-950 shadow">
             <div className="text-lg font-black uppercase tracking-wide">Duplicate Player Warning</div>
             {sameGameDuplicateLineIds.length > 0 && (
@@ -1815,6 +1831,7 @@ export default function MatchDetailPage() {
         </div>
 
         <div className="mt-4 space-y-4">
+          {specialResultAllowed && (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow md:p-5">
             <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
               <div>
@@ -1923,8 +1940,9 @@ export default function MatchDetailPage() {
               </div>
             )}
           </div>
+          )}
 
-          {scoreEntryMode === "normal" && displayedLines.map((line) => {
+          {activeScoreEntryMode === "normal" && displayedLines.map((line) => {
             const divisionLine = line.division_lines;
             const lineGames = games.filter((game) => game.match_line_id === line.id);
             const requiredGameIdsForLine = lmsRequiredLineGameIds(lineGames, line);
@@ -2208,7 +2226,7 @@ export default function MatchDetailPage() {
             );
           })}
 
-          {scoreEntryMode === "normal" && displayedLines.length === 0 && (
+          {activeScoreEntryMode === "normal" && displayedLines.length === 0 && (
             <div className="rounded-2xl bg-white p-8 text-center text-slate-500 shadow">
               No teams or games generated for this match.
             </div>

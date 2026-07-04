@@ -49,7 +49,7 @@ const DASHBOARD_TEAM_TAB_SELECTED =
 const DASHBOARD_TEAM_TAB_UNSELECTED =
   "border-slate-300 bg-gradient-to-b from-white to-slate-200 py-2 text-slate-800 shadow-[0_5px_0_#cbd5e1,0_10px_16px_rgba(15,23,42,0.14)] hover:border-blue-300 hover:from-blue-50 hover:to-blue-100 active:shadow-[0_2px_0_#cbd5e1,0_5px_10px_rgba(15,23,42,0.12)]";
 const DASHBOARD_ACTION_BUTTON_3D =
-  "w-full cursor-pointer rounded-xl border border-blue-300 bg-gradient-to-b from-white to-blue-100 px-3 py-3 text-sm font-black text-blue-950 shadow-[0_5px_0_#2563eb,0_10px_16px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:from-blue-50 hover:to-blue-200 active:translate-y-1 active:shadow-[0_2px_0_#2563eb,0_5px_10px_rgba(15,23,42,0.16)]";
+  "w-full min-w-0 cursor-pointer whitespace-normal break-words rounded-xl border border-blue-300 bg-gradient-to-b from-white to-blue-100 px-2 py-3 text-center text-xs font-black leading-tight text-blue-950 shadow-[0_5px_0_#2563eb,0_10px_16px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:from-blue-50 hover:to-blue-200 active:translate-y-1 active:shadow-[0_2px_0_#2563eb,0_5px_10px_rgba(15,23,42,0.16)] sm:px-3 sm:text-sm";
 const DASHBOARD_EMERALD_BUTTON_3D =
   "rounded-xl border border-emerald-300 bg-gradient-to-b from-white to-emerald-100 px-3 py-3 text-sm font-black text-emerald-950 shadow-[0_4px_0_#059669,0_8px_14px_rgba(15,23,42,0.16)] transition hover:-translate-y-0.5 hover:from-emerald-50 hover:to-emerald-200 active:translate-y-1 active:shadow-[0_2px_0_#059669,0_4px_8px_rgba(15,23,42,0.14)] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:bg-none disabled:text-slate-400 disabled:shadow-none disabled:hover:translate-y-0";
 
@@ -78,6 +78,7 @@ export default function CaptainDashboardPage() {
   const [teamRosters, setTeamRosters] = useState({});
   const [captainRatings, setCaptainRatings] = useState([]);
   const [matchSetupStatus, setMatchSetupStatus] = useState({});
+  const [scoreSubmittersById, setScoreSubmittersById] = useState({});
   const [selectedCaptainTeamId, setSelectedCaptainTeamId] = useState("");
   const [showPreviousSeasonTeams, setShowPreviousSeasonTeams] = useState(false);
   const [captainSection, setCaptainSection] = useState("upcoming");
@@ -344,6 +345,7 @@ export default function CaptainDashboardPage() {
       setByeWeeks([]);
       setTeamStats({});
       setDivisionStandings([]);
+      setScoreSubmittersById({});
       router.push("/standings");
       finishLoading(startedAt, setLoading);
       return;
@@ -544,6 +546,32 @@ export default function CaptainDashboardPage() {
       alert(matchError.message);
       setLoading(false);
       return;
+    }
+
+    const scoreSubmitterIds = [
+      ...new Set(
+        (matchData || [])
+          .map((match) => match.score_entered_by_member_id)
+          .filter(Boolean)
+          .map(String)
+      ),
+    ];
+
+    if (scoreSubmitterIds.length > 0) {
+      const { data: scoreSubmitterRows, error: scoreSubmitterError } = await supabase
+        .from("members")
+        .select("id, first_name, last_name, email")
+        .in("id", scoreSubmitterIds);
+
+      if (scoreSubmitterError) {
+        setScoreSubmittersById({});
+      } else {
+        setScoreSubmittersById(
+          Object.fromEntries((scoreSubmitterRows || []).map((member) => [String(member.id), member]))
+        );
+      }
+    } else {
+      setScoreSubmittersById({});
     }
 
     setMatches(matchData || []);
@@ -965,6 +993,10 @@ export default function CaptainDashboardPage() {
     const flexScheduleAllowed = canManageFlexSchedule(match);
     const selectedResult = selectedTeamMatchResult(match);
     const scoreHasBeenEntered = hasEnteredMatchScore(match);
+    const scoreSubmitter =
+      match.score_status === "pending_verification"
+        ? scoreSubmittersById[String(match.score_entered_by_member_id || "")]
+        : null;
     const specialResult = isSpecialMatchResult(match);
     const isMatchScheduled = Boolean(match.scheduled_date);
     const needsScoreEntry = showSetup && canEnterScores && !scoreHasBeenEntered && !scoreButtonAction;
@@ -1083,6 +1115,11 @@ export default function CaptainDashboardPage() {
                 <div className="rounded-xl bg-slate-50 px-3 py-2">
                   <div className="text-xs font-black uppercase tracking-wide text-slate-500">Score Status</div>
                   <div className="font-bold text-slate-900">{formatScoreStatus(match)}</div>
+                  {match.score_status === "pending_verification" && (
+                    <div className="mt-1 text-xs font-bold text-slate-600">
+                      Submitted by {scoreSubmitter ? formatMemberName(scoreSubmitter) : "Unknown"}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

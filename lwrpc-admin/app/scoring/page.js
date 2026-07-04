@@ -617,8 +617,11 @@ function MatchRow({ match, selected, membersById, onToggle, onOpen }) {
               )}
             </div>
 
+            <div className="mt-1 text-base font-black text-slate-950 sm:text-lg">
+              {formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "TBD")}
+            </div>
+
             <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
-              <span>{formatDate(match.scheduled_date)} at {formatDisplayTime(match.scheduled_time, "TBD")}</span>
               <span>{match.leagues?.name || "No League"}</span>
               <span>{match.divisions?.name || "No Division"}</span>
               <span>{match.locations?.name || "No Location"}</span>

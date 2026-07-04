@@ -5,7 +5,7 @@ import {
   isSpecialMatchResult,
   specialMatchResultLabel,
 } from "../lib/specialMatchResults";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function TeamScheduleModal({
   title,
@@ -25,6 +25,7 @@ export default function TeamScheduleModal({
   onClose,
 }) {
   const [standingsView, setStandingsView] = useState("summary");
+  const [expandedMatchId, setExpandedMatchId] = useState("");
   const selectedTeam = teams.find((team) => String(team.id) === String(selectedTeamId));
   const selectedTeamCaptainNames = captainNames(selectedTeam);
   const divisionOptionGroups = divisionOptions.reduce((groups, division) => {
@@ -64,6 +65,10 @@ export default function TeamScheduleModal({
       data: bye,
     })),
   ].sort(compareScheduleItems);
+
+  useEffect(() => {
+    setExpandedMatchId("");
+  }, [selectedTeamId]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-slate-950/70 p-0">
@@ -260,6 +265,13 @@ export default function TeamScheduleModal({
                       compact={compact}
                       ratingByMemberId={ratingByMemberId}
                       ratingType={ratingType}
+                      expanded={String(expandedMatchId) === String(item.data.id)}
+                      onToggleExpanded={() =>
+                        setExpandedMatchId((current) =>
+                          String(current) === String(item.data.id) ? "" : item.data.id
+                        )
+                      }
+                      onCollapse={() => setExpandedMatchId("")}
                     />
                   )
                 )}
@@ -307,8 +319,16 @@ function ScheduleByeCard({ bye }) {
   );
 }
 
-function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, ratingType }) {
-  const [expanded, setExpanded] = useState(false);
+function ScheduleMatchCard({
+  match,
+  selectedTeamId,
+  compact,
+  ratingByMemberId,
+  ratingType,
+  expanded,
+  onToggleExpanded,
+  onCollapse,
+}) {
   const matchCardRef = useRef(null);
   const isHome = String(match.home_team_id) === String(selectedTeamId);
   const opponent = isHome ? match.away_team : match.home_team;
@@ -343,7 +363,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
       ? "bg-red-500"
       : "bg-blue-500";
   function hideMatchDetails() {
-    setExpanded(false);
+    onCollapse?.();
     requestAnimationFrame(() => {
       matchCardRef.current?.scrollIntoView({
         behavior: "smooth",
@@ -388,7 +408,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
                     return;
                   }
 
-                  setExpanded(true);
+                  onToggleExpanded?.();
                 }}
                 className="rounded-lg bg-blue-100 px-3 py-1 text-xs font-black text-blue-900 hover:bg-blue-200"
               >

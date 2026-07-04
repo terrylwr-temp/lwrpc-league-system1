@@ -614,9 +614,12 @@ export default function MatchesPage() {
                         {match.away_team?.name || "Away"}
                       </div>
 
+                      <div className="mt-1 text-base font-black text-slate-950 sm:text-lg">
+                        {formatDisplayDate(match.scheduled_date, "No Date")} at {formatDisplayTime(match.scheduled_time, "No Time")}
+                      </div>
+
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold text-slate-600">
                         <span>{match.divisions?.name || "No Division"}</span>
-                        <span>{formatDisplayDate(match.scheduled_date, "No Date")} at {formatDisplayTime(match.scheduled_time, "No Time")}</span>
                         <span>{match.locations?.name || "No Location"}</span>
                         <span>Week {match.week_number || "-"}</span>
                         <span>{match.status || "scheduled"}</span>
