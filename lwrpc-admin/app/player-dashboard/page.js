@@ -31,6 +31,10 @@ import {
 import { GUIDE_DOCUMENT_TYPES, guidePdfDocument } from "../lib/dashboardGuides";
 import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
 import { buildActiveDivisionOptions } from "../lib/divisionOptions";
+import {
+  isSpecialMatchResult,
+  specialMatchResultLabel,
+} from "../lib/specialMatchResults";
 
 const PLAYER_DOCUMENT_KEYS = new Set([
   "code_of_conduct",
@@ -1017,6 +1021,8 @@ export default function PlayerDashboardPage() {
           home_score,
           away_score,
           winning_team_id,
+          result_type,
+          result_notes,
           is_published,
           locations ( id, name ),
           home_team:teams!matches_home_team_id_fkey ( id, name ),
@@ -2276,6 +2282,7 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
   const hasScoreStatus = Boolean(match.score_status && match.score_status !== "not_entered");
   const showScoreStatusBlock = hasScoreStatus || hasCompletedMatchScore;
   const selectedResult = selectedTeamMatchResult(match, selectedTeamId);
+  const specialResult = isSpecialMatchResult(match);
   const isMatchScheduled = Boolean(match.scheduled_date);
   const headingClass =
     selectedResult === "win"
@@ -2326,7 +2333,7 @@ function MatchSummaryCard({ match, selectedTeamId, onOpenDetails }) {
                 {hasCompletedMatchScore && (
                   <div className="rounded-xl border border-white bg-white px-4 py-3 shadow-sm">
                     <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                      Final Score
+                      {specialResult ? `${specialMatchResultLabel(match)} Result` : "Final Score"}
                     </div>
                     <div className="mt-1 text-4xl font-black leading-none text-slate-950 sm:text-5xl">
                       {homeScore} - {awayScore}
@@ -2444,6 +2451,7 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
   const lines = [...(match.match_lines || [])].sort(
     (a, b) => Number(a.line_number || 0) - Number(b.line_number || 0)
   );
+  const specialResult = isSpecialMatchResult(match);
 
   function printMatchResults() {
     window.localStorage.setItem(
@@ -2519,6 +2527,11 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                   {formatMatchScoreStatus(match)}
                 </div>
+                {specialResult && (
+                  <div className="mt-1 text-xs font-black uppercase tracking-wide text-amber-700">
+                    {specialMatchResultLabel(match)} Result
+                  </div>
+                )}
                 <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
                   <MatchScoreSummaryRow
                     label="Home"
@@ -2569,7 +2582,23 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
 
             {isVerifiedCompleted && (
               <>
-                {lines.map((line) => (
+                {specialResult && (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
+                    <div className="text-xs font-black uppercase tracking-wide">
+                      {specialMatchResultLabel(match)} Result
+                    </div>
+                    <div className="mt-1 text-lg font-black">
+                      {match.home_team?.name || "Home"} {homeScore ?? "-"} - {awayScore ?? "-"} {match.away_team?.name || "Away"}
+                    </div>
+                    {match.result_notes && (
+                      <div className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-sm font-semibold">
+                        {match.result_notes}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!specialResult && lines.map((line) => (
                   <MatchLineResult
                     key={line.id}
                     line={line}
@@ -2578,7 +2607,7 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
                   />
                 ))}
 
-                {!match.match_lines?.length && (
+                {!specialResult && !match.match_lines?.length && (
                   <div className="rounded-xl bg-slate-50 p-4 text-center text-sm font-semibold text-slate-500">
                     No game results have been entered for this match.
                   </div>
@@ -3071,6 +3100,26 @@ function gameScoreText(game) {
 }
 
 function matchResultsPrintHtml(match, lines) {
+  if (isSpecialMatchResult(match)) {
+    return `
+      <style>
+        h1 { margin: 0 0 4px; font-size: 24px; }
+        h2 { margin: 0 0 18px; color: #475569; font-size: 15px; font-weight: 600; }
+        .score { margin: 12px 0 18px; font-size: 16px; font-weight: 700; }
+        .result { border: 1px solid #fbbf24; background: #fffbeb; padding: 14px; font-size: 13px; }
+        .label { font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; }
+      </style>
+      <h1>${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")}</h1>
+      <h2>${escapeHtml(formatDate(match.scheduled_date))} / ${escapeHtml(match.locations?.name || "Home Location TBD")}</h2>
+      <div class="score">Match Score: ${escapeHtml(matchTeamScore(match, "home") ?? 0)}-${escapeHtml(matchTeamScore(match, "away") ?? 0)}</div>
+      <div class="result">
+        <div class="label">${escapeHtml(specialMatchResultLabel(match))} Result</div>
+        <div>${escapeHtml(match.home_team?.name || "Home")} ${escapeHtml(matchTeamScore(match, "home") ?? "-")} - ${escapeHtml(matchTeamScore(match, "away") ?? "-")} ${escapeHtml(match.away_team?.name || "Away")}</div>
+        ${match.result_notes ? `<div>${escapeHtml(match.result_notes)}</div>` : ""}
+      </div>
+    `;
+  }
+
   const rows = lines.map((line) => {
     const games = [...(line.line_games || [])]
       .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))

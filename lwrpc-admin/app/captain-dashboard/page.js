@@ -28,6 +28,10 @@ import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsav
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, memberEmailResolution } from "../lib/memberLookup";
 import { buildActiveDivisionOptions } from "../lib/divisionOptions";
+import {
+  isSpecialMatchResult,
+  specialMatchResultLabel,
+} from "../lib/specialMatchResults";
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
 const CAPTAIN_MATCH_SETUP_NOTES_STORAGE_PREFIX = "lwrpc-captain-match-setup-notes-seen";
@@ -961,6 +965,7 @@ export default function CaptainDashboardPage() {
     const flexScheduleAllowed = canManageFlexSchedule(match);
     const selectedResult = selectedTeamMatchResult(match);
     const scoreHasBeenEntered = hasEnteredMatchScore(match);
+    const specialResult = isSpecialMatchResult(match);
     const isMatchScheduled = Boolean(match.scheduled_date);
     const needsScoreEntry = showSetup && canEnterScores && !scoreHasBeenEntered && !scoreButtonAction;
     const completedWithScores = match.status === "completed" && scoreHasBeenEntered;
@@ -1087,7 +1092,7 @@ export default function CaptainDashboardPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <div className="text-[11px] font-black uppercase tracking-wide opacity-70">
-                      Final Result
+                      {specialResult ? `${specialMatchResultLabel(match)} Result` : "Final Result"}
                     </div>
                     <div className="mt-1 text-2xl font-black leading-none">
                       {match.home_score ?? 0} - {match.away_score ?? 0}
@@ -2231,6 +2236,8 @@ export default function CaptainDashboardPage() {
             home_score,
             away_score,
             winning_team_id,
+            result_type,
+            result_notes,
             is_published,
             locations (
               id,
@@ -3788,6 +3795,7 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
   const homeTeam = teamWithRoster(match.home_team_id);
   const awayTeam = teamWithRoster(match.away_team_id);
   const scoreHasBeenEntered = hasEnteredMatchScore(match);
+  const specialResult = isSpecialMatchResult(match);
 
   function printScoreDetails() {
     window.localStorage.setItem(
@@ -3861,6 +3869,11 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                   {formatScoreStatus(match)}
                 </div>
+                {specialResult && (
+                  <div className="mt-1 text-xs font-black uppercase tracking-wide text-amber-700">
+                    {specialMatchResultLabel(match)} Result
+                  </div>
+                )}
                 <div className="mt-2 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
                   <MatchScoreSummaryRow
                     label="Home"
@@ -3886,7 +3899,22 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
 
           <div className="p-3 sm:p-5">
             <div className="space-y-3">
-              {lines.map((line) => (
+              {specialResult && (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-950">
+                  <div className="text-xs font-black uppercase tracking-wide">
+                    {specialMatchResultLabel(match)} Result
+                  </div>
+                  <div className="mt-1 text-lg font-black">
+                    {match.home_team?.name || "Home"} {match.home_score ?? "-"} - {match.away_score ?? "-"} {match.away_team?.name || "Away"}
+                  </div>
+                  {match.result_notes && (
+                    <div className="mt-2 rounded-xl bg-white/70 px-3 py-2 text-sm font-semibold">
+                      {match.result_notes}
+                    </div>
+                  )}
+                </div>
+              )}
+              {!specialResult && lines.map((line) => (
                 <MatchLineResult
                   key={line.id}
                   line={line}
@@ -3894,7 +3922,7 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
                   ratingForMember={ratingForMember}
                 />
               ))}
-              {lines.length === 0 && (
+              {!specialResult && lines.length === 0 && (
                 <div className="rounded-xl bg-slate-50 p-8 text-center text-slate-500">
                   No game details found.
                 </div>
@@ -4448,6 +4476,28 @@ function divisionCaptainsPrintHtml({ leagueName, divisionName, teams }) {
 }
 
 function matchScoreDetailsPrintHtml(match, lines, clubName = DEFAULT_SYSTEM_SETTINGS.club_name) {
+  if (isSpecialMatchResult(match)) {
+    return `
+      <style>
+        h1 { margin: 0 0 4px; font-size: 24px; }
+        h2 { margin: 0 0 18px; color: #475569; font-size: 15px; font-weight: 600; }
+        .club-name { margin: 0 0 6px; color: #0f172a; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; }
+        .score { margin: 12px 0 18px; font-size: 16px; font-weight: 700; }
+        .result { border: 1px solid #fbbf24; background: #fffbeb; padding: 14px; font-size: 13px; }
+        .label { font-weight: 900; text-transform: uppercase; letter-spacing: 0.04em; }
+      </style>
+      <div class="club-name">${escapeHtml(clubName)}</div>
+      <h1>${escapeHtml(match.home_team?.name || "Home")} vs ${escapeHtml(match.away_team?.name || "Away")}</h1>
+      <h2>${escapeHtml(formatDate(match.scheduled_date))} / ${escapeHtml(match.locations?.name || "Home Location TBD")}</h2>
+      <div class="score">Match Score: ${escapeHtml(match.home_score ?? 0)}-${escapeHtml(match.away_score ?? 0)}</div>
+      <div class="result">
+        <div class="label">${escapeHtml(specialMatchResultLabel(match))} Result</div>
+        <div>${escapeHtml(match.home_team?.name || "Home")} ${escapeHtml(match.home_score ?? "-")} - ${escapeHtml(match.away_score ?? "-")} ${escapeHtml(match.away_team?.name || "Away")}</div>
+        ${match.result_notes ? `<div>${escapeHtml(match.result_notes)}</div>` : ""}
+      </div>
+    `;
+  }
+
   const rows = lines.map((line) => {
     const games = [...(line.line_games || [])]
       .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))

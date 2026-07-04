@@ -870,6 +870,8 @@ export default function TeamsPage() {
           home_score,
           away_score,
           winning_team_id,
+          result_type,
+          result_notes,
           is_published,
           locations ( id, name ),
           home_team:teams!matches_home_team_id_fkey ( id, name ),

@@ -1,6 +1,10 @@
 "use client";
 
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
+import {
+  isSpecialMatchResult,
+  specialMatchResultLabel,
+} from "../lib/specialMatchResults";
 import { useRef, useState } from "react";
 
 export default function TeamScheduleModal({
@@ -312,6 +316,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
   const opponentScore = isHome ? match.away_score : match.home_score;
   const hasScore = selectedScore !== null && selectedScore !== undefined && opponentScore !== null && opponentScore !== undefined;
   const scoreHasBeenEntered = hasEnteredMatchScore(match);
+  const specialResult = isSpecialMatchResult(match);
   const showMatchDetails = hasScore && match.score_status === "verified";
   const verifiedCompleted = match.status === "completed" && match.score_status === "verified";
   const selectedTeamWon =
@@ -398,6 +403,11 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
             <div className="text-xs font-bold uppercase tracking-wide text-slate-500">
               {formatScoreStatus(match)}
             </div>
+            {specialResult && (
+              <div className="mt-1 text-xs font-black uppercase tracking-wide text-amber-700">
+                {specialMatchResultLabel(match)} Result
+              </div>
+            )}
             {compact ? (
               <div className="mt-2 space-y-1">
                 <ScoreRow label="Home" name={formatTeamName(match.home_team, "Home")} score={homeScore} won={homeWon} />
@@ -413,7 +423,29 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
       </div>
       </div>
 
-      {showMatchDetails && expanded && match.match_lines?.length > 0 && (
+      {showMatchDetails && expanded && specialResult && (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={hideMatchDetails}
+          onKeyDown={hideMatchDetailsOnKeyDown}
+          className="mx-3 mb-4 cursor-pointer rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-semibold text-amber-950 sm:mx-4"
+          aria-label="Hide match details"
+        >
+          <div className="text-xs font-black uppercase tracking-wide">
+            {specialMatchResultLabel(match)} Result
+          </div>
+          <div className="mt-1 text-lg font-black">
+            {formatTeamName(match.home_team, "Home")} {match.home_score ?? "-"} - {match.away_score ?? "-"} {formatTeamName(match.away_team, "Away")}
+          </div>
+          {match.result_notes && (
+            <div className="mt-2 rounded-xl bg-white/70 px-3 py-2">
+              {match.result_notes}
+            </div>
+          )}
+        </div>
+      )}
+      {showMatchDetails && expanded && !specialResult && match.match_lines?.length > 0 && (
         <div
           role="button"
           tabIndex={0}
@@ -469,7 +501,7 @@ function ScheduleMatchCard({ match, selectedTeamId, compact, ratingByMemberId, r
             })}
         </div>
       )}
-      {showMatchDetails && expanded && !match.match_lines?.length && (
+      {showMatchDetails && expanded && !specialResult && !match.match_lines?.length && (
         <div
           role="button"
           tabIndex={0}

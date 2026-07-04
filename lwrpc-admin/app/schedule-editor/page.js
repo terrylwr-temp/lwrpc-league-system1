@@ -808,6 +808,8 @@ export default function ScheduleEditorPage() {
         home_score: null,
         away_score: null,
         winning_team_id: null,
+        result_type: "played",
+        result_notes: null,
         score_entered_by_member_id: null,
         score_entered_at: null,
         score_verified_by_member_id: null,

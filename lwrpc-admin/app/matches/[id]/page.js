@@ -20,6 +20,11 @@ import {
   picklebreakerValidationIssues,
   requiredLineGameIds as sharedRequiredLineGameIds,
 } from "../../lib/matchScoring";
+import {
+  isSpecialMatchResult,
+  specialMatchResultLabel,
+  specialMatchWinnerName,
+} from "../../lib/specialMatchResults";
 
 function lmsLineScoreRequired(line) {
   return sharedLineScoreRequired(line);
@@ -55,6 +60,13 @@ export default function MatchDetailPage() {
   const [scoreDirty, setScoreDirty] = useState(false);
   const [scoreValidationIssueList, setScoreValidationIssueList] = useState([]);
   const [scoreValidationSubmitting, setScoreValidationSubmitting] = useState(false);
+  const [scoreEntryMode, setScoreEntryMode] = useState("normal");
+  const [specialResult, setSpecialResult] = useState({
+    resultType: "forfeit",
+    homeScore: "",
+    awayScore: "",
+    notes: "",
+  });
   const pendingGameUpdatesRef = useRef(new Map());
   const scoreValidationSubmittingRef = useRef(false);
 
@@ -280,6 +292,13 @@ export default function MatchDetailPage() {
     }
 
     setMatch(matchData);
+    setScoreEntryMode(isSpecialMatchResult(matchData) ? "special" : "normal");
+    setSpecialResult({
+      resultType: isSpecialMatchResult(matchData) ? matchData.result_type : "forfeit",
+      homeScore: matchData.home_score ?? "",
+      awayScore: matchData.away_score ?? "",
+      notes: matchData.result_notes || "",
+    });
     setLines(lineData || []);
     setHomeRoster(homeRosterData || []);
     setAwayRoster(awayRosterData || []);
@@ -581,6 +600,78 @@ export default function MatchDetailPage() {
       winnerName: matchPointTotals.winnerName,
     };
   }, [matchPointTotals]);
+
+  const specialResultPreview = useMemo(() => {
+    const homeScore = specialScoreNumber(specialResult.homeScore);
+    const awayScore = specialScoreNumber(specialResult.awayScore);
+    const hasScore = homeScore !== null && awayScore !== null;
+    const winningTeamId = hasScore
+      ? homeScore > awayScore
+        ? match?.home_team_id || null
+        : awayScore > homeScore
+          ? match?.away_team_id || null
+          : null
+      : null;
+    const winnerName = !hasScore
+      ? "-"
+      : winningTeamId === match?.home_team_id
+        ? match?.home_team?.name || "Home"
+        : winningTeamId === match?.away_team_id
+          ? match?.away_team?.name || "Away"
+          : "Tie";
+
+    return {
+      homeScore,
+      awayScore,
+      hasScore,
+      winningTeamId,
+      winnerName,
+      scoreText: hasScore ? `${homeScore} - ${awayScore}` : "-",
+    };
+  }, [match, specialResult]);
+
+  const displayedMatchScore = scoreEntryMode === "special"
+    ? {
+        homeWins: specialResultPreview.hasScore ? specialResultPreview.homeScore : match?.home_score ?? 0,
+        awayWins: specialResultPreview.hasScore ? specialResultPreview.awayScore : match?.away_score ?? 0,
+        winningTeamId: specialResultPreview.hasScore ? specialResultPreview.winningTeamId : match?.winning_team_id || null,
+        winnerName: specialResultPreview.hasScore ? specialResultPreview.winnerName : specialMatchWinnerName(match),
+      }
+    : matchSummary;
+
+  function specialScoreNumber(value) {
+    const text = String(value ?? "").trim();
+    if (!text) return null;
+    const number = Number(text);
+    return Number.isFinite(number) ? number : null;
+  }
+
+  function updateSpecialResult(field, value) {
+    if (!canEditScoreEntry()) {
+      alert("Only the captain or co-captain who submitted these pending scores can make corrections.");
+      return;
+    }
+
+    const normalizedValue =
+      field === "homeScore" || field === "awayScore"
+        ? String(value).replace(/\D/g, "")
+        : value;
+
+    setScoreDirty(true);
+    setScoreValidationIssueList([]);
+    setSpecialResult((current) => ({
+      ...current,
+      [field]: normalizedValue,
+    }));
+  }
+
+  function selectScoreEntryMode(mode) {
+    if (mode === scoreEntryMode) return;
+    if (!canEditScoreEntry() && mode !== scoreEntryMode) return;
+    setScoreDirty(true);
+    setScoreEntryMode(mode);
+    setScoreValidationIssueList([]);
+  }
 
   async function updateLinePlayer(lineId, field, value) {
     if (!canEditScoreEntry()) {
@@ -1122,6 +1213,11 @@ export default function MatchDetailPage() {
 
     const scoringOperationsOverride = isScoringOperationsOverride();
 
+    if (scoreEntryMode === "special") {
+      await completeSpecialMatch(scoringOperationsOverride);
+      return;
+    }
+
     if (match.score_status === "pending_verification" && !scoringOperationsOverride) {
       if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
     }
@@ -1157,6 +1253,8 @@ export default function MatchDetailPage() {
           home_score: matchSummary.homeWins,
           away_score: matchSummary.awayWins,
           winning_team_id: matchSummary.winningTeamId,
+          result_type: "played",
+          result_notes: null,
           updated_at: now,
         }
       : {
@@ -1170,6 +1268,8 @@ export default function MatchDetailPage() {
           home_score: matchSummary.homeWins,
           away_score: matchSummary.awayWins,
           winning_team_id: matchSummary.winningTeamId,
+          result_type: "played",
+          result_notes: null,
           updated_at: now,
         };
 
@@ -1196,6 +1296,116 @@ export default function MatchDetailPage() {
       await sendScoreNotification("submitted");
 
       alert("Scores submitted for verification and opposing captains notified.");
+    }
+
+    setScoreDirty(false);
+    router.push(matchReturnPath());
+  }
+
+  async function completeSpecialMatch(scoringOperationsOverride) {
+    if (match.score_status === "pending_verification" && !scoringOperationsOverride) {
+      if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
+    }
+
+    await flushPendingGameUpdates();
+
+    const homeScore = specialScoreNumber(specialResult.homeScore);
+    const awayScore = specialScoreNumber(specialResult.awayScore);
+    const resultType = specialResult.resultType === "weather" ? "weather" : "forfeit";
+    const issues = [];
+
+    if (homeScore === null || awayScore === null) {
+      issues.push({
+        lineId: null,
+        gameId: null,
+        message: "Special Match Result: both match scores are required.",
+      });
+    }
+
+    if (resultType === "forfeit" && homeScore !== null && awayScore !== null && homeScore === awayScore) {
+      issues.push({
+        lineId: null,
+        gameId: null,
+        message: "Special Match Result: a forfeit result must have a winning team.",
+      });
+    }
+
+    if (issues.length > 0) {
+      setScoreValidationIssueList(issues);
+      alert(["Scores cannot be submitted yet.", "", ...issues.map((issue) => `- ${issue.message}`)].join("\n"));
+      return;
+    }
+
+    setScoreValidationIssueList([]);
+
+    const currentMemberId = currentUserMember?.id || null;
+    const now = new Date().toISOString();
+    const winningTeamId =
+      homeScore > awayScore
+        ? match.home_team_id
+        : awayScore > homeScore
+          ? match.away_team_id
+          : null;
+    const trimmedNotes = String(specialResult.notes || "").trim();
+    const matchUpdate = scoringOperationsOverride
+      ? {
+          status: "completed",
+          score_status: "verified",
+          score_entered_by_member_id: currentMemberId,
+          score_entered_at: now,
+          score_verified_by_member_id: currentMemberId,
+          score_verified_at: now,
+          score_disputed: false,
+          score_dispute_notes: null,
+          finalized_at: now,
+          home_score: homeScore,
+          away_score: awayScore,
+          winning_team_id: winningTeamId,
+          result_type: resultType,
+          result_notes: trimmedNotes || null,
+          updated_at: now,
+        }
+      : {
+          status: "completed",
+          score_status: "pending_verification",
+          score_entered_by_member_id: currentMemberId,
+          score_entered_at: now,
+          score_verified_by_member_id: null,
+          score_verified_at: null,
+          finalized_at: null,
+          home_score: homeScore,
+          away_score: awayScore,
+          winning_team_id: winningTeamId,
+          result_type: resultType,
+          result_notes: trimmedNotes || null,
+          updated_at: now,
+        };
+
+    const { error } = await supabase
+      .from("matches")
+      .update(matchUpdate)
+      .eq("id", id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    const scoreText = `${homeScore}-${awayScore}`;
+
+    if (scoringOperationsOverride) {
+      const standingsResult = await rebuildDivisionStandings();
+      await sendScoreNotification("changed", scoreText);
+
+      alert(
+        standingsResult?.byeAdjustmentApplied
+          ? "Special result submitted, verified, final bye adjustments applied, standings updated, and match captains notified."
+          : "Special result submitted, verified, standings updated, and match captains notified."
+      );
+    } else {
+      await sendScoreNotification("submitted", scoreText);
+
+      alert("Special result submitted for verification and opposing captains notified.");
     }
 
     setScoreDirty(false);
@@ -1292,7 +1502,7 @@ export default function MatchDetailPage() {
     loadData();
   }
 
-  async function sendScoreNotification(notificationType) {
+  async function sendScoreNotification(notificationType, scoreText = null) {
     try {
       const teamIds = notificationTeamIdsForCurrentUser(notificationType === "changed");
 
@@ -1369,7 +1579,7 @@ export default function MatchDetailPage() {
           phones,
           homeTeam: match.home_team?.name,
           awayTeam: match.away_team?.name,
-          score: `${matchSummary.homeWins}-${matchSummary.awayWins}`,
+          score: scoreText || `${matchSummary.homeWins}-${matchSummary.awayWins}`,
           matchDate: match.scheduled_date,
           enteredBy: currentUserMember
             ? `${currentUserMember.first_name} ${currentUserMember.last_name}`
@@ -1444,6 +1654,13 @@ export default function MatchDetailPage() {
 
   const scoreReviewAllowed = canReviewSubmittedScores();
   const scoreEntryEditable = canEditScoreEntry();
+  const submitScoreLabel = scoreEntryMode === "special"
+    ? isScoringOperationsOverride()
+      ? "Submit/Verify Special Result"
+      : "Submit Special Result"
+    : isScoringOperationsOverride()
+      ? "Submit/Verify Scores"
+      : "Submit Scores";
   const scoreReviewActionsVisible =
     !isScoringOperationsOverride() && match.score_status === "pending_verification" && scoreReviewAllowed;
   const scoreValidationIssuesByGameId = scoreValidationIssueList.reduce((grouped, issue) => {
@@ -1455,6 +1672,7 @@ export default function MatchDetailPage() {
       [key]: [...(grouped[key] || []), issue.message],
     };
   }, {});
+  const specialResultIssues = scoreValidationIssueList.filter((issue) => !issue.lineId && !issue.gameId);
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 pb-28 md:p-6">
@@ -1483,7 +1701,7 @@ export default function MatchDetailPage() {
               onClick={completeMatch}
               className="rounded-xl bg-green-700 px-4 py-3 font-semibold text-white hover:bg-green-800 lg:py-2"
             >
-              {isScoringOperationsOverride() ? "Submit/Verify Scores" : "Submit Scores"}
+              {submitScoreLabel}
             </button>
           )}
 
@@ -1522,7 +1740,7 @@ export default function MatchDetailPage() {
           </div>
         )}
 
-        {(sameGameDuplicateLineIds.length > 0 || overLineLimitPlayerIds.length > 0) && (
+        {scoreEntryMode === "normal" && (sameGameDuplicateLineIds.length > 0 || overLineLimitPlayerIds.length > 0) && (
           <div className="mb-4 rounded-2xl border-2 border-red-600 bg-red-100 p-4 text-red-950 shadow">
             <div className="text-lg font-black uppercase tracking-wide">Duplicate Player Warning</div>
             {sameGameDuplicateLineIds.length > 0 && (
@@ -1567,7 +1785,7 @@ export default function MatchDetailPage() {
                   Score: {formatMatchScoreStatus(match)}
                 </span>
                 <span className="rounded-full bg-green-100 px-3 py-1 text-green-900">
-                  Winner: {matchSummary.winnerName}
+                  Winner: {displayedMatchScore.winnerName}
                 </span>
               </div>
 
@@ -1582,9 +1800,9 @@ export default function MatchDetailPage() {
             <div className="w-full rounded-2xl bg-slate-900 p-5 text-white shadow-lg lg:w-auto">
               <div className="text-xs uppercase tracking-wide text-slate-300">Match Score</div>
               <div className="mt-1 text-4xl font-bold">
-                {matchSummary.homeWins} - {matchSummary.awayWins}
+                {displayedMatchScore.homeWins} - {displayedMatchScore.awayWins}
               </div>
-              <div className="mt-2 text-sm text-slate-300">Winner: {matchSummary.winnerName}</div>
+              <div className="mt-2 text-sm text-slate-300">Winner: {displayedMatchScore.winnerName}</div>
             </div>
           </div>
 
@@ -1597,7 +1815,116 @@ export default function MatchDetailPage() {
         </div>
 
         <div className="mt-4 space-y-4">
-          {displayedLines.map((line) => {
+          <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow md:p-5">
+            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+              <div>
+                <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                  Score Entry Mode
+                </div>
+                <div className="mt-1 text-lg font-black text-slate-950">
+                  {scoreEntryMode === "special" ? "Special Match Result" : "Normal Game Scores"}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 rounded-2xl bg-slate-100 p-1">
+                {[
+                  { value: "normal", label: "Normal Scores" },
+                  { value: "special", label: "Special Result" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => selectScoreEntryMode(option.value)}
+                    disabled={!scoreEntryEditable && option.value !== scoreEntryMode}
+                    className={`rounded-xl px-3 py-2 text-sm font-black transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                      scoreEntryMode === option.value
+                        ? "bg-slate-950 text-white shadow"
+                        : "bg-transparent text-slate-700 hover:bg-white"
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {scoreEntryMode === "special" && (
+              <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_18rem]">
+                <div className="grid gap-3 md:grid-cols-3">
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                    Result Type
+                    <select
+                      value={specialResult.resultType}
+                      onChange={(event) => updateSpecialResult("resultType", event.target.value)}
+                      disabled={!scoreEntryEditable}
+                      className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-bold normal-case tracking-normal text-slate-950 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="forfeit">Forfeit</option>
+                      <option value="weather">Weather</option>
+                    </select>
+                  </label>
+
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                    {match.home_team?.name || "Home"} Score
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={specialResult.homeScore}
+                      onChange={(event) => updateSpecialResult("homeScore", event.target.value)}
+                      disabled={!scoreEntryEditable}
+                      className="mt-1 w-full rounded-xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </label>
+
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-600">
+                    {match.away_team?.name || "Away"} Score
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      value={specialResult.awayScore}
+                      onChange={(event) => updateSpecialResult("awayScore", event.target.value)}
+                      disabled={!scoreEntryEditable}
+                      className="mt-1 w-full rounded-xl border-2 border-slate-300 bg-white px-3 py-3 text-center text-2xl font-black text-slate-950 shadow-inner outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </label>
+
+                  <label className="text-xs font-bold uppercase tracking-wide text-slate-600 md:col-span-3">
+                    Result Notes
+                    <textarea
+                      value={specialResult.notes}
+                      onChange={(event) => updateSpecialResult("notes", event.target.value)}
+                      disabled={!scoreEntryEditable}
+                      rows={3}
+                      className="mt-1 w-full rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-semibold normal-case tracking-normal text-slate-950 outline-none transition focus:border-blue-600 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    />
+                  </label>
+                </div>
+
+                <div className="rounded-2xl bg-slate-950 p-4 text-white">
+                  <div className="text-xs font-black uppercase tracking-wide text-slate-300">
+                    {specialMatchResultLabel(specialResult.resultType)} Result
+                  </div>
+                  <div className="mt-2 text-4xl font-black">
+                    {specialResultPreview.scoreText}
+                  </div>
+                  <div className="mt-2 text-sm font-semibold text-slate-300">
+                    Winner: {specialResultPreview.winnerName}
+                  </div>
+                </div>
+
+                {specialResultIssues.length > 0 && (
+                  <div className="lg:col-span-2 rounded-xl border border-red-300 bg-red-50 px-3 py-2 text-sm font-bold text-red-800">
+                    {specialResultIssues.map((issue) => (
+                      <div key={issue.message}>{issue.message}</div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {scoreEntryMode === "normal" && displayedLines.map((line) => {
             const divisionLine = line.division_lines;
             const lineGames = games.filter((game) => game.match_line_id === line.id);
             const requiredGameIdsForLine = lmsRequiredLineGameIds(lineGames, line);
@@ -1881,7 +2208,7 @@ export default function MatchDetailPage() {
             );
           })}
 
-          {displayedLines.length === 0 && (
+          {scoreEntryMode === "normal" && displayedLines.length === 0 && (
             <div className="rounded-2xl bg-white p-8 text-center text-slate-500 shadow">
               No teams or games generated for this match.
             </div>
@@ -1897,7 +2224,7 @@ export default function MatchDetailPage() {
                   onClick={completeMatch}
                   className="rounded-xl bg-green-700 px-4 py-3 text-base font-bold text-white shadow hover:bg-green-800"
                 >
-                  {isScoringOperationsOverride() ? "Submit/Verify Scores" : "Submit Scores"}
+                  {submitScoreLabel}
                 </button>
               )}
 

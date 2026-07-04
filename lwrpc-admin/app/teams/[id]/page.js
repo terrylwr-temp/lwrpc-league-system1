@@ -269,6 +269,12 @@ export default function TeamRosterPage() {
             scheduled_date,
             scheduled_time,
             status,
+            score_status,
+            home_score,
+            away_score,
+            winning_team_id,
+            result_type,
+            result_notes,
             home_team_id,
             away_team_id,
             home_team:teams!matches_home_team_id_fkey (

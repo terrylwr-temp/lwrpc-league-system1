@@ -2,6 +2,10 @@ import {
   isPicklebreakerLine,
   matchPointSummary,
 } from "./matchScoring";
+import {
+  isSpecialMatchResult,
+  specialMatchWinnerTeamId,
+} from "./specialMatchResults";
 
 function gameSummary(game) {
   if (game.game_status === "forfeit_home" || game.game_status === "retired_home") {
@@ -209,6 +213,10 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
       home_team_id,
       away_team_id,
       winning_team_id,
+      result_type,
+      result_notes,
+      home_score,
+      away_score,
       scheduled_date,
       scheduled_time,
       status,
@@ -285,6 +293,66 @@ export async function rebuildDivisionStandingsForDivision(supabase, divisionId) 
   for (const matchRow of verifiedMatches || []) {
     const home = ensureTeam(matchRow.home_team_id);
     const away = ensureTeam(matchRow.away_team_id);
+
+    if (isSpecialMatchResult(matchRow)) {
+      const hasHomeScore = matchRow.home_score !== null && matchRow.home_score !== undefined;
+      const hasAwayScore = matchRow.away_score !== null && matchRow.away_score !== undefined;
+      const homeTeamWinPoints = Number(matchRow.home_score);
+      const awayTeamWinPoints = Number(matchRow.away_score);
+
+      if (!hasHomeScore || !hasAwayScore || !Number.isFinite(homeTeamWinPoints) || !Number.isFinite(awayTeamWinPoints)) {
+        return {
+          success: false,
+          error: "Special match results must have both match-level scores before rebuilding standings.",
+        };
+      }
+
+      const matchWinningTeamId = specialMatchWinnerTeamId(matchRow);
+
+      home.matches_played += 1;
+      away.matches_played += 1;
+      home.standings_points += homeTeamWinPoints;
+      away.standings_points += awayTeamWinPoints;
+      home.points_for += homeTeamWinPoints;
+      home.points_against += awayTeamWinPoints;
+      away.points_for += awayTeamWinPoints;
+      away.points_against += homeTeamWinPoints;
+
+      if (matchWinningTeamId === matchRow.home_team_id) {
+        home.match_wins += 1;
+        away.match_losses += 1;
+        home.home_wins += 1;
+        away.away_losses += 1;
+        home.recentResults.push("W");
+        away.recentResults.push("L");
+      } else if (matchWinningTeamId === matchRow.away_team_id) {
+        away.match_wins += 1;
+        home.match_losses += 1;
+        away.away_wins += 1;
+        home.home_losses += 1;
+        away.recentResults.push("W");
+        home.recentResults.push("L");
+      } else {
+        home.match_ties += 1;
+        away.match_ties += 1;
+        home.recentResults.push("T");
+        away.recentResults.push("T");
+      }
+
+      const { error: matchUpdateError } = await supabase
+        .from("matches")
+        .update({
+          home_score: homeTeamWinPoints,
+          away_score: awayTeamWinPoints,
+          winning_team_id: matchWinningTeamId,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", matchRow.id);
+
+      if (matchUpdateError) return { success: false, error: matchUpdateError.message };
+      continue;
+    }
+
     let homeTeamWinPoints = 0;
     let awayTeamWinPoints = 0;
     let homeLineWins = 0;
