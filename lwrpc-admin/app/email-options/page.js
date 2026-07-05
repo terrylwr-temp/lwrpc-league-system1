@@ -66,7 +66,7 @@ export default function EmailOptionsPage() {
 
   useEffect(() => {
     async function run() {
-      const ok = await requireRole(router, "league_manager");
+      const ok = await requireRole(router, "commissioner");
 
       if (ok) {
         await loadTemplates();

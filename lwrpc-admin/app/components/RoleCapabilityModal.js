@@ -14,11 +14,11 @@ export const ROLE_CAPABILITIES = [
     roles: ["league_manager", "commissioner"],
   },
   {
-    label: "Admin dashboard, members, ratings, scheduling, scoring operations, and League Setup pages (Seasons, Leagues, Divisions, Locations, Schedule Settings, Score Sheets, Email Options)",
+    label: "Admin dashboard, members, ratings, scheduling, scoring operations, and League Setup pages (Seasons, Leagues, Divisions, Schedule Settings)",
     roles: ["league_manager", "commissioner"],
   },
   {
-    label: "User role management and all System Setup / Club Setup options",
+    label: "User role management and all System Setup options (Locations, Score Sheets, Email Options, Club Setup)",
     roles: ["commissioner"],
   },
 ];

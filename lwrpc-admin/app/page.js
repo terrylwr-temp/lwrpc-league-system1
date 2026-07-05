@@ -841,10 +841,13 @@ export default function DashboardPage() {
         { title: "Seasons", desc: "Create seasons and maintain season date ranges.", path: "/seasons", code: "SN", tone: "amber" },
         { title: "Leagues", desc: "Manage leagues and roster locking.", path: "/leagues", code: "LG", tone: "blue" },
         { title: "Divisions", desc: "Manage division rules, DUPR limits, and game lines.", path: "/divisions", code: "DV", tone: "emerald" },
-        { title: "Locations", desc: "Maintain clubs, courts, and court availability.", path: "/locations", code: "LC", tone: "slate" },
-        { title: "Email Options", desc: "Edit automated email templates and send test notifications.", path: "/email-options", code: "EO", tone: "blue" },
         ...(currentUserRole === "commissioner"
-          ? [{ title: "Club Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "CS", tone: "amber" }]
+          ? [
+              { title: "Locations", desc: "Maintain clubs, courts, and court availability.", path: "/locations", code: "LC", tone: "slate" },
+              { title: "Email Options", desc: "Edit automated email templates and send test notifications.", path: "/email-options", code: "EO", tone: "blue" },
+              { title: "Score Sheets", desc: "Manage printable score sheet templates.", path: "/score-sheets", code: "SS", tone: "emerald" },
+              { title: "Club Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "CS", tone: "amber" },
+            ]
           : []),
       ],
     },

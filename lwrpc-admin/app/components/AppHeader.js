@@ -73,9 +73,9 @@ export default function AppHeader({
       key: "system-setup",
       label: "System Setup",
       links: [
-        { label: "Locations", path: "/locations", role: "league_manager", icon: "\u{1F4CD}" },
-        { label: "Email Options", path: "/email-options", role: "league_manager", icon: "\u{2709}\u{FE0F}" },
-        { label: "Score Sheets", path: "/score-sheets", role: "league_manager", icon: "\u{1F4DD}" },
+        { label: "Locations", path: "/locations", role: "commissioner", icon: "\u{1F4CD}" },
+        { label: "Email Options", path: "/email-options", role: "commissioner", icon: "\u{2709}\u{FE0F}" },
+        { label: "Score Sheets", path: "/score-sheets", role: "commissioner", icon: "\u{1F4DD}" },
         { label: "Club Setup", path: "/system-setup", role: "commissioner", icon: "\u{1F3F7}\u{FE0F}" },
       ]
     }

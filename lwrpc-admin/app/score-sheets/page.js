@@ -61,7 +61,7 @@ export default function ScoreSheetsPage() {
 
   useEffect(() => {
     async function run() {
-      const ok = await requireRole(router, "league_manager");
+      const ok = await requireRole(router, "commissioner");
       if (ok) await Promise.all([loadTemplates(), loadSystemSettings()]);
     }
 

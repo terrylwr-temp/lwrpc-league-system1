@@ -36,7 +36,7 @@ export default function LocationsPage() {
   );
 
   const checkAuth = useCallback(async function checkAuth() {
-    const user = await requireRole(router, "league_manager");
+    const user = await requireRole(router, "commissioner");
     return !!user;
   }, [router]);
 
