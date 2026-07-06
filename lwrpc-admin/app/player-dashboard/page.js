@@ -1220,9 +1220,11 @@ export default function PlayerDashboardPage() {
           <div className="bg-slate-950 px-4 py-5 text-white md:px-6">
             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div className="min-w-0 space-y-2">
-                <h2 className="text-2xl font-black leading-tight">My Teams</h2>
-                <div className="flex max-w-full flex-wrap items-baseline gap-x-3 gap-y-1 text-sm font-semibold text-slate-300">
-                  <span className="min-w-0 break-words text-xl font-black leading-tight text-white">
+                <h2 className="text-sm font-black uppercase leading-tight tracking-wide text-blue-200 md:text-base">
+                  My Teams
+                </h2>
+                <div className="flex max-w-full flex-wrap items-baseline gap-x-3 gap-y-1 text-base font-semibold text-slate-300">
+                  <span className="min-w-0 break-words text-2xl font-black leading-tight text-white">
                     {playerDisplayName}
                   </span>
                   <span className="hidden h-4 w-px bg-white/25 sm:inline-block" aria-hidden="true" />
