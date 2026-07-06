@@ -1164,6 +1164,9 @@ export default function PlayerDashboardPage() {
     return <LoadingScreen subtitle="Loading Player Dashboard..." />;
   }
 
+  const playerDisplayName = formatMemberName(member) || "Player";
+  const playerTeamRatingSummary = mySelectedTeamRatingSummary();
+
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
       <div className="mx-auto max-w-7xl">
@@ -1215,14 +1218,27 @@ export default function PlayerDashboardPage() {
 
         <section className="overflow-hidden rounded-2xl bg-white shadow">
           <div className="bg-slate-950 px-4 py-5 text-white md:px-6">
-            <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-              <div>
-                <div className="inline-flex max-w-full flex-col rounded-xl border border-white/30 bg-white px-3 py-2 text-slate-950 shadow-sm">
-                  <div className="break-words text-xl font-black leading-tight">
-                    {formatMemberName(member) || "Player"}
-                  </div>
+            <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div className="min-w-0 space-y-2">
+                <h2 className="text-2xl font-black leading-tight">My Teams</h2>
+                <div className="flex max-w-full flex-wrap items-baseline gap-x-3 gap-y-1 text-sm font-semibold text-slate-300">
+                  <span className="min-w-0 break-words text-xl font-black leading-tight text-white">
+                    {playerDisplayName}
+                  </span>
+                  <span className="hidden h-4 w-px bg-white/25 sm:inline-block" aria-hidden="true" />
+                  <span>
+                    {visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}
+                  </span>
+                  {playerTeamRatingSummary && (
+                    <>
+                      <span className="hidden h-4 w-px bg-white/25 sm:inline-block" aria-hidden="true" />
+                      <span className="text-emerald-100">
+                        <span className="font-black">{playerTeamRatingSummary.label}</span>
+                        <span className="text-white"> {playerTeamRatingSummary.value}</span>
+                      </span>
+                    </>
+                  )}
                 </div>
-                <h2 className="mt-1 text-2xl font-black">My Teams</h2>
               </div>
               <div className="flex flex-col gap-2 text-sm font-semibold text-slate-300 md:items-end">
                 <div className="flex flex-wrap items-center gap-2 md:justify-end">
@@ -1240,14 +1256,6 @@ export default function PlayerDashboardPage() {
                       {filteredPlayHistory.length}
                     </span>
                   </button>
-                  <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-bold text-slate-200">
-                    {visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}
-                  </span>
-                  {mySelectedTeamRatingSummary() && (
-                    <span className="rounded-full border border-emerald-300/30 bg-emerald-300/15 px-3 py-1.5 text-xs font-bold text-emerald-100">
-                      {mySelectedTeamRatingSummary().label}: {mySelectedTeamRatingSummary().value}
-                    </span>
-                  )}
                   {hasPreviousSeasonTeams && (
                     <button
                       type="button"
