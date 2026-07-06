@@ -636,6 +636,11 @@ export default function PlayerDashboardPage() {
     run();
   }, [loadData, router]);
 
+  const hasPreviousSeasonTeams = useMemo(
+    () => teams.some((team) => team.is_active === false),
+    [teams]
+  );
+
   const visibleTeams = useMemo(() => {
     const sourceTeams = showPreviousSeasonTeams
       ? teams
@@ -1212,8 +1217,10 @@ export default function PlayerDashboardPage() {
           <div className="bg-slate-950 px-4 py-5 text-white md:px-6">
             <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
               <div>
-                <div className="inline-flex rounded-full border border-emerald-300/40 bg-emerald-300/15 px-3 py-1 text-xs font-black uppercase tracking-wide text-emerald-100 shadow-sm">
-                  {formatMemberName(member) || "Player"}
+                <div className="inline-flex max-w-full flex-col rounded-xl border border-white/30 bg-white px-3 py-2 text-slate-950 shadow-sm">
+                  <div className="break-words text-xl font-black leading-tight">
+                    {formatMemberName(member) || "Player"}
+                  </div>
                 </div>
                 <h2 className="mt-1 text-2xl font-black">My Teams</h2>
               </div>
@@ -1241,13 +1248,15 @@ export default function PlayerDashboardPage() {
                       {mySelectedTeamRatingSummary().label}: {mySelectedTeamRatingSummary().value}
                     </span>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => setShowPreviousSeasonTeams((value) => !value)}
-                    className={DASHBOARD_HEADER_BUTTON_3D}
-                  >
-                    {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
-                  </button>
+                  {hasPreviousSeasonTeams && (
+                    <button
+                      type="button"
+                      onClick={() => setShowPreviousSeasonTeams((value) => !value)}
+                      className={DASHBOARD_HEADER_BUTTON_3D}
+                    >
+                      {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

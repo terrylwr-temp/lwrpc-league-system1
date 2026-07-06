@@ -65,8 +65,8 @@ export default function MiniStandingsLeaders({ leaders, metricLabel, divisionNam
     }`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="hidden min-w-0 flex-1 sm:flex">
-          <div className="inline-flex max-w-full items-center rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-emerald-800 shadow-sm">
-            <span className="truncate">{divisionName || "Division"} / {metricLabel}</span>
+          <div className="min-w-0 max-w-full border-l-4 border-emerald-500 bg-emerald-50/70 py-1 pl-3 pr-2 text-sm font-black uppercase tracking-wide text-emerald-900">
+            <span className="block truncate">{divisionName || "Division"} / {metricLabel}</span>
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">

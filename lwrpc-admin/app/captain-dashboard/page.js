@@ -740,6 +740,11 @@ export default function CaptainDashboardPage() {
     );
   }, [currentMemberId, matches]);
 
+  const hasPreviousSeasonTeams = useMemo(
+    () => teams.some((team) => team.is_active === false),
+    [teams]
+  );
+
   const visibleTeams = useMemo(() => {
     const sourceTeams = showPreviousSeasonTeams
       ? teams
@@ -2842,13 +2847,15 @@ export default function CaptainDashboardPage() {
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-300 md:justify-end">
                 <span>{visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}</span>
-                <button
-                  type="button"
-                  onClick={() => setShowPreviousSeasonTeams((value) => !value)}
-                  className={DASHBOARD_HEADER_BUTTON_3D}
-                >
-                  {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
-                </button>
+                {hasPreviousSeasonTeams && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPreviousSeasonTeams((value) => !value)}
+                    className={DASHBOARD_HEADER_BUTTON_3D}
+                  >
+                    {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
+                  </button>
+                )}
               </div>
             </div>
           </div>
