@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import RoleCapabilityModal from "../../components/RoleCapabilityModal";
+import PlayerHistoryPanel from "../../components/PlayerHistoryPanel";
 import { requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate } from "../../lib/dateTime";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -13,6 +14,7 @@ import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } fr
 import { hasRole } from "../../lib/permissions";
 import { hasAnotherCommissioner } from "../../lib/roleGuards";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
+import { sortHistoryRows } from "../../lib/playHistory";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
@@ -28,6 +30,10 @@ export default function MemberDetailPage() {
   const [form, setForm] = useState({});
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [teamMemberships, setTeamMemberships] = useState([]);
+  const [playerTeams, setPlayerTeams] = useState([]);
+  const [playHistory, setPlayHistory] = useState([]);
+  const [historyModalTeam, setHistoryModalTeam] = useState(null);
+  const [historyFilter, setHistoryFilter] = useState("all");
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
@@ -88,7 +94,14 @@ export default function MemberDetailPage() {
             name,
             leagues (
               id,
-              name
+              name,
+              abbreviation,
+              season_id,
+              seasons (
+                id,
+                name,
+                abbreviation
+              )
             )
           )
         )
@@ -97,6 +110,84 @@ export default function MemberDetailPage() {
 
     if (teamError) {
       alert(teamError.message);
+      return;
+    }
+
+    const playerFilter = [
+      `home_player_1_id.eq.${id}`,
+      `home_player_2_id.eq.${id}`,
+      `away_player_1_id.eq.${id}`,
+      `away_player_2_id.eq.${id}`,
+    ].join(",");
+
+    const { data: historyData, error: historyError } = await supabase
+      .from("match_lines")
+      .select(`
+        id,
+        line_number,
+        home_player_1_id,
+        home_player_2_id,
+        away_player_1_id,
+        away_player_2_id,
+        home_team_games_won,
+        away_team_games_won,
+        winning_team_id,
+        line_games (
+          id,
+          game_number,
+          home_score,
+          away_score,
+          game_status
+        ),
+        division_lines (
+          id,
+          line_name,
+          line_type
+        ),
+        matches (
+          id,
+          scheduled_date,
+          scheduled_time,
+          status,
+          score_status,
+          home_score,
+          away_score,
+          winning_team_id,
+          result_type,
+          result_notes,
+          home_team_id,
+          away_team_id,
+          home_team:teams!matches_home_team_id_fkey (
+            id,
+            name,
+            is_active
+          ),
+          away_team:teams!matches_away_team_id_fkey (
+            id,
+            name,
+            is_active
+          ),
+          divisions (
+            id,
+            name
+          ),
+          leagues (
+            id,
+            name,
+            abbreviation,
+            season_id,
+            seasons (
+              id,
+              name,
+              abbreviation
+            )
+          )
+        )
+      `)
+      .or(playerFilter);
+
+    if (historyError) {
+      alert(historyError.message);
       return;
     }
 const { data: roleData, error: roleError } = await supabase
@@ -139,6 +230,8 @@ setUserRole(roleData?.role || "player");
     });
     setSeasonRatings(ratingData || []);
     setTeamMemberships((teamData || []).filter((row) => row.teams?.is_active !== false));
+    setPlayerTeams((teamData || []).map((row) => row.teams).filter(Boolean));
+    setPlayHistory(historyData || []);
   }, [id]);
 
   useEffect(() => {
@@ -175,6 +268,8 @@ setUserRole(roleData?.role || "player");
 
     return rating?.season_dupr_rating ?? "—";
   }, [seasonRatings]);
+
+  const sortedPlayHistory = useMemo(() => sortHistoryRows(playHistory), [playHistory]);
 
   function updateForm(field, value) {
     setForm((current) => ({
@@ -380,11 +475,26 @@ async function updateMemberActiveStatus(nextIsActive) {
   setMemberFormFromRow(data);
 }
 
+function openTeamPlayHistory(team) {
+  if (!team?.id) return;
+
+  setHistoryFilter(`team:${team.id}`);
+  setHistoryModalTeam(team);
+}
+
+function closeTeamPlayHistory() {
+  setHistoryModalTeam(null);
+}
+
   if (!member) {
     return <LoadingScreen subtitle="Loading Member Detail..." />;
   }
 
   const memberIsActive = member.is_active_member !== false;
+  const memberDisplayName =
+    `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
+    member.email ||
+    "Member";
   const openMemberRatings = () => {
     if (confirmUnsavedChanges()) router.push(`/ratings?member=${encodeURIComponent(id)}`);
   };
@@ -835,8 +945,15 @@ async function updateMemberActiveStatus(nextIsActive) {
                       key={teamMembership.id}
                       className="border-b border-slate-100 hover:bg-slate-50"
                     >
-                      <td className="p-4 font-semibold text-slate-900">
-                        {team?.name || "Unknown Team"}
+                      <td className="p-4">
+                        <button
+                          type="button"
+                          onClick={() => openTeamPlayHistory(team)}
+                          disabled={!team?.id}
+                          className="text-left font-semibold text-blue-800 hover:text-blue-950 hover:underline disabled:cursor-default disabled:text-slate-900 disabled:no-underline"
+                        >
+                          {team?.name || "Unknown Team"}
+                        </button>
                       </td>
 
                       <td className="p-4 text-slate-700">
@@ -870,6 +987,48 @@ async function updateMemberActiveStatus(nextIsActive) {
             </table>
           </div>
         </div>
+
+        {historyModalTeam && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4 py-6"
+            onClick={closeTeamPlayHistory}
+          >
+            <div
+              className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl sm:p-6"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    Play History
+                  </h2>
+                  <div className="mt-1 text-sm font-semibold text-slate-600">
+                    {memberDisplayName} - {historyModalTeam.name || "Unknown Team"}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={closeTeamPlayHistory}
+                  className="rounded-xl border-2 border-slate-700 bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50"
+                >
+                  Close
+                </button>
+              </div>
+
+              <PlayerHistoryPanel
+                memberId={id}
+                historyRows={sortedPlayHistory}
+                playerTeams={playerTeams}
+                selectedFilter={historyFilter}
+                onFilterChange={setHistoryFilter}
+                onClose={closeTeamPlayHistory}
+                className="mt-0"
+                closeOnPanelClick={false}
+              />
+            </div>
+          </div>
+        )}
 
         {roleHelpOpen && (
           <RoleCapabilityModal onClose={() => setRoleHelpOpen(false)} />
