@@ -34,6 +34,7 @@ export default function MemberDetailPage() {
   const [playHistory, setPlayHistory] = useState([]);
   const [historyModalTeam, setHistoryModalTeam] = useState(null);
   const [historyFilter, setHistoryFilter] = useState("all");
+  const [includeInactiveHistory, setIncludeInactiveHistory] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
@@ -92,15 +93,18 @@ export default function MemberDetailPage() {
           divisions (
             id,
             name,
+            is_active,
             leagues (
               id,
               name,
               abbreviation,
               season_id,
+              is_active,
               seasons (
                 id,
                 name,
-                abbreviation
+                abbreviation,
+                is_active
               )
             )
           )
@@ -169,17 +173,20 @@ export default function MemberDetailPage() {
           ),
           divisions (
             id,
-            name
+            name,
+            is_active
           ),
           leagues (
             id,
             name,
             abbreviation,
             season_id,
+            is_active,
             seasons (
               id,
               name,
-              abbreviation
+              abbreviation,
+              is_active
             )
           )
         )
@@ -1003,7 +1010,7 @@ function closeTeamPlayHistory() {
                     Play History
                   </h2>
                   <div className="mt-1 text-sm font-semibold text-slate-600">
-                    {memberDisplayName} - {historyModalTeam.name || "Unknown Team"}
+                    {memberDisplayName}
                   </div>
                 </div>
 
@@ -1025,6 +1032,10 @@ function closeTeamPlayHistory() {
                 onClose={closeTeamPlayHistory}
                 className="mt-0"
                 closeOnPanelClick={false}
+                printTitle="Play History"
+                printSubtitle={memberDisplayName}
+                includeInactiveScopes={includeInactiveHistory}
+                onIncludeInactiveScopesChange={setIncludeInactiveHistory}
               />
             </div>
           </div>

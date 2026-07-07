@@ -16,13 +16,23 @@ export function formatPlayerName(member) {
   );
 }
 
-export function historyFilterOptions(historyRows, playerTeams = [], memberId = null) {
+export function historyFilterOptions(historyRows, playerTeams = [], memberId = null, options = {}) {
   const seasons = new Map();
   const leagues = new Map();
   const divisions = new Map();
   const teams = new Map();
+  const includeInactive = options.includeInactive !== false;
 
   playerTeams.forEach((team) => {
+    if (!includeInactive && !historyScopeIsActive({
+      season: team?.divisions?.leagues?.seasons,
+      league: team?.divisions?.leagues,
+      division: team?.divisions,
+      team,
+    })) {
+      return;
+    }
+
     addHistoryScopeOption({
       seasons,
       leagues,
@@ -38,6 +48,15 @@ export function historyFilterOptions(historyRows, playerTeams = [], memberId = n
   historyRows.forEach((row) => {
     const match = row.matches;
     const playerTeam = teamForHistoryRow(row, memberId);
+
+    if (!includeInactive && !historyScopeIsActive({
+      season: match?.leagues?.seasons,
+      league: match?.leagues,
+      division: match?.divisions,
+      team: playerTeam,
+    })) {
+      return;
+    }
 
     addHistoryScopeOption({
       seasons,
@@ -65,6 +84,7 @@ function addHistoryScopeOption({ seasons, leagues, divisions, teams, season, lea
       id: season.id,
       name: season.name || "No Season",
       abbreviation: season.abbreviation || "",
+      isActive: season.is_active !== false,
     });
   }
 
@@ -75,6 +95,7 @@ function addHistoryScopeOption({ seasons, leagues, divisions, teams, season, lea
       abbreviation: league.abbreviation || "",
       seasonName: season?.name || "",
       seasonAbbreviation: season?.abbreviation || "",
+      isActive: league.is_active !== false && season?.is_active !== false,
     });
   }
 
@@ -83,6 +104,7 @@ function addHistoryScopeOption({ seasons, leagues, divisions, teams, season, lea
       id: division.id,
       name: division.name || "No Division",
       leagueName: league?.name || "",
+      isActive: division.is_active !== false && league?.is_active !== false && season?.is_active !== false,
     });
   }
 
@@ -96,7 +118,12 @@ function addHistoryScopeOption({ seasons, leagues, divisions, teams, season, lea
       ...existing,
       id: team.id,
       name: team.name || existing.name || "No Team",
-      isActive: team.is_active === false || existing.isActive === false ? false : true,
+      isActive: historyScopeIsActive({
+        season: teamSeason,
+        league: teamLeague,
+        division: teamDivision,
+        team,
+      }) && existing.isActive !== false,
       divisionName: teamDivision?.name || existing.divisionName || "",
       leagueName: teamLeague?.name || existing.leagueName || "",
       leagueAbbreviation: teamLeague?.abbreviation || existing.leagueAbbreviation || "",
@@ -258,6 +285,27 @@ export function playerLineDetails(row, memberId) {
     score: `${playerGamesWon}-${opponentGamesWon}`,
     sideLabel: isHomePlayer ? "Home" : "Away",
   };
+}
+
+export function historyRowIsActive(row, memberId = null) {
+  const match = row.matches;
+  const playerTeam = teamForHistoryRow(row, memberId);
+
+  return historyScopeIsActive({
+    season: match?.leagues?.seasons,
+    league: match?.leagues,
+    division: match?.divisions,
+    team: playerTeam,
+  });
+}
+
+function historyScopeIsActive({ season, league, division, team }) {
+  return (
+    season?.is_active !== false &&
+    league?.is_active !== false &&
+    division?.is_active !== false &&
+    team?.is_active !== false
+  );
 }
 
 export function specialGameStatus(gameStatus) {
