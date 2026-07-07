@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import RoleCapabilityModal from "../../components/RoleCapabilityModal";
-import PlayerHistoryPanel from "../../components/PlayerHistoryPanel";
+import PlayerHistoryPanel, { printPlayerHistory } from "../../components/PlayerHistoryPanel";
 import { requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate } from "../../lib/dateTime";
 import LoadingScreen from "../../components/LoadingScreen";
@@ -35,6 +35,7 @@ export default function MemberDetailPage() {
   const [historyModalTeam, setHistoryModalTeam] = useState(null);
   const [historyFilter, setHistoryFilter] = useState("all");
   const [includeInactiveHistory, setIncludeInactiveHistory] = useState(false);
+  const [printableHistory, setPrintableHistory] = useState(null);
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
@@ -486,11 +487,22 @@ function openTeamPlayHistory(team) {
   if (!team?.id) return;
 
   setHistoryFilter(`team:${team.id}`);
+  setPrintableHistory(null);
   setHistoryModalTeam(team);
 }
 
 function closeTeamPlayHistory() {
   setHistoryModalTeam(null);
+}
+
+const updatePrintableHistory = useCallback((snapshot) => {
+  setPrintableHistory(snapshot);
+}, []);
+
+function printCurrentHistory() {
+  if (printableHistory) {
+    printPlayerHistory(printableHistory);
+  }
 }
 
   if (!member) {
@@ -1014,13 +1026,24 @@ function closeTeamPlayHistory() {
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={closeTeamPlayHistory}
-                  className="rounded-xl border-2 border-slate-700 bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50"
-                >
-                  Close
-                </button>
+                <div className="flex flex-wrap gap-2 sm:justify-end">
+                  <button
+                    type="button"
+                    onClick={printCurrentHistory}
+                    disabled={!printableHistory}
+                    className="rounded-xl border-2 border-slate-700 bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Print
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={closeTeamPlayHistory}
+                    className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-slate-700"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
 
               <PlayerHistoryPanel
@@ -1036,6 +1059,7 @@ function closeTeamPlayHistory() {
                 printSubtitle={memberDisplayName}
                 includeInactiveScopes={includeInactiveHistory}
                 onIncludeInactiveScopesChange={setIncludeInactiveHistory}
+                onPrintableHistoryChange={updatePrintableHistory}
               />
             </div>
           </div>

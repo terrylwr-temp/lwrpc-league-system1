@@ -1615,7 +1615,7 @@ function PlayerHistoryPanel({
                   {formatDate(match?.scheduled_date)}
                 </span>
                 <span className="text-slate-600">
-                  vs {details.opponentName}
+                  {details.playerTeamName} vs {details.opponentName}
                 </span>
                 <span className="font-semibold text-slate-800">
                   {gameScoreSummary}

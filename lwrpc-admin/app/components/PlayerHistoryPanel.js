@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo } from "react";
 import {
   filterHistoryRows,
   formatDate,
@@ -24,18 +25,33 @@ export default function PlayerHistoryPanel({
   printSubtitle = "",
   includeInactiveScopes = true,
   onIncludeInactiveScopesChange = null,
+  onPrintableHistoryChange = null,
 }) {
-  const visibleRows = includeInactiveScopes
-    ? historyRows
-    : historyRows.filter((row) => historyRowIsActive(row, memberId));
-  const visibleTeams = includeInactiveScopes
-    ? playerTeams
-    : playerTeams.filter((team) => historyScopeOptionIsActive(team));
-  const options = historyFilterOptions(visibleRows, visibleTeams, memberId, {
+  const visibleRows = useMemo(() => (
+    includeInactiveScopes
+      ? historyRows
+      : historyRows.filter((row) => historyRowIsActive(row, memberId))
+  ), [historyRows, includeInactiveScopes, memberId]);
+  const visibleTeams = useMemo(() => (
+    includeInactiveScopes
+      ? playerTeams
+      : playerTeams.filter((team) => historyScopeOptionIsActive(team))
+  ), [includeInactiveScopes, playerTeams]);
+  const options = useMemo(() => historyFilterOptions(visibleRows, visibleTeams, memberId, {
     includeInactive: includeInactiveScopes,
-  });
-  const filteredRows = filterHistoryRows(visibleRows, selectedFilter, memberId, visibleTeams);
-  const filteredRecord = playerHistoryRecord(filteredRows, memberId);
+  }), [includeInactiveScopes, memberId, visibleRows, visibleTeams]);
+  const filteredRows = useMemo(
+    () => filterHistoryRows(visibleRows, selectedFilter, memberId, visibleTeams),
+    [memberId, selectedFilter, visibleRows, visibleTeams]
+  );
+  const filteredRecord = useMemo(
+    () => playerHistoryRecord(filteredRows, memberId),
+    [filteredRows, memberId]
+  );
+  const selectedScopeLabel = useMemo(
+    () => selectedHistoryScopeLabel(selectedFilter, options, includeInactiveScopes),
+    [includeInactiveScopes, options, selectedFilter]
+  );
   const clickToCloseProps = closeOnPanelClick
     ? {
         onClick: onClose,
@@ -49,6 +65,27 @@ export default function PlayerHistoryPanel({
         tabIndex: 0,
       }
     : {};
+
+  useEffect(() => {
+    if (!onPrintableHistoryChange) return;
+
+    onPrintableHistoryChange({
+      title: printTitle,
+      subtitle: printSubtitle,
+      scopeLabel: selectedScopeLabel,
+      record: filteredRecord,
+      rows: filteredRows,
+      memberId,
+    });
+  }, [
+    filteredRecord,
+    filteredRows,
+    memberId,
+    onPrintableHistoryChange,
+    printSubtitle,
+    printTitle,
+    selectedScopeLabel,
+  ]);
 
   return (
     <div
@@ -115,23 +152,6 @@ export default function PlayerHistoryPanel({
                 </optgroup>
               )}
             </select>
-
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-                printPlayerHistory({
-                  title: printTitle,
-                  subtitle: printSubtitle,
-                  record: filteredRecord,
-                  rows: filteredRows,
-                  memberId,
-                });
-              }}
-              className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-bold text-white hover:bg-slate-700"
-            >
-              Print
-            </button>
           </div>
 
           {onIncludeInactiveScopesChange && (
@@ -181,7 +201,7 @@ export default function PlayerHistoryPanel({
                   {formatDate(match?.scheduled_date)}
                 </span>
                 <span className="text-slate-600">
-                  vs {details.opponentName}
+                  {details.playerTeamName} vs {details.opponentName}
                 </span>
                 <span className="font-semibold text-slate-800">
                   {gameScoreSummary}
@@ -210,7 +230,7 @@ export default function PlayerHistoryPanel({
   );
 }
 
-function playerHistoryRecord(rows, memberId) {
+export function playerHistoryRecord(rows, memberId) {
   return (rows || []).reduce(
     (record, row) => {
       const details = playerLineDetails(row, memberId);
@@ -269,8 +289,45 @@ function historyScopeOptionLabel(label, option) {
   return option?.isActive === false ? `${label} (Inactive)` : label;
 }
 
-function printPlayerHistory({ title, subtitle, record, rows, memberId }) {
-  const printWindow = window.open("", "_blank", "noopener,noreferrer,width=900,height=700");
+function selectedHistoryScopeLabel(selectedFilter, options, includeInactiveScopes) {
+  const [filterType, filterId] = String(selectedFilter || "all").split(":");
+  if (!filterId || filterType === "all") {
+    return includeInactiveScopes ? "All Seasons/All Teams" : "All Active Seasons/Teams";
+  }
+
+  const optionGroups = {
+    season: options.seasons,
+    league: options.leagues,
+    division: options.divisions,
+    team: options.teams,
+  };
+  const selectedOption = (optionGroups[filterType] || []).find((option) => String(option.id) === String(filterId));
+
+  if (!selectedOption) return includeInactiveScopes ? "All Seasons/All Teams" : "All Active Seasons/Teams";
+
+  if (filterType === "league") {
+    return historyScopeOptionLabel(
+      `${selectedOption.name}${selectedOption.seasonName ? ` / ${selectedOption.seasonName}` : ""}`,
+      selectedOption
+    );
+  }
+
+  if (filterType === "division") {
+    return historyScopeOptionLabel(
+      `${selectedOption.name}${selectedOption.leagueName ? ` / ${selectedOption.leagueName}` : ""}`,
+      selectedOption
+    );
+  }
+
+  if (filterType === "team") {
+    return historyScopeOptionLabel(historyTeamOptionLabel(selectedOption), selectedOption);
+  }
+
+  return historyScopeOptionLabel(selectedOption.name, selectedOption);
+}
+
+export function printPlayerHistory({ title, subtitle, scopeLabel, record, rows, memberId }) {
+  const printWindow = window.open("", "_blank", "noopener,noreferrer,width=1100,height=800");
   if (!printWindow) {
     window.print();
     return;
@@ -294,13 +351,14 @@ function printPlayerHistory({ title, subtitle, record, rows, memberId }) {
           <tr>
             <td>${escapeHtml(formatDate(match?.scheduled_date))}</td>
             <td>${escapeHtml(result)}</td>
+            <td>${escapeHtml(details.playerTeamName)}</td>
             <td>${escapeHtml(details.opponentName)}</td>
             <td>${escapeHtml(score)}</td>
             <td>${escapeHtml(scope)}</td>
           </tr>
         `;
       }).join("")
-    : `<tr><td colspan="5" class="empty">No game play history found for this player.</td></tr>`;
+    : `<tr><td colspan="6" class="empty">No game play history found for this player.</td></tr>`;
 
   printWindow.document.write(`
     <!doctype html>
@@ -308,25 +366,44 @@ function printPlayerHistory({ title, subtitle, record, rows, memberId }) {
       <head>
         <title>${escapeHtml(title)}</title>
         <style>
-          body { color: #0f172a; font-family: Arial, sans-serif; margin: 32px; }
-          h1 { font-size: 24px; margin: 0 0 6px; }
-          .subtitle { color: #475569; font-size: 14px; font-weight: 700; margin-bottom: 10px; }
-          .summary { color: #334155; font-size: 13px; font-weight: 700; margin-bottom: 18px; }
+          @page { margin: 0.45in; size: letter landscape; }
+          * { box-sizing: border-box; }
+          body { color: #0f172a; font-family: Arial, sans-serif; margin: 0; }
+          .report-header { border-bottom: 3px solid #0f172a; margin-bottom: 14px; padding-bottom: 10px; }
+          h1 { font-size: 22px; margin: 0 0 4px; }
+          .subtitle { color: #0f172a; font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+          .summary { color: #334155; display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; font-weight: 700; }
+          .summary span { white-space: nowrap; }
           table { border-collapse: collapse; width: 100%; }
-          th, td { border: 1px solid #cbd5e1; font-size: 12px; padding: 8px; text-align: left; vertical-align: top; }
+          thead { display: table-header-group; }
+          tr { break-inside: avoid; page-break-inside: avoid; }
+          th, td { border: 1px solid #cbd5e1; font-size: 11px; line-height: 1.25; padding: 6px; text-align: left; vertical-align: top; }
           th { background: #0f172a; color: white; }
+          th:nth-child(1), td:nth-child(1) { width: 9%; }
+          th:nth-child(2), td:nth-child(2) { width: 9%; }
+          th:nth-child(3), td:nth-child(3) { width: 17%; }
+          th:nth-child(4), td:nth-child(4) { width: 17%; }
+          th:nth-child(5), td:nth-child(5) { width: 18%; }
+          th:nth-child(6), td:nth-child(6) { width: 30%; }
           .empty { color: #64748b; text-align: center; }
         </style>
       </head>
       <body>
-        <h1>${escapeHtml(title)}</h1>
-        ${subtitle ? `<div class="subtitle">${escapeHtml(subtitle)}</div>` : ""}
-        <div class="summary">Games: ${record.games} - Record: ${escapeHtml(record.record)}</div>
+        <div class="report-header">
+          <h1>${escapeHtml(title)}</h1>
+          ${subtitle ? `<div class="subtitle">${escapeHtml(subtitle)}</div>` : ""}
+          <div class="summary">
+            <span>Games: ${record.games}</span>
+            <span>Record: ${escapeHtml(record.record)}</span>
+            <span>Scope: ${escapeHtml(scopeLabel || "All Seasons/All Teams")}</span>
+          </div>
+        </div>
         <table>
           <thead>
             <tr>
               <th>Date</th>
               <th>Result</th>
+              <th>Player Team</th>
               <th>Opponent</th>
               <th>Score</th>
               <th>Scope</th>
@@ -338,8 +415,10 @@ function printPlayerHistory({ title, subtitle, record, rows, memberId }) {
     </html>
   `);
   printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
+  setTimeout(() => {
+    printWindow.focus();
+    printWindow.print();
+  }, 250);
 }
 
 function escapeHtml(value) {
