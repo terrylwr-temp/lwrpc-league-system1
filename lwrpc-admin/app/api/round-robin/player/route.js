@@ -208,24 +208,44 @@ async function loadPlayerHistory(supabase, group, player) {
   const playerRowsResult = await supabase
     .from("round_robin_session_players")
     .select("session_id, response_status, updated_at")
-    .eq("player_id", player.id)
-    .eq("response_status", "joined");
+    .eq("player_id", player.id);
   if (playerRowsResult.error) throw playerRowsResult.error;
 
-  const joinedSessionIds = [...new Set((playerRowsResult.data || []).map((row) => row.session_id).filter(Boolean))];
-  if (joinedSessionIds.length === 0) return emptyHistory();
+  const playerSessionIds = [...new Set((playerRowsResult.data || [])
+    .filter((row) => row.response_status !== "declined")
+    .map((row) => row.session_id)
+    .filter(Boolean))];
+  const sessionFields = "id, session_name, location, session_date, starts_at, status, summary_text, round_count, mode, settings, updated_at, host_player_id, cohost_player_id";
 
-  const sessionsResult = await supabase
-    .from("round_robin_sessions")
-    .select("id, session_name, location, session_date, starts_at, status, summary_text, round_count, mode, settings, updated_at")
-    .eq("group_id", group.id)
-    .in("id", joinedSessionIds)
-    .order("session_date", { ascending: false })
-    .order("starts_at", { ascending: false });
-  if (sessionsResult.error) throw sessionsResult.error;
+  const [playerSessionsResult, hostedSessionsResult] = await Promise.all([
+    playerSessionIds.length > 0
+      ? supabase
+        .from("round_robin_sessions")
+        .select(sessionFields)
+        .eq("group_id", group.id)
+        .in("id", playerSessionIds)
+      : Promise.resolve({ data: [], error: null }),
+    supabase
+      .from("round_robin_sessions")
+      .select(sessionFields)
+      .eq("group_id", group.id)
+      .or(`host_player_id.eq.${player.id},cohost_player_id.eq.${player.id}`),
+  ]);
+  if (playerSessionsResult.error) throw playerSessionsResult.error;
+  if (hostedSessionsResult.error) throw hostedSessionsResult.error;
 
-  const historySessions = (sessionsResult.data || [])
+  const sessionById = new Map();
+  [...(playerSessionsResult.data || []), ...(hostedSessionsResult.data || [])].forEach((session) => {
+    sessionById.set(String(session.id), session);
+  });
+
+  const historySessions = [...sessionById.values()]
     .filter((session) => session.status === "done" || String(session.session_date || "") < today)
+    .sort((a, b) => (
+      String(b.session_date || "").localeCompare(String(a.session_date || "")) ||
+      String(b.starts_at || "").localeCompare(String(a.starts_at || "")) ||
+      String(b.updated_at || "").localeCompare(String(a.updated_at || ""))
+    ))
     .slice(0, 50);
   if (historySessions.length === 0) return emptyHistory();
 
@@ -259,11 +279,10 @@ async function loadPlayerHistory(supabase, group, player) {
   });
   const playerResultBySession = new Map(playerResults.map((row) => [String(row.session_id || ""), row]));
   const playedHistorySessions = historySessions.filter((session) => playerResultBySession.has(String(session.id)));
-  if (playedHistorySessions.length === 0) return emptyHistory();
 
   return {
     stats: aggregateHistoryStats(playerResults, playedHistorySessions.length),
-    sessions: playedHistorySessions.map((session) => {
+    sessions: historySessions.map((session) => {
       const sessionId = String(session.id);
       const playedIds = playedIdsBySession.get(sessionId) || new Set();
       return {

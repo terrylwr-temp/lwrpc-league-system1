@@ -2331,7 +2331,7 @@ function timeInputValue(value) {
 }
 
 function pastSessionResultLabel(result) {
-  if (!result) return "Match Rank - / Record: 0-0";
+  if (!result) return "Not started / No games played";
   return `Match Rank ${result.rank || "-"} / Record: ${result.wins || 0}-${result.losses || 0}`;
 }
 
