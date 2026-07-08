@@ -1235,7 +1235,7 @@ export default function PlayerDashboardPage() {
                     <>
                       <span className="hidden h-4 w-px bg-white/25 sm:inline-block" aria-hidden="true" />
                       <span className="text-emerald-100">
-                        <span className="font-black">{playerTeamRatingSummary.label}</span>
+                        <span className="font-black">{playerTeamRatingSummary.label}:</span>
                         <span className="text-white"> {playerTeamRatingSummary.value}</span>
                       </span>
                     </>
