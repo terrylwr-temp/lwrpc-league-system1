@@ -1397,7 +1397,7 @@ function goToPage(value) {
             </div>
           </div>
 
-          <div className="max-h-[68vh] overflow-auto overscroll-contain md:max-h-none md:overflow-visible">
+          <div className="overflow-x-auto overscroll-x-contain md:overflow-visible">
             <table className="min-w-[1120px] md:min-w-full">
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
