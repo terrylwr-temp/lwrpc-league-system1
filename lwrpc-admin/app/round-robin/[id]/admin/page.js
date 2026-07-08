@@ -4538,8 +4538,40 @@ function sessionsForMode(sessions = [], showPastSessions) {
 }
 
 function isPastSession(session) {
-  const today = new Date().toISOString().slice(0, 10);
-  return ["done", "cancelled"].includes(session.status) || String(session.session_date || "") < today;
+  if (["done", "cancelled"].includes(session.status)) return true;
+
+  const sessionDate = String(session.session_date || "");
+  if (!sessionDate) return false;
+
+  const now = new Date();
+  const today = localIsoDate(now);
+  if (sessionDate < today) return true;
+  if (sessionDate > today) return false;
+
+  const startMinutes = timeToMinutes(session.starts_at);
+  if (startMinutes === null) return false;
+
+  return startMinutes <= currentLocalMinutes(now);
+}
+
+function localIsoDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function currentLocalMinutes(date = new Date()) {
+  return date.getHours() * 60 + date.getMinutes();
+}
+
+function timeToMinutes(value) {
+  const [hourText, minuteText] = String(value || "").split(":");
+  const hours = Number(hourText);
+  const minutes = Number(minuteText);
+  if (!Number.isInteger(hours) || !Number.isInteger(minutes)) return null;
+  if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return null;
+  return hours * 60 + minutes;
 }
 
 function isLadderSession(session) {
