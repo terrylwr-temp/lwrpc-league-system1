@@ -47,6 +47,7 @@ export default function RatingsPage() {
   });
   const [page, setPage] = useState(1);
   const [requestedMemberId, setRequestedMemberId] = useState("");
+  const [isMobileRatingsView, setIsMobileRatingsView] = useState(false);
   const requestedMemberRowRef = useRef(null);
 
   const checkAuth = useCallback(async function checkAuth() {
@@ -887,6 +888,15 @@ export default function RatingsPage() {
   }, []);
 
   useEffect(() => {
+    const query = window.matchMedia("(max-width: 767px)");
+    const updateView = () => setIsMobileRatingsView(query.matches);
+
+    updateView();
+    query.addEventListener("change", updateView);
+    return () => query.removeEventListener("change", updateView);
+  }, []);
+
+  useEffect(() => {
     setPage(1);
   }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly, showInvalidDuprIdsOnly]);
 
@@ -1023,7 +1033,7 @@ function goToPage(value) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 px-3 pb-16 pt-4 sm:px-6 sm:pt-6">
+    <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-4 sm:px-6 sm:pb-16 sm:pt-6">
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="Season Ratings"
@@ -1397,7 +1407,174 @@ function goToPage(value) {
             </div>
           </div>
 
-          <div className="overflow-visible">
+          <div className="md:hidden">
+            <div className="sticky top-0 z-30 grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2 bg-slate-900 px-4 py-3 text-xs font-black uppercase tracking-wide text-white shadow">
+              <div>Player</div>
+              <div>DUPR ID</div>
+              <div>Ratings</div>
+            </div>
+
+            <div className="divide-y divide-slate-100">
+              {pagedMembers.map((member) => {
+                const missingDoublesRating = !hasDoublesRating(member.id);
+
+                return (
+                  <div
+                    key={`${member.id}-mobile`}
+                    ref={isMobileRatingsView && String(member.id) === String(requestedMemberId) ? requestedMemberRowRef : null}
+                    className={`px-4 py-4 ${
+                      String(member.id) === String(requestedMemberId)
+                        ? "bg-blue-50 ring-2 ring-inset ring-blue-300"
+                        : missingDoublesRating
+                        ? "bg-amber-50"
+                        : "bg-white"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="break-words font-black text-slate-950">
+                          {member.last_name}, {member.first_name}
+                        </div>
+                        <div className="mt-1 text-xs font-semibold text-slate-500">
+                          Added {formatMemberCreatedAt(member.created_at)}
+                        </div>
+                      </div>
+
+                      <div className="flex shrink-0 items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => copyMemberName(member)}
+                          aria-label={`Copy name for ${member.first_name} ${member.last_name}`}
+                          title="Copy name"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        >
+                          <CopyIcon />
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (confirmUnsavedChanges()) router.push(`/members/${member.id}`);
+                          }}
+                          aria-label={`Edit member ${member.first_name} ${member.last_name}`}
+                          title="Edit member"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200"
+                        >
+                          <EditIcon />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid grid-cols-1 gap-3">
+                      <label className="text-xs font-black uppercase tracking-wide text-slate-500">
+                        DUPR ID
+                        <input
+                          key={`${member.id}-mobile-dupr-id`}
+                          type="text"
+                          defaultValue={member.dupr_id || ""}
+                          onBlur={(e) => {
+                            const cleanValue = e.target.value.trim();
+                            e.target.value = cleanValue;
+                            updateMemberDuprId(member.id, cleanValue);
+                          }}
+                          className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-950"
+                          placeholder="DUPR ID"
+                        />
+                      </label>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <label className="text-xs font-black uppercase tracking-wide text-slate-500">
+                          DUPR Doubles
+                          <input
+                            key={`${member.id}-${selectedSeason}-mobile-dupr-doubles`}
+                            type="text"
+                            defaultValue={getRating(member.id, "dupr_doubles_rating")}
+                            onBlur={(e) => {
+                              const cleanValue = normalizeRatingInput("dupr_doubles_rating", e.target.value);
+                              e.target.value = cleanValue ?? "";
+                              updateRating(member.id, "dupr_doubles_rating", e.target.value);
+                            }}
+                            className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-950"
+                            placeholder="3.999 or NR"
+                          />
+                        </label>
+
+                        <label className="text-xs font-black uppercase tracking-wide text-slate-500">
+                          Reliability
+                          <input
+                            key={`${member.id}-${selectedSeason}-mobile-dupr-reliability`}
+                            type="number"
+                            step="0.01"
+                            defaultValue={getRating(member.id, "dupr_reliability_rating")}
+                            onBlur={(e) => {
+                              const cleanValue = normalizeRatingInput("dupr_reliability_rating", e.target.value);
+                              e.target.value = cleanValue ?? "";
+                              updateRating(member.id, "dupr_reliability_rating", e.target.value);
+                            }}
+                            className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-950"
+                            placeholder="60"
+                          />
+                        </label>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <label className="text-xs font-black uppercase tracking-wide text-slate-500">
+                          Season DUPR
+                          <input
+                            key={`${member.id}-${selectedSeason}-mobile-season-dupr`}
+                            type="number"
+                            step="0.01"
+                            defaultValue={getRating(member.id, "season_dupr_rating")}
+                            onBlur={(e) => {
+                              const cleanValue = normalizeRatingInput("season_dupr_rating", e.target.value);
+                              e.target.value = cleanValue ?? "";
+                              updateRating(member.id, "season_dupr_rating", e.target.value);
+                            }}
+                            className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-950"
+                            placeholder="3.50"
+                          />
+                        </label>
+
+                        <label className="text-xs font-black uppercase tracking-wide text-slate-500">
+                          Age-Based
+                          <input
+                            key={`${member.id}-${selectedSeason}-mobile-age`}
+                            type="number"
+                            step="0.01"
+                            defaultValue={getRating(member.id, "season_primetime_rating")}
+                            onBlur={(e) =>
+                              updateRating(member.id, "season_primetime_rating", e.target.value)
+                            }
+                            className="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-950"
+                            placeholder="3.50"
+                          />
+                        </label>
+                      </div>
+
+                      <label className="text-xs font-black uppercase tracking-wide text-slate-500">
+                        DUPR Notes
+                        <textarea
+                          key={`${member.id}-${selectedSeason}-mobile-dupr-notes`}
+                          defaultValue={getRating(member.id, "notes")}
+                          onBlur={(e) => updateRating(member.id, "notes", e.target.value)}
+                          className="mt-1 min-h-16 w-full resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm font-semibold normal-case tracking-normal text-slate-950"
+                          placeholder="DUPR notes"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {pagedMembers.length === 0 && (
+                <div className="px-4 py-10 text-center text-slate-500">
+                  No players found.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="hidden overflow-visible md:block">
             <table className="min-w-[1120px] md:min-w-full">
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
@@ -1468,7 +1645,7 @@ function goToPage(value) {
                 return (
                   <tr
                     key={member.id}
-                    ref={String(member.id) === String(requestedMemberId) ? requestedMemberRowRef : null}
+                    ref={!isMobileRatingsView && String(member.id) === String(requestedMemberId) ? requestedMemberRowRef : null}
                     className={`border-b border-slate-100 ${
                       String(member.id) === String(requestedMemberId)
                         ? "bg-blue-50 ring-2 ring-inset ring-blue-300 hover:bg-blue-100"
