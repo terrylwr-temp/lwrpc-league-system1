@@ -1023,20 +1023,20 @@ function goToPage(value) {
   }
 
   return (
-    <main className="min-h-screen bg-slate-100 p-6">
+    <main className="min-h-screen bg-slate-100 px-3 pb-16 pt-4 sm:px-6 sm:pt-6">
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="Season Ratings"
           subtitle="Manage each player's season-specific doubles and age-based ratings."
         />
 
-        <div className="rounded-2xl bg-white p-6 shadow">
-          <div className="mb-4 flex items-center justify-between">
+        <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <h2 className="text-xl font-bold text-slate-900">
               Ratings Filters
             </h2>
 
-            <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
+            <div className="rounded-xl bg-slate-900 px-5 py-3 text-white sm:text-right">
               <div className="text-xs uppercase tracking-wide text-slate-300">
                 Players
               </div>
@@ -1340,7 +1340,7 @@ function goToPage(value) {
         )}
 
         <div className="mt-6 rounded-2xl bg-white shadow">
-          <div className="flex flex-col gap-2 border-b border-slate-200 px-4 py-2 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-3 border-b border-slate-200 px-4 py-3 md:flex-row md:items-center md:justify-between">
             <div className="text-xs text-slate-600">
               Showing{" "}
               <span className="font-semibold text-slate-900">
@@ -1363,44 +1363,42 @@ function goToPage(value) {
               </span>
             </div>
 
-<div className="flex justify-end">
+            <div className="flex justify-start md:justify-end">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Previous
+                </button>
 
-  <div className="flex flex-wrap items-center gap-2">
-    <button
-      disabled={page <= 1}
-      onClick={() => setPage((p) => Math.max(1, p - 1))}
-      className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      Previous
-    </button>
+                <div className="text-sm font-semibold text-slate-700">
+                  Page {page} of {totalPages}
+                </div>
 
-    <div className="text-sm font-semibold text-slate-700">
-      Page {page} of {totalPages}
-    </div>
+                <input
+                  type="number"
+                  min="1"
+                  max={totalPages}
+                  value={page}
+                  onChange={(e) => goToPage(e.target.value)}
+                  className="w-20 rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+                />
 
-    <input
-      type="number"
-      min="1"
-      max={totalPages}
-      value={page}
-      onChange={(e) => goToPage(e.target.value)}
-      className="w-20 rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
-    />
-
-    <button
-      disabled={page >= totalPages}
-      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-      className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-    >
-      Next
-    </button>
-  </div>
-
-</div>
+                <button
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  className="rounded-lg bg-slate-200 px-3 py-1.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="overflow-visible">
-          <table className="min-w-full">
+          <div className="max-h-[68vh] overflow-auto overscroll-contain md:max-h-none md:overflow-visible">
+            <table className="min-w-[1120px] md:min-w-full">
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
                 <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("name", memberSort)} data-sort-indicator={sortIndicator("name")}>
@@ -1639,38 +1637,38 @@ function goToPage(value) {
                 </tr>
               )}
             </tbody>
-          </table>
+            </table>
           </div>
-<div className="flex flex-wrap items-center gap-2">
-  <button
-    disabled={page <= 1}
-    onClick={() => setPage((p) => Math.max(1, p - 1))}
-    className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    Previous
-  </button>
+          <div className="flex flex-wrap items-center gap-2 px-4 py-4">
+            <button
+              disabled={page <= 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Previous
+            </button>
 
-  <div className="text-sm font-semibold text-slate-700">
-    Page {page} of {totalPages}
-  </div>
+            <div className="text-sm font-semibold text-slate-700">
+              Page {page} of {totalPages}
+            </div>
 
-  <input
-    type="number"
-    min="1"
-    max={totalPages}
-    value={page}
-    onChange={(e) => goToPage(e.target.value)}
-    className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
-  />
+            <input
+              type="number"
+              min="1"
+              max={totalPages}
+              value={page}
+              onChange={(e) => goToPage(e.target.value)}
+              className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
 
-  <button
-    disabled={page >= totalPages}
-    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-    className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
-  >
-    Next
-  </button>
-</div>
+            <button
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </div>
     </main>
