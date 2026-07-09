@@ -54,6 +54,7 @@ Use **Schedules/Standings** to review division schedules, standings, and complet
 See the list of all Captains/Co-Captains within the Division of the team that you have selected. This will include the names, email and phone numbers along with simply clicking on the name to send an email to them.
 
 ![Division Captains button](/help/captain/screenshots/division-captains.png "Division Captains button")
+![Division Captains popup](/help/captain/screenshots/division-captains2.png "Division Captains popup")
 
 ## Printing or saving this guide
 
