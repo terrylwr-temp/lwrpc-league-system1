@@ -62,6 +62,8 @@ const DASHBOARD_TEAM_TAB_UNSELECTED =
   "border-slate-300 bg-gradient-to-b from-white to-slate-200 py-2 text-slate-800 shadow-[0_5px_0_#cbd5e1,0_10px_16px_rgba(15,23,42,0.14)] hover:border-blue-300 hover:from-blue-50 hover:to-blue-100 active:shadow-[0_2px_0_#cbd5e1,0_5px_10px_rgba(15,23,42,0.12)]";
 const DASHBOARD_ACTION_BUTTON_3D =
   "w-full cursor-pointer rounded-xl border border-blue-300 bg-gradient-to-b from-white to-blue-100 px-3 py-3 text-sm font-black text-blue-950 shadow-[0_5px_0_#2563eb,0_10px_16px_rgba(15,23,42,0.18)] transition hover:-translate-y-0.5 hover:from-blue-50 hover:to-blue-200 active:translate-y-1 active:shadow-[0_2px_0_#2563eb,0_5px_10px_rgba(15,23,42,0.16)]";
+const DASHBOARD_ACTION_BUTTON_ACTIVE_3D =
+  "w-full cursor-pointer rounded-xl border border-blue-200 bg-gradient-to-b from-blue-500 to-blue-800 px-3 py-3 text-sm font-black text-white shadow-[0_5px_0_#1e3a8a,0_10px_16px_rgba(15,23,42,0.24)] transition hover:-translate-y-0.5 hover:from-blue-400 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.2)]";
 const DASHBOARD_EMERALD_BUTTON_3D =
   "rounded-xl border border-emerald-300 bg-gradient-to-b from-white to-emerald-100 px-3 py-2 text-xs font-black text-emerald-950 shadow-[0_4px_0_#059669,0_8px_14px_rgba(15,23,42,0.16)] transition hover:-translate-y-0.5 hover:from-emerald-50 hover:to-emerald-200 active:translate-y-1 active:shadow-[0_2px_0_#059669,0_4px_8px_rgba(15,23,42,0.14)] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:bg-none disabled:text-slate-400 disabled:shadow-none disabled:hover:translate-y-0";
 
@@ -1294,6 +1296,10 @@ export default function PlayerDashboardPage() {
                   selectPanel("standings");
                 }}
                 onOpenTeamMatches={() => selectPanel("upcoming")}
+                historyActive={activePanel === "history"}
+                rosterActive={String(rosterTeam?.id || "") === String(selectedVisibleTeam.id)}
+                standingsActive={activePanel === "standings"}
+                teamMatchesActive={activePanel === "upcoming"}
                 historyCount={filteredPlayHistory.length}
                 standingsCount={selectedDivisionStandings.length}
                 teamMatchesCount={upcomingMatchesBySelectedTeam.length}
@@ -1824,6 +1830,10 @@ function TeamCard({
   onOpenHistory,
   onOpenDivisionStandings,
   onOpenTeamMatches,
+  historyActive,
+  rosterActive,
+  standingsActive,
+  teamMatchesActive,
   historyCount,
   standingsCount,
   teamMatchesCount,
@@ -1879,10 +1889,10 @@ function TeamCard({
             event.stopPropagation();
             onOpenHistory();
           }}
-          className={DASHBOARD_ACTION_BUTTON_3D}
+          className={dashboardActionButtonClass(historyActive)}
         >
           My Play History
-          <span className="ml-2 rounded-lg bg-white px-2 py-0.5 text-xs">
+          <span className={dashboardActionBadgeClass(historyActive)}>
             {historyCount}
           </span>
         </button>
@@ -1892,7 +1902,7 @@ function TeamCard({
             event.stopPropagation();
             onOpenRoster(team);
           }}
-          className={DASHBOARD_ACTION_BUTTON_3D}
+          className={dashboardActionButtonClass(rosterActive)}
         >
           Team Roster
         </button>
@@ -1902,10 +1912,10 @@ function TeamCard({
             event.stopPropagation();
             onOpenDivisionStandings();
           }}
-          className={DASHBOARD_ACTION_BUTTON_3D}
+          className={dashboardActionButtonClass(standingsActive)}
         >
           Division Standings
-          <span className="ml-2 rounded-lg bg-white px-2 py-0.5 text-xs">
+          <span className={dashboardActionBadgeClass(standingsActive)}>
             {standingsCount}
           </span>
         </button>
@@ -1915,10 +1925,10 @@ function TeamCard({
             event.stopPropagation();
             onOpenTeamMatches();
           }}
-          className={DASHBOARD_ACTION_BUTTON_3D}
+          className={dashboardActionButtonClass(teamMatchesActive)}
         >
           Team Matches
-          <span className="ml-2 rounded-lg bg-white px-2 py-0.5 text-xs">
+          <span className={dashboardActionBadgeClass(teamMatchesActive)}>
             {teamMatchesCount}
           </span>
         </button>
@@ -1995,6 +2005,14 @@ function TeamCard({
       </div>
     </div>
   );
+}
+
+function dashboardActionButtonClass(active) {
+  return active ? DASHBOARD_ACTION_BUTTON_ACTIVE_3D : DASHBOARD_ACTION_BUTTON_3D;
+}
+
+function dashboardActionBadgeClass(active) {
+  return `ml-2 rounded-lg px-2 py-0.5 text-xs ${active ? "bg-white/20 text-white" : "bg-white text-blue-950"}`;
 }
 
 function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {

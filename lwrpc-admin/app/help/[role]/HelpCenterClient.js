@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
 export default function HelpCenterClient({ guide }) {
@@ -10,6 +10,7 @@ export default function HelpCenterClient({ guide }) {
   const navigation = useMemo(() => guide.navigation || [], [guide.navigation]);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState(documents[0]?.id || "");
+  const [showGoToTop, setShowGoToTop] = useState(false);
   const selectedDocument = documents.find((document) => document.id === selectedId) || documents[0] || null;
   const normalizedQuery = query.trim().toLowerCase();
   const filteredNavigation = useMemo(() => {
@@ -29,11 +30,25 @@ export default function HelpCenterClient({ guide }) {
       .filter((group) => group.items.length > 0);
   }, [documents, navigation, normalizedQuery]);
 
+  useEffect(() => {
+    function updateGoToTopVisibility() {
+      setShowGoToTop(window.scrollY > 360);
+    }
+
+    updateGoToTopVisibility();
+    window.addEventListener("scroll", updateGoToTopVisibility, { passive: true });
+    return () => window.removeEventListener("scroll", updateGoToTopVisibility);
+  }, []);
+
   function selectDocument(documentId) {
     setSelectedId(documentId);
     window.requestAnimationFrame(() => {
       document.getElementById("help-article-top")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
+  }
+
+  function goToTop() {
+    document.getElementById("help-article-top")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   function printGuide() {
@@ -204,6 +219,16 @@ export default function HelpCenterClient({ guide }) {
           <MarkdownRenderer markdown={selectedDocument?.body || ""} />
         </article>
       </div>
+
+      {guide.role === "captain" && showGoToTop && (
+        <button
+          type="button"
+          onClick={goToTop}
+          className="help-no-print fixed bottom-6 right-4 z-30 rounded-lg bg-blue-700 px-4 py-3 text-sm font-black text-white shadow-lg shadow-slate-900/20 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 md:right-6"
+        >
+          Go to Top
+        </button>
+      )}
     </main>
   );
 }

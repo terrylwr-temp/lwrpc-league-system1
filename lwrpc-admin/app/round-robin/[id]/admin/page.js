@@ -1103,7 +1103,7 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
               startsAt: value,
               repeatSchedule: current.repeatsWeekly ? current.repeatSchedule : defaultRepeatSchedule(current.sessionDate, value),
             }))} />
-            <TextInput label="Max players" type="number" value={form.maxPlayers} onChange={(value) => setForm((current) => ({ ...current, maxPlayers: Number(value) }))} />
+            <TextInput label="Max players" type="number" value={form.maxPlayers} onChange={(value) => setForm((current) => ({ ...current, maxPlayers: value }))} />
             <label className="block text-sm font-bold text-slate-600">
               Default reminder sent hours before match
               <input
@@ -1187,7 +1187,7 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
                   type="number"
                   min="1"
                   value={form.pointsToWin}
-                  onChange={(event) => setForm((current) => ({ ...current, pointsToWin: clampNumber(event.target.value, 1, 99, DEFAULT_ROUND_ROBIN_SCORING.pointsToWin) }))}
+                  onChange={(event) => setForm((current) => ({ ...current, pointsToWin: event.target.value }))}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
                 />
               </label>
@@ -1197,7 +1197,7 @@ function SessionFormModal({ state, form, setForm, isEditingSession, toggleInvite
                   type="number"
                   min="1"
                   value={form.winBy}
-                  onChange={(event) => setForm((current) => ({ ...current, winBy: clampNumber(event.target.value, 1, 20, DEFAULT_ROUND_ROBIN_SCORING.winBy) }))}
+                  onChange={(event) => setForm((current) => ({ ...current, winBy: event.target.value }))}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950"
                 />
               </label>
@@ -2351,17 +2351,22 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
   const courtLabel = `${courts.length} court${courts.length === 1 ? "" : "s"}`;
   const initialMode = mode === "initial";
   const busy = ["startSessionAndGenerateFirstGame", "generateNextGame", "updateMatchScore"].includes(actionLoading);
-  const scoring = normalizeRoundRobinScoring(scoringDraft || session?.settings?.scoring);
+  const scoring = scoringDraft && typeof scoringDraft === "object"
+    ? scoringDraft
+    : normalizeRoundRobinScoring(session?.settings?.scoring);
+  const normalizedScoring = normalizeRoundRobinScoring(scoring);
 
   function updateScoring(field, value) {
     if (!setScoring) return;
     setScoring((current) => {
-      const currentScoring = normalizeRoundRobinScoring(current);
+      const currentScoring = current && typeof current === "object"
+        ? current
+        : normalizeRoundRobinScoring(current);
       if (field === "pointsToWin") {
-        return { ...currentScoring, pointsToWin: Math.round(clampNumber(value, 1, 99, DEFAULT_ROUND_ROBIN_SCORING.pointsToWin)) };
+        return { ...currentScoring, pointsToWin: value };
       }
       if (field === "winBy") {
-        return { ...currentScoring, winBy: Math.round(clampNumber(value, 1, 20, DEFAULT_ROUND_ROBIN_SCORING.winBy)) };
+        return { ...currentScoring, winBy: value };
       }
       return { ...currentScoring, scoreType: normalizeRoundRobinScoreType(value) };
     });
@@ -2449,7 +2454,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
                       <div className="text-sm font-black text-emerald-950">Match Scoring</div>
                       <div className="mt-1 text-xs font-bold text-emerald-800">Confirm the scoring format before live play starts.</div>
                     </div>
-                    <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-emerald-800 shadow-sm">{roundRobinScoringLabel(scoring)}</div>
+                    <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-emerald-800 shadow-sm">{roundRobinScoringLabel(normalizedScoring)}</div>
                   </div>
                   <div className="mt-3 grid grid-cols-1 gap-3 text-sm font-bold text-emerald-950 sm:grid-cols-3">
                     <label className="block rounded-lg bg-white px-3 py-3 shadow-sm">
@@ -2458,7 +2463,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
                         type="number"
                         min="1"
                         max="99"
-                        value={scoring.pointsToWin}
+                        value={scoring.pointsToWin ?? ""}
                         onChange={(event) => updateScoring("pointsToWin", event.target.value)}
                         className="mt-2 w-full rounded-lg border border-emerald-200 px-3 py-2 text-base font-black text-slate-950 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                       />
@@ -2469,7 +2474,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
                         type="number"
                         min="1"
                         max="20"
-                        value={scoring.winBy}
+                        value={scoring.winBy ?? ""}
                         onChange={(event) => updateScoring("winBy", event.target.value)}
                         className="mt-2 w-full rounded-lg border border-emerald-200 px-3 py-2 text-base font-black text-slate-950 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                       />
@@ -2477,7 +2482,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
                     <label className="block rounded-lg bg-white px-3 py-3 shadow-sm">
                       <span className="text-xs font-black uppercase tracking-wide text-emerald-700">Score type</span>
                       <select
-                        value={scoring.scoreType}
+                        value={normalizeRoundRobinScoreType(scoring.scoreType)}
                         onChange={(event) => updateScoring("scoreType", event.target.value)}
                         className="mt-2 w-full rounded-lg border border-emerald-200 px-3 py-2 text-base font-black text-slate-950 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
                       >
