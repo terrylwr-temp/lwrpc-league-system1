@@ -15,7 +15,7 @@ The Team Roster screen shows the players currently assigned to a team, their rat
 
 Use **Add Player** to select from eligible members. The player list is filtered by the selected home location and excludes anyone already on the roster.
 
-![Player Pulldown](/help/captain/screenshots/Player-pulldown.png "Player Pulldown")
+![Player Pulldown](/help/captain/screenshots/Player-Pulldown.png "Player Pulldown")
 
 - **Eligible** means the player has the required rating and fits the team rating range.
 - **Rating Needed** means the player can be added to the roster, but cannot be used for Match Setup or score entry until the required rating is entered.
