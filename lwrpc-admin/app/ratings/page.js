@@ -728,7 +728,7 @@ export default function RatingsPage() {
     }
 
     const reliabilityThresholdText = window.prompt(
-      "Reliability Rating threshold for NR-style cleanup?\n\nEnter 0 or leave blank to ignore Reliability Rating.",
+      "Reliability Rating threshold for NR-style cleanup?\n\nIf a player in the selected Season has a Reliability Rating of the entered amount or below, this leaves the DUPR Doubles rating as-is but adjusts the Season DUPR rating as if the player has an NR rating, based on the division they're in and the rules in place for doing that adjustment.\n\nEnter 0 or leave blank to ignore Reliability Rating.",
       "0"
     );
 
@@ -742,7 +742,7 @@ export default function RatingsPage() {
     }
 
     const reliabilityRuleText = reliabilityThreshold > 0
-      ? `Reliability Rating values of ${reliabilityThreshold} or below also use the NR rule.`
+      ? `Reliability Rating values of ${reliabilityThreshold} or below will leave DUPR Doubles as-is, then adjust Season DUPR using the NR rule: the player's highest division Rating Range Max minus 0.5. A DUPR Notes entry will be added for each reliability-based NR-style adjustment.`
       : "Reliability Rating will not change the cleanup rule.";
     const ok = confirm(
       `Clean ratings for ${selectedSeasonLabel()}?\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.\n\n${reliabilityRuleText}`
@@ -806,10 +806,15 @@ export default function RatingsPage() {
     const updateRequests = [];
     let cleanedCount = 0;
     let skippedCount = 0;
+    let reliabilityAdjustedCount = 0;
 
     members.forEach((member) => {
       const existing = rowsByMemberId[String(member.id)];
       const rawValue = existing?.dupr_doubles_rating;
+      const reliabilityTriggered = isReliabilityNrAdjustment(
+        existing?.dupr_reliability_rating,
+        reliabilityThreshold
+      );
       const cleanedValue = cleanedSeasonDuprRating(
         rawValue,
         maxRatingByMemberId[String(member.id)],
@@ -828,6 +833,14 @@ export default function RatingsPage() {
         season_dupr_rating: cleanedValue,
         updated_at: now,
       };
+
+      if (reliabilityTriggered) {
+        reliabilityAdjustedCount += 1;
+        payload.notes = ratingNotesWithReliabilityAdjustment(
+          existing?.notes,
+          reliabilityThreshold
+        );
+      }
 
       if (existing) {
         updateRequests.push(
@@ -867,7 +880,7 @@ export default function RatingsPage() {
 
     await loadRatings(selectedSeason);
     await loadAllRatings();
-    setRatingImportStatus(`Cleaned ${cleanedCount} Season DUPR rating(s). Skipped ${skippedCount} player(s) without a numeric DUPR Doubles Rating or usable NR team range.${reliabilityThreshold > 0 ? ` Reliability threshold applied at ${reliabilityThreshold} or below.` : ""}`);
+    setRatingImportStatus(`Cleaned ${cleanedCount} Season DUPR rating(s). Skipped ${skippedCount} player(s) without a numeric DUPR Doubles Rating or usable NR team range.${reliabilityThreshold > 0 ? ` Reliability threshold applied at ${reliabilityThreshold} or below; ${reliabilityAdjustedCount} player(s) were treated as NR for Season DUPR cleanup with DUPR Notes updated.` : ""}`);
     setIsCleaningRatings(false);
   }
 
@@ -2009,16 +2022,40 @@ function parseReliabilityThreshold(value) {
   return threshold;
 }
 
-function cleanedSeasonDuprRating(rawValue, highestMaxRating, reliabilityValue = null, reliabilityThreshold = 0) {
-  const text = String(rawValue ?? "").trim();
+function isReliabilityNrAdjustment(reliabilityValue, reliabilityThreshold = 0) {
   const reliabilityNumber = Number(reliabilityValue);
-  const hasLowReliability =
+
+  return (
     Number(reliabilityThreshold || 0) > 0 &&
     reliabilityValue !== null &&
     reliabilityValue !== undefined &&
     String(reliabilityValue).trim() !== "" &&
     !Number.isNaN(reliabilityNumber) &&
-    reliabilityNumber <= Number(reliabilityThreshold);
+    reliabilityNumber <= Number(reliabilityThreshold)
+  );
+}
+
+function reliabilityAdjustmentNote(reliabilityThreshold) {
+  return `Season DUPR rating is adjusted based on the Reliability rating threshold of ${reliabilityThreshold} and treated as NR for the division-based Season DUPR adjustment.`;
+}
+
+function ratingNotesWithReliabilityAdjustment(existingNotes, reliabilityThreshold) {
+  const note = reliabilityAdjustmentNote(reliabilityThreshold);
+  const cleanedLines = String(existingNotes || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter(
+      (line) =>
+        !/^Season DUPR rating is adjusted based on the Reliability rating (of|threshold of) .+ (and automatically adjusted to NR|and treated as NR for the division-based Season DUPR adjustment)\.$/.test(line)
+    );
+
+  return [...cleanedLines, note].join("\n");
+}
+
+function cleanedSeasonDuprRating(rawValue, highestMaxRating, reliabilityValue = null, reliabilityThreshold = 0) {
+  const text = String(rawValue ?? "").trim();
+  const hasLowReliability = isReliabilityNrAdjustment(reliabilityValue, reliabilityThreshold);
 
   if (hasLowReliability || text.toUpperCase() === "NR") {
     const maxRating = Number(highestMaxRating);
