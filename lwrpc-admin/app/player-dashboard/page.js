@@ -1242,23 +1242,9 @@ export default function PlayerDashboardPage() {
                   )}
                 </div>
               </div>
-              <div className="flex flex-col gap-2 text-sm font-semibold text-slate-300 md:items-end">
-                <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                  <button
-                    type="button"
-                    onClick={() => selectPanel("history")}
-                    className={`cursor-pointer rounded-xl border px-3 py-2 text-xs font-black shadow-[0_4px_0_rgba(30,64,175,0.7),0_8px_14px_rgba(0,0,0,0.25)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2 focus:ring-offset-slate-950 active:translate-y-1 active:shadow-[0_2px_0_rgba(30,64,175,0.7),0_4px_8px_rgba(0,0,0,0.22)] ${
-                      activePanel === "history"
-                        ? "border-blue-300 bg-gradient-to-b from-blue-500 to-blue-700 text-white hover:from-blue-400 hover:to-blue-600"
-                        : "border-blue-200 bg-gradient-to-b from-white to-blue-100 text-blue-950 hover:from-blue-50 hover:to-blue-200"
-                    }`}
-                  >
-                    My Play History
-                    <span className={`ml-2 rounded-lg px-2 py-0.5 ${activePanel === "history" ? "bg-white/20" : "bg-white"}`}>
-                      {filteredPlayHistory.length}
-                    </span>
-                  </button>
-                  {hasPreviousSeasonTeams && (
+              {hasPreviousSeasonTeams && (
+                <div className="flex flex-col gap-2 text-sm font-semibold text-slate-300 md:items-end">
+                  <div className="flex flex-wrap items-center gap-2 md:justify-end">
                     <button
                       type="button"
                       onClick={() => setShowPreviousSeasonTeams((value) => !value)}
@@ -1266,9 +1252,9 @@ export default function PlayerDashboardPage() {
                     >
                       {showPreviousSeasonTeams ? "Show Active Teams" : "Show Previous Seasons Teams"}
                     </button>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -1295,6 +1281,7 @@ export default function PlayerDashboardPage() {
                 }
                 onOpenDocument={openLeagueDocument}
                 onOpenRoster={setRosterTeam}
+                onOpenHistory={() => selectPanel("history")}
                 onOpenStandings={(team) =>
                   openDivisionScheduleForTeam(team)
                 }
@@ -1307,6 +1294,7 @@ export default function PlayerDashboardPage() {
                   selectPanel("standings");
                 }}
                 onOpenTeamMatches={() => selectPanel("upcoming")}
+                historyCount={filteredPlayHistory.length}
                 standingsCount={selectedDivisionStandings.length}
                 teamMatchesCount={upcomingMatchesBySelectedTeam.length}
                 standingsLeaders={selectedDivisionStandingsLeaders.leaders}
@@ -1833,8 +1821,10 @@ function TeamCard({
   onToggleDocuments,
   onOpenDocument,
   onOpenRoster,
+  onOpenHistory,
   onOpenDivisionStandings,
   onOpenTeamMatches,
+  historyCount,
   standingsCount,
   teamMatchesCount,
   standingsLeaders,
@@ -1882,7 +1872,20 @@ function TeamCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 border-t border-slate-100 p-4 sm:grid-cols-4">
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            onOpenHistory();
+          }}
+          className={DASHBOARD_ACTION_BUTTON_3D}
+        >
+          My Play History
+          <span className="ml-2 rounded-lg bg-white px-2 py-0.5 text-xs">
+            {historyCount}
+          </span>
+        </button>
         <button
           type="button"
           onClick={(event) => {

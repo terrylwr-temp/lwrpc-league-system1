@@ -897,6 +897,16 @@ export default function RatingsPage() {
   }, []);
 
   useEffect(() => {
+    if (!isMobileRatingsView) return;
+
+    setShowMissingDoublesOnly(false);
+    setShowNrDoublesOnly(false);
+    setShowNrAgeOnly(false);
+    setShowInvalidDuprIdsOnly(false);
+    setShowRatingImportTools(false);
+  }, [isMobileRatingsView]);
+
+  useEffect(() => {
     setPage(1);
   }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly, showInvalidDuprIdsOnly]);
 
@@ -1123,7 +1133,7 @@ function goToPage(value) {
             <button
               type="button"
               onClick={() => setShowMissingDoublesOnly((value) => !value)}
-              className={`rounded-xl px-4 py-3 font-semibold ${
+              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
                 showMissingDoublesOnly
                   ? "bg-amber-600 text-white hover:bg-amber-700"
                   : "bg-amber-100 text-amber-950 hover:bg-amber-200"
@@ -1135,7 +1145,7 @@ function goToPage(value) {
             <button
               type="button"
               onClick={() => setShowNrDoublesOnly((value) => !value)}
-              className={`rounded-xl px-4 py-3 font-semibold ${
+              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
                 showNrDoublesOnly
                   ? "bg-red-700 text-white hover:bg-red-800"
                   : "bg-red-100 text-red-900 hover:bg-red-200"
@@ -1147,7 +1157,7 @@ function goToPage(value) {
             <button
               type="button"
               onClick={() => setShowNrAgeOnly((value) => !value)}
-              className={`rounded-xl px-4 py-3 font-semibold ${
+              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
                 showNrAgeOnly
                   ? "bg-purple-700 text-white hover:bg-purple-800"
                   : "bg-purple-100 text-purple-900 hover:bg-purple-200"
@@ -1159,7 +1169,7 @@ function goToPage(value) {
             <button
               type="button"
               onClick={() => setShowInvalidDuprIdsOnly((value) => !value)}
-              className={`rounded-xl px-4 py-3 font-semibold ${
+              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
                 showInvalidDuprIdsOnly
                   ? "bg-slate-800 text-white hover:bg-slate-900"
                   : "bg-slate-200 text-slate-900 hover:bg-slate-300"
@@ -1171,7 +1181,7 @@ function goToPage(value) {
             <button
               type="button"
               onClick={() => setShowRatingImportTools((value) => !value)}
-              className={`rounded-xl px-4 py-3 font-semibold ${
+              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
                 showRatingImportTools
                   ? "bg-blue-700 text-white hover:bg-blue-800"
                   : "bg-blue-100 text-blue-900 hover:bg-blue-200"
@@ -1182,7 +1192,7 @@ function goToPage(value) {
           </div>
         </div>
 
-        {showRatingImportTools && (
+        {showRatingImportTools && !isMobileRatingsView && (
         <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-5 shadow-sm">
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div>
