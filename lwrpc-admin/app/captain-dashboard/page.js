@@ -2965,7 +2965,7 @@ export default function CaptainDashboardPage() {
                     }}
                     className={DASHBOARD_ACTION_BUTTON_3D}
                   >
-                    Schedules/Standings
+                    Schedules / Standings
                   </button>
 
                   <button
