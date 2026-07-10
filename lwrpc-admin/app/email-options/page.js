@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
-import { requireRole, supabase } from "../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import {
   EMAIL_TEMPLATES,
   renderEmailTemplate,
@@ -169,9 +169,9 @@ export default function EmailOptionsPage() {
 
     const response = await fetch("/api/notifications", {
       method: "POST",
-      headers: {
+      headers: await getRequestAuthorizationHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify({
         emails: email ? [email] : [],
         phones: phone ? [phone] : [],

@@ -18,21 +18,19 @@ function serviceClient() {
   return createClient(url, key);
 }
 
-function isVercelCronRequest(req) {
-  return (req.headers.get("user-agent") || "").includes("vercel-cron/1.0");
-}
-
-function authorizeCronRequest(req, { allowVercelCron = false } = {}) {
+function authorizeCronRequest(req) {
   const authHeader = req.headers.get("authorization") || "";
-  const cronSecret = process.env.PBCC_REMINDER_SECRET || process.env.CRON_SECRET;
-  if (cronSecret && authHeader === `Bearer ${cronSecret}`) return true;
-  if (allowVercelCron && isVercelCronRequest(req)) return true;
-  return !cronSecret && process.env.NODE_ENV !== "production";
+  const cronSecrets = [process.env.CRON_SECRET, process.env.PBCC_REMINDER_SECRET]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+
+  if (cronSecrets.length === 0) return process.env.NODE_ENV !== "production";
+  return cronSecrets.some((cronSecret) => authHeader === `Bearer ${cronSecret}`);
 }
 
 async function handlePbccReminderRequest(req, options = {}) {
   try {
-    if (!authorizeCronRequest(req, { allowVercelCron: options.allowVercelCron === true })) {
+    if (!authorizeCronRequest(req)) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
@@ -48,7 +46,7 @@ async function handlePbccReminderRequest(req, options = {}) {
 }
 
 export async function GET(req) {
-  return handlePbccReminderRequest(req, { dryRun: false, allowVercelCron: true });
+  return handlePbccReminderRequest(req, { dryRun: false });
 }
 
 export async function POST(req) {

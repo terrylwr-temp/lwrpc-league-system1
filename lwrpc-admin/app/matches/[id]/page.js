@@ -4,7 +4,7 @@ import LoadingScreen from "../../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
-import { requireRole, supabase } from "../../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestampShort } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
@@ -1596,9 +1596,9 @@ export default function MatchDetailPage() {
 
       await fetch("/api/score-notification", {
         method: "POST",
-        headers: {
+        headers: await getRequestAuthorizationHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         body: JSON.stringify({
           emails,
           phones,

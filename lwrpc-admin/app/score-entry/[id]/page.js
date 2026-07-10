@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { requireRole, supabase } from "../../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
@@ -435,9 +435,9 @@ export default function MobileScoreEntryPage() {
 
       await fetch("/api/score-notification", {
         method: "POST",
-        headers: {
+        headers: await getRequestAuthorizationHeaders({
           "Content-Type": "application/json",
-        },
+        }),
         body: JSON.stringify({
           emails,
           phones,

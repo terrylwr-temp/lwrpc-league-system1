@@ -7,7 +7,7 @@ import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
 import MiniStandingsLeaders, { buildMiniStandingsLeaders } from "../components/MiniStandingsLeaders";
-import { requireRole, supabase } from "../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayDateWithLeadingWeekday, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
@@ -1438,7 +1438,7 @@ export default function CaptainDashboardPage() {
 
     const response = await fetch("/api/notifications", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: await getRequestAuthorizationHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         emails,
         phones,
@@ -2031,7 +2031,7 @@ export default function CaptainDashboardPage() {
 
     const response = await fetch("/api/notifications", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: await getRequestAuthorizationHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({
         emails,
         phones,
@@ -2130,7 +2130,7 @@ export default function CaptainDashboardPage() {
     try {
       response = await fetch("/api/notifications", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: await getRequestAuthorizationHeaders({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           emails,
           phones: [],

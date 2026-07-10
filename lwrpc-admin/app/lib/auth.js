@@ -19,6 +19,20 @@ if (!globalThis.__lwrpcSupabaseClient) {
   globalThis.__lwrpcSupabaseClient = supabase;
 }
 
+export async function getRequestAuthorizationHeaders(headers = {}) {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData?.session?.access_token;
+
+  if (!accessToken) {
+    throw new Error("Your session expired. Please sign in again.");
+  }
+
+  return {
+    ...headers,
+    Authorization: `Bearer ${accessToken}`,
+  };
+}
+
 export async function getCurrentUserRole() {
   const { data: sessionData } = await supabase.auth.getSession();
 

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import LoadingScreen from "../../components/LoadingScreen";
-import { requireRole, supabase } from "../../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib/auth";
 import { hasRole } from "../../lib/permissions";
 import { confirmDeleteAction } from "../../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
@@ -569,9 +569,9 @@ export default function TeamRosterPage() {
 
     const response = await fetch("/api/notifications", {
       method: "POST",
-      headers: {
+      headers: await getRequestAuthorizationHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify({
         emails: ["info@lwrpickleballclub.com"],
         phones: [],

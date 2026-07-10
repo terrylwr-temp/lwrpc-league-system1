@@ -35,21 +35,19 @@ function anonClient() {
   });
 }
 
-function isVercelCronRequest(req) {
-  return (req.headers.get("user-agent") || "").includes("vercel-cron/1.0");
+function hasValidCronSecret(req) {
+  const authHeader = req.headers.get("authorization") || "";
+  const cronSecrets = [process.env.CRON_SECRET, process.env.MATCH_SETUP_REMINDER_SECRET]
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+
+  return cronSecrets.some((cronSecret) => authHeader === `Bearer ${cronSecret}`);
 }
 
-async function authorizeReminderRequest(req, supabase, { allowVercelCron = false } = {}) {
+async function authorizeReminderRequest(req, supabase) {
   const authHeader = req.headers.get("authorization") || "";
-  const cronSecret = process.env.MATCH_SETUP_REMINDER_SECRET || process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader === `Bearer ${cronSecret}`) {
-    return true;
-  }
-
-  if (allowVercelCron && isVercelCronRequest(req)) {
-    return true;
-  }
+  if (hasValidCronSecret(req)) return true;
 
   const token = authHeader.replace(/^Bearer\s+/i, "").trim();
 
@@ -75,15 +73,13 @@ async function authorizeReminderRequest(req, supabase, { allowVercelCron = false
     return hasRole(role, "league_manager");
   }
 
-  return !cronSecret && process.env.NODE_ENV !== "production";
+  return false;
 }
 
 async function handleReminderRequest(req, options = {}) {
   try {
     const supabase = serviceClient();
-    const authorized = await authorizeReminderRequest(req, supabase, {
-      allowVercelCron: options.allowVercelCron === true,
-    });
+    const authorized = await authorizeReminderRequest(req, supabase);
 
     if (!authorized) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
@@ -100,7 +96,7 @@ async function handleReminderRequest(req, options = {}) {
 }
 
 export async function GET(req) {
-  return handleReminderRequest(req, { dryRun: false, allowVercelCron: true });
+  return handleReminderRequest(req, { dryRun: false });
 }
 
 export async function POST(req) {

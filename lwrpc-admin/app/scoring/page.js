@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
-import { requireRole, supabase } from "../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
@@ -333,9 +333,9 @@ export default function ScoringPage() {
         );
         const response = await fetch("/api/notifications", {
           method: "POST",
-          headers: {
+          headers: await getRequestAuthorizationHeaders({
             "Content-Type": "application/json",
-          },
+          }),
           body: JSON.stringify({
             emails: job.emails,
             phones: job.phones,
