@@ -1389,6 +1389,7 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
   const [sendResultsOnStatsOk, setSendResultsOnStatsOk] = useState(false);
   const isPlaying = session.status === "playing";
   const isClosed = ["done", "cancelled"].includes(session.status);
+  const sessionPlayers = activeSessionPlayersForSession(state, session.id);
   const joinedPlayers = sessionPlayersForStatus(state, session.id, "joined");
   const joinedCount = joinedPlayers.length;
   const canStartSession = isPlaying || joinedCount >= 4;
@@ -1457,6 +1458,29 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
       }
       return next;
     });
+  }
+
+  async function addStartSessionPlayer(player) {
+    const result = await runAction("addSessionPlayer", {
+      sessionId: session.id,
+      playerId: player.player_id,
+    }, { returnResult: true });
+    if (result?.success !== false && result?.sessionPlayer?.id) {
+      setStartCheckedPlayerIds((current) => [...new Set([...current, String(result.sessionPlayer.id)])]);
+    }
+    return result;
+  }
+
+  async function addStartSessionNewPlayer({ displayName, phone }) {
+    const result = await runAction("addSessionNewPlayer", {
+      sessionId: session.id,
+      displayName,
+      phone,
+    }, { returnResult: true });
+    if (result?.success !== false && result?.sessionPlayer?.id) {
+      setStartCheckedPlayerIds((current) => [...new Set([...current, String(result.sessionPlayer.id)])]);
+    }
+    return result;
   }
 
   async function confirmStartSession() {
@@ -1607,8 +1631,11 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
           scoring={startScoring}
           setScoring={setStartScoring}
           joinedPlayers={joinedPlayers}
+          sessionPlayers={sessionPlayers}
           checkedPlayerIds={startCheckedPlayerIds}
           togglePlayer={toggleStartPlayer}
+          addSessionPlayer={addStartSessionPlayer}
+          addNewPlayer={addStartSessionNewPlayer}
           mode={startModalMode}
           roundNumber={verifyPlayersRoundNumber}
           actionLoading={actionLoading}
@@ -2161,7 +2188,7 @@ function SessionListItem({ state, session, isEditing, editSession, duplicateSess
               Delete
             </button>
           )}
-          {canDeletePastUnplayed && (
+          {canDeletePastUnplayed && isStarted && (
             <button type="button" onClick={(event) => { stopActionClick(event); deleteSession(session); }} disabled={actionLoading === "deleteSession"} className="rounded-lg bg-red-50 px-3 py-2 text-xs font-black text-red-700 shadow-sm hover:bg-red-100 disabled:bg-slate-100 disabled:text-slate-400">
               Delete
             </button>
@@ -2345,7 +2372,11 @@ function SessionPlayersModal({ state, session, status, setStatus, runAction, act
   );
 }
 
-function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft, setScoring, joinedPlayers, checkedPlayerIds, togglePlayer, mode = "initial", roundNumber = 1, actionLoading, onClose, onStart }) {
+function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft, setScoring, joinedPlayers, sessionPlayers, checkedPlayerIds, togglePlayer, addSessionPlayer, addNewPlayer, mode = "initial", roundNumber = 1, actionLoading, onClose, onStart }) {
+  const [addPlayerOpen, setAddPlayerOpen] = useState(false);
+  const [selectedSessionPlayerId, setSelectedSessionPlayerId] = useState("");
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerPhone, setNewPlayerPhone] = useState("");
   const checkedSet = new Set((checkedPlayerIds || []).map(String));
   const checkedCount = checkedSet.size;
   const courtLabel = `${courts.length} court${courts.length === 1 ? "" : "s"}`;
@@ -2355,6 +2386,28 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
     ? scoringDraft
     : normalizeRoundRobinScoring(session?.settings?.scoring);
   const normalizedScoring = normalizeRoundRobinScoring(scoring);
+  const availableSessionPlayers = (sessionPlayers || [])
+    .filter((player) => player.response_status !== "joined")
+    .sort((a, b) => compareNamesByFirstName(a.display_name, b.display_name));
+  const addingExistingPlayer = actionLoading === "addSessionPlayer";
+  const addingNewPlayer = actionLoading === "addSessionNewPlayer";
+
+  async function addSelectedSessionPlayer() {
+    const player = availableSessionPlayers.find((item) => String(item.id) === selectedSessionPlayerId);
+    if (!player) return;
+    const result = await addSessionPlayer?.(player);
+    if (result?.success !== false) setSelectedSessionPlayerId("");
+  }
+
+  async function addNamedPlayer() {
+    if (!newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10) return;
+    const result = await addNewPlayer?.({ displayName: newPlayerName, phone: newPlayerPhone });
+    if (result?.success !== false) {
+      setNewPlayerName("");
+      setNewPlayerPhone("");
+      setAddPlayerOpen(false);
+    }
+  }
 
   function updateScoring(field, value) {
     if (!setScoring) return;
@@ -2428,6 +2481,58 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
                   </div>
                 )}
               </div>
+              {initialMode && !isLadderSession(session) && (
+                <div className="mt-3 border-t border-blue-200 pt-3">
+                  {!addPlayerOpen ? (
+                    <button type="button" onClick={() => setAddPlayerOpen(true)} className="w-full rounded-lg border border-blue-700 bg-white px-3 py-2 text-sm font-black text-blue-900 shadow-sm hover:bg-blue-100">
+                      Add Player
+                    </button>
+                  ) : (
+                    <div className="space-y-3 rounded-lg border border-blue-200 bg-white p-3">
+                      <div>
+                        <div className="text-sm font-black text-blue-950">Add a player who is here</div>
+                        <p className="mt-1 text-xs font-semibold text-blue-800">Select someone invited to this match, or add a new player by name and phone number.</p>
+                      </div>
+                      <label className="block text-sm font-bold text-slate-700">
+                        Invited player
+                        <select value={selectedSessionPlayerId} onChange={(event) => setSelectedSessionPlayerId(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold text-slate-950">
+                          <option value="">Select a player from the invited group</option>
+                          {availableSessionPlayers.map((player) => (
+                            <option key={player.id} value={player.id}>
+                              {player.display_name || "Player"}{player.phone ? ` - ${player.phone}` : ""}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <button type="button" onClick={addSelectedSessionPlayer} disabled={addingExistingPlayer || !selectedSessionPlayerId} className="w-full rounded-lg bg-blue-700 px-3 py-2 text-sm font-black text-white shadow-sm hover:bg-blue-800 disabled:bg-slate-300">
+                        {addingExistingPlayer ? "Adding..." : "Add Selected Player"}
+                      </button>
+                      <div className="border-t border-slate-200 pt-3">
+                        <div className="mb-2 text-xs font-black uppercase tracking-wide text-slate-500">Or add a new player</div>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          <TextInput label="Player name" value={newPlayerName} onChange={setNewPlayerName} required />
+                          <TextInput label="Phone #" type="tel" value={newPlayerPhone} onChange={(value) => setNewPlayerPhone(formatPhoneInput(value))} placeholder="(941) 555-1212" required />
+                        </div>
+                        <button type="button" onClick={addNamedPlayer} disabled={addingNewPlayer || !newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10} className="mt-3 w-full rounded-lg bg-teal-700 px-3 py-2 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300">
+                          {addingNewPlayer ? "Adding..." : "Add New Player"}
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAddPlayerOpen(false);
+                          setSelectedSessionPlayerId("");
+                          setNewPlayerName("");
+                          setNewPlayerPhone("");
+                        }}
+                        className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-black text-slate-700 hover:bg-slate-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {initialMode && (
