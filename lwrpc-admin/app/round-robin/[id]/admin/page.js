@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import PbccFooter from "../../../components/PbccFooter";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
+import TurnstileWidget from "../../../components/TurnstileWidget";
 import { supabase } from "../../../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../../lib/email";
 import { passkeyErrorMessage } from "../../../lib/passkeyErrors";
@@ -142,6 +143,7 @@ export default function RoundRobinAdminPage() {
   const [loginPassword, setLoginPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   const [hostPhone, setHostPhone] = useState("");
   const [state, setState] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -354,6 +356,7 @@ export default function RoundRobinAdminPage() {
       body: JSON.stringify({
         email: normalizedEmail,
         returnTo: roundRobinPath(id, "admin"),
+        turnstileToken,
       }),
     });
 
@@ -365,29 +368,7 @@ export default function RoundRobinAdminPage() {
       return;
     }
 
-    if (memberCheckResult.verification !== "complete") {
-      setAuthMessage("Unable to verify that email address right now. Please contact league support.");
-      setLoading(false);
-      return;
-    }
-
-    if (!memberCheckResult.memberExists) {
-      setAuthMessage("That email address is not linked to a league member record. Please contact league support to confirm your account email.");
-      setLoading(false);
-      return;
-    }
-
-    if (!memberCheckResult.isActiveMember) {
-      setAuthMessage("That member record is currently inactive. Please contact league support before resetting your password.");
-      setLoading(false);
-      return;
-    }
-
-    setAuthMessage(
-      memberCheckResult.emailType === "invite"
-        ? "Account setup email sent. Please check your inbox, spam, and promotions folders."
-        : "Password reset email sent. Please check your inbox."
-    );
+    setAuthMessage(memberCheckResult.message || "If that email address belongs to an active league member, a sign-in email has been sent. Please check your inbox, spam, and promotions folders.");
     setLoading(false);
   }
 
@@ -677,6 +658,7 @@ export default function RoundRobinAdminPage() {
               >
                 {loading ? "Signing In..." : "Sign In"}
               </button>
+              <TurnstileWidget onToken={setTurnstileToken} />
             </form>
             <button
               type="button"

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import TurnstileWidget from "../components/TurnstileWidget";
 import { supabase } from "../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { defaultDashboardForRole } from "../lib/permissions";
@@ -20,6 +21,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   useEffect(() => {
     async function loadSystemSettings() {
@@ -142,6 +144,7 @@ export default function LoginPage() {
       },
       body: JSON.stringify({
         email: normalizedEmail,
+        turnstileToken,
       }),
     });
 
@@ -153,33 +156,7 @@ export default function LoginPage() {
       return;
     }
 
-    if (memberCheckResult.verification !== "complete") {
-      setMessage("Unable to verify that email address right now. Please contact league support.");
-      setLoading(false);
-      return;
-    }
-
-    if (
-      !memberCheckResult.memberExists
-    ) {
-      setMessage("That email address is not linked to a league member record. Please contact league support to confirm your account email.");
-      setLoading(false);
-      return;
-    }
-
-    if (
-      !memberCheckResult.isActiveMember
-    ) {
-      setMessage("That member record is currently inactive. Please contact league support before resetting your password.");
-      setLoading(false);
-      return;
-    }
-
-    setMessage(
-      memberCheckResult.emailType === "invite"
-        ? "Account setup email sent. Please check your inbox, spam, and promotions folders."
-        : "Password reset email sent. Please check your inbox."
-    );
+    setMessage(memberCheckResult.message || "If that email address belongs to an active league member, a sign-in email has been sent. Please check your inbox, spam, and promotions folders.");
 
     setLoading(false);
   }
@@ -338,6 +315,8 @@ export default function LoginPage() {
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>
+
+            <TurnstileWidget onToken={setTurnstileToken} />
 
             <div className="mt-3">
               <button

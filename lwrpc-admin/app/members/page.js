@@ -4,7 +4,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
-import { requireRole, supabase } from "../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import { ROLE_LEVELS } from "../lib/permissions";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
@@ -588,9 +588,9 @@ export default function MembersPage() {
 
     const response = await fetch("/api/member-password-reset-check", {
       method: "POST",
-      headers: {
+      headers: await getRequestAuthorizationHeaders({
         "Content-Type": "application/json",
-      },
+      }),
       body: JSON.stringify({
         email: normalizedEmail,
       }),
