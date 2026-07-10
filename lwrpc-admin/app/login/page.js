@@ -322,8 +322,6 @@ export default function LoginPage() {
               {loading ? "Signing In..." : "Sign In"}
             </button>
 
-            <TurnstileWidget key={turnstileResetKey} onToken={setTurnstileToken} />
-
             <p className="mt-3 rounded-xl border border-amber-300 bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-950 shadow-sm">
               First time logging in? Enter your email and click Forgot Password.
             </p>
@@ -344,6 +342,8 @@ export default function LoginPage() {
                 <span>Sign In with Passkey / Fingerprint</span>
               </button>
             </div>
+
+            <TurnstileWidget key={turnstileResetKey} onToken={setTurnstileToken} />
 
             {message && !isErrorMessage && !isSuccessMessage && (
               <div
