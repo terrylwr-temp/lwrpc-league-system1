@@ -861,6 +861,19 @@ export default function DashboardPage() {
       { title: "AI League Insights", desc: "Ask LMS, weekly health, anomalies, lineup gaps, and cleanup suggestions.", path: "/ai-insights", code: "AI", tone: "amber" },
     ],
   };
+  const dashboardJumpLinks = [
+    { label: "People and Teams", targetId: "dashboard-people-and-teams" },
+    { label: "Match Operations", targetId: "dashboard-match-operations" },
+    { label: "League Structure", targetId: "dashboard-league-structure" },
+    { label: "Dashboard Guides", targetId: "dashboard-guides" },
+    { label: "Dashboard Messages", targetId: "dashboard-messages" },
+    { label: "Modules", targetId: "dashboard-modules" },
+    { label: "Reset Options", targetId: "dashboard-reset-options" },
+  ];
+
+  function scrollToDashboardSection(targetId) {
+    document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
@@ -1028,6 +1041,25 @@ export default function DashboardPage() {
           />
         </section>
 
+        <section className="mt-6 overflow-hidden rounded-2xl border border-blue-200 bg-white shadow">
+          <div className="border-b border-blue-100 bg-blue-50 px-4 py-4 md:px-6">
+            <div className="text-xs font-black uppercase tracking-wide text-blue-700">Dashboard Navigation</div>
+            <h2 className="mt-1 text-xl font-black text-slate-950">Jump to a Dashboard Section</h2>
+          </div>
+          <div className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 md:p-6">
+            {dashboardJumpLinks.map((link) => (
+              <button
+                key={link.targetId}
+                type="button"
+                onClick={() => scrollToDashboardSection(link.targetId)}
+                className="rounded-xl border border-blue-200 bg-gradient-to-b from-white to-blue-50 px-3 py-3 text-sm font-black leading-tight text-blue-950 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:from-blue-50 hover:to-blue-100 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:translate-y-0"
+              >
+                {link.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
         {pendingVerificationModalOpen && (
           <PendingVerificationModal
             matches={dashboardCounts?.pendingVerificationMatches || []}
@@ -1039,7 +1071,7 @@ export default function DashboardPage() {
 
         <div className="mt-6 space-y-6">
           {sections.map((section) => (
-            <section key={section.title} className="overflow-hidden rounded-2xl bg-white shadow">
+            <section id={`dashboard-${section.title.toLowerCase().replaceAll(" ", "-")}`} key={section.title} className="scroll-mt-4 overflow-hidden rounded-2xl bg-white shadow">
               <div className="border-b border-slate-200 px-4 py-5 md:px-6">
                 <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
                   <div>
@@ -1065,7 +1097,7 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+        <section id="dashboard-guides" className="mt-6 scroll-mt-4 overflow-hidden rounded-2xl bg-white shadow">
           <div className="border-b border-slate-200 px-4 py-5 md:px-6">
             <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
               <div>
@@ -1157,7 +1189,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+        <section id="dashboard-messages" className="mt-6 scroll-mt-4 overflow-hidden rounded-2xl bg-white shadow">
           <div className="border-b border-slate-200 px-4 py-5 md:px-6">
             <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
               <div>
@@ -1295,7 +1327,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-2xl bg-white shadow">
+        <section id="dashboard-modules" className="mt-6 scroll-mt-4 overflow-hidden rounded-2xl bg-white shadow">
           <div className="border-b border-slate-200 px-4 py-5 md:px-6">
             <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
               <div>
@@ -1319,7 +1351,7 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="mt-6 overflow-hidden rounded-2xl border border-red-200 bg-white shadow">
+        <section id="dashboard-reset-options" className="mt-6 scroll-mt-4 overflow-hidden rounded-2xl border border-red-200 bg-white shadow">
           <div className="border-b border-red-100 bg-red-50 px-4 py-5 md:px-6">
             <h2 className="text-xl font-black text-red-950">Reset Options</h2>
             <p className="mt-1 text-sm font-semibold text-red-800">
