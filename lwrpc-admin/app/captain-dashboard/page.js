@@ -5344,7 +5344,7 @@ function CaptainSectionButton({ active, label, value, tone = "blue", onClick }) 
     <button
       type="button"
       onClick={onClick}
-      className={`w-full cursor-pointer rounded-xl border px-3 py-3 text-left text-sm font-black transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:translate-y-1 ${tones[tone] || tones.blue}`}
+      className={`w-full cursor-pointer rounded-xl border px-3 py-3 text-left text-xs font-black transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:translate-y-1 sm:text-sm ${tones[tone] || tones.blue}`}
     >
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">

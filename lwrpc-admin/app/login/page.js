@@ -318,6 +318,10 @@ export default function LoginPage() {
 
             <TurnstileWidget onToken={setTurnstileToken} />
 
+            <p className="mt-3 rounded-xl border border-amber-300 bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-950 shadow-sm">
+              First time logging in? Enter your email and click Forgot Password.
+            </p>
+
             <div className="mt-3">
               <button
                 type="button"
@@ -334,10 +338,6 @@ export default function LoginPage() {
                 <span>Sign In with Passkey / Fingerprint</span>
               </button>
             </div>
-
-            <p className="mt-3 rounded-xl border border-teal-200 bg-teal-50 px-4 py-3 text-center text-sm font-normal text-teal-900">
-              First time logging in? Enter your email and click Forgot Password.
-            </p>
 
             {message && !isErrorMessage && !isSuccessMessage && (
               <div
