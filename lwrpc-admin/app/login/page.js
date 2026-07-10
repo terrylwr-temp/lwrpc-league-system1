@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [mounted, setMounted] = useState(false);
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   useEffect(() => {
     async function loadSystemSettings() {
@@ -137,28 +138,33 @@ export default function LoginPage() {
     setEmail(normalizedEmail);
     setMessage("Checking member email...");
 
-    const memberCheck = await fetch("/api/member-password-reset-check", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email: normalizedEmail,
-        turnstileToken,
-      }),
-    });
+    try {
+      const memberCheck = await fetch("/api/member-password-reset-check", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: normalizedEmail,
+          turnstileToken,
+        }),
+      });
 
-    const memberCheckResult = await memberCheck.json();
+      const memberCheckResult = await memberCheck.json();
 
-    if (!memberCheck.ok || !memberCheckResult.success) {
-      setMessage(memberCheckResult.error || "Unable to verify that email address.");
+      if (!memberCheck.ok || !memberCheckResult.success) {
+        setMessage(memberCheckResult.error || "Unable to verify that email address.");
+        return;
+      }
+
+      setMessage(memberCheckResult.message || "If that email address belongs to an active league member, a sign-in email has been sent. Please check your inbox, spam, and promotions folders.");
+    } catch {
+      setMessage("Unable to verify that email address. Please try again.");
+    } finally {
       setLoading(false);
-      return;
+      setTurnstileToken("");
+      setTurnstileResetKey((currentKey) => currentKey + 1);
     }
-
-    setMessage(memberCheckResult.message || "If that email address belongs to an active league member, a sign-in email has been sent. Please check your inbox, spam, and promotions folders.");
-
-    setLoading(false);
   }
 
   const messageText = message.toLowerCase();
@@ -316,7 +322,7 @@ export default function LoginPage() {
               {loading ? "Signing In..." : "Sign In"}
             </button>
 
-            <TurnstileWidget onToken={setTurnstileToken} />
+            <TurnstileWidget key={turnstileResetKey} onToken={setTurnstileToken} />
 
             <p className="mt-3 rounded-xl border border-amber-300 bg-amber-100 px-4 py-3 text-center text-sm font-semibold text-amber-950 shadow-sm">
               First time logging in? Enter your email and click Forgot Password.
