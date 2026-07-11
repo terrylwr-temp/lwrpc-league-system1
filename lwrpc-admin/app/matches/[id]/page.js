@@ -1700,7 +1700,7 @@ export default function MatchDetailPage() {
   const specialResultIssues = scoreValidationIssueList.filter((issue) => !issue.lineId && !issue.gameId);
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 pb-28 md:p-6">
+    <main className="min-h-screen bg-slate-100 p-4 pb-[calc(8rem+env(safe-area-inset-bottom))] md:p-6">
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="Enter Match Scores"
@@ -2255,7 +2255,7 @@ export default function MatchDetailPage() {
         </div>
 
         {(scoreEntryEditable || scoreReviewActionsVisible) && (
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-2xl backdrop-blur md:hidden">
+          <div className="fixed inset-x-0 bottom-8 z-30 border-t border-slate-200 bg-white/95 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl backdrop-blur md:hidden">
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-2">
               {scoreEntryEditable && (
                 <button
