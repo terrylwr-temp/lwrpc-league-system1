@@ -24,6 +24,8 @@ export default function EmailOptionsPage() {
   });
   const [sendingTestNotification, setSendingTestNotification] = useState(false);
   const [testNotificationResult, setTestNotificationResult] = useState(null);
+  const [checkingBrevo, setCheckingBrevo] = useState(false);
+  const [brevoDiagnostic, setBrevoDiagnostic] = useState(null);
   const [checkingTwilio, setCheckingTwilio] = useState(false);
   const [twilioDiagnostic, setTwilioDiagnostic] = useState(null);
 
@@ -199,6 +201,26 @@ export default function EmailOptionsPage() {
     });
   }
 
+  async function checkBrevoConfiguration() {
+    setCheckingBrevo(true);
+    setBrevoDiagnostic(null);
+
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      setBrevoDiagnostic({ success: false, error: "Your session expired. Please log in again before checking Brevo." });
+      setCheckingBrevo(false);
+      return;
+    }
+
+    const response = await fetch("/api/brevo-diagnostics", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    setBrevoDiagnostic(await response.json().catch(() => ({})));
+    setCheckingBrevo(false);
+  }
+
   async function checkTwilioConfiguration() {
     setCheckingTwilio(true);
     setTwilioDiagnostic(null);
@@ -253,7 +275,7 @@ export default function EmailOptionsPage() {
                 </p>
               </div>
               <div className="text-xs font-black uppercase tracking-wide text-slate-400">
-                SendGrid
+                Brevo
               </div>
             </div>
           </div>
@@ -358,7 +380,7 @@ export default function EmailOptionsPage() {
               <div>
                 <h2 className="text-xl font-black text-slate-950">Notification Test</h2>
                 <p className="mt-1 text-sm font-semibold text-slate-600">
-                  Send a test email or text using the same SendGrid and Twilio settings used by the app.
+                  Send a test email or text using the same Brevo and Twilio settings used by the app.
                 </p>
               </div>
               <div className="text-xs font-black uppercase tracking-wide text-slate-400">
@@ -411,6 +433,15 @@ export default function EmailOptionsPage() {
             <div className="flex flex-col justify-end gap-3">
               <button
                 type="button"
+                onClick={checkBrevoConfiguration}
+                disabled={checkingBrevo}
+                className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black uppercase tracking-wide text-slate-900 hover:bg-slate-50 disabled:opacity-50"
+              >
+                {checkingBrevo ? "Checking Brevo..." : "Check Brevo Configuration"}
+              </button>
+
+              <button
+                type="button"
                 onClick={checkTwilioConfiguration}
                 disabled={checkingTwilio}
                 className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black uppercase tracking-wide text-slate-900 hover:bg-slate-50 disabled:opacity-50"
@@ -445,6 +476,9 @@ export default function EmailOptionsPage() {
                 </div>
               )}
 
+              {brevoDiagnostic && (
+                <BrevoDiagnosticResult diagnostic={brevoDiagnostic} />
+              )}
               {twilioDiagnostic && (
                 <TwilioDiagnosticResult diagnostic={twilioDiagnostic} />
               )}
@@ -613,6 +647,31 @@ function notificationChannelSummary(label, result) {
   }
 
   return `${label}: ${sent} sent.`;
+}
+
+function BrevoDiagnosticResult({ diagnostic }) {
+  if (!diagnostic?.success) {
+    return <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-900">{diagnostic?.error || "Brevo diagnostics could not be loaded."}</div>;
+  }
+
+  const senderCheck = diagnostic.brevoSenderCheck || {};
+  return (
+    <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800">
+      <div className="font-black text-slate-950">Brevo sender: {diagnostic.fromEmail || "not configured"}</div>
+      <div className={`mt-2 rounded-lg px-3 py-2 text-xs font-bold ${senderCheck.ok ? "bg-emerald-100 text-emerald-900" : "bg-red-100 text-red-900"}`}>
+        Sender check: {senderCheck.message || "No sender check result."}{senderCheck.status ? ` Status ${senderCheck.status}.` : ""}
+      </div>
+      <div className="mt-3 grid gap-2">
+        {(diagnostic.variables || []).map((item) => (
+          <div key={item.name} className="rounded-lg border border-slate-200 bg-white p-3">
+            <div className="font-black text-slate-950">{item.name}</div>
+            <div className="mt-1 text-xs leading-5 text-slate-700">Present: {item.trimmedPresent ? "yes" : "no"} | Prefix: {item.prefix || "blank"} | Length: {item.trimmedLength}</div>
+            {(item.hasLeadingOrTrailingWhitespace || item.hasInternalWhitespace || item.wrappedInQuotes) && <div className="mt-2 rounded-lg bg-amber-100 px-3 py-2 text-xs font-bold text-amber-900">Check this value: whitespace or quote characters were detected.</div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function TwilioDiagnosticResult({ diagnostic }) {

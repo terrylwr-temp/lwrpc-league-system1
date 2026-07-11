@@ -16,9 +16,9 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Twilio Notifications
+## Notification Delivery
 
-The app sends SMS through Twilio Programmable Messaging and email through Twilio SendGrid.
+The app sends SMS through Twilio Programmable Messaging and transactional email through Brevo.
 
 Add these values to `.env.local`:
 
@@ -28,9 +28,9 @@ TWILIO_AUTH_TOKEN=your_twilio_auth_token
 TWILIO_FROM_PHONE_NUMBER=+15551234567
 # or use TWILIO_MESSAGING_SERVICE_SID instead of TWILIO_FROM_PHONE_NUMBER
 
-SENDGRID_API_KEY=your_sendgrid_api_key
-SENDGRID_FROM_EMAIL=verified-sender@example.com
-SENDGRID_FROM_NAME=LWRPC League Management
+BREVO_API_KEY=your_brevo_api_key
+BREVO_FROM_EMAIL=verified-sender@example.com
+BREVO_FROM_NAME=LWRPC League Management
 ```
 
 Restart `npm run dev` after changing `.env.local`.

@@ -144,53 +144,39 @@ export async function sendEmailMessages({ emails, subject, text, html }) {
     return { skipped: true, reason: "Missing email subject or content", sent: 0, results: [] };
   }
 
-  if (!process.env.SENDGRID_API_KEY || !process.env.SENDGRID_FROM_EMAIL) {
-    return {
-      skipped: true,
-      reason: "Missing SENDGRID_API_KEY or SENDGRID_FROM_EMAIL",
-      sent: 0,
-      results: [],
-    };
+  if (!process.env.BREVO_API_KEY || !process.env.BREVO_FROM_EMAIL) {
+    return { skipped: true, reason: "Missing BREVO_API_KEY or BREVO_FROM_EMAIL", sent: 0, results: [] };
   }
 
-  const response = await fetch("https://api.sendgrid.com/v3/mail/send", {
+  const response = await fetch("https://api.brevo.com/v3/smtp/email", {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+      "api-key": process.env.BREVO_API_KEY,
+      Accept: "application/json",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      personalizations: [
-        {
-          to: recipients.map((email) => ({ email })),
-        },
-      ],
-      from: {
-        email: process.env.SENDGRID_FROM_EMAIL,
-        name: process.env.SENDGRID_FROM_NAME || "Lakewood Ranch Pickleball Club",
+      sender: {
+        email: process.env.BREVO_FROM_EMAIL,
+        name: process.env.BREVO_FROM_NAME || "Lakewood Ranch Pickleball Club",
       },
+      to: recipients.map((email) => ({ email })),
       subject,
-      content: [
-        {
-          type: html ? "text/html" : "text/plain",
-          value: html || text,
-        },
-      ],
+      ...(html ? { htmlContent: html } : { textContent: text }),
     }),
   });
 
-  const responseText = await response.text();
+  const responseBody = await response.json().catch(() => ({}));
 
   return {
     skipped: false,
     sent: response.ok ? recipients.length : 0,
-    results: [
-      {
-        to: recipients,
-        ok: response.ok,
-        status: response.status,
-        error: response.ok ? null : responseText || "Email send failed",
-      },
-    ],
+    results: [{
+      to: recipients,
+      ok: response.ok,
+      status: response.status,
+      messageId: responseBody.messageId || null,
+      error: response.ok ? null : responseBody.message || responseBody.code || "Email send failed",
+    }],
   };
 }
