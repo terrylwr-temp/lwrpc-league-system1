@@ -533,21 +533,9 @@ export default function ScoringPage() {
               </div>
 
               <div className="flex w-full flex-col gap-3 lg:items-end">
-                <div className="w-full rounded-xl border border-blue-200 bg-blue-50 p-2.5 lg:w-auto">
-                  <div className="mb-2 text-xs font-black uppercase tracking-wide text-blue-800">Match Filters</div>
+                <div className="w-full rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 lg:w-auto">
+                  <div className="mb-2 text-xs font-black uppercase tracking-wide text-emerald-800">DUPR Export</div>
                   <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={toggleUnverifiedFilter}
-                      className={`rounded-lg px-4 py-2.5 text-sm font-semibold ${
-                        showUnverifiedOnly
-                          ? "bg-blue-700 text-white hover:bg-blue-800"
-                          : "bg-white text-blue-900 ring-1 ring-blue-200 hover:bg-blue-100"
-                      }`}
-                    >
-                      {showUnverifiedOnly ? "Showing Not Verified" : "Not Verified"}
-                    </button>
-
                     <button
                       type="button"
                       onClick={toggleDuprExportReadyFilter}
@@ -559,13 +547,42 @@ export default function ScoringPage() {
                     >
                       {showDuprExportReadyOnly ? "Showing DUPR Export Ready" : "DUPR Export Ready"}
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={exportForDupr}
+                      disabled={exportingScores}
+                      className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                      {exportingScores ? "Exporting..." : "DUPR Export"}
+                    </button>
                   </div>
-                  <div className="mt-2 text-xs font-semibold text-blue-800">
+                  <div className="mt-2 text-xs font-semibold text-emerald-800">
                     DUPR Export Ready shows verified matches that have not been exported yet.
                   </div>
+                  <label className="mt-2 flex items-center gap-2 text-xs font-semibold text-emerald-900">
+                    <input
+                      type="checkbox"
+                      checked={includeAlreadyExported}
+                      onChange={(e) => setIncludeAlreadyExported(e.target.checked)}
+                    />
+                    Include already exported verified matches for re-export override
+                  </label>
                 </div>
 
                 <div className="flex flex-wrap gap-2 lg:justify-end">
+                  <button
+                    type="button"
+                    onClick={toggleUnverifiedFilter}
+                    className={`rounded-xl px-4 py-3 font-semibold ${
+                      showUnverifiedOnly
+                        ? "bg-blue-700 text-white hover:bg-blue-800"
+                        : "bg-blue-100 text-blue-900 hover:bg-blue-200"
+                    }`}
+                  >
+                    {showUnverifiedOnly ? "Showing Not Verified" : "Filter Not Verified"}
+                  </button>
+
                   <button
                     type="button"
                     onClick={toggleAllVisible}
@@ -583,27 +600,10 @@ export default function ScoringPage() {
                     {sending ? "Sending..." : "Send Email Reminder"}
                   </button>
 
-                  <button
-                    type="button"
-                    onClick={exportForDupr}
-                    disabled={exportingScores}
-                    className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                  >
-                    {exportingScores ? "Exporting..." : "DUPR Export"}
-                  </button>
                 </div>
               </div>
             </div>
           </div>
-
-          <label className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <input
-              type="checkbox"
-              checked={includeAlreadyExported}
-              onChange={(e) => setIncludeAlreadyExported(e.target.checked)}
-            />
-            Include already exported verified matches for re-export override
-          </label>
 
           {lastSendResult && (
             <div className="mb-4 rounded-xl bg-green-50 p-4 text-sm font-semibold text-green-900">
