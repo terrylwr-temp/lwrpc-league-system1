@@ -82,10 +82,12 @@ export async function GET(req) {
     if (auth.error) return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });
     const apiKey = String(process.env.BREVO_API_KEY || "").trim();
     const fromEmail = String(process.env.BREVO_FROM_EMAIL || "").trim();
+    const replyToEmail = String(process.env.BREVO_REPLY_TO_EMAIL || "").trim();
     return NextResponse.json({
       success: true,
       fromEmail,
-      variables: [envSummary("BREVO_API_KEY"), envSummary("BREVO_FROM_EMAIL"), envSummary("BREVO_FROM_NAME")],
+      replyToEmail,
+      variables: [envSummary("BREVO_API_KEY"), envSummary("BREVO_FROM_EMAIL"), envSummary("BREVO_FROM_NAME"), envSummary("BREVO_REPLY_TO_EMAIL")],
       brevoSenderCheck: await checkBrevoSender(apiKey, fromEmail),
     });
   } catch (error) {

@@ -135,6 +135,7 @@ export async function sendSmsMessages({ phones, body, preferAppNotifications = f
 
 export async function sendEmailMessages({ emails, subject, text, html }) {
   const recipients = cleanList(emails);
+  const replyToEmail = String(process.env.BREVO_REPLY_TO_EMAIL || "").trim();
 
   if (recipients.length === 0) {
     return { skipped: true, reason: "No email recipients", sent: 0, results: [] };
@@ -160,6 +161,7 @@ export async function sendEmailMessages({ emails, subject, text, html }) {
         email: process.env.BREVO_FROM_EMAIL,
         name: process.env.BREVO_FROM_NAME || "Lakewood Ranch Pickleball Club",
       },
+      ...(replyToEmail ? { replyTo: { email: replyToEmail } } : {}),
       to: recipients.map((email) => ({ email })),
       subject,
       ...(html ? { htmlContent: html } : { textContent: text }),

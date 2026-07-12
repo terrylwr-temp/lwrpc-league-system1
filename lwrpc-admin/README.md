@@ -31,6 +31,7 @@ TWILIO_FROM_PHONE_NUMBER=+15551234567
 BREVO_API_KEY=your_brevo_api_key
 BREVO_FROM_EMAIL=verified-sender@example.com
 BREVO_FROM_NAME=LWRPC League Management
+BREVO_REPLY_TO_EMAIL=info@lwrpickleballclub.com
 ```
 
 Restart `npm run dev` after changing `.env.local`.
