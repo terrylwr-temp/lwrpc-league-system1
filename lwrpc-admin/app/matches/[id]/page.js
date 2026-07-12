@@ -1,6 +1,7 @@
 "use client";
 
 import LoadingScreen from "../../components/LoadingScreen";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
@@ -60,6 +61,7 @@ export default function MatchDetailPage() {
   const [scoreDirty, setScoreDirty] = useState(false);
   const [scoreValidationIssueList, setScoreValidationIssueList] = useState([]);
   const [scoreValidationSubmitting, setScoreValidationSubmitting] = useState(false);
+  const [scoreSubmissionProgress, setScoreSubmissionProgress] = useState("");
   const [scoreEntryMode, setScoreEntryMode] = useState("normal");
   const [specialResult, setSpecialResult] = useState({
     resultType: "forfeit",
@@ -70,6 +72,7 @@ export default function MatchDetailPage() {
   const [showMatchNotes, setShowMatchNotes] = useState(false);
   const pendingGameUpdatesRef = useRef(new Map());
   const scoreValidationSubmittingRef = useRef(false);
+  const scoreSubmissionInProgressRef = useRef(false);
 
   useUnsavedChangesWarning(scoreDirty, "match scores");
 
@@ -1226,6 +1229,8 @@ export default function MatchDetailPage() {
   }
 
   async function completeMatch() {
+    if (scoreSubmissionInProgressRef.current) return;
+
     if (!canEditScoreEntry()) {
       alert("Only the captain or co-captain who submitted these pending scores, or Scoring Operations managers, can make corrections and resubmit.");
       return;
@@ -1242,20 +1247,32 @@ export default function MatchDetailPage() {
       if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
     }
 
-    await flushPendingGameUpdates();
+    scoreSubmissionInProgressRef.current = true;
+    setScoreSubmissionProgress("Saving score details...");
 
-    const issues = scoreValidationIssues();
-    if (issues.length > 0) {
-      setScoreValidationIssueList(issues);
-      alert(["Scores cannot be submitted yet.", "", ...issues.map((issue) => `- ${issue.message}`)].join("\n"));
-      return;
-    }
+    try {
+      await flushPendingGameUpdates();
 
-    setScoreValidationIssueList([]);
+      setScoreSubmissionProgress("Verifying scores and confirming DUPR ratings...");
+      const issues = scoreValidationIssues();
+      if (issues.length > 0) {
+        setScoreValidationIssueList(issues);
+        scoreSubmissionInProgressRef.current = false;
+        setScoreSubmissionProgress("");
+        alert(["Scores cannot be submitted yet.", "", ...issues.map((issue) => `- ${issue.message}`)].join("\n"));
+        return;
+      }
 
-    const saved = await saveCalculatedWinners(false);
+      setScoreValidationIssueList([]);
 
-    if (!saved) return;
+      setScoreSubmissionProgress("Confirming score totals...");
+      const saved = await saveCalculatedWinners(false);
+
+      if (!saved) {
+        scoreSubmissionInProgressRef.current = false;
+        setScoreSubmissionProgress("");
+        return;
+      }
 
     const currentMemberId = currentUserMember?.id || null;
     const now = new Date().toISOString();
@@ -1293,36 +1310,55 @@ export default function MatchDetailPage() {
           updated_at: now,
         };
 
+    setScoreSubmissionProgress(scoringOperationsOverride
+      ? "Finalizing verified match information..."
+      : "Submitting match information for verification...");
     const { error } = await supabase
       .from("matches")
       .update(matchUpdate)
       .eq("id", id);
 
     if (error) {
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
       alert(error.message);
       return;
     }
 
     if (scoringOperationsOverride) {
+      setScoreSubmissionProgress("Updating division standings...");
       const standingsResult = await rebuildDivisionStandings();
+      setScoreSubmissionProgress("Completing match information and notifying captains...");
       await sendScoreNotification("changed");
 
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
       alert(
         standingsResult?.byeAdjustmentApplied
           ? "Scores submitted, verified, final bye adjustments applied, standings updated, and match captains notified."
           : "Scores submitted, verified, standings updated, and match captains notified."
       );
     } else {
+      setScoreSubmissionProgress("Completing match information and notifying captains...");
       await sendScoreNotification("submitted");
 
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
       alert("Scores submitted for verification and opposing captains notified.");
     }
 
     setScoreDirty(false);
     router.push(matchReturnPath());
+    } catch (error) {
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
+      alert(error?.message || "Unable to complete score submission.");
+    }
   }
 
   async function completeSpecialMatch(scoringOperationsOverride) {
+    if (scoreSubmissionInProgressRef.current) return;
+
     if (!specialResultAllowed) {
       alert("Only League Managers and Commissioners can enter special match results.");
       return;
@@ -1332,7 +1368,11 @@ export default function MatchDetailPage() {
       if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
     }
 
-    await flushPendingGameUpdates();
+    scoreSubmissionInProgressRef.current = true;
+    setScoreSubmissionProgress("Saving match result details...");
+
+    try {
+      await flushPendingGameUpdates();
 
     const homeScore = specialScoreNumber(specialResult.homeScore);
     const awayScore = specialScoreNumber(specialResult.awayScore);
@@ -1357,6 +1397,8 @@ export default function MatchDetailPage() {
 
     if (issues.length > 0) {
       setScoreValidationIssueList(issues);
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
       alert(["Scores cannot be submitted yet.", "", ...issues.map((issue) => `- ${issue.message}`)].join("\n"));
       return;
     }
@@ -1406,12 +1448,17 @@ export default function MatchDetailPage() {
           updated_at: now,
         };
 
+    setScoreSubmissionProgress(scoringOperationsOverride
+      ? "Finalizing verified match information..."
+      : "Submitting match information for verification...");
     const { error } = await supabase
       .from("matches")
       .update(matchUpdate)
       .eq("id", id);
 
     if (error) {
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
       alert(error.message);
       return;
     }
@@ -1419,22 +1466,34 @@ export default function MatchDetailPage() {
     const scoreText = `${homeScore}-${awayScore}`;
 
     if (scoringOperationsOverride) {
+      setScoreSubmissionProgress("Updating division standings...");
       const standingsResult = await rebuildDivisionStandings();
+      setScoreSubmissionProgress("Completing match information and notifying captains...");
       await sendScoreNotification("changed", scoreText);
 
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
       alert(
         standingsResult?.byeAdjustmentApplied
           ? "Special result submitted, verified, final bye adjustments applied, standings updated, and match captains notified."
           : "Special result submitted, verified, standings updated, and match captains notified."
       );
     } else {
+      setScoreSubmissionProgress("Completing match information and notifying captains...");
       await sendScoreNotification("submitted", scoreText);
 
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
       alert("Special result submitted for verification and opposing captains notified.");
     }
 
     setScoreDirty(false);
     router.push(matchReturnPath());
+    } catch (error) {
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
+      alert(error?.message || "Unable to complete match result submission.");
+    }
   }
 
   async function verifyScores() {
@@ -1457,6 +1516,8 @@ export default function MatchDetailPage() {
 
     scoreValidationSubmittingRef.current = true;
     setScoreValidationSubmitting(true);
+    scoreSubmissionInProgressRef.current = true;
+    setScoreSubmissionProgress("Verifying submitted scores...");
 
     const { error } = await supabase
       .from("matches")
@@ -1472,13 +1533,19 @@ export default function MatchDetailPage() {
     if (error) {
       scoreValidationSubmittingRef.current = false;
       setScoreValidationSubmitting(false);
+      scoreSubmissionInProgressRef.current = false;
+      setScoreSubmissionProgress("");
       alert(error.message);
       return;
     }
 
+    setScoreSubmissionProgress("Updating division standings...");
     const standingsResult = await rebuildDivisionStandings();
+    setScoreSubmissionProgress("Completing match information and notifying captains...");
     await sendScoreNotification("verified");
 
+    scoreSubmissionInProgressRef.current = false;
+    setScoreSubmissionProgress("");
     alert(
       standingsResult?.byeAdjustmentApplied
         ? "Scores verified, final bye adjustments applied, and standings updated."
@@ -1724,7 +1791,8 @@ export default function MatchDetailPage() {
             <button
               type="button"
               onClick={completeMatch}
-              className="rounded-xl bg-green-700 px-4 py-3 font-semibold text-white hover:bg-green-800 lg:py-2"
+              disabled={Boolean(scoreSubmissionProgress)}
+              className="rounded-xl bg-green-700 px-4 py-3 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300 lg:py-2"
             >
               {submitScoreLabel}
             </button>
@@ -2261,7 +2329,8 @@ export default function MatchDetailPage() {
                 <button
                   type="button"
                   onClick={completeMatch}
-                  className="rounded-xl bg-green-700 px-4 py-3 text-base font-bold text-white shadow hover:bg-green-800"
+                  disabled={Boolean(scoreSubmissionProgress)}
+                  className="rounded-xl bg-green-700 px-4 py-3 text-base font-bold text-white shadow hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   {submitScoreLabel}
                 </button>
@@ -2290,8 +2359,34 @@ export default function MatchDetailPage() {
             </div>
           </div>
         )}
+        {scoreSubmissionProgress && (
+          <ScoreSubmissionProgressModal message={scoreSubmissionProgress} />
+        )}
       </div>
     </main>
+  );
+}
+
+function ScoreSubmissionProgressModal({ message }) {
+  return (
+    <div
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-950/55 p-4"
+      role="status"
+      aria-live="assertive"
+      aria-label="Match score submission in progress"
+    >
+      <div className="w-full max-w-xs rounded-lg border border-white/70 bg-white p-5 text-center shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
+        <Image
+          src="/favicon.ico"
+          alt="Working"
+          width={56}
+          height={56}
+          className="mx-auto h-14 w-14 animate-spin object-contain"
+        />
+        <div className="mt-4 text-base font-black text-slate-950">Working on scores...</div>
+        <p className="mt-2 text-sm font-semibold leading-5 text-slate-600">{message}</p>
+      </div>
+    </div>
   );
 }
 

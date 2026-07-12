@@ -44,6 +44,7 @@ export default function ScoringPage() {
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [matchSearch, setMatchSearch] = useState("");
   const [showUnverifiedOnly, setShowUnverifiedOnly] = useState(false);
+  const [showDuprExportReadyOnly, setShowDuprExportReadyOnly] = useState(false);
   const [emailSubject, setEmailSubject] = useState(SCORE_REMINDER_TEMPLATE.defaultSubject);
   const [emailTemplate, setEmailTemplate] = useState(SCORE_REMINDER_TEMPLATE.defaultBody);
   const [sending, setSending] = useState(false);
@@ -245,10 +246,18 @@ export default function ScoringPage() {
   }, [matchSearch, matches]);
 
   const visibleMatches = useMemo(() => {
-    if (!showUnverifiedOnly) return searchableMatches;
+    if (showUnverifiedOnly) {
+      return searchableMatches.filter((match) => match.score_status !== "verified");
+    }
 
-    return searchableMatches.filter((match) => match.score_status !== "verified");
-  }, [searchableMatches, showUnverifiedOnly]);
+    if (showDuprExportReadyOnly) {
+      return searchableMatches.filter(
+        (match) => match.score_status === "verified" && !match.score_exported_at
+      );
+    }
+
+    return searchableMatches;
+  }, [searchableMatches, showDuprExportReadyOnly, showUnverifiedOnly]);
 
   const selectedMatches = useMemo(() => {
     const selected = new Set(selectedMatchIds);
@@ -288,7 +297,23 @@ export default function ScoringPage() {
       .map((match) => match.id);
 
     setSelectedMatchIds(unverifiedIds);
+    setShowDuprExportReadyOnly(false);
     setShowUnverifiedOnly(true);
+  }
+
+  function toggleDuprExportReadyFilter() {
+    if (showDuprExportReadyOnly) {
+      setShowDuprExportReadyOnly(false);
+      return;
+    }
+
+    const exportReadyIds = searchableMatches
+      .filter((match) => match.score_status === "verified" && !match.score_exported_at)
+      .map((match) => match.id);
+
+    setSelectedMatchIds(exportReadyIds);
+    setShowUnverifiedOnly(false);
+    setShowDuprExportReadyOnly(true);
   }
 
   async function sendReminders() {
@@ -507,44 +532,66 @@ export default function ScoringPage() {
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2 lg:justify-end">
-                <button
-                  type="button"
-                  onClick={toggleUnverifiedFilter}
-                  className={`rounded-xl px-4 py-3 font-semibold ${
-                    showUnverifiedOnly
-                      ? "bg-blue-700 text-white hover:bg-blue-800"
-                      : "bg-blue-100 text-blue-900 hover:bg-blue-200"
-                  }`}
-                >
-                  {showUnverifiedOnly ? "Showing Not Verified" : "Filter Not Verified"}
-                </button>
+              <div className="flex w-full flex-col gap-3 lg:items-end">
+                <div className="w-full rounded-xl border border-blue-200 bg-blue-50 p-2.5 lg:w-auto">
+                  <div className="mb-2 text-xs font-black uppercase tracking-wide text-blue-800">Match Filters</div>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={toggleUnverifiedFilter}
+                      className={`rounded-lg px-4 py-2.5 text-sm font-semibold ${
+                        showUnverifiedOnly
+                          ? "bg-blue-700 text-white hover:bg-blue-800"
+                          : "bg-white text-blue-900 ring-1 ring-blue-200 hover:bg-blue-100"
+                      }`}
+                    >
+                      {showUnverifiedOnly ? "Showing Not Verified" : "Not Verified"}
+                    </button>
 
-                <button
-                  type="button"
-                  onClick={toggleAllVisible}
-                  className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300"
-                >
-                  {allVisibleSelected ? "Clear Visible" : "Select Visible"}
-                </button>
+                    <button
+                      type="button"
+                      onClick={toggleDuprExportReadyFilter}
+                      className={`rounded-lg px-4 py-2.5 text-sm font-semibold ${
+                        showDuprExportReadyOnly
+                          ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                          : "bg-white text-emerald-900 ring-1 ring-emerald-200 hover:bg-emerald-50"
+                      }`}
+                    >
+                      {showDuprExportReadyOnly ? "Showing DUPR Export Ready" : "DUPR Export Ready"}
+                    </button>
+                  </div>
+                  <div className="mt-2 text-xs font-semibold text-blue-800">
+                    DUPR Export Ready shows verified matches that have not been exported yet.
+                  </div>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={sendReminders}
-                  disabled={sending || selectedMatches.length === 0}
-                  className="rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                >
-                  {sending ? "Sending..." : "Send Email Reminder"}
-                </button>
+                <div className="flex flex-wrap gap-2 lg:justify-end">
+                  <button
+                    type="button"
+                    onClick={toggleAllVisible}
+                    className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300"
+                  >
+                    {allVisibleSelected ? "Clear Visible" : "Select Visible"}
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={exportForDupr}
-                  disabled={exportingScores}
-                  className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                >
-                  {exportingScores ? "Exporting..." : "DUPR Export"}
-                </button>
+                  <button
+                    type="button"
+                    onClick={sendReminders}
+                    disabled={sending || selectedMatches.length === 0}
+                    className="rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    {sending ? "Sending..." : "Send Email Reminder"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={exportForDupr}
+                    disabled={exportingScores}
+                    className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    {exportingScores ? "Exporting..." : "DUPR Export"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
