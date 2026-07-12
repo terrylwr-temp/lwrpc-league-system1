@@ -9,6 +9,7 @@ import {
   renderEmailTemplate,
   sampleTemplateValues,
 } from "../lib/emailTemplates";
+import { DEFAULT_SYSTEM_SETTINGS, emailIsActivated } from "../lib/systemSettings";
 
 export default function EmailOptionsPage() {
   const router = useRouter();
@@ -28,6 +29,8 @@ export default function EmailOptionsPage() {
   const [brevoDiagnostic, setBrevoDiagnostic] = useState(null);
   const [checkingTwilio, setCheckingTwilio] = useState(false);
   const [twilioDiagnostic, setTwilioDiagnostic] = useState(null);
+  const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
+  const [savingEmailActivation, setSavingEmailActivation] = useState(false);
 
   const activeConfig = useMemo(
     () => EMAIL_TEMPLATES.find((template) => template.key === activeTemplateKey) || EMAIL_TEMPLATES[0],
@@ -66,19 +69,57 @@ export default function EmailOptionsPage() {
     setTemplates(Object.fromEntries(entries));
   }, []);
 
+  const loadSystemSettings = useCallback(async function loadSystemSettings() {
+    const response = await fetch("/api/system-settings");
+    const result = await response.json().catch(() => null);
+    if (response.ok && result?.success && result.settings) {
+      setSystemSettings(result.settings);
+    }
+  }, []);
+
   useEffect(() => {
     async function run() {
       const ok = await requireRole(router, "commissioner");
 
       if (ok) {
-        await loadTemplates();
+        await Promise.all([loadTemplates(), loadSystemSettings()]);
       }
 
       setLoading(false);
     }
 
     run();
-  }, [loadTemplates, router]);
+  }, [loadSystemSettings, loadTemplates, router]);
+
+  async function setEmailActivation(nextActivated) {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const accessToken = sessionData?.session?.access_token;
+
+    if (!accessToken) {
+      alert("Your session expired. Please log in again before changing email delivery.");
+      return;
+    }
+
+    const nextSettings = { ...systemSettings, email_activated: nextActivated };
+    setSavingEmailActivation(true);
+    const response = await fetch("/api/system-settings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({ settings: nextSettings }),
+    });
+    const result = await response.json().catch(() => null);
+    setSavingEmailActivation(false);
+
+    if (!response.ok || !result?.success) {
+      alert(result?.error || "Unable to update email delivery.");
+      return;
+    }
+
+    setSystemSettings(nextSettings);
+  }
 
   function updateTemplate(field, value) {
     setTemplates((current) => ({
@@ -264,6 +305,32 @@ export default function EmailOptionsPage() {
           title="Email Options"
           subtitle="Manage automatic email templates, previews, and notification tests."
         />
+
+        <section className={`mb-6 rounded-2xl border p-4 shadow-sm md:p-5 ${
+          emailIsActivated(systemSettings)
+            ? "border-emerald-300 bg-emerald-50"
+            : "border-amber-300 bg-amber-50"
+        }`}>
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={emailIsActivated(systemSettings)}
+              disabled={savingEmailActivation}
+              onChange={(event) => setEmailActivation(event.target.checked)}
+              className="mt-1 h-5 w-5 rounded border-slate-400 text-emerald-700 focus:ring-emerald-600 disabled:opacity-50"
+            />
+            <span>
+              <span className="block text-base font-black text-slate-950">
+                {emailIsActivated(systemSettings) ? "Email Activated" : "Email Not Activated"}
+              </span>
+              <span className="mt-1 block text-sm font-semibold text-slate-700">
+                {savingEmailActivation
+                  ? "Saving email delivery setting..."
+                  : "When unchecked, the system will not send Brevo emails or Supabase login and password emails. SMS remains active."}
+              </span>
+            </span>
+          </label>
+        </section>
 
         <section className="overflow-hidden rounded-2xl bg-white shadow">
           <div className="border-b border-slate-200 px-4 py-5 md:px-6">

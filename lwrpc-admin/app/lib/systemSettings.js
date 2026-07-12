@@ -10,6 +10,7 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   membership_url: "https://lwrpickleballclub.com/manage-membership",
   league_site_url: "https://league.lwrpickleballclub.com",
   timezone: "America/New_York",
+  email_activated: true,
 };
 
 export const SYSTEM_SETTING_FIELDS = [
@@ -94,6 +95,12 @@ export function mergeSystemSettings(settings = {}) {
 
 export function browserTabTitle(settings = {}) {
   return mergeSystemSettings(settings).browser_tab_title || DEFAULT_SYSTEM_SETTINGS.browser_tab_title;
+}
+
+export function emailIsActivated(settings = {}) {
+  const value = mergeSystemSettings(settings).email_activated;
+  if (typeof value === "boolean") return value;
+  return String(value).trim().toLowerCase() !== "false";
 }
 
 export function cachedSystemSettings() {

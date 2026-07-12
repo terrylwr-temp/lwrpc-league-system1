@@ -2115,6 +2115,7 @@ export default function CaptainDashboardPage() {
       league: setupTeam.divisions?.leagues?.name || setupMatch.divisions?.leagues?.name || "League",
       division: setupTeam.divisions?.name || setupMatch.divisions?.name || "Division",
       location: setupMatch.locations?.name || "Location TBD",
+      location_address: formatLocationAddress(setupMatch.locations),
       lineup_list: setupLineupsHtml(),
       home_captain_contacts: teamCaptainContactsWithPhoneHtml(setupMatch.home_team, "Home captain contact not listed."),
       away_captain_contacts: teamCaptainContactsWithPhoneHtml(setupMatch.away_team, "Away captain contact not listed."),

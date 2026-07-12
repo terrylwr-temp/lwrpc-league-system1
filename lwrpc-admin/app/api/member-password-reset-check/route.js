@@ -3,6 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
 import { hasRole } from "../../lib/permissions";
 import { highestRoleForMembers } from "../../lib/memberLookup";
+import { loadServerSystemSettings } from "../../lib/serverEmailTemplates";
+import { emailIsActivated } from "../../lib/systemSettings";
 
 export const runtime = "nodejs";
 
@@ -104,6 +106,17 @@ export async function POST(req) {
         memberExists: true,
         isActiveMember: false,
         emailSent: false,
+      });
+    }
+
+    const systemSettings = await loadServerSystemSettings();
+    if (!emailIsActivated(systemSettings)) {
+      return resetResponse(isManager, {
+        memberExists: true,
+        isActiveMember: true,
+        emailSent: false,
+        emailDeliveryDisabled: true,
+        message: "Email delivery is not activated in Email Options.",
       });
     }
 

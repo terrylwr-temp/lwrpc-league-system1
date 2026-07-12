@@ -63,7 +63,7 @@ export const EMAIL_TEMPLATES = [
     key: EMAIL_TEMPLATE_KEYS.matchSetupPlayers,
     label: "Match Setup - Players",
     description: "Sent from the Match Setup popup to all roster players on the setup team.",
-    placeholders: withCommonPlaceholders(["{{setup_team}}", "{{opponent_team}}", "{{home_team}}", "{{away_team}}", "{{match_date}}", "{{match_time}}", "{{league}}", "{{division}}", "{{location}}", "{{lineup_list}}", "{{home_captain_contacts}}", "{{away_captain_contacts}}"]),
+    placeholders: withCommonPlaceholders(["{{setup_team}}", "{{opponent_team}}", "{{home_team}}", "{{away_team}}", "{{match_date}}", "{{match_time}}", "{{league}}", "{{division}}", "{{location}}", "{{location_address}}", "{{lineup_list}}", "{{home_captain_contacts}}", "{{away_captain_contacts}}"]),
     defaultSubject: "Match Setup: {{setup_team}} vs {{opponent_team}}",
     defaultBody: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
   <h2>Match Setup</h2>
@@ -347,6 +347,7 @@ export function sampleTemplateValues() {
     league: "Spring League",
     lineup_list: "<li><strong>Team 1:</strong> Alex Player (DUPR: 3.72) / Morgan Player (DUPR: 3.51) <strong>Team Rating:</strong> 7.23</li><li><strong>Team 2:</strong> Casey Player (DUPR: 3.44) / Taylor Player (DUPR: 3.33) <strong>Team Rating:</strong> 6.77</li>",
     location: "Lakewood Ranch Country Club",
+    location_address: "7650 Legacy Boulevard, Lakewood Ranch, FL 34202",
     match_count: "1",
     match_date: "06/04/2026 Thursday",
     match_time: "6:00 PM",

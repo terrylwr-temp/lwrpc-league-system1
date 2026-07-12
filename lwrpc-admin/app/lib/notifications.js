@@ -1,4 +1,6 @@
 import { normalizeAppNotificationPhone, sendAppNotificationMessages } from "./appNotifications";
+import { loadServerSystemSettings } from "./serverEmailTemplates";
+import { emailIsActivated } from "./systemSettings";
 
 function cleanList(values) {
   return [...new Set((values || []).map((value) => String(value || "").trim()).filter(Boolean))];
@@ -143,6 +145,11 @@ export async function sendEmailMessages({ emails, subject, text, html }) {
 
   if (!subject || (!text && !html)) {
     return { skipped: true, reason: "Missing email subject or content", sent: 0, results: [] };
+  }
+
+  const systemSettings = await loadServerSystemSettings();
+  if (!emailIsActivated(systemSettings)) {
+    return { skipped: true, reason: "Email delivery is not activated in Email Options", sent: 0, results: [] };
   }
 
   if (!process.env.BREVO_API_KEY || !process.env.BREVO_FROM_EMAIL) {

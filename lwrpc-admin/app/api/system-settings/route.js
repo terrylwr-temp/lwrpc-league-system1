@@ -123,7 +123,7 @@ export async function POST(req) {
     const now = new Date().toISOString();
     const rows = Object.entries(mergeSystemSettings(settings)).map(([setting_key, setting_value]) => ({
       setting_key,
-      setting_value: String(setting_value || ""),
+      setting_value: String(setting_value ?? ""),
       updated_at: now,
     }));
     const supabase = adminClient();
