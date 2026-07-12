@@ -437,7 +437,7 @@ export default function EmailOptionsPage() {
                 disabled={checkingBrevo}
                 className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black uppercase tracking-wide text-slate-900 hover:bg-slate-50 disabled:opacity-50"
               >
-                {checkingBrevo ? "Checking Brevo..." : "Check Brevo Configuration"}
+                {checkingBrevo ? "Checking Brevo..." : "Check Brevo Email Configuration"}
               </button>
 
               <button
@@ -446,7 +446,7 @@ export default function EmailOptionsPage() {
                 disabled={checkingTwilio}
                 className="rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-black uppercase tracking-wide text-slate-900 hover:bg-slate-50 disabled:opacity-50"
               >
-                {checkingTwilio ? "Checking Twilio..." : "Check Twilio Configuration"}
+                {checkingTwilio ? "Checking Twilio..." : "Check Twilio SMS Configuration"}
               </button>
 
               <button
