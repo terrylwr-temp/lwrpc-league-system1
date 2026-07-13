@@ -1241,7 +1241,7 @@ function getAverageTeamRating() {
                   <div
                     key={player.id}
                     id={member?.id ? `roster-player-${member.id}` : undefined}
-                    className="rounded-xl border border-slate-200 px-4 py-3 hover:bg-slate-50"
+                    className="rounded-xl border-2 border-slate-300 bg-white px-4 py-3 shadow-sm transition hover:border-slate-400 hover:bg-slate-50"
                   >
 
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -1310,7 +1310,10 @@ function getAverageTeamRating() {
                               {member?.dupr_id || "—"}
                             </span>
                             {"  "}
-                            {member?.club_location || "—"}
+                            Home Location:{" "}
+                            <span className="font-semibold">
+                              {member?.club_location || "—"}
+                            </span>
                           </div>
 
                           {membershipRenewalNeedsAttention(member) && (
