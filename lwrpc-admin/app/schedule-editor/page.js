@@ -215,6 +215,7 @@ export default function ScheduleEditorPage() {
 
     return [
       `Courts available: ${available}${unavailableText}`,
+      `Courts needed for this match: ${courtsNeededForMatch(proposedMatch)}`,
       `Current Courts Used: ${currentUsed}`,
       courtOk
         ? `Courts Used After Swap: ${afterSwapUsed}`
@@ -1210,7 +1211,7 @@ export default function ScheduleEditorPage() {
               disabled={locked}
               className="min-h-8 rounded-lg bg-blue-100 px-2.5 py-1.5 text-xs font-semibold text-blue-800 hover:bg-blue-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
             >
-              Swap
+              Swap Home
             </button>
             <button
               onClick={() => router.push(`/matches/${match.id}?from=scoring&returnTo=schedule-editor`)}
