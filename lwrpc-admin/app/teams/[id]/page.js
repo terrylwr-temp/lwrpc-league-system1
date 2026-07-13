@@ -465,7 +465,7 @@ export default function TeamRosterPage() {
 
   function playerRatingEligibility(member) {
     if (!memberHasDuprId(member)) {
-      return "Not Eligible";
+      return "DUPR ID Needed";
     }
 
     const playerRating = getPlayerRating(member);
@@ -769,11 +769,7 @@ function getAverageTeamRating() {
       }
     }
 
-    if (!memberHasDuprId(member)) {
-      alert(`${formatMemberName(member)} does not have a DUPR ID and cannot be added to this roster.`);
-      return;
-    }
-
+    const missingDuprId = !memberHasDuprId(member);
     const playerRating = getPlayerRating(member);
     const missingRating =
       playerRating === null ||
@@ -811,8 +807,12 @@ function getAverageTeamRating() {
       return;
     }
 
-    if (missingRating) {
-      alert(`${formatMemberName(member)} does not have a ${getRatingLabel()} entered for this season. They will be added to this roster, and a rating check email will be sent to info@lwrpickleballclub.com. We will send you an email with their updated rating when that is entered.`);
+    if (missingDuprId || missingRating) {
+      const missingItems = [];
+      if (missingDuprId) missingItems.push("a DUPR ID");
+      if (missingRating) missingItems.push(`a ${getRatingLabel()} for this season`);
+
+      alert(`${formatMemberName(member)} does not have ${missingItems.join(" or ")} entered. They will be added to this roster, and a player information check email will be sent to info@lwrpickleballclub.com. We will send you an email when their information is updated.`);
     }
 
     const alreadyOnRoster = roster.find(
@@ -836,14 +836,15 @@ function getAverageTeamRating() {
       return;
     }
 
-    if (missingRating || nrDuprDoublesRating) {
+    if (missingDuprId || missingRating || nrDuprDoublesRating) {
       const reasons = [];
+      if (missingDuprId) reasons.push("No DUPR ID entered");
       if (missingRating) reasons.push(`No ${getRatingLabel()} entered`);
       if (nrDuprDoublesRating) reasons.push("NR DUPR Doubles rating");
 
       await sendRatingCheckAlert(member, reasons.join("; ")).catch((alertError) => {
-        console.warn("Roster rating check alert failed.", alertError);
-        alert("Player added, but the rating check email could not be sent. Please notify the league manually.");
+        console.warn("Roster player information check alert failed.", alertError);
+        alert("Player added, but the player information check email could not be sent. Please notify the league manually.");
       });
     }
 

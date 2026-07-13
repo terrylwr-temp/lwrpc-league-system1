@@ -192,13 +192,13 @@ export const EMAIL_TEMPLATES = [
   },
   {
     key: EMAIL_TEMPLATE_KEYS.ratingCheckAlert,
-    label: "Roster Rating Check Alert",
-    description: "Sent to league support when a roster add needs rating review.",
+    label: "Roster Player Check Alert",
+    description: "Sent to league support when a roster add needs rating or DUPR ID review.",
     placeholders: withCommonPlaceholders(["{{player_name}}", "{{team}}", "{{reason}}", "{{rating_type}}", "{{rating_range}}", "{{captain_contacts}}"]),
-    defaultSubject: "Roster rating check needed: {{player_name}}",
+    defaultSubject: "Roster player check needed: {{player_name}}",
     defaultBody: `<div style="font-family: Arial, sans-serif; line-height: 1.6;">
-  <h2>Roster Rating Check Needed</h2>
-  <p>A player was added to a team roster and needs a rating check.</p>
+  <h2>Roster Player Check Needed</h2>
+  <p>A player was added to a team roster and needs a rating or DUPR ID check.</p>
   <p>
     <strong>Player:</strong> {{player_name}}<br />
     <strong>Team:</strong> {{team}}<br />
@@ -208,7 +208,7 @@ export const EMAIL_TEMPLATES = [
   </p>
   <p><strong>Captain Contacts:</strong></p>
   <div>{{captain_contacts}}</div>
-  <p>Please check this player and update their rating if needed.</p>
+  <p>Please check this player and update their rating or DUPR ID as needed.</p>
 </div>`,
   },
 ];
