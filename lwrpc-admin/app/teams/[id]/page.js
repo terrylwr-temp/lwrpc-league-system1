@@ -424,6 +424,13 @@ export default function TeamRosterPage() {
     return rating.toFixed(2);
   }
 
+  function getDuprDoublesRatingDisplay(member) {
+    const rawRating = getSeasonRating(member.id)?.dupr_doubles_rating;
+    const displayValue = String(rawRating ?? "").trim();
+
+    return displayValue || "—";
+  }
+
   function memberHasDuprId(member) {
     return Boolean(String(member?.dupr_id || "").trim());
   }
@@ -1247,21 +1254,21 @@ function getAverageTeamRating() {
 
                       <div className="min-w-0 flex-1">
 
-                        <div className="flex flex-wrap items-center gap-2">
-
-                          <button
-                            type="button"
-                            onClick={() => {
-                              if (teamRosterView !== "summary") return;
-                              setMobileExpandedRosterMemberId((current) =>
-                                current === member?.id ? "" : member?.id
-                              );
-                            }}
-                            aria-expanded={memberDetailVisible}
-                            className="min-w-0 break-words text-left text-base font-bold text-slate-900 sm:truncate"
-                          >
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (teamRosterView !== "summary") return;
+                            setExpandedHistoryMemberId("");
+                            setMobileExpandedRosterMemberId((current) =>
+                              current === member?.id ? "" : member?.id
+                            );
+                          }}
+                          aria-expanded={memberDetailVisible}
+                          className="flex min-w-0 flex-wrap items-center gap-2 text-left"
+                        >
+                          <div className="min-w-0 break-words text-base font-bold text-slate-900 sm:truncate">
                             {member?.last_name}, {member?.first_name}
-                          </button>
+                          </div>
 
                           {isCaptain && (
                             <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase text-blue-800">
@@ -1281,7 +1288,7 @@ function getAverageTeamRating() {
                             </span>
                           )}
 
-                        </div>
+                        </button>
 
                         <div className="mt-2 space-y-2 break-words text-sm text-slate-600">
 
@@ -1295,9 +1302,9 @@ function getAverageTeamRating() {
                               {playerRosterRecord(member?.id).record}
                             </span>
                             {"  "}
-                            DUPR Rating:{" "}
+                            DUPR Doubles Rating:{" "}
                             <span className="font-semibold">
-                              {member ? getRatingDisplay(member) : "N/A"}
+                              {member ? getDuprDoublesRatingDisplay(member) : "N/A"}
                             </span>
                           </div>
 
