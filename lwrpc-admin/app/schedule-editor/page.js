@@ -114,6 +114,22 @@ export default function ScheduleEditorPage() {
       .from("league_blackout_dates")
       .select("*");
 
+    const scoreMemberIds = [
+      ...(matchData || []).map((match) => match.score_entered_by_member_id),
+      ...(matchData || []).map((match) => match.score_verified_by_member_id),
+    ].filter(Boolean);
+
+    if (scoreMemberIds.length > 0) {
+      const { data: scoreMembers } = await supabase
+        .from("members")
+        .select("id, first_name, last_name, email")
+        .in("id", [...new Set(scoreMemberIds)]);
+
+      setScoreMembersById(Object.fromEntries((scoreMembers || []).map((member) => [String(member.id), member])));
+    } else {
+      setScoreMembersById({});
+    }
+
     setMatches(matchData || []);
     setLeagues((leagueData || []).filter((league) => league.is_active !== false && league.seasons?.is_active !== false));
     setDivisions((divisionData || []).filter((division) => division.is_active !== false));
@@ -825,22 +841,6 @@ export default function ScheduleEditorPage() {
     if (matchError) {
       alert(matchError.message);
       return;
-    }
-
-    const scoreMemberIds = [
-      ...(matchData || []).map((match) => match.score_entered_by_member_id),
-      ...(matchData || []).map((match) => match.score_verified_by_member_id),
-    ].filter(Boolean);
-
-    if (scoreMemberIds.length > 0) {
-      const { data: scoreMembers } = await supabase
-        .from("members")
-        .select("id, first_name, last_name, email")
-        .in("id", [...new Set(scoreMemberIds)]);
-
-      setScoreMembersById(Object.fromEntries((scoreMembers || []).map((member) => [String(member.id), member])));
-    } else {
-      setScoreMembersById({});
     }
 
     await rebuildDivisionStandings(match.division_id);
