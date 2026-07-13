@@ -1303,12 +1303,6 @@ function getAverageTeamRating() {
                           </div>
 
                           <div className={`${memberDetailVisible ? "" : "hidden"} md:block`}>
-                            {getRatingLabel()}:
-                            {" "}
-                            <span className="font-semibold">
-                              {member ? getRatingDisplay(member) : "—"}
-                            </span>
-                            {"  "}
                             DUPR ID:
                             {" "}
                             <span className="font-semibold">
