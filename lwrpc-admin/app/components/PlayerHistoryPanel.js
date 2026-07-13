@@ -6,10 +6,10 @@ import {
   formatDate,
   historyFilterOptions,
   historyRowIsActive,
+  historyScoreSummary,
   historyTeamOptionLabel,
   playerLineDetails,
   rowCountsForIndividualWinLoss,
-  specialGameStatus,
 } from "../lib/playHistory";
 
 export default function PlayerHistoryPanel({
@@ -175,7 +175,7 @@ export default function PlayerHistoryPanel({
         {filteredRows.map((row) => {
           const match = row.matches;
           const details = playerLineDetails(row, memberId);
-          const gameScoreSummary = formatHistoryGameScoreSummary(row, details.sideLabel);
+          const gameScoreSummary = historyScoreSummary(row, details.sideLabel);
           const countsForIndividualWinLoss = rowCountsForIndividualWinLoss(row);
           const resultBadgeLabel = countsForIndividualWinLoss ? details.result : "Picklebreaker";
           const resultBadgeTone = !countsForIndividualWinLoss
@@ -251,31 +251,6 @@ export function playerHistoryRecord(rows, memberId) {
   );
 }
 
-function formatHistoryGameScoreSummary(row, sideLabel) {
-  const isHomePlayer = sideLabel === "Home";
-  const scoredGames = [...(row.line_games || [])]
-    .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
-    .filter((game) => {
-      const hasScore = game.home_score !== null && game.away_score !== null;
-      return hasScore || specialGameStatus(game.game_status);
-    });
-
-  if (scoredGames.length === 0) {
-    return "Scores pending";
-  }
-
-  return scoredGames
-    .map((game) => {
-      const playerScore = isHomePlayer ? game.home_score : game.away_score;
-      const opponentScore = isHomePlayer ? game.away_score : game.home_score;
-      const score = `${playerScore ?? "-"}-${opponentScore ?? "-"}`;
-      const special = specialGameStatus(game.game_status);
-
-      return special ? `${score} ${special.label}` : score;
-    })
-    .join(", ");
-}
-
 function historyScopeOptionIsActive(team) {
   return (
     team?.is_active !== false &&
@@ -337,7 +312,7 @@ export function printPlayerHistory({ title, subtitle, scopeLabel, record, rows, 
     ? rows.map((row) => {
         const match = row.matches;
         const details = playerLineDetails(row, memberId);
-        const score = formatHistoryGameScoreSummary(row, details.sideLabel);
+        const score = historyScoreSummary(row, details.sideLabel);
         const result = rowCountsForIndividualWinLoss(row) ? details.result : "Picklebreaker";
         const scope = [
           match?.leagues?.seasons?.name || "No Season",

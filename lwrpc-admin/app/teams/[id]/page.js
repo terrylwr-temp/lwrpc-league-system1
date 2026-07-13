@@ -12,12 +12,12 @@ import { EMAIL_TEMPLATE_KEYS, escapeHtml, getEmailTemplateConfig, renderEmailTem
 import {
   filterHistoryRows,
   formatDate,
+  historyScoreSummary,
   historyFilterOptions,
   historyTeamOptionLabel,
   playerLineDetails,
   rowCountsForIndividualWinLoss,
   sortHistoryRows,
-  specialGameStatus,
 } from "../../lib/playHistory";
 
 export default function TeamRosterPage() {
@@ -1607,7 +1607,7 @@ function PlayerHistoryPanel({
         {filteredRows.map((row) => {
           const match = row.matches;
           const details = playerLineDetails(row, memberId);
-          const gameScoreSummary = formatHistoryGameScoreSummary(row, details.sideLabel);
+          const gameScoreSummary = historyScoreSummary(row, details.sideLabel);
           const countsForIndividualWinLoss = rowCountsForIndividualWinLoss(row);
           const resultBadgeLabel = countsForIndividualWinLoss ? details.result : "Picklebreaker";
           const resultBadgeTone = !countsForIndividualWinLoss
@@ -1681,31 +1681,6 @@ function playerHistoryRecord(rows, memberId) {
     },
     { games: 0, wins: 0, losses: 0, other: 0, record: "0-0" }
   );
-}
-
-function formatHistoryGameScoreSummary(row, sideLabel) {
-  const isHomePlayer = sideLabel === "Home";
-  const scoredGames = [...(row.line_games || [])]
-    .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
-    .filter((game) => {
-      const hasScore = game.home_score !== null && game.away_score !== null;
-      return hasScore || specialGameStatus(game.game_status);
-    });
-
-  if (scoredGames.length === 0) {
-    return "Scores pending";
-  }
-
-  return scoredGames
-    .map((game) => {
-      const playerScore = isHomePlayer ? game.home_score : game.away_score;
-      const opponentScore = isHomePlayer ? game.away_score : game.home_score;
-      const score = `${playerScore ?? "-"}-${opponentScore ?? "-"}`;
-      const special = specialGameStatus(game.game_status);
-
-      return special ? `${score} ${special.label}` : score;
-    })
-    .join(", ");
 }
 
 function Info({ label, value }) {

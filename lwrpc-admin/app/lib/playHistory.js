@@ -1,5 +1,6 @@
 import { formatDisplayDate } from "./dateTime";
 import { isPicklebreakerLine } from "./matchScoring";
+import { isSpecialMatchResult, specialMatchResultLabel } from "./specialMatchResults";
 
 export function formatDate(value) {
   return formatDisplayDate(value, "-");
@@ -314,6 +315,48 @@ export function specialGameStatus(gameStatus) {
   if (gameStatus === "retired_home") return { type: "retired", winnerSide: "Home", label: "Retired to Home" };
   if (gameStatus === "retired_away") return { type: "retired", winnerSide: "Away", label: "Retired to Away" };
   return null;
+}
+
+export function historyScoreSummary(row, sideLabel) {
+  const match = row?.matches;
+
+  if (isSpecialMatchResult(match)) {
+    const isHomePlayer = sideLabel === "Home";
+    const hasHomeScore = match.home_score !== null && match.home_score !== undefined;
+    const hasAwayScore = match.away_score !== null && match.away_score !== undefined;
+    const resultLabel = specialMatchResultLabel(match);
+
+    if (hasHomeScore && hasAwayScore) {
+      const playerScore = isHomePlayer ? match.home_score : match.away_score;
+      const opponentScore = isHomePlayer ? match.away_score : match.home_score;
+      return `${playerScore}-${opponentScore} ${resultLabel}`;
+    }
+
+    return resultLabel || "Scores pending";
+  }
+
+  const isHomePlayer = sideLabel === "Home";
+  const scoredGames = [...(row?.line_games || [])]
+    .sort((a, b) => Number(a.game_number || 0) - Number(b.game_number || 0))
+    .filter((game) => {
+      const hasScore = game.home_score !== null && game.away_score !== null;
+      return hasScore || specialGameStatus(game.game_status);
+    });
+
+  if (scoredGames.length === 0) {
+    return "Scores pending";
+  }
+
+  return scoredGames
+    .map((game) => {
+      const playerScore = isHomePlayer ? game.home_score : game.away_score;
+      const opponentScore = isHomePlayer ? game.away_score : game.home_score;
+      const score = `${playerScore ?? "-"}-${opponentScore ?? "-"}`;
+      const special = specialGameStatus(game.game_status);
+
+      return special ? `${score} ${special.label}` : score;
+    })
+    .join(", ");
 }
 
 export function rowHasSpecialGame(row) {
