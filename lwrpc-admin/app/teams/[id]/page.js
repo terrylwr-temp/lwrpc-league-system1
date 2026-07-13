@@ -37,6 +37,7 @@ export default function TeamRosterPage() {
   const [historyFilters, setHistoryFilters] = useState({});
   const [teamInfoView, setTeamInfoView] = useState("summary");
   const [teamRosterView, setTeamRosterView] = useState("summary");
+  const [mobileExpandedRosterMemberId, setMobileExpandedRosterMemberId] = useState("");
 
   const [selectedMemberId, setSelectedMemberId] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState(null);
@@ -735,6 +736,7 @@ function getAverageTeamRating() {
 
     if (nextView === "summary") {
       setExpandedHistoryMemberId("");
+      setMobileExpandedRosterMemberId("");
     }
   }
 
@@ -1218,6 +1220,7 @@ function getAverageTeamRating() {
 
               {sortedRoster.map(player => {
                 const member = player.members;
+                const memberDetailVisible = teamRosterDetailView || mobileExpandedRosterMemberId === member?.id;
 
                 const isCaptain =
                   String(team.captain_member_id) ===
@@ -1246,9 +1249,19 @@ function getAverageTeamRating() {
 
                         <div className="flex flex-wrap items-center gap-2">
 
-                          <div className="min-w-0 break-words text-base font-bold text-slate-900 sm:truncate">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              if (teamRosterView !== "summary") return;
+                              setMobileExpandedRosterMemberId((current) =>
+                                current === member?.id ? "" : member?.id
+                              );
+                            }}
+                            aria-expanded={memberDetailVisible}
+                            className="min-w-0 break-words text-left text-base font-bold text-slate-900 sm:truncate"
+                          >
                             {member?.last_name}, {member?.first_name}
-                          </div>
+                          </button>
 
                           {isCaptain && (
                             <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase text-blue-800">
@@ -1288,7 +1301,7 @@ function getAverageTeamRating() {
                             </span>
                           </div>
 
-                          <div className={`${teamRosterDetailView ? "" : "hidden"} md:block`}>
+                          <div className={`${memberDetailVisible ? "" : "hidden"} md:block`}>
                             {getRatingLabel()}:
                             {" "}
                             <span className="font-semibold">
@@ -1305,7 +1318,7 @@ function getAverageTeamRating() {
                           </div>
 
                           {membershipRenewalNeedsAttention(member) && (
-                            <div className={`${teamRosterDetailView ? "" : "hidden"} font-black text-red-700 md:block`}>
+                            <div className={`${memberDetailVisible ? "" : "hidden"} font-black text-red-700 md:block`}>
                               {membershipInfoLabel(member)}
                             </div>
                           )}
@@ -1314,7 +1327,7 @@ function getAverageTeamRating() {
 
                       </div>
 
-                      <div className={`${teamRosterDetailView ? "grid" : "hidden"} shrink-0 grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end md:flex`}>
+                      <div className={`${memberDetailVisible ? "grid" : "hidden"} shrink-0 grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:justify-end md:flex`}>
                         <button
                           type="button"
                           onClick={() =>
@@ -1395,7 +1408,7 @@ function getAverageTeamRating() {
                 <button
                   type="button"
                   onClick={closeAddPlayerModal}
-                  className="rounded-xl border-2 border-slate-700 bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50"
+                  className="hidden rounded-xl border-2 border-slate-700 bg-white px-4 py-2 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50 sm:inline-flex"
                 >
                   Close
                 </button>
@@ -1482,14 +1495,24 @@ function getAverageTeamRating() {
 
                 </div>
 
-                <button
-                  type="button"
-                  onClick={addPlayer}
-                  disabled={!canModifyRoster}
-                  className="w-full rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                >
-                  Add Player To Team
-                </button>
+                <div className="flex flex-col gap-2 sm:block">
+                  <button
+                    type="button"
+                    onClick={addPlayer}
+                    disabled={!canModifyRoster}
+                    className="w-full rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    Add Player To Team
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={closeAddPlayerModal}
+                    className="w-full rounded-xl border-2 border-slate-700 bg-white px-5 py-3 text-sm font-black text-slate-900 shadow-sm hover:bg-slate-50 sm:hidden"
+                  >
+                    Close
+                  </button>
+                </div>
 
               </div>
 
