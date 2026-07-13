@@ -1,8 +1,8 @@
 ---
-title: Captain Help Overview
+title: User Help Overview
 category: Getting Started
 order: 10
-description: Start here for the Captain Dashboard and weekly league workflow.
+description: Start here for the Player Dashboard and Captain Dashboard workflows.
 ---
 
 Use the Captain Dashboard to manage your assigned teams, prepare match setup teams, review roster details, enter scores, and verify submitted results.
@@ -27,7 +27,7 @@ Use your regular email address that you used when signing up for your Club membe
 
 ## Navigation
 
-Manage everything from one central Captain dashboard. Matches are categorized by Upcoming, Completed, and Pending Verification status. Quickly toggle between your captain assignments using the top team tabs. Need to update your account or get help? Use the top header to **change your password**, view your **club membership** info, or click **Contact League** to email support.
+Manage everything from one central Captain Dashboard. Matches are categorized by Upcoming, Completed, and Pending Verification status. Quickly toggle between your team assignments using the top team tabs. Need to update your account or get help? Use the top header to **change your password**, view your **club membership** info, or click **Contact League** to email support.
 
 ## Upcoming Matches
 

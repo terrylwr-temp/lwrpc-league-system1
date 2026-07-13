@@ -5,9 +5,9 @@ const HELP_ROOT = path.join(process.cwd(), "content", "help");
 
 export const HELP_ROLE_CONFIG = {
   captain: {
-    label: "Captain",
-    title: "Captain Help Center",
-    description: "Captain workflows for rosters, match setup, scoring, and score verification.",
+    label: "User",
+    title: "User Help Center",
+    description: "User guidance for the Player Dashboard and Captain Dashboard.",
   },
   player: {
     label: "Player",

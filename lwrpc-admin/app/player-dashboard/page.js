@@ -1185,7 +1185,7 @@ export default function PlayerDashboardPage() {
               }}
               className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
             >
-              Players Guide
+              User Guide
             </button>
           }
           actions={

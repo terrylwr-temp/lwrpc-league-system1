@@ -156,7 +156,7 @@ export default function HelpCenterClient({ guide }) {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search captain help"
+              placeholder={`Search ${String(guide.label || "user").toLowerCase()} help`}
               className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
