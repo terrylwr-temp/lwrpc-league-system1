@@ -2150,8 +2150,8 @@ function SessionResultsModal({ state, session, runAction, actionLoading, onClose
   return (
     <ModalPortal>
       <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-slate-950/70 p-0 sm:p-6">
-        <div className="h-full max-h-screen w-full max-w-5xl overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-2 sm:h-auto sm:max-h-[calc(100vh-1rem)] sm:rounded-lg">
-          <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
+        <div className="flex h-full max-h-screen w-full max-w-5xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:my-2 sm:h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-1rem)] sm:rounded-lg">
+          <div className={`shrink-0 flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
             <div className="min-w-0">
               <div className={MODAL_EYEBROW_CHROME}>Match Results</div>
               <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
@@ -2163,7 +2163,7 @@ function SessionResultsModal({ state, session, runAction, actionLoading, onClose
               Close
             </button>
           </div>
-          <div className="max-h-[calc(100vh-7rem)] overflow-y-auto p-3 sm:max-h-[76vh] sm:p-4">
+          <div className="min-h-0 flex-1 overflow-y-auto p-3 pb-[calc(5rem+env(safe-area-inset-bottom))] sm:p-4 sm:pb-6">
             <div className="overflow-hidden rounded-lg border border-slate-200">
               <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-100 px-3 py-2">
                 <div className="text-sm font-black text-slate-700">Match Standings</div>
