@@ -729,6 +729,7 @@ export default function RoundRobinAdminPage() {
           {rounds.map((round) => (
             <ManagerRound
               key={round.roundNumber}
+              state={state}
               round={round}
               session={latestSession}
               runAction={runAction}
@@ -781,6 +782,7 @@ export default function RoundRobinAdminPage() {
           {rounds.map((round) => (
             <ManagerRound
               key={round.roundNumber}
+              state={state}
               round={round}
               session={selectedSession}
               runAction={runAction}
@@ -1048,6 +1050,8 @@ function SessionTab(props) {
         <SessionResultsModal
           state={state}
           session={resultsModalSession}
+          runAction={runAction}
+          actionLoading={actionLoading}
           onClose={() => setResultsModalSession(null)}
         />
       )}
@@ -1868,7 +1872,7 @@ function MobileStatPill({ label, value }) {
   );
 }
 
-function AdminGameResultCard({ match }) {
+function AdminGameResultCard({ match, onEdit = null }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-3 shadow-[0_14px_24px_-20px_rgba(15,23,42,0.95)]">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -1878,6 +1882,11 @@ function AdminGameResultCard({ match }) {
         <div className="rounded-md bg-slate-100 px-2 py-1 text-xs font-black uppercase tracking-wide text-slate-500">
           Final
         </div>
+        {onEdit && (
+          <button type="button" onClick={onEdit} className="rounded-md border border-teal-300 bg-teal-50 px-2 py-1 text-xs font-black text-teal-900 hover:bg-teal-100">
+            Edit Result
+          </button>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-stretch">
         <AdminGameTeamPanel
@@ -1895,6 +1904,122 @@ function AdminGameResultCard({ match }) {
       </div>
     </div>
   );
+}
+
+function PastMatchEditModal({ state, session, match, runAction, actionLoading, onClose }) {
+  const [team1Score, setTeam1Score] = useState(match.team1_score ?? "");
+  const [team2Score, setTeam2Score] = useState(match.team2_score ?? "");
+  const [team1Players, setTeam1Players] = useState(() => [...(match.team1_players || [])]);
+  const [team2Players, setTeam2Players] = useState(() => [...(match.team2_players || [])]);
+  const playerOptions = matchPlayerOptionsForEdit(state, session, match);
+  const saving = ["updateMatchLineup", "updateMatchScore"].includes(actionLoading);
+
+  function updatePlayer(side, index, playerId) {
+    const selected = playerOptions.find((player) => player.id === String(playerId));
+    if (!selected) return;
+    const nextPlayer = {
+      id: selected.id,
+      displayName: selected.displayName,
+      firstLabel: selected.firstLabel,
+      duprId: selected.duprId,
+    };
+    const setPlayers = side === "team1" ? setTeam1Players : setTeam2Players;
+    setPlayers((current) => current.map((player, playerIndex) => playerIndex === index ? nextPlayer : player));
+  }
+
+  async function save() {
+    const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, session?.settings?.scoring);
+    if (scoreError) {
+      window.alert(scoreError);
+      return;
+    }
+
+    const playerIds = [...team1Players, ...team2Players].map((player) => String(player?.id || "")).filter(Boolean);
+    if (playerIds.length !== new Set(playerIds).size) {
+      window.alert("Each player can appear only once in a game.");
+      return;
+    }
+
+    const lineupResult = await runAction("updateMatchLineup", {
+      matchId: match.id,
+      team1Players,
+      team2Players,
+      byePlayers: match.bye_players || [],
+    }, { returnResult: true });
+    if (lineupResult?.success === false) return;
+
+    const scoreResult = await runAction("updateMatchScore", {
+      matchId: match.id,
+      team1Score,
+      team2Score,
+    }, { returnResult: true });
+    if (scoreResult?.success !== false) onClose();
+  }
+
+  return (
+    <div className="fixed inset-0 z-[10000] flex items-start justify-center overflow-y-auto bg-slate-950/70 p-0 sm:items-center sm:p-4">
+      <div className="flex min-h-[100dvh] w-full max-w-xl flex-col bg-white shadow-2xl sm:min-h-0 sm:rounded-lg">
+        <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
+          <div>
+            <div className={MODAL_EYEBROW_CHROME}>Pre-Export Correction</div>
+            <h3 className="text-xl font-black">{match.court_name || `Court ${match.court_number || ""}`}</h3>
+            <div className={MODAL_SUPPORTING_TEXT}>Update player names or the final score before DUPR export.</div>
+          </div>
+          <button type="button" onClick={onClose} disabled={saving} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 hover:bg-slate-100 disabled:opacity-60">Close</button>
+        </div>
+        <div className="space-y-5 p-4">
+          <PastMatchEditTeam title="Team 1" players={team1Players} score={team1Score} options={playerOptions} onPlayerChange={(index, value) => updatePlayer("team1", index, value)} onScoreChange={setTeam1Score} />
+          <PastMatchEditTeam title="Team 2" players={team2Players} score={team2Score} options={playerOptions} onPlayerChange={(index, value) => updatePlayer("team2", index, value)} onScoreChange={setTeam2Score} />
+        </div>
+        <div className="mt-auto flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end">
+          <button type="button" onClick={onClose} disabled={saving} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-700 hover:bg-slate-100 disabled:opacity-60">Cancel</button>
+          <button type="button" onClick={save} disabled={saving} className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-black text-white hover:bg-teal-800 disabled:bg-slate-300">{saving ? "Saving..." : "Save Corrections"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PastMatchEditTeam({ title, players, score, options, onPlayerChange, onScoreChange }) {
+  return (
+    <section className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+      <div className="flex items-center justify-between gap-3">
+        <div className="font-black text-slate-950">{title}</div>
+        <label className="flex items-center gap-2 text-sm font-black text-slate-700">Score
+          <input value={score} onChange={(event) => onScoreChange(event.target.value)} inputMode="numeric" className="w-20 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-center text-lg font-black text-slate-950" />
+        </label>
+      </div>
+      <div className="mt-3 grid gap-2">
+        {players.map((player, index) => (
+          <label key={`${player?.id || "player"}-${index}`} className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
+            Player {index + 1}
+            <select value={String(player?.id || "")} onChange={(event) => onPlayerChange(index, event.target.value)} className="rounded-md border border-slate-300 bg-white px-2 py-2 text-sm font-bold normal-case tracking-normal text-slate-950">
+              {options.map((option) => <option key={option.id} value={option.id}>{option.displayName}{option.duprId ? ` (DUPR ${option.duprId})` : ""}</option>)}
+            </select>
+          </label>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function matchPlayerOptionsForEdit(state, session, match) {
+  const options = new Map();
+  const addPlayer = (player) => {
+    const id = String(player?.id || player?.player_id || "").trim();
+    const displayName = String(player?.displayName || player?.display_name || player?.display_name_snapshot || player?.name || "").trim();
+    if (!id || !displayName || options.has(id)) return;
+    options.set(id, {
+      id,
+      displayName,
+      firstLabel: String(player?.firstLabel || "").trim() || roundRobinPlayerLabel(displayName),
+      duprId: normalizeDuprId(player?.duprId || player?.dupr_id),
+    });
+  };
+
+  allPlayersForSession(state, session.id).forEach(addPlayer);
+  [...(match.team1_players || []), ...(match.team2_players || [])].forEach(addPlayer);
+  return [...options.values()].sort((first, second) => compareNamesByFirstName(first.displayName, second.displayName));
 }
 
 function AdminGameTeamPanel({ players, score, isWinner, align = "left" }) {
@@ -1942,9 +2067,11 @@ function AdminPlayerNameList({ players, align = "left" }) {
   );
 }
 
-function SessionResultsModal({ state, session, onClose }) {
+function SessionResultsModal({ state, session, runAction, actionLoading, onClose }) {
   const [showLadderHelp, setShowLadderHelp] = useState(false);
+  const [editingMatch, setEditingMatch] = useState(null);
   const isLadder = isLadderSession(session);
+  const canEditResults = session.status === "done" && !sessionDuprExported(session);
   const ladder = sessionLadderForSession(state, session);
   const standings = sessionResultsForSession(state, session.id).map((row) => ({
     ...row,
@@ -2062,6 +2189,9 @@ function SessionResultsModal({ state, session, onClose }) {
 
             <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 p-3">
               <div className="text-sm font-black text-slate-700">Match Game Details</div>
+              {canEditResults && (
+                <div className="mt-1 text-xs font-bold text-teal-800">Correct player names or scores before DUPR export.</div>
+              )}
               <div className="mt-3 space-y-3">
                 {roundGroups.map((round) => {
                   const byes = roundByePlayers(round);
@@ -2080,7 +2210,7 @@ function SessionResultsModal({ state, session, onClose }) {
                       )}
                       <div className="grid grid-cols-1 gap-3 p-3">
                         {round.matches.map((match) => (
-                          <AdminGameResultCard key={match.id} match={match} />
+                          <AdminGameResultCard key={match.id} match={match} onEdit={canEditResults ? () => setEditingMatch(match) : null} />
                         ))}
                       </div>
                     </section>
@@ -2094,6 +2224,16 @@ function SessionResultsModal({ state, session, onClose }) {
           </div>
         </div>
       </div>
+      {editingMatch && (
+        <PastMatchEditModal
+          state={state}
+          session={session}
+          match={editingMatch}
+          runAction={runAction}
+          actionLoading={actionLoading}
+          onClose={() => setEditingMatch(null)}
+        />
+      )}
     </ModalPortal>
   );
 }
@@ -2600,7 +2740,8 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
   );
 }
 
-function ManagerRound({ round, session = null, runAction, actionLoading, swapSelection, setSwapSelection, isLadderMatch = false, onPendingScoreChange }) {
+function ManagerRound({ state, round, session = null, runAction, actionLoading, swapSelection, setSwapSelection, isLadderMatch = false, onPendingScoreChange }) {
+  const [editPlayersOpen, setEditPlayersOpen] = useState(false);
   const scoring = normalizeRoundRobinScoring(session?.settings?.scoring);
   const roundScored = round.matches.length > 0 && round.matches.every(matchHasSavedScore);
   const byeSlots = round.matches.flatMap((match) => slotPlayers(match, "bye"));
@@ -2641,6 +2782,7 @@ function ManagerRound({ round, session = null, runAction, actionLoading, swapSel
   }
 
   return (
+    <>
     <section id={roundElementId(round.roundNumber)} className={`scroll-mt-28 rounded-lg border p-4 shadow-[0_20px_60px_-42px_rgba(15,23,42,0.75)] ${
       roundScored
         ? "border-emerald-300 bg-emerald-50/95 ring-2 ring-emerald-200/80"
@@ -2669,9 +2811,14 @@ function ManagerRound({ round, session = null, runAction, actionLoading, swapSel
           )}
         </div>
         {!roundScored && !isLadderMatch && (
-          <button type="button" onClick={shuffleRound} disabled={actionLoading === "updateMatchLineup"} className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-amber-600 disabled:bg-slate-300">
-            Shuffle Round
-          </button>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setEditPlayersOpen(true)} disabled={actionLoading === "updateMatchLineup"} className="rounded-lg border border-teal-300 bg-teal-50 px-4 py-2 text-sm font-black text-teal-900 shadow-sm hover:bg-teal-100 disabled:bg-slate-100 disabled:text-slate-400">
+              Edit
+            </button>
+            <button type="button" onClick={shuffleRound} disabled={actionLoading === "updateMatchLineup"} className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-amber-600 disabled:bg-slate-300">
+              Shuffle Round
+            </button>
+          </div>
         )}
       </div>
       <div className="mt-3 grid grid-cols-1 gap-4 2xl:grid-cols-2">
@@ -2689,7 +2836,173 @@ function ManagerRound({ round, session = null, runAction, actionLoading, swapSel
         ))}
       </div>
     </section>
+    {editPlayersOpen && (
+      <LiveRoundPlayerEditor
+        state={state}
+        session={session}
+        round={round}
+        runAction={runAction}
+        actionLoading={actionLoading}
+        onClose={() => setEditPlayersOpen(false)}
+      />
+    )}
+    </>
   );
+}
+
+function LiveRoundPlayerEditor({ state, session, round, runAction, actionLoading, onClose }) {
+  const currentPlayerIds = useMemo(
+    () => [...playerIdsFromMatches(round.matches || [])],
+    [round.matches]
+  );
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState(currentPlayerIds);
+  const [showAddPlayer, setShowAddPlayer] = useState(false);
+  const [selectedSessionPlayerId, setSelectedSessionPlayerId] = useState("");
+  const [newPlayerName, setNewPlayerName] = useState("");
+  const [newPlayerPhone, setNewPlayerPhone] = useState("");
+  const joinedPlayers = sessionPlayersForStatus(state, session.id, "joined");
+  const availableSessionPlayers = allPlayersForSession(state, session.id)
+    .filter((player) => player.response_status !== "joined")
+    .sort((first, second) => compareNamesByFirstName(first.display_name, second.display_name));
+  const selectedSet = new Set(selectedPlayerIds.map(String));
+  const slotCount = currentPlayerIds.length;
+  const saving = actionLoading === "updateMatchLineup";
+  const addingExistingPlayer = actionLoading === "addSessionPlayer";
+  const addingNewPlayer = actionLoading === "addSessionNewPlayer";
+
+  function togglePlayer(playerId) {
+    const id = String(playerId || "");
+    setSelectedPlayerIds((current) => current.map(String).includes(id)
+      ? current.filter((value) => String(value) !== id)
+      : [...current, id]);
+  }
+
+  async function addSelectedSessionPlayer() {
+    const player = availableSessionPlayers.find((item) => String(item.id) === selectedSessionPlayerId);
+    if (!player) return;
+    const result = await runAction("addSessionPlayer", {
+      sessionId: session.id,
+      playerId: player.player_id,
+    }, { returnResult: true });
+    if (result?.success !== false) {
+      const playerId = String(result?.sessionPlayer?.player_id || player.player_id || "");
+      setSelectedPlayerIds((current) => [...new Set([...current, playerId])]);
+      setSelectedSessionPlayerId("");
+    }
+  }
+
+  async function addNewPlayer() {
+    if (!newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10) return;
+    const result = await runAction("addSessionNewPlayer", {
+      sessionId: session.id,
+      displayName: newPlayerName,
+      phone: newPlayerPhone,
+    }, { returnResult: true });
+    if (result?.success !== false) {
+      const playerId = String(result?.sessionPlayer?.player_id || "");
+      if (playerId) setSelectedPlayerIds((current) => [...new Set([...current, playerId])]);
+      setNewPlayerName("");
+      setNewPlayerPhone("");
+      setShowAddPlayer(false);
+    }
+  }
+
+  async function savePlayerChanges() {
+    if (selectedPlayerIds.length !== slotCount) {
+      window.alert(`Choose exactly ${slotCount} player${slotCount === 1 ? "" : "s"} to refill this round's existing court slots.`);
+      return;
+    }
+
+    const playerById = new Map(joinedPlayers.map((player) => [String(player.player_id || player.id || ""), player]));
+    const selectedPlayers = selectedPlayerIds.map((playerId) => playerById.get(String(playerId))).filter(Boolean);
+    if (selectedPlayers.length !== slotCount) {
+      window.alert("Please wait for the added player to appear, then save the updated player list.");
+      return;
+    }
+
+    let playerIndex = 0;
+    for (const match of round.matches || []) {
+      const nextPlayers = (count) => selectedPlayers.slice(playerIndex, playerIndex += count).map(liveRoundPlayerPayload);
+      const result = await runAction("updateMatchLineup", {
+        matchId: match.id,
+        team1Players: nextPlayers((match.team1_players || []).length),
+        team2Players: nextPlayers((match.team2_players || []).length),
+        byePlayers: nextPlayers((match.bye_players || []).length),
+      }, { returnResult: true });
+      if (result?.success === false) return;
+    }
+    onClose();
+  }
+
+  return (
+    <ModalPortal>
+      <div className="fixed inset-0 z-[9999] flex items-start justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
+        <div className="flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden rounded-none bg-white shadow-2xl sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
+          <div className={`flex flex-wrap items-start justify-between gap-3 p-4 ${MODAL_HEADER_CHROME}`}>
+            <div>
+              <div className={MODAL_EYEBROW_CHROME}>Edit Round Players</div>
+              <h3 className="text-xl font-black">Round {round.roundNumber}</h3>
+              <div className={MODAL_SUPPORTING_TEXT}>Choose players or add someone, then refill the current unscored court slots.</div>
+            </div>
+            <button type="button" onClick={onClose} disabled={saving} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 hover:bg-slate-100 disabled:opacity-60">Cancel</button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="text-sm font-black text-blue-950">Select {slotCount} players for this round</div>
+                <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-blue-900">{selectedPlayerIds.length} selected</div>
+              </div>
+              <div className="mt-3 grid gap-2">
+                {joinedPlayers.map((player) => {
+                  const playerId = String(player.player_id || player.id || "");
+                  return (
+                    <label key={player.id} className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-sm font-black ${selectedSet.has(playerId) ? "border-teal-300 bg-white text-slate-950" : "border-slate-200 bg-slate-100 text-slate-500"}`}>
+                      <input type="checkbox" checked={selectedSet.has(playerId)} onChange={() => togglePlayer(playerId)} className="h-5 w-5 rounded border-slate-300 text-teal-700" />
+                      <span>{player.display_name || "Player"}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              {!showAddPlayer ? (
+                <button type="button" onClick={() => setShowAddPlayer(true)} className="mt-3 w-full rounded-lg border border-blue-700 bg-white px-3 py-2 text-sm font-black text-blue-900 hover:bg-blue-100">Add Player</button>
+              ) : (
+                <div className="mt-3 space-y-3 rounded-lg border border-blue-200 bg-white p-3">
+                  <label className="block text-sm font-bold text-slate-700">Invited player
+                    <select value={selectedSessionPlayerId} onChange={(event) => setSelectedSessionPlayerId(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950">
+                      <option value="">Select a player from the invited group</option>
+                      {availableSessionPlayers.map((player) => <option key={player.id} value={player.id}>{player.display_name || "Player"}{player.phone ? ` - ${player.phone}` : ""}</option>)}
+                    </select>
+                  </label>
+                  <button type="button" onClick={addSelectedSessionPlayer} disabled={addingExistingPlayer || !selectedSessionPlayerId} className="w-full rounded-lg bg-blue-700 px-3 py-2 text-sm font-black text-white disabled:bg-slate-300">{addingExistingPlayer ? "Adding..." : "Add Selected Player"}</button>
+                  <div className="border-t border-slate-200 pt-3">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <TextInput label="Player name" value={newPlayerName} onChange={setNewPlayerName} required />
+                      <TextInput label="Phone #" type="tel" value={newPlayerPhone} onChange={(value) => setNewPlayerPhone(formatPhoneInput(value))} placeholder="(941) 555-1212" required />
+                    </div>
+                    <button type="button" onClick={addNewPlayer} disabled={addingNewPlayer || !newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10} className="mt-3 w-full rounded-lg bg-teal-700 px-3 py-2 text-sm font-black text-white disabled:bg-slate-300">{addingNewPlayer ? "Adding..." : "Add New Player"}</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end">
+            <button type="button" onClick={onClose} disabled={saving} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-700 disabled:opacity-60">Cancel</button>
+            <button type="button" onClick={savePlayerChanges} disabled={saving} className="rounded-lg bg-teal-700 px-4 py-2 text-sm font-black text-white hover:bg-teal-800 disabled:bg-slate-300">{saving ? "Saving..." : "Save Player Changes"}</button>
+          </div>
+        </div>
+      </div>
+    </ModalPortal>
+  );
+}
+
+function liveRoundPlayerPayload(player) {
+  const displayName = player?.display_name || player?.displayName || "Player";
+  return {
+    id: String(player?.player_id || player?.id || ""),
+    displayName,
+    firstLabel: roundRobinPlayerLabel(displayName),
+    duprId: normalizeDuprId(player?.dupr_id || player?.duprId),
+  };
 }
 
 function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked = false, runAction, swapSelection, setSwapSelection, onPendingScoreChange }) {

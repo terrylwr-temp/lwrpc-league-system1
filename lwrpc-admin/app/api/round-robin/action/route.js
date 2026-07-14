@@ -1888,6 +1888,7 @@ async function updateMatchScore(supabase, group, body) {
   const team1Score = normalizeScore(body.team1Score);
   const team2Score = normalizeScore(body.team2Score);
   const session = await loadSessionForGroup(supabase, group.id, existing.session_id);
+  if (sessionDuprExported(session)) throw new Error("This match has already been exported to DUPR and can no longer be edited.");
   const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, session.settings?.scoring);
   if (scoreError) throw new Error(scoreError);
 
@@ -1913,6 +1914,8 @@ async function updateMatchLineup(supabase, group, body) {
   if (!matchId) throw new Error("Match is required.");
 
   const existing = await loadMatchForGroup(supabase, group.id, matchId);
+  const session = await loadSessionForGroup(supabase, group.id, existing.session_id);
+  if (sessionDuprExported(session)) throw new Error("This match has already been exported to DUPR and can no longer be edited.");
   const payload = {
     team1_players: sanitizeMatchPlayers(body.team1Players),
     team2_players: sanitizeMatchPlayers(body.team2Players),
@@ -3015,6 +3018,10 @@ function publicPlayerPayload(player) {
 
 function normalizeDuprId(value) {
   return String(value || "").trim().toUpperCase();
+}
+
+function sessionDuprExported(session) {
+  return Boolean(session?.settings?.duprExportedAt || session?.settings?.duprExport?.exportedAt);
 }
 
 function sanitizeMatchPlayers(players = []) {
