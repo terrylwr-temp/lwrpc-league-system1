@@ -1907,11 +1907,11 @@ function AdminGameResultCard({ match, onEdit = null }) {
 }
 
 function PastMatchEditModal({ state, session, match, runAction, actionLoading, onClose }) {
+  const playerOptions = matchPlayerOptionsForEdit(state, session, match);
   const [team1Score, setTeam1Score] = useState(match.team1_score ?? "");
   const [team2Score, setTeam2Score] = useState(match.team2_score ?? "");
-  const [team1Players, setTeam1Players] = useState(() => [...(match.team1_players || [])]);
-  const [team2Players, setTeam2Players] = useState(() => [...(match.team2_players || [])]);
-  const playerOptions = matchPlayerOptionsForEdit(state, session, match);
+  const [team1Players, setTeam1Players] = useState(() => normalizeMatchPlayersForEdit(match.team1_players, playerOptions));
+  const [team2Players, setTeam2Players] = useState(() => normalizeMatchPlayersForEdit(match.team2_players, playerOptions));
   const saving = ["updateMatchLineup", "updateMatchScore"].includes(actionLoading);
 
   function updatePlayer(side, index, playerId) {
@@ -1940,20 +1940,29 @@ function PastMatchEditModal({ state, session, match, runAction, actionLoading, o
       return;
     }
 
-    const lineupResult = await runAction("updateMatchLineup", {
-      matchId: match.id,
-      team1Players,
-      team2Players,
-      byePlayers: match.bye_players || [],
-    }, { returnResult: true });
-    if (lineupResult?.success === false) return;
+    const lineupChanged = !sameMatchPlayers(team1Players, match.team1_players) ||
+      !sameMatchPlayers(team2Players, match.team2_players);
+    if (lineupChanged) {
+      const lineupResult = await runAction("updateMatchLineup", {
+        matchId: match.id,
+        team1Players,
+        team2Players,
+        byePlayers: match.bye_players || [],
+      }, { returnResult: true });
+      if (lineupResult?.success === false) return;
+    }
 
-    const scoreResult = await runAction("updateMatchScore", {
-      matchId: match.id,
-      team1Score,
-      team2Score,
-    }, { returnResult: true });
-    if (scoreResult?.success !== false) onClose();
+    const scoreChanged = String(team1Score) !== String(match.team1_score ?? "") ||
+      String(team2Score) !== String(match.team2_score ?? "");
+    if (scoreChanged) {
+      const scoreResult = await runAction("updateMatchScore", {
+        matchId: match.id,
+        team1Score,
+        team2Score,
+      }, { returnResult: true });
+      if (scoreResult?.success === false) return;
+    }
+    onClose();
   }
 
   return (
@@ -1994,7 +2003,7 @@ function PastMatchEditTeam({ title, players, score, options, onPlayerChange, onS
           <label key={`${player?.id || "player"}-${index}`} className="grid gap-1 text-xs font-black uppercase tracking-wide text-slate-500">
             Player {index + 1}
             <select value={String(player?.id || "")} onChange={(event) => onPlayerChange(index, event.target.value)} className="rounded-md border border-slate-300 bg-white px-2 py-2 text-sm font-bold normal-case tracking-normal text-slate-950">
-              {options.map((option) => <option key={option.id} value={option.id}>{option.displayName}{option.duprId ? ` (DUPR ${option.duprId})` : ""}</option>)}
+              {options.map((option) => <option key={option.id} value={option.id}>{option.displayName}</option>)}
             </select>
           </label>
         ))}
@@ -2005,21 +2014,51 @@ function PastMatchEditTeam({ title, players, score, options, onPlayerChange, onS
 
 function matchPlayerOptionsForEdit(state, session, match) {
   const options = new Map();
+  const sessionPlayerIdsByRowId = new Map(allPlayersForSession(state, session.id)
+    .map((player) => [String(player.id || ""), String(player.player_id || "")])
+    .filter(([rowId, playerId]) => rowId && playerId));
   const addPlayer = (player) => {
-    const id = String(player?.id || player?.player_id || "").trim();
+    const rawId = String(player?.id || player?.player_id || "").trim();
+    const id = String(player?.player_id || sessionPlayerIdsByRowId.get(rawId) || rawId).trim();
     const displayName = String(player?.displayName || player?.display_name || player?.display_name_snapshot || player?.name || "").trim();
-    if (!id || !displayName || options.has(id)) return;
+    if (!id || !displayName) return;
+    const existing = options.get(id);
+    if (existing) {
+      existing.sourceIds.add(rawId);
+      return;
+    }
     options.set(id, {
       id,
       displayName,
       firstLabel: String(player?.firstLabel || "").trim() || roundRobinPlayerLabel(displayName),
       duprId: normalizeDuprId(player?.duprId || player?.dupr_id),
+      sourceIds: new Set([id, rawId]),
     });
   };
 
-  allPlayersForSession(state, session.id).forEach(addPlayer);
+  activeSessionPlayersForSession(state, session.id).forEach(addPlayer);
   [...(match.team1_players || []), ...(match.team2_players || [])].forEach(addPlayer);
   return [...options.values()].sort((first, second) => compareNamesByFirstName(first.displayName, second.displayName));
+}
+
+function normalizeMatchPlayersForEdit(players, options) {
+  return (players || []).map((player) => {
+    const playerId = String(player?.id || player?.player_id || "");
+    const option = options.find((item) => item.sourceIds?.has(playerId));
+    return option
+      ? { id: option.id, displayName: option.displayName, firstLabel: option.firstLabel, duprId: option.duprId }
+      : player;
+  });
+}
+
+function sameMatchPlayers(firstPlayers, secondPlayers) {
+  if ((firstPlayers || []).length !== (secondPlayers || []).length) return false;
+  return (firstPlayers || []).every((player, index) => {
+    const other = secondPlayers[index] || {};
+    return String(player?.id || player?.player_id || "") === String(other?.id || other?.player_id || "") &&
+      String(player?.displayName || player?.display_name || "") === String(other?.displayName || other?.display_name || "") &&
+      normalizeDuprId(player?.duprId || player?.dupr_id) === normalizeDuprId(other?.duprId || other?.dupr_id);
+  });
 }
 
 function AdminGameTeamPanel({ players, score, isWinner, align = "left" }) {

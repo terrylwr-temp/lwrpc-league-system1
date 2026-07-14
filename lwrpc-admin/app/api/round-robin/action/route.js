@@ -1916,10 +1916,18 @@ async function updateMatchLineup(supabase, group, body) {
   const existing = await loadMatchForGroup(supabase, group.id, matchId);
   const session = await loadSessionForGroup(supabase, group.id, existing.session_id);
   if (sessionDuprExported(session)) throw new Error("This match has already been exported to DUPR and can no longer be edited.");
+  const sessionPlayers = await loadSessionPlayers(supabase, session.id);
+  const savedPlayerIdBySessionRowId = new Map(sessionPlayers
+    .map((player) => [String(player.id || ""), String(player.player_id || "")])
+    .filter(([sessionRowId, playerId]) => sessionRowId && playerId));
+  const normalizeLineup = (players) => sanitizeMatchPlayers(players).map((player) => ({
+    ...player,
+    id: savedPlayerIdBySessionRowId.get(player.id) || player.id,
+  }));
   const payload = {
-    team1_players: sanitizeMatchPlayers(body.team1Players),
-    team2_players: sanitizeMatchPlayers(body.team2Players),
-    bye_players: sanitizeMatchPlayers(body.byePlayers),
+    team1_players: normalizeLineup(body.team1Players),
+    team2_players: normalizeLineup(body.team2Players),
+    bye_players: normalizeLineup(body.byePlayers),
     updated_at: new Date().toISOString(),
   };
 
@@ -2409,18 +2417,65 @@ async function rebuildResults(supabase, group, sessionId) {
     loadSessionMatches(supabase, sessionId),
   ]);
 
-  let standings = roundRobinStandings(matches.map((match) => ({
+  // Older correction saves could store a round_robin_session_players row ID in
+  // a match lineup. Results, however, must always reference the saved
+  // round_robin_players ID. Repair those recoverable legacy lineups for the
+  // entire session before calculating or saving player results.
+  const savedPlayerIdBySessionRowId = new Map(players
+    .map((player) => [String(player.id || ""), String(player.player_id || "")])
+    .filter(([sessionRowId, playerId]) => sessionRowId && playerId));
+  const validPlayerIds = new Set(players
+    .map((player) => String(player.player_id || ""))
+    .filter(Boolean));
+  const repairMatchPlayers = (matchPlayers = []) => (Array.isArray(matchPlayers) ? matchPlayers : [])
+    .map((player) => {
+      const playerId = String(player?.id || "");
+      const savedPlayerId = savedPlayerIdBySessionRowId.get(playerId);
+      return savedPlayerId ? { ...player, id: savedPlayerId } : player;
+    });
+  const repairedMatches = await Promise.all(matches.map(async (match) => {
+    const team1Players = repairMatchPlayers(match.team1_players);
+    const team2Players = repairMatchPlayers(match.team2_players);
+    const byePlayers = repairMatchPlayers(match.bye_players);
+    const lineupsChanged = JSON.stringify(team1Players) !== JSON.stringify(match.team1_players || [])
+      || JSON.stringify(team2Players) !== JSON.stringify(match.team2_players || [])
+      || JSON.stringify(byePlayers) !== JSON.stringify(match.bye_players || []);
+
+    if (lineupsChanged) {
+      const { error } = await supabase
+        .from("round_robin_matches")
+        .update({
+          team1_players: team1Players,
+          team2_players: team2Players,
+          bye_players: byePlayers,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", match.id);
+      if (error) throw error;
+    }
+
+    return {
+      ...match,
+      team1_players: team1Players,
+      team2_players: team2Players,
+      bye_players: byePlayers,
+    };
+  }));
+  const validMatchPlayers = (matchPlayers = []) => (Array.isArray(matchPlayers) ? matchPlayers : [])
+    .filter((player) => validPlayerIds.has(String(player?.id || "")));
+
+  let standings = roundRobinStandings(repairedMatches.map((match) => ({
     ...match,
-    team1: match.team1_players || [],
-    team2: match.team2_players || [],
-    byes: match.bye_players || [],
+    team1: validMatchPlayers(match.team1_players),
+    team2: validMatchPlayers(match.team2_players),
+    byes: validMatchPlayers(match.bye_players),
   })), players.map((player) => ({
     id: player.player_id,
     displayName: player.display_name,
   })));
   if (isLadderSession(session)) {
     const ladder = await loadCurrentLadderForSession(supabase, group, session);
-    standings = sortLadderStandings(standings, matches, ladder);
+    standings = sortLadderStandings(standings, repairedMatches, ladder);
   }
 
   const { data: existingResults, error: existingResultsError } = await supabase
