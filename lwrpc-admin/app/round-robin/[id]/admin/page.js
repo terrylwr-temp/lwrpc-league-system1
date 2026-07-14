@@ -139,6 +139,7 @@ export default function RoundRobinAdminPage() {
   const playerPhoneStorageKey = `lwrpc-round-robin-player-phone-${id}`;
   const requestedHostSessionId = searchParams.get("hostSessionId") || "";
   const requestedManagerMode = searchParams.get("manager") === "1";
+  const loginEmailInputRef = useRef(null);
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -334,7 +335,7 @@ export default function RoundRobinAdminPage() {
   }
 
   async function forgotPassword(tokenOverride = "") {
-    const normalizedEmail = normalizeEmailAddress(tokenOverride ? pendingPasswordResetEmail : loginEmail);
+    const normalizedEmail = normalizeEmailAddress(tokenOverride ? pendingPasswordResetEmail : (loginEmailInputRef.current?.value || loginEmail));
     const securityToken = tokenOverride || turnstileToken;
 
     if (!normalizedEmail) {
@@ -613,6 +614,7 @@ export default function RoundRobinAdminPage() {
               <div>
                 <label className="text-sm font-black text-teal-100">Email Address</label>
                 <input
+                  ref={loginEmailInputRef}
                   type="email"
                   value={loginEmail}
                   onChange={(event) => {

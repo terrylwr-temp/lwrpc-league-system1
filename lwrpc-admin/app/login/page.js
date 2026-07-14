@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import TurnstileWidget from "../components/TurnstileWidget";
 import { supabase } from "../lib/auth";
@@ -13,6 +13,7 @@ import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from
 
 export default function LoginPage() {
   const router = useRouter();
+  const emailInputRef = useRef(null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -122,7 +123,7 @@ export default function LoginPage() {
   }
 
   async function forgotPassword(tokenOverride = "") {
-    const normalizedEmail = normalizeEmailAddress(tokenOverride ? pendingPasswordResetEmail : email);
+    const normalizedEmail = normalizeEmailAddress(tokenOverride ? pendingPasswordResetEmail : (emailInputRef.current?.value || email));
     const securityToken = tokenOverride || turnstileToken;
 
     if (!normalizedEmail) {
@@ -247,6 +248,7 @@ export default function LoginPage() {
               </label>
 
               <input
+                ref={emailInputRef}
                 type="email"
                 className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 value={email}
