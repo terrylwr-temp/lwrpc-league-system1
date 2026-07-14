@@ -23,6 +23,7 @@ export default function LoginPage() {
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
   const [turnstileToken, setTurnstileToken] = useState("");
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [showPasswordResetSecurity, setShowPasswordResetSecurity] = useState(false);
 
   useEffect(() => {
     async function loadSystemSettings() {
@@ -134,6 +135,12 @@ export default function LoginPage() {
       return;
     }
 
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+      setShowPasswordResetSecurity(true);
+      setMessage("Complete the security check, then click Forgot Password again.");
+      return;
+    }
+
     setLoading(true);
     setEmail(normalizedEmail);
     setMessage("Checking member email...");
@@ -164,6 +171,7 @@ export default function LoginPage() {
       setLoading(false);
       setTurnstileToken("");
       setTurnstileResetKey((currentKey) => currentKey + 1);
+      setShowPasswordResetSecurity(false);
     }
   }
 
@@ -343,7 +351,12 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <TurnstileWidget key={turnstileResetKey} onToken={setTurnstileToken} />
+            {showPasswordResetSecurity && (
+              <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
+                <p className="mb-2 text-center text-xs font-semibold text-slate-600">Security check required before sending a password reset email.</p>
+                <TurnstileWidget key={turnstileResetKey} onToken={setTurnstileToken} />
+              </div>
+            )}
 
             {message && !isErrorMessage && !isSuccessMessage && (
               <div

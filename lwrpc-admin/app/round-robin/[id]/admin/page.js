@@ -144,6 +144,8 @@ export default function RoundRobinAdminPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [authMessage, setAuthMessage] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [showPasswordResetSecurity, setShowPasswordResetSecurity] = useState(false);
   const [hostPhone, setHostPhone] = useState("");
   const [state, setState] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -343,6 +345,12 @@ export default function RoundRobinAdminPage() {
       return;
     }
 
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+      setShowPasswordResetSecurity(true);
+      setAuthMessage("Complete the security check, then click Forgot Password again.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     setLoginEmail(normalizedEmail);
@@ -364,12 +372,13 @@ export default function RoundRobinAdminPage() {
 
     if (!memberCheck.ok || !memberCheckResult.success) {
       setAuthMessage(memberCheckResult.error || "Unable to verify that email address.");
-      setLoading(false);
-      return;
+    } else {
+      setAuthMessage(memberCheckResult.message || "If that email address belongs to an active league member, a sign-in email has been sent. Please check your inbox, spam, and promotions folders.");
     }
-
-    setAuthMessage(memberCheckResult.message || "If that email address belongs to an active league member, a sign-in email has been sent. Please check your inbox, spam, and promotions folders.");
     setLoading(false);
+    setTurnstileToken("");
+    setTurnstileResetKey((currentKey) => currentKey + 1);
+    setShowPasswordResetSecurity(false);
   }
 
   async function unlockHost(nextPhone = hostPhone, nextSessionId = requestedHostSessionId || window.sessionStorage.getItem(hostSessionStorageKey) || "") {
@@ -658,7 +667,12 @@ export default function RoundRobinAdminPage() {
               >
                 {loading ? "Signing In..." : "Sign In"}
               </button>
-              <TurnstileWidget onToken={setTurnstileToken} />
+              {showPasswordResetSecurity && (
+                <div className="rounded-lg border border-teal-300/25 bg-teal-950/40 px-3 py-3">
+                  <p className="mb-2 text-center text-xs font-semibold text-teal-100">Security check required before sending a password reset email.</p>
+                  <TurnstileWidget key={turnstileResetKey} onToken={setTurnstileToken} />
+                </div>
+              )}
             </form>
             <button
               type="button"
