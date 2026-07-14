@@ -1301,7 +1301,6 @@ export default function PlayerDashboardPage() {
                 standingsActive={activePanel === "standings"}
                 teamMatchesActive={activePanel === "upcoming"}
                 historyCount={filteredPlayHistory.length}
-                standingsCount={selectedDivisionStandings.length}
                 teamMatchesCount={upcomingMatchesBySelectedTeam.length}
                 standingsLeaders={selectedDivisionStandingsLeaders.leaders}
                 standingsMetricLabel={selectedDivisionStandingsLeaders.metricLabel}
@@ -1835,7 +1834,6 @@ function TeamCard({
   standingsActive,
   teamMatchesActive,
   historyCount,
-  standingsCount,
   teamMatchesCount,
   standingsLeaders,
   standingsMetricLabel,
@@ -1915,9 +1913,6 @@ function TeamCard({
           className={dashboardActionButtonClass(standingsActive)}
         >
           Division Standings
-          <span className={dashboardActionBadgeClass(standingsActive)}>
-            {standingsCount}
-          </span>
         </button>
         <button
           type="button"
