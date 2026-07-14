@@ -146,6 +146,7 @@ export default function RoundRobinAdminPage() {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [showPasswordResetSecurity, setShowPasswordResetSecurity] = useState(false);
+  const [pendingPasswordResetEmail, setPendingPasswordResetEmail] = useState("");
   const [hostPhone, setHostPhone] = useState("");
   const [state, setState] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -332,8 +333,9 @@ export default function RoundRobinAdminPage() {
     await unlock(liveSessionId);
   }
 
-  async function forgotPassword() {
-    const normalizedEmail = normalizeEmailAddress(loginEmail);
+  async function forgotPassword(tokenOverride = "") {
+    const normalizedEmail = normalizeEmailAddress(tokenOverride ? pendingPasswordResetEmail : loginEmail);
+    const securityToken = tokenOverride || turnstileToken;
 
     if (!normalizedEmail) {
       setAuthMessage("Enter your LMS email address first, then click Forgot Password.");
@@ -345,9 +347,10 @@ export default function RoundRobinAdminPage() {
       return;
     }
 
-    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !securityToken) {
+      setPendingPasswordResetEmail(normalizedEmail);
       setShowPasswordResetSecurity(true);
-      setAuthMessage("Complete the security check, then click Forgot Password again.");
+      setAuthMessage("");
       return;
     }
 
@@ -364,7 +367,7 @@ export default function RoundRobinAdminPage() {
       body: JSON.stringify({
         email: normalizedEmail,
         returnTo: roundRobinPath(id, "admin"),
-        turnstileToken,
+        turnstileToken: securityToken,
       }),
     });
 
@@ -379,6 +382,7 @@ export default function RoundRobinAdminPage() {
     setTurnstileToken("");
     setTurnstileResetKey((currentKey) => currentKey + 1);
     setShowPasswordResetSecurity(false);
+    setPendingPasswordResetEmail("");
   }
 
   async function unlockHost(nextPhone = hostPhone, nextSessionId = requestedHostSessionId || window.sessionStorage.getItem(hostSessionStorageKey) || "") {
@@ -670,7 +674,13 @@ export default function RoundRobinAdminPage() {
               {showPasswordResetSecurity && (
                 <div className="rounded-lg border border-teal-300/25 bg-teal-950/40 px-3 py-3">
                   <p className="mb-2 text-center text-xs font-semibold text-teal-100">Security check required before sending a password reset email.</p>
-                  <TurnstileWidget key={turnstileResetKey} onToken={setTurnstileToken} />
+                  <TurnstileWidget
+                    key={turnstileResetKey}
+                    onToken={(token) => {
+                      setTurnstileToken(token);
+                      if (token) void forgotPassword(token);
+                    }}
+                  />
                 </div>
               )}
             </form>

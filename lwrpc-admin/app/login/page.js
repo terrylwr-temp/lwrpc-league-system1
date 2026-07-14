@@ -24,6 +24,7 @@ export default function LoginPage() {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [showPasswordResetSecurity, setShowPasswordResetSecurity] = useState(false);
+  const [pendingPasswordResetEmail, setPendingPasswordResetEmail] = useState("");
 
   useEffect(() => {
     async function loadSystemSettings() {
@@ -120,8 +121,9 @@ export default function LoginPage() {
     await routeSignedInUser();
   }
 
-  async function forgotPassword() {
-    const normalizedEmail = normalizeEmailAddress(email);
+  async function forgotPassword(tokenOverride = "") {
+    const normalizedEmail = normalizeEmailAddress(tokenOverride ? pendingPasswordResetEmail : email);
+    const securityToken = tokenOverride || turnstileToken;
 
     if (!normalizedEmail) {
       setMessage(
@@ -135,9 +137,10 @@ export default function LoginPage() {
       return;
     }
 
-    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !securityToken) {
+      setPendingPasswordResetEmail(normalizedEmail);
       setShowPasswordResetSecurity(true);
-      setMessage("Complete the security check, then click Forgot Password again.");
+      setMessage("");
       return;
     }
 
@@ -153,7 +156,7 @@ export default function LoginPage() {
         },
         body: JSON.stringify({
           email: normalizedEmail,
-          turnstileToken,
+          turnstileToken: securityToken,
         }),
       });
 
@@ -172,6 +175,7 @@ export default function LoginPage() {
       setTurnstileToken("");
       setTurnstileResetKey((currentKey) => currentKey + 1);
       setShowPasswordResetSecurity(false);
+      setPendingPasswordResetEmail("");
     }
   }
 
@@ -354,7 +358,13 @@ export default function LoginPage() {
             {showPasswordResetSecurity && (
               <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
                 <p className="mb-2 text-center text-xs font-semibold text-slate-600">Security check required before sending a password reset email.</p>
-                <TurnstileWidget key={turnstileResetKey} onToken={setTurnstileToken} />
+                <TurnstileWidget
+                  key={turnstileResetKey}
+                  onToken={(token) => {
+                    setTurnstileToken(token);
+                    if (token) void forgotPassword(token);
+                  }}
+                />
               </div>
             )}
 
