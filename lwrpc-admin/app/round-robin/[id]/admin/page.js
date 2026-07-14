@@ -632,7 +632,7 @@ export default function RoundRobinAdminPage() {
                   <label className="text-sm font-black text-teal-100">Password</label>
                   <button
                     type="button"
-                    onClick={forgotPassword}
+                    onClick={() => forgotPassword()}
                     disabled={loading}
                     className="text-xs font-bold text-teal-200 hover:text-white disabled:opacity-50"
                   >

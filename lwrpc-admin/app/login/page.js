@@ -267,7 +267,7 @@ export default function LoginPage() {
 
                 <button
                   type="button"
-                  onClick={forgotPassword}
+                  onClick={() => forgotPassword()}
                   disabled={loading}
                   className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
                 >
