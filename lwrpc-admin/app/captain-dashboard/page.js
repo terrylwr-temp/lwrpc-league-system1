@@ -2525,15 +2525,6 @@ export default function CaptainDashboardPage() {
               </button>
 
               <a
-                href="https://lwrpickleballclub.com/manage-membership"
-                target="_blank"
-                rel="noreferrer"
-                className="hidden rounded-xl bg-white px-4 py-2 text-center text-sm font-bold text-slate-950 hover:bg-slate-100 md:block"
-              >
-                Membership Info
-              </a>
-
-              <a
                 href="mailto:info@lwrpickleballclub.com"
                 className="rounded-lg bg-emerald-500 px-2.5 py-1.5 text-center text-xs font-bold text-white hover:bg-emerald-400 md:rounded-xl md:px-4 md:py-2 md:text-sm"
               >

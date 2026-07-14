@@ -1208,12 +1208,6 @@ export default function PlayerDashboardPage() {
                 Membership Info
               </a>
 
-              <a
-                href="mailto:info@lwrpickleballclub.com"
-                className="rounded-lg bg-emerald-500 px-2.5 py-1.5 text-center text-xs font-bold text-white hover:bg-emerald-400 md:rounded-xl md:px-4 md:py-2 md:text-sm"
-              >
-                Contact League
-              </a>
             </div>
           }
         />
