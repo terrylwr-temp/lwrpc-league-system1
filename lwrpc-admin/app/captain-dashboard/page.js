@@ -995,6 +995,11 @@ export default function CaptainDashboardPage() {
           { id: match.away_team_id, name: match.away_team?.name || "Away", side: "Away" },
         ].filter((team) => team.id)
       : [];
+    const bothTeamsSetupComplete =
+      matchSetupTeams.length === 2 &&
+      matchSetupTeams.every((team) => (
+        matchSetupStatus[matchSetupKey(match.id, team.id)]?.complete === true
+      ));
     const opposingEmails = showSetup ? opposingCaptainEmailsForMatch(match) : [];
     const flexScheduleAvailable = canShowFlexScheduleControl(match);
     const flexScheduleAllowed = canManageFlexSchedule(match);
@@ -1170,22 +1175,26 @@ export default function CaptainDashboardPage() {
               {showSetup && (
                 <button
                   type="button"
-                  onClick={() => openMatchScoreSheet(match)}
-                  className="w-full rounded-lg bg-emerald-700 px-3 py-2 text-sm font-bold text-white hover:bg-emerald-800 sm:w-auto"
-                >
-                  Match Score Sheet
-                </button>
-              )}
-
-              {showSetup && (
-                <button
-                  type="button"
                   onClick={() => emailOpposingCaptains(match)}
                   disabled={opposingEmails.length === 0}
                   className="w-full rounded-lg bg-sky-700 px-3 py-2 text-sm font-bold text-white hover:bg-sky-800 disabled:cursor-not-allowed disabled:bg-slate-300 sm:w-auto"
                   title={opposingEmails.length > 0 ? `Email ${opposingEmails.length} opposing captain contact${opposingEmails.length === 1 ? "" : "s"}` : "No opposing captain email addresses found"}
                 >
                   Email Opposing Captains
+                </button>
+              )}
+
+              {showSetup && (
+                <button
+                  type="button"
+                  onClick={() => openMatchScoreSheet(match)}
+                  className={`w-full rounded-lg px-3 py-2 text-sm font-bold text-white sm:w-auto ${
+                    bothTeamsSetupComplete
+                      ? "bg-emerald-700 hover:bg-emerald-800"
+                      : "bg-red-700 hover:bg-red-800"
+                  }`}
+                >
+                  Match Score Sheet
                 </button>
               )}
 
