@@ -1135,6 +1135,14 @@ export default function PlayerDashboardPage() {
       return;
     }
 
+    const useNativePdfViewer = window.matchMedia("(max-width: 767px)").matches;
+    const documentWindow = useNativePdfViewer ? window.open("", "_blank") : null;
+
+    if (useNativePdfViewer && !documentWindow) {
+      alert("Unable to open this PDF. Please allow popups for this site and try again.");
+      return;
+    }
+
     const bucket = league?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET;
     let documentUrl = "";
 
@@ -1150,7 +1158,14 @@ export default function PlayerDashboardPage() {
     }
 
     if (!documentUrl) {
+      documentWindow?.close();
       alert("Unable to open this PDF. Check the Supabase Storage bucket and file path.");
+      return;
+    }
+
+    if (documentWindow) {
+      documentWindow.opener = null;
+      documentWindow.location.replace(documentUrl);
       return;
     }
 
@@ -1233,9 +1248,9 @@ export default function PlayerDashboardPage() {
                     {playerDisplayName}
                   </span>
                   <span className="hidden h-4 w-px bg-white/25 sm:inline-block" aria-hidden="true" />
-                  <span>
-                    {visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}
-                  </span>
+                  {visibleTeams.length > 1 && (
+                    <span>{visibleTeams.length} teams</span>
+                  )}
                   {playerTeamRatingSummary && (
                     <>
                       <span className="hidden h-4 w-px bg-white/25 sm:inline-block" aria-hidden="true" />

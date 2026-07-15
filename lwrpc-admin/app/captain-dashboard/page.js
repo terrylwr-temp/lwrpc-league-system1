@@ -2437,6 +2437,14 @@ export default function CaptainDashboardPage() {
       return;
     }
 
+    const useNativePdfViewer = window.matchMedia("(max-width: 767px)").matches;
+    const documentWindow = useNativePdfViewer ? window.open("", "_blank") : null;
+
+    if (useNativePdfViewer && !documentWindow) {
+      alert("Unable to open this PDF. Please allow popups for this site and try again.");
+      return;
+    }
+
     const bucket = league?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET;
     let documentUrl = "";
 
@@ -2452,7 +2460,14 @@ export default function CaptainDashboardPage() {
     }
 
     if (!documentUrl) {
+      documentWindow?.close();
       alert("Unable to open this PDF. Check the Supabase Storage bucket and file path.");
+      return;
+    }
+
+    if (documentWindow) {
+      documentWindow.opener = null;
+      documentWindow.location.replace(documentUrl);
       return;
     }
 
@@ -2858,10 +2873,16 @@ export default function CaptainDashboardPage() {
                 <div className="text-xs font-black uppercase tracking-wide text-blue-200">
                   Captain Workspace
                 </div>
-                <h2 className="mt-1 text-2xl font-black">My Teams</h2>
+                <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                  <h2 className="text-2xl font-black">My Teams</h2>
+                  {visibleTeams.length > 1 && (
+                    <span className="text-sm font-semibold text-slate-300">
+                      {visibleTeams.length} teams
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-300 md:justify-end">
-                <span>{visibleTeams.length} team{visibleTeams.length === 1 ? "" : "s"}</span>
                 {hasPreviousSeasonTeams && (
                   <button
                     type="button"

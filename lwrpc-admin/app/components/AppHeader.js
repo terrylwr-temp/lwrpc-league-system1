@@ -471,7 +471,7 @@ export default function AppHeader({
             <NavGroups mobile />
 
             {mobileSidebarAction && (
-              <div className="mt-6" onClickCapture={() => setMenuOpen(false)}>
+              <div className="mt-6" onClick={() => setMenuOpen(false)}>
                 {mobileSidebarAction}
               </div>
             )}
