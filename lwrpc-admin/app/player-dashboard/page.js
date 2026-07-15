@@ -35,6 +35,10 @@ import {
   isSpecialMatchResult,
   specialMatchResultLabel,
 } from "../lib/specialMatchResults";
+import {
+  matchLinePlayerRatingDisplay,
+  matchLineTeamRatingDisplay,
+} from "../lib/matchRatingSnapshots";
 
 const PLAYER_DOCUMENT_KEYS = new Set([
   "code_of_conduct",
@@ -310,6 +314,14 @@ export default function PlayerDashboardPage() {
               home_team_games_won,
               away_team_games_won,
               winning_team_id,
+              rating_type_at_play,
+              home_player_1_rating_at_play,
+              home_player_2_rating_at_play,
+              away_player_1_rating_at_play,
+              away_player_2_rating_at_play,
+              home_team_rating_at_play,
+              away_team_rating_at_play,
+              ratings_snapshotted_at,
               division_lines (
                 id,
                 line_name,
@@ -472,6 +484,14 @@ export default function PlayerDashboardPage() {
         home_team_games_won,
         away_team_games_won,
         winning_team_id,
+        rating_type_at_play,
+        home_player_1_rating_at_play,
+        home_player_2_rating_at_play,
+        away_player_1_rating_at_play,
+        away_player_2_rating_at_play,
+        home_team_rating_at_play,
+        away_team_rating_at_play,
+        ratings_snapshotted_at,
         line_games (
           id,
           game_number,
@@ -1041,6 +1061,14 @@ export default function PlayerDashboardPage() {
             home_team_games_won,
             away_team_games_won,
             winning_team_id,
+            rating_type_at_play,
+            home_player_1_rating_at_play,
+            home_player_2_rating_at_play,
+            away_player_1_rating_at_play,
+            away_player_2_rating_at_play,
+            home_team_rating_at_play,
+            away_team_rating_at_play,
+            ratings_snapshotted_at,
             division_lines ( line_name, line_type, posted_to_dupr, team_win_points, picklebreaker_not_played_points, picklebreaker_not_played_award_rule, picklebreaker_play_rule ),
             home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
             home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
@@ -2692,6 +2720,8 @@ function MatchLineResult({ line, match, ratingForMember }) {
         <ResultTeamPlayers
           label={`Home: ${match.home_team?.name || "Home"}`}
           players={[line.home_player_1, line.home_player_2]}
+          line={line}
+          side="home"
           match={match}
           tone="home"
           won={winnerSide === "home"}
@@ -2700,6 +2730,8 @@ function MatchLineResult({ line, match, ratingForMember }) {
         <ResultTeamPlayers
           label={`Away: ${match.away_team?.name || "Away"}`}
           players={[line.away_player_1, line.away_player_2]}
+          line={line}
+          side="away"
           match={match}
           tone="away"
           won={winnerSide === "away"}
@@ -2776,7 +2808,7 @@ function GameScoreCard({ game, match }) {
   );
 }
 
-function ResultTeamPlayers({ label, players, match, ratingForMember, tone = "home", won = false }) {
+function ResultTeamPlayers({ label, players, line, side, match, ratingForMember, tone = "home", won = false }) {
   const toneClass =
     tone === "away"
       ? "bg-indigo-50 text-indigo-950"
@@ -2791,17 +2823,22 @@ function ResultTeamPlayers({ label, players, match, ratingForMember, tone = "hom
         {label}
       </div>
       <div className="mt-1 space-y-1 text-sm font-semibold text-slate-800">
-        {players.filter(Boolean).map((player) => (
+        {players.map((player, index) => ({ player, index })).filter(({ player }) => Boolean(player)).map(({ player, index }) => (
           <div key={player.id} className="flex items-center justify-between gap-2">
             <span>{formatMemberName(player)}</span>
             <span className="rounded-full bg-white px-2 py-0.5 text-xs font-black text-slate-700">
-              {ratingForMember(player.id, match.leagues?.season_id, match.divisions?.rating_type || "dupr", player)}
+              {matchLinePlayerRatingDisplay(
+                line,
+                side,
+                index + 1,
+                ratingForMember(player.id, match.leagues?.season_id, match.divisions?.rating_type || "dupr", player)
+              )}
             </span>
           </div>
         ))}
         {players.filter(Boolean).length > 0 && (
           <div className="pt-1 text-xs font-black uppercase tracking-wide text-slate-600">
-            Team Rating: {teamLineRating(players, match, ratingForMember)}
+            Team Rating: {teamLineRating(players, match, ratingForMember, line, side)}
           </div>
         )}
         {players.filter(Boolean).length === 0 && (
@@ -2932,7 +2969,7 @@ function formatPlayerRecord(record) {
   return `${wins}-${losses}`;
 }
 
-function teamLineRating(players, match, ratingForMember) {
+function teamLineRating(players, match, ratingForMember, line = null, side = "home") {
   const ratings = players
     .filter(Boolean)
     .map((player) =>
@@ -2947,8 +2984,7 @@ function teamLineRating(players, match, ratingForMember) {
     )
     .filter((rating) => !Number.isNaN(rating));
 
-  if (!ratings.length) return "NR";
-  return ratings.reduce((sum, rating) => sum + rating, 0).toFixed(2);
+  return matchLineTeamRatingDisplay(line, side, ratings);
 }
 
 function lineTeamPointsText(line) {
@@ -3541,12 +3577,13 @@ function linePlayerNames(row, sideLabel, ratingForMember) {
   const seasonId = match?.leagues?.season_id;
 
   return members
-    .filter(Boolean)
-    .map((member) => {
+    .map((member, index) => ({ member, index }))
+    .filter(({ member }) => Boolean(member))
+    .map(({ member, index }) => {
       const rating = ratingForMember
         ? ratingForMember(member.id, seasonId, ratingType, member)
         : "NR";
-      return `${formatMemberName(member)} (${rating})`;
+      return `${formatMemberName(member)} (${matchLinePlayerRatingDisplay(row, sideLabel.toLowerCase(), index + 1, rating)})`;
     })
     .filter(Boolean)
     .join(" / ") || "Players TBD";
@@ -3562,5 +3599,5 @@ function lineTeamRating(row, sideLabel, ratingForMember) {
       ? [row.home_player_1, row.home_player_2]
       : [row.away_player_1, row.away_player_2];
 
-  return teamLineRating(players, row.matches, ratingForMember);
+  return teamLineRating(players, row.matches, ratingForMember, row, sideLabel.toLowerCase());
 }

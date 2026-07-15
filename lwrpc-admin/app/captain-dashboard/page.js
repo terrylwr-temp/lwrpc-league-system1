@@ -33,6 +33,10 @@ import {
   isSpecialMatchResult,
   specialMatchResultLabel,
 } from "../lib/specialMatchResults";
+import {
+  matchLinePlayerRatingDisplay,
+  matchLineTeamRatingDisplay,
+} from "../lib/matchRatingSnapshots";
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
 const CAPTAIN_MATCH_SETUP_NOTES_STORAGE_PREFIX = "lwrpc-captain-match-setup-notes-seen";
@@ -521,6 +525,14 @@ export default function CaptainDashboardPage() {
           home_team_games_won,
           away_team_games_won,
           winning_team_id,
+          rating_type_at_play,
+          home_player_1_rating_at_play,
+          home_player_2_rating_at_play,
+          away_player_1_rating_at_play,
+          away_player_2_rating_at_play,
+          home_team_rating_at_play,
+          away_team_rating_at_play,
+          ratings_snapshotted_at,
           division_lines (
             line_name,
             line_type,
@@ -984,9 +996,11 @@ export default function CaptainDashboardPage() {
       scoreButtonAction = null,
       scoreButtonTone = "slate",
     } = options;
+    const today = localDateString();
     const canEnterScores =
       match.scheduled_date &&
-      match.scheduled_date <= localDateString();
+      match.scheduled_date <= today;
+    const isPastMatchDate = match.scheduled_date && match.scheduled_date < today;
 
     const setupTeams = showSetup ? getCaptainTeamsForMatch(match) : [];
     const matchSetupTeams = showSetup
@@ -1028,9 +1042,13 @@ export default function CaptainDashboardPage() {
           ? "bg-gradient-to-r from-rose-700 to-red-700"
           : "bg-gradient-to-r from-blue-800 to-indigo-800";
     const scoreButtonClass =
-      scoreButtonTone === "red" || needsScoreEntry
+      scoreButtonTone === "red"
         ? "bg-red-700 hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-        : "bg-slate-900 hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300";
+        : needsScoreEntry
+          ? isPastMatchDate
+            ? "bg-red-700 hover:bg-red-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            : "bg-blue-700 hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+          : "bg-slate-900 hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300";
 
     return (
       <div
@@ -1086,9 +1104,9 @@ export default function CaptainDashboardPage() {
                         return (
                           <span
                             key={team.id}
-                            className={`text-xs font-bold ${setupComplete ? "text-green-700" : "text-amber-700"}`}
+                            className={`text-xs ${setupComplete ? "text-green-700" : "text-amber-700"}`}
                           >
-                            {team.side} - {team.name}: {setupComplete ? "Setup Complete" : "Setup Pending"}
+                            {team.side} - <span className="font-medium">{team.name}</span>: <span className="font-bold">{setupComplete ? "Setup Complete" : "Setup Pending"}</span>
                           </span>
                         );
                       })}
@@ -2312,6 +2330,14 @@ export default function CaptainDashboardPage() {
               home_team_games_won,
               away_team_games_won,
               winning_team_id,
+              rating_type_at_play,
+              home_player_1_rating_at_play,
+              home_player_2_rating_at_play,
+              away_player_1_rating_at_play,
+              away_player_2_rating_at_play,
+              home_team_rating_at_play,
+              away_team_rating_at_play,
+              ratings_snapshotted_at,
               division_lines (
                 line_name,
                 line_type,
@@ -3746,21 +3772,21 @@ function MatchLineResult({ line, match, ratingForMember }) {
         <div className={`rounded-xl bg-emerald-50 px-3 py-3 text-sm font-semibold text-emerald-950 ${homeTeamCardClass}`}>
           <div className="text-xs font-black uppercase tracking-wide text-emerald-800">Home: {match.home_team?.name || "Home"}</div>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            <PlayerScoreCard member={line.home_player_1} match={match} ratingForMember={ratingForMember} tone="home" />
-            <PlayerScoreCard member={line.home_player_2} match={match} ratingForMember={ratingForMember} tone="home" />
+            <PlayerScoreCard member={line.home_player_1} line={line} playerNumber={1} match={match} ratingForMember={ratingForMember} tone="home" />
+            <PlayerScoreCard member={line.home_player_2} line={line} playerNumber={2} match={match} ratingForMember={ratingForMember} tone="home" />
           </div>
           <div className="mt-1 text-xs font-black uppercase tracking-wide text-emerald-800">
-            Team Rating: {teamLineRating([line.home_player_1, line.home_player_2], match, ratingForMember)}
+            Team Rating: {teamLineRating([line.home_player_1, line.home_player_2], match, ratingForMember, line, "home")}
           </div>
         </div>
         <div className={`rounded-xl bg-indigo-50 px-3 py-3 text-sm font-semibold text-indigo-950 ${awayTeamCardClass}`}>
           <div className="text-xs font-black uppercase tracking-wide text-indigo-800">Away: {match.away_team?.name || "Away"}</div>
           <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            <PlayerScoreCard member={line.away_player_1} match={match} ratingForMember={ratingForMember} tone="away" />
-            <PlayerScoreCard member={line.away_player_2} match={match} ratingForMember={ratingForMember} tone="away" />
+            <PlayerScoreCard member={line.away_player_1} line={line} playerNumber={1} match={match} ratingForMember={ratingForMember} tone="away" />
+            <PlayerScoreCard member={line.away_player_2} line={line} playerNumber={2} match={match} ratingForMember={ratingForMember} tone="away" />
           </div>
           <div className="mt-1 text-xs font-black uppercase tracking-wide text-indigo-800">
-            Team Rating: {teamLineRating([line.away_player_1, line.away_player_2], match, ratingForMember)}
+            Team Rating: {teamLineRating([line.away_player_1, line.away_player_2], match, ratingForMember, line, "away")}
           </div>
         </div>
       </div>
@@ -3783,7 +3809,7 @@ function MatchLineResult({ line, match, ratingForMember }) {
   );
 }
 
-function PlayerScoreCard({ member, match, ratingForMember, tone }) {
+function PlayerScoreCard({ member, line, playerNumber, match, ratingForMember, tone }) {
   const tones = {
     home: "border-emerald-200 bg-white text-emerald-950",
     away: "border-indigo-200 bg-white text-indigo-950",
@@ -3795,7 +3821,14 @@ function PlayerScoreCard({ member, match, ratingForMember, tone }) {
         {formatMemberName(member) || "Player TBD"}
       </div>
       <div className="mt-1 text-xs font-black uppercase tracking-wide text-slate-500">
-        Rating {member?.id ? ratingForMember(member.id, match.leagues?.season_id, match.divisions?.rating_type, member) : "NR"}
+        Rating {member?.id
+          ? matchLinePlayerRatingDisplay(
+              line,
+              tone,
+              playerNumber,
+              ratingForMember(member.id, match.leagues?.season_id, match.divisions?.rating_type, member)
+            )
+          : "NR"}
       </div>
     </div>
   );
@@ -4358,7 +4391,7 @@ function mapLink(location) {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${location?.name || ""} ${address}`.trim())}`;
 }
 
-function teamLineRating(players, match, ratingForMember) {
+function teamLineRating(players, match, ratingForMember, line = null, side = "home") {
   const ratings = players
     .filter(Boolean)
     .map((player) =>
@@ -4373,8 +4406,7 @@ function teamLineRating(players, match, ratingForMember) {
     )
     .filter((rating) => !Number.isNaN(rating));
 
-  if (!ratings.length) return "NR";
-  return ratings.reduce((sum, rating) => sum + rating, 0).toFixed(2);
+  return matchLineTeamRatingDisplay(line, side, ratings);
 }
 
 function captainContacts(team) {

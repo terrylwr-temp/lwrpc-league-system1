@@ -258,24 +258,13 @@ export default function LoginPage() {
 
             </div>
 
-            <div className="mt-4">
+            <div className="mt-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3">
 
-              <div className="flex items-center justify-between gap-3">
-                <label className="text-sm font-semibold text-slate-700">
-                  Password
-                </label>
+              <label className="text-sm font-semibold text-slate-700">
+                Password
+              </label>
 
-                <button
-                  type="button"
-                  onClick={() => forgotPassword()}
-                  disabled={loading}
-                  className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-
-              <div className="relative mt-1">
+              <div className="relative col-span-2 mt-1">
                 <input
                   type={showPassword ? "text" : "password"}
                   className="w-full rounded-xl border border-slate-300 py-3 pl-4 pr-12 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
@@ -326,6 +315,14 @@ export default function LoginPage() {
                 </button>
               </div>
 
+              <button
+                type="button"
+                onClick={() => forgotPassword()}
+                disabled={loading}
+                className="col-start-2 row-start-1 justify-self-end rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 transition hover:bg-slate-200 disabled:opacity-50"
+              >
+                Forgot Password?
+              </button>
             </div>
 
             <button

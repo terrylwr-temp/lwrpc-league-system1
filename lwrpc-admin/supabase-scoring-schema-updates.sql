@@ -90,7 +90,15 @@ alter table public.match_lines
   add column if not exists away_team_games_won integer default 0,
   add column if not exists home_team_points integer default 0,
   add column if not exists away_team_points integer default 0,
-  add column if not exists winning_team_id uuid references public.teams(id);
+  add column if not exists winning_team_id uuid references public.teams(id),
+  add column if not exists rating_type_at_play text,
+  add column if not exists home_player_1_rating_at_play numeric(6,3),
+  add column if not exists home_player_2_rating_at_play numeric(6,3),
+  add column if not exists away_player_1_rating_at_play numeric(6,3),
+  add column if not exists away_player_2_rating_at_play numeric(6,3),
+  add column if not exists home_team_rating_at_play numeric(7,3),
+  add column if not exists away_team_rating_at_play numeric(7,3),
+  add column if not exists ratings_snapshotted_at timestamptz;
 
 alter table public.leagues
   add column if not exists rosters_locked boolean not null default false;

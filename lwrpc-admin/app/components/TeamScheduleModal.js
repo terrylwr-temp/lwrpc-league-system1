@@ -5,6 +5,10 @@ import {
   isSpecialMatchResult,
   specialMatchResultLabel,
 } from "../lib/specialMatchResults";
+import {
+  matchLinePlayerRatingDisplay,
+  matchLineTeamRatingDisplay,
+} from "../lib/matchRatingSnapshots";
 import { useEffect, useRef, useState } from "react";
 
 export default function TeamScheduleModal({
@@ -505,12 +509,16 @@ function ScheduleMatchCard({
                   <TeamPlayers
                     label="Home"
                     players={[line.home_player_1, line.home_player_2]}
+                    line={line}
+                    side="home"
                     ratingByMemberId={ratingByMemberId}
                     ratingType={ratingType}
                   />
                   <TeamPlayers
                     label="Away"
                     players={[line.away_player_1, line.away_player_2]}
+                    line={line}
+                    side="away"
                     ratingByMemberId={ratingByMemberId}
                     ratingType={ratingType}
                   />
@@ -593,7 +601,7 @@ function GameScoreCard({ game, match }) {
   );
 }
 
-function TeamPlayers({ label, players, ratingByMemberId, ratingType }) {
+function TeamPlayers({ label, players, line, side, ratingByMemberId, ratingType }) {
   const enteredPlayers = players.filter(Boolean);
 
   return (
@@ -603,18 +611,23 @@ function TeamPlayers({ label, players, ratingByMemberId, ratingType }) {
         {enteredPlayers.length === 0 ? (
           <div className="text-slate-500">Players not entered</div>
         ) : (
-          enteredPlayers.map((player) => (
+          players.map((player, index) => ({ player, index })).filter(({ player }) => Boolean(player)).map(({ player, index }) => (
             <div key={player.id} className="flex items-center justify-between gap-2">
               <span>{formatMemberName(player)}</span>
               <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-black text-slate-700">
-                {formatPlayerRating(player, ratingByMemberId, ratingType)}
+                {matchLinePlayerRatingDisplay(
+                  line,
+                  side,
+                  index + 1,
+                  formatPlayerRating(player, ratingByMemberId, ratingType)
+                )}
               </span>
             </div>
           ))
         )}
         {enteredPlayers.length > 0 && (
           <div className="pt-1 text-xs font-black uppercase tracking-wide text-slate-600">
-            Team Rating: {formatTeamLineRating(enteredPlayers, ratingByMemberId, ratingType)}
+            Team Rating: {formatTeamLineRating(enteredPlayers, ratingByMemberId, ratingType, line, side)}
           </div>
         )}
       </div>
@@ -812,12 +825,10 @@ function formatPlayerRating(player, ratingByMemberId, ratingType) {
   return Number.isNaN(number) ? "NR" : number.toFixed(2);
 }
 
-function formatTeamLineRating(players, ratingByMemberId, ratingType) {
+function formatTeamLineRating(players, ratingByMemberId, ratingType, line = null, side = "home") {
   const ratings = players
     .map((player) => Number(formatPlayerRating(player, ratingByMemberId, ratingType)))
     .filter((rating) => !Number.isNaN(rating));
 
-  if (!ratings.length) return "NR";
-
-  return ratings.reduce((sum, rating) => sum + rating, 0).toFixed(2);
+  return matchLineTeamRatingDisplay(line, side, ratings);
 }

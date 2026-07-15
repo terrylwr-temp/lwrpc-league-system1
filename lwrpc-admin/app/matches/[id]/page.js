@@ -26,6 +26,7 @@ import {
   specialMatchResultLabel,
   specialMatchWinnerName,
 } from "../../lib/specialMatchResults";
+import { buildMatchLineRatingSnapshot } from "../../lib/matchRatingSnapshots";
 
 function lmsLineScoreRequired(line) {
   return sharedLineScoreRequired(line);
@@ -336,6 +337,35 @@ export default function MatchDetailPage() {
     if (ratingType === "primetime") return ratingRow?.season_primetime_rating ?? null;
     if (ratingType === "self_rating") return member.self_rating ?? null;
     return ratingRow?.season_dupr_rating ?? null;
+  }
+
+  async function saveMatchRatingSnapshots() {
+    const ratingType = match?.divisions?.rating_type || "dupr";
+    const results = await Promise.all(
+      lines.map(async (line) => {
+        const snapshot = buildMatchLineRatingSnapshot(line, ratingType, memberRating);
+        const { error } = await supabase
+          .from("match_lines")
+          .update({
+            ...snapshot,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", line.id);
+
+        return { line, snapshot, error };
+      })
+    );
+    const failed = results.find((result) => result.error);
+
+    if (failed) {
+      throw new Error(`Unable to save rating snapshots. Run the updated Supabase SQL, then try again: ${failed.error.message}`);
+    }
+
+    const snapshotsByLineId = new Map(results.map((result) => [String(result.line.id), result.snapshot]));
+    setLines((current) => current.map((line) => ({
+      ...line,
+      ...(snapshotsByLineId.get(String(line.id)) || {}),
+    })));
   }
 
   function memberHasValidRating(member) {
@@ -1274,6 +1304,9 @@ export default function MatchDetailPage() {
         return;
       }
 
+      setScoreSubmissionProgress("Saving player and team ratings at time of play...");
+      await saveMatchRatingSnapshots();
+
     const currentMemberId = currentUserMember?.id || null;
     const now = new Date().toISOString();
     const matchUpdate = scoringOperationsOverride
@@ -1404,6 +1437,9 @@ export default function MatchDetailPage() {
     }
 
     setScoreValidationIssueList([]);
+
+    setScoreSubmissionProgress("Saving player and team ratings at time of play...");
+    await saveMatchRatingSnapshots();
 
     const currentMemberId = currentUserMember?.id || null;
     const now = new Date().toISOString();
