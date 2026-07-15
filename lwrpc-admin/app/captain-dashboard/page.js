@@ -2515,18 +2515,6 @@ export default function CaptainDashboardPage() {
           title="Captain Dashboard"
           subtitle="Captain tools, upcoming matches, score entry, and score verification."
           hideSubtitleOnMobile
-          welcomeAction={
-            <button
-              type="button"
-              onClick={async () => {
-                const document = await guidePdfDocument(supabase, captainGuide);
-                if (document) setPdfDocument(document);
-              }}
-              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
-            >
-              User Guide
-            </button>
-          }
           mobileSidebarAction={
             <button
               type="button"
@@ -2554,6 +2542,17 @@ export default function CaptainDashboardPage() {
               >
                 Contact League
               </a>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  const document = await guidePdfDocument(supabase, captainGuide);
+                  if (document) setPdfDocument(document);
+                }}
+                className="hidden rounded-lg bg-emerald-500 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-400 md:block md:rounded-xl md:px-4 md:py-2 md:text-sm"
+              >
+                User Guide
+              </button>
             </div>
           }
         />

@@ -1191,18 +1191,6 @@ export default function PlayerDashboardPage() {
           title="Player Dashboard"
           subtitle="Your league teams, standings, and match access."
           hideSubtitleOnMobile
-          welcomeAction={
-            <button
-              type="button"
-              onClick={async () => {
-                const document = await guidePdfDocument(supabase, playerGuide);
-                if (document) setPdfDocument(document);
-              }}
-              className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
-            >
-              User Guide
-            </button>
-          }
           mobileSidebarAction={
             <button
               type="button"
@@ -1231,6 +1219,17 @@ export default function PlayerDashboardPage() {
               >
                 Membership Info
               </a>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  const document = await guidePdfDocument(supabase, playerGuide);
+                  if (document) setPdfDocument(document);
+                }}
+                className="hidden rounded-lg bg-emerald-500 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-400 md:block md:rounded-xl md:px-4 md:py-2 md:text-sm"
+              >
+                User Guide
+              </button>
 
             </div>
           }
