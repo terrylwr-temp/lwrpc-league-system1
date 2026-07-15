@@ -15,6 +15,7 @@ export default function AppHeader({
   hideSubtitleOnMobile = false,
   actions = null,
   welcomeAction = null,
+  mobileSidebarAction = null,
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -469,9 +470,15 @@ export default function AppHeader({
 
             <NavGroups mobile />
 
+            {mobileSidebarAction && (
+              <div className="mt-6" onClickCapture={() => setMenuOpen(false)}>
+                {mobileSidebarAction}
+              </div>
+            )}
+
             <button
               onClick={logout}
-              className="mt-6 w-full rounded-xl bg-white/10 px-4 py-3 font-semibold text-white"
+              className={`${mobileSidebarAction ? "mt-2" : "mt-6"} w-full rounded-xl bg-white/10 px-4 py-3 font-semibold text-white`}
             >
               Logout
             </button>

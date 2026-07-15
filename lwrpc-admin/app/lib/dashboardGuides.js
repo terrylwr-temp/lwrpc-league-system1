@@ -74,11 +74,21 @@ export async function loadGuideDocument(templateKey) {
 }
 
 export async function openGuideDocument(supabase, guideType) {
+  const guideWindow = window.open("", "_blank");
   const document = await guidePdfDocument(supabase, guideType);
 
-  if (!document) return;
+  if (!document) {
+    guideWindow?.close();
+    return;
+  }
 
-  window.open(document.url, "_blank", "noopener,noreferrer");
+  if (!guideWindow) {
+    alert("Unable to open the guide. Please allow popups for this site and try again.");
+    return;
+  }
+
+  guideWindow.opener = null;
+  guideWindow.location.replace(document.url);
 }
 
 export async function guidePdfDocument(supabase, guideType) {

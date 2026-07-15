@@ -17,7 +17,7 @@ import {
   LEAGUE_DOCUMENT_TYPES,
   leagueDocumentPath,
 } from "../lib/leagueDocuments";
-import { GUIDE_DOCUMENT_TYPES, guidePdfDocument } from "../lib/dashboardGuides";
+import { GUIDE_DOCUMENT_TYPES, guidePdfDocument, openGuideDocument } from "../lib/dashboardGuides";
 import { specialGameStatus } from "../lib/playHistory";
 import {
   DEFAULT_SCORE_SHEET_RULES,
@@ -2508,6 +2508,15 @@ export default function CaptainDashboardPage() {
                 if (document) setPdfDocument(document);
               }}
               className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-bold text-white hover:bg-emerald-400"
+            >
+              User Guide
+            </button>
+          }
+          mobileSidebarAction={
+            <button
+              type="button"
+              onClick={() => openGuideDocument(supabase, captainGuide)}
+              className="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-400"
             >
               User Guide
             </button>
