@@ -496,6 +496,7 @@ function previewScoreSheetDocument({ templateHtml, sheetTitle, rulesText, clubNa
       .score-sheet table { width: 100%; border-collapse: collapse; }
       .score-sheet th, .score-sheet td { border: 1px solid #111827; padding: 7px; vertical-align: middle; }
       .score-sheet th { background: #e5e7eb; text-align: center; font-size: 14px; font-weight: 900; }
+      .score-sheet .lineups th { background: #e5e7eb !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
       .score-sheet .header-score { display: inline-block; margin-left: 18px; font-size: 13px; font-weight: 900; }
       .score-sheet .lineups, .score-sheet .configured-lines, .score-sheet .score-entries, .score-sheet .rounds { margin-top: 10px; }
       .score-sheet .line-cell { width: 50%; min-height: 68px; font-size: 13px; font-weight: 800; }
@@ -545,8 +546,8 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText, clubName }) {
     </tr>
   `;
   const configuredRows = `
-    <tr><td>Game 1) Home 1 vs Away 1</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
-    <tr><td>Game 2) Home 2 vs Away 2</td><td>Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
+    <tr><td>Game 1) Home 1 vs Away 1</td><td>Gndr Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
+    <tr><td>Game 2) Home 2 vs Away 2</td><td>Gndr Doubles</td><td>Regular to 15, win by 1</td><td>1</td></tr>
   `;
   const configuredTable = `
     <table class="configured-lines">
@@ -564,7 +565,7 @@ function renderPreviewBody({ templateHtml, sheetTitle, rulesText, clubName }) {
   `;
   const scoreTable = `
     <div class="score-entry-details">
-      <span>Line Type: Doubles</span>
+      <span>Team Type: Gender Doubles</span>
       <span>Game Format: Regular to 15, win by 1</span>
     </div>
     <table class="score-entries compact">

@@ -4755,6 +4755,11 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember, clubName = DE
         font-size: 14px;
         font-weight: 900;
       }
+      .score-sheet .lineups th {
+        background: #e5e7eb !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+      }
       .score-sheet .header-score {
         display: inline-block;
         margin-left: 18px;
@@ -5179,7 +5184,7 @@ function scoreSheetEntryTable(match) {
     <div class="score-entry-section">
     ${sharedDetails ? `
       <div class="score-entry-details">
-        <span>Line Type: ${escapeHtml(sharedDetails.lineType)}</span>
+        <span>Team Type: ${escapeHtml(scoreSheetTeamTypeLabel(sharedDetails.lineType))}</span>
         <span>Game Format: ${escapeHtml(sharedDetails.gameFormat)}</span>
       </div>
     ` : ""}
@@ -5240,13 +5245,17 @@ function scoreSheetGameLineLabel(line) {
 
 function scoreSheetLineTypeLabel(value) {
   const labels = {
-    doubles: "Doubles",
+    doubles: "Gndr Doubles",
     singles: "Singles",
     mixed: "Mixed",
     picklebreaker: "Picklebreaker",
   };
 
   return labels[value] || value || "-";
+}
+
+function scoreSheetTeamTypeLabel(value) {
+  return value === "Gndr Doubles" ? "Gender Doubles" : value;
 }
 
 function scoreSheetFormatLabel(value) {
