@@ -495,7 +495,7 @@ function previewScoreSheetDocument({ templateHtml, sheetTitle, rulesText, clubNa
       .score-sheet .value { display: block; margin-top: 3px; font-size: 13px; font-weight: 800; }
       .score-sheet table { width: 100%; border-collapse: collapse; }
       .score-sheet th, .score-sheet td { border: 1px solid #111827; padding: 7px; vertical-align: middle; }
-      .score-sheet th { background: #e5e7eb; text-align: center; font-size: 14px; font-weight: 900; }
+      .score-sheet th { background: #e5e7eb; text-align: center; font-size: 14px; font-weight: 900; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
       .score-sheet .lineups th { background: #e5e7eb !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
       .score-sheet .header-score { display: inline-block; margin-left: 18px; font-size: 13px; font-weight: 900; }
       .score-sheet .lineups, .score-sheet .configured-lines, .score-sheet .score-entries, .score-sheet .rounds { margin-top: 10px; }
@@ -513,7 +513,7 @@ function previewScoreSheetDocument({ templateHtml, sheetTitle, rulesText, clubNa
       .score-sheet .score-entries .compact-game-col { width: 70%; }
       .score-sheet .score-entries td:first-child { font-size: 12px; font-weight: 900; }
       .score-sheet .score-entries.compact td:first-child { font-size: 13px; }
-      .score-sheet .score-entry-details { margin-top: 10px; border: 1px solid #111827; background: #f9fafb; padding: 6px; font-size: 13px; font-weight: 900; text-align: center; }
+      .score-sheet .score-entry-details { margin-top: 10px; border: 1px solid #111827; background: #e5e7eb; padding: 6px; font-size: 13px; font-weight: 900; text-align: center; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
       .score-sheet .score-entry-details span { display: inline-block; margin: 0 10px; }
       .score-sheet .score-entries .grouped-score-row td:first-child { border-left-width: 2px; }
       .score-sheet .score-entries .grouped-score-row td:last-child { border-right-width: 2px; }

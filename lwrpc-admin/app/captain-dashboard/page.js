@@ -4754,6 +4754,8 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember, clubName = DE
         text-align: center;
         font-size: 14px;
         font-weight: 900;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
       }
       .score-sheet .lineups th {
         background: #e5e7eb !important;
@@ -4874,11 +4876,13 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember, clubName = DE
       .score-sheet .score-entry-details {
         margin-top: 10px;
         border: 1px solid #111827;
-        background: #f9fafb;
+        background: #e5e7eb;
         padding: 6px;
         font-size: 13px;
         font-weight: 900;
         text-align: center;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
       }
       .score-sheet .score-entry-details span {
         display: inline-block;

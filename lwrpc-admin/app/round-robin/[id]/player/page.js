@@ -16,6 +16,19 @@ const PLAYER_RECORD_RANGES = [
   { id: "currentYear", label: "Current Year" },
   { id: "all", label: "All" },
 ];
+const PARTNER_COMPARISON_TIME_FRAMES = [
+  { id: "lastGame", label: "Last Game" },
+  { id: "currentMonth", label: "Current Month" },
+  { id: "lastMonth", label: "Last Month" },
+  { id: "currentYear", label: "Current Year" },
+  { id: "all", label: "All Time" },
+];
+const PARTNER_COMPARISON_SORTS = [
+  { id: "dates", label: "Dates" },
+  { id: "record", label: "Record" },
+  { id: "winPct", label: "Win %" },
+  { id: "pointDiff", label: "Pt. Diff." },
+];
 const DEFAULT_HOST_SMS_TEMPLATES = {
   gameUpdate: "{{group_name}} game update: ",
 };
@@ -1733,10 +1746,6 @@ function filterHistorySessions(sessions, range) {
   });
 }
 
-function playerRecordRangeLabel(range) {
-  return PLAYER_RECORD_RANGES.find((item) => item.id === range)?.label || "All";
-}
-
 function aggregateHistorySessions(sessions) {
   const totals = sessions.reduce((summary, session) => {
     const result = session.playerResult;
@@ -1804,7 +1813,7 @@ function ladderRankingItems(ladders = []) {
     }));
 }
 
-function partnerComparisonRows(history, player) {
+function partnerComparisonRows(history, player, sortBy = "winPct") {
   const playerId = String(player?.id || "");
   if (!playerId) return [];
 
@@ -1857,12 +1866,37 @@ function partnerComparisonRows(history, player) {
       winPct: row.games > 0 ? row.wins / row.games : 0,
     }))
     .sort((a, b) => {
+      if (sortBy === "dates" && b.sessions !== a.sessions) return b.sessions - a.sessions;
+      if (sortBy === "record") {
+        if (b.wins !== a.wins) return b.wins - a.wins;
+        if (a.losses !== b.losses) return a.losses - b.losses;
+      }
+      if (sortBy === "winPct" && b.winPct !== a.winPct) return b.winPct - a.winPct;
+      if (sortBy === "pointDiff" && b.pointDiff !== a.pointDiff) return b.pointDiff - a.pointDiff;
       if (b.winPct !== a.winPct) return b.winPct - a.winPct;
       if (b.sessions !== a.sessions) return b.sessions - a.sessions;
       if ((b.wins - b.losses) !== (a.wins - a.losses)) return (b.wins - b.losses) - (a.wins - a.losses);
       if (b.pointDiff !== a.pointDiff) return b.pointDiff - a.pointDiff;
       return a.partnerName.localeCompare(b.partnerName);
     });
+}
+
+function filterPartnerComparisonSessions(sessions, timeFrame) {
+  const allSessions = sessions || [];
+  if (timeFrame !== "lastGame") return filterHistorySessions(allSessions, timeFrame);
+
+  const mostRecentDate = allSessions.reduce((latest, session) => {
+    const date = String(session?.session_date || "");
+    return date > latest ? date : latest;
+  }, "");
+
+  return mostRecentDate
+    ? allSessions.filter((session) => String(session?.session_date || "") === mostRecentDate)
+    : [];
+}
+
+function partnerComparisonTimeFrameLabel(timeFrame) {
+  return PARTNER_COMPARISON_TIME_FRAMES.find((item) => item.id === timeFrame)?.label || "All Time";
 }
 
 function matchSideForPlayer(match, playerId) {
@@ -2093,11 +2127,13 @@ function HistorySessionModal({ session, player, onClose }) {
   );
 }
 
-function PartnerComparisonModal({ history, player, range, onClose }) {
+function PartnerComparisonModal({ history, player, onClose }) {
   const [showMobilePartnerDetail, setShowMobilePartnerDetail] = useState(false);
-  const filteredSessions = filterHistorySessions(history?.sessions || [], range);
-  const rows = partnerComparisonRows({ ...(history || {}), sessions: filteredSessions }, player);
-  const rangeLabel = playerRecordRangeLabel(range);
+  const [timeFrame, setTimeFrame] = useState("all");
+  const [sortBy, setSortBy] = useState("winPct");
+  const filteredSessions = filterPartnerComparisonSessions(history?.sessions || [], timeFrame);
+  const rows = partnerComparisonRows({ ...(history || {}), sessions: filteredSessions }, player, sortBy);
+  const rangeLabel = partnerComparisonTimeFrameLabel(timeFrame);
 
   return (
     <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
@@ -2116,8 +2152,33 @@ function PartnerComparisonModal({ history, player, range, onClose }) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-          <div className="rounded-lg border border-teal-100 bg-teal-50 px-3 py-2 text-sm font-black text-teal-950">
-            Partners are sorted by win percentage, then dates played, record, and point diff.
+          <div className="rounded-lg border border-teal-100 bg-teal-50 p-3">
+            <div className="text-xs font-black uppercase tracking-wide text-teal-800">Time Frame</div>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              {PARTNER_COMPARISON_TIME_FRAMES.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setTimeFrame(option.id)}
+                  className={`min-h-11 whitespace-nowrap rounded-md border px-3 py-2 text-xs font-black shadow-sm transition ${timeFrame === option.id ? "border-teal-800 bg-teal-800 text-white" : "border-teal-200 bg-white text-teal-900 hover:bg-teal-100"}`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            <div className="mt-3 text-xs font-black uppercase tracking-wide text-teal-800">Sort By</div>
+            <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              {PARTNER_COMPARISON_SORTS.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => setSortBy(option.id)}
+                  className={`min-h-11 whitespace-nowrap rounded-md border px-3 py-2 text-xs font-black shadow-sm transition ${sortBy === option.id ? "border-teal-800 bg-teal-800 text-white" : "border-teal-200 bg-white text-teal-900 hover:bg-teal-100"}`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
@@ -2126,7 +2187,7 @@ function PartnerComparisonModal({ history, player, range, onClose }) {
               <button
                 type="button"
                 onClick={() => setShowMobilePartnerDetail((current) => !current)}
-                className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-black text-slate-800 shadow-sm md:hidden"
+                className="min-h-11 rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-black text-slate-800 shadow-sm md:hidden"
               >
                 {showMobilePartnerDetail ? "Summary" : "Detail"}
               </button>
