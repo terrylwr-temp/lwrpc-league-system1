@@ -592,7 +592,7 @@ export default function DashboardPage() {
       "Master Reset All will permanently remove generated schedules and scoring data.",
       "",
       "It will delete all generated matches, match lines, game scores, saved match setup lineups, byes, and standings.",
-      "Teams, team rosters, captains, user roles, Seasons, Leagues, Divisions, game lines, Locations, saved Schedule Settings, Court Availability, Blackout Dates, Email Options, and Score Sheets will not be changed.",
+      "Teams stay active, but team rosters will be deleted, captain and co-captain assignments cleared, and Captain user roles changed to Player. Commissioner, League Manager, and Club Pro roles remain unchanged. Seasons, Leagues, Divisions, game lines, Locations, saved Schedule Settings, Court Availability, Blackout Dates, Email Options, and Score Sheets will not be changed.",
       "The Schedule Editor, Match Scheduler, and Scoring (Master) will be blank until schedules are generated again.",
       "",
       "Continue?",
@@ -1433,7 +1433,7 @@ export default function DashboardPage() {
                   className="mt-1"
                 />
                 <span>
-                  I understand this permanently deletes generated matches, match lines, game scores, saved match setup lineups, byes, and standings. Teams, team rosters, captains, user roles, Seasons, Leagues, Divisions, game lines, Locations, saved Schedule Settings, Court Availability, Blackout Dates, Email Options, and Score Sheets stay unchanged.
+                  I understand this permanently deletes generated matches, match lines, game scores, saved match setup lineups, byes, standings, and team rosters; clears captain and co-captain assignments; and changes Captain user roles to Player. Teams stay active. Commissioner, League Manager, and Club Pro roles remain unchanged, as do Seasons, Leagues, Divisions, game lines, Locations, saved Schedule Settings, Court Availability, Blackout Dates, Email Options, and Score Sheets.
                 </span>
               </label>
               <button

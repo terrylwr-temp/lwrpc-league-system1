@@ -124,6 +124,29 @@ export async function POST(req) {
 
     await checkedDelete(supabase.from("team_byes").delete().not("id", "is", null));
     await checkedDelete(supabase.from("team_standings").delete().not("id", "is", null));
+    await checkedDelete(supabase.from("team_members").delete().not("id", "is", null));
+
+    const { error: teamError } = await supabase
+      .from("teams")
+      .update({
+        captain_member_id: null,
+        co_captain_member_id: null,
+        co_captain_2_member_id: null,
+        updated_at: now,
+      })
+      .not("id", "is", null);
+
+    if (teamError) throw teamError;
+
+    const { error: captainRoleError } = await supabase
+      .from("user_roles")
+      .update({
+        role: "player",
+        updated_at: now,
+      })
+      .eq("role", "captain");
+
+    if (captainRoleError) throw captainRoleError;
 
     return NextResponse.json({
       success: true,
