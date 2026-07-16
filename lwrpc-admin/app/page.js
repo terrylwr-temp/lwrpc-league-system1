@@ -192,10 +192,14 @@ export default function DashboardPage() {
   }, []);
 
   const loadLoginMessages = useCallback(async function loadLoginMessages() {
-    const { data } = await supabase
-      .from("notification_templates")
-      .select("template_key, subject, body")
-      .in("template_key", LOGIN_MESSAGE_TEMPLATES.map((template) => template.key));
+    const results = await Promise.all(
+      LOGIN_MESSAGE_TEMPLATES.map(async (template) => {
+        const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(template.key)}`);
+        const result = await response.json().catch(() => ({}));
+        return response.ok && result?.success ? result.template : null;
+      })
+    );
+    const data = results.filter(Boolean);
 
     if (!data?.length) return;
 

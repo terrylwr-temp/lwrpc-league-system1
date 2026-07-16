@@ -60,7 +60,9 @@ export default function ScoringPage() {
   }, [router]);
 
   const loadTemplate = useCallback(async function loadTemplate() {
-    const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(TEMPLATE_KEY)}`);
+    const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(TEMPLATE_KEY)}`, {
+      headers: await getRequestAuthorizationHeaders(),
+    });
     const result = await response.json().catch(() => null);
     const data = result?.template;
 

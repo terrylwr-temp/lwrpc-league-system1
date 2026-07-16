@@ -52,7 +52,9 @@ export default function EmailOptionsPage() {
   const loadTemplates = useCallback(async function loadTemplates() {
     const entries = await Promise.all(
       EMAIL_TEMPLATES.map(async (template) => {
-        const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(template.key)}`);
+        const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(template.key)}`, {
+          headers: await getRequestAuthorizationHeaders(),
+        });
         const result = await response.json().catch(() => null);
         const saved = result?.template;
 

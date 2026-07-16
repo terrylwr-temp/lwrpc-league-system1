@@ -2,6 +2,7 @@ import {
   DEFAULT_LEAGUE_DOCUMENT_BUCKET,
   DEFAULT_LEAGUE_DOCUMENT_PREFIX,
 } from "./leagueDocuments";
+import { getRequestAuthorizationHeaders } from "./auth";
 
 export const GUIDE_DOCUMENT_TYPES = [
   {
@@ -60,7 +61,9 @@ export function guideDocumentBody(document) {
 }
 
 export async function loadGuideDocument(templateKey) {
-  const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(templateKey)}`);
+  const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(templateKey)}`, {
+    headers: await getRequestAuthorizationHeaders(),
+  });
   const result = await response.json().catch(() => ({}));
 
   if (!response.ok || !result.success) {

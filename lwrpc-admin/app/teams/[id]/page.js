@@ -1796,7 +1796,9 @@ function normalizeLocationName(value) {
 
 async function loadClientEmailTemplate(templateKey) {
   const fallback = getEmailTemplateConfig(templateKey);
-  const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(templateKey)}`);
+  const response = await fetch(`/api/notification-templates?template_key=${encodeURIComponent(templateKey)}`, {
+    headers: await getRequestAuthorizationHeaders(),
+  });
   const result = await response.json().catch(() => null);
   const template = result?.template;
 

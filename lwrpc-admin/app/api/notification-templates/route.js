@@ -9,6 +9,10 @@ const DASHBOARD_MESSAGE_AUDIENCES = {
   player_login_popup: "Player Message",
 };
 
+// These two messages are intentionally shown immediately after a user signs in.
+// Every other template stays behind an authenticated server request.
+const PUBLIC_TEMPLATE_KEYS = new Set(Object.keys(DASHBOARD_MESSAGE_AUDIENCES));
+
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const key =
@@ -45,6 +49,23 @@ function anonClient() {
   });
 }
 
+async function requireAuthenticatedUser(req) {
+  const authHeader = req.headers.get("authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "").trim();
+
+  if (!token) {
+    return { error: "Not authorized.", status: 401 };
+  }
+
+  const { data: userData, error: userError } = await anonClient().auth.getUser(token);
+
+  if (userError || !userData?.user?.id) {
+    return { error: "Not authorized.", status: 401 };
+  }
+
+  return { user: userData.user };
+}
+
 export async function GET(req) {
   try {
     const url = new URL(req.url);
@@ -55,6 +76,17 @@ export async function GET(req) {
         { success: false, error: "Template key is required." },
         { status: 400 }
       );
+    }
+
+    if (!PUBLIC_TEMPLATE_KEYS.has(templateKey)) {
+      const auth = await requireAuthenticatedUser(req);
+
+      if (auth.error) {
+        return NextResponse.json(
+          { success: false, error: auth.error },
+          { status: auth.status }
+        );
+      }
     }
 
     const supabase = adminClient();
