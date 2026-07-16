@@ -1475,6 +1475,7 @@ function copyDivisionPayload(division, leagueId, name) {
     id,
     leagues,
     division_lines,
+    configured_line_count,
     created_at,
     updated_at,
     ...rest
@@ -1482,6 +1483,8 @@ function copyDivisionPayload(division, leagueId, name) {
   void id;
   void leagues;
   void division_lines;
+  // This is a display-only value calculated in loadData, not a divisions column.
+  void configured_line_count;
   void created_at;
   void updated_at;
 
