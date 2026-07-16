@@ -584,23 +584,23 @@ export default function DashboardPage() {
 
   async function runMasterResetAll() {
     if (!masterResetAcknowledged) {
-      alert("Confirm that you understand Master Reset All permanently removes generated league operations data.");
+      alert("Confirm that you understand Master Reset All permanently removes generated schedules and scoring data.");
       return;
     }
 
     const firstOk = confirm([
-      "Master Reset All will permanently remove generated league operations data.",
+      "Master Reset All will permanently remove generated schedules and scoring data.",
       "",
-      "It will delete all matches, match lines, game scores, saved match setup lineups, byes, standings, and team roster rows.",
-      "It will clear team captains/co-captains, mark all teams inactive, and change Captain user roles back to Player.",
-      "Saved Schedule Settings will not be deleted.",
+      "It will delete all generated matches, match lines, game scores, saved match setup lineups, byes, and standings.",
+      "Teams, team rosters, captains, user roles, Seasons, Leagues, Divisions, game lines, Locations, saved Schedule Settings, Court Availability, Blackout Dates, Email Options, and Score Sheets will not be changed.",
+      "The Schedule Editor, Match Scheduler, and Scoring (Master) will be blank until schedules are generated again.",
       "",
       "Continue?",
     ].join("\n"));
 
     if (!firstOk) return;
 
-    const secondOk = confirm("This cannot be undone from the app. Are you absolutely sure you want to reset all leagues and teams?");
+    const secondOk = confirm("This cannot be undone from the app. Are you absolutely sure you want to delete all generated schedules and scoring data?");
     if (!secondOk) return;
 
     const typed = prompt('Final confirmation: type MASTER RESET ALL to continue.');
@@ -1423,7 +1423,7 @@ export default function DashboardPage() {
             <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
               <h3 className="text-lg font-black text-red-950">Master Reset All</h3>
               <p className="mt-1 text-sm font-semibold leading-6 text-red-800">
-                Removes generated league operations data across the whole system. Use only when starting from a clean operations slate.
+                Removes generated schedules and scoring data across the whole system while preserving the league and team setup.
               </p>
               <label className="mt-4 flex items-start gap-3 rounded-xl bg-white/80 p-3 text-sm font-semibold text-red-950">
                 <input
@@ -1433,7 +1433,7 @@ export default function DashboardPage() {
                   className="mt-1"
                 />
                 <span>
-                  I understand this permanently deletes matches, match lines, game scores, saved match setup lineups, byes, standings, and team roster rows; clears team captains and co-captains; inactivates teams; and changes Captain users back to Player.
+                  I understand this permanently deletes generated matches, match lines, game scores, saved match setup lineups, byes, and standings. Teams, team rosters, captains, user roles, Seasons, Leagues, Divisions, game lines, Locations, saved Schedule Settings, Court Availability, Blackout Dates, Email Options, and Score Sheets stay unchanged.
                 </span>
               </label>
               <button
