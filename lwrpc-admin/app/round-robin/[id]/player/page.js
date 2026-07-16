@@ -2152,33 +2152,33 @@ function PartnerComparisonModal({ history, player, onClose }) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-3 sm:p-4">
-          <div className="rounded-lg border border-teal-100 bg-teal-50 p-3">
-            <div className="text-xs font-black uppercase tracking-wide text-teal-800">Time Frame</div>
-            <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-              {PARTNER_COMPARISON_TIME_FRAMES.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setTimeFrame(option.id)}
-                  className={`min-h-11 whitespace-nowrap rounded-md border px-3 py-2 text-xs font-black shadow-sm transition ${timeFrame === option.id ? "border-teal-800 bg-teal-800 text-white" : "border-teal-200 bg-white text-teal-900 hover:bg-teal-100"}`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-            <div className="mt-3 text-xs font-black uppercase tracking-wide text-teal-800">Sort By</div>
-            <div className="mt-2 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-              {PARTNER_COMPARISON_SORTS.map((option) => (
-                <button
-                  key={option.id}
-                  type="button"
-                  onClick={() => setSortBy(option.id)}
-                  className={`min-h-11 whitespace-nowrap rounded-md border px-3 py-2 text-xs font-black shadow-sm transition ${sortBy === option.id ? "border-teal-800 bg-teal-800 text-white" : "border-teal-200 bg-white text-teal-900 hover:bg-teal-100"}`}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+          <div className="grid gap-3 rounded-lg border border-teal-100 bg-teal-50 p-3 sm:grid-cols-2">
+            <label className="block text-xs font-black uppercase tracking-wide text-teal-800" htmlFor="partner-comparison-time-frame">
+              Time Frame
+              <select
+                id="partner-comparison-time-frame"
+                value={timeFrame}
+                onChange={(event) => setTimeFrame(event.target.value)}
+                className="mt-2 block min-h-11 w-full rounded-md border border-teal-200 bg-white px-3 py-2 text-sm font-bold normal-case tracking-normal text-teal-950 shadow-sm outline-none transition focus:border-teal-700 focus:ring-2 focus:ring-teal-200"
+              >
+                {PARTNER_COMPARISON_TIME_FRAMES.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-xs font-black uppercase tracking-wide text-teal-800" htmlFor="partner-comparison-sort-by">
+              Sort By
+              <select
+                id="partner-comparison-sort-by"
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value)}
+                className="mt-2 block min-h-11 w-full rounded-md border border-teal-200 bg-white px-3 py-2 text-sm font-bold normal-case tracking-normal text-teal-950 shadow-sm outline-none transition focus:border-teal-700 focus:ring-2 focus:ring-teal-200"
+              >
+                {PARTNER_COMPARISON_SORTS.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
