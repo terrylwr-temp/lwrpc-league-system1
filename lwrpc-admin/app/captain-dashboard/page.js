@@ -4631,7 +4631,7 @@ function matchScoreDetailsPrintHtml(match, lines, clubName = DEFAULT_SYSTEM_SETT
     <table>
       <thead>
         <tr>
-          <th>Game</th>
+          <th>Game (Circle Winning Team)</th>
           <th>Line</th>
           <th>Home Players</th>
           <th>Away Players</th>
@@ -4915,68 +4915,68 @@ function matchScoreSheetPrintHtml(match, lineups, ratingForMember, clubName = DE
         height: 26px;
       }
       .score-sheet.split-score-sheet h1 {
-        font-size: 15px;
-        line-height: 1.05;
+        font-size: 17px;
+        line-height: 1.1;
       }
       .score-sheet.split-score-sheet .meta {
-        margin-top: 5px;
-        gap: 4px;
+        margin-top: 6px;
+        gap: 5px;
       }
       .score-sheet.split-score-sheet .box {
-        min-height: 22px;
-        padding: 3px 4px;
+        min-height: 28px;
+        padding: 4px 5px;
       }
       .score-sheet.split-score-sheet .label {
-        font-size: 7px;
+        font-size: 8px;
       }
       .score-sheet.split-score-sheet .value {
-        margin-top: 1px;
-        font-size: 10px;
+        margin-top: 2px;
+        font-size: 11px;
       }
       .score-sheet.split-score-sheet .signatures {
-        margin-top: 5px;
-        gap: 6px;
-        font-size: 10px;
+        margin-top: 6px;
+        gap: 7px;
+        font-size: 11px;
       }
       .score-sheet.split-score-sheet .signature-line {
-        height: 16px;
+        height: 20px;
       }
       .score-sheet.split-score-sheet .lineups {
-        margin-top: 6px;
+        margin-top: 8px;
       }
       .score-sheet.split-score-sheet th {
-        padding: 3px 4px;
-        font-size: 10px;
+        padding: 5px;
+        font-size: 12px;
       }
       .score-sheet.split-score-sheet td {
-        padding: 3px 4px;
+        padding: 5px;
       }
       .score-sheet.split-score-sheet .header-score {
-        margin-left: 6px;
-        font-size: 9px;
+        margin-left: 10px;
+        font-size: 11px;
       }
       .score-sheet.split-score-sheet .line-cell {
         min-height: 0;
-        font-size: 10px;
-        line-height: 1.05;
+        font-size: 11px;
+        line-height: 1.12;
       }
       .score-sheet.split-score-sheet .line-cell-layout {
-        gap: 5px;
+        gap: 6px;
       }
       .score-sheet.split-score-sheet .line-heading {
-        flex-basis: 72px;
+        flex-basis: 78px;
       }
       .score-sheet.split-score-sheet .line-number {
-        font-size: 12px;
+        font-size: 15px;
       }
       .score-sheet.split-score-sheet .line-team-type,
       .score-sheet.split-score-sheet .team-rating,
       .score-sheet.split-score-sheet .rating {
-        font-size: 8px;
-        line-height: 1.05;
+        font-size: 9px;
+        line-height: 1.1;
       }
       .score-sheet.split-score-sheet .team-rating {
-        margin-top: 1px;
+        margin-top: 2px;
       }
     </style>
     <div class="score-sheet${splitScoreSheetPages ? " split-score-sheet" : ""}">
@@ -5136,7 +5136,7 @@ function scoreSheetConfiguredGameLinesTable(match) {
     <table class="configured-lines">
       <thead>
         <tr>
-          <th>Game</th>
+          <th>Game (Circle Winning Team)</th>
           <th>Line Type</th>
           <th>Game Format</th>
           <th>Team Pts</th>
@@ -5195,7 +5195,7 @@ function scoreSheetEntryTable(match) {
       </colgroup>
       <thead>
         <tr>
-          <th>Game</th>
+          <th>Game (Circle Winning Team)</th>
           ${hideRepeatedDetails ? "" : `
           <th>Line Type</th>
           <th>Game Format</th>
