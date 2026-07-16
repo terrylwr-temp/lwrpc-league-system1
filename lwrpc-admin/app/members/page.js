@@ -31,6 +31,7 @@ export default function MembersPage() {
 
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState([]);
+  const [clubLocations, setClubLocations] = useState([]);
   const [seasons, setSeasons] = useState([]);
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({
@@ -79,6 +80,7 @@ export default function MembersPage() {
     const [
       { data, error },
       { data: seasonData, error: seasonError },
+      { data: locationData, error: locationError },
     ] = await Promise.all([
       supabase
         .from("members")
@@ -101,6 +103,11 @@ export default function MembersPage() {
         .from("seasons")
         .select("id, name, is_active, start_date")
         .order("start_date", { ascending: false }),
+      supabase
+        .from("locations")
+        .select("id, name")
+        .or("is_active.eq.true,is_active.is.null")
+        .order("name", { ascending: true }),
     ]);
 
     if (error) {
@@ -111,6 +118,12 @@ export default function MembersPage() {
 
     if (seasonError) {
       alert(seasonError.message);
+      setLoading(false);
+      return;
+    }
+
+    if (locationError) {
+      alert(locationError.message);
       setLoading(false);
       return;
     }
@@ -168,6 +181,7 @@ export default function MembersPage() {
       }))
     );
     setSeasons(seasonData || []);
+    setClubLocations(locationData || []);
     setLoading(false);
   }, [router]);
 
@@ -710,8 +724,6 @@ export default function MembersPage() {
   }, [filteredMembers, sortConfig]);
 
   const totalPages = Math.max(1, Math.ceil(sortedMembers.length / PAGE_SIZE));
-
-  const clubLocations = uniqueMemberLocations(members);
 
   const pagedMembers = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
@@ -1541,25 +1553,6 @@ function locationIdForName(locations, name) {
   );
 
   return location?.id || null;
-}
-
-function uniqueMemberLocations(members) {
-  const byName = new Map();
-
-  members.forEach((member) => {
-    if (!member.club_location) return;
-    const key = normalizeLocationName(member.club_location);
-    const existing = byName.get(key);
-
-    if (!existing || (!existing.id && member.location_id)) {
-      byName.set(key, {
-        id: member.location_id || null,
-        name: member.club_location,
-      });
-    }
-  });
-
-  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 function normalizeLocationName(value) {

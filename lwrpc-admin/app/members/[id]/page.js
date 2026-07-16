@@ -212,6 +212,7 @@ if (roleError) {
 const { data: locationData, error: locationError } = await supabase
   .from("locations")
   .select("id, name")
+  .or("is_active.eq.true,is_active.is.null")
   .order("name", { ascending: true });
 
 if (locationError) {
