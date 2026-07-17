@@ -47,6 +47,7 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
   const [visible, setVisible] = useState(false);
   const [status, setStatus] = useState("idle");
   const [message, setMessage] = useState("");
+  const [statusModal, setStatusModal] = useState(null);
 
   useEffect(() => {
     function updateVisible() {
@@ -126,6 +127,10 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
 
       setStatus("enabled");
       setMessage("Text messages will still be used if an app notification cannot be delivered.");
+      setStatusModal({
+        title: "App Notifications Are On",
+        message: "PBCourtCommand can now send notifications to this device for your sessions. Text messages will still be used if an app notification cannot be delivered.",
+      });
     } catch (error) {
       setStatus("idle");
       setMessage(error.message || "Unable to enable App Notifications.");
@@ -171,6 +176,10 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
 
       setStatus("idle");
       setMessage("App Notifications are off on this device. Text messages will still be used.");
+      setStatusModal({
+        title: "App Notifications Are Off",
+        message: "PBCourtCommand will no longer send app notifications to this device. You will still receive text messages for your sessions.",
+      });
     } catch (error) {
       setStatus("enabled");
       setMessage(error.message || "Unable to turn off App Notifications.");
@@ -187,6 +196,30 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
   }
 
   if (!visible) return null;
+
+  const notificationStatusModal = statusModal && (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-950/55 p-4" role="presentation">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="app-notifications-status-title"
+        className="w-full max-w-sm rounded-2xl border border-emerald-100 bg-white p-5 text-center shadow-2xl"
+      >
+        <Image src="/favicon.ico" alt="" width={48} height={48} className="mx-auto h-12 w-12 rounded-xl bg-emerald-50 object-contain" />
+        <h2 id="app-notifications-status-title" className="mt-3 text-lg font-black text-slate-950">
+          {statusModal.title}
+        </h2>
+        <p className="mt-2 text-sm font-medium leading-relaxed text-slate-700">{statusModal.message}</p>
+        <button
+          type="button"
+          onClick={() => setStatusModal(null)}
+          className="mt-5 w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-black text-white transition hover:bg-emerald-800"
+        >
+          Got It
+        </button>
+      </div>
+    </div>
+  );
 
   if (iconOnly) {
     return (
@@ -208,6 +241,7 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
             {message}
           </div>
         )}
+        {notificationStatusModal}
       </>
     );
   }
@@ -228,6 +262,7 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
           {message}
         </div>
       )}
+      {notificationStatusModal}
     </div>
   );
 }
