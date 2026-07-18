@@ -6,6 +6,7 @@ import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib
 import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
+import { currentMemberRating, divisionRatingIssue } from "../../lib/ratingEligibility";
 import {
   gameHasScoreEntry as sharedGameHasScoreEntry,
   getLineSummary as sharedGetLineSummary,
@@ -24,6 +25,7 @@ export default function MobileScoreEntryPage() {
   const [match, setMatch] = useState(null);
   const [lines, setLines] = useState([]);
   const [games, setGames] = useState([]);
+  const [seasonRatings, setSeasonRatings] = useState([]);
   const [currentUserMember, setCurrentUserMember] = useState(null);
   const [scoreDirty, setScoreDirty] = useState(false);
   const pendingGameUpdatesRef = useRef(new Map());
@@ -71,7 +73,8 @@ export default function MobileScoreEntryPage() {
           club_pro_member_id
         ),
         locations(name),
-        divisions(name)
+        leagues(id, season_id),
+        divisions(name, rating_type, min_dupr, max_dupr, team_dupr_max)
       `)
       .eq("id", id)
       .single();
@@ -85,6 +88,10 @@ export default function MobileScoreEntryPage() {
       .from("match_lines")
       .select(`
         *,
+        home_player_1:members!match_lines_home_player_1_id_fkey(id, first_name, last_name, self_rating),
+        home_player_2:members!match_lines_home_player_2_id_fkey(id, first_name, last_name, self_rating),
+        away_player_1:members!match_lines_away_player_1_id_fkey(id, first_name, last_name, self_rating),
+        away_player_2:members!match_lines_away_player_2_id_fkey(id, first_name, last_name, self_rating),
         division_lines (
           line_name,
           line_number,
@@ -128,10 +135,78 @@ export default function MobileScoreEntryPage() {
       gameData = data || [];
     }
 
+    let ratingData = [];
+    const seasonId = matchData.leagues?.season_id;
+
+    if (seasonId) {
+      const { data, error } = await supabase
+        .from("member_season_ratings")
+        .select("*")
+        .eq("season_id", seasonId);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      ratingData = data || [];
+    }
+
     setMatch(matchData);
     setLines(lineData || []);
     setGames(gameData);
+    setSeasonRatings(ratingData);
   }, [id]);
+
+  async function loadCurrentSeasonRatings() {
+    const seasonId = match?.leagues?.season_id;
+    if (!seasonId) return [];
+
+    const { data, error } = await supabase
+      .from("member_season_ratings")
+      .select("*")
+      .eq("season_id", seasonId);
+
+    if (error) {
+      throw new Error("Current player ratings could not be verified: " + error.message);
+    }
+
+    return data || [];
+  }
+
+  function ratingLabel() {
+    const ratingType = match?.divisions?.rating_type || "dupr";
+    if (ratingType === "primetime") return "PT";
+    if (ratingType === "self_rating") return "Self";
+    return "DUPR";
+  }
+
+  function memberRating(member, ratings = seasonRatings) {
+    if (!member) return null;
+    const ratingType = match?.divisions?.rating_type || "dupr";
+    const ratingRow = ratings.find((row) => String(row.member_id) === String(member.id));
+    return currentMemberRating(member, ratingRow, ratingType);
+  }
+
+  function memberRatingIssue(member, ratings = seasonRatings) {
+    const playerName = ((member?.first_name || "") + " " + (member?.last_name || "")).trim() || "Selected player";
+    return divisionRatingIssue({
+      rating: memberRating(member, ratings),
+      minRating: match?.divisions?.min_dupr,
+      maxRating: match?.divisions?.max_dupr,
+      ratingLabel: ratingLabel(),
+      playerName,
+    });
+  }
+
+  function lineRatingIssues(line, ratings = seasonRatings) {
+    return [...new Set([
+      line.home_player_1,
+      line.home_player_2,
+      line.away_player_1,
+      line.away_player_2,
+    ].filter(Boolean).map((member) => memberRatingIssue(member, ratings)).filter(Boolean))];
+  }
 
   function queueGameUpdate(gameId, field, normalizedValue) {
     const key = `${gameId}:${field}`;
@@ -172,6 +247,15 @@ export default function MobileScoreEntryPage() {
   }
 
   async function updateGame(gameId, field, value) {
+    const game = games.find((item) => String(item.id) === String(gameId));
+    const line = lines.find((item) => String(item.id) === String(game?.match_line_id));
+    const ratingIssues = line ? lineRatingIssues(line) : [];
+
+    if (ratingIssues.length > 0) {
+      alert(["Scores cannot be entered for this game line until player ratings are eligible:", "", ...ratingIssues.map((issue) => "- " + issue)].join("\n"));
+      return;
+    }
+
     const numericValue = String(value).replace(/\D/g, "");
     const normalizedValue = numericValue === "" ? null : Number(numericValue);
 
@@ -227,7 +311,7 @@ export default function MobileScoreEntryPage() {
     return sharedRequiredLineGameIds(lineGames, line);
   }
 
-  function lineScoreValidationIssues(line) {
+  function lineScoreValidationIssues(line, ratings = seasonRatings) {
     const pointsToWin = Number(line.division_lines?.points_to_win || 0);
     const winBy = Number(line.division_lines?.win_by || 0);
     const lineGames = games.filter((game) => game.match_line_id === line.id);
@@ -247,6 +331,10 @@ export default function MobileScoreEntryPage() {
     }
 
     const shouldValidateLine = lineRequiresValidation(line, lineGames);
+
+    if (shouldValidateLine) {
+      issues.push(...lineRatingIssues(line, ratings).map((issue) => lineLabel + ": " + issue));
+    }
 
     lineGames.forEach((game) => {
       if (!requiredGameIds.has(String(game.id))) return;
@@ -294,15 +382,24 @@ export default function MobileScoreEntryPage() {
     return issues;
   }
 
-  function scoreValidationIssues() {
-    return lines.flatMap((line) => lineScoreValidationIssues(line));
+  function scoreValidationIssues(ratings = seasonRatings) {
+    return lines.flatMap((line) => lineScoreValidationIssues(line, ratings));
   }
 
 
   async function submitScores() {
     await flushPendingGameUpdates();
 
-    const validationIssues = scoreValidationIssues();
+    let currentRatings;
+    try {
+      currentRatings = await loadCurrentSeasonRatings();
+    } catch (error) {
+      alert(error.message);
+      return;
+    }
+
+    setSeasonRatings(currentRatings);
+    const validationIssues = scoreValidationIssues(currentRatings);
 
     if (validationIssues.length > 0) {
       alert(`Fix these scores before submitting:\n\n${validationIssues.join("\n")}`);
@@ -524,6 +621,7 @@ export default function MobileScoreEntryPage() {
             const requiredGameIdsForLine = requiredLineGameIds(lineGames, line);
 
             const summary = getLineSummary(line);
+            const ratingIssues = lineRatingIssues(line);
 
             return (
               <div
@@ -545,6 +643,13 @@ export default function MobileScoreEntryPage() {
                     {summary.homeGameWins}-{summary.awayGameWins}
                   </div>
                 </div>
+
+                {ratingIssues.length > 0 && (
+                  <div className="mt-4 rounded-xl border border-red-300 bg-red-50 p-3 text-sm font-bold text-red-900">
+                    <div className="mb-1">Player rating eligibility must be corrected before scores can be entered:</div>
+                    {ratingIssues.map((issue) => <div key={issue}>{issue}</div>)}
+                  </div>
+                )}
 
                 {lineGames.length === 0 && (
                   <div className="mt-4 rounded-xl bg-slate-50 p-4 text-center text-sm text-slate-500">

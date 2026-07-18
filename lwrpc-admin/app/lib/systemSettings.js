@@ -1,7 +1,7 @@
 export const DEFAULT_SYSTEM_SETTINGS = {
   club_name: "Lakewood Ranch Pickleball Club",
   club_short_name: "LWRPC",
-  system_name: "LWRPC League Management System",
+  system_name: "League Management System",
   browser_tab_title: "LWR PC League Management",
   logo_url: "https://lwrpickleballclub.com/lwrpc-logo.png",
   main_email: "info@lwrpickleballclub.com",

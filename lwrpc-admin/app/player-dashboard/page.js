@@ -2,7 +2,8 @@
 
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { usePathname, useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
@@ -40,6 +41,10 @@ import {
   matchLineTeamRatingDisplay,
 } from "../lib/matchRatingSnapshots";
 
+const DesignPreviewView = dynamic(() => import("../design-preview/DesignPreviewView"), {
+  loading: () => <LoadingScreen subtitle="Loading design preview..." />,
+});
+
 const PLAYER_DOCUMENT_KEYS = new Set([
   "code_of_conduct",
   "league_rules",
@@ -51,6 +56,9 @@ const PLAYER_LEAGUE_DOCUMENT_TYPES = LEAGUE_DOCUMENT_TYPES.filter((documentType)
 );
 
 const PLAYER_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-player-dashboard-selected-team";
+const PROFILE_PHOTO_BUCKET = "profile-photos";
+const PROFILE_PHOTO_URL_MARKER = `/storage/v1/object/public/${PROFILE_PHOTO_BUCKET}/`;
+const PROFILE_PHOTO_EXTENSIONS = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const PLAYER_PANEL_SECTION_IDS = {
   history: "player-dashboard-play-history",
   standings: "player-dashboard-division-standings",
@@ -71,6 +79,19 @@ const DASHBOARD_ACTION_BUTTON_ACTIVE_3D =
 const DASHBOARD_EMERALD_BUTTON_3D =
   "rounded-xl border border-emerald-300 bg-gradient-to-b from-white to-emerald-100 px-3 py-2 text-xs font-black text-emerald-950 shadow-[0_4px_0_#059669,0_8px_14px_rgba(15,23,42,0.16)] transition hover:-translate-y-0.5 hover:from-emerald-50 hover:to-emerald-200 active:translate-y-1 active:shadow-[0_2px_0_#059669,0_4px_8px_rgba(15,23,42,0.14)] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:bg-none disabled:text-slate-400 disabled:shadow-none disabled:hover:translate-y-0";
 
+function managedProfilePhotoPath(url) {
+  if (!url) return "";
+
+  try {
+    const parsed = new URL(url);
+    const markerIndex = parsed.pathname.indexOf(PROFILE_PHOTO_URL_MARKER);
+    if (markerIndex < 0) return "";
+    return decodeURIComponent(parsed.pathname.slice(markerIndex + PROFILE_PHOTO_URL_MARKER.length));
+  } catch {
+    return "";
+  }
+}
+
 function scrollDashboardSectionIntoView(sectionId) {
   if (!sectionId || typeof window === "undefined") return;
 
@@ -86,8 +107,11 @@ function scrollDashboardSectionIntoView(sectionId) {
 
 export default function PlayerDashboardPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const designPreview = pathname === "/design-preview";
   const playerGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "player_guide_pdf");
   const [loading, setLoading] = useState(true);
+  const [currentRole, setCurrentRole] = useState("player");
   const [member, setMember] = useState(null);
   const [teams, setTeams] = useState([]);
   const [matchTeamRosters, setMatchTeamRosters] = useState({});
@@ -105,6 +129,8 @@ export default function PlayerDashboardPage() {
   const [historyFilter, setHistoryFilter] = useState("all");
   const [pdfDocument, setPdfDocument] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
+  const [matchLineupPreview, setMatchLineupPreview] = useState(null);
+  const [designPreviewHistoryOpen, setDesignPreviewHistoryOpen] = useState(false);
   const [rosterTeam, setRosterTeam] = useState(null);
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
@@ -127,7 +153,7 @@ export default function PlayerDashboardPage() {
     const { data: memberRows, error: memberError } = await findMembersByEmail(
       supabase,
       user.email,
-      "id, first_name, last_name, email, is_active_member"
+      "id, first_name, last_name, email, is_active_member, profile_image_urls"
     );
 
     if (memberError) {
@@ -453,7 +479,8 @@ export default function PlayerDashboardPage() {
             last_name,
             email,
             phone,
-            self_rating
+            self_rating,
+            profile_image_urls
           )
         `)
         .in("team_id", matchTeamIds);
@@ -651,8 +678,11 @@ export default function PlayerDashboardPage() {
 
   useEffect(() => {
     async function run() {
-      const ok = await requireRole(router, "player");
-      if (ok) await loadData();
+      const authorization = await requireRole(router, "player");
+      if (authorization) {
+        setCurrentRole(authorization.role || "player");
+        await loadData();
+      }
     }
 
     run();
@@ -875,6 +905,27 @@ export default function PlayerDashboardPage() {
     if (value === null || value === undefined || value === "") return "NR";
     const number = Number(value);
     return Number.isNaN(number) ? "NR" : number.toFixed(2);
+  }
+
+  async function openMatchLineup(match) {
+    setMatchLineupPreview({ match, lineups: [], loading: true, error: "" });
+
+    const { data, error } = await supabase
+      .from("match_lineups")
+      .select("match_id, team_id, line_number, player_1_member_id, player_2_member_id, player_1:members!match_lineups_player_1_member_id_fkey(id, first_name, last_name, email, self_rating), player_2:members!match_lineups_player_2_member_id_fkey(id, first_name, last_name, email, self_rating)")
+      .eq("match_id", match.id)
+      .order("team_id", { ascending: true })
+      .order("line_number", { ascending: true });
+
+    setMatchLineupPreview((current) => {
+      if (String(current?.match?.id || "") !== String(match.id)) return current;
+      return {
+        match,
+        lineups: data || [],
+        loading: false,
+        error: error ? "The saved match lineup could not be loaded. " + error.message : "",
+      };
+    });
   }
 
   function teamWithRoster(teamId) {
@@ -1209,8 +1260,215 @@ export default function PlayerDashboardPage() {
     return <LoadingScreen subtitle="Loading Player Dashboard..." />;
   }
 
+  async function saveDesignPreviewProfileImage(file) {
+    const extension = PROFILE_PHOTO_EXTENSIONS[file?.type];
+    if (!extension) {
+      throw new Error("Choose a JPG, PNG, or WebP image.");
+    }
+    if (!member?.id) {
+      throw new Error("Your member profile could not be identified.");
+    }
+    if (file.size > 2_000_000) {
+      throw new Error("Choose an image smaller than 2 MB.");
+    }
+
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser();
+    if (userError || !user?.id) {
+      throw userError || new Error("Your signed-in account could not be identified.");
+    }
+
+    const objectPath = `${user.id}/avatar-${crypto.randomUUID()}.${extension}`;
+    const existingUrls = Array.isArray(member.profile_image_urls)
+      ? member.profile_image_urls.filter(Boolean)
+      : [];
+    const previousManagedPaths = existingUrls
+      .map(managedProfilePhotoPath)
+      .filter(Boolean);
+
+    const { error: uploadError } = await supabase.storage
+      .from(PROFILE_PHOTO_BUCKET)
+      .upload(objectPath, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
+    if (uploadError) throw uploadError;
+
+    const { data: publicUrlData } = supabase.storage
+      .from(PROFILE_PHOTO_BUCKET)
+      .getPublicUrl(objectPath);
+    const publicUrl = publicUrlData?.publicUrl;
+    if (!publicUrl) {
+      await supabase.storage.from(PROFILE_PHOTO_BUCKET).remove([objectPath]);
+      throw new Error("The profile picture URL could not be created.");
+    }
+
+    const nextProfileImageUrls = [
+      publicUrl,
+      ...existingUrls.filter((url) => !managedProfilePhotoPath(url)),
+    ];
+    const { data: updatedMember, error: memberUpdateError } = await supabase
+      .from("members")
+      .update({ profile_image_urls: nextProfileImageUrls })
+      .eq("id", member.id)
+      .select("id, profile_image_urls")
+      .single();
+
+    if (memberUpdateError) {
+      await supabase.storage.from(PROFILE_PHOTO_BUCKET).remove([objectPath]);
+      throw memberUpdateError;
+    }
+
+    setMember((current) => ({ ...current, profile_image_urls: updatedMember.profile_image_urls }));
+    if (previousManagedPaths.length > 0) {
+      await supabase.storage.from(PROFILE_PHOTO_BUCKET).remove(previousManagedPaths);
+    }
+
+    return publicUrl;
+  }
+
+  async function logoutFromDesignPreview() {
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) throw error;
+
+    router.replace("/login");
+    router.refresh();
+  }
+
   const playerDisplayName = formatMemberName(member) || "Player";
   const playerTeamRatingSummary = mySelectedTeamRatingSummary();
+  const designPreviewDocumentTypes = currentRole === "player"
+    ? PLAYER_LEAGUE_DOCUMENT_TYPES
+    : LEAGUE_DOCUMENT_TYPES;
+  const designPreviewLeagueDocuments = selectedVisibleTeam
+    ? designPreviewDocumentTypes.map((documentType) => ({
+        ...documentType,
+        available: Boolean(leagueDocumentPath(selectedVisibleTeam.divisions?.leagues, documentType)),
+      }))
+    : [];
+
+  if (designPreview) {
+    return (
+      <>
+        <DesignPreviewView
+          dashboard={{
+            member,
+            role: currentRole,
+            teams: visibleTeams,
+            selectedTeam: selectedVisibleTeam,
+            seasonName:
+              selectedVisibleTeam?.divisions?.leagues?.seasons?.name ||
+              activeDivisionOptions.find(
+                (option) => String(option.id) === String(selectedVisibleTeam?.divisions?.id)
+              )?.division?.leagues?.seasons?.name ||
+              "",
+            divisionStandings: selectedDivisionStandings,
+            scheduleItems: selectedTeamScheduleItems,
+            matches,
+            rosters: matchTeamRosters,
+            ratingSummary: playerTeamRatingSummary,
+            leagueDocuments: designPreviewLeagueDocuments,
+            standingsLeaders: selectedDivisionStandingsLeaders.leaders,
+            standingsMetricLabel: selectedDivisionStandingsLeaders.metricLabel,
+            membershipUrl: "https://lwrpickleballclub.com/manage-membership",
+            contactEmail: "info@lwrpickleballclub.com",
+            onSelectTeam: selectPlayerTeam,
+            onOpenMatch: setMatchDetails,
+            onOpenLineup: openMatchLineup,
+            onOpenRoster: () => selectedVisibleTeam && setRosterTeam(selectedVisibleTeam),
+            onOpenHistory: () => setDesignPreviewHistoryOpen(true),
+            onOpenSchedule: () => selectedVisibleTeam && openDivisionScheduleForTeam(selectedVisibleTeam),
+            onOpenLeagueDocument: (documentType) =>
+              selectedVisibleTeam && openLeagueDocument(selectedVisibleTeam, documentType),
+            onOpenGuide: async () => {
+              const document = await guidePdfDocument(supabase, playerGuide);
+              if (document) setPdfDocument(document);
+            },
+            onChangePassword: () => router.push("/reset-password"),
+            onChangeDashboard: (path) => router.push(path),
+            onSaveProfileImage: saveDesignPreviewProfileImage,
+            onLogout: logoutFromDesignPreview,
+          }}
+        />
+
+        {pdfDocument && (
+          <PdfViewerModal document={pdfDocument} onClose={() => setPdfDocument(null)} />
+        )}
+
+        {matchDetails && (
+          <MatchDetailsModal
+            match={matchDetails}
+            standings={standings}
+            ratingForMember={ratingForMember}
+            teamWithRoster={teamWithRoster}
+            onOpenRoster={setRosterTeam}
+            onClose={() => setMatchDetails(null)}
+          />
+        )}
+
+        {rosterTeam && (
+          <RosterModal
+            team={rosterTeam}
+            ratingForMember={ratingForMember}
+            playerRecordForTeam={playerTeamRecord}
+            onClose={() => setRosterTeam(null)}
+          />
+        )}
+
+        {matchLineupPreview && (
+          <MatchLineupModal
+            preview={matchLineupPreview}
+            ratingForMember={ratingForMember}
+            onClose={() => setMatchLineupPreview(null)}
+          />
+        )}
+
+        {designPreviewHistoryOpen && (
+          <PreviewPlayHistoryModal
+            historyFilter={historyFilter}
+            onChangeHistoryFilter={setHistoryFilter}
+            options={playHistoryOptions}
+            stats={playHistoryStats}
+            groups={groupedPlayHistory}
+            resultCount={filteredPlayHistory.length}
+            memberId={member?.id}
+            ratingForMember={ratingForMember}
+            onClose={() => setDesignPreviewHistoryOpen(false)}
+          />
+        )}
+
+        {divisionScheduleTeam && (
+          <TeamScheduleModal
+            title="Division Team Schedules"
+            subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} / ${divisionScheduleTeam.divisions?.name || "Division"}`}
+            divisionOptions={activeDivisionOptions}
+            selectedDivisionId={divisionScheduleTeam.divisions?.id || divisionScheduleTeam.division_id}
+            onSelectDivision={selectDivisionScheduleDivision}
+            teams={divisionScheduleTeams}
+            selectedTeamId={divisionScheduleTeam.id}
+            onSelectTeam={(team) => setDivisionScheduleTeam({ ...divisionScheduleTeam, ...team })}
+            matches={divisionScheduleMatches}
+            byes={divisionScheduleByes}
+            ratings={divisionScheduleRatings}
+            ratingType={divisionScheduleTeam.divisions?.rating_type || "dupr"}
+            loading={divisionScheduleLoading}
+            compact
+            onClose={() => {
+              setDivisionScheduleTeam(null);
+              setDivisionScheduleTeams([]);
+              setDivisionScheduleMatches([]);
+              setDivisionScheduleByes([]);
+              setDivisionScheduleRatings([]);
+              setDivisionScheduleLoading(false);
+            }}
+          />
+        )}
+      </>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-slate-100 p-4 md:p-6">
@@ -1864,6 +2122,62 @@ function HistoryStat({ label, value, tone = "slate" }) {
   );
 }
 
+function PreviewPlayHistoryModal({
+  historyFilter,
+  onChangeHistoryFilter,
+  options,
+  stats,
+  groups,
+  resultCount,
+  memberId,
+  ratingForMember,
+  onClose,
+}) {
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/75 p-2 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="preview-play-history-title">
+      <div className="flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-4 bg-gradient-to-r from-blue-700 to-indigo-700 p-5 text-white md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-blue-100">Match Results</div>
+            <h2 id="preview-play-history-title" className="mt-1 text-2xl font-black">My Play History</h2>
+          </div>
+
+          <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-end">
+            <label className="w-full md:w-96">
+              <span className="mb-1 block text-xs font-black uppercase tracking-wide text-blue-100">Play History Scope</span>
+              <select
+                value={historyFilter}
+                onChange={(event) => onChangeHistoryFilter(event.target.value)}
+                className="w-full rounded-xl border border-white/40 bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm"
+                aria-label="Filter play history by dashboard scope"
+              >
+                <option value="all">All Seasons/All Teams</option>
+                {options.seasons.length > 0 && <optgroup label="Seasons">{options.seasons.map((season) => <option key={season.id} value={`season:${season.id}`}>{season.name}</option>)}</optgroup>}
+                {options.leagues.length > 0 && <optgroup label="Leagues">{options.leagues.map((league) => <option key={league.id} value={`league:${league.id}`}>{league.name}{league.seasonName ? ` / ${league.seasonName}` : ""}</option>)}</optgroup>}
+                {options.divisions.length > 0 && <optgroup label="Divisions">{options.divisions.map((division) => <option key={division.id} value={`division:${division.id}`}>{division.name}{division.leagueName ? ` / ${division.leagueName}` : ""}</option>)}</optgroup>}
+                {options.teams.length > 0 && <optgroup label="Teams">{options.teams.map((team) => <option key={team.id} value={`team:${team.id}`}>{historyTeamOptionLabel(team)}</option>)}</optgroup>}
+              </select>
+            </label>
+            <button type="button" onClick={onClose} className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20">Close</button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 md:grid-cols-4 md:gap-3 md:p-5">
+          <HistoryStat label="Games Played" value={stats.games} tone="slate" />
+          <HistoryStat label="Wins" value={stats.wins} tone="emerald" />
+          <HistoryStat label="Losses" value={stats.losses} tone="red" />
+          <HistoryStat label="Other" value={stats.other} tone="amber" />
+        </div>
+
+        <div className="flex-1 space-y-3 overflow-y-auto p-4 md:p-5">
+          {groups.map((group) => <PlayerHistoryMatchGroup key={group.key} group={group} memberId={memberId} ratingForMember={ratingForMember} />)}
+          {resultCount === 0 && <div className="rounded-xl bg-slate-50 p-6 text-center text-slate-500">No game play history found.</div>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TeamCard({
   team,
   selected,
@@ -2115,8 +2429,9 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
             {roster.map((player) => {
               const phone = formatPhoneNumberForStorage(player.phone);
               const playerName = formatMemberName(player);
+              const canEmailPlayer = !hidePlayerContacts && Boolean(player.email);
               return (
-                <div key={player.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div key={player.id} role={canEmailPlayer ? "link" : undefined} tabIndex={canEmailPlayer ? 0 : undefined} title={canEmailPlayer ? "Email " + playerName : undefined} onClick={() => { if (canEmailPlayer) window.location.href = "mailto:" + player.email; }} onKeyDown={(event) => { if (canEmailPlayer && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); window.location.href = "mailto:" + player.email; } }} className={"rounded-xl border border-slate-200 bg-white p-3 shadow-sm " + (canEmailPlayer ? "cursor-pointer hover:border-blue-300 hover:bg-blue-50 focus:bg-blue-50 focus:outline-none" : "")}>
                   <div className="break-words font-black text-slate-950">
                     {!hidePlayerContacts && player.email ? (
                       <a href={`mailto:${player.email}`} className="text-blue-800 underline decoration-blue-300 underline-offset-2 hover:text-blue-950">
@@ -2171,7 +2486,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
             </thead>
             <tbody>
               {roster.map((player) => (
-                <tr key={player.id} className="border-b border-slate-100 hover:bg-slate-50">
+                <tr key={player.id} role={!hidePlayerContacts && player.email ? "link" : undefined} tabIndex={!hidePlayerContacts && player.email ? 0 : undefined} title={!hidePlayerContacts && player.email ? "Email " + formatMemberName(player) : undefined} onClick={() => { if (!hidePlayerContacts && player.email) window.location.href = "mailto:" + player.email; }} onKeyDown={(event) => { if (!hidePlayerContacts && player.email && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); window.location.href = "mailto:" + player.email; } }} className={"border-b border-slate-100 hover:bg-blue-50 " + (!hidePlayerContacts && player.email ? "cursor-pointer focus:bg-blue-50 focus:outline-none" : "")}>
                   <td className="p-3 font-bold text-slate-900">
                     {!hidePlayerContacts && player.email ? (
                       <a href={`mailto:${player.email}`} className="text-blue-800 underline decoration-blue-300 underline-offset-2 hover:text-blue-950">
@@ -2504,6 +2819,93 @@ function ByeSummaryCard({ bye }) {
   );
 }
 
+function MatchLineupModal({ preview, ratingForMember, onClose }) {
+  const { match, lineups, loading, error } = preview;
+  const seasonId = match.leagues?.season_id;
+  const ratingType = match.divisions?.rating_type || "dupr";
+  const ratingLabel = ratingType === "primetime" ? "PT" : ratingType === "self_rating" ? "Self" : "DUPR";
+  const locationName = match.locations?.name || "Location TBD";
+  const sides = [
+    { key: "home", label: "Home Team", teamId: match.home_team_id, team: match.home_team, tone: "border-emerald-200 bg-emerald-50" },
+    { key: "away", label: "Away Team", teamId: match.away_team_id, team: match.away_team, tone: "border-blue-200 bg-blue-50" },
+  ];
+
+  function playerRating(member) {
+    return ratingForMember(member?.id, seasonId, ratingType, member);
+  }
+
+  function lineupRating(lineup) {
+    const values = [playerRating(lineup.player_1), playerRating(lineup.player_2)]
+      .map(Number)
+      .filter((value) => Number.isFinite(value));
+    return values.length === 2 ? values.reduce((total, value) => total + value, 0).toFixed(2) : "NR";
+  }
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="match-lineup-title">
+      <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
+        <div className="flex flex-col gap-4 bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] px-4 py-5 text-white sm:px-5 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
+            <div className="text-xs font-black uppercase tracking-[.13em] text-blue-100">Week {match.week_number || "-"} Match Lineup</div>
+            <h2 id="match-lineup-title" className="mt-1 break-words text-xl font-black sm:text-2xl">{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-blue-100">
+              <span>{formatDisplayDateWithLeadingWeekday(match.scheduled_date, "Date TBD")} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
+              <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1">{locationName}</span>
+              <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1">{match.leagues?.name || "League"} | {match.divisions?.name || "Division"}</span>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md">Close</button>
+        </div>
+
+        <div className="overflow-y-auto bg-slate-50 p-3 sm:p-5">
+          {loading ? (
+            <div className="rounded-2xl border border-blue-200 bg-white p-8 text-center font-bold text-[#1558d5]">Loading saved match lineup...</div>
+          ) : error ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-5 font-semibold text-red-800">{error}</div>
+          ) : lineups.length === 0 ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center">
+              <div className="text-lg font-black text-amber-900">Match lineup has not been published yet</div>
+              <p className="mt-1 text-sm font-semibold text-amber-800">The saved player assignments will appear here after the captains complete Match Setup.</p>
+            </div>
+          ) : (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {sides.map((side) => {
+                const teamLineups = lineups.filter((lineup) => String(lineup.team_id) === String(side.teamId)).sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0));
+                return (
+                  <section key={side.key} className={"overflow-hidden rounded-2xl border shadow-sm " + side.tone}>
+                    <header className="border-b border-current/10 px-4 py-4">
+                      <div className="text-xs font-black uppercase tracking-wide text-slate-500">{side.label}</div>
+                      <h3 className="mt-1 text-xl font-black text-[#102e64]">{side.team?.name || side.label}</h3>
+                    </header>
+                    <div className="space-y-3 p-3 sm:p-4">
+                      {teamLineups.length === 0 ? (
+                        <div className="rounded-xl bg-white/80 p-4 text-sm font-semibold text-slate-600">Setup is still pending for this team.</div>
+                      ) : teamLineups.map((lineup) => (
+                        <article key={side.key + "-" + lineup.line_number} className="rounded-xl border border-white bg-white p-3 shadow-sm">
+                          <div className="mb-3 flex items-center justify-between gap-3">
+                            <strong className="text-sm font-black text-[#102e64]">Team {lineup.line_number || "-"}</strong>
+                            <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-black text-blue-900">Team {ratingLabel}: {lineupRating(lineup)}</span>
+                          </div>
+                          {[lineup.player_1, lineup.player_2].map((player, index) => (
+                            <div key={player?.id || index} className="flex items-center justify-between gap-3 border-t border-slate-100 py-2 first:border-t-0">
+                              <span className="min-w-0 truncate font-bold text-slate-900">{formatMemberName(player) || "Player TBD"}</span>
+                              <span className="flex-none rounded-lg bg-slate-100 px-2 py-1 text-xs font-black text-slate-700">{ratingLabel}: {playerRating(player)}</span>
+                            </div>
+                          ))}
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, onOpenRoster, onClose }) {
   const homeStanding = teamStanding(standings, match.home_team_id);
   const awayStanding = teamStanding(standings, match.away_team_id);
@@ -2536,17 +2938,17 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
-      <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-800 to-zinc-800 px-3 py-4 text-white sm:px-4 md:flex-row md:items-start md:justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4">
+      <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] px-4 py-5 text-white sm:px-5 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
-            <div className="text-xs font-black uppercase tracking-wide text-slate-200">
+            <div className="text-xs font-black uppercase tracking-[.13em] text-blue-100">
               Week {match.week_number || "-"} {isVerifiedCompleted ? "Match Results" : "Match Details"}
             </div>
             <h2 className="mt-1 break-words text-xl font-black sm:text-2xl">
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-200">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-blue-100">
               <span>{formatDisplayDateWithLeadingWeekday(match.scheduled_date, "Date TBD")} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
             </div>
           </div>
@@ -2555,22 +2957,22 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
             <button
               type="button"
               onClick={printMatchResults}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+              className="rounded-xl border border-white/25 bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
             >
               Print
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
+              className="rounded-xl bg-white px-4 py-2 text-sm font-black text-[#154eaf] shadow-sm hover:bg-blue-50"
             >
               Close
             </button>
           </div>
         </div>
 
-        <div className="overflow-y-auto">
-          <div className="grid gap-3 bg-slate-50 p-3 sm:p-5 md:grid-cols-2">
+        <div className="overflow-y-auto bg-[#f7f9fc]">
+          <div className="grid gap-3 p-3 sm:p-5 md:grid-cols-2">
             <MatchTeamDetail
               label="Home Team"
               team={homeTeam || match.home_team}
@@ -2588,7 +2990,7 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
           </div>
 
           {isVerifiedCompleted && (
-            <div className="border-y border-slate-200 bg-slate-50 px-3 pb-3 sm:px-5 sm:pb-5">
+            <div className="border-y border-[#e1e7f0] bg-[#f7f9fc] px-3 pb-3 sm:px-5 sm:pb-5">
               <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                   {formatMatchScoreStatus(match)}
@@ -2623,7 +3025,7 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
 
           <div className="space-y-3 p-3 sm:p-5">
             {!isVerifiedCompleted && (
-              <div className="rounded-2xl border border-slate-200 bg-white p-4">
+              <div className="rounded-2xl border border-[#dce4ef] bg-white p-4 shadow-sm">
                 <div className="text-xs font-black uppercase tracking-wide text-slate-500">
                   Location
                 </div>
@@ -2638,7 +3040,7 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
                     href={mapUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="mt-3 inline-flex rounded-xl bg-slate-700 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800"
+                    className="mt-3 inline-flex rounded-xl bg-[#1558d5] px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-[#124bb4]"
                   >
                     Open Home Team Address Map
                   </a>
@@ -2851,8 +3253,8 @@ function ResultTeamPlayers({ label, players, line, side, match, ratingForMember,
 
 function MatchTeamDetail({ label, team, standing, tone, onOpenRoster }) {
   const tones = {
-    green: "bg-emerald-50 text-emerald-950",
-    gray: "bg-indigo-50 text-indigo-950",
+    green: "border border-emerald-200 bg-emerald-50 text-[#102e64]",
+    gray: "border border-blue-200 bg-blue-50 text-[#102e64]",
   };
 
   return (
@@ -2875,7 +3277,7 @@ function MatchTeamDetail({ label, team, standing, tone, onOpenRoster }) {
         <button
           type="button"
           onClick={onOpenRoster}
-          className="mt-3 w-full rounded-xl bg-slate-950 px-3 py-2 text-sm font-bold text-white hover:bg-slate-800"
+          className="mt-3 w-full rounded-xl bg-[#1558d5] px-3 py-2 text-sm font-black text-white shadow-sm hover:bg-[#124bb4]"
         >
           Team Roster ({team?.roster?.length || 0})
         </button>
