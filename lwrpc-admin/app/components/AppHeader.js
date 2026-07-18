@@ -28,6 +28,9 @@ export default function AppHeader({
   const [openGroups, setOpenGroups] = useState({});
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
   const [memberEmailIssue, setMemberEmailIssue] = useState(null);
+  const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
+  const [logoutPending, setLogoutPending] = useState(false);
+  const [logoutError, setLogoutError] = useState("");
 
   const primaryLinks = useMemo(() => [
     { label: "Player Dashboard", path: "/player-dashboard", role: "player", icon: "\u{1F3E0}" },
@@ -120,11 +123,29 @@ export default function AppHeader({
     }
   }
 
-  async function logout() {
+  function requestLogout() {
     if (!confirmUnsavedChanges()) return;
 
-    await supabase.auth.signOut();
-    router.push("/login");
+    setLogoutError("");
+    setMenuOpen(false);
+    setLogoutDialogOpen(true);
+  }
+
+  async function logout() {
+    setLogoutPending(true);
+    setLogoutError("");
+
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+
+    if (error) {
+      setLogoutError(error.message || "Unable to log out. Please try again.");
+      setLogoutPending(false);
+      return;
+    }
+
+    setLogoutDialogOpen(false);
+    router.replace("/login");
+    router.refresh();
   }
 
   async function loadSystemSettings() {
@@ -318,41 +339,6 @@ export default function AppHeader({
 
           <NavGroups />
 
-          <div className="mt-auto border-t border-white/10 pt-5">
-            {!collapsed ? (
-              <>
-                <div className="text-xs uppercase tracking-wide text-slate-400">
-                  Signed in as
-                </div>
-
-                <div className="mt-1 text-sm font-bold text-white">
-                  {memberName || "User"}
-                </div>
-
-                <div className="mt-1 text-xs text-slate-300">
-                  {roleLabel(role)}
-                </div>
-
-                <button
-                  onClick={logout}
-                  className="mt-4 w-full rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20"
-                >
-                  Logout
-                </button>
-
-              </>
-            ) : (
-              <div className="space-y-2">
-                <button
-                  onClick={logout}
-                  className="w-full rounded-xl bg-white/10 px-2 py-3 text-sm font-semibold text-white hover:bg-white/20"
-                  title="Logout"
-                >
-                  {"\u{23FB}"}
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </aside>
 
@@ -400,7 +386,13 @@ export default function AppHeader({
             )}
 
             <div className="hidden flex-col items-end gap-2 md:flex">
-              <div className="rounded-xl bg-white/10 px-4 py-3 text-right">
+              <button
+                type="button"
+                onClick={requestLogout}
+                className="rounded-xl bg-white/10 px-4 py-3 text-right transition hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-sky-300"
+                aria-haspopup="dialog"
+                title="Open logout confirmation"
+              >
                 <div className="text-xs uppercase tracking-wide text-sky-200">
                   Welcome
                 </div>
@@ -412,7 +404,7 @@ export default function AppHeader({
                 <div className="text-xs text-slate-200">
                   {roleLabel(role)}
                 </div>
-              </div>
+              </button>
 
               {welcomeAction}
             </div>
@@ -477,12 +469,79 @@ export default function AppHeader({
             )}
 
             <button
-              onClick={logout}
+              onClick={requestLogout}
               className={`${mobileSidebarAction ? "mt-2" : "mt-6"} w-full rounded-xl bg-white/10 px-4 py-3 font-semibold text-white`}
             >
               Logout
             </button>
 
+          </div>
+        </div>
+      )}
+
+      {logoutDialogOpen && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="logout-dialog-title"
+        >
+          <button
+            type="button"
+            className="absolute inset-0 cursor-default bg-slate-950/65 backdrop-blur-sm"
+            onClick={() => !logoutPending && setLogoutDialogOpen(false)}
+            aria-label="Close logout dialog"
+          />
+
+          <div className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
+            <div className="border-b border-slate-200 bg-slate-50 px-6 py-5">
+              <div className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">
+                Account
+              </div>
+              <h2 id="logout-dialog-title" className="mt-1 text-2xl font-black text-slate-950">
+                Log out of this device?
+              </h2>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+                <div className="font-black text-slate-950">
+                  {memberName || "User"}
+                </div>
+                <div className="mt-1 text-sm font-semibold text-slate-600">
+                  {roleLabel(role)}
+                </div>
+              </div>
+
+              <p className="mt-4 text-sm font-semibold leading-6 text-slate-600">
+                You will be logged out of this browser or device only. You will remain signed in on your other devices.
+              </p>
+
+              {logoutError && (
+                <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-800">
+                  {logoutError}
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setLogoutDialogOpen(false)}
+                  disabled={logoutPending}
+                  className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Stay signed in
+                </button>
+                <button
+                  type="button"
+                  onClick={logout}
+                  disabled={logoutPending}
+                  className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-red-700 disabled:cursor-wait disabled:opacity-70"
+                >
+                  {logoutPending ? "Logging out..." : "Log out"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

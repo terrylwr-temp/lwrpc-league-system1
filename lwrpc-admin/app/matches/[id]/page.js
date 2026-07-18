@@ -27,6 +27,7 @@ import {
   specialMatchWinnerName,
 } from "../../lib/specialMatchResults";
 import { buildMatchLineRatingSnapshot } from "../../lib/matchRatingSnapshots";
+import { currentMemberRating, divisionRatingIssue, divisionRatingStatus } from "../../lib/ratingEligibility";
 
 function lmsLineScoreRequired(line) {
   return sharedLineScoreRequired(line);
@@ -48,6 +49,7 @@ export default function MatchDetailPage() {
   const { id } = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const embeddedScoreEntry = searchParams.get("embedded") === "1";
   const [loading, setLoading] = useState(true);
 
   const [match, setMatch] = useState(null);
@@ -105,7 +107,7 @@ export default function MatchDetailPage() {
       .select(`
         *,
         leagues(id, name, season_id),
-        divisions(name, number_of_lines, games_per_line, rating_type, team_dupr_max),
+        divisions(name, number_of_lines, games_per_line, rating_type, min_dupr, max_dupr, team_dupr_max),
         locations(name),
         home_team:teams!matches_home_team_id_fkey(
           id,
@@ -328,22 +330,56 @@ export default function MatchDetailPage() {
     return "DUPR";
   }
 
-  function memberRating(member) {
-    if (!member) return null;
+  async function loadCurrentSeasonRatings() {
+    const seasonId = match?.leagues?.season_id;
+    if (!seasonId) return [];
 
-    const ratingType = match?.divisions?.rating_type || "dupr";
-    const ratingRow = seasonRatings.find((rating) => rating.member_id === member.id);
+    const { data, error } = await supabase
+      .from("member_season_ratings")
+      .select("*")
+      .eq("season_id", seasonId);
 
-    if (ratingType === "primetime") return ratingRow?.season_primetime_rating ?? null;
-    if (ratingType === "self_rating") return member.self_rating ?? null;
-    return ratingRow?.season_dupr_rating ?? null;
+    if (error) {
+      throw new Error("Current player ratings could not be verified: " + error.message);
+    }
+
+    return data || [];
   }
 
-  async function saveMatchRatingSnapshots() {
+  function memberRating(member, ratings = seasonRatings) {
+    if (!member) return null;
+    const ratingType = match?.divisions?.rating_type || "dupr";
+    const ratingRow = ratings.find((rating) => String(rating.member_id) === String(member.id));
+    return currentMemberRating(member, ratingRow, ratingType);
+  }
+
+  function memberDisplayName(member) {
+    return ((member?.first_name || "") + " " + (member?.last_name || "")).trim() || "Player";
+  }
+
+  function memberRatingIssue(member, ratings = seasonRatings) {
+    return divisionRatingIssue({
+      rating: memberRating(member, ratings),
+      minRating: match?.divisions?.min_dupr,
+      maxRating: match?.divisions?.max_dupr,
+      ratingLabel: ratingLabel(),
+      playerName: memberDisplayName(member),
+    });
+  }
+
+  function memberRatingStatus(member, ratings = seasonRatings) {
+    return divisionRatingStatus({
+      rating: memberRating(member, ratings),
+      minRating: match?.divisions?.min_dupr,
+      maxRating: match?.divisions?.max_dupr,
+    });
+  }
+
+  async function saveMatchRatingSnapshots(ratings = seasonRatings) {
     const ratingType = match?.divisions?.rating_type || "dupr";
     const results = await Promise.all(
       lines.map(async (line) => {
-        const snapshot = buildMatchLineRatingSnapshot(line, ratingType, memberRating);
+        const snapshot = buildMatchLineRatingSnapshot(line, ratingType, (member) => memberRating(member, ratings));
         const { error } = await supabase
           .from("match_lines")
           .update({
@@ -358,7 +394,7 @@ export default function MatchDetailPage() {
     const failed = results.find((result) => result.error);
 
     if (failed) {
-      throw new Error(`Unable to save rating snapshots. Run the updated Supabase SQL, then try again: ${failed.error.message}`);
+      throw new Error("Unable to save rating snapshots. Run the updated Supabase SQL, then try again: " + failed.error.message);
     }
 
     const snapshotsByLineId = new Map(results.map((result) => [String(result.line.id), result.snapshot]));
@@ -368,9 +404,8 @@ export default function MatchDetailPage() {
     })));
   }
 
-  function memberHasValidRating(member) {
-    const rating = memberRating(member);
-    return rating !== null && rating !== undefined && rating !== "" && Number.isFinite(Number(rating));
+  function memberHasValidRating(member, ratings = seasonRatings) {
+    return Boolean(member) && !memberRatingIssue(member, ratings);
   }
 
   function rosterRowHasValidRating(row) {
@@ -381,21 +416,20 @@ export default function MatchDetailPage() {
     return memberHasValidRating(lineup?.player_1) && memberHasValidRating(lineup?.player_2);
   }
 
-  function ratingNeededPlayerNames(players) {
+  function playerRatingIssues(players, ratings = seasonRatings) {
     return players
-      .filter((player) => player && !memberHasValidRating(player))
-      .map((player) => `${player.first_name || ""} ${player.last_name || ""}`.trim())
+      .filter(Boolean)
+      .map((player) => memberRatingIssue(player, ratings))
       .filter(Boolean);
   }
 
   function rosterOptionLabel(row) {
     const rating = memberRating(row.members);
-    const ratingText =
-      rating === null || rating === undefined || rating === ""
-        ? "NR"
-        : Number(rating).toFixed(2);
+    const ratingText = rating === null ? "NR" : rating.toFixed(2);
+    const status = memberRatingStatus(row.members);
+    const label = rosterOptionName(row) + " (" + ratingLabel() + ": " + ratingText + ")";
 
-    return `${rosterOptionName(row)} (${ratingLabel()}: ${ratingText})`;
+    return status ? label + " - " + status : label;
   }
 
   function teamDuprRating(player1, player2) {
@@ -406,15 +440,16 @@ export default function MatchDetailPage() {
     return value.toFixed(2);
   }
 
-  function teamDuprRatingValue(player1, player2) {
-    const ratings = [memberRating(player1), memberRating(player2)]
+  function teamDuprRatingValue(player1, player2, ratings = seasonRatings) {
+    const playerRatings = [memberRating(player1, ratings), memberRating(player2, ratings)]
       .map((rating) => Number(rating))
       .filter((rating) => !Number.isNaN(rating));
 
-    if (ratings.length === 0) return null;
+    if (playerRatings.length === 0) return null;
 
-    return ratings.reduce((sum, rating) => sum + rating, 0);
+    return playerRatings.reduce((sum, rating) => sum + rating, 0);
   }
+
   function teamSlotNumber(line) {
     return Number(line.division_lines?.line_number || line.line_number || 0);
   }
@@ -561,7 +596,7 @@ export default function MatchDetailPage() {
     );
   }, [playerAssignmentCounts, match]);
 
-  function lineWarnings(line) {
+  function lineWarnings(line, ratings = seasonRatings) {
     const warnings = [];
     const doublesMax = match?.divisions?.team_dupr_max;
 
@@ -569,15 +604,15 @@ export default function MatchDetailPage() {
       warnings.push("A player is selected twice in this game.");
     }
 
-    const ratingNeededNames = ratingNeededPlayerNames([
+    const currentRatingIssues = playerRatingIssues([
       line.home_player_1,
       line.home_player_2,
       line.away_player_1,
       line.away_player_2,
-    ]);
+    ], ratings);
 
-    if (ratingNeededNames.length > 0) {
-      warnings.push(`${[...new Set(ratingNeededNames)].join(", ")} need a valid ${ratingLabel()} rating before scores can be submitted.`);
+    if (currentRatingIssues.length > 0) {
+      warnings.push(...new Set(currentRatingIssues));
     }
 
     const overLimitNames = isPicklebreakerLine(line)
@@ -589,25 +624,23 @@ export default function MatchDetailPage() {
           line.away_player_2,
         ]
           .filter((player) => overLineLimitPlayerIds.includes(player?.id))
-          .map((player) => `${player.first_name || ""} ${player.last_name || ""}`.trim())
+          .map((player) => ((player.first_name || "") + " " + (player.last_name || "")).trim())
           .filter(Boolean);
 
     if (overLimitNames.length > 0) {
-      warnings.push(
-        `${[...new Set(overLimitNames)].join(", ")} selected more than the division allows.`
-      );
+      warnings.push([...new Set(overLimitNames)].join(", ") + " selected more than the division allows.");
     }
 
     if (doublesMax !== null && doublesMax !== undefined && doublesMax !== "") {
-      const homeRating = teamDuprRatingValue(line.home_player_1, line.home_player_2);
-      const awayRating = teamDuprRatingValue(line.away_player_1, line.away_player_2);
+      const homeRating = teamDuprRatingValue(line.home_player_1, line.home_player_2, ratings);
+      const awayRating = teamDuprRatingValue(line.away_player_1, line.away_player_2, ratings);
 
       if (homeRating !== null && homeRating > Number(doublesMax)) {
-        warnings.push(`${match?.home_team?.name || "Home"} doubles team is over the ${ratingLabel()} maximum of ${Number(doublesMax).toFixed(2)}.`);
+        warnings.push((match?.home_team?.name || "Home") + " doubles team is over the " + ratingLabel() + " maximum of " + Number(doublesMax).toFixed(2) + ".");
       }
 
       if (awayRating !== null && awayRating > Number(doublesMax)) {
-        warnings.push(`${match?.away_team?.name || "Away"} doubles team is over the ${ratingLabel()} maximum of ${Number(doublesMax).toFixed(2)}.`);
+        warnings.push((match?.away_team?.name || "Away") + " doubles team is over the " + ratingLabel() + " maximum of " + Number(doublesMax).toFixed(2) + ".");
       }
     }
 
@@ -759,9 +792,12 @@ export default function MatchDetailPage() {
     const roster = field.startsWith("home_") ? homeRoster : awayRoster;
     const selectedRosterRow = roster.find((row) => String(row.members?.id) === String(value));
 
-    if (value && selectedRosterRow && !rosterRowHasValidRating(selectedRosterRow)) {
-      alert(`${rosterOptionName(selectedRosterRow)} needs a valid ${ratingLabel()} rating before they can be entered as an actual player.`);
-      return;
+    if (value && selectedRosterRow) {
+      const ratingIssue = memberRatingIssue(selectedRosterRow.members);
+      if (ratingIssue) {
+        alert(ratingIssue + " Select an eligible player before entering scores.");
+        return;
+      }
     }
 
     const { error } = await supabase
@@ -804,9 +840,9 @@ export default function MatchDetailPage() {
     const lineup = matchLineups.find((item) => item.id === lineupId);
     if (!lineup) return;
 
-    if (!savedLineupHasValidRatings(lineup)) {
-      const names = ratingNeededPlayerNames([lineup.player_1, lineup.player_2]);
-      alert(`${names.join(" and ") || "This saved match setup team"} need a valid ${ratingLabel()} rating before they can be entered as actual players.`);
+    const savedLineupRatingIssues = playerRatingIssues([lineup.player_1, lineup.player_2]);
+    if (savedLineupRatingIssues.length > 0) {
+      alert(["This saved Match Setup team is no longer eligible:", "", ...savedLineupRatingIssues.map((issue) => "- " + issue)].join("\n"));
       return;
     }
 
@@ -906,7 +942,7 @@ export default function MatchDetailPage() {
     }
 
     if ((field === "home_score" || field === "away_score") && line && lineHasBlockingRatingWarning(line)) {
-      alert("This game line has a team over the division rating maximum. Fix the players before entering scores for this line.");
+      alert("This game line has a current player-rating eligibility warning. Fix the players before entering scores for this line.");
       return;
     }
 
@@ -1036,6 +1072,14 @@ export default function MatchDetailPage() {
     return isScoringOperationsOverride() && searchParams.get("returnTo") === "schedule-editor";
   }
 
+  function finishScoreEntryNavigation() {
+    if (embeddedScoreEntry) {
+      window.parent?.postMessage({ type: "lwrpc-score-entry-complete", matchId: id }, window.location.origin);
+      return;
+    }
+    router.push(matchReturnPath());
+  }
+
   function matchReturnPath() {
     if (shouldReturnToScheduleEditor()) return "/schedule-editor";
     if (isScoringOperationsOverride()) return "/scoring";
@@ -1067,12 +1111,21 @@ export default function MatchDetailPage() {
     );
   }
 
-  function lineHasBlockingRatingWarning(line) {
+  function lineHasBlockingRatingWarning(line, ratings = seasonRatings) {
+    if (playerRatingIssues([
+      line.home_player_1,
+      line.home_player_2,
+      line.away_player_1,
+      line.away_player_2,
+    ], ratings).length > 0) {
+      return true;
+    }
+
     const doublesMax = match?.divisions?.team_dupr_max;
     if (doublesMax === null || doublesMax === undefined || doublesMax === "") return false;
 
-    const homeRating = teamDuprRatingValue(line.home_player_1, line.home_player_2);
-    const awayRating = teamDuprRatingValue(line.away_player_1, line.away_player_2);
+    const homeRating = teamDuprRatingValue(line.home_player_1, line.home_player_2, ratings);
+    const awayRating = teamDuprRatingValue(line.away_player_1, line.away_player_2, ratings);
 
     return (
       (homeRating !== null && homeRating > Number(doublesMax)) ||
@@ -1097,7 +1150,7 @@ export default function MatchDetailPage() {
     ];
   }
 
-  function gameLineValidationIssues(line, lineGames) {
+  function gameLineValidationIssues(line, lineGames, ratings = seasonRatings) {
     const issues = [];
     const pointsToWin = Number(line.division_lines?.points_to_win || 0);
     const winBy = Number(line.division_lines?.win_by || 0);
@@ -1115,9 +1168,9 @@ export default function MatchDetailPage() {
 
     const lineRequiresValidation = lmsLineRequiresValidation(line, lineGames);
 
-    if (lineRequiresValidation && lineWarnings(line).length > 0) {
+    if (lineRequiresValidation && lineWarnings(line, ratings).length > 0) {
       issues.push(
-        ...lineWarnings(line).map((message) => ({
+        ...lineWarnings(line, ratings).map((message) => ({
           lineId: line.id,
           gameId: null,
           message,
@@ -1181,16 +1234,18 @@ export default function MatchDetailPage() {
     return issues;
   }
 
-  function scoreValidationIssues() {
+  function scoreValidationIssues(ratings = seasonRatings) {
     return displayedLines.flatMap((line) =>
       gameLineValidationIssues(
         line,
-        games.filter((game) => game.match_line_id === line.id)
+        games.filter((game) => game.match_line_id === line.id),
+        ratings
       )
     );
   }
 
-  async function saveCalculatedWinners(showAlert = true) {
+
+  async function saveCalculatedWinners(showAlert = true, ratings = seasonRatings) {
     if (!canManageScores()) {
       alert("Only captains for this match can enter or verify scores.");
       return false;
@@ -1198,7 +1253,7 @@ export default function MatchDetailPage() {
 
     await flushPendingGameUpdates();
 
-    const issues = scoreValidationIssues();
+    const issues = scoreValidationIssues(ratings);
 
     if (issues.length > 0) {
       setScoreValidationIssueList(issues);
@@ -1283,8 +1338,10 @@ export default function MatchDetailPage() {
     try {
       await flushPendingGameUpdates();
 
-      setScoreSubmissionProgress("Verifying scores and confirming DUPR ratings...");
-      const issues = scoreValidationIssues();
+      setScoreSubmissionProgress("Verifying scores and confirming current player ratings...");
+      const currentRatings = await loadCurrentSeasonRatings();
+      setSeasonRatings(currentRatings);
+      const issues = scoreValidationIssues(currentRatings);
       if (issues.length > 0) {
         setScoreValidationIssueList(issues);
         scoreSubmissionInProgressRef.current = false;
@@ -1296,7 +1353,7 @@ export default function MatchDetailPage() {
       setScoreValidationIssueList([]);
 
       setScoreSubmissionProgress("Confirming score totals...");
-      const saved = await saveCalculatedWinners(false);
+      const saved = await saveCalculatedWinners(false, currentRatings);
 
       if (!saved) {
         scoreSubmissionInProgressRef.current = false;
@@ -1305,7 +1362,7 @@ export default function MatchDetailPage() {
       }
 
       setScoreSubmissionProgress("Saving player and team ratings at time of play...");
-      await saveMatchRatingSnapshots();
+      await saveMatchRatingSnapshots(currentRatings);
 
     const currentMemberId = currentUserMember?.id || null;
     const now = new Date().toISOString();
@@ -1381,7 +1438,7 @@ export default function MatchDetailPage() {
     }
 
     setScoreDirty(false);
-    router.push(matchReturnPath());
+    finishScoreEntryNavigation();
     } catch (error) {
       scoreSubmissionInProgressRef.current = false;
       setScoreSubmissionProgress("");
@@ -1524,7 +1581,7 @@ export default function MatchDetailPage() {
     }
 
     setScoreDirty(false);
-    router.push(matchReturnPath());
+    finishScoreEntryNavigation();
     } catch (error) {
       scoreSubmissionInProgressRef.current = false;
       setScoreSubmissionProgress("");
@@ -1589,7 +1646,7 @@ export default function MatchDetailPage() {
     );
 
     setScoreDirty(false);
-    router.push(matchReturnPath());
+    finishScoreEntryNavigation();
   }
 
   async function disputeScores() {
@@ -1803,25 +1860,29 @@ export default function MatchDetailPage() {
   const specialResultIssues = scoreValidationIssueList.filter((issue) => !issue.lineId && !issue.gameId);
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 pb-[calc(8rem+env(safe-area-inset-bottom))] md:p-6">
+    <main className={embeddedScoreEntry ? "min-h-full bg-slate-100 p-3 pb-[calc(8rem+env(safe-area-inset-bottom))] sm:p-4" : "min-h-screen bg-slate-100 p-4 pb-[calc(8rem+env(safe-area-inset-bottom))] md:p-6"}>
       <div className="mx-auto max-w-7xl">
-        <AppHeader
-          title="Enter Match Scores"
-          subtitle="Assign players by team, enter game scores, and submit final results."
-        />
+        {!embeddedScoreEntry && (
+          <AppHeader
+            title="Enter Match Scores"
+            subtitle="Assign players by team, enter game scores, and submit final results."
+          />
+        )}
 
         <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:gap-3">
-          <button
-            type="button"
-            onClick={() => {
-              if (confirmUnsavedChanges()) {
-                router.push(matchReturnPath());
-              }
-            }}
-            className="rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 lg:py-2"
-          >
-            Back to {matchReturnLabel()}
-          </button>
+          {!embeddedScoreEntry && (
+            <button
+              type="button"
+              onClick={() => {
+                if (confirmUnsavedChanges()) {
+                  router.push(matchReturnPath());
+                }
+              }}
+              className="rounded-xl bg-slate-200 px-4 py-3 font-semibold transition hover:-translate-y-0.5 hover:bg-slate-300 lg:py-2"
+            >
+              Back to {matchReturnLabel()}
+            </button>
+          )}
 
           {scoreEntryEditable && (
             <button
@@ -2526,7 +2587,7 @@ function TeamPlayers({
                 disabled={optionDisabled}
               >
                 {rosterOptionName(player)}
-                {optionDisabled ? " - Rating Needed" : ""}
+                {optionDisabled ? " - Not Eligible" : ""}
               </option>
             );
           })}
@@ -2553,7 +2614,7 @@ function TeamPlayers({
                 disabled={optionDisabled}
               >
                 {rosterOptionName(player)}
-                {optionDisabled ? " - Rating Needed" : ""}
+                {optionDisabled ? " - Not Eligible" : ""}
               </option>
             );
           })}
@@ -2601,4 +2662,4 @@ function formatMatchScoreStatus(match) {
 
 
 
-
+

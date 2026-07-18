@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { hasRole } from "../../lib/permissions";
 import { highestRoleForMembers } from "../../lib/memberLookup";
+import { currentMemberRating, divisionRatingIssue, numericRating } from "../../lib/ratingEligibility";
 
 export const runtime = "nodejs";
 
@@ -100,12 +101,19 @@ export async function POST(req) {
         id,
         home_team_id,
         away_team_id,
+        leagues (
+          season_id
+        ),
         divisions (
           id,
           number_of_lines,
           primary_team_type,
           secondary_number_of_lines,
-          secondary_team_type
+          secondary_team_type,
+          rating_type,
+          min_dupr,
+          max_dupr,
+          team_dupr_max
         )
       `)
       .eq("id", matchId)
@@ -160,7 +168,7 @@ export async function POST(req) {
     if (playerIds.length > 0) {
       const { data: rosterRows, error: rosterError } = await supabase
         .from("team_members")
-        .select("member_id")
+        .select("member_id, members(id, first_name, last_name, self_rating)")
         .eq("team_id", teamId)
         .in("member_id", playerIds);
 
@@ -174,6 +182,90 @@ export async function POST(req) {
           { success: false, error: "Every selected lineup player must be on this team roster." },
           { status: 400 }
         );
+      }
+
+
+      let ratingRows = [];
+      const seasonId = match.leagues?.season_id;
+
+      if (seasonId) {
+        const { data, error } = await supabase
+          .from("member_season_ratings")
+          .select("member_id, season_dupr_rating, season_primetime_rating")
+          .eq("season_id", seasonId)
+          .in("member_id", playerIds);
+
+        if (error) throw error;
+        ratingRows = data || [];
+      }
+
+      const ratingByMemberId = new Map(
+        ratingRows.map((row) => [String(row.member_id), row])
+      );
+      const memberById = new Map(
+        (rosterRows || []).map((row) => [String(row.member_id), row.members])
+      );
+      const ratingType = match.divisions?.rating_type || "dupr";
+      const ratingLabel = ratingType === "primetime" ? "PT" : ratingType === "self_rating" ? "Self" : "DUPR";
+      const currentRatingByMemberId = new Map();
+      const ratingIssues = playerIds
+        .map((playerId) => {
+          const member = memberById.get(String(playerId));
+          const rating = currentMemberRating(
+            member,
+            ratingByMemberId.get(String(playerId)),
+            ratingType
+          );
+          currentRatingByMemberId.set(String(playerId), rating);
+          const playerName =
+            ((member?.first_name || "") + " " + (member?.last_name || "")).trim() ||
+            "Selected player";
+
+          return divisionRatingIssue({
+            rating,
+            minRating: match.divisions?.min_dupr,
+            maxRating: match.divisions?.max_dupr,
+            ratingLabel,
+            playerName,
+          });
+        })
+        .filter(Boolean);
+
+      if (ratingIssues.length > 0) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: ["Match setup cannot be saved because current ratings are outside the division requirements.", "", ...ratingIssues.map((issue) => "- " + issue)].join("\n"),
+          },
+          { status: 400 }
+        );
+      }
+
+      const doublesMaximum = numericRating(match.divisions?.team_dupr_max);
+
+      if (doublesMaximum !== null) {
+        const overMaximumLine = lineups.find((lineup) => {
+          const player1Rating = currentRatingByMemberId.get(String(lineup.player_1_member_id));
+          const player2Rating = currentRatingByMemberId.get(String(lineup.player_2_member_id));
+          return player1Rating !== null && player2Rating !== null &&
+            player1Rating + player2Rating > doublesMaximum;
+        });
+
+        if (overMaximumLine) {
+          const combinedRating =
+            currentRatingByMemberId.get(String(overMaximumLine.player_1_member_id)) +
+            currentRatingByMemberId.get(String(overMaximumLine.player_2_member_id));
+
+          return NextResponse.json(
+            {
+              success: false,
+              error: "Match setup cannot be saved. Line " + Number(overMaximumLine.line_number) +
+                " has a combined " + ratingLabel + " rating of " + combinedRating.toFixed(2) +
+                ", above the division doubles-team maximum of " + doublesMaximum.toFixed(2) + ".",
+            },
+            { status: 400 }
+          );
+        }
       }
     }
 

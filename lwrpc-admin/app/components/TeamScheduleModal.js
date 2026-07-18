@@ -85,10 +85,10 @@ export default function TeamScheduleModal({
             <h2 className="mt-1 text-xl font-black sm:text-2xl">{title || "Team Schedule"}</h2>
             {subtitle && <p className="mt-1 text-sm font-semibold text-slate-200">{subtitle}</p>}
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center md:justify-end">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end md:justify-end">
             {divisionOptions.length > 0 && (
               <label className="block sm:min-w-72">
-                <span className="sr-only">Choose division</span>
+                <span className="mb-1 block text-xs font-black uppercase tracking-wide text-blue-100">Selected Scope</span>
                 <select
                   value={selectedDivisionId || ""}
                   onChange={(event) => onSelectDivision?.(event.target.value)}
@@ -110,7 +110,7 @@ export default function TeamScheduleModal({
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 shadow-sm hover:bg-slate-100"
+              className="min-h-[40px] rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:bg-slate-100 hover:shadow-md"
             >
               Close
             </button>

@@ -44,6 +44,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "glikrmmgirilnmamxxyl.supabase.co",
+        pathname: "/storage/v1/object/public/profile-photos/**",
+      },
+      {
+        protocol: "https",
         hostname: "lwrpickleballclub.com",
         pathname: "/lwrpc-logo.png",
       },

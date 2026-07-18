@@ -1,8 +1,9 @@
-﻿"use client";
+"use client";
 
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { usePathname, useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
@@ -37,6 +38,11 @@ import {
   matchLinePlayerRatingDisplay,
   matchLineTeamRatingDisplay,
 } from "../lib/matchRatingSnapshots";
+import { currentMemberRating, divisionRatingIssue, divisionRatingStatus } from "../lib/ratingEligibility";
+
+const CaptainDesignPreviewView = dynamic(() => import("../design-preview/captain/CaptainDesignPreviewView"), {
+  loading: () => <LoadingScreen subtitle="Loading Captain design preview..." />,
+});
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
 const CAPTAIN_MATCH_SETUP_NOTES_STORAGE_PREFIX = "lwrpc-captain-match-setup-notes-seen";
@@ -73,9 +79,12 @@ function scrollDashboardSectionIntoView(sectionId) {
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const designPreview = pathname === "/design-preview/captain";
   const captainGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "captain_guide_pdf");
 
   const [currentMember, setCurrentMember] = useState(null);
+  const [currentRole, setCurrentRole] = useState("captain");
   const [teams, setTeams] = useState([]);
   const [matches, setMatches] = useState([]);
   const [byeWeeks, setByeWeeks] = useState([]);
@@ -114,6 +123,7 @@ export default function CaptainDashboardPage() {
   const [divisionCaptainsPreview, setDivisionCaptainsPreview] = useState(null);
   const [scoreDetailsMatch, setScoreDetailsMatch] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
+  const [scoreEntryMatch, setScoreEntryMatch] = useState(null);
   const [rosterTeam, setRosterTeam] = useState(null);
   const [flexScheduleMatch, setFlexScheduleMatch] = useState(null);
   const [flexScheduleDate, setFlexScheduleDate] = useState("");
@@ -131,6 +141,7 @@ export default function CaptainDashboardPage() {
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
+    if (user?.role) setCurrentRole(user.role);
     return !!user;
   }, [router]);
 
@@ -208,6 +219,7 @@ export default function CaptainDashboardPage() {
         name,
         is_active,
         rating_type,
+        playoff_team_count,
         leagues (
           id,
           name,
@@ -268,7 +280,10 @@ export default function CaptainDashboardPage() {
           win_by,
           default_game_format,
           rating_type,
+          playoff_team_count,
           line_notes,
+          min_dupr,
+          max_dupr,
           team_dupr_max,
           score_sheet_template_id,
           score_sheet_templates (
@@ -299,6 +314,11 @@ export default function CaptainDashboardPage() {
             id,
             name,
             season_id,
+            seasons (
+              id,
+              name,
+              abbreviation
+            ),
             rosters_locked,
             flex_league,
             league_document_bucket,
@@ -406,7 +426,10 @@ export default function CaptainDashboardPage() {
           win_by,
           default_game_format,
           rating_type,
+          playoff_team_count,
           line_notes,
+          min_dupr,
+          max_dupr,
           team_dupr_max,
           score_sheet_template_id,
           score_sheet_templates (
@@ -1689,18 +1712,37 @@ export default function CaptainDashboardPage() {
     });
   }
 
-  function setupMemberRating(member) {
-    const ratingType = setupTeam?.divisions?.rating_type || "dupr";
-    const ratingRow = setupRatings.find((rating) => rating.member_id === member?.id);
-
-    if (ratingType === "primetime") return ratingRow?.season_primetime_rating ?? null;
-    if (ratingType === "self_rating") return member?.self_rating ?? null;
-    return ratingRow?.season_dupr_rating ?? null;
+  function setupMemberName(member) {
+    return formatMemberName(member) || "Player";
   }
 
-  function setupMemberHasValidRating(member) {
-    const rating = setupMemberRating(member);
-    return rating !== null && rating !== undefined && rating !== "" && Number.isFinite(Number(rating));
+  function setupMemberRating(member, ratings = setupRatings) {
+    const ratingType = setupTeam?.divisions?.rating_type || "dupr";
+    const ratingRow = ratings.find((rating) => String(rating.member_id) === String(member?.id));
+
+    return currentMemberRating(member, ratingRow, ratingType);
+  }
+
+  function setupMemberRatingIssue(member, ratings = setupRatings) {
+    return divisionRatingIssue({
+      rating: setupMemberRating(member, ratings),
+      minRating: setupTeam?.divisions?.min_dupr,
+      maxRating: setupTeam?.divisions?.max_dupr,
+      ratingLabel: setupRatingLabel(),
+      playerName: setupMemberName(member),
+    });
+  }
+
+  function setupMemberRatingStatus(member, ratings = setupRatings) {
+    return divisionRatingStatus({
+      rating: setupMemberRating(member, ratings),
+      minRating: setupTeam?.divisions?.min_dupr,
+      maxRating: setupTeam?.divisions?.max_dupr,
+    });
+  }
+
+  function setupMemberHasValidRating(member, ratings = setupRatings) {
+    return Boolean(member) && !setupMemberRatingIssue(member, ratings);
   }
 
   function setupRosterRowHasValidRating(row) {
@@ -1710,18 +1752,14 @@ export default function CaptainDashboardPage() {
   function setupRosterLabel(row) {
     const member = row.members;
     const rating = setupMemberRating(member);
-    const ratingText =
-      rating === null || rating === undefined || rating === ""
-        ? "NR"
-        : Number(rating).toFixed(2);
+    const ratingText = rating === null ? "NR" : rating.toFixed(2);
 
-    return `${member?.last_name || ""}, ${member?.first_name || ""} (${setupRatingLabel()}: ${ratingText})`;
+    return (member?.last_name || "") + ", " + (member?.first_name || "") + " (" + setupRatingLabel() + ": " + ratingText + ")";
   }
 
   function setupRosterOptionLabel(row) {
-    return setupRosterRowHasValidRating(row)
-      ? setupRosterLabel(row)
-      : `${setupRosterLabel(row)} - Rating Needed`;
+    const status = setupMemberRatingStatus(row?.members);
+    return status ? setupRosterLabel(row) + " - " + status : setupRosterLabel(row);
   }
 
   function setupRosterOptionsFor(selectedMemberId) {
@@ -1738,18 +1776,18 @@ export default function CaptainDashboardPage() {
     return "DUPR";
   }
 
-  function setupTeamRating(lineup) {
+  function setupTeamRating(lineup, ratings = setupRatings) {
     const players = [
       setupRoster.find((row) => row.member_id === lineup.player_1_member_id)?.members,
       setupRoster.find((row) => row.member_id === lineup.player_2_member_id)?.members,
     ];
-    const ratings = players
-      .map(setupMemberRating)
+    const playerRatings = players
+      .map((member) => setupMemberRating(member, ratings))
       .map((rating) => Number(rating))
       .filter((rating) => !Number.isNaN(rating));
 
-    if (ratings.length === 0) return null;
-    return ratings.reduce((sum, rating) => sum + rating, 0);
+    if (playerRatings.length === 0) return null;
+    return playerRatings.reduce((sum, rating) => sum + rating, 0);
   }
 
   function setupEmailPlayerLabel(member) {
@@ -1809,9 +1847,9 @@ export default function CaptainDashboardPage() {
     ];
   }
 
-  function setupLineWarning(lineup) {
+  function setupLineWarning(lineup, ratings = setupRatings) {
     const maxRating = setupTeam?.divisions?.team_dupr_max;
-    const rating = setupTeamRating(lineup);
+    const rating = setupTeamRating(lineup, ratings);
 
     if (
       maxRating !== null &&
@@ -1869,29 +1907,29 @@ export default function CaptainDashboardPage() {
     return "";
   }
 
-  function setupLineIssue(lineup) {
+  function setupLineIssue(lineup, ratings = setupRatings) {
     if (!lineup.player_1_member_id || !lineup.player_2_member_id) {
       return `${matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)} needs two players before match setup can be saved.`;
     }
 
-    const invalidRatingPlayers = [
+    const ratingIssues = [
       setupRoster.find((row) => String(row.member_id) === String(lineup.player_1_member_id))?.members,
       setupRoster.find((row) => String(row.member_id) === String(lineup.player_2_member_id))?.members,
     ]
-      .filter((member) => member && !setupMemberHasValidRating(member))
-      .map(formatMemberName)
+      .filter(Boolean)
+      .map((member) => setupMemberRatingIssue(member, ratings))
       .filter(Boolean);
 
-    if (invalidRatingPlayers.length > 0) {
-      return `${invalidRatingPlayers.join(" and ")} need a valid ${setupRatingLabel()} rating before match setup can be saved.`;
+    if (ratingIssues.length > 0) {
+      return ratingIssues.join(" ");
     }
 
-    return setupDuplicateWarning(lineup) || setupLineWarning(lineup);
+    return setupDuplicateWarning(lineup) || setupLineWarning(lineup, ratings);
   }
 
-  function setupValidationIssues() {
+  function setupValidationIssues(ratings = setupRatings) {
     return setupLineups
-      .map(setupLineIssue)
+      .map((lineup) => setupLineIssue(lineup, ratings))
       .filter(Boolean);
   }
 
@@ -1907,7 +1945,25 @@ export default function CaptainDashboardPage() {
   async function saveMatchSetup() {
     if (!setupMatch || !setupTeam) return;
 
-    const validationIssues = setupValidationIssues();
+    let currentRatings = setupRatings;
+    const seasonId = setupTeam.divisions?.leagues?.season_id;
+
+    if (seasonId) {
+      const { data, error } = await supabase
+        .from("member_season_ratings")
+        .select("*")
+        .eq("season_id", seasonId);
+
+      if (error) {
+        alert("Current player ratings could not be verified: " + error.message);
+        return;
+      }
+
+      currentRatings = data || [];
+      setSetupRatings(currentRatings);
+    }
+
+    const validationIssues = setupValidationIssues(currentRatings);
 
     if (validationIssues.length > 0) {
       alert(
@@ -2533,65 +2589,12 @@ export default function CaptainDashboardPage() {
     setupDivisionNotesMatchId && String(setupDivisionNotesMatchId) === String(setupMatch?.id)
       ? setupDivisionRulesText
       : "";
-
-  return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-6">
-      <div className="mx-auto max-w-7xl">
-        <AppHeader
-          title="Captain Dashboard"
-          subtitle="Captain tools, upcoming matches, score entry, and score verification."
-          hideSubtitleOnMobile
-          mobileSidebarAction={
-            <button
-              type="button"
-              onClick={() => openGuideDocument(supabase, captainGuide)}
-              className="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-400"
-            >
-              User Guide
-            </button>
-          }
-          actions={
-            <div className="grid grid-cols-2 gap-1.5 md:grid-cols-1 md:gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirmUnsavedChanges()) router.push("/reset-password");
-                }}
-                className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-blue-500 md:rounded-xl md:px-4 md:py-2 md:text-sm"
-              >
-                Change Password
-              </button>
-
-              <a
-                href="mailto:info@lwrpickleballclub.com"
-                className="rounded-lg bg-emerald-500 px-2.5 py-1.5 text-center text-xs font-bold text-white hover:bg-emerald-400 md:rounded-xl md:px-4 md:py-2 md:text-sm"
-              >
-                Contact League
-              </a>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  const document = await guidePdfDocument(supabase, captainGuide);
-                  if (document) setPdfDocument(document);
-                }}
-                className="hidden rounded-lg bg-emerald-500 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-400 md:block md:rounded-xl md:px-4 md:py-2 md:text-sm"
-              >
-                User Guide
-              </button>
-            </div>
-          }
-        />
-
-        <LoginMessageModal
-          templateKey="captain_login_popup"
-          audienceLabel="Captain Message"
-        />
-
+  const matchSetupModal = (
+    <>
         {setupMatch && setupTeam && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-          <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-2xl">
-            <div className="bg-slate-950 p-5 text-white">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4">
+          <div className="flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
+            <div className="bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] p-5 text-white">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
                   <div className="text-xs font-bold uppercase tracking-wide text-blue-200">
@@ -2631,7 +2634,7 @@ export default function CaptainDashboardPage() {
                   type="button"
                   onClick={saveMatchSetup}
                   disabled={savingSetup || emailingSetupPlayers}
-                  className="rounded-lg bg-blue-700 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-800 disabled:opacity-50"
+                  className="rounded-xl bg-[#1558d5] px-4 py-2.5 text-sm font-black text-white hover:bg-[#124bb4] disabled:opacity-50"
                 >
                   {savingSetup ? "Saving..." : "Save Match Setup"}
                 </button>
@@ -2640,7 +2643,7 @@ export default function CaptainDashboardPage() {
                   type="button"
                   onClick={requestEmailMatchSetupPlayers}
                   disabled={savingSetup || emailingSetupPlayers}
-                  className="rounded-lg bg-emerald-700 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-800 disabled:opacity-50"
+                  className="rounded-xl bg-emerald-700 px-4 py-2.5 text-sm font-black text-white hover:bg-emerald-800 disabled:opacity-50"
                 >
                   {emailingSetupPlayers ? "Emailing..." : "Email Players"}
                 </button>
@@ -2648,7 +2651,7 @@ export default function CaptainDashboardPage() {
                 <button
                   type="button"
                   onClick={closeMatchSetup}
-                  className="rounded-lg bg-slate-200 px-3 py-2 text-xs font-semibold text-slate-900 hover:bg-slate-300"
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-black text-slate-900 hover:bg-slate-100"
                 >
                   Close
                 </button>
@@ -2816,6 +2819,230 @@ export default function CaptainDashboardPage() {
           )}
           </div>
         )}
+    </>
+  );
+
+  if (designPreview) {
+    const leagueDocuments = LEAGUE_DOCUMENT_TYPES.map((documentType) => ({
+      ...documentType,
+      available: Boolean(
+        selectedCaptainTeam &&
+          leagueDocumentPath(selectedCaptainTeam.divisions?.leagues, documentType)
+      ),
+    }));
+
+    return (
+      <>
+        <CaptainDesignPreviewView
+          dashboard={{
+            member: currentMember,
+            role: currentRole,
+            teams: visibleTeams,
+            selectedTeam: selectedCaptainTeam,
+            seasonName:
+              selectedCaptainTeam?.divisions?.leagues?.seasons?.name ||
+              activeDivisionOptions.find(
+                (option) => String(option.id) === String(selectedCaptainTeam?.divisions?.id)
+              )?.division?.leagues?.seasons?.name ||
+              "",
+            teamStats,
+            upcomingItems,
+            pendingVerification,
+            matchSetupStatus,
+            completedMatches,
+            standingsLeaders: selectedDivisionStandingsLeaders.leaders,
+            standingsMetricLabel: selectedDivisionStandingsLeaders.metricLabel,
+            leagueDocuments,
+            contactEmail: systemSettings.main_email,
+            membershipUrl: systemSettings.membership_url,
+            onSelectTeam: selectCaptainTeam,
+            onChangeDashboard: (path) => router.push(path),
+            onOpenGuide: async () => {
+              const document = await guidePdfDocument(supabase, captainGuide);
+              if (document) setPdfDocument(document);
+            },
+            onChangePassword: () => router.push("/reset-password"),
+            onLogout: async () => {
+              const { error } = await supabase.auth.signOut({ scope: "local" });
+              if (error) throw error;
+              router.replace("/login");
+              router.refresh();
+            },
+            onOpenMatch: setMatchDetails,
+            onOpenScoreDetails: openScoreDetails,
+            onOpenCaptainTools: () => router.push("/captain-dashboard"),
+            onEmailOpposingCaptains: emailOpposingCaptains,
+            onOpenMatchScoreSheet: openMatchScoreSheet,
+            onEnterMatchScores: (match) => {
+              if (confirmUnsavedChanges()) setScoreEntryMatch(match);
+            },
+            onOpenMatchSetup: (match, team) => openMatchSetup(match, team || selectedCaptainTeam),
+            onManageRoster: () => {
+              if (!selectedCaptainTeam) return;
+              if (selectedCaptainTeam.divisions?.leagues?.rosters_locked === true) {
+                alert(rosterLockedMessage());
+                return;
+              }
+              router.push(`/teams/${selectedCaptainTeam.id}`);
+            },
+            onOpenRoster: () =>
+              selectedCaptainTeam &&
+              openRosterModal(teamWithRoster(selectedCaptainTeam.id)),
+            onOpenSchedule: () =>
+              selectedCaptainTeam && openDivisionSchedule(selectedCaptainTeam),
+            onOpenCaptains: () =>
+              selectedCaptainTeam && displayDivisionCaptains(selectedCaptainTeam),
+            onOpenLeagueDocument: (documentType) =>
+              selectedCaptainTeam &&
+              openLeagueDocument(selectedCaptainTeam, documentType),
+          }}
+        />
+
+        {pdfDocument && (
+          <PdfViewerModal document={pdfDocument} onClose={() => setPdfDocument(null)} />
+        )}
+
+        {rosterTeam && (
+          <RosterModal
+            team={rosterTeam}
+            ratingForMember={ratingForMember}
+            playerRecordForTeam={playerTeamRecord}
+            onClose={() => setRosterTeam(null)}
+          />
+        )}
+        {divisionScheduleTeam && (
+          <TeamScheduleModal
+            title="Division Team Schedules/Standings"
+            subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} | ${divisionScheduleTeam.divisions?.name || "Division"}`}
+            divisionOptions={activeDivisionOptions}
+            selectedDivisionId={divisionScheduleTeam.divisions?.id || divisionScheduleTeam.division_id}
+            onSelectDivision={selectDivisionScheduleDivision}
+            teams={divisionScheduleTeams}
+            selectedTeamId={divisionScheduleTeam.id}
+            onSelectTeam={(team) => setDivisionScheduleTeam({ ...divisionScheduleTeam, ...team })}
+            matches={divisionScheduleMatches}
+            byes={divisionScheduleByes}
+            ratings={divisionScheduleRatings}
+            ratingType={divisionScheduleTeam.divisions?.rating_type || "dupr"}
+            loading={divisionScheduleLoading}
+            compact
+            onClose={() => {
+              setDivisionScheduleTeam(null);
+              setDivisionScheduleTeams([]);
+              setDivisionScheduleMatches([]);
+              setDivisionScheduleByes([]);
+              setDivisionScheduleRatings([]);
+            }}
+          />
+        )}
+
+        {scoreSheetPreview && (
+          <PrintableDocumentModal
+            document={scoreSheetPreview}
+            onClose={() => setScoreSheetPreview(null)}
+          />
+        )}
+
+        {divisionCaptainsPreview && (
+          <DivisionCaptainsModal
+            data={divisionCaptainsPreview}
+            onClose={() => setDivisionCaptainsPreview(null)}
+          />
+        )}
+
+        {scoreDetailsMatch && (
+          <MatchScoreDetailsModal
+            match={scoreDetailsMatch}
+            ratingForMember={ratingForMember}
+            teamWithRoster={teamWithRoster}
+            onOpenRoster={openRosterModal}
+            clubName={systemSettings.club_name}
+            onClose={() => setScoreDetailsMatch(null)}
+          />
+        )}
+
+        {matchDetails && (
+          <MatchDetailsModal
+            match={matchDetails}
+            ratingForMember={ratingForMember}
+            teamWithRoster={teamWithRoster}
+            onOpenRoster={openRosterModal}
+            onClose={() => setMatchDetails(null)}
+          />
+        )}
+
+        {scoreEntryMatch && (
+          <ScoreEntryModal
+            match={scoreEntryMatch}
+            onComplete={() => {
+              setScoreEntryMatch(null);
+              loadData();
+            }}
+            onClose={() => setScoreEntryMatch(null)}
+          />
+        )}
+
+        {matchSetupModal}
+
+      </>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-100 p-4 md:p-6">
+      <div className="mx-auto max-w-7xl">
+        <AppHeader
+          title="Captain Dashboard"
+          subtitle="Captain tools, upcoming matches, score entry, and score verification."
+          hideSubtitleOnMobile
+          mobileSidebarAction={
+            <button
+              type="button"
+              onClick={() => openGuideDocument(supabase, captainGuide)}
+              className="w-full rounded-xl bg-emerald-500 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-400"
+            >
+              User Guide
+            </button>
+          }
+          actions={
+            <div className="grid grid-cols-2 gap-1.5 md:grid-cols-1 md:gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirmUnsavedChanges()) router.push("/reset-password");
+                }}
+                className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-blue-500 md:rounded-xl md:px-4 md:py-2 md:text-sm"
+              >
+                Change Password
+              </button>
+
+              <a
+                href="mailto:info@lwrpickleballclub.com"
+                className="rounded-lg bg-emerald-500 px-2.5 py-1.5 text-center text-xs font-bold text-white hover:bg-emerald-400 md:rounded-xl md:px-4 md:py-2 md:text-sm"
+              >
+                Contact League
+              </a>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  const document = await guidePdfDocument(supabase, captainGuide);
+                  if (document) setPdfDocument(document);
+                }}
+                className="hidden rounded-lg bg-emerald-500 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-emerald-400 md:block md:rounded-xl md:px-4 md:py-2 md:text-sm"
+              >
+                User Guide
+              </button>
+            </div>
+          }
+        />
+
+        <LoginMessageModal
+          templateKey="captain_login_popup"
+          audienceLabel="Captain Message"
+        />
+
+        {matchSetupModal}
 
         {flexScheduleMatch && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
@@ -2993,7 +3220,7 @@ export default function CaptainDashboardPage() {
                   />
                   <CaptainSectionButton
                     active={captainSection === "pending"}
-                    label="Pending Score Verification"
+                    label="Pending Match Verifications"
                     value={pendingVerification.length}
                     tone="red"
                     onClick={() => selectCaptainSection("pending")}
@@ -3108,7 +3335,7 @@ export default function CaptainDashboardPage() {
         </div>
 
         {captainSection === "pending" && (
-          <Section id={CAPTAIN_SECTION_IDS.pending} title={`Pending Score Verification${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={pendingVerification.length}>
+          <Section id={CAPTAIN_SECTION_IDS.pending} title={`Pending Match Verifications${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={pendingVerification.length}>
             {pendingVerification.map((match) =>
               matchCard(match, {
                 showSetup: false,
@@ -3449,7 +3676,7 @@ function DivisionCaptainsModal({ data, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-3 sm:p-4">
       <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-3 border-b border-blue-200 bg-gradient-to-r from-[#102e64] to-[#1558d5] px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-blue-200">
               {data.leagueName}
@@ -3478,7 +3705,7 @@ function DivisionCaptainsModal({ data, onClose }) {
 
         <div className="overflow-auto p-4">
           <table className="w-full min-w-[900px] border-collapse text-sm">
-            <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
+            <thead className="bg-[#102e64] text-xs uppercase tracking-wide text-white">
               <tr>
                 <th className="border border-slate-300 p-3 text-left">Team</th>
                 <th className="border border-slate-300 p-3 text-left">Role</th>
@@ -3529,7 +3756,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
       <div className="flex max-h-[94dvh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-950 to-blue-800 px-4 py-4 text-white md:flex-row md:items-start md:justify-between">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] to-[#1558d5] px-4 py-4 text-white md:flex-row md:items-start md:justify-between">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-blue-100">Team Roster</div>
             <h2 className="mt-1 text-xl font-black sm:text-2xl">{team.name}</h2>
@@ -3548,7 +3775,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
 
         <div className="overflow-auto p-3 sm:p-5">
           <table className="w-full border-collapse text-sm">
-            <thead className="bg-slate-900 text-xs uppercase tracking-wide text-white">
+            <thead className="bg-[#102e64] text-xs uppercase tracking-wide text-white">
               <tr>
                 <th className="p-3 text-left">Player</th>
                 <th className="p-3 text-left">Rating</th>
@@ -3559,7 +3786,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
             </thead>
             <tbody>
               {roster.map((player) => (
-                <tr key={player.id} className="border-b border-slate-100 hover:bg-slate-50">
+                <tr key={player.id} role={player.email ? "link" : undefined} tabIndex={player.email ? 0 : undefined} title={player.email ? "Email " + formatMemberName(player) : "No email address on file"} onClick={() => { if (player.email) window.location.href = "mailto:" + player.email; }} onKeyDown={(event) => { if (player.email && (event.key === "Enter" || event.key === " ")) { event.preventDefault(); window.location.href = "mailto:" + player.email; } }} className={"border-b border-slate-100 hover:bg-blue-50 " + (player.email ? "cursor-pointer focus:bg-blue-50 focus:outline-none" : "")}>
                   <td className="p-3 font-bold text-slate-900">{formatMemberName(player)}</td>
                   <td className="p-3 font-bold text-blue-900">
                     {ratingForMember(player.id, seasonId, ratingType, player)}
@@ -3588,6 +3815,43 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
   );
 }
 
+function ScoreEntryModal({ match, onComplete, onClose }) {
+  useEffect(() => {
+    function handleScoreEntryMessage(event) {
+      if (event.origin !== window.location.origin) return;
+      if (event.data?.type !== "lwrpc-score-entry-complete") return;
+      if (String(event.data?.matchId || "") !== String(match.id)) return;
+      onComplete?.();
+    }
+
+    window.addEventListener("message", handleScoreEntryMessage);
+    return () => window.removeEventListener("message", handleScoreEntryMessage);
+  }, [match.id, onComplete]);
+
+  return (
+    <div className="fixed inset-0 z-[95] flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="score-entry-title">
+      <div className="flex h-[94dvh] w-full max-w-7xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] px-4 py-4 text-white sm:px-5 md:flex-row md:items-start md:justify-between">
+          <div className="min-w-0">
+            <div className="text-xs font-black uppercase tracking-[.13em] text-blue-100">Week {match.week_number || "-"} | Enter Match Scores</div>
+            <h2 id="score-entry-title" className="mt-1 break-words text-xl font-black sm:text-2xl">{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</h2>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-blue-100">
+              <span>{formatDisplayDateWithLeadingWeekday(match.scheduled_date, "Date TBD")} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
+              {match.locations?.name && <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1">{match.locations.name}</span>}
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md">Close</button>
+        </div>
+        <iframe
+          title="Enter Match Scores"
+          src={"/matches/" + match.id + "?embedded=1"}
+          className="min-h-0 flex-1 border-0 bg-slate-100"
+        />
+      </div>
+    </div>
+  );
+}
+
 function MatchDetailsModal({ match, ratingForMember, teamWithRoster, onOpenRoster, onClose }) {
   const location = match.locations;
   const mapUrl = mapLink(location);
@@ -3597,17 +3861,17 @@ function MatchDetailsModal({ match, ratingForMember, teamWithRoster, onOpenRoste
   const awayScore = match.away_score ?? null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
-      <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-slate-800 to-zinc-800 px-4 py-4 text-white md:flex-row md:items-start md:justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4">
+      <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] px-4 py-5 text-white sm:px-5 md:flex-row md:items-start md:justify-between">
           <div>
-            <div className="text-xs font-black uppercase tracking-wide text-slate-200">
+            <div className="text-xs font-black uppercase tracking-[.13em] text-blue-100">
               Week {match.week_number || "-"} Match Details
             </div>
             <h2 className="mt-1 text-xl font-black sm:text-2xl">
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
-            <div className="mt-2 flex flex-wrap gap-2 text-sm font-semibold text-slate-200">
+            <div className="mt-2 flex flex-wrap gap-2 text-sm font-semibold text-blue-100">
               <span>{formatDisplayDateWithLeadingWeekday(match.scheduled_date, "Date TBD")} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
               {homeScore !== null && awayScore !== null && (
                 <span className="rounded-full bg-white/15 px-3 py-0.5 text-white">
@@ -3619,7 +3883,7 @@ function MatchDetailsModal({ match, ratingForMember, teamWithRoster, onOpenRoste
           <button
             type="button"
             onClick={onClose}
-            className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
+            className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md"
           >
             Close
           </button>
@@ -3912,17 +4176,17 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
-      <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-slate-950 px-3 py-4 text-white sm:px-4 md:flex-row md:items-start md:justify-between">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4">
+      <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] px-3 py-5 text-white sm:px-5 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
-            <div className="text-xs font-black uppercase tracking-wide text-blue-200">
+            <div className="text-xs font-black uppercase tracking-[.13em] text-blue-100">
               Week {match.week_number || "-"} Match Results
             </div>
             <h2 className="mt-1 break-words text-xl font-black sm:text-2xl">
               {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
             </h2>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-slate-200">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm font-semibold text-blue-100">
               <span>{formatDisplayDateWithLeadingWeekday(match.scheduled_date, "Date TBD")} at {formatDisplayTime(match.scheduled_time, "Time TBD")}</span>
             </div>
           </div>
