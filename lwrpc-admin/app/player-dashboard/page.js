@@ -3,7 +3,7 @@
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
@@ -42,7 +42,7 @@ import {
 } from "../lib/matchRatingSnapshots";
 
 const DesignPreviewView = dynamic(() => import("../design-preview/DesignPreviewView"), {
-  loading: () => <LoadingScreen subtitle="Loading design preview..." />,
+  loading: () => <LoadingScreen subtitle="Loading Player Dashboard..." />,
 });
 
 const PLAYER_DOCUMENT_KEYS = new Set([
@@ -107,8 +107,7 @@ function scrollDashboardSectionIntoView(sectionId) {
 
 export default function PlayerDashboardPage() {
   const router = useRouter();
-  const pathname = usePathname();
-  const designPreview = pathname === "/design-preview";
+  const designPreview = true;
   const playerGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "player_guide_pdf");
   const [loading, setLoading] = useState(true);
   const [currentRole, setCurrentRole] = useState("player");

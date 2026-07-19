@@ -1,5 +1,5 @@
-import CaptainDashboardPage from "../../captain-dashboard/page";
+import { permanentRedirect } from "next/navigation";
 
 export default function CaptainDesignPreviewPage() {
-  return <CaptainDashboardPage />;
+  permanentRedirect("/captain-dashboard");
 }

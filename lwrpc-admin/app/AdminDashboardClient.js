@@ -46,7 +46,8 @@ const LOGIN_MESSAGE_TEMPLATES = [
 
 const SETUP_REMINDER_HIDE_DATE_KEY = "lwrpc-match-setup-reminder-hide-date";
 
-export default function DashboardPage({ designPreview = false } = {}) {
+export default function DashboardPage() {
+  const designPreview = true;
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState("");

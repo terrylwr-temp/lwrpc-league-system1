@@ -19,7 +19,7 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - Sidebar accordion: opening Dashboard modes, team choices, or league documents closes any other expanded sidebar selection. Expandable items show a right-facing chevron that rotates downward while open; non-expandable items do not show it.
 - Play history: My Play History appears directly below My Team and opens the existing grouped play-history view with its full scope selector.
 - Dashboard interactions: schedule and result rows open existing match details; completed matches include a Match Score Details action; View Team opens the full roster.
-- Match context: show Home Match or Away Match in a pill beside Next Match; keep the date/time prominent at 15px desktop and 13px mobile; use the latest supplied navy/gold crossed-paddles emblem with the single inner gold ring as the exact Next Match artwork; upcoming schedules include published bye weeks; result scores follow the displayed home-team/away-team order.
+- Match context: show Home Match or Away Match in a pill beside Next Match; keep the date/time prominent at 15px desktop and 13px mobile; use the supplied blue-and-silver Website Emblem artwork as the exact Next Match artwork; upcoming schedules include published bye weeks; result scores follow the displayed home-team/away-team order.
 - Sidebar popups: Schedule opens Division Team Schedules; Standings opens the selected division's standings-points bar chart.
 - Standings context: show League | Division on one line in the Division Rank card. In the popup, show Season and League above Division with equal visual emphasis. Player and Captain standings summaries and popups highlight the division-configured top playoff/championship teams.
 - Team record: show the selected team's win-loss record and total Team Points.
@@ -28,8 +28,8 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - Shared presentation: Match Details keeps its existing logic and actions but uses the preview's navy/club-blue shell; loading branding starts with "League Management System" so cached settings do not cause a name flash.
 - Copyright: show a readable copyright line at the bottom of the desktop sidebar and above the fixed bottom navigation on mobile; repeat copyright and the application version in the Profile popup footer.
 - Help: the question-mark icon opens User Guide; a separate envelope icon starts the existing Contact League email flow.
-- Architecture: `/design-preview` reuses current authentication, permissions, queries, selectors, and modals. It must not become a second data system or add preview code to the normal dashboard's initial bundle.
-- Captain preview: `/design-preview/captain` reuses Captain authentication, team context, statistics, schedules, byes, standings, results, league documents, roster data, permissions, and the live Match Setup workflow. Preview actions must call existing business logic instead of duplicating it.
+- Architecture: the approved dashboard designs are the only live dashboard UIs at `/player-dashboard`, `/captain-dashboard`, and `/`. The retired `/design-preview` URLs permanently redirect to those canonical routes while the shared views continue to reuse existing authentication, permissions, queries, selectors, and modals.
+- Captain dashboard: `/captain-dashboard` reuses Captain authentication, team context, statistics, schedules, byes, standings, results, league documents, roster data, permissions, and the live Match Setup workflow. Dashboard actions must call existing business logic instead of duplicating it.
 - Standings access: Division Rank is an interactive card on Player and Captain dashboards; it and every Standings full-view action open the same division standings popup.
 - Captain match actions: the Next Match hero keeps View Match and adds Email Opposing Captains, Match Score Sheet, and Enter Match Scores using the existing Captain rules and red/green status colors; its Match Setup status panel mirrors the current Captain workflow.
 - Captain alerts: use the single label "Pending Match Verifications" throughout; when verification is pending, its sidebar item, summary card, and panel header use red alert styling.
@@ -51,7 +51,7 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - Match dialogs: Match Details and Match Results share the navy/club-blue gradient header, rounded 24px shell, subdued backdrop blur, and aligned light Close action. Division Schedule aligns Close with the Selected Scope field.
 
 - Player navigation: use the explicit labels "Division Schedule" and "Division Standings" in the Player desktop sidebar so their scope is unambiguous.
-- Admin preview: `/design-preview/admin` reuses the existing Admin Dashboard authorization, selected-scope controls, operational counts, permission-filtered tool definitions, routes, and full League Analytics component. Dashboard Guides, Dashboard Messages, Season Reset, and Master Reset reuse their existing controls inside preview dialogs.
+- Admin dashboard: `/` reuses the existing Admin Dashboard authorization, selected-scope controls, operational counts, permission-filtered tool definitions, routes, and full League Analytics component. Dashboard Guides, Dashboard Messages, Season Reset, and Master Reset reuse their existing controls inside dashboard dialogs.
 
 - Sidebar selection: Dashboard-view and multi-team submenus indicate the active choice with a thicker light border instead of the words Current or Active.
 - Sidebar cleanup: Player desktop omits Results; Captain desktop omits Pending Match Verifications, Matches, and Standings; Captain mobile omits Scores. The underlying panels and workflows remain available from dashboard cards and match tools.
@@ -77,4 +77,3 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - A notification bell when the intended action is Help / Contact League.
 - Duplicate Supabase queries or separate business rules solely for the redesign.
 - Changing the production dashboard before the corresponding preview section is approved.
-

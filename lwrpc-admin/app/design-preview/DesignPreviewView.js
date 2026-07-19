@@ -161,9 +161,9 @@ export default function DesignPreviewView({ dashboard = {} }) {
   const canUseAdminDashboard = hasRole(role, "league_manager");
   const hasMultipleTeams = teams.length > 1;
   const dashboardOptions = [
-    { label: "Player Dashboard", path: "/design-preview" },
-    ...(canUseCaptainDashboard ? [{ label: "Captain Dashboard", path: "/design-preview/captain" }] : []),
-    ...(canUseAdminDashboard ? [{ label: "Admin Dashboard", path: "/design-preview/admin" }] : []),
+    { label: "Player Dashboard", path: "/player-dashboard" },
+    ...(canUseCaptainDashboard ? [{ label: "Captain Dashboard", path: "/captain-dashboard" }] : []),
+    ...(canUseAdminDashboard ? [{ label: "Admin Dashboard", path: "/" }] : []),
   ];
   const upcomingMatchCount = allScheduleItems.filter((item) => item.type === "match").length;
   const scheduleItems = showAllSchedule ? allScheduleItems : allScheduleItems.slice(0, 3);
@@ -290,8 +290,8 @@ export default function DesignPreviewView({ dashboard = {} }) {
             {expandedMenu === "dashboard" && (
               <div className={styles.submenu}>
                 <button type="button" className={styles.submenuActive} aria-current="page" onClick={() => { setExpandedMenu(""); scrollToSection("dashboard"); }}><span>Player Dashboard</span></button>
-                {canUseCaptainDashboard && <button type="button" onClick={() => dashboard.onChangeDashboard?.("/design-preview/captain")}><span>Captain Dashboard</span></button>}
-                {canUseAdminDashboard && <button type="button" onClick={() => dashboard.onChangeDashboard?.("/design-preview/admin")}><span>Admin Dashboard</span></button>}
+                {canUseCaptainDashboard && <button type="button" onClick={() => dashboard.onChangeDashboard?.("/captain-dashboard")}><span>Captain Dashboard</span></button>}
+                {canUseAdminDashboard && <button type="button" onClick={() => dashboard.onChangeDashboard?.("/")}><span>Admin Dashboard</span></button>}
               </div>
             )}
           </div>
@@ -326,7 +326,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
 
       <section className={styles.content}>
         <header className={styles.desktopHeader}>
-          <div><span>Player dashboard preview</span><h1>Welcome, {firstName}</h1></div>
+          <div><span>Player dashboard</span><h1>Welcome, {firstName}</h1></div>
           <div className={styles.headerActions}>
             <button type="button" className={styles.helpButton} onClick={() => dashboard.onOpenGuide?.()} aria-label="Open User Guide" title="User Guide"><Icon name="help"/></button>
             <a className={styles.helpButton} href={`mailto:${dashboard.contactEmail || "info@lwrpickleballclub.com"}`} aria-label="Email League Management" title="Email League Management"><Icon name="mail"/></a>
@@ -346,8 +346,8 @@ export default function DesignPreviewView({ dashboard = {} }) {
         {canUseCaptainDashboard && (
           <label className={styles.mobileDashboardSelect}>
             <span>Dashboard view</span>
-            <select value="/design-preview" onChange={(event) => {
-              if (event.target.value !== "/design-preview") dashboard.onChangeDashboard?.(event.target.value);
+            <select value="/player-dashboard" onChange={(event) => {
+              if (event.target.value !== "/player-dashboard") dashboard.onChangeDashboard?.(event.target.value);
             }}>
               {dashboardOptions.map((option) => <option key={option.path} value={option.path}>{option.label}</option>)}
             </select>
@@ -367,7 +367,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
         )}
 
         <section className={styles.hero}>
-          <div className={styles.heroArt} aria-hidden="true"><Image src="/next-match-emblem-v2.png" width={1000} height={1024} sizes="(max-width: 700px) 74px, 154px" className={styles.heroEmblem} alt="" priority/></div>
+          <div className={styles.heroArt} aria-hidden="true"><Image src="/website-emblem.png" width={2048} height={2096} sizes="(max-width: 700px) 74px, 154px" className={styles.heroEmblem} alt="" priority/></div>
           <div className={styles.heroCopy}><div className={styles.nextMatch}><span>Next match</span>{nextMatch && <span className={styles.matchType}>{selectedIsHome ? "Home Match" : "Away Match"}</span>}<b>{nextMatch ? `${nextDate.label} - ${shortTime(nextMatch.scheduled_time)}` : "No upcoming match scheduled"}</b></div><h2>{teamName} <em>vs</em> {opponentName}</h2><div className={styles.location}><Icon name="pin" size={16}/><span>{nextMatch?.locations?.name || selectedTeam?.locations?.name || "Location TBD"}</span>{nextMatch?.week_number ? <><i>-</i><span>Week {nextMatch.week_number}</span></> : null}</div><div className={styles.heroButtons}><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenMatch?.(nextMatch)}>Match details</button><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenLineup?.(nextMatch)}>Match Lineup <Icon name="team" size={17}/></button></div></div>
         </section>
 
@@ -420,7 +420,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
           </section>
         </div>
 
-        <p className={styles.note}>Live read-only preview · using the same player dashboard data and permissions</p>
+        <p className={styles.note}>Live dashboard · current player data and permissions</p>
         <p className={styles.mobileCopyright}>&copy; {currentYear} Lakewood Ranch Pickleball Club</p>
       </section>
 

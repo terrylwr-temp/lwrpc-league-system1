@@ -1,5 +1,5 @@
 import AdminDashboardClient from "./AdminDashboardClient";
 
 export default function DashboardPage() {
-  return <AdminDashboardClient designPreview />;
+  return <AdminDashboardClient />;
 }

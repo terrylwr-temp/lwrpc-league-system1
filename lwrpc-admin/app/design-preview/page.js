@@ -1,9 +1,5 @@
-import PlayerDashboardPage from "../player-dashboard/page";
-
-export const metadata = {
-  title: "Live Player Dashboard Design Preview",
-};
+import { permanentRedirect } from "next/navigation";
 
 export default function DesignPreviewPage() {
-  return <PlayerDashboardPage />;
+  permanentRedirect("/player-dashboard");
 }

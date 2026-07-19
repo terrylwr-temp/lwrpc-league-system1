@@ -3,7 +3,7 @@
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
@@ -41,7 +41,7 @@ import {
 import { currentMemberRating, divisionRatingIssue, divisionRatingStatus } from "../lib/ratingEligibility";
 
 const CaptainDesignPreviewView = dynamic(() => import("../design-preview/captain/CaptainDesignPreviewView"), {
-  loading: () => <LoadingScreen subtitle="Loading Captain design preview..." />,
+  loading: () => <LoadingScreen subtitle="Loading Captain Dashboard..." />,
 });
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
@@ -79,8 +79,7 @@ function scrollDashboardSectionIntoView(sectionId) {
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
-  const pathname = usePathname();
-  const designPreview = pathname === "/design-preview/captain";
+  const designPreview = true;
   const captainGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "captain_guide_pdf");
 
   const [currentMember, setCurrentMember] = useState(null);
@@ -5832,6 +5831,5 @@ function Empty({ message }) {
     </div>
   );
 }
-
 
 

@@ -1,5 +1,5 @@
-import AdminDashboardClient from "../../AdminDashboardClient";
+import { permanentRedirect } from "next/navigation";
 
 export default function AdminDesignPreviewPage() {
-  return <AdminDashboardClient designPreview />;
+  permanentRedirect("/");
 }

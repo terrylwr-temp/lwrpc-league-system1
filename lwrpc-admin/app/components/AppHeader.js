@@ -80,9 +80,9 @@ export default function AppHeader({
   const [logoutError, setLogoutError] = useState("");
 
   const dashboardLinks = useMemo(() => [
-    { label: "Player Dashboard", path: "/design-preview", aliases: ["/player-dashboard"], role: "player" },
-    { label: "Captain Dashboard", path: "/design-preview/captain", aliases: ["/captain-dashboard"], role: "captain" },
-    { label: "Admin Dashboard", path: "/", aliases: ["/design-preview/admin"], role: "league_manager" },
+    { label: "Player Dashboard", path: "/player-dashboard", aliases: [], role: "player" },
+    { label: "Captain Dashboard", path: "/captain-dashboard", aliases: [], role: "captain" },
+    { label: "Admin Dashboard", path: "/", aliases: [], role: "league_manager" },
   ].filter((link) => hasRole(role, link.role)), [role]);
 
   const adminGroups = useMemo(() => {
