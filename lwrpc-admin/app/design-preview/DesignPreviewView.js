@@ -267,8 +267,8 @@ export default function DesignPreviewView({ dashboard = {} }) {
     }
   }
 
-  const navButton = (section, label, icon, detail, onClick) => (
-    <button type="button" className={activeSection === section ? styles.active : ""} onClick={onClick || (() => scrollToSection(section))}>
+  const navButton = (section, label, icon, detail, onClick, expandable = false) => (
+    <button type="button" className={activeSection === section ? styles.active : ""} aria-expanded={expandable ? expandedMenu === section : undefined} onClick={onClick || (() => scrollToSection(section))}>
       <Icon name={icon}/><span><b>{label}</b>{detail && <small>{detail}</small>}</span>
     </button>
   );
@@ -286,7 +286,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
             {navButton("dashboard", "Dashboard", "dashboard", canUseCaptainDashboard ? "Player" : "", () => {
               if (canUseCaptainDashboard) toggleExpandedMenu("dashboard");
               else scrollToSection("dashboard");
-            })}
+            }, canUseCaptainDashboard)}
             {expandedMenu === "dashboard" && (
               <div className={styles.submenu}>
                 <button type="button" className={styles.submenuActive} aria-current="page" onClick={() => { setExpandedMenu(""); scrollToSection("dashboard"); }}><span>Player Dashboard</span></button>
@@ -300,7 +300,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
             {navButton("team", "My Team", "team", hasMultipleTeams ? teamName : "", () => {
               if (hasMultipleTeams) toggleExpandedMenu("team");
               else scrollToSection("team");
-            })}
+            }, hasMultipleTeams)}
             {expandedMenu === "team" && (
               <div className={styles.submenu}>
                 {teams.map((team) => <button type="button" className={String(team.id) === String(teamId) ? styles.submenuActive : ""} aria-current={String(team.id) === String(teamId) ? "true" : undefined} key={team.id} onClick={() => selectTeam(team)}><span>{team.name}</span></button>)}
@@ -314,7 +314,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
 
 
           <div className={styles.navGroup}>
-            {navButton("documents", "League Documents", "document", leagueName, () => toggleExpandedMenu("documents"))}
+            {navButton("documents", "League Documents", "document", leagueName, () => toggleExpandedMenu("documents"), true)}
             {expandedMenu === "documents" && <div className={styles.submenu}>{availableDocuments.length > 0 ? availableDocuments.map((document) => <button type="button" key={document.key} onClick={() => dashboard.onOpenLeagueDocument?.(document)}><span>{document.label}</span></button>) : <p>No documents are published for this league.</p>}</div>}
           </div>
 
@@ -368,7 +368,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
 
         <section className={styles.hero}>
           <div className={styles.heroArt} aria-hidden="true"><Image src="/next-match-emblem-v2.png" width={1000} height={1024} sizes="(max-width: 700px) 74px, 154px" className={styles.heroEmblem} alt="" priority/></div>
-          <div className={styles.heroCopy}><div className={styles.nextMatch}><span>Next match</span>{nextMatch && <span className={styles.matchType}>{selectedIsHome ? "Home Match" : "Away Match"}</span>}<b>{nextMatch ? `${nextDate.label} - ${shortTime(nextMatch.scheduled_time)}` : "No upcoming match scheduled"}</b></div><h2>{teamName} <em>vs</em> {opponentName}</h2><div className={styles.location}><Icon name="pin" size={16}/><span>{nextMatch?.locations?.name || selectedTeam?.locations?.name || "Location TBD"}</span>{nextMatch?.week_number ? <><i>-</i><span>Week {nextMatch.week_number}</span></> : null}</div><div className={styles.heroButtons}><button type="button" className={styles.primary} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenMatch?.(nextMatch)}>Match details <Icon name="arrow" size={17}/></button><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenLineup?.(nextMatch)}>Match Lineup <Icon name="team" size={17}/></button></div></div>
+          <div className={styles.heroCopy}><div className={styles.nextMatch}><span>Next match</span>{nextMatch && <span className={styles.matchType}>{selectedIsHome ? "Home Match" : "Away Match"}</span>}<b>{nextMatch ? `${nextDate.label} - ${shortTime(nextMatch.scheduled_time)}` : "No upcoming match scheduled"}</b></div><h2>{teamName} <em>vs</em> {opponentName}</h2><div className={styles.location}><Icon name="pin" size={16}/><span>{nextMatch?.locations?.name || selectedTeam?.locations?.name || "Location TBD"}</span>{nextMatch?.week_number ? <><i>-</i><span>Week {nextMatch.week_number}</span></> : null}</div><div className={styles.heroButtons}><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenMatch?.(nextMatch)}>Match details</button><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenLineup?.(nextMatch)}>Match Lineup <Icon name="team" size={17}/></button></div></div>
         </section>
 
         <section className={styles.stats} id="preview-standings" aria-label="Team statistics">
