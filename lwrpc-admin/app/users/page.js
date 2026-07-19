@@ -4,12 +4,15 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { requireRole, supabase } from "../lib/auth";
 import { ROLE_LEVELS, roleLabel } from "../lib/permissions";
 import { wouldRemoveLastCommissioner } from "../lib/roleGuards";
 import { normalizeEmailAddress } from "../lib/email";
 import { formatDisplayTimestamp } from "../lib/dateTime";
+
+const PAGE_SIZE = 100;
 
 export default function UsersPage() {
   const router = useRouter();
@@ -25,6 +28,7 @@ export default function UsersPage() {
     direction: "asc",
   });
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
+  const [page, setPage] = useState(1);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "commissioner");
@@ -32,16 +36,7 @@ export default function UsersPage() {
   }, [router]);
 
   const loadData = useCallback(async function loadData() {
-    const { data: memberData, error: memberError } = await supabase
-      .from("members")
-      .select(`
-        id,
-        first_name,
-        last_name,
-        email,
-        club_location
-      `)
-      .order("last_name", { ascending: true });
+    const { data: memberData, error: memberError } = await loadAllRoleMembers();
 
     if (memberError) {
       alert(memberError.message);
@@ -181,6 +176,26 @@ const { error } = await supabase
     });
   }, [filteredMembers, lastLoginsByEmail, roles, sortConfig]);
 
+  const totalPages = Math.max(1, Math.ceil(sortedMembers.length / PAGE_SIZE));
+  const pagedMembers = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return sortedMembers.slice(start, start + PAGE_SIZE);
+  }, [page, sortedMembers]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, sortConfig.direction, sortConfig.key]);
+
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
+
+  function goToPage(value) {
+    const requestedPage = Number(value);
+    if (!requestedPage || requestedPage < 1) return setPage(1);
+    setPage(Math.min(totalPages, requestedPage));
+  }
+
 if (loading) {
   return <LoadingScreen subtitle="Loading All Users..." />;
 }
@@ -214,17 +229,7 @@ if (loading) {
 
             </div>
 
-            <div className="rounded-xl bg-slate-900 p-4 text-white">
-
-              <div className="text-xs uppercase tracking-wide text-slate-300">
-                Members Shown
-              </div>
-
-              <div className="mt-1 text-3xl font-bold">
-                {filteredMembers.length}
-              </div>
-
-            </div>
+            <ListingCount compact className="self-end justify-self-end" label="Members" shown={filteredMembers.length} total={members.length} />
 
           </div>
 
@@ -232,7 +237,17 @@ if (loading) {
 
         <div className="mt-6 overflow-visible rounded-2xl bg-white shadow">
 
-          <table className="w-full border-collapse">
+          <UserPaginationBar
+            page={page}
+            totalPages={totalPages}
+            totalRows={sortedMembers.length}
+            setPage={setPage}
+            goToPage={goToPage}
+          />
+
+          <div className="overflow-x-auto">
+
+          <table className="min-w-[980px] w-full table-fixed border-collapse">
 
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
 
@@ -300,7 +315,7 @@ if (loading) {
 
             <tbody>
 
-              {sortedMembers.map(member => {
+              {pagedMembers.map(member => {
                 const currentRole =
                   getRole(member.id);
 
@@ -380,7 +395,7 @@ if (loading) {
                 );
               })}
 
-              {sortedMembers.length === 0 && (
+              {pagedMembers.length === 0 && (
                 <tr>
 
                   <td
@@ -397,6 +412,17 @@ if (loading) {
 
           </table>
 
+          </div>
+
+          <UserPaginationBar
+            page={page}
+            totalPages={totalPages}
+            totalRows={sortedMembers.length}
+            setPage={setPage}
+            goToPage={goToPage}
+            position="bottom"
+          />
+
         </div>
 
         {roleHelpOpen && (
@@ -406,6 +432,28 @@ if (loading) {
       </div>
     </main>
   );
+}
+
+async function loadAllRoleMembers() {
+  const batchSize = 1000;
+  const rows = [];
+
+  for (let from = 0; ; from += batchSize) {
+    const { data, error } = await supabase
+      .from("members")
+      .select("id, first_name, last_name, email, club_location")
+      .order("last_name", { ascending: true })
+      .order("first_name", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + batchSize - 1);
+
+    if (error) return { data: [], error };
+
+    rows.push(...(data || []));
+    if (!data || data.length < batchSize) break;
+  }
+
+  return { data: rows, error: null };
 }
 
 function SortHeader({ active, direction, label, onClick }) {
@@ -420,6 +468,54 @@ function SortHeader({ active, direction, label, onClick }) {
         {active ? (direction === "asc" ? "ASC" : "DESC") : "SORT"}
       </span>
     </button>
+  );
+}
+
+function UserPaginationBar({ page, totalPages, totalRows, setPage, goToPage, position = "top" }) {
+  const firstRow = totalRows === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const lastRow = Math.min(page * PAGE_SIZE, totalRows);
+
+  return (
+    <div className={`flex flex-col gap-3 px-4 py-4 md:flex-row md:items-center md:justify-between ${
+      position === "top" ? "border-b border-slate-200" : "border-t border-slate-200"
+    }`}>
+      <div className="text-sm text-slate-600">
+        Showing <span className="font-semibold text-slate-900">{firstRow}</span> to{" "}
+        <span className="font-semibold text-slate-900">{lastRow}</span> of{" "}
+        <span className="font-semibold text-slate-900">{totalRows}</span> members
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          disabled={page <= 1}
+          onClick={() => setPage((current) => Math.max(1, current - 1))}
+          className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Previous
+        </button>
+        <div className="text-sm font-semibold text-slate-700">
+          Page {page} of {totalPages}
+        </div>
+        <input
+          type="number"
+          min="1"
+          max={totalPages}
+          value={page}
+          onChange={(event) => goToPage(event.target.value)}
+          aria-label="Go to member page"
+          className="w-20 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        />
+        <button
+          type="button"
+          disabled={page >= totalPages}
+          onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+          className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Next
+        </button>
+      </div>
+    </div>
   );
 }
 

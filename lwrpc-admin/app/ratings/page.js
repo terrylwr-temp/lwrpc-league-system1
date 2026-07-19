@@ -4,6 +4,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
@@ -1069,12 +1070,7 @@ function goToPage(value) {
               Ratings Filters
             </h2>
 
-            <div className="rounded-xl bg-slate-900 px-5 py-3 text-white sm:text-right">
-              <div className="text-xs uppercase tracking-wide text-slate-300">
-                Players
-              </div>
-              <div className="text-2xl font-bold">{filteredMembers.length}</div>
-            </div>
+            <ListingCount label="Players" shown={filteredMembers.length} total={members.length} />
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
@@ -1597,11 +1593,11 @@ function goToPage(value) {
             </div>
           </div>
 
-          <div className="hidden overflow-visible md:block">
-            <table className="min-w-[1120px] md:min-w-full">
+          <div className="hidden overflow-x-auto md:block">
+            <table className="w-full min-w-[1040px]">
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("name", memberSort)} data-sort-indicator={sortIndicator("name")}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-3 py-3 text-left" aria-sort={sortAria("name", memberSort)} data-sort-indicator={sortIndicator("name")}>
                   <SortHeader
                     active={memberSort.field === "name"}
                     direction={memberSort.direction}
@@ -1609,7 +1605,7 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("name")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("created_at", memberSort)} data-sort-indicator={sortIndicator("created_at")}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-3 py-3 text-left" aria-sort={sortAria("created_at", memberSort)} data-sort-indicator={sortIndicator("created_at")}>
                   <SortHeader
                     active={memberSort.field === "created_at"}
                     direction={memberSort.direction}
@@ -1617,7 +1613,7 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("created_at")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("dupr_id", memberSort)} data-sort-indicator={sortIndicator("dupr_id")}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-3 py-3 text-left" aria-sort={sortAria("dupr_id", memberSort)} data-sort-indicator={sortIndicator("dupr_id")}>
                   <SortHeader
                     active={memberSort.field === "dupr_id"}
                     direction={memberSort.direction}
@@ -1625,7 +1621,7 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("dupr_id")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("dupr_doubles_rating", memberSort)} data-sort-indicator={sortIndicator("dupr_doubles_rating")}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-3 py-3 text-left" aria-sort={sortAria("dupr_doubles_rating", memberSort)} data-sort-indicator={sortIndicator("dupr_doubles_rating")}>
                   <SortHeader
                     active={memberSort.field === "dupr_doubles_rating"}
                     direction={memberSort.direction}
@@ -1633,7 +1629,7 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("dupr_doubles_rating")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("dupr_reliability_rating", memberSort)} data-sort-indicator={sortIndicator("dupr_reliability_rating")}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-3 py-3 text-left" aria-sort={sortAria("dupr_reliability_rating", memberSort)} data-sort-indicator={sortIndicator("dupr_reliability_rating")}>
                   <SortHeader
                     active={memberSort.field === "dupr_reliability_rating"}
                     direction={memberSort.direction}
@@ -1641,7 +1637,7 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("dupr_reliability_rating")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("season_dupr_rating", memberSort)} data-sort-indicator={sortIndicator("season_dupr_rating")}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-3 py-3 text-left" aria-sort={sortAria("season_dupr_rating", memberSort)} data-sort-indicator={sortIndicator("season_dupr_rating")}>
                   <SortHeader
                     active={memberSort.field === "season_dupr_rating"}
                     direction={memberSort.direction}
@@ -1649,7 +1645,7 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("season_dupr_rating")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("season_primetime_rating", memberSort)} data-sort-indicator={sortIndicator("season_primetime_rating")}>
+                <th className="sticky top-0 z-20 bg-slate-900 px-3 py-3 text-left" aria-sort={sortAria("season_primetime_rating", memberSort)} data-sort-indicator={sortIndicator("season_primetime_rating")}>
                   <SortHeader
                     active={memberSort.field === "season_primetime_rating"}
                     direction={memberSort.direction}
@@ -1657,7 +1653,7 @@ function goToPage(value) {
                     onClick={() => toggleMemberSort("season_primetime_rating")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left">DUPR Notes</th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-3 py-3 text-left">DUPR Notes</th>
               </tr>
             </thead>
 
@@ -1819,7 +1815,7 @@ function goToPage(value) {
                             e.target.value
                           )
                         }
-                        className="min-h-16 w-48 resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm"
+                        className="min-h-16 w-40 resize-y rounded-xl border border-slate-300 px-3 py-2 text-sm"
                         placeholder="DUPR notes"
                       />
                     </td>

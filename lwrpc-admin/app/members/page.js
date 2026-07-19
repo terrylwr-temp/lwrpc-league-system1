@@ -4,6 +4,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import { ROLE_LEVELS } from "../lib/permissions";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
@@ -750,10 +751,7 @@ export default function MembersPage() {
                 <h2 className="mt-1 text-xl font-black text-slate-950">Member Search</h2>
               </div>
 
-              <div className="min-w-[5.5rem] rounded-xl bg-slate-900 px-4 py-2 text-right text-white">
-                <div className="text-[10px] font-bold uppercase tracking-wide text-slate-300">Members</div>
-                <div className="text-2xl font-black leading-none">{filteredMembers.length}</div>
-              </div>
+              <ListingCount label="Members" shown={filteredMembers.length} total={members.length} />
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center md:justify-end">
@@ -800,7 +798,7 @@ export default function MembersPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 border-t border-slate-200 pt-5 md:grid-cols-[1fr_auto] md:gap-4">
+          <div className="grid grid-cols-1 gap-3 border-t border-slate-200 pt-5 md:grid-cols-[1fr_auto] md:gap-4 md:border-t-0 md:pt-0">
             <div>
               <label className="mb-1 block text-sm font-semibold text-slate-700">
                 Search Members

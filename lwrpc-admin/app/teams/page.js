@@ -4,6 +4,7 @@ import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { hasRole } from "../lib/permissions";
 import { confirmDeleteAction } from "../lib/confirmDelete";
@@ -1338,15 +1339,7 @@ if (loading) {
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(8rem,0.75fr)_minmax(0,1fr)]">
-                  <div className="rounded-xl bg-slate-900 px-4 py-3 text-white">
-                    <div className="text-xs font-black uppercase tracking-wide text-slate-300">
-                      Teams
-                    </div>
-
-                    <div className="text-2xl font-black">
-                      {filteredTeams.length}
-                    </div>
-                  </div>
+                  <ListingCount label="Teams" shown={filteredTeams.length} total={teams.length} />
 
                   <div className="grid grid-cols-2 gap-2">
                     <button

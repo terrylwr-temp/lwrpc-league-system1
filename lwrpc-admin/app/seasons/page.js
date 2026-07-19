@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import { formatDisplayDate } from "../lib/dateTime";
@@ -357,9 +358,6 @@ export default function SeasonsPage() {
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">Current Seasons</h2>
-                <div className="mt-1 text-sm font-semibold text-slate-500">
-                  {filteredSeasons.length} of {seasons.length} seasons
-                </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                 <button
@@ -369,9 +367,7 @@ export default function SeasonsPage() {
                 >
                   Add Season
                 </button>
-                <div className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">
-                  {filteredSeasons.length} / {seasons.length}
-                </div>
+                <ListingCount label="Seasons" shown={filteredSeasons.length} total={seasons.length} />
               </div>
             </div>
 

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayTimestampShort } from "../lib/dateTime";
 import { confirmDeleteAction } from "../lib/confirmDelete";
@@ -1301,15 +1302,7 @@ export default function ScheduleEditorPage() {
                 Clear Filters
               </button>
 
-              <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-                <div className="text-xs uppercase tracking-wide text-slate-300">
-                  Matches
-                </div>
-
-                <div className="text-2xl font-bold">
-                  {filteredMatches.length}
-                </div>
-              </div>
+              <ListingCount label="Matches" shown={filteredMatches.length} total={matches.length} />
             </div>
 
           </div>

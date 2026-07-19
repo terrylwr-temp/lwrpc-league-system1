@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
@@ -1025,9 +1026,6 @@ export default function DivisionsPage() {
                 <h2 className="text-xl font-bold text-slate-900">
                   Current Divisions
                 </h2>
-                <div className="mt-1 text-sm font-semibold text-slate-500">
-                  {divisions.length} division{divisions.length === 1 ? "" : "s"}
-                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2 md:justify-end">
@@ -1059,15 +1057,7 @@ export default function DivisionsPage() {
                   Copy League Divisions
                 </button>
 
-                <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-                  <div className="text-xs uppercase tracking-wide text-slate-300">
-                    Showing
-                  </div>
-
-                  <div className="text-2xl font-bold">
-                    {filteredDivisions.length} / {divisions.length}
-                  </div>
-                </div>
+                <ListingCount label="Divisions" shown={filteredDivisions.length} total={divisions.length} />
               </div>
             </div>
 

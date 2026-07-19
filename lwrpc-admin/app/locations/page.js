@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
@@ -14,6 +15,7 @@ export default function LocationsPage() {
   const [members, setMembers] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [locationFormOpen, setLocationFormOpen] = useState(false);
+  const [mergeFormOpen, setMergeFormOpen] = useState(false);
   const [isMerging, setIsMerging] = useState(false);
   const [locationSearch, setLocationSearch] = useState("");
 
@@ -278,6 +280,7 @@ export default function LocationsPage() {
 
       setMergeFromId("");
       setMergeToId("");
+      setMergeFormOpen(false);
       await loadLocations();
     } finally {
       setIsMerging(false);
@@ -310,6 +313,18 @@ export default function LocationsPage() {
   function closeLocationForm() {
     clearForm();
     setLocationFormOpen(false);
+  }
+
+  function openMergeLocations() {
+    setMergeFromId("");
+    setMergeToId("");
+    setDeleteOldLocation(true);
+    setMergeFormOpen(true);
+  }
+
+  function closeMergeLocations() {
+    if (isMerging) return;
+    setMergeFormOpen(false);
   }
 
   function clearForm() {
@@ -378,8 +393,8 @@ export default function LocationsPage() {
           subtitle="Manage clubs, courts, addresses, and cleanup duplicate locations."
         />
 
-        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-1">
+        <div className="mt-6 grid grid-cols-1 gap-6">
+          <div className="space-y-6">
             {locationFormOpen && (
             <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
             <div className="my-auto w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
@@ -521,7 +536,9 @@ export default function LocationsPage() {
             </div>
             )}
 
-            <div className="rounded-2xl bg-white p-6 shadow">
+            {mergeFormOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+            <div className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="text-xl font-bold text-slate-900">
                   Merge Locations
@@ -580,28 +597,44 @@ export default function LocationsPage() {
                   Delete old location after merge
                 </label>
 
-                <button
-                  type="button"
-                  onClick={mergeLocations}
-                  disabled={isMerging}
-                  className="w-full rounded-xl bg-amber-600 px-5 py-3 font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
-                >
-                  {isMerging ? "Merging..." : "Merge Locations"}
-                </button>
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <button
+                    type="button"
+                    onClick={mergeLocations}
+                    disabled={isMerging}
+                    className="rounded-xl bg-amber-600 px-5 py-3 font-semibold text-white hover:bg-amber-700 disabled:opacity-50"
+                  >
+                    {isMerging ? "Merging..." : "Merge Locations"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeMergeLocations}
+                    disabled={isMerging}
+                    className="rounded-xl bg-slate-200 px-5 py-3 font-semibold text-slate-900 hover:bg-slate-300 disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
+            </div>
+            )}
           </div>
 
-          <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
+          <div className="rounded-2xl bg-white p-6 shadow">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">Current Locations</h2>
-                <div className="mt-1 text-sm font-semibold text-slate-500">
-                  {filteredLocations.length} of {locations.length} locations
-                </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                <button
+                  type="button"
+                  onClick={openMergeLocations}
+                  className="rounded-xl bg-amber-100 px-4 py-3 text-sm font-bold text-amber-900 hover:bg-amber-200"
+                >
+                  Merge Locations
+                </button>
                 <button
                   type="button"
                   onClick={openCreateLocation}
@@ -609,9 +642,7 @@ export default function LocationsPage() {
                 >
                   Add Location
                 </button>
-                <div className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">
-                  {filteredLocations.length} / {locations.length}
-                </div>
+                <ListingCount label="Locations" shown={filteredLocations.length} total={locations.length} />
               </div>
             </div>
 
@@ -686,15 +717,19 @@ export default function LocationsPage() {
                     </div>
                   </div>
 
-                  <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
-                    {formatMemberName(location.club_pro) && (
-                      <Info label="Club Pro" value={formatMemberName(location.club_pro)} />
-                    )}
-                    {formatMemberName(location.club_pro_2) && (
-                      <Info label="Second Club Pro" value={formatMemberName(location.club_pro_2)} />
-                    )}
-                    <Info label="Court Notes" value={location.court_notes} />
-                  </div>
+                  {(formatMemberName(location.club_pro) || formatMemberName(location.club_pro_2) || location.court_notes) && (
+                    <div className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                      {formatMemberName(location.club_pro) && (
+                        <Info label="Club Pro" value={formatMemberName(location.club_pro)} />
+                      )}
+                      {formatMemberName(location.club_pro_2) && (
+                        <Info label="Second Club Pro" value={formatMemberName(location.club_pro_2)} />
+                      )}
+                      {location.court_notes && (
+                        <Info label="Court Notes" value={location.court_notes} />
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
 

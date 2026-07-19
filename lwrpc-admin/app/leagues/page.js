@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import LoadingScreen from "../components/LoadingScreen";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
@@ -490,9 +491,6 @@ export default function LeaguesPage() {
             <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="text-xl font-bold text-slate-900">Current Leagues</h2>
-                <div className="mt-1 text-sm font-semibold text-slate-500">
-                  {visibleLeagues.length} of {leagues.length} leagues
-                </div>
               </div>
               <div className="flex flex-wrap items-center gap-2 md:justify-end">
                 <button
@@ -513,9 +511,7 @@ export default function LeaguesPage() {
                 >
                   {showInactiveLeagues ? "Hide Inactive Leagues" : "Include Inactive Leagues"}
                 </button>
-                <div className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">
-                  {visibleLeagues.length} / {leagues.length}
-                </div>
+                <ListingCount label="Leagues" shown={visibleLeagues.length} total={leagues.length} />
               </div>
             </div>
 

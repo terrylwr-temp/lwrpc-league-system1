@@ -76,6 +76,14 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 
 - League structure administration: Seasons, Leagues, Divisions, and Locations open on searchable record lists. Add and Edit actions use focused modal forms instead of permanently occupying the page.
 - Flex scheduling: Flex League is configured per division, not per league. For enabled divisions, only the home captain or co-captain sees an enabled Captain Dashboard control to change an unfinished match date/time within the supported window.
+- Location cleanup: Merge Locations is an explicit list action and opens the complete merge workflow in a focused dialog rather than permanently displaying the cleanup form.
+- Scheduling administration: saved schedule settings are list-first with search and Add Schedule controls. Adding and editing share one modal form, and the generation-status pill is the single status display on each record.
+- Listing counts: administration list headers use one consistent navy count block labeled for the record type and displaying the filtered count as `x of y` against the full loaded set. Do not repeat the same count beneath Current Seasons, Leagues, Divisions, or Locations.
+- Scheduling exceptions: Court Availability and League Blackout Dates are list-first, searchable sections. Add and Edit actions share focused modal forms instead of permanently displaying entry forms.
+- User Roles directory: use the same 100-member page size and top-and-bottom pagination treatment as Member Administration so the full member directory is not rendered at once.
+- Schedule Settings grouping: group saved settings by league behind compact Show/Hide headers that include each league's schedule count; expanded schedule cards do not repeat the league field.
+- Dense admin lists: User Roles uses the compact count badge. Desktop Season Ratings contains wide tables within the white card and keeps DUPR Notes narrower; Locations omits empty Court Notes rows, and desktop Member Search has no divider gap beneath its action buttons.
+- Compact role count: the User Roles count is an intrinsic-width, single-line navy pill aligned to the end of its search grid column; it must not stretch to fill the grid cell.
 
 ## Rejected ideas
 

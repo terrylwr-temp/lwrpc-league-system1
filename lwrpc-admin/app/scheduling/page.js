@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
+import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestamp } from "../lib/dateTime";
 import { confirmDeleteAction } from "../lib/confirmDelete";
@@ -23,8 +24,13 @@ export default function SchedulingPage() {
   const [leagueBlackouts, setLeagueBlackouts] = useState([]);
 
   const [editingSettingId, setEditingSettingId] = useState(null);
+  const [settingFormOpen, setSettingFormOpen] = useState(false);
+  const [scheduleSearch, setScheduleSearch] = useState("");
+  const [expandedScheduleLeagueKeys, setExpandedScheduleLeagueKeys] = useState([]);
   const [editingAvailabilityId, setEditingAvailabilityId] = useState(null);
   const [editingLeagueBlackoutId, setEditingLeagueBlackoutId] = useState(null);
+  const [availabilityFormOpen, setAvailabilityFormOpen] = useState(false);
+  const [blackoutFormOpen, setBlackoutFormOpen] = useState(false);
 
   const [selectedLeague, setSelectedLeague] = useState("");
   const [selectedDivision, setSelectedDivision] = useState("");
@@ -52,35 +58,42 @@ export default function SchedulingPage() {
   const [blackoutDivision, setBlackoutDivision] = useState("");
   const [blackoutDate, setBlackoutDate] = useState("");
   const [blackoutReason, setBlackoutReason] = useState("");
+  const [blackoutSearch, setBlackoutSearch] = useState("");
 
   useUnsavedChangesWarning(
     Boolean(
-      editingSettingId ||
-      editingAvailabilityId ||
-      editingLeagueBlackoutId ||
-      selectedLeague ||
-      selectedDivision ||
-      settingName.trim() ||
-      seasonStart ||
-      seasonEnd ||
-      defaultMatchDay ||
-      defaultMatchTime ||
-      courtsNeededPerMatch !== "4" ||
-      actualScheduleWeeks ||
-      everyOtherWeek ||
-      !allowByes ||
-      notes.trim() ||
-      availabilityLocation ||
-      dayOfWeek ||
-      specificDate ||
-      startTime ||
-      endTime ||
-      courtsUnavailable !== "0" ||
-      availabilityNotes.trim() ||
-      blackoutLeague ||
-      blackoutDivision ||
-      blackoutDate ||
-      blackoutReason.trim()
+      (settingFormOpen && (
+        editingSettingId ||
+        selectedLeague ||
+        selectedDivision ||
+        settingName.trim() ||
+        seasonStart ||
+        seasonEnd ||
+        defaultMatchDay ||
+        defaultMatchTime ||
+        courtsNeededPerMatch !== "4" ||
+        actualScheduleWeeks ||
+        everyOtherWeek ||
+        !allowByes ||
+        notes.trim()
+      )) ||
+      (availabilityFormOpen && (
+        editingAvailabilityId ||
+        availabilityLocation ||
+        dayOfWeek ||
+        specificDate ||
+        startTime ||
+        endTime ||
+        courtsUnavailable !== "0" ||
+        availabilityNotes.trim()
+      )) ||
+      (blackoutFormOpen && (
+        editingLeagueBlackoutId ||
+        blackoutLeague ||
+        blackoutDivision ||
+        blackoutDate ||
+        blackoutReason.trim()
+      ))
     ),
     "schedule setup"
   );
@@ -186,6 +199,20 @@ export default function SchedulingPage() {
     return divisions.filter((division) => division.league_id === blackoutLeague);
   }, [divisions, blackoutLeague]);
 
+  const filteredLeagueBlackouts = useMemo(() => {
+    const search = blackoutSearch.trim().toLowerCase();
+    if (!search) return leagueBlackouts;
+
+    return leagueBlackouts.filter((row) => [
+      row.leagues?.name || "All Leagues",
+      row.divisions?.name || "All Divisions",
+      row.blackout_date,
+      formatDisplayDate(row.blackout_date, ""),
+      dayOfWeekForDate(row.blackout_date),
+      row.reason,
+    ].filter(Boolean).some((value) => String(value).toLowerCase().includes(search)));
+  }, [blackoutSearch, leagueBlackouts]);
+
   function getSeasonWeeks(startDate, endDate) {
     if (!startDate || !endDate) return "";
     const start = new Date(`${startDate}T12:00:00`);
@@ -250,6 +277,7 @@ export default function SchedulingPage() {
     if (result.error) return alert(result.error.message);
 
     clearSettingsForm();
+    setSettingFormOpen(false);
     await loadData();
   }
 
@@ -279,6 +307,7 @@ export default function SchedulingPage() {
     if (result.error) return alert(result.error.message);
 
     clearAvailabilityForm();
+    setAvailabilityFormOpen(false);
     await loadData();
   }
 
@@ -305,6 +334,7 @@ export default function SchedulingPage() {
     if (result.error) return alert(result.error.message);
 
     clearLeagueBlackoutForm();
+    setBlackoutFormOpen(false);
     await loadData();
   }
 
@@ -323,7 +353,25 @@ export default function SchedulingPage() {
     setEveryOtherWeek(setting.every_other_week === true);
     setAllowByes(setting.allow_byes !== false);
     setNotes(setting.notes || "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setSettingFormOpen(true);
+  }
+
+  function openCreateSetting() {
+    clearSettingsForm();
+    setSettingFormOpen(true);
+  }
+
+  function closeSettingsForm() {
+    clearSettingsForm();
+    setSettingFormOpen(false);
+  }
+
+  function toggleScheduleLeague(groupKey) {
+    setExpandedScheduleLeagueKeys((current) =>
+      current.includes(groupKey)
+        ? current.filter((key) => key !== groupKey)
+        : [...current, groupKey]
+    );
   }
 
   async function deleteSetting(settingId) {
@@ -352,7 +400,17 @@ export default function SchedulingPage() {
     setEndTime(row.end_time || "");
     setCourtsUnavailable(String(row.courts_unavailable ?? row.courts_available ?? 0));
     setAvailabilityNotes(row.notes || "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setAvailabilityFormOpen(true);
+  }
+
+  function openCreateAvailability() {
+    clearAvailabilityForm();
+    setAvailabilityFormOpen(true);
+  }
+
+  function closeAvailabilityForm() {
+    clearAvailabilityForm();
+    setAvailabilityFormOpen(false);
   }
 
   async function deleteAvailability(rowId) {
@@ -378,7 +436,17 @@ export default function SchedulingPage() {
     setBlackoutDivision(row.division_id || "");
     setBlackoutDate(row.blackout_date || "");
     setBlackoutReason(row.reason || "");
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setBlackoutFormOpen(true);
+  }
+
+  function openCreateLeagueBlackout() {
+    clearLeagueBlackoutForm();
+    setBlackoutFormOpen(true);
+  }
+
+  function closeLeagueBlackoutForm() {
+    clearLeagueBlackoutForm();
+    setBlackoutFormOpen(false);
   }
 
   async function deleteLeagueBlackout(id) {
@@ -946,10 +1014,38 @@ export default function SchedulingPage() {
   }
 
   const sortedSettings = useMemo(() => {
-    return [...settings].sort((a, b) =>
-      (a.name || "Unnamed Schedule").localeCompare(b.name || "Unnamed Schedule")
-    );
-  }, [settings]);
+    const search = scheduleSearch.trim().toLowerCase();
+
+    return [...settings]
+      .filter((setting) => {
+        if (!search) return true;
+        return [
+          setting.name,
+          setting.leagues?.name,
+          setting.divisions?.name,
+          setting.season_start_date,
+          setting.season_end_date,
+          dayName(setting.default_match_day),
+          setting.notes,
+        ].filter(Boolean).some((value) => String(value).toLowerCase().includes(search));
+      })
+      .sort((a, b) =>
+        (a.name || "Unnamed Schedule").localeCompare(b.name || "Unnamed Schedule")
+      );
+  }, [scheduleSearch, settings]);
+
+  const groupedScheduleSettings = useMemo(() => {
+    const groups = new Map();
+
+    sortedSettings.forEach((setting) => {
+      const key = String(setting.league_id || "no-league");
+      const leagueName = setting.leagues?.name || "No League";
+      if (!groups.has(key)) groups.set(key, { key, leagueName, settings: [] });
+      groups.get(key).settings.push(setting);
+    });
+
+    return [...groups.values()].sort((a, b) => a.leagueName.localeCompare(b.leagueName));
+  }, [sortedSettings]);
 
   const sectionCards = [
     {
@@ -1009,7 +1105,10 @@ export default function SchedulingPage() {
         </section>
 
         {activeSection === "settings" && (
-          <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr]">
+          <section className="mt-6">
+            {settingFormOpen && (
+            <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+            <div className="my-auto w-full max-w-3xl">
             <FormCard title={editingSettingId ? "Edit Schedule Setting" : "Add Schedule Setting"} subtitle="Create the dates, time, court usage, and frequency used to generate a season schedule. Match format comes from the Division setup.">
               <form onSubmit={saveScheduleSettings} className="space-y-4">
                 <div>
@@ -1065,7 +1164,7 @@ export default function SchedulingPage() {
 
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div className="rounded-xl bg-slate-50 p-4">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Season Length</div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">Calculated Date Length</div>
                     <div className="mt-1 text-2xl font-bold text-slate-900">{seasonWeeksLabel(seasonStart, seasonEnd)}</div>
                   </div>
                   <div>
@@ -1078,7 +1177,7 @@ export default function SchedulingPage() {
                       className="w-full rounded-xl border border-slate-300 px-4 py-3"
                     />
                     <p className="mt-2 text-xs text-slate-500">
-                      Defaults to Season Length. Override this when blackout weeks should not count as playable weeks.
+                      Defaults to Calculated Date Length. Override this when blackout weeks should not count as playable weeks.
                     </p>
                   </div>
                 </div>
@@ -1127,49 +1226,131 @@ export default function SchedulingPage() {
                   <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="Scheduling notes..." />
                 </div>
 
-                <FormButtons isEditing={!!editingSettingId} submitLabel={editingSettingId ? "Save Schedule Setting" : "Add Schedule Setting"} onCancel={clearSettingsForm} />
+                <FormButtons showCancel submitLabel={editingSettingId ? "Save Schedule Setting" : "Add Schedule Setting"} onCancel={closeSettingsForm} />
               </form>
             </FormCard>
+            </div>
+            </div>
+            )}
 
-            <ListCard title="Saved Schedule Settings" subtitle="Generate or delete schedules from each saved setting." count={settings.length} emptyText="No schedule settings saved yet.">
-              {sortedSettings.map((setting) => {
-                const generationSummary = scheduleGenerationSummary(setting);
-
-                return (
-                <RecordCard
-                  key={setting.id}
-                  title={setting.name || "Unnamed Schedule"}
-                  status={generationSummary}
-                  statusTone={generationSummary.startsWith("Generated") ? "green" : "slate"}
+            <ListCard
+              title="Schedule Settings"
+              subtitle="Generate, edit, or delete schedules from each saved setting."
+              countLabel="Schedules"
+              shownCount={sortedSettings.length}
+              totalCount={settings.length}
+              emptyText={settings.length === 0 ? "No schedule settings saved yet." : "No schedule settings match the current search."}
+              actions={(
+                <button
+                  type="button"
+                  onClick={openCreateSetting}
+                  className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800"
                 >
-                  <DetailGrid>
-                    <Detail label="League" value={setting.leagues?.name || ""} />
-                    <Detail label="Division" value={setting.divisions?.name || ""} />
-                    <Detail label="Season" value={`${formatDisplayDate(setting.season_start_date, "")} - ${formatDisplayDate(setting.season_end_date, "")}`} />
-                    <Detail label="Season Length" value={seasonWeeksLabel(setting.season_start_date, setting.season_end_date)} />
-                    <Detail label="Actual Weeks" value={setting.actual_schedule_weeks || getSeasonWeeks(setting.season_start_date, setting.season_end_date) || ""} />
-                    <Detail label="Match Day" value={dayName(setting.default_match_day)} />
-                    <Detail label="Match Time" value={formatDisplayTime(setting.default_match_time, "")} />
-                    <Detail label="Frequency" value={setting.every_other_week ? "Every Other Week" : "Weekly"} />
-                    <Detail label="Courts Needed" value={setting.courts_needed_per_match || ""} />
-                    <Detail label="Schedule Status" value={scheduleGenerationSummary(setting)} />
-                  </DetailGrid>
-                  {setting.notes && <NoteBox>{setting.notes}</NoteBox>}
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <SmallButton onClick={() => editSetting(setting)}>Edit</SmallButton>
-                    <SmallButton color="lightRed" onClick={() => deleteSetting(setting.id)}>Delete Setting</SmallButton>
-                    <SmallButton color="green" disabled={isGeneratingSchedule} onClick={() => generateSchedule(setting)}>{isGeneratingSchedule ? "Generating..." : "Generate Schedule"}</SmallButton>
-                    <SmallButton color="red" onClick={() => deleteGeneratedSchedule(setting)}>Delete Schedule</SmallButton>
-                  </div>
-                </RecordCard>
-                );
-              })}
+                  Add Schedule
+                </button>
+              )}
+            >
+              <div className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto]">
+                <div>
+                  <FieldLabel label="Search Schedules" />
+                  <input
+                    type="search"
+                    value={scheduleSearch}
+                    onChange={(event) => setScheduleSearch(event.target.value)}
+                    placeholder="Search by schedule, league, division, date, day, or notes"
+                    className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <button
+                    type="button"
+                    onClick={() => setScheduleSearch("")}
+                    className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300 md:w-auto"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {groupedScheduleSettings.map((group) => {
+                  const expanded = expandedScheduleLeagueKeys.includes(group.key);
+
+                  return (
+                    <div key={group.key} className="overflow-hidden rounded-xl border border-slate-200">
+                      <button
+                        type="button"
+                        onClick={() => toggleScheduleLeague(group.key)}
+                        className="flex w-full flex-wrap items-center justify-between gap-2 bg-slate-900 px-4 py-3 text-left text-white hover:bg-slate-800"
+                        aria-expanded={expanded}
+                      >
+                        <div className="min-w-0">
+                          <div className="text-xs font-semibold uppercase tracking-wide text-blue-200">League</div>
+                          <div className="truncate text-base font-bold">{group.leagueName}</div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="rounded-lg bg-white/10 px-3 py-1 text-sm font-bold">
+                            {group.settings.length} schedule{group.settings.length === 1 ? "" : "s"}
+                          </div>
+                          <div className="rounded-lg bg-white/10 px-3 py-1 text-sm font-black">
+                            {expanded ? "Hide" : "Show"}
+                          </div>
+                        </div>
+                      </button>
+
+                      {expanded && (
+                        <div className="space-y-3 bg-slate-100 p-3">
+                          {group.settings.map((setting) => {
+                            const generationSummary = scheduleGenerationSummary(setting);
+
+                            return (
+                              <RecordCard
+                                key={setting.id}
+                                title={setting.name || "Unnamed Schedule"}
+                                status={generationSummary}
+                                statusTone={generationSummary.startsWith("Generated") ? "green" : "slate"}
+                              >
+                                <DetailGrid>
+                                  <Detail label="Division" value={setting.divisions?.name || ""} />
+                                  <Detail label="Season" value={`${formatDisplayDate(setting.season_start_date, "")} - ${formatDisplayDate(setting.season_end_date, "")}`} />
+                                  <Detail label="Calculated Date Length" value={seasonWeeksLabel(setting.season_start_date, setting.season_end_date)} />
+                                  <Detail label="Actual Weeks" value={setting.actual_schedule_weeks || getSeasonWeeks(setting.season_start_date, setting.season_end_date) || ""} />
+                                  <Detail label="Match Day" value={dayName(setting.default_match_day)} />
+                                  <Detail label="Match Time" value={formatDisplayTime(setting.default_match_time, "")} />
+                                  <Detail label="Frequency" value={setting.every_other_week ? "Every Other Week" : "Weekly"} />
+                                  <Detail label="Courts Needed" value={setting.courts_needed_per_match || ""} />
+                                </DetailGrid>
+                                {setting.notes && <NoteBox>{setting.notes}</NoteBox>}
+                                <div className="mt-4 flex flex-wrap gap-2">
+                                  <SmallButton onClick={() => editSetting(setting)}>Edit</SmallButton>
+                                  <SmallButton color="lightRed" onClick={() => deleteSetting(setting.id)}>Delete Setting</SmallButton>
+                                  <SmallButton color="green" disabled={isGeneratingSchedule} onClick={() => generateSchedule(setting)}>{isGeneratingSchedule ? "Generating..." : "Generate Schedule"}</SmallButton>
+                                  <SmallButton color="red" onClick={() => deleteGeneratedSchedule(setting)}>Delete Schedule</SmallButton>
+                                </div>
+                              </RecordCard>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {sortedSettings.length === 0 && (
+                <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
+                  {settings.length === 0
+                    ? "No schedule settings saved yet."
+                    : "No schedule settings match the current search."}
+                </div>
+              )}
             </ListCard>
           </section>
         )}
 
         {activeSection === "courts" && (
-          <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr]">
+          <section className="mt-6">
+            {availabilityFormOpen && (
+              <div className="fixed inset-0 z-50 flex overflow-y-auto bg-slate-950/55 p-4" role="dialog" aria-modal="true" aria-label={editingAvailabilityId ? "Edit Court Unavailability" : "Add Court Unavailability"}>
+                <div className="my-auto w-full max-w-2xl mx-auto">
             <FormCard title={editingAvailabilityId ? "Edit Court Unavailability" : "Add Court Unavailability"} subtitle="Block courts by location, weekday, date, and time.">
               <form onSubmit={saveAvailability} className="space-y-4">
                 <div>
@@ -1214,11 +1395,26 @@ export default function SchedulingPage() {
                   <FieldLabel label="Notes" />
                   <textarea value={availabilityNotes} onChange={(e) => setAvailabilityNotes(e.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="Court notes, blackout reason, etc." />
                 </div>
-                <FormButtons isEditing={!!editingAvailabilityId} submitLabel={editingAvailabilityId ? "Save Court Unavailability" : "Add Court Unavailability"} onCancel={clearAvailabilityForm} />
+                <FormButtons showCancel submitLabel={editingAvailabilityId ? "Save Court Unavailability" : "Add Court Unavailability"} onCancel={closeAvailabilityForm} />
               </form>
             </FormCard>
+                </div>
+              </div>
+            )}
 
-            <ListCard title="Saved Court Unavailability" subtitle="These records reduce or block courts when generating schedules." count={filteredAvailability.length} emptyText="No court unavailability records saved yet.">
+            <ListCard
+              title="Court Unavailability"
+              subtitle="These records reduce or block courts when generating schedules."
+              countLabel="Courts"
+              shownCount={filteredAvailability.length}
+              totalCount={availability.length}
+              emptyText="No court unavailability records saved yet."
+              actions={(
+                <button type="button" onClick={openCreateAvailability} className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800">
+                  Add Court Unavailability
+                </button>
+              )}
+            >
               <input
                 type="search"
                 value={availabilitySearch}
@@ -1241,12 +1437,20 @@ export default function SchedulingPage() {
                   </div>
                 </RecordCard>
               ))}
+              {filteredAvailability.length === 0 && (
+                <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
+                  {availability.length === 0 ? "No court unavailability records saved yet." : "No court availability records match the current search."}
+                </div>
+              )}
             </ListCard>
           </section>
         )}
 
         {activeSection === "blackouts" && (
-          <section className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[420px_1fr]">
+          <section className="mt-6">
+            {blackoutFormOpen && (
+              <div className="fixed inset-0 z-50 flex overflow-y-auto bg-slate-950/55 p-4" role="dialog" aria-modal="true" aria-label={editingLeagueBlackoutId ? "Edit League Blackout" : "Add League Blackout"}>
+                <div className="my-auto w-full max-w-2xl mx-auto">
             <FormCard title={editingLeagueBlackoutId ? "Edit League Blackout" : "Add League Blackout"} subtitle="Block league play for holidays or club-wide no-play dates. These dates are skipped when schedules are generated.">
               <form onSubmit={saveLeagueBlackout} className="space-y-4">
                 <div>
@@ -1275,12 +1479,39 @@ export default function SchedulingPage() {
                   <FieldLabel label="Reason" />
                   <input value={blackoutReason} onChange={(e) => setBlackoutReason(e.target.value)} placeholder="Holiday, club event, no league play, etc." className="w-full rounded-xl border border-slate-300 px-4 py-3" />
                 </div>
-                <FormButtons isEditing={!!editingLeagueBlackoutId} submitLabel={editingLeagueBlackoutId ? "Save League Blackout" : "Add League Blackout"} onCancel={clearLeagueBlackoutForm} />
+                <FormButtons showCancel submitLabel={editingLeagueBlackoutId ? "Save League Blackout" : "Add League Blackout"} onCancel={closeLeagueBlackoutForm} />
               </form>
             </FormCard>
+                </div>
+              </div>
+            )}
 
-            <ListCard title="Saved League Blackout Dates" subtitle="These dates are skipped during schedule generation. All Leagues applies to every league schedule." count={leagueBlackouts.length} emptyText="No league blackout dates saved yet.">
-              {leagueBlackouts.map((row) => (
+            <ListCard
+              title="League Blackout Dates"
+              subtitle="These dates are skipped during schedule generation. All Leagues applies to every league schedule."
+              countLabel="Dates"
+              shownCount={filteredLeagueBlackouts.length}
+              totalCount={leagueBlackouts.length}
+              emptyText="No league blackout dates saved yet."
+              actions={(
+                <button type="button" onClick={openCreateLeagueBlackout} className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800">
+                  Add Blackout Date
+                </button>
+              )}
+            >
+              <div className="mb-4 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto]">
+                <input
+                  type="search"
+                  value={blackoutSearch}
+                  onChange={(e) => setBlackoutSearch(e.target.value)}
+                  placeholder="Search league, division, date, day, or reason"
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                />
+                <button type="button" onClick={() => setBlackoutSearch("")} className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300">
+                  Clear
+                </button>
+              </div>
+              {filteredLeagueBlackouts.map((row) => (
                 <RecordCard key={row.id} title={`${formatDisplayDate(row.blackout_date, "")}${dayOfWeekForDate(row.blackout_date) ? ` - ${dayOfWeekForDate(row.blackout_date)}` : ""}`}>
                   <DetailGrid>
                     <Detail label="League" value={row.leagues?.name || "All Leagues"} />
@@ -1293,6 +1524,11 @@ export default function SchedulingPage() {
                   </div>
                 </RecordCard>
               ))}
+              {filteredLeagueBlackouts.length === 0 && (
+                <div className="rounded-xl border border-dashed border-slate-300 p-8 text-center text-slate-500">
+                  {leagueBlackouts.length === 0 ? "No league blackout dates saved yet." : "No league blackout dates match the current search."}
+                </div>
+              )}
             </ListCard>
           </section>
         )}
@@ -1311,7 +1547,7 @@ function FormCard({ title, subtitle, children }) {
   );
 }
 
-function ListCard({ title, subtitle, count, emptyText, children }) {
+function ListCard({ title, subtitle, countLabel, shownCount, totalCount, emptyText, actions, children }) {
   const hasChildren = Array.isArray(children) ? children.length > 0 : !!children;
 
   return (
@@ -1321,9 +1557,9 @@ function ListCard({ title, subtitle, count, emptyText, children }) {
           <h2 className="text-xl font-bold text-slate-900">{title}</h2>
           <p className="mt-1 text-sm text-slate-600">{subtitle}</p>
         </div>
-        <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-          <div className="text-xs uppercase tracking-wide text-slate-300">Saved</div>
-          <div className="text-2xl font-bold">{count}</div>
+        <div className="flex flex-wrap items-center gap-2 md:justify-end">
+          {actions}
+          <ListingCount label={countLabel} shown={shownCount} total={totalCount} />
         </div>
       </div>
 
@@ -1364,13 +1600,13 @@ function DetailGrid({ children }) {
   return <div className="mt-2 grid grid-cols-1 gap-x-6 md:grid-cols-2">{children}</div>;
 }
 
-function FormButtons({ isEditing, submitLabel, onCancel }) {
+function FormButtons({ isEditing, showCancel = isEditing, submitLabel, onCancel }) {
   return (
     <div className="flex gap-3">
       <button type="submit" className="flex-1 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800">
         {submitLabel}
       </button>
-      {isEditing && (
+      {showCancel && (
         <button type="button" onClick={onCancel} className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300">
           Cancel
         </button>
