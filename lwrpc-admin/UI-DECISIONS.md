@@ -58,13 +58,17 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - Mobile selectors: Player and Captain stack Dashboard view above Active team using the same bordered, two-column control styling; Active team appears only for multi-team members, and Dashboard view appears only for roles allowed to switch dashboards.
 - Dashboard stat cards: the helper line under Team Record, Division Rank, and the third summary metric uses the same readable type scale as the card label on Player and Captain dashboards.
 - Next Match action pairing: on Player and Captain dashboards, the first match-details action uses the same background treatment as the adjacent action button.
-- Admin organization: retain League Analytics, Season Reset, and Master Reset All as Admin Dashboard cards, but omit all three from the sidebar. System Setup navigation keeps Email Options, Score Sheets, and Club Setup; Guides and Messages remain full management dialogs.
+- Admin organization: retain League Analytics, Season Reset, and Master Reset All as Admin Dashboard cards, but omit all three from the sidebar. Dashboard Messages is grouped under People & Teams after Teams & Rosters; Dashboard Guides is grouped under System Setup after Score Sheets; both retain their full management dialogs.
 - Admin shell migration: the approved Admin navigation and Welcome/profile row are the shared shell for Members, Ratings, Teams, scheduling, scoring, league structure, system setup, and module screens. Keep the Welcome row vertically compact, aligned near the same top edge as the Admin Dashboard, and retain full-size help/profile controls. Existing page bodies and business logic stay intact; each route uses a consistent navy/blue page-title banner beneath the shared identity row.
 - Unified Admin navigation: the Admin Dashboard and every administration route use the same shared menu definitions, ordering, labels, expandable groups, active-row treatment, and Selected Scope footer; route-specific sidebars are rejected.
 
 - Admin typography: metric, status, action, and management blocks use the Captain Workspace scale—17px titles with 14px supporting text on desktop and 15px/13px on mobile.
 
 - Admin profile navigation: Change Password, Player Dashboard, and Captain Dashboard use direct Next.js links; the profile closes before navigation, and password changes return to the Admin preview.
+
+- Consolidated match operations: Scoring Operations is the single match-management destination. It includes New Match, searchable match management, editing, and protected deletion; completed matches cannot be deleted, their scored team/division structure stays locked during edits, and the former Matches route redirects to Scoring Operations.
+
+- Admin metric controls: Players on Teams offers All Players (roster assignments) and Unique counts using the current dashboard scope. Season Reset help must layer above the Reset dialog, and logout reassurance text remains readable at 15px.
 
 ## Rejected ideas
 

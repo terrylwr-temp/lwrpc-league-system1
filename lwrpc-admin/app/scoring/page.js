@@ -7,6 +7,7 @@ import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/au
 import { formatDisplayDate, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
+import { confirmDeleteAction } from "../lib/confirmDelete";
 
 const TEMPLATE_KEY = EMAIL_TEMPLATE_KEYS.scoreReminder;
 const DUPR_EXPORT_HEADERS = [
@@ -41,6 +42,16 @@ export default function ScoringPage() {
   const router = useRouter();
 
   const [matches, setMatches] = useState([]);
+  const [allMatches, setAllMatches] = useState([]);
+  const [leagues, setLeagues] = useState([]);
+  const [divisions, setDivisions] = useState([]);
+  const [teams, setTeams] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [createMatchOpen, setCreateMatchOpen] = useState(false);
+  const [editingMatch, setEditingMatch] = useState(null);
+  const [showMatchManagement, setShowMatchManagement] = useState(false);
+  const [managementSearch, setManagementSearch] = useState("");
+  const [deletingMatchId, setDeletingMatchId] = useState("");
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [matchSearch, setMatchSearch] = useState("");
   const [showUnverifiedOnly, setShowUnverifiedOnly] = useState(false);
@@ -72,11 +83,39 @@ export default function ScoringPage() {
     }
   }, []);
 
+  const loadMatchOptions = useCallback(async function loadMatchOptions() {
+    const [leagueResult, divisionResult, teamResult, locationResult] = await Promise.all([
+      supabase.from("leagues").select("id, name, is_active, seasons(is_active)").order("name", { ascending: true }),
+      supabase.from("divisions").select("id, name, league_id, is_active, sort_order").order("sort_order", { ascending: true }),
+      supabase.from("teams").select("id, name, division_id, is_active").order("name", { ascending: true }),
+      supabase.from("locations").select("id, name").order("name", { ascending: true }),
+    ]);
+
+    const firstError = [leagueResult, divisionResult, teamResult, locationResult]
+      .map((result) => result.error)
+      .find(Boolean);
+
+    if (firstError) {
+      alert(firstError.message);
+      return;
+    }
+
+    setLeagues((leagueResult.data || []).filter((league) => league.is_active !== false && league.seasons?.is_active !== false));
+    setDivisions((divisionResult.data || []).filter((division) => division.is_active !== false));
+    setTeams((teamResult.data || []).filter((team) => team.is_active !== false));
+    setLocations(locationResult.data || []);
+  }, []);
   const loadMatches = useCallback(async function loadMatches() {
     const { data, error } = await supabase
       .from("matches")
       .select(`
         id,
+        league_id,
+        division_id,
+        home_team_id,
+        away_team_id,
+        location_id,
+        notes,
         scheduled_date,
         scheduled_time,
         week_number,
@@ -174,7 +213,6 @@ export default function ScoringPage() {
           )
         )
       `)
-      .lte("scheduled_date", localDateString())
       .order("scheduled_date", { ascending: false })
       .order("scheduled_time", { ascending: true });
 
@@ -184,9 +222,13 @@ export default function ScoringPage() {
     }
 
     const sortedMatches = [...(data || [])].sort(compareScoringMatches);
+    const currentDate = localDateString();
+    const dueMatches = sortedMatches.filter(
+      (match) => match.scheduled_date && match.scheduled_date <= currentDate
+    );
     const scoreMemberIds = [
-      ...sortedMatches.map((match) => match.score_entered_by_member_id),
-      ...sortedMatches.map((match) => match.score_verified_by_member_id),
+      ...dueMatches.map((match) => match.score_entered_by_member_id),
+      ...dueMatches.map((match) => match.score_verified_by_member_id),
     ].filter(Boolean);
 
     if (scoreMemberIds.length > 0) {
@@ -200,9 +242,10 @@ export default function ScoringPage() {
       setScoreMembersById({});
     }
 
-    setMatches(sortedMatches);
+    setAllMatches(sortedMatches);
+    setMatches(dueMatches);
     setSelectedMatchIds(
-      sortedMatches
+      dueMatches
         .filter((match) => match.score_status === "verified" && !match.score_exported_at)
         .map((match) => match.id)
     );
@@ -214,12 +257,12 @@ export default function ScoringPage() {
       const ok = await checkAuth();
 
       if (ok) {
-        await Promise.all([loadMatches(), loadTemplate()]);
+        await Promise.all([loadMatches(), loadMatchOptions(), loadTemplate()]);
       }
     }
 
     run();
-  }, [checkAuth, loadMatches, loadTemplate]);
+  }, [checkAuth, loadMatches, loadMatchOptions, loadTemplate]);
 
   const searchableMatches = useMemo(() => {
     const q = matchSearch.trim().toLowerCase();
@@ -266,6 +309,27 @@ export default function ScoringPage() {
     return matches.filter((match) => selected.has(match.id));
   }, [matches, selectedMatchIds]);
 
+  const managedMatches = useMemo(() => {
+    const q = managementSearch.trim().toLowerCase();
+
+    return allMatches.filter((match) => {
+      if (match.status === "completed") return false;
+      if (!q) return true;
+
+      return [
+        match.home_team?.name,
+        match.away_team?.name,
+        match.leagues?.name,
+        match.divisions?.name,
+        match.locations?.name,
+        match.scheduled_date,
+        ...dateSearchValues(match.scheduled_date),
+        match.scheduled_time,
+        formatDisplayTime(match.scheduled_time, ""),
+        match.week_number,
+      ].join(" ").toLowerCase().includes(q);
+    });
+  }, [allMatches, managementSearch]);
   const allVisibleSelected = visibleMatches.length > 0 &&
     visibleMatches.every((match) => selectedMatchIds.includes(match.id));
 
@@ -318,6 +382,43 @@ export default function ScoringPage() {
     setShowDuprExportReadyOnly(true);
   }
 
+  async function deleteMatch(match) {
+    if (match.status === "completed") {
+      alert("Completed matches cannot be deleted. Use Schedule Editor reset tools first if the result must be removed.");
+      return;
+    }
+
+    const ok = confirmDeleteAction({
+      title: "Delete this non-completed match?",
+      details: "This will permanently delete the match, its lineup, generated match lines, and game rows. Completed matches are protected.",
+    });
+
+    if (!ok) return;
+
+    setDeletingMatchId(match.id);
+
+    const { data, error } = await supabase
+      .from("matches")
+      .delete()
+      .eq("id", match.id)
+      .neq("status", "completed")
+      .select("id");
+
+    setDeletingMatchId("");
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      alert("This match is now completed or no longer exists, so it was not deleted.");
+      await loadMatches();
+      return;
+    }
+
+    await loadMatches();
+  }
   async function sendReminders() {
     if (selectedMatches.length === 0) {
       alert("Select one or more matches first.");
@@ -413,6 +514,12 @@ export default function ScoringPage() {
       .from("matches")
       .select(`
         id,
+        league_id,
+        division_id,
+        home_team_id,
+        away_team_id,
+        location_id,
+        notes,
         scheduled_date,
         score_status,
         score_exported_at,
@@ -496,10 +603,108 @@ export default function ScoringPage() {
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="Scoring Operations"
-          subtitle="Monitor overdue match scores and remind captains to enter or verify results."
+          subtitle="Create and manage matches, monitor overdue scores, and remind captains to enter or verify results."
         />
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <MatchEditorDialog
+          open={createMatchOpen || !!editingMatch}
+          match={editingMatch}
+          leagues={leagues}
+          divisions={divisions}
+          teams={teams}
+          locations={locations}
+          matchCount={allMatches.length}
+          onClose={() => {
+            setCreateMatchOpen(false);
+            setEditingMatch(null);
+          }}
+          onSaved={async () => {
+            setCreateMatchOpen(false);
+            setEditingMatch(null);
+            setShowMatchManagement(true);
+            await loadMatches();
+          }}
+        />
+
+        <section className="mt-6 rounded-2xl border border-blue-200 bg-gradient-to-r from-slate-950 to-blue-900 p-5 text-white shadow-lg">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-200">Match Management</div>
+              <h2 className="mt-1 text-xl font-black">Create and manage matches here</h2>
+              <p className="mt-1 max-w-3xl text-sm font-semibold text-blue-100">
+                Scoring Operations now includes new-match creation, editing, and protected deletion. Completed matches cannot be deleted.
+              </p>
+            </div>
+
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => setShowMatchManagement((value) => !value)}
+                className="rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm font-bold text-white hover:bg-white/20"
+              >
+                {showMatchManagement ? "Hide Scheduled Matches" : "Manage Scheduled Matches"}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingMatch(null);
+                  setCreateMatchOpen(true);
+                }}
+                className="rounded-xl bg-white px-5 py-3 text-sm font-black text-blue-950 hover:bg-blue-50"
+              >
+                New Match
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {showMatchManagement && (
+          <section className="mt-6 rounded-2xl bg-white p-6 shadow">
+            <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Non-completed Matches</h2>
+                <p className="mt-1 text-sm font-semibold text-slate-600">
+                  Search, edit, open, or delete any scheduled match. Completed matches stay protected from deletion.
+                </p>
+                <div className="mt-1 text-sm text-slate-500">
+                  {managedMatches.length} shown / {allMatches.filter((match) => match.status !== "completed").length} non-completed matches
+                </div>
+              </div>
+
+              <div className="w-full lg:max-w-md">
+                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
+                  Search Scheduled Matches
+                </label>
+                <input
+                  value={managementSearch}
+                  onChange={(event) => setManagementSearch(event.target.value)}
+                  placeholder="Teams, division, date, location..."
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {managedMatches.map((match) => (
+                <ManagementMatchRow
+                  key={match.id}
+                  match={match}
+                  deleting={deletingMatchId === match.id}
+                  onOpen={() => router.push(`/matches/${match.id}?from=scoring`)}
+                  onEdit={() => setEditingMatch(match)}
+                  onDelete={() => deleteMatch(match)}
+                />
+              ))}
+
+              {managedMatches.length === 0 && (
+                <div className="rounded-xl bg-slate-50 p-8 text-center font-semibold text-slate-500">
+                  No non-completed matches match the current search.
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-4">
           <SummaryCard label="Due Matches" value={matches.length} />
           <SummaryCard label="Not Verified" value={matches.filter((match) => match.score_status !== "verified").length} />
           <SummaryCard label="Verified" value={matches.filter((match) => match.score_status === "verified").length} />
@@ -622,6 +827,9 @@ export default function ScoringPage() {
                 membersById={scoreMembersById}
                 onToggle={() => toggleMatch(match.id)}
                 onOpen={() => router.push(`/matches/${match.id}?from=scoring`)}
+                onEdit={() => setEditingMatch(match)}
+                onDelete={() => deleteMatch(match)}
+                deleting={deletingMatchId === match.id}
               />
             ))}
 
@@ -637,7 +845,347 @@ export default function ScoringPage() {
   );
 }
 
-function MatchRow({ match, selected, membersById, onToggle, onOpen }) {
+function MatchEditorDialog({ open, match, leagues, divisions, teams, locations, matchCount, onClose, onSaved }) {
+  const [selectedLeague, setSelectedLeague] = useState("");
+  const [selectedDivision, setSelectedDivision] = useState("");
+  const [homeTeamId, setHomeTeamId] = useState("");
+  const [awayTeamId, setAwayTeamId] = useState("");
+  const [locationId, setLocationId] = useState("");
+  const [scheduledDate, setScheduledDate] = useState("");
+  const [scheduledTime, setScheduledTime] = useState("");
+  const [weekNumber, setWeekNumber] = useState("1");
+  const [notes, setNotes] = useState("");
+  const [saving, setSaving] = useState(false);
+  const editing = !!match;
+  const structureLocked = match?.status === "completed";
+
+  useEffect(() => {
+    if (!open) return;
+
+    setSelectedLeague(match?.league_id || "");
+    setSelectedDivision(match?.division_id || "");
+    setHomeTeamId(match?.home_team_id || "");
+    setAwayTeamId(match?.away_team_id || "");
+    setLocationId(match?.location_id || "");
+    setScheduledDate(match?.scheduled_date || "");
+    setScheduledTime(match?.scheduled_time || "");
+    setWeekNumber(match?.week_number == null ? "1" : String(match.week_number));
+    setNotes(match?.notes || "");
+    setSaving(false);
+  }, [match, open]);
+
+  const filteredDivisions = useMemo(
+    () => divisions.filter((division) => division.league_id === selectedLeague),
+    [divisions, selectedLeague]
+  );
+  const filteredTeams = useMemo(
+    () => teams.filter((team) => team.division_id === selectedDivision),
+    [teams, selectedDivision]
+  );
+
+  async function saveMatch(event) {
+    event.preventDefault();
+
+    if (!selectedLeague || !selectedDivision || !homeTeamId || !awayTeamId) {
+      alert("League, division, home team, and away team are required.");
+      return;
+    }
+
+    if (homeTeamId === awayTeamId) {
+      alert("Home and away teams cannot be the same.");
+      return;
+    }
+
+    const structuralChange = editing && !structureLocked && (
+      selectedLeague !== match.league_id ||
+      selectedDivision !== match.division_id ||
+      homeTeamId !== match.home_team_id ||
+      awayTeamId !== match.away_team_id
+    );
+
+    if (structuralChange && !confirm("Changing the league, division, or teams will clear saved lineups and rebuild the generated scoring rows for this match. Continue?")) {
+      return;
+    }
+
+    setSaving(true);
+
+    const schedulePayload = {
+      location_id: locationId || null,
+      scheduled_date: scheduledDate || null,
+      scheduled_time: scheduledTime || null,
+      week_number: Number(weekNumber || 1),
+      notes: notes || null,
+      updated_at: new Date().toISOString(),
+    };
+    const fullPayload = {
+      ...schedulePayload,
+      league_id: selectedLeague,
+      division_id: selectedDivision,
+      home_team_id: homeTeamId,
+      away_team_id: awayTeamId,
+    };
+
+    if (editing) {
+      const { error } = await supabase
+        .from("matches")
+        .update(structureLocked ? schedulePayload : fullPayload)
+        .eq("id", match.id)
+        .select("id")
+        .single();
+
+      if (error) {
+        setSaving(false);
+        alert(error.message);
+        return;
+      }
+
+      if (structuralChange) {
+        const resetError = await resetMatchScheduleRows(match.id);
+        const setupError = resetError || await generateMatchScheduleRows(match.id, selectedDivision);
+
+        if (setupError) {
+          alert(`The match was updated, but its generated scoring rows could not be rebuilt: ${setupError.message}`);
+        }
+      }
+    } else {
+      const { data: createdMatch, error } = await supabase
+        .from("matches")
+        .insert({ ...fullPayload, status: "scheduled" })
+        .select("id")
+        .single();
+
+      if (error) {
+        setSaving(false);
+        alert(error.message);
+        return;
+      }
+
+      const setupError = await generateMatchScheduleRows(createdMatch.id, selectedDivision);
+
+      if (setupError) {
+        alert(`The match was created, but its generated scoring rows could not be completed: ${setupError.message}`);
+      }
+    }
+
+    await onSaved();
+    setSaving(false);
+  }
+
+  if (!open) return null;
+
+  const currentLeagueMissing = selectedLeague && !leagues.some((league) => league.id === selectedLeague);
+  const currentDivisionMissing = selectedDivision && !filteredDivisions.some((division) => division.id === selectedDivision);
+  const currentHomeTeamMissing = homeTeamId && !filteredTeams.some((team) => team.id === homeTeamId);
+  const currentAwayTeamMissing = awayTeamId && !filteredTeams.some((team) => team.id === awayTeamId);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="match-editor-title">
+      <div className="my-auto w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-slate-950 to-blue-900 px-5 py-4 text-white">
+          <div>
+            <div className="text-xs font-black uppercase tracking-[0.16em] text-blue-200">Scoring Operations</div>
+            <h2 id="match-editor-title" className="text-xl font-black text-white">{editing ? "Edit Match" : "Create New Match"}</h2>
+          </div>
+
+          <div className="hidden rounded-xl bg-white/10 px-5 py-2.5 sm:block">
+            <div className="text-xs font-bold uppercase tracking-wide text-blue-200">Current Matches</div>
+            <div className="text-2xl font-black">{matchCount}</div>
+          </div>
+
+          <button type="button" onClick={onClose} disabled={saving} className="rounded-xl border border-white/30 bg-white px-4 py-2.5 text-sm font-black text-slate-950 hover:bg-blue-50 disabled:cursor-not-allowed disabled:opacity-60">
+            Close
+          </button>
+        </div>
+
+        <form onSubmit={saveMatch} className="max-h-[calc(100dvh-7rem)] space-y-4 overflow-y-auto p-5">
+          {structureLocked && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-bold leading-6 text-amber-900">
+              This match is completed. League, division, and teams are locked to protect its scores; date, time, location, week, and notes can still be corrected.
+            </div>
+          )}
+
+          <div>
+            <FieldLabel label="League" />
+            <select
+              value={selectedLeague}
+              onChange={(event) => {
+                setSelectedLeague(event.target.value);
+                setSelectedDivision("");
+                setHomeTeamId("");
+                setAwayTeamId("");
+              }}
+              disabled={structureLocked}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-base disabled:bg-slate-100 disabled:text-slate-600"
+              required
+            >
+              <option value="">Select League</option>
+              {currentLeagueMissing && <option value={selectedLeague}>{match?.leagues?.name || "Current League"}</option>}
+              {leagues.map((league) => <option key={league.id} value={league.id}>{league.name}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <FieldLabel label="Division" />
+            <select
+              value={selectedDivision}
+              onChange={(event) => {
+                setSelectedDivision(event.target.value);
+                setHomeTeamId("");
+                setAwayTeamId("");
+              }}
+              disabled={structureLocked}
+              className="w-full rounded-xl border border-slate-300 px-4 py-3 text-base disabled:bg-slate-100 disabled:text-slate-600"
+              required
+            >
+              <option value="">Select Division</option>
+              {currentDivisionMissing && <option value={selectedDivision}>{match?.divisions?.name || "Current Division"}</option>}
+              {filteredDivisions.map((division) => <option key={division.id} value={division.id}>{division.name}</option>)}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <FieldLabel label="Home Team" />
+              <select value={homeTeamId} onChange={(event) => setHomeTeamId(event.target.value)} disabled={structureLocked} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-base disabled:bg-slate-100 disabled:text-slate-600" required>
+                <option value="">Select Home Team</option>
+                {currentHomeTeamMissing && <option value={homeTeamId}>{match?.home_team?.name || "Current Home Team"}</option>}
+                {filteredTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <FieldLabel label="Away Team" />
+              <select value={awayTeamId} onChange={(event) => setAwayTeamId(event.target.value)} disabled={structureLocked} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-base disabled:bg-slate-100 disabled:text-slate-600" required>
+                <option value="">Select Away Team</option>
+                {currentAwayTeamMissing && <option value={awayTeamId}>{match?.away_team?.name || "Current Away Team"}</option>}
+                {filteredTeams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <FieldLabel label="Match Location" />
+            <select value={locationId} onChange={(event) => setLocationId(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-base">
+              <option value="">Select Location</option>
+              {locationId && !locations.some((location) => location.id === locationId) && <option value={locationId}>{match?.locations?.name || "Current Location"}</option>}
+              {locations.map((location) => <option key={location.id} value={location.id}>{location.name}</option>)}
+            </select>
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <div>
+              <FieldLabel label="Match Date" />
+              <input type="date" value={scheduledDate} onChange={(event) => setScheduledDate(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-base" />
+            </div>
+            <div>
+              <FieldLabel label="Match Time" />
+              <input type="time" value={scheduledTime} onChange={(event) => setScheduledTime(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-base" />
+            </div>
+            <div>
+              <FieldLabel label="Week Number" />
+              <input type="number" min="1" value={weekNumber} onChange={(event) => setWeekNumber(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3 text-base" />
+            </div>
+          </div>
+
+          <div>
+            <FieldLabel label="Match Notes" />
+            <textarea value={notes} onChange={(event) => setNotes(event.target.value)} className="min-h-24 w-full rounded-xl border border-slate-300 px-4 py-3 text-base" placeholder="Rain date, makeup match, holiday week, special court assignment, etc." />
+          </div>
+
+          <button type="submit" disabled={saving} className="w-full rounded-xl bg-blue-700 px-5 py-3.5 text-base font-black text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-300">
+            {saving ? (editing ? "Saving Match..." : "Creating Match...") : (editing ? "Save Match" : "Create Match")}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+async function generateMatchScheduleRows(matchId, divisionId) {
+  const { data: lineTemplates, error } = await supabase
+    .from("division_lines")
+    .select("id, line_number, posted_to_dupr, games_per_line")
+    .eq("division_id", divisionId)
+    .order("line_number", { ascending: true });
+
+  if (error || !lineTemplates?.length) return error || null;
+
+  const { data: createdLines, error: lineError } = await supabase
+    .from("match_lines")
+    .insert(lineTemplates.map((line) => ({
+      match_id: matchId,
+      division_line_id: line.id,
+      line_number: line.line_number,
+      posted_to_dupr: line.posted_to_dupr,
+      line_status: "scheduled",
+    })))
+    .select("id, division_line_id");
+
+  if (lineError) return lineError;
+
+  const gameRows = (createdLines || []).flatMap((matchLine) => {
+    const template = lineTemplates.find((line) => line.id === matchLine.division_line_id);
+    return Array.from({ length: Number(template?.games_per_line || 1) }, (_, index) => ({
+      match_line_id: matchLine.id,
+      game_number: index + 1,
+      game_status: "scheduled",
+    }));
+  });
+
+  if (gameRows.length === 0) return null;
+
+  const { error: gameError } = await supabase.from("line_games").insert(gameRows);
+  return gameError || null;
+}
+
+async function resetMatchScheduleRows(matchId) {
+  const { error: lineupError } = await supabase
+    .from("match_lineups")
+    .delete()
+    .eq("match_id", matchId);
+
+  if (lineupError) return lineupError;
+
+  const { error: lineError } = await supabase
+    .from("match_lines")
+    .delete()
+    .eq("match_id", matchId);
+
+  return lineError || null;
+}
+function ManagementMatchRow({ match, deleting, onOpen, onEdit, onDelete }) {
+  return (
+    <div className="rounded-xl border border-slate-200 p-4 transition hover:border-blue-200 hover:bg-blue-50/40">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="min-w-0">
+          <div className="text-lg font-black text-slate-900">
+            {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+          </div>
+          <div className="mt-1 text-base font-black text-slate-950">
+            {formatDisplayDate(match.scheduled_date, "Date not set")} at {formatDisplayTime(match.scheduled_time, "Time not set")}
+          </div>
+          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-slate-600">
+            <span>{match.leagues?.name || "No League"}</span>
+            <span>{match.divisions?.name || "No Division"}</span>
+            <span>{match.locations?.name || "No Location"}</span>
+            <span>Week {match.week_number || "-"}</span>
+          </div>
+        </div>
+
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <button type="button" onClick={onEdit} className="rounded-lg bg-blue-100 px-4 py-2.5 text-sm font-bold text-blue-900 hover:bg-blue-200">Edit</button>
+          <button type="button" onClick={onOpen} className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800">Open Match</button>
+          <button type="button" onClick={onDelete} disabled={deleting} className="rounded-lg bg-red-100 px-4 py-2.5 text-sm font-bold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400">
+            {deleting ? "Deleting..." : "Delete"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FieldLabel({ label }) {
+  return <label className="mb-1 block text-sm font-bold text-slate-700">{label}</label>;
+}
+function MatchRow({ match, selected, membersById, onToggle, onOpen, onEdit, onDelete, deleting }) {
   const contacts = captainContacts(match);
 
   return (
@@ -688,13 +1236,31 @@ function MatchRow({ match, selected, membersById, onToggle, onOpen }) {
           </div>
         </label>
 
-        <button
-          type="button"
-          onClick={onOpen}
-          className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-semibold text-white hover:bg-slate-800"
-        >
-          Open Match
-        </button>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={onEdit}
+            className="rounded-lg bg-blue-100 px-4 py-2.5 text-sm font-bold text-blue-900 hover:bg-blue-200"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            onClick={onOpen}
+            className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800"
+          >
+            Open Match
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={match.status === "completed" || deleting}
+            title={match.status === "completed" ? "Completed matches cannot be deleted" : "Delete this non-completed match"}
+            className="rounded-lg bg-red-100 px-4 py-2.5 text-sm font-bold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+          >
+            {deleting ? "Deleting..." : "Delete"}
+          </button>
+        </div>
       </div>
     </div>
   );

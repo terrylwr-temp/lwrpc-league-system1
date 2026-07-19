@@ -99,10 +99,6 @@ export default function AppHeader({
     }));
   }, [role]);
 
-  const quickLinks = useMemo(() => hasRole(role, "league_manager") ? [
-    { label: "Dashboard Guides", path: "/?adminPanel=guides", icon: "document" },
-    { label: "Dashboard Messages", path: "/?adminPanel=messages", icon: "document" },
-  ] : [], [role]);
 
   const isPathActive = useCallback((path, aliases = []) => {
     const paths = [path, ...aliases];
@@ -231,7 +227,6 @@ export default function AppHeader({
       <nav className={`${adminShellStyles.sideNav} ${className}`} aria-label="League Management navigation">
         {dashboardExpandable ? <Group group={{ key: "dashboard", label: "Dashboard", icon: "dashboard", links: dashboardLinks }}/> : dashboardLinks[0] ? <NavLink link={{ ...dashboardLinks[0], label: "Dashboard", icon: "dashboard" }}/> : null}
         {setupGroups.map((group) => <Group key={group.key} group={group}/>)}
-        {quickLinks.map((link) => <NavLink key={link.path} link={link}/>)}
         {moduleGroups.map((group) => <Group key={group.key} group={group}/>)}
       </nav>
     );

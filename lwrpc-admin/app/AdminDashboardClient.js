@@ -849,8 +849,6 @@ export default function DashboardPage({ designPreview = false } = {}) {
     { label: "Match Operations", targetId: "dashboard-match-operations" },
     { label: "League Structure", targetId: "dashboard-league-structure" },
     { label: "System Setup", targetId: "dashboard-system-setup" },
-    { label: "Dashboard Guides", targetId: "dashboard-guides" },
-    { label: "Dashboard Messages", targetId: "dashboard-messages" },
     { label: "Modules", targetId: "dashboard-modules" },
     { label: "Reset Options", targetId: "dashboard-reset-options" },
   ];
@@ -1189,7 +1187,7 @@ export default function DashboardPage({ designPreview = false } = {}) {
   );
 
   const seasonResetHelpPanel = seasonResetHelpOpen ? (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/70 p-4">
             <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
               <div className="bg-slate-950 px-5 py-4 text-white">
                 <div className="text-xs font-black uppercase tracking-wide text-amber-200">
@@ -1253,6 +1251,8 @@ export default function DashboardPage({ designPreview = false } = {}) {
           member: currentAdminMember,
           role: currentUserRole,
           counts: dashboardCounts,
+          rosterCountMode: dashboardRosterCountMode,
+          onRosterCountModeChange: setDashboardRosterCountMode,
           filter: dashboardFilter,
           filterOptions: dashboardFilterOptions,
           scopeLabel: scopeHelper,

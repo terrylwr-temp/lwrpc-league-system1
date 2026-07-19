@@ -11,6 +11,7 @@ const ADMIN_SECTIONS = [
       { title: "Members", desc: "Search, edit, and review member records.", path: "/members", code: "MB", tone: "slate", role: "league_manager" },
       { title: "Season Ratings", desc: "Update DUPR and PrimeTime ratings.", path: "/ratings", code: "RT", tone: "amber", role: "league_manager" },
       { title: "Teams & Rosters", desc: "Create teams and manage rosters.", path: "/teams", code: "TR", tone: "emerald", role: "league_manager" },
+      { title: "Dashboard Messages", desc: "Create dashboard login messages and review message history.", path: "#dashboard-messages", code: "DM", tone: "blue", role: "league_manager", dialog: "messages" },
       { title: "User Roles", desc: "Manage role-based access permissions.", path: "/users", code: "UR", tone: "blue", role: "commissioner" },
     ],
   },
@@ -23,8 +24,7 @@ const ADMIN_SECTIONS = [
     cards: [
       { title: "Scheduling Admin", desc: "Rules, blackout dates, and initial schedule generation.", path: "/scheduling", code: "SA", tone: "blue", role: "league_manager" },
       { title: "Schedule Editor", desc: "Review, edit, publish, and reset matches.", path: "/schedule-editor", code: "SE", tone: "amber", role: "league_manager" },
-      { title: "Matches", desc: "Open match operations and match-level details.", path: "/matches", code: "MT", tone: "slate", role: "league_manager" },
-      { title: "Scoring Operations", desc: "Score reminders, verification review, and DUPR export.", path: "/scoring", code: "SC", tone: "emerald", role: "league_manager" },
+      { title: "Scoring Operations", desc: "Create and manage matches, send score reminders, review verification, and export to DUPR.", path: "/scoring", code: "SC", tone: "emerald", role: "league_manager" },
     ],
   },
   {
@@ -49,6 +49,7 @@ const ADMIN_SECTIONS = [
     cards: [
       { title: "Email Options", desc: "Edit automated email templates and send test notifications.", path: "/email-options", code: "EO", tone: "blue", role: "commissioner" },
       { title: "Score Sheets", desc: "Manage printable score sheet templates.", path: "/score-sheets", code: "SS", tone: "emerald", role: "commissioner" },
+      { title: "Dashboard Guides", desc: "Select the PDF guides shown on each dashboard.", path: "#dashboard-guides", code: "DG", tone: "blue", role: "league_manager", dialog: "guides" },
       { title: "Club Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "CS", tone: "amber", role: "commissioner" },
       { title: "Season Reset", desc: "Prepare one season for rollover while preserving match history.", path: "#season-reset", code: "SR", tone: "amber", role: "league_manager", dialog: "reset", hideFromSidebar: true },
       { title: "Master Reset All", desc: "Open the protected full-system operations reset.", path: "#master-reset", code: "MR", tone: "slate", role: "league_manager", dialog: "reset", hideFromSidebar: true },
