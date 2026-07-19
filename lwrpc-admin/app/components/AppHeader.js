@@ -91,7 +91,7 @@ export default function AppHeader({
       key: section.key,
       label: section.navLabel,
       icon: section.icon,
-      links: section.cards.map((card) => ({
+      links: section.cards.filter((card) => !card.hideFromSidebar).map((card) => ({
         label: card.title,
         path: card.path,
         dialog: card.dialog,
@@ -100,7 +100,6 @@ export default function AppHeader({
   }, [role]);
 
   const quickLinks = useMemo(() => hasRole(role, "league_manager") ? [
-    { label: "League Analytics", path: "/#admin-preview-analytics", icon: "structure" },
     { label: "Dashboard Guides", path: "/?adminPanel=guides", icon: "document" },
     { label: "Dashboard Messages", path: "/?adminPanel=messages", icon: "document" },
   ] : [], [role]);
@@ -231,9 +230,8 @@ export default function AppHeader({
     return (
       <nav className={`${adminShellStyles.sideNav} ${className}`} aria-label="League Management navigation">
         {dashboardExpandable ? <Group group={{ key: "dashboard", label: "Dashboard", icon: "dashboard", links: dashboardLinks }}/> : dashboardLinks[0] ? <NavLink link={{ ...dashboardLinks[0], label: "Dashboard", icon: "dashboard" }}/> : null}
-        {quickLinks.slice(0, 1).map((link) => <NavLink key={link.path} link={link}/>)}
         {setupGroups.map((group) => <Group key={group.key} group={group}/>)}
-        {quickLinks.slice(1).map((link) => <NavLink key={link.path} link={link}/>)}
+        {quickLinks.map((link) => <NavLink key={link.path} link={link}/>)}
         {moduleGroups.map((group) => <Group key={group.key} group={group}/>)}
       </nav>
     );
