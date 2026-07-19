@@ -9,6 +9,8 @@ import { confirmUnsavedChanges } from "../lib/useUnsavedChangesWarning";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 import { APP_VERSION } from "../lib/version";
+import { adminNavigationSections } from "../lib/adminNavigation";
+import adminShellStyles from "../design-preview/page.module.css";
 
 const iconPaths = {
   dashboard: <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>,
@@ -85,69 +87,22 @@ export default function AppHeader({
 
   const adminGroups = useMemo(() => {
     if (!hasRole(role, "league_manager")) return [];
-    return [
-      {
-        key: "people",
-        label: "People & Teams",
-        icon: "people",
-        links: [
-          { label: "Members", path: "/members", role: "league_manager" },
-          { label: "Membership Import", path: "/member-import", role: "league_manager" },
-          { label: "Season Ratings", path: "/ratings", role: "league_manager" },
-          { label: "Teams & Rosters", path: "/teams", role: "league_manager" },
-          { label: "User Roles", path: "/users", role: "commissioner" },
-        ],
-      },
-      {
-        key: "matches",
-        label: "Match Operations",
-        icon: "calendar",
-        links: [
-          { label: "Scheduling", path: "/scheduling", role: "league_manager" },
-          { label: "Schedule Editor", path: "/schedule-editor", role: "league_manager" },
-          { label: "Matches", path: "/matches", role: "league_manager" },
-          { label: "Scoring Operations", path: "/scoring", role: "league_manager" },
-          { label: "Standings", path: "/standings", role: "league_manager" },
-        ],
-      },
-      {
-        key: "structure",
-        label: "League Structure",
-        icon: "structure",
-        links: [
-          { label: "Seasons", path: "/seasons", role: "league_manager" },
-          { label: "Leagues", path: "/leagues", role: "league_manager" },
-          { label: "Divisions", path: "/divisions", role: "league_manager" },
-          { label: "Locations", path: "/locations", role: "commissioner" },
-        ],
-      },
-      {
-        key: "system",
-        label: "System Setup",
-        icon: "settings",
-        links: [
-          { label: "Email Options", path: "/email-options", role: "commissioner" },
-          { label: "Score Sheets", path: "/score-sheets", role: "commissioner" },
-          { label: "Club Setup", path: "/system-setup", role: "commissioner" },
-        ],
-      },
-      {
-        key: "modules",
-        label: "Modules",
-        icon: "modules",
-        links: [
-          { label: "Tournaments", path: "/tourney/tpro", role: "league_manager" },
-          { label: "PBCourtCommand", path: "/pbcc/admin", role: "league_manager" },
-          { label: "AI League Insights", path: "/ai-insights", role: "league_manager" },
-        ],
-      },
-    ].map((group) => ({ ...group, links: group.links.filter((link) => hasRole(role, link.role)) })).filter((group) => group.links.length > 0);
+    return adminNavigationSections(role).map((section) => ({
+      key: section.key,
+      label: section.navLabel,
+      icon: section.icon,
+      links: section.cards.map((card) => ({
+        label: card.title,
+        path: card.path,
+        dialog: card.dialog,
+      })),
+    }));
   }, [role]);
 
   const quickLinks = useMemo(() => hasRole(role, "league_manager") ? [
-    { label: "League Analytics", path: "/#admin-preview-analytics", icon: "chart" },
-    { label: "Dashboard Guides", path: "/#admin-preview-guides", icon: "document" },
-    { label: "Dashboard Messages", path: "/#admin-preview-messages", icon: "document" },
+    { label: "League Analytics", path: "/#admin-preview-analytics", icon: "structure" },
+    { label: "Dashboard Guides", path: "/?adminPanel=guides", icon: "document" },
+    { label: "Dashboard Messages", path: "/?adminPanel=messages", icon: "document" },
   ] : [], [role]);
 
   const isPathActive = useCallback((path, aliases = []) => {
@@ -236,11 +191,22 @@ export default function AppHeader({
     router.refresh();
   }
 
+  function navigationTarget(link) {
+    return link.dialog ? `/?adminPanel=${encodeURIComponent(link.dialog)}` : link.path;
+  }
+
   function NavLink({ link, nested = false }) {
     const active = isPathActive(link.path, link.aliases);
+    if (nested) {
+      return (
+        <button type="button" onClick={() => navigate(navigationTarget(link))} aria-current={active ? "page" : undefined} className={active ? adminShellStyles.submenuActive : ""}>
+          <span>{link.label}</span>
+        </button>
+      );
+    }
     return (
-      <button type="button" onClick={() => navigate(link.path)} aria-current={active ? "page" : undefined} className={`${nested ? "ml-9 w-[calc(100%-2.25rem)] px-3 py-2.5 text-[13px]" : "w-full px-3 py-3 text-sm"} flex min-h-11 items-center gap-3 rounded-xl border text-left font-extrabold transition ${active ? "border-white/90 bg-white text-[#1558d5] shadow-lg" : "border-transparent text-white hover:translate-x-0.5 hover:bg-white/10"}`}>
-        {!nested && <Icon name={link.icon || "document"} size={20}/>}<span className="min-w-0 truncate">{link.label}</span>
+      <button type="button" onClick={() => navigate(navigationTarget(link))} aria-current={active ? "page" : undefined} className={active ? adminShellStyles.active : ""}>
+        <Icon name={link.icon || "document"} size={20}/><span><b>{link.label}</b></span>
       </button>
     );
   }
@@ -249,24 +215,26 @@ export default function AppHeader({
     const expanded = openGroup === group.key;
     const active = group.links.some((link) => isPathActive(link.path, link.aliases));
     return (
-      <div>
-        <button type="button" onClick={() => toggleGroup(group.key)} aria-expanded={expanded} className={`flex min-h-12 w-full items-center gap-3 rounded-xl border px-3 py-3 text-left text-sm font-extrabold transition ${active ? "border-white/90 bg-white/10 text-white" : "border-transparent text-white hover:translate-x-0.5 hover:bg-white/10"}`}>
-          <Icon name={group.icon} size={20}/><span className="min-w-0 flex-1 truncate">{group.label}</span><span className={`text-xl leading-none transition-transform ${expanded ? "rotate-90" : ""}`} aria-hidden="true">{"\u203A"}</span>
+      <div className={adminShellStyles.navGroup}>
+        <button type="button" onClick={() => toggleGroup(group.key)} aria-expanded={expanded} className={active ? adminShellStyles.active : ""}>
+          <Icon name={group.icon} size={20}/><span><b>{group.label}</b></span>
         </button>
-        {expanded && <div className="mt-1 space-y-1">{group.links.map((link) => <NavLink key={link.path} link={link} nested/>)}</div>}
+        {expanded && <div className={adminShellStyles.submenu}>{group.links.map((link) => <NavLink key={`${link.path}-${link.label}`} link={link} nested/>)}</div>}
       </div>
     );
   }
 
-  function Navigation() {
+  function Navigation({ className = "" }) {
     const dashboardExpandable = dashboardLinks.length > 1;
+    const setupGroups = adminGroups.filter((group) => group.key !== "modules");
+    const moduleGroups = adminGroups.filter((group) => group.key === "modules");
     return (
-      <nav className="mt-5 space-y-1.5" aria-label="League Management navigation">
+      <nav className={`${adminShellStyles.sideNav} ${className}`} aria-label="League Management navigation">
         {dashboardExpandable ? <Group group={{ key: "dashboard", label: "Dashboard", icon: "dashboard", links: dashboardLinks }}/> : dashboardLinks[0] ? <NavLink link={{ ...dashboardLinks[0], label: "Dashboard", icon: "dashboard" }}/> : null}
         {quickLinks.slice(0, 1).map((link) => <NavLink key={link.path} link={link}/>)}
-        {adminGroups.slice(0, 4).map((group) => <Group key={group.key} group={group}/>)}
+        {setupGroups.map((group) => <Group key={group.key} group={group}/>)}
         {quickLinks.slice(1).map((link) => <NavLink key={link.path} link={link}/>)}
-        {adminGroups.slice(4).map((group) => <Group key={group.key} group={group}/>)}
+        {moduleGroups.map((group) => <Group key={group.key} group={group}/>)}
       </nav>
     );
   }
@@ -279,20 +247,18 @@ export default function AppHeader({
 
   return (
     <>
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[var(--sidebar-width)] flex-col overflow-y-auto bg-gradient-to-b from-[#102e64] to-[#0d2249] px-4 py-5 text-white shadow-[8px_0_30px_rgba(15,35,74,.12)] min-[701px]:flex">
-        <a href={clubWebsite} target="_blank" rel="noreferrer" className="flex items-center gap-3 border-b border-white/10 px-1 pb-5" title={`Open ${clubName} website`}>
-          <Image src={logoUrl} alt={clubName} width={48} height={48} className="h-12 w-12 shrink-0 rounded-full bg-white object-contain p-0.5" unoptimized/>
-          <strong className="text-[15px] font-black leading-tight">{clubName}</strong>
+      <aside className={adminShellStyles.sidebar} style={{ "--blue": "#1558d5" }}>
+        <a href={clubWebsite} target="_blank" rel="noreferrer" className={adminShellStyles.brand} title={`Open ${clubName} website`}>
+          <Image src={logoUrl} alt={clubName} width={46} height={46} unoptimized/>
+          <strong>{clubName}</strong>
         </a>
         <Navigation/>
-        <div className="mt-auto pt-5">
-          <div className="rounded-xl border border-white/10 bg-white/8 px-3 py-3">
-            <span className="block text-[10px] font-black uppercase tracking-[.12em] text-[#afc1dd]">Current area</span>
-            <strong className="mt-1 block text-sm font-black text-white">{contextLabel}</strong>
-            <small className="mt-1 block text-[12px] font-bold text-[#afc1dd]">{roleLabel(role)}</small>
-          </div>
-          <p className="mt-4 text-center text-[11px] font-bold leading-4 text-[#afc1dd]">{"\u00A9"} {new Date().getFullYear()} {clubName}</p>
+        <div className={adminShellStyles.season}>
+          <span>Selected scope</span>
+          <strong>Active Seasons</strong>
+          <small>Admin operations</small>
         </div>
+        <p className={adminShellStyles.sidebarCopyright}>{"\u00A9"} {new Date().getFullYear()} {clubName}</p>
       </aside>
 
       <header className="-mt-4 mx-auto mb-2 hidden min-h-[68px] max-w-[1180px] items-center justify-between gap-5 md:-mt-6 min-[701px]:flex">
@@ -323,7 +289,7 @@ export default function AppHeader({
 
       {memberEmailIssue && <div className="mx-auto mb-6 max-w-[1180px] rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm font-semibold leading-6 text-amber-950 shadow-sm">This login email is linked to {memberEmailIssue.count} member records. Showing data for {memberEmailIssue.selectedName || "the first active member record"}. Contact league support if this does not look right.</div>}
 
-      {menuOpen && <div className="fixed inset-0 z-[60] min-[701px]:hidden"><button type="button" className="absolute inset-0 bg-slate-950/60" onClick={() => setMenuOpen(false)} aria-label="Close navigation"/><aside className="relative flex h-full w-[min(88vw,320px)] flex-col overflow-y-auto bg-gradient-to-b from-[#102e64] to-[#0d2249] p-5 text-white shadow-2xl"><div className="flex items-center justify-between gap-3"><a href={clubWebsite} target="_blank" rel="noreferrer" className="flex min-w-0 items-center gap-3"><Image src={logoUrl} alt={clubName} width={46} height={46} className="h-11 w-11 rounded-full bg-white object-contain" unoptimized/><strong className="text-sm font-black leading-tight">{clubName}</strong></a><button type="button" onClick={() => setMenuOpen(false)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-xl" aria-label="Close navigation">{"\u00D7"}</button></div><Navigation/>{mobileSidebarAction && <div className="mt-5" onClick={() => setMenuOpen(false)}>{mobileSidebarAction}</div>}<p className="mt-auto pt-6 text-center text-[11px] font-bold text-[#afc1dd]">{"\u00A9"} {new Date().getFullYear()} {clubName}</p></aside></div>}
+      {menuOpen && <div className="fixed inset-0 z-[60] min-[701px]:hidden"><button type="button" className="absolute inset-0 bg-slate-950/60" onClick={() => setMenuOpen(false)} aria-label="Close navigation"/><aside className="relative flex h-full w-[min(88vw,320px)] flex-col overflow-y-auto bg-gradient-to-b from-[#102e64] to-[#0d2249] p-5 text-white shadow-2xl" style={{ "--blue": "#1558d5" }}><div className="flex items-center justify-between gap-3"><a href={clubWebsite} target="_blank" rel="noreferrer" className="flex min-w-0 items-center gap-3"><Image src={logoUrl} alt={clubName} width={46} height={46} className="h-11 w-11 rounded-full bg-white object-contain" unoptimized/><strong className="text-sm font-black leading-tight">{clubName}</strong></a><button type="button" onClick={() => setMenuOpen(false)} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/10 text-xl" aria-label="Close navigation">{"\u00D7"}</button></div><Navigation className="mt-5"/>{mobileSidebarAction && <div className="mt-5" onClick={() => setMenuOpen(false)}>{mobileSidebarAction}</div>}<p className="mt-auto pt-6 text-center text-[11px] font-bold text-[#afc1dd]">{"\u00A9"} {new Date().getFullYear()} {clubName}</p></aside></div>}
 
       {profileOpen && <div className="fixed inset-0 z-[70] grid place-items-center p-4" role="dialog" aria-modal="true" aria-labelledby="shared-profile-title"><button type="button" className="absolute inset-0 bg-slate-950/65 backdrop-blur-sm" onClick={() => setProfileOpen(false)} aria-label="Close profile"/><section className="relative w-full max-w-[500px] overflow-hidden rounded-[22px] border border-slate-200 bg-white shadow-2xl"><header className="flex items-center gap-4 bg-gradient-to-r from-[#102e64] to-[#1558d5] px-5 py-5 text-white"><ProfileAvatar member={member} size={54}/><div className="min-w-0 flex-1"><span className="text-[11px] font-black uppercase tracking-[.12em] text-[#bcd1f6]">Signed-in profile</span><h2 id="shared-profile-title" className="truncate text-[23px] font-black">{displayName}</h2><p className="truncate text-[13px] font-semibold text-[#d8e5fb]">{roleLabel(role)}{member?.email ? ` - ${member.email}` : ""}</p></div><button type="button" onClick={() => setProfileOpen(false)} className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-white/25 bg-white/10 text-2xl" aria-label="Close profile">{"\u00D7"}</button></header><div className="grid gap-2 p-4">
         <button type="button" onClick={() => navigate(`/reset-password?returnTo=${encodeURIComponent(pathname)}`)} className="flex min-h-16 items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 text-left transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50"><Icon name="lock"/><span className="grid flex-1"><strong className="text-[15px] font-black text-slate-900">Change Password</strong><small className="text-[13px] font-semibold text-slate-500">Update this account</small></span><span aria-hidden="true">{"\u203A"}</span></button>

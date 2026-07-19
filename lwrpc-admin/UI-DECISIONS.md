@@ -60,6 +60,7 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - Next Match action pairing: on Player and Captain dashboards, the first match-details action uses the same background treatment as the adjacent action button.
 - Admin organization: retain League Analytics; place Email Options, Score Sheets, Club Setup, Season Reset, and Master Reset All under System Setup. Guides and Messages open as full management dialogs.
 - Admin shell migration: the approved Admin navigation and Welcome/profile row are the shared shell for Members, Ratings, Teams, scheduling, scoring, league structure, system setup, and module screens. Keep the Welcome row vertically compact, aligned near the same top edge as the Admin Dashboard, and retain full-size help/profile controls. Existing page bodies and business logic stay intact; each route uses a consistent navy/blue page-title banner beneath the shared identity row.
+- Unified Admin navigation: the Admin Dashboard and every administration route use the same shared menu definitions, ordering, labels, expandable groups, active-row treatment, and Selected Scope footer; route-specific sidebars are rejected.
 
 - Admin typography: metric, status, action, and management blocks use the Captain Workspace scale—17px titles with 14px supporting text on desktop and 15px/13px on mobile.
 

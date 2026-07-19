@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import AppHeader from "./components/AppHeader";
 import AdminDesignPreviewView from "./design-preview/admin/AdminDesignPreviewView";
+import { adminNavigationSections } from "./lib/adminNavigation";
 import { requireRole, supabase } from "./lib/auth";
 import { formatDisplayTimestampShort } from "./lib/dateTime";
 import {
@@ -840,73 +841,9 @@ export default function DashboardPage({ designPreview = false } = {}) {
   ];
   const executiveAnalytics = dashboardCounts?.executive || emptyExecutiveAnalytics();
 
-  const sections = [
-    {
-      key: "people",
-      title: "People And Teams",
-      desc: "Keep player records, captains, ratings, teams, and access current.",
-      cards: [
-        { title: "Members", desc: "Search, edit, and review member records.", path: "/members", code: "MB", tone: "slate" },
-        { title: "Season Ratings", desc: "Update DUPR and PrimeTime ratings.", path: "/ratings", code: "RT", tone: "amber" },
-        { title: "Teams & Rosters", desc: "Create teams and manage rosters.", path: "/teams", code: "TR", tone: "emerald" },
-        ...(currentUserRole === "commissioner"
-          ? [{ title: "User Roles", desc: "Manage role-based access permissions.", path: "/users", code: "UR", tone: "blue" }]
-          : []),
-      ],
-    },
-    {
-      key: "matches",
-      title: "Match Operations",
-      desc: "Generate, edit, publish, reset, score, and export matches.",
-      cards: [
-        { title: "Scheduling Admin", desc: "Rules, blackout dates, and initial schedule generation.", path: "/scheduling", code: "SA", tone: "blue" },
-        { title: "Schedule Editor", desc: "Review, edit, publish, and reset matches.", path: "/schedule-editor", code: "SE", tone: "amber" },
-        { title: "Matches", desc: "Open match operations and match-level details.", path: "/matches", code: "MT", tone: "slate" },
-        { title: "Scoring Operations", desc: "Score reminders, verification review, and DUPR export.", path: "/scoring", code: "SC", tone: "emerald" },
-      ],
-    },
-    {
-      key: "structure",
-      title: "League Structure",
-      desc: "Set up the season framework before teams start playing.",
-      cards: [
-        { title: "Seasons", desc: "Create seasons and maintain season date ranges.", path: "/seasons", code: "SN", tone: "amber" },
-        { title: "Leagues", desc: "Manage leagues and roster locking.", path: "/leagues", code: "LG", tone: "blue" },
-        { title: "Divisions", desc: "Manage division rules, DUPR limits, and game lines.", path: "/divisions", code: "DV", tone: "emerald" },
-        ...(currentUserRole === "commissioner"
-          ? [
-              { title: "Locations", desc: "Maintain clubs, courts, and court availability.", path: "/locations", code: "LC", tone: "slate" },
-            ]
-          : []),
-      ],
-    },
-    {
-      key: "system",
-      title: "System Setup",
-      desc: "Configure system-wide communication, score sheets, club settings, and controlled reset operations.",
-      cards: [
-        ...(currentUserRole === "commissioner"
-          ? [
-              { title: "Email Options", desc: "Edit automated email templates and send test notifications.", path: "/email-options", code: "EO", tone: "blue" },
-              { title: "Score Sheets", desc: "Manage printable score sheet templates.", path: "/score-sheets", code: "SS", tone: "emerald" },
-              { title: "Club Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "CS", tone: "amber" },
-            ]
-          : []),
-        { title: "Season Reset", desc: "Prepare one season for rollover while preserving match history.", path: "#season-reset", code: "SR", tone: "amber", dialog: "reset" },
-        { title: "Master Reset All", desc: "Open the protected full-system operations reset.", path: "#master-reset", code: "MR", tone: "slate", dialog: "reset" },
-      ],
-    },
-  ];
-  const moduleSection = {
-    key: "modules",
-    title: "Modules",
-    desc: "Standalone tools that share club data with the main league system.",
-    cards: [
-      { title: "Tournaments", desc: "Open public tournament displays and event-code tournament operations.", path: "/tourney/tpro", code: "TN", tone: "emerald" },
-      { title: "PBCourtCommand", desc: "Run round robin and ladder sessions with saved players, lineups, scores, and texts.", path: "/pbcc/admin", code: "PB", tone: "blue" },
-      { title: "AI League Insights", desc: "Ask LMS, weekly health, anomalies, lineup gaps, and cleanup suggestions.", path: "/ai-insights", code: "AI", tone: "amber" },
-    ],
-  };
+  const adminSections = adminNavigationSections(currentUserRole);
+  const sections = adminSections.filter((section) => section.key !== "modules");
+  const moduleSection = adminSections.find((section) => section.key === "modules");
   const dashboardJumpLinks = [
     { label: "People and Teams", targetId: "dashboard-people-and-teams" },
     { label: "Match Operations", targetId: "dashboard-match-operations" },
