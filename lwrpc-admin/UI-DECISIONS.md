@@ -67,9 +67,15 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 
 - Admin profile navigation: Change Password, Player Dashboard, and Captain Dashboard use direct Next.js links; the profile closes before navigation, and password changes return to the Admin preview.
 
-- Consolidated match operations: Scoring Operations is the single match-management destination. It includes New Match, searchable match management, editing, and protected deletion; completed matches cannot be deleted, their scored team/division structure stays locked during edits, and the former Matches route redirects to Scoring Operations.
+- Consolidated match operations: Scoring Operations is the single match-management destination. New Match, Current/Upcoming views, search, selection, reminders, editing, and protected deletion share one match workspace; completed matches cannot be deleted, their scored team/division structure stays locked during edits, and the former Matches route redirects to Scoring Operations. Match lists sort oldest date first, then league, division, and home team.
+- DUPR operations: keep DUPR Options collapsed until requested. Export confirms the completed-game and selected-match counts before downloading and marking matches exported; selected exported matches can be confirmed and marked Not Exported for correction.
+- Admin mobile navigation: the Admin Dashboard header includes the same hamburger access as administration routes and opens the complete expandable sidebar navigation in a mobile drawer.
+- Mobile administration controls: Member Search keeps the title and count together, uses a consistent two-column action grid with full-size touch targets, and visually separates search inputs from directory actions. Scoring action buttons align with the search field rather than its helper text.
 
 - Admin metric controls: Players on Teams offers All Players (roster assignments) and Unique counts using the current dashboard scope. Season Reset help must layer above the Reset dialog, and logout reassurance text remains readable at 15px.
+
+- League structure administration: Seasons, Leagues, Divisions, and Locations open on searchable record lists. Add and Edit actions use focused modal forms instead of permanently occupying the page.
+- Flex scheduling: Flex League is configured per division, not per league. For enabled divisions, only the home captain or co-captain sees an enabled Captain Dashboard control to change an unfinished match date/time within the supported window.
 
 ## Rejected ideas
 

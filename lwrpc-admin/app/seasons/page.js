@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
@@ -16,9 +16,11 @@ export default function SeasonsPage() {
   const [seasonStart, setSeasonStart] = useState("");
   const [seasonEnd, setSeasonEnd] = useState("");
   const [editingSeasonId, setEditingSeasonId] = useState(null);
+  const [seasonFormOpen, setSeasonFormOpen] = useState(false);
+  const [seasonSearch, setSeasonSearch] = useState("");
 
   useUnsavedChangesWarning(
-    Boolean(editingSeasonId || seasonName.trim() || seasonAbbreviation.trim() || seasonStart || seasonEnd),
+    Boolean(seasonFormOpen && (editingSeasonId || seasonName.trim() || seasonAbbreviation.trim() || seasonStart || seasonEnd)),
     "season"
   );
 
@@ -74,6 +76,7 @@ export default function SeasonsPage() {
     }
 
     clearSeasonForm();
+    setSeasonFormOpen(false);
     loadSeasons();
   }
 
@@ -222,6 +225,17 @@ export default function SeasonsPage() {
     setSeasonAbbreviation(season.abbreviation || "");
     setSeasonStart(season.start_date || "");
     setSeasonEnd(season.end_date || "");
+    setSeasonFormOpen(true);
+  }
+
+  function openCreateSeason() {
+    clearSeasonForm();
+    setSeasonFormOpen(true);
+  }
+
+  function closeSeasonForm() {
+    clearSeasonForm();
+    setSeasonFormOpen(false);
   }
 
   function clearSeasonForm() {
@@ -244,6 +258,17 @@ export default function SeasonsPage() {
     run();
   }, [checkAuth, loadSeasons]);
 
+  const filteredSeasons = useMemo(() => {
+    const search = seasonSearch.trim().toLowerCase();
+    if (!search) return seasons;
+
+    return seasons.filter((season) =>
+      [season.name, season.abbreviation, season.start_date, season.end_date]
+        .filter(Boolean)
+        .some((value) => String(value).toLowerCase().includes(search))
+    );
+  }, [seasonSearch, seasons]);
+
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-7xl">
@@ -252,8 +277,10 @@ export default function SeasonsPage() {
           subtitle="Create seasons and manage their date windows."
         />
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <section className="rounded-2xl bg-white p-6 shadow">
+        <div className="grid grid-cols-1 gap-6">
+          {seasonFormOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+          <section className="w-full max-w-xl rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-bold text-slate-900">
                 {editingSeasonId ? "Edit Season" : "Create Season"}
@@ -313,31 +340,64 @@ export default function SeasonsPage() {
                   {editingSeasonId ? "Save Season" : "Create Season"}
                 </button>
 
-                {editingSeasonId && (
-                  <button
-                    type="button"
-                    onClick={clearSeasonForm}
-                    className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300"
-                  >
-                    Cancel
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={closeSeasonForm}
+                  className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </section>
+          </div>
+          )}
 
           <section className="rounded-2xl bg-white p-6 shadow">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-xl font-bold text-slate-900">
-                Current Seasons
-              </h2>
-              <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
-                {seasons.length}
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Current Seasons</h2>
+                <div className="mt-1 text-sm font-semibold text-slate-500">
+                  {filteredSeasons.length} of {seasons.length} seasons
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                <button
+                  type="button"
+                  onClick={openCreateSeason}
+                  className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800"
+                >
+                  Add Season
+                </button>
+                <div className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">
+                  {filteredSeasons.length} / {seasons.length}
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-5 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:grid-cols-[1fr_auto]">
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-slate-700">Search Seasons</label>
+                <input
+                  value={seasonSearch}
+                  onChange={(e) => setSeasonSearch(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  placeholder="Search by name, abbreviation, or date"
+                />
+              </div>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => setSeasonSearch("")}
+                  className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 sm:w-auto"
+                >
+                  Clear
+                </button>
               </div>
             </div>
 
             <div className="space-y-3">
-              {seasons.map((season) => (
+              {filteredSeasons.map((season) => (
                 <div key={season.id} className="rounded-xl border border-slate-200 p-4">
                   <div className="flex items-start justify-between gap-4">
                     <div>
@@ -388,6 +448,12 @@ export default function SeasonsPage() {
 
               {seasons.length === 0 && (
                 <div className="text-slate-500">No seasons created yet.</div>
+              )}
+
+              {seasons.length > 0 && filteredSeasons.length === 0 && (
+                <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-slate-500">
+                  No seasons match the current search.
+                </div>
               )}
             </div>
           </section>

@@ -42,6 +42,7 @@ export default function DivisionsPage() {
   const [teamDuprMax, setTeamDuprMax] = useState("");
   const [sortOrder, setSortOrder] = useState("");
   const [playoffTeamCount, setPlayoffTeamCount] = useState("");
+  const [flexLeague, setFlexLeague] = useState(false);
 
   const [numberOfTeams, setNumberOfTeams] = useState("3");
   const [teamType, setTeamType] = useState("gender_doubles");
@@ -79,6 +80,7 @@ export default function DivisionsPage() {
         teamDuprMax ||
         sortOrder ||
         playoffTeamCount ||
+        flexLeague ||
         numberOfTeams !== "3" ||
         teamType !== "gender_doubles" ||
         secondaryNumberOfTeams ||
@@ -222,6 +224,7 @@ export default function DivisionsPage() {
       team_dupr_max: ratingNumber(teamDuprMax),
       sort_order: sortOrder ? Number(sortOrder) : 0,
       playoff_team_count: playoffTeamCount ? Number(playoffTeamCount) : null,
+      flex_league: flexLeague,
 
       number_of_lines: Number(numberOfTeams || 3),
       primary_team_type: primaryType,
@@ -506,6 +509,7 @@ export default function DivisionsPage() {
     setPlayoffTeamCount(
       division.playoff_team_count == null ? "" : String(division.playoff_team_count)
     );
+    setFlexLeague(division.flex_league === true);
 
     setNumberOfTeams(
       division.number_of_lines == null ? "3" : String(division.number_of_lines)
@@ -599,6 +603,7 @@ export default function DivisionsPage() {
     setTeamDuprMax("");
     setSortOrder("");
     setPlayoffTeamCount("");
+    setFlexLeague(false);
 
     setNumberOfTeams("3");
     setTeamType("gender_doubles");
@@ -955,6 +960,21 @@ export default function DivisionsPage() {
                 />
               </Field>
 
+              <label className="flex items-start gap-3 rounded-xl bg-violet-50 p-4 text-sm font-semibold text-violet-950">
+                <input
+                  type="checkbox"
+                  checked={flexLeague}
+                  onChange={(e) => setFlexLeague(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  Flex League Division
+                  <span className="mt-1 block text-xs font-normal text-violet-800">
+                    Allows the home team captain or co-captain to modify a scheduled match date and time within the permitted window.
+                  </span>
+                </span>
+              </label>
+
               <Field label="Score Sheet Format">
                 <select
                   value={scoreSheetTemplateId}
@@ -1214,6 +1234,12 @@ export default function DivisionsPage() {
                               <span className="font-semibold text-slate-700">League:</span>{" "}
                               {division.leagues?.name || "No League"}
                             </div>
+
+                            {division.flex_league === true && (
+                              <div className="mt-2 inline-flex rounded-full bg-violet-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-violet-800">
+                                Flex Division
+                              </div>
+                            )}
 
                             <div className="mt-1 text-sm text-slate-600">
                               <span className="font-semibold text-slate-700">Rating Type:</span>{" "}

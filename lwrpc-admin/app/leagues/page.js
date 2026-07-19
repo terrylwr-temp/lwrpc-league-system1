@@ -23,7 +23,6 @@ export default function LeaguesPage() {
   const [leagueName, setLeagueName] = useState("");
   const [leagueAbbreviation, setLeagueAbbreviation] = useState("");
   const [selectedSeason, setSelectedSeason] = useState("");
-  const [flexLeague, setFlexLeague] = useState(false);
   const [rostersLocked, setRostersLocked] = useState(false);
   const [onlyHomeCommunityPlayers, setOnlyHomeCommunityPlayers] = useState(false);
   const [matchSetupReminderDaysBefore, setMatchSetupReminderDaysBefore] = useState("2");
@@ -34,11 +33,13 @@ export default function LeaguesPage() {
   const [documentFilesStatus, setDocumentFilesStatus] = useState("");
   const [loadingDocumentFiles, setLoadingDocumentFiles] = useState(false);
   const [editingLeagueId, setEditingLeagueId] = useState(null);
+  const [leagueFormOpen, setLeagueFormOpen] = useState(false);
+  const [leagueSearch, setLeagueSearch] = useState("");
   const [showInactiveLeagues, setShowInactiveLeagues] = useState(false);
   const [hydrated, setHydrated] = useState(false);
 
   useUnsavedChangesWarning(
-    Boolean(editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || flexLeague || rostersLocked || onlyHomeCommunityPlayers || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean)),
+    Boolean(leagueFormOpen && (editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || rostersLocked || onlyHomeCommunityPlayers || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean))),
     "league"
   );
 
@@ -82,7 +83,6 @@ export default function LeaguesPage() {
       name: leagueName,
       abbreviation: leagueAbbreviation.trim() || null,
       season_id: selectedSeason,
-      flex_league: flexLeague,
       rosters_locked: rostersLocked,
       only_home_community_players: onlyHomeCommunityPlayers,
       match_setup_reminder_days_before: Number(matchSetupReminderDaysBefore || 0),
@@ -108,6 +108,7 @@ export default function LeaguesPage() {
     }
 
     clearLeagueForm();
+    setLeagueFormOpen(false);
     loadData();
   }
 
@@ -164,7 +165,6 @@ export default function LeaguesPage() {
     setLeagueName(league.name || "");
     setLeagueAbbreviation(league.abbreviation || "");
     setSelectedSeason(league.season_id || "");
-    setFlexLeague(league.flex_league === true);
     setRostersLocked(league.rosters_locked === true);
     setOnlyHomeCommunityPlayers(league.only_home_community_players === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
@@ -177,6 +177,7 @@ export default function LeaguesPage() {
         ])
       )
     );
+    setLeagueFormOpen(true);
   }
 
   function copyLeague(league) {
@@ -184,7 +185,6 @@ export default function LeaguesPage() {
     setLeagueName(league.name || "");
     setLeagueAbbreviation(league.abbreviation || "");
     setSelectedSeason("");
-    setFlexLeague(league.flex_league === true);
     setRostersLocked(league.rosters_locked === true);
     setOnlyHomeCommunityPlayers(league.only_home_community_players === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
@@ -197,7 +197,17 @@ export default function LeaguesPage() {
         ])
       )
     );
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setLeagueFormOpen(true);
+  }
+
+  function openCreateLeague() {
+    clearLeagueForm();
+    setLeagueFormOpen(true);
+  }
+
+  function closeLeagueForm() {
+    clearLeagueForm();
+    setLeagueFormOpen(false);
   }
 
   function clearLeagueForm() {
@@ -205,7 +215,6 @@ export default function LeaguesPage() {
     setLeagueName("");
     setLeagueAbbreviation("");
     setSelectedSeason("");
-    setFlexLeague(false);
     setRostersLocked(false);
     setOnlyHomeCommunityPlayers(false);
     setMatchSetupReminderDaysBefore("2");
@@ -278,9 +287,23 @@ export default function LeaguesPage() {
     return <LoadingScreen subtitle="Loading League Administration..." />;
   }
 
-  const visibleLeagues = showInactiveLeagues
-    ? leagues
-    : leagues.filter((league) => league.is_active !== false && league.seasons?.is_active !== false);
+  const visibleLeagues = (() => {
+    const search = leagueSearch.trim().toLowerCase();
+
+    return leagues.filter((league) => {
+      const matchesActive = showInactiveLeagues || (
+        league.is_active !== false && league.seasons?.is_active !== false
+      );
+      const matchesSearch = !search || [
+        league.name,
+        league.abbreviation,
+        league.seasons?.name,
+        league.seasons?.abbreviation,
+      ].filter(Boolean).some((value) => String(value).toLowerCase().includes(search));
+
+      return matchesActive && matchesSearch;
+    });
+  })();
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -290,8 +313,10 @@ export default function LeaguesPage() {
           subtitle="Manage league settings, rosters, and captain documents."
         />
 
-        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
-          <section className="rounded-2xl bg-white p-6 shadow">
+        <div className="grid grid-cols-1 gap-6">
+          {leagueFormOpen && (
+          <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+          <section className="my-auto w-full max-w-3xl rounded-2xl bg-white p-6 shadow-2xl">
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-xl font-bold text-slate-900">
                 {editingLeagueId ? "Edit League" : "Create League"}
@@ -335,21 +360,6 @@ export default function LeaguesPage() {
                   </option>
                 ))}
               </select>
-
-              <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={flexLeague}
-                  onChange={(e) => setFlexLeague(e.target.checked)}
-                  className="mt-1"
-                />
-                <span>
-                  Flex League
-                  <span className="mt-1 block text-xs font-normal text-slate-500">
-                    When checked, this league will have the flexibility for the Captain of the Home Team to change the pre-scheduled date/time of the match.
-                  </span>
-                </span>
-              </label>
 
               <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
                 <input
@@ -463,25 +473,35 @@ export default function LeaguesPage() {
                   {editingLeagueId ? "Save League" : "Create League"}
                 </button>
 
-                {editingLeagueId && (
-                  <button
-                    type="button"
-                    onClick={clearLeagueForm}
-                    className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300"
-                  >
-                    Cancel
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={closeLeagueForm}
+                  className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300"
+                >
+                  Cancel
+                </button>
               </div>
             </form>
           </section>
+          </div>
+          )}
 
           <section className="rounded-2xl bg-white p-6 shadow">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-xl font-bold text-slate-900">
-                Current Leagues
-              </h2>
-              <div className="flex items-center gap-2">
+            <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Current Leagues</h2>
+                <div className="mt-1 text-sm font-semibold text-slate-500">
+                  {visibleLeagues.length} of {leagues.length} leagues
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                <button
+                  type="button"
+                  onClick={openCreateLeague}
+                  className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800"
+                >
+                  Add League
+                </button>
                 <button
                   type="button"
                   onClick={() => setShowInactiveLeagues((value) => !value)}
@@ -493,9 +513,30 @@ export default function LeaguesPage() {
                 >
                   {showInactiveLeagues ? "Hide Inactive Leagues" : "Include Inactive Leagues"}
                 </button>
-                <div className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-bold text-white">
+                <div className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">
                   {visibleLeagues.length} / {leagues.length}
                 </div>
+              </div>
+            </div>
+
+            <div className="mb-5 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto]">
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-slate-700">Search Leagues</label>
+                <input
+                  value={leagueSearch}
+                  onChange={(e) => setLeagueSearch(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  placeholder="Search by league, abbreviation, or season"
+                />
+              </div>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => setLeagueSearch("")}
+                  className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 md:w-auto"
+                >
+                  Clear
+                </button>
               </div>
             </div>
 
@@ -573,11 +614,6 @@ export default function LeaguesPage() {
                         {league.only_home_community_players === true && (
                           <span className="rounded-full bg-teal-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-teal-800">
                             Home Community Only
-                          </span>
-                        )}
-                        {league.flex_league === true && (
-                          <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-800">
-                            Flex League
                           </span>
                         )}
                       </div>

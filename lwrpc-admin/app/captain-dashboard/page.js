@@ -270,6 +270,7 @@ export default function CaptainDashboardPage() {
         divisions (
           id,
           name,
+          flex_league,
           number_of_lines,
           primary_team_type,
           secondary_number_of_lines,
@@ -319,7 +320,6 @@ export default function CaptainDashboardPage() {
               abbreviation
             ),
             rosters_locked,
-            flex_league,
             league_document_bucket,
             code_of_conduct_pdf_path,
             captains_guide_pdf_path,
@@ -405,16 +405,15 @@ export default function CaptainDashboardPage() {
           id,
           name,
           season_id,
-          rosters_locked,
-          flex_league
+          rosters_locked
         ),
         divisions (
           id,
           name,
+          flex_league,
           leagues (
             id,
-            name,
-            flex_league
+            name
           ),
           number_of_lines,
           primary_team_type,
@@ -1351,7 +1350,7 @@ export default function CaptainDashboardPage() {
   }
 
   function isFlexLeagueMatch(match) {
-    const value = match?.leagues?.flex_league ?? match?.divisions?.leagues?.flex_league;
+    const value = match?.divisions?.flex_league;
     return value === true || value === "true" || value === 1 || value === "1";
   }
 
@@ -5831,5 +5830,3 @@ function Empty({ message }) {
     </div>
   );
 }
-
-

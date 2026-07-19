@@ -13,6 +13,7 @@ export default function LocationsPage() {
   const [locations, setLocations] = useState([]);
   const [members, setMembers] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [locationFormOpen, setLocationFormOpen] = useState(false);
   const [isMerging, setIsMerging] = useState(false);
   const [locationSearch, setLocationSearch] = useState("");
 
@@ -31,7 +32,7 @@ export default function LocationsPage() {
   const [courtNotes, setCourtNotes] = useState("");
 
   useUnsavedChangesWarning(
-    Boolean(editingId || name.trim() || address.trim() || city.trim() || stateValue !== "FL" || zipCode.trim() || numberOfCourts || clubProMemberId || clubPro2MemberId || courtNotes.trim()),
+    Boolean(locationFormOpen && (editingId || name.trim() || address.trim() || city.trim() || stateValue !== "FL" || zipCode.trim() || numberOfCourts || clubProMemberId || clubPro2MemberId || courtNotes.trim())),
     "location"
   );
 
@@ -117,6 +118,7 @@ export default function LocationsPage() {
     await upgradeMemberToClubPro(clubPro2MemberId);
 
     clearForm();
+    setLocationFormOpen(false);
     await loadLocations();
   }
 
@@ -297,8 +299,17 @@ export default function LocationsPage() {
     setClubProMemberId(location.club_pro_member_id || "");
     setClubPro2MemberId(location.club_pro_2_member_id || "");
     setCourtNotes(location.court_notes || "");
+    setLocationFormOpen(true);
+  }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  function openCreateLocation() {
+    clearForm();
+    setLocationFormOpen(true);
+  }
+
+  function closeLocationForm() {
+    clearForm();
+    setLocationFormOpen(false);
   }
 
   function clearForm() {
@@ -369,7 +380,9 @@ export default function LocationsPage() {
 
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-1">
-            <div className="rounded-2xl bg-white p-6 shadow">
+            {locationFormOpen && (
+            <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+            <div className="my-auto w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <h2 className="text-xl font-bold text-slate-900">
                   {editingId ? "Edit Location" : "Add Location"}
@@ -495,18 +508,18 @@ export default function LocationsPage() {
                     {editingId ? "Save Location" : "Add Location"}
                   </button>
 
-                  {editingId && (
-                    <button
-                      type="button"
-                      onClick={clearForm}
-                      className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300"
-                    >
-                      Cancel
-                    </button>
-                  )}
+                  <button
+                    type="button"
+                    onClick={closeLocationForm}
+                    className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300"
+                  >
+                    Cancel
+                  </button>
                 </div>
               </form>
             </div>
+            </div>
+            )}
 
             <div className="rounded-2xl bg-white p-6 shadow">
               <div className="mb-4 flex items-center justify-between gap-3">
@@ -580,35 +593,48 @@ export default function LocationsPage() {
           </div>
 
           <div className="rounded-2xl bg-white p-6 shadow lg:col-span-2">
-            <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-xl font-bold text-slate-900">
-                Current Locations
-              </h2>
-
-              <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-                <div className="text-xs uppercase tracking-wide text-slate-300">
-                  Total
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-slate-900">Current Locations</h2>
+                <div className="mt-1 text-sm font-semibold text-slate-500">
+                  {filteredLocations.length} of {locations.length} locations
                 </div>
+              </div>
 
-                <div className="text-2xl font-bold">{filteredLocations.length}</div>
+              <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                <button
+                  type="button"
+                  onClick={openCreateLocation}
+                  className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800"
+                >
+                  Add Location
+                </button>
+                <div className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white">
+                  {filteredLocations.length} / {locations.length}
+                </div>
               </div>
             </div>
 
-            <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-[1fr_auto]">
-              <input
-                value={locationSearch}
-                onChange={(e) => setLocationSearch(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                placeholder="Search locations by name, address, club pro, or notes"
-              />
+            <div className="mb-5 grid grid-cols-1 gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-[1fr_auto]">
+              <div>
+                <label className="mb-1 block text-sm font-semibold text-slate-700">Search Locations</label>
+                <input
+                  value={locationSearch}
+                  onChange={(e) => setLocationSearch(e.target.value)}
+                  className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
+                  placeholder="Search by name, address, club pro, or notes"
+                />
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setLocationSearch("")}
-                className="rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300"
-              >
-                Clear
-              </button>
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={() => setLocationSearch("")}
+                  className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 md:w-auto"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
 
             <div className="space-y-4">

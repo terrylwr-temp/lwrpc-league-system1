@@ -49,19 +49,20 @@ export default function ScoringPage() {
   const [locations, setLocations] = useState([]);
   const [createMatchOpen, setCreateMatchOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState(null);
-  const [showMatchManagement, setShowMatchManagement] = useState(false);
-  const [managementSearch, setManagementSearch] = useState("");
+  const [matchView, setMatchView] = useState("current");
   const [deletingMatchId, setDeletingMatchId] = useState("");
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [matchSearch, setMatchSearch] = useState("");
   const [showUnverifiedOnly, setShowUnverifiedOnly] = useState(false);
   const [showDuprExportReadyOnly, setShowDuprExportReadyOnly] = useState(false);
+  const [showDuprOptions, setShowDuprOptions] = useState(false);
   const [emailSubject, setEmailSubject] = useState(SCORE_REMINDER_TEMPLATE.defaultSubject);
   const [emailTemplate, setEmailTemplate] = useState(SCORE_REMINDER_TEMPLATE.defaultBody);
   const [sending, setSending] = useState(false);
   const [lastSendResult, setLastSendResult] = useState("");
   const [today, setToday] = useState("");
   const [exportingScores, setExportingScores] = useState(false);
+  const [updatingDuprStatus, setUpdatingDuprStatus] = useState(false);
   const [includeAlreadyExported, setIncludeAlreadyExported] = useState(false);
   const [scoreMembersById, setScoreMembersById] = useState({});
 
@@ -213,7 +214,7 @@ export default function ScoringPage() {
           )
         )
       `)
-      .order("scheduled_date", { ascending: false })
+      .order("scheduled_date", { ascending: true })
       .order("scheduled_time", { ascending: true });
 
     if (error) {
@@ -264,12 +265,20 @@ export default function ScoringPage() {
     run();
   }, [checkAuth, loadMatches, loadMatchOptions, loadTemplate]);
 
+  const activeMatches = useMemo(() => {
+    if (matchView === "upcoming") {
+      return allMatches.filter((match) => match.scheduled_date && match.scheduled_date > today);
+    }
+
+    return matches;
+  }, [allMatches, matchView, matches, today]);
+
   const searchableMatches = useMemo(() => {
     const q = matchSearch.trim().toLowerCase();
 
-    if (!q) return matches;
+    if (!q) return activeMatches;
 
-    return matches.filter((match) => {
+    return activeMatches.filter((match) => {
       const text = [
         match.home_team?.name,
         match.away_team?.name,
@@ -288,7 +297,7 @@ export default function ScoringPage() {
 
       return text.includes(q);
     });
-  }, [matchSearch, matches]);
+  }, [activeMatches, matchSearch]);
 
   const visibleMatches = useMemo(() => {
     if (showUnverifiedOnly) {
@@ -306,30 +315,16 @@ export default function ScoringPage() {
 
   const selectedMatches = useMemo(() => {
     const selected = new Set(selectedMatchIds);
-    return matches.filter((match) => selected.has(match.id));
-  }, [matches, selectedMatchIds]);
-
-  const managedMatches = useMemo(() => {
-    const q = managementSearch.trim().toLowerCase();
-
-    return allMatches.filter((match) => {
-      if (match.status === "completed") return false;
-      if (!q) return true;
-
-      return [
-        match.home_team?.name,
-        match.away_team?.name,
-        match.leagues?.name,
-        match.divisions?.name,
-        match.locations?.name,
-        match.scheduled_date,
-        ...dateSearchValues(match.scheduled_date),
-        match.scheduled_time,
-        formatDisplayTime(match.scheduled_time, ""),
-        match.week_number,
-      ].join(" ").toLowerCase().includes(q);
-    });
-  }, [allMatches, managementSearch]);
+    return activeMatches.filter((match) => selected.has(match.id));
+  }, [activeMatches, selectedMatchIds]);
+  const selectedExportMatches = useMemo(
+    () => selectedMatches.filter((match) => match.score_status === "verified" && (includeAlreadyExported || !match.score_exported_at)),
+    [includeAlreadyExported, selectedMatches]
+  );
+  const selectedAlreadyExportedMatches = useMemo(
+    () => selectedMatches.filter((match) => !!match.score_exported_at),
+    [selectedMatches]
+  );
   const allVisibleSelected = visibleMatches.length > 0 &&
     visibleMatches.every((match) => selectedMatchIds.includes(match.id));
 
@@ -350,6 +345,13 @@ export default function ScoringPage() {
     }
 
     setSelectedMatchIds((current) => [...new Set([...current, ...visibleIds])]);
+  }
+
+  function changeMatchView(nextView) {
+    setMatchView(nextView);
+    setSelectedMatchIds([]);
+    setShowUnverifiedOnly(false);
+    setShowDuprExportReadyOnly(false);
   }
 
   function toggleUnverifiedFilter() {
@@ -497,11 +499,7 @@ export default function ScoringPage() {
   }
 
   async function exportForDupr() {
-    const exportMatches = selectedMatches.filter(
-      (match) =>
-        match.score_status === "verified" &&
-        (includeAlreadyExported || !match.score_exported_at)
-    );
+    const exportMatches = selectedExportMatches;
 
     if (exportMatches.length === 0) {
       alert("Select one or more verified matches to export.");
@@ -569,10 +567,26 @@ export default function ScoringPage() {
     }
 
     const csvRows = rows.flatMap((match) => duprRowsForMatch(match));
+    const gameCount = rows.reduce(
+      (total, match) => total + (match.match_lines || []).reduce(
+        (lineTotal, line) => lineTotal + (line.line_games || []).filter(hasCompletedGameScore).length,
+        0
+      ),
+      0
+    );
 
-    if (csvRows.length === 0) {
+    if (csvRows.length === 0 || gameCount === 0) {
       setExportingScores(false);
       alert("No completed line scores were found for the selected matches.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Export ${gameCount} completed game${gameCount === 1 ? "" : "s"} from ${rows.length} selected match${rows.length === 1 ? "" : "es"}?\n\nA DUPR CSV file will be downloaded and ${rows.length === 1 ? "this match" : "these matches"} will be marked as exported.`
+    );
+
+    if (!confirmed) {
+      setExportingScores(false);
       return;
     }
 
@@ -598,6 +612,37 @@ export default function ScoringPage() {
     setExportingScores(false);
   }
 
+  async function markSelectedNotExported() {
+    if (selectedAlreadyExportedMatches.length === 0) {
+      alert("Select one or more matches currently marked as exported.");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Mark ${selectedAlreadyExportedMatches.length} selected match${selectedAlreadyExportedMatches.length === 1 ? "" : "es"} as not exported?\n\n${selectedAlreadyExportedMatches.length === 1 ? "It" : "They"} will become eligible for DUPR export again.`
+    );
+
+    if (!confirmed) return;
+
+    setUpdatingDuprStatus(true);
+    const { error } = await supabase
+      .from("matches")
+      .update({
+        score_exported_at: null,
+        updated_at: new Date().toISOString(),
+      })
+      .in("id", selectedAlreadyExportedMatches.map((match) => match.id));
+
+    if (error) {
+      alert(error.message);
+      setUpdatingDuprStatus(false);
+      return;
+    }
+
+    await loadMatches();
+    setUpdatingDuprStatus(false);
+  }
+
   return (
     <main className="min-h-screen bg-slate-100 p-6">
       <div className="mx-auto max-w-7xl">
@@ -621,204 +666,102 @@ export default function ScoringPage() {
           onSaved={async () => {
             setCreateMatchOpen(false);
             setEditingMatch(null);
-            setShowMatchManagement(true);
             await loadMatches();
           }}
         />
 
-        <section className="mt-6 rounded-2xl border border-blue-200 bg-gradient-to-r from-slate-950 to-blue-900 p-5 text-white shadow-lg">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div className="text-xs font-black uppercase tracking-[0.18em] text-blue-200">Match Management</div>
-              <h2 className="mt-1 text-xl font-black">Create and manage matches here</h2>
-              <p className="mt-1 max-w-3xl text-sm font-semibold text-blue-100">
-                Scoring Operations now includes new-match creation, editing, and protected deletion. Completed matches cannot be deleted.
+        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-4">
+          <SummaryCard label={matchView === "current" ? "Current Matches" : "Upcoming Matches"} value={activeMatches.length} />
+          <SummaryCard label="Not Verified" value={activeMatches.filter((match) => match.score_status !== "verified").length} />
+          <SummaryCard label="Verified" value={activeMatches.filter((match) => match.score_status === "verified").length} />
+          <SummaryCard label="Selected" value={selectedMatches.length} />
+        </div>
+
+        <section className="mt-6 rounded-2xl bg-white p-6 shadow">
+          <div className="mb-5 flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="text-xs font-black uppercase tracking-[0.16em] text-blue-700">Match Workspace</div>
+              <h2 className="mt-1 text-xl font-black text-slate-950">
+                {matchView === "current" ? "Current Matches" : "Upcoming Matches"}
+              </h2>
+              <p className="mt-1 text-sm font-semibold text-slate-600">
+                {matchView === "current"
+                  ? `Matches dated ${today ? formatDate(today) : "today"} or earlier.`
+                  : `Matches scheduled after ${today ? formatDate(today) : "today"}.`}
               </p>
+              <div className="mt-1 text-sm text-slate-500">
+                {visibleMatches.length} shown / {activeMatches.length} total {matchView === "current" ? "current" : "upcoming"} matches
+              </div>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <button
-                type="button"
-                onClick={() => setShowMatchManagement((value) => !value)}
-                className="rounded-xl border border-white/30 bg-white/10 px-4 py-3 text-sm font-bold text-white hover:bg-white/20"
-              >
-                {showMatchManagement ? "Hide Scheduled Matches" : "Manage Scheduled Matches"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingMatch(null);
-                  setCreateMatchOpen(true);
-                }}
-                className="rounded-xl bg-white px-5 py-3 text-sm font-black text-blue-950 hover:bg-blue-50"
-              >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="inline-flex rounded-xl bg-slate-100 p-1" aria-label="Match date view">
+                <button type="button" onClick={() => changeMatchView("current")} aria-pressed={matchView === "current"} className={`rounded-lg px-4 py-2.5 text-sm font-black transition ${matchView === "current" ? "bg-white text-blue-800 shadow" : "text-slate-600 hover:text-slate-950"}`}>Current</button>
+                <button type="button" onClick={() => changeMatchView("upcoming")} aria-pressed={matchView === "upcoming"} className={`rounded-lg px-4 py-2.5 text-sm font-black transition ${matchView === "upcoming" ? "bg-white text-blue-800 shadow" : "text-slate-600 hover:text-slate-950"}`}>Upcoming</button>
+              </div>
+              <button type="button" onClick={() => { setEditingMatch(null); setCreateMatchOpen(true); }} className="rounded-xl bg-blue-700 px-5 py-3 text-sm font-black text-white shadow-sm hover:bg-blue-800">
                 New Match
               </button>
             </div>
           </div>
-        </section>
 
-        {showMatchManagement && (
-          <section className="mt-6 rounded-2xl bg-white p-6 shadow">
-            <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-              <div>
-                <h2 className="text-xl font-bold text-slate-900">Non-completed Matches</h2>
-                <p className="mt-1 text-sm font-semibold text-slate-600">
-                  Search, edit, open, or delete any scheduled match. Completed matches stay protected from deletion.
-                </p>
-                <div className="mt-1 text-sm text-slate-500">
-                  {managedMatches.length} shown / {allMatches.filter((match) => match.status !== "completed").length} non-completed matches
-                </div>
-              </div>
-
-              <div className="w-full lg:max-w-md">
-                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
-                  Search Scheduled Matches
-                </label>
-                <input
-                  value={managementSearch}
-                  onChange={(event) => setManagementSearch(event.target.value)}
-                  placeholder="Teams, division, date, location..."
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {managedMatches.map((match) => (
-                <ManagementMatchRow
-                  key={match.id}
-                  match={match}
-                  deleting={deletingMatchId === match.id}
-                  onOpen={() => router.push(`/matches/${match.id}?from=scoring`)}
-                  onEdit={() => setEditingMatch(match)}
-                  onDelete={() => deleteMatch(match)}
-                />
-              ))}
-
-              {managedMatches.length === 0 && (
-                <div className="rounded-xl bg-slate-50 p-8 text-center font-semibold text-slate-500">
-                  No non-completed matches match the current search.
-                </div>
-              )}
-            </div>
-          </section>
-        )}
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-          <SummaryCard label="Due Matches" value={matches.length} />
-          <SummaryCard label="Not Verified" value={matches.filter((match) => match.score_status !== "verified").length} />
-          <SummaryCard label="Verified" value={matches.filter((match) => match.score_status === "verified").length} />
-          <SummaryCard label="Selected" value={selectedMatchIds.length} />
-        </div>
-
-        <section className="mt-6 rounded-2xl bg-white p-6 shadow">
-          <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid gap-4 lg:grid-cols-[minmax(18rem,1fr)_auto] lg:items-start">
             <div>
-              <h2 className="text-xl font-bold text-slate-900">Matches On or Before Today</h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Showing matches dated {today ? formatDate(today) : "today"} or earlier.
-              </p>
-              <div className="mt-1 text-sm text-slate-500">
-                {visibleMatches.length} shown / {matches.length} total due matches
-              </div>
+              <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">Search / Filter</label>
+              <input value={matchSearch} onChange={(event) => setMatchSearch(event.target.value)} placeholder="Teams, league, division, date, location..." className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold" />
+              <div className="mt-1 text-xs font-semibold text-slate-500">Dates work as MM/DD/YYYY, M/D/YYYY, or YYYY-MM-DD.</div>
             </div>
 
-            <div className="flex w-full flex-col gap-3 lg:w-auto lg:items-end">
-              <div className="w-full lg:min-w-[28rem]">
-                <label className="mb-1 block text-xs font-black uppercase tracking-wide text-slate-500">
-                  Search / Filter
-                </label>
-                <input
-                  value={matchSearch}
-                  onChange={(event) => setMatchSearch(event.target.value)}
-                  placeholder="Teams, division, date, location..."
-                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-semibold"
-                />
-                <div className="mt-1 text-xs font-semibold text-slate-500">
-                  Dates work as MM/DD/YYYY, M/D/YYYY, or YYYY-MM-DD.
-                </div>
-              </div>
-
-              <div className="flex w-full flex-col gap-3 lg:items-end">
-                <div className="w-full rounded-xl border border-emerald-200 bg-emerald-50 p-2.5 lg:w-auto">
-                  <div className="mb-2 text-xs font-black uppercase tracking-wide text-emerald-800">DUPR Export</div>
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={toggleDuprExportReadyFilter}
-                      className={`rounded-lg px-4 py-2.5 text-sm font-semibold ${
-                        showDuprExportReadyOnly
-                          ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                          : "bg-white text-emerald-900 ring-1 ring-emerald-200 hover:bg-emerald-50"
-                      }`}
-                    >
-                      {showDuprExportReadyOnly ? "Showing DUPR Export Ready" : "DUPR Export Ready"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={exportForDupr}
-                      disabled={exportingScores}
-                      className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                    >
-                      {exportingScores ? "Exporting..." : "DUPR Export"}
-                    </button>
-                  </div>
-                  <div className="mt-2 text-xs font-semibold text-emerald-800">
-                    DUPR Export Ready shows verified matches that have not been exported yet.
-                  </div>
-                  <label className="mt-2 flex items-center gap-2 text-xs font-semibold text-emerald-900">
-                    <input
-                      type="checkbox"
-                      checked={includeAlreadyExported}
-                      onChange={(e) => setIncludeAlreadyExported(e.target.checked)}
-                    />
-                    Include already exported verified matches for re-export override
-                  </label>
-                </div>
-
-                <div className="flex flex-wrap gap-2 lg:justify-end">
-                  <button
-                    type="button"
-                    onClick={toggleUnverifiedFilter}
-                    className={`rounded-xl px-4 py-3 font-semibold ${
-                      showUnverifiedOnly
-                        ? "bg-blue-700 text-white hover:bg-blue-800"
-                        : "bg-blue-100 text-blue-900 hover:bg-blue-200"
-                    }`}
-                  >
-                    {showUnverifiedOnly ? "Showing Not Verified" : "Filter Not Verified"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={toggleAllVisible}
-                    className="rounded-xl bg-slate-200 px-4 py-3 font-semibold text-slate-900 hover:bg-slate-300"
-                  >
-                    {allVisibleSelected ? "Clear Visible" : "Select Visible"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={sendReminders}
-                    disabled={sending || selectedMatches.length === 0}
-                    className="rounded-xl bg-green-700 px-5 py-3 font-semibold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300"
-                  >
-                    {sending ? "Sending..." : "Send Email Reminder"}
-                  </button>
-
-                </div>
-              </div>
+            <div className="flex flex-wrap gap-2 lg:justify-end lg:pt-5">
+              <button type="button" onClick={toggleUnverifiedFilter} className={`rounded-xl px-4 py-3 text-sm font-bold ${showUnverifiedOnly ? "bg-blue-700 text-white hover:bg-blue-800" : "bg-blue-100 text-blue-900 hover:bg-blue-200"}`}>
+                {showUnverifiedOnly ? "Showing Not Verified" : "Not Verified"}
+              </button>
+              <button type="button" onClick={toggleAllVisible} className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300">
+                {allVisibleSelected ? "Clear Visible" : "Select Visible"}
+              </button>
+              <button type="button" onClick={sendReminders} disabled={sending || selectedMatches.length === 0} className="rounded-xl bg-green-700 px-4 py-3 text-sm font-bold text-white hover:bg-green-800 disabled:cursor-not-allowed disabled:bg-slate-300">
+                {sending ? "Sending..." : "Send Reminder"}
+              </button>
+              <button type="button" onClick={() => setShowDuprOptions((value) => !value)} aria-expanded={showDuprOptions} className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800">
+                DUPR Options {showDuprOptions ? "\u25B2" : "\u25BC"}
+              </button>
             </div>
           </div>
 
+          {showDuprOptions && (
+            <section className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-4" aria-label="DUPR options">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="text-xs font-black uppercase tracking-[0.14em] text-emerald-800">DUPR Options</div>
+                  <p className="mt-1 text-sm font-semibold text-emerald-950">Filter export-ready matches, export selected scores, or correct an exported status.</p>
+                  <label className="mt-3 flex items-start gap-2 text-sm font-semibold text-emerald-950">
+                    <input type="checkbox" checked={includeAlreadyExported} onChange={(event) => setIncludeAlreadyExported(event.target.checked)} className="mt-0.5" />
+                    Include already exported verified matches when exporting again
+                  </label>
+                </div>
+
+                <div className="flex flex-wrap gap-2 lg:max-w-[42rem] lg:justify-end">
+                  <button type="button" onClick={toggleDuprExportReadyFilter} className={`rounded-xl px-4 py-3 text-sm font-bold ${showDuprExportReadyOnly ? "bg-emerald-700 text-white hover:bg-emerald-800" : "bg-white text-emerald-900 ring-1 ring-emerald-200 hover:bg-emerald-100"}`}>
+                    {showDuprExportReadyOnly ? "Showing Export Ready" : "DUPR Export Ready"}
+                  </button>
+                  <button type="button" onClick={exportForDupr} disabled={exportingScores || selectedExportMatches.length === 0} className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300">
+                    {exportingScores ? "Exporting..." : `DUPR Export (${selectedExportMatches.length})`}
+                  </button>
+                  <button type="button" onClick={markSelectedNotExported} disabled={updatingDuprStatus || selectedAlreadyExportedMatches.length === 0} className="rounded-xl border border-amber-300 bg-white px-4 py-3 text-sm font-bold text-amber-900 hover:bg-amber-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400">
+                    {updatingDuprStatus ? "Updating..." : `Mark Not Exported (${selectedAlreadyExportedMatches.length})`}
+                  </button>
+                </div>
+              </div>
+            </section>
+          )}
+
           {lastSendResult && (
-            <div className="mb-4 rounded-xl bg-green-50 p-4 text-sm font-semibold text-green-900">
+            <div className="mt-4 rounded-xl bg-green-50 p-4 text-sm font-semibold text-green-900">
               {lastSendResult}
             </div>
           )}
 
-          <div className="space-y-3">
+          <div className="mt-5 space-y-3">
             {visibleMatches.map((match) => (
               <MatchRow
                 key={match.id}
@@ -1151,37 +1094,6 @@ async function resetMatchScheduleRows(matchId) {
 
   return lineError || null;
 }
-function ManagementMatchRow({ match, deleting, onOpen, onEdit, onDelete }) {
-  return (
-    <div className="rounded-xl border border-slate-200 p-4 transition hover:border-blue-200 hover:bg-blue-50/40">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="min-w-0">
-          <div className="text-lg font-black text-slate-900">
-            {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
-          </div>
-          <div className="mt-1 text-base font-black text-slate-950">
-            {formatDisplayDate(match.scheduled_date, "Date not set")} at {formatDisplayTime(match.scheduled_time, "Time not set")}
-          </div>
-          <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm font-semibold text-slate-600">
-            <span>{match.leagues?.name || "No League"}</span>
-            <span>{match.divisions?.name || "No Division"}</span>
-            <span>{match.locations?.name || "No Location"}</span>
-            <span>Week {match.week_number || "-"}</span>
-          </div>
-        </div>
-
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <button type="button" onClick={onEdit} className="rounded-lg bg-blue-100 px-4 py-2.5 text-sm font-bold text-blue-900 hover:bg-blue-200">Edit</button>
-          <button type="button" onClick={onOpen} className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800">Open Match</button>
-          <button type="button" onClick={onDelete} disabled={deleting} className="rounded-lg bg-red-100 px-4 py-2.5 text-sm font-bold text-red-800 hover:bg-red-200 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400">
-            {deleting ? "Deleting..." : "Delete"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function FieldLabel({ label }) {
   return <label className="mb-1 block text-sm font-bold text-slate-700">{label}</label>;
 }
@@ -1267,16 +1179,23 @@ function MatchRow({ match, selected, membersById, onToggle, onOpen, onEdit, onDe
 }
 
 function compareScoringMatches(a, b) {
-  const dateCompare = String(b.scheduled_date || "").localeCompare(String(a.scheduled_date || ""));
+  const dateCompare = String(a.scheduled_date || "9999-12-31").localeCompare(String(b.scheduled_date || "9999-12-31"));
   if (dateCompare !== 0) return dateCompare;
 
-  const timeCompare = String(a.scheduled_time || "").localeCompare(String(b.scheduled_time || ""));
-  if (timeCompare !== 0) return timeCompare;
+  const leagueCompare = (a.leagues?.name || "").localeCompare(b.leagues?.name || "", undefined, { sensitivity: "base" });
+  if (leagueCompare !== 0) return leagueCompare;
 
-  const divisionCompare = (a.divisions?.name || "").localeCompare(b.divisions?.name || "");
+  const divisionCompare = (a.divisions?.name || "").localeCompare(b.divisions?.name || "", undefined, { sensitivity: "base" });
   if (divisionCompare !== 0) return divisionCompare;
 
-  return (a.home_team?.name || "").localeCompare(b.home_team?.name || "");
+  const homeTeamCompare = (a.home_team?.name || "").localeCompare(b.home_team?.name || "", undefined, { sensitivity: "base" });
+  if (homeTeamCompare !== 0) return homeTeamCompare;
+
+  return String(a.scheduled_time || "").localeCompare(String(b.scheduled_time || ""));
+}
+
+function hasCompletedGameScore(game) {
+  return game?.home_score !== null && game?.home_score !== undefined && game?.away_score !== null && game?.away_score !== undefined;
 }
 
 function dateSearchValues(value) {

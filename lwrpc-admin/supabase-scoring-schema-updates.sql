@@ -128,6 +128,16 @@ alter table public.seasons
 alter table public.divisions
   add column if not exists is_active boolean not null default true;
 
+alter table public.divisions
+  add column if not exists flex_league boolean not null default false;
+
+update public.divisions d
+set flex_league = true
+from public.leagues l
+where l.id = d.league_id
+  and l.flex_league = true
+  and d.flex_league = false;
+
 alter table public.teams
   add column if not exists is_active boolean not null default true;
 

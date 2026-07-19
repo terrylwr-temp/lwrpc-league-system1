@@ -742,17 +742,25 @@ export default function MembersPage() {
           subtitle="Search, review, edit, and manage club members."
         />
 
-        <div className="rounded-2xl bg-white p-6 shadow">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <h2 className="text-xl font-bold text-slate-900">
-              Member Search
-            </h2>
+        <div className="rounded-2xl bg-white p-4 shadow md:p-6">
+          <div className="mb-5">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Member Directory</div>
+                <h2 className="mt-1 text-xl font-black text-slate-950">Member Search</h2>
+              </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-2">
+              <div className="min-w-[5.5rem] rounded-xl bg-slate-900 px-4 py-2 text-right text-white">
+                <div className="text-[10px] font-bold uppercase tracking-wide text-slate-300">Members</div>
+                <div className="text-2xl font-black leading-none">{filteredMembers.length}</div>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center md:justify-end">
               <button
                 type="button"
                 onClick={() => setShowAddMember(true)}
-                className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800"
+                className="min-h-12 w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 md:w-auto"
               >
                 Add Member
               </button>
@@ -760,7 +768,7 @@ export default function MembersPage() {
               <button
                 type="button"
                 onClick={() => setShowCurrentRosterOnly((value) => !value)}
-                className={`rounded-xl px-4 py-3 font-semibold ${
+                className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
                   showCurrentRosterOnly
                     ? "bg-emerald-700 text-white hover:bg-emerald-800"
                     : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
@@ -772,7 +780,7 @@ export default function MembersPage() {
               <button
                 type="button"
                 onClick={() => setIncludeInactiveMembers((value) => !value)}
-                className={`rounded-xl px-4 py-3 font-semibold ${
+                className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
                   includeInactiveMembers
                     ? "bg-red-700 text-white hover:bg-red-800"
                     : "bg-red-100 text-red-900 hover:bg-red-200"
@@ -784,21 +792,15 @@ export default function MembersPage() {
               <button
                 type="button"
                 onClick={() => setShowMaintenance((value) => !value)}
-                className="rounded-xl bg-blue-100 px-4 py-3 font-semibold text-blue-800 hover:bg-blue-200"
+                className="min-h-12 w-full rounded-xl bg-blue-100 px-4 py-3 text-sm font-bold text-blue-800 hover:bg-blue-200 md:w-auto"
               >
                 {showMaintenance ? "Hide Tools" : "Data Tools"}
               </button>
 
-              <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-                <div className="text-xs uppercase tracking-wide text-slate-300">
-                  Members
-                </div>
-                <div className="text-2xl font-bold">{filteredMembers.length}</div>
-              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-[1fr_auto]">
+          <div className="grid grid-cols-1 gap-3 border-t border-slate-200 pt-5 md:grid-cols-[1fr_auto] md:gap-4">
             <div>
               <label className="mb-1 block text-sm font-semibold text-slate-700">
                 Search Members
@@ -819,7 +821,7 @@ export default function MembersPage() {
                   setSearch("");
                   setPage(1);
                 }}
-                className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300"
+                className="min-h-12 w-full rounded-xl bg-slate-200 px-5 py-3 font-bold text-slate-900 hover:bg-slate-300"
               >
                 Clear Search
               </button>
