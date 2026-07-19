@@ -2867,6 +2867,9 @@ export default function CaptainDashboardPage() {
               router.refresh();
             },
             onOpenMatch: setMatchDetails,
+            canShowFlexScheduleControl,
+            canManageFlexSchedule,
+            onOpenFlexSchedule: openFlexSchedule,
             onOpenScoreDetails: openScoreDetails,
             onOpenCaptainTools: () => router.push("/captain-dashboard"),
             onEmailOpposingCaptains: emailOpposingCaptains,
@@ -2981,6 +2984,18 @@ export default function CaptainDashboardPage() {
         )}
 
         {matchSetupModal}
+
+        <FlexScheduleDialog
+          match={flexScheduleMatch}
+          date={flexScheduleDate}
+          time={flexScheduleTime}
+          windowRange={flexScheduleMatch ? flexScheduleWindow(flexScheduleMatch) : null}
+          saving={savingFlexSchedule}
+          onDateChange={setFlexScheduleDate}
+          onTimeChange={setFlexScheduleTime}
+          onSave={saveFlexSchedule}
+          onClose={closeFlexSchedule}
+        />
 
       </>
     );
@@ -3476,6 +3491,56 @@ function rosterLockedMessage() {
     "Captains and co-captains cannot view or modify rosters while the league is locked.",
     "Please contact a League Manager or Commissioner for roster changes.",
   ].join("\n");
+}
+
+function FlexScheduleDialog({ match, date, time, windowRange, saving, onDateChange, onTimeChange, onSave, onClose }) {
+  if (!match || !windowRange) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true" aria-labelledby="flex-schedule-dialog-title">
+      <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="bg-slate-950 px-5 py-4 text-white">
+          <div className="text-xs font-black uppercase tracking-wide text-violet-200">Flex League Schedule</div>
+          <h2 id="flex-schedule-dialog-title" className="mt-1 text-2xl font-black">
+            {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+          </h2>
+          <div className="mt-2 text-sm font-semibold text-slate-200">
+            {match.leagues?.name || "League"} / {match.divisions?.name || "Division"}
+          </div>
+        </div>
+
+        <div className="space-y-4 p-5">
+          <div className="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-950">
+            Select a match date from {formatDate(windowRange.min)} through {formatDate(windowRange.max)}.
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <label>
+              <span className="mb-1 block text-sm font-bold text-slate-700">Match Date</span>
+              <input type="date" value={date} min={windowRange.min} max={windowRange.max} onChange={(event) => onDateChange(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" />
+            </label>
+            <label>
+              <span className="mb-1 block text-sm font-bold text-slate-700">Match Time</span>
+              <input type="time" value={time} onChange={(event) => onTimeChange(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" />
+            </label>
+          </div>
+
+          <div className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-700">
+            Opposing captains will be notified using their saved notification preferences.
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <button type="button" onClick={onSave} disabled={saving} className="rounded-xl bg-violet-700 px-4 py-3 text-sm font-bold text-white hover:bg-violet-800 disabled:cursor-not-allowed disabled:bg-slate-300">
+              {saving ? "Sending..." : "Save and Notify"}
+            </button>
+            <button type="button" onClick={onClose} disabled={saving} className="rounded-xl bg-slate-200 px-4 py-3 text-sm font-bold text-slate-900 hover:bg-slate-300 disabled:cursor-not-allowed disabled:opacity-60">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function PdfViewerModal({ document, onClose }) {

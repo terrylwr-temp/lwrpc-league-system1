@@ -84,6 +84,7 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - Schedule Settings grouping: group saved settings by league behind compact Show/Hide headers that include each league's schedule count; expanded schedule cards do not repeat the league field.
 - Dense admin lists: User Roles uses the compact count badge. Desktop Season Ratings contains wide tables within the white card and keeps DUPR Notes narrower; Locations omits empty Court Notes rows, and desktop Member Search has no divider gap beneath its action buttons.
 - Compact role count: the User Roles count is an intrinsic-width, single-line navy pill aligned to the end of its search grid column; it must not stretch to fill the grid cell.
+- Flex captain scheduling: the live Captain design exposes Modify Match Date/Time for eligible Flex Division matches in both the Next Match action row and each upcoming match's Match Tools dialog. Only home captains/co-captains can open the shared date/time editor; away captains see the disabled control.
 
 ## Rejected ideas
 
