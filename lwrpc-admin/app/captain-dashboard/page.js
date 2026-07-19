@@ -2912,8 +2912,8 @@ export default function CaptainDashboardPage() {
         )}
         {divisionScheduleTeam && (
           <TeamScheduleModal
-            title="Division Team Schedules/Standings"
-            subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} | ${divisionScheduleTeam.divisions?.name || "Division"}`}
+            title="Division Team Schedules"
+            subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} / ${divisionScheduleTeam.divisions?.name || "Division"}`}
             divisionOptions={activeDivisionOptions}
             selectedDivisionId={divisionScheduleTeam.divisions?.id || divisionScheduleTeam.division_id}
             onSelectDivision={selectDivisionScheduleDivision}

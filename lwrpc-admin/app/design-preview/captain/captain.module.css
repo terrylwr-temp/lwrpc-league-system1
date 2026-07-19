@@ -2,10 +2,10 @@
 .mobileTeamSelect { display: none; }
 .heroActions { display: flex; flex-wrap: wrap; align-items: center; gap: 9px; margin-top: 19px; }
 .heroActions :global(button) { margin-top: 0; }
-.secondaryHeroAction { border: 1px solid rgba(255,255,255,.55); border-radius: 9px; background: rgba(255,255,255,.1); padding: 10px 14px; color: #fff; font-size: 11px; font-weight: 900; transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
+.secondaryHeroAction { border: 1px solid rgba(255,255,255,.55); border-radius: 9px; background: rgba(255,255,255,.1); padding: 10px 14px; color: #fff; font-size: 14px; font-weight: 900; transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
 .secondaryHeroAction:hover { background: rgba(255,255,255,.2); box-shadow: 0 10px 20px rgba(4,23,59,.18); transform: translateY(-2px); }
 .dashboardGrid { display: grid; max-width: 1180px; margin: 0 auto; grid-template-columns: minmax(0,1.15fr) minmax(360px,1fr); gap: 14px; }
-.blueAction,.successAction,.dangerAction { min-height: 40px; border: 1px solid rgba(255,255,255,.28); border-radius: 9px; padding: 9px 12px; color: #fff; font-size: 10px; font-weight: 900; line-height: 1.2; box-shadow: 0 7px 15px rgba(4,23,59,.16); transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
+.blueAction,.successAction,.dangerAction { min-height: 44px; border: 1px solid rgba(255,255,255,.28); border-radius: 9px; padding: 9px 12px; color: #fff; font-size: 14px; font-weight: 900; line-height: 1.2; box-shadow: 0 7px 15px rgba(4,23,59,.16); transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
 .blueAction:not(:disabled):hover,.successAction:not(:disabled):hover,.dangerAction:not(:disabled):hover { box-shadow: 0 11px 22px rgba(4,23,59,.24); transform: translateY(-2px); }
 .blueAction { background: #0369a1; }
 .blueAction:hover { background: #075985; }
@@ -16,10 +16,10 @@
 .blueAction:disabled,.successAction:disabled,.dangerAction:disabled { cursor: not-allowed; border-color: rgba(255,255,255,.18); background: #94a3b8; opacity: .72; }
 .matchSetupPanel { display: grid; max-width: 1180px; margin: 14px auto 18px; grid-template-columns: minmax(180px,.8fr) minmax(280px,1.5fr) auto; align-items: center; gap: 14px; border: 1px solid #d7dee9; border-left: 5px solid #1558d5; border-radius: 15px; background: #fff; padding: 14px 16px; box-shadow: 0 8px 24px rgba(33,53,86,.045); }
 .matchSetupPanel > div:first-child { display: grid; gap: 4px; }
-.matchSetupPanel > div:first-child span { color: #69758a; font-size: 10px; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }
-.matchSetupPanel > div:first-child strong { color: #172f5d; font-size: 14px; line-height: 1.25; }
+.matchSetupPanel > div:first-child span { color: #69758a; font-size: 13px; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }
+.matchSetupPanel > div:first-child strong { color: #172f5d; font-size: 16px; line-height: 1.25; }
 .setupStatuses { display: flex; flex-wrap: wrap; gap: 7px 14px; }
-.setupStatuses > span { font-size: 11px; line-height: 1.35; }
+.setupStatuses > span { font-size: 14px; line-height: 1.35; }
 .setupStatuses b { font-weight: 650; }
 .setupStatuses strong { font-weight: 900; }
 .setupComplete { color: #047857; }
@@ -48,23 +48,23 @@
 .compactList > button:last-child,.matchRow:last-child { border-bottom: 0; }
 .compactList > button:hover,button.matchRow:hover { background: #f7faff; }
 .compactList > button > span { display: grid; min-width: 0; gap: 4px; }
-.compactList strong { overflow: hidden; color: #26334b; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.compactList small { color: #8490a3; font-size: 10px; }
-.compactList > button > b { flex: none; border-radius: 999px; background: var(--captain-green-soft); padding: 6px 9px; color: var(--captain-green); font-size: 10px; }
+.compactList strong { overflow: hidden; color: #26334b; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.compactList small { color: #8490a3; font-size: 12px; }
+.compactList > button > b { flex: none; border-radius: 999px; background: var(--captain-green-soft); padding: 6px 9px; color: var(--captain-green); font-size: 13px; }
 .matchRow { display: grid; width: 100%; grid-template-columns: 43px minmax(0,1fr) auto; align-items: center; gap: 12px; border: 0; border-bottom: 1px solid #edf1f6; background: transparent; padding: 11px 2px; color: inherit; text-align: left; }
 .matchRow time { display: grid; width: 41px; height: 44px; place-content: center; border: 1px solid #dfe7f2; border-radius: 9px; background: #f8faff; text-align: center; }
 .matchRow time b { color: #15356a; font-size: 16px; line-height: 1; }
 .matchRow time span { margin-top: 3px; color: #1a5dcc; font-size: 7px; font-weight: 900; letter-spacing: .08em; }
 .matchRow p { display: grid; min-width: 0; gap: 4px; margin: 0; }
-.matchRow p strong { overflow: hidden; color: #26334b; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.matchRow p span { color: #8490a3; font-size: 10px; }
-.matchRow > small { border-radius: 999px; background: #eef4ff; padding: 6px 9px; color: #245bb6; font-size: 9px; font-weight: 850; }
+.matchRow p strong { overflow: hidden; color: #26334b; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.matchRow p span { color: #8490a3; font-size: 12px; }
+.matchRow > small { border-radius: 999px; background: #eef4ff; padding: 6px 9px; color: #245bb6; font-size: 12px; font-weight: 850; }
 .matchSummaryButton { display: grid; min-width: 0; gap: 4px; border: 0; background: transparent; padding: 4px 0; text-align: left; }
-.matchSummaryButton strong { overflow: hidden; color: #26334b; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-.matchSummaryButton span { color: #8490a3; font-size: 10px; }
+.matchSummaryButton strong { overflow: hidden; color: #26334b; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.matchSummaryButton span { color: #8490a3; font-size: 12px; }
 .matchRowActions { display: grid; justify-items: end; gap: 5px; }
-.matchRowActions small { border-radius: 999px; background: #eef4ff; padding: 5px 8px; color: #245bb6; font-size: 9px; font-weight: 850; }
-.matchRowActions button { border: 1px solid #9ebae8; border-radius: 8px; background: #1558d5; padding: 7px 9px; color: #fff; font-size: 9px; font-weight: 900; transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
+.matchRowActions small { border-radius: 999px; background: #eef4ff; padding: 5px 8px; color: #245bb6; font-size: 12px; font-weight: 850; }
+.matchRowActions button { border: 1px solid #9ebae8; border-radius: 8px; background: #1558d5; padding: 8px 10px; color: #fff; font-size: 14px; font-weight: 900; transition: background .18s ease, box-shadow .18s ease, transform .18s ease; }
 .matchRowActions button:hover { background: #124bb4; box-shadow: 0 8px 16px rgba(21,88,213,.2); transform: translateY(-2px); }
 .matchToolsDialog { position: relative; width: min(100%, 920px); max-height: min(92dvh, 820px); overflow: hidden; border: 1px solid #dce4ef; border-radius: 22px; background: #fff; box-shadow: 0 30px 80px rgba(3,15,39,.38); }
 .matchToolsDialog > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; background: linear-gradient(120deg,#102e64,#1558d5); padding: 20px 22px; color: #fff; }
@@ -74,7 +74,7 @@
 .matchToolsDialog > header > button { display: grid; width: 34px; height: 34px; flex: none; place-items: center; border: 1px solid rgba(255,255,255,.3); border-radius: 50%; background: rgba(255,255,255,.12); color: #fff; font-size: 22px; }
 .matchToolsBody { max-height: calc(92dvh - 112px); overflow-y: auto; padding: 18px; }
 .matchToolsActions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
-.matchToolsActions button { width: 100%; min-height: 46px; justify-content: center; margin: 0; }
+.matchToolsActions button { width: 100%; min-height: 48px; justify-content: center; margin: 0; font-size: 14px; }
 .dialogMatchSetupPanel { margin: 16px 0 0; grid-template-columns: 1fr; }
 .dialogMatchSetupPanel .setupButtons { justify-content: flex-start; }
 .standings { display: grid; gap: 7px; padding-top: 13px; }
