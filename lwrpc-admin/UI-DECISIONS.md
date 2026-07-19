@@ -85,6 +85,7 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - Dense admin lists: User Roles uses the compact count badge. Desktop Season Ratings contains wide tables within the white card and keeps DUPR Notes narrower; Locations omits empty Court Notes rows, and desktop Member Search has no divider gap beneath its action buttons.
 - Compact role count: the User Roles count is an intrinsic-width, single-line navy pill aligned to the end of its search grid column; it must not stretch to fill the grid cell.
 - Flex captain scheduling: the live Captain design exposes Modify Match Date/Time for eligible Flex Division matches in both the Next Match action row and each upcoming match's Match Tools dialog. Only home captains/co-captains can open the shared date/time editor; away captains see the disabled control.
+- Player season rating: the Player Dashboard rating summary follows the currently selected team, using that team's season and division rating type. Rating queries stay scoped to members in the player's relevant team and match context so Data API row limits cannot omit the selected player's season rating.
 
 ## Rejected ideas
 

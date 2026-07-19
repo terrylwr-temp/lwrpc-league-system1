@@ -152,7 +152,7 @@ export default function PlayerDashboardPage() {
     const { data: memberRows, error: memberError } = await findMembersByEmail(
       supabase,
       user.email,
-      "id, first_name, last_name, email, is_active_member, profile_image_urls"
+      "id, first_name, last_name, email, is_active_member, self_rating, profile_image_urls"
     );
 
     if (memberError) {
@@ -618,13 +618,30 @@ export default function PlayerDashboardPage() {
         ].filter(Boolean)
       ),
     ];
+    const ratingMemberIds = [
+      ...new Set(
+        [
+          memberData.id,
+          ...Object.values(rostersByTeamId).flatMap((roster) =>
+            roster.map((rosterMember) => rosterMember?.id)
+          ),
+          ...historyData.flatMap((row) => [
+            row.home_player_1?.id,
+            row.home_player_2?.id,
+            row.away_player_1?.id,
+            row.away_player_2?.id,
+          ]),
+        ].filter(Boolean)
+      ),
+    ];
     let ratingRows = [];
 
-    if (seasonIds.length > 0) {
+    if (seasonIds.length > 0 && ratingMemberIds.length > 0) {
       const { data, error } = await supabase
         .from("member_season_ratings")
         .select("member_id, season_id, season_dupr_rating, season_primetime_rating")
-        .in("season_id", seasonIds);
+        .in("season_id", seasonIds)
+        .in("member_id", ratingMemberIds);
 
       if (error) {
         alert(error.message);
@@ -985,11 +1002,7 @@ export default function PlayerDashboardPage() {
     return record;
   }
 
-  function mySelectedTeamRatingSummary() {
-    const selectedTeam =
-      visibleTeams.find((team) => String(team.id) === String(selectedPlayerTeamId)) ||
-      visibleTeams[0];
-
+  function ratingSummaryForTeam(selectedTeam) {
     if (!selectedTeam) return null;
 
     const ratingType = selectedTeam.divisions?.rating_type || "dupr";
@@ -1338,7 +1351,7 @@ export default function PlayerDashboardPage() {
   }
 
   const playerDisplayName = formatMemberName(member) || "Player";
-  const playerTeamRatingSummary = mySelectedTeamRatingSummary();
+  const playerTeamRatingSummary = ratingSummaryForTeam(selectedVisibleTeam);
   const designPreviewDocumentTypes = currentRole === "player"
     ? PLAYER_LEAGUE_DOCUMENT_TYPES
     : LEAGUE_DOCUMENT_TYPES;
