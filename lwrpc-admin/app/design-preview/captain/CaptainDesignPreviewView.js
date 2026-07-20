@@ -15,6 +15,7 @@ const paths = {
   calendar: <><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4m8-4v4M3 10h18"/></>,
   trophy: <><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 6H4v1a4 4 0 0 0 4 4m8-5h4v1a4 4 0 0 1-4 4M12 13v4m-4 3h8"/></>,
   chart: <path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/>,
+  history: <><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></>,
   verify: <><path d="M12 3 5 6v5c0 5 3 8 7 10 4-2 7-5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></>,
   clipboard: <><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V2h6v2m-6 6h6m-6 4h6"/></>,
   document: <><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 13h6m-6 4h6"/></>,
@@ -25,6 +26,7 @@ const paths = {
   lock: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></>,
   external: <><path d="M14 4h6v6m0-6-9 9"/><path d="M18 13v6H5V6h6"/></>,
   logout: <><path d="M10 4H5v16h5m4-4 4-4-4-4m4 4H9"/></>,
+  menu: <path d="M4 7h16M4 12h16M4 17h16"/>,
 };
 
 function Icon({ name, size = 20 }) {
@@ -139,6 +141,7 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
   const currentYear = new Date().getFullYear();
   const [activeSection, setActiveSection] = useState("dashboard");
   const [expandedMenu, setExpandedMenu] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
@@ -155,6 +158,7 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
     function closeOnEscape(event) {
       if (event.key !== "Escape") return;
       setExpandedMenu("");
+      setMobileMenuOpen(false);
       setProfileOpen(false);
       setLogoutConfirmOpen(false);
       setStandingsOpen(false);
@@ -234,6 +238,7 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
             {navButton("team", "My Team", "team", teams.length > 1 ? teamName : "", () => teams.length > 1 ? setExpandedMenu((current) => current === "team" ? "" : "team") : goToSection("team"), teams.length > 1)}
             {expandedMenu === "team" && <div className={styles.submenu}>{teams.map((team) => <button type="button" className={String(team.id) === String(teamId) ? styles.submenuActive : ""} aria-current={String(team.id) === String(teamId) ? "true" : undefined} key={team.id} onClick={() => selectTeam(team)}><span>{team.name}</span></button>)}</div>}
           </div>
+          {navButton("history", "My Play History", "history", "", () => dashboard.onOpenHistory?.())}
           {navButton("actions", "Captain Tools", "clipboard", "", () => openNavigationSection("actions"))}
 
 
@@ -244,9 +249,38 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
         <p className={styles.sidebarCopyright}>&copy; {currentYear} Lakewood Ranch Pickleball Club</p>
       </aside>
 
+      {mobileMenuOpen && (
+        <div className={styles.mobileDrawerLayer} role="dialog" aria-modal="true" aria-labelledby="captain-mobile-navigation-title">
+          <button type="button" className={styles.mobileDrawerBackdrop} onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation menu"/>
+          <aside className={[styles.mobileDrawer, appearance.isLightSidebar ? styles.lightSidebar : ""].filter(Boolean).join(" ")} id="captain-mobile-navigation">
+            <div className={styles.mobileDrawerHeader}>
+              <a className={styles.brand} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer"><Image src="/lms-icon-192.png" width={42} height={42} alt="Lakewood Ranch Pickleball Club"/><strong id="captain-mobile-navigation-title">Lakewood Ranch Pickleball Club</strong></a>
+              <button type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation menu">&times;</button>
+            </div>
+            <nav className={styles.sideNav} aria-label="Mobile captain dashboard menu">
+              <div className={styles.navGroup}>
+                {navButton("dashboard", "Dashboard", "dashboard", "Captain", () => setExpandedMenu((current) => current === "dashboard" ? "" : "dashboard"), true)}
+                {expandedMenu === "dashboard" && <div className={styles.submenu}><button type="button" onClick={() => { setMobileMenuOpen(false); dashboard.onChangeDashboard?.("/player-dashboard"); }}><span>Player Dashboard</span></button><button type="button" className={styles.submenuActive} aria-current="page" onClick={() => { setMobileMenuOpen(false); goToSection("dashboard"); }}><span>Captain Dashboard</span></button>{canUseAdminDashboard && <button type="button" onClick={() => { setMobileMenuOpen(false); dashboard.onChangeDashboard?.("/"); }}><span>Admin Dashboard</span></button>}</div>}
+              </div>
+              <div className={styles.navGroup}>
+                {navButton("team", "My Team", "team", teams.length > 1 ? teamName : "", () => {
+                  if (teams.length > 1) setExpandedMenu((current) => current === "team" ? "" : "team");
+                  else { setMobileMenuOpen(false); goToSection("team"); }
+                }, teams.length > 1)}
+                {expandedMenu === "team" && <div className={styles.submenu}>{teams.map((team) => <button type="button" className={String(team.id) === String(teamId) ? styles.submenuActive : ""} aria-current={String(team.id) === String(teamId) ? "true" : undefined} key={team.id} onClick={() => { setMobileMenuOpen(false); selectTeam(team); }}><span>{team.name}</span></button>)}</div>}
+              </div>
+              {navButton("history", "My Play History", "history", "", () => { setMobileMenuOpen(false); setActiveSection("history"); dashboard.onOpenHistory?.(); })}
+              {navButton("actions", "Captain Tools", "clipboard", "", () => { setMobileMenuOpen(false); openNavigationSection("actions"); })}
+              <div className={styles.navGroup}>{navButton("documents", "League Documents", "document", leagueName, () => setExpandedMenu((current) => current === "documents" ? "" : "documents"), true)}{expandedMenu === "documents" && <div className={styles.submenu}>{documents.length ? documents.map((document) => <button type="button" key={document.key} onClick={() => { setMobileMenuOpen(false); dashboard.onOpenLeagueDocument?.(document); }}><span>{document.label}</span></button>) : <p>No documents are published for this league.</p>}</div>}</div>
+            </nav>
+            <div className={styles.season}><span>Selected season</span><strong>{seasonName}</strong><small>{leagueName}</small></div>
+          </aside>
+        </div>
+      )}
+
       <section className={styles.content}>
         <header className={styles.desktopHeader}><div><span>Captain dashboard</span><h1>Welcome, {member?.first_name || displayName(member).split(" ")[0]}</h1></div><div className={styles.headerActions}><button type="button" className={styles.helpButton} onClick={() => dashboard.onOpenGuide?.()} aria-label="Open User Guide"><Icon name="help"/></button><a className={styles.helpButton} href={`mailto:${dashboard.contactEmail || "info@lwrpickleballclub.com"}`} aria-label="Email League Management"><Icon name="mail"/></a><div className={styles.userIdentity}><strong>{displayName(member)}</strong><small>{roleLabel(role)}</small></div><button type="button" className={styles.profileButton} onClick={() => setProfileOpen(true)}><Avatar person={member}/></button></div></header>
-        <header className={styles.mobileHeader}><a className={styles.mobileLogo} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer"><Image src="/lms-icon-192.png" width={36} height={36} alt=""/></a><div className={styles.mobileTitle}><strong>Captain Dashboard</strong><span>{teamName}</span></div><div className={styles.mobileActions}><button type="button" onClick={() => dashboard.onOpenGuide?.()} aria-label="Open User Guide"><Icon name="help" size={18}/></button><button type="button" onClick={() => setProfileOpen(true)} aria-label="Open profile"><Avatar person={member}/></button></div></header>
+        <header className={styles.mobileHeader}><div className={styles.mobileLeading}><button type="button" className={styles.mobileMenuButton} onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={mobileMenuOpen} aria-controls="captain-mobile-navigation"><Icon name="menu" size={19}/></button><a className={styles.mobileLogo} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer"><Image src="/lms-icon-192.png" width={36} height={36} alt=""/></a></div><div className={styles.mobileTitle}><strong>Captain Dashboard</strong><span>{teamName}</span></div><div className={styles.mobileActions}><button type="button" onClick={() => dashboard.onOpenGuide?.()} aria-label="Open User Guide"><Icon name="help" size={18}/></button><button type="button" onClick={() => setProfileOpen(true)} aria-label="Open profile"><Avatar person={member}/></button></div></header>
         <label className={`${styles.mobileDashboardSelect} ${captainStyles.mobileDashboardSelect}`}><span>Dashboard view</span><select value="/captain-dashboard" onChange={(event) => dashboard.onChangeDashboard?.(event.target.value)}><option value="/player-dashboard">Player Dashboard</option><option value="/captain-dashboard">Captain Dashboard</option>{canUseAdminDashboard && <option value="/">Admin Dashboard</option>}</select></label>
         {teams.length > 1 && <label className={captainStyles.mobileTeamSelect}><span>Active team</span><select value={teamId || ""} onChange={(event) => { const team = teams.find((item) => String(item.id) === String(event.target.value)); if (team) selectTeam(team); }}>{teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}</select></label>}
 
@@ -336,7 +370,7 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
         <p className={styles.note}>Live Captain dashboard - current data, permissions, and operational tools</p><p className={styles.mobileCopyright}>&copy; {currentYear} Lakewood Ranch Pickleball Club</p>
       </section>
 
-      <nav className={styles.bottomNav} aria-label="Mobile captain navigation">{[["dashboard", "Dashboard", "dashboard"], ["actions", "Tools", "clipboard"], ["matches", "Matches", "calendar"], ["team", "Team", "team"]].map(([section, label, icon]) => <button type="button" className={activeSection === section ? styles.active : ""} key={section} onClick={() => section === "team" ? dashboard.onOpenRoster?.() : goToSection(section)}><Icon name={icon} size={20}/><span>{label}</span></button>)}</nav>
+      <nav className={styles.bottomNav} aria-label="Mobile captain navigation">{[["dashboard", "Dashboard", "dashboard"], ["actions", "Tools", "clipboard"], ["matches", "Matches", "calendar"], ["history", "Play History", "history"]].map(([section, label, icon]) => <button type="button" className={activeSection === section ? styles.active : ""} key={section} onClick={() => { if (section === "history") { setActiveSection("history"); dashboard.onOpenHistory?.(); return; } goToSection(section); }}><Icon name={icon} size={20}/><span>{label}</span></button>)}</nav>
 
       {profileOpen && <div className={styles.modalLayer} role="dialog" aria-modal="true"><button type="button" className={styles.backdrop} onClick={() => setProfileOpen(false)} aria-label="Close profile"/><section className={styles.profileDialog}><header><Avatar person={member}/><div><span>Signed-in profile</span><h2>{displayName(member)}</h2><p>{roleLabel(role)}{member?.email ? ` - ${member.email}` : ""}</p></div><button type="button" onClick={() => setProfileOpen(false)} aria-label="Close profile">X</button></header><div className={styles.profileActions}><button type="button" onClick={() => dashboard.onChangePassword?.()}><Icon name="lock"/><span><strong>Change Password</strong><small>Update the password for this account</small></span><Icon name="arrow" size={17}/></button><DashboardAppearanceControls isLightSidebar={appearance.isLightSidebar} isLightCardHeaders={appearance.isLightCardHeaders} onToggleSidebar={appearance.toggleSidebarTheme} onToggleCardHeaders={appearance.toggleCardHeaderTheme}/><a href={dashboard.membershipUrl || "https://lwrpickleballclub.com/manage-membership"} target="_blank" rel="noreferrer"><Icon name="external"/><span><strong>Club Membership</strong><small>Open the club membership website</small></span><Icon name="arrow" size={17}/></a><button type="button" onClick={() => dashboard.onChangeDashboard?.("/player-dashboard")}><Icon name="dashboard"/><span><strong>Player Dashboard</strong><small>Switch to your player view</small></span><Icon name="arrow" size={17}/></button><button type="button" className={styles.logoutAction} onClick={() => setLogoutConfirmOpen(true)}><Icon name="logout"/><span><strong>Log Out</strong><small>Log out of this browser or device only</small></span><Icon name="arrow" size={17}/></button></div><footer className={styles.profileMeta}><span>Version {APP_VERSION}</span><span>&copy; {currentYear} Lakewood Ranch Pickleball Club</span></footer></section></div>}
       {standingsOpen && <div className={styles.modalLayer} role="dialog" aria-modal="true" aria-labelledby="captain-standings-dialog-title"><button type="button" className={styles.backdrop} onClick={() => setStandingsOpen(false)} aria-label="Close standings"/><section className={styles.standingsDialog}><header><div><span>Division standings</span><div className={styles.standingsNames}><strong>{seasonName}</strong><strong>{leagueName}</strong><h2 id="captain-standings-dialog-title">{divisionName}</h2></div><p className={styles.standingsMetric}>{dashboard.standingsMetricLabel || "Standings Points"}</p></div><button type="button" onClick={() => setStandingsOpen(false)} aria-label="Close standings">&times;</button></header><div className={styles.standingsChart}>{playoffTeamCount > 0 && <p className={styles.playoffNote}>Top {playoffTeamCount} teams highlighted for Playoffs / Championship Day</p>}{leaders.length > 0 ? leaders.map((leader) => { const width = Math.max(7, Math.round((Number(leader.chartValue || 0) / standingsMaximum) * 100)); const selected = String(leader.teamId) === String(teamId); const playoffTeam = playoffTeamIds.has(String(leader.teamId || leader.id)); const rowClassName = [selected ? styles.selectedStanding : "", playoffTeam ? styles.playoffStanding : ""].filter(Boolean).join(" "); return <div className={rowClassName} key={leader.id}><strong>#{leader.rank} {leader.team}</strong><span><i style={{ width: `${width}%` }}/></span><b>{leader.chartValue}</b></div>; }) : <p className={styles.emptyMessage}>No standings have been published for this division.</p>}</div></section></div>}

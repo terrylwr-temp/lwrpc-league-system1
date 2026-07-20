@@ -139,6 +139,15 @@ export default function PlayerDashboardPage() {
   const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
   const [activeDivisionOptions, setActiveDivisionOptions] = useState([]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("open") !== "play-history") return;
+
+    setDesignPreviewHistoryOpen(true);
+    router.replace("/player-dashboard", { scroll: false });
+  }, [router]);
+
   const loadData = useCallback(async function loadData() {
     const {
       data: { user },

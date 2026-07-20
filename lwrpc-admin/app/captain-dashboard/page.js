@@ -2930,6 +2930,7 @@ export default function CaptainDashboardPage() {
             onOpenRoster: () =>
               selectedCaptainTeam &&
               openRosterModal(teamWithRoster(selectedCaptainTeam.id)),
+            onOpenHistory: () => router.push("/player-dashboard?open=play-history"),
             onOpenSchedule: () =>
               selectedCaptainTeam && openDivisionSchedule(selectedCaptainTeam),
             onOpenCaptains: () =>

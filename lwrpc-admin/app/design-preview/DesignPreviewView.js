@@ -27,6 +27,7 @@ const paths = {
   camera: <><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3"/></>,
   external: <><path d="M14 4h6v6m0-6-9 9"/><path d="M18 13v6H5V6h6"/></>,
   logout: <><path d="M10 4H5v16h5m4-4 4-4-4-4m4 4H9"/></>,
+  menu: <path d="M4 7h16M4 12h16M4 17h16"/>,
 };
 
 function Icon({ name, size = 20 }) {
@@ -155,6 +156,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
 
   const [activeSection, setActiveSection] = useState("dashboard");
   const [expandedMenu, setExpandedMenu] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
@@ -192,6 +194,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
       setLogoutConfirmOpen(false);
       setProfileOpen(false);
       setExpandedMenu("");
+      setMobileMenuOpen(false);
       setStandingsOpen(false);
     }
     window.addEventListener("keydown", closeOnEscape);
@@ -336,6 +339,45 @@ export default function DesignPreviewView({ dashboard = {} }) {
         <p className={styles.sidebarCopyright}>&copy; {currentYear} Lakewood Ranch Pickleball Club</p>
       </aside>
 
+      {mobileMenuOpen && (
+        <div className={styles.mobileDrawerLayer} role="dialog" aria-modal="true" aria-labelledby="player-mobile-navigation-title">
+          <button type="button" className={styles.mobileDrawerBackdrop} onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation menu"/>
+          <aside className={[styles.mobileDrawer, appearance.isLightSidebar ? styles.lightSidebar : ""].filter(Boolean).join(" ")} id="player-mobile-navigation">
+            <div className={styles.mobileDrawerHeader}>
+              <a className={styles.brand} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer">
+                <Image src="/lms-icon-192.png" width={42} height={42} alt="Lakewood Ranch Pickleball Club"/>
+                <strong id="player-mobile-navigation-title">Lakewood Ranch Pickleball Club</strong>
+              </a>
+              <button type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close navigation menu">&times;</button>
+            </div>
+            <nav className={styles.sideNav} aria-label="Mobile dashboard menu">
+              <div className={styles.navGroup}>
+                {navButton("dashboard", "Dashboard", "dashboard", canUseCaptainDashboard ? "Player" : "", () => {
+                  if (canUseCaptainDashboard) toggleExpandedMenu("dashboard");
+                  else { setMobileMenuOpen(false); scrollToSection("dashboard"); }
+                }, canUseCaptainDashboard)}
+                {expandedMenu === "dashboard" && <div className={styles.submenu}><button type="button" className={styles.submenuActive} aria-current="page" onClick={() => { setExpandedMenu(""); setMobileMenuOpen(false); scrollToSection("dashboard"); }}><span>Player Dashboard</span></button>{canUseCaptainDashboard && <button type="button" onClick={() => { setMobileMenuOpen(false); dashboard.onChangeDashboard?.("/captain-dashboard"); }}><span>Captain Dashboard</span></button>}{canUseAdminDashboard && <button type="button" onClick={() => { setMobileMenuOpen(false); dashboard.onChangeDashboard?.("/"); }}><span>Admin Dashboard</span></button>}</div>}
+              </div>
+              <div className={styles.navGroup}>
+                {navButton("team", "My Team", "team", hasMultipleTeams ? teamName : "", () => {
+                  if (hasMultipleTeams) toggleExpandedMenu("team");
+                  else { setMobileMenuOpen(false); scrollToSection("team"); }
+                }, hasMultipleTeams)}
+                {expandedMenu === "team" && <div className={styles.submenu}>{teams.map((team) => <button type="button" className={String(team.id) === String(teamId) ? styles.submenuActive : ""} aria-current={String(team.id) === String(teamId) ? "true" : undefined} key={team.id} onClick={() => { setMobileMenuOpen(false); selectTeam(team); }}><span>{team.name}</span></button>)}</div>}
+              </div>
+              {navButton("history", "My Play History", "history", "", () => { setMobileMenuOpen(false); setActiveSection("history"); dashboard.onOpenHistory?.(); })}
+              {navButton("schedule", "Division Schedule", "calendar", "", () => { setMobileMenuOpen(false); openNavigationSection("schedule"); })}
+              {navButton("standings", "Division Standings", "trophy", "", () => { setMobileMenuOpen(false); openNavigationSection("standings"); })}
+              <div className={styles.navGroup}>
+                {navButton("documents", "League Documents", "document", leagueName, () => toggleExpandedMenu("documents"), true)}
+                {expandedMenu === "documents" && <div className={styles.submenu}>{availableDocuments.length > 0 ? availableDocuments.map((document) => <button type="button" key={document.key} onClick={() => { setMobileMenuOpen(false); dashboard.onOpenLeagueDocument?.(document); }}><span>{document.label}</span></button>) : <p>No documents are published for this league.</p>}</div>}
+              </div>
+            </nav>
+            <div className={styles.season}><span>Selected season</span><strong>{seasonName}</strong><small>{leagueName}</small></div>
+          </aside>
+        </div>
+      )}
+
       <section className={styles.content}>
         <header className={styles.desktopHeader}>
           <div><span>Player dashboard</span><h1>Welcome, {firstName}</h1></div>
@@ -350,7 +392,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
         </header>
 
         <header className={styles.mobileHeader}>
-          <a className={styles.mobileLogo} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer" aria-label="Open Lakewood Ranch Pickleball Club website"><Image src="/lms-icon-192.png" width={36} height={36} alt=""/></a>
+          <div className={styles.mobileLeading}><button type="button" className={styles.mobileMenuButton} onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={mobileMenuOpen} aria-controls="player-mobile-navigation"><Icon name="menu" size={19}/></button><a className={styles.mobileLogo} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer" aria-label="Open Lakewood Ranch Pickleball Club website"><Image src="/lms-icon-192.png" width={36} height={36} alt=""/></a></div>
           <div className={styles.mobileTitle}><strong>Player Dashboard</strong><span>{teamName}</span></div>
           <div className={styles.mobileActions}><button type="button" onClick={() => dashboard.onOpenGuide?.()} aria-label="Open User Guide" title="User Guide"><Icon name="help" size={18}/></button><a href={`mailto:${dashboard.contactEmail || "info@lwrpickleballclub.com"}`} aria-label="Email League Management" title="Email League Management"><Icon name="mail" size={18}/></a><button type="button" onClick={() => setProfileOpen(true)} aria-label="Open profile"><Avatar person={member} initials={initialsFor(member)} imageUrl={displayedProfileImage} user/></button></div>
         </header>
@@ -469,7 +511,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
       </section>
 
       <nav className={styles.bottomNav} aria-label="Mobile dashboard navigation">
-        {[["dashboard", "Dashboard", "dashboard"], ["team", "My Team", "team"], ["schedule", "Schedule", "calendar"], ["standings", "Standings", "trophy"], ["results", "Results", "chart"]].map(([section, label, icon]) => <button type="button" className={activeSection === section ? styles.active : ""} key={section} onClick={() => openNavigationSection(section)}><Icon name={icon} size={20}/><span>{label}</span></button>)}
+        {[["dashboard", "Dashboard", "dashboard"], ["history", "Play History", "history"], ["schedule", "Schedule", "calendar"], ["standings", "Standings", "trophy"], ["results", "Results", "chart"]].map(([section, label, icon]) => <button type="button" className={activeSection === section ? styles.active : ""} key={section} onClick={() => { if (section === "history") { setActiveSection("history"); dashboard.onOpenHistory?.(); return; } openNavigationSection(section); }}><Icon name={icon} size={20}/><span>{label}</span></button>)}
       </nav>
 
       {standingsOpen && (
