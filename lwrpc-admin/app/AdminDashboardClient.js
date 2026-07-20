@@ -108,11 +108,11 @@ export default function DashboardPage() {
     const today = localDateValue(new Date());
     const { start, end } = currentWeekDateRange();
 
-    const [membersCount, leagueData, teamData] = await Promise.all([
+    const [membersCount, leagueData] = await Promise.all([
       countActiveMembers(),
       loadDashboardLeagues(today, dashboardFilter),
-      loadTeamsForDashboard(),
     ]);
+    const teamData = await loadTeamsForDashboard(leagueData);
 
     const scopedLeagueIds = leagueData.leagueIds;
     const scopedDivisionIds = leagueData.divisionIds;
@@ -2017,15 +2017,17 @@ async function loadDashboardLeagues(today, dashboardFilter) {
   };
 }
 
-async function loadTeamsForDashboard() {
-  const { data, error } = await supabase
+async function loadTeamsForDashboard(scopeData) {
+  if (!scopeData?.leagueIds?.length) return [];
+
+  let query = supabase
     .from("teams")
     .select(`
       id,
       name,
       division_id,
       is_active,
-      divisions (
+      divisions!inner (
         id,
         name,
         league_id,
@@ -2035,14 +2037,22 @@ async function loadTeamsForDashboard() {
           season_id
         )
       )
-    `);
+    `)
+    .in("divisions.league_id", scopeData.leagueIds)
+    .or("is_active.eq.true,is_active.is.null");
+
+  if (scopeData.divisionIds.length > 0) {
+    query = query.in("division_id", scopeData.divisionIds);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     console.error("Unable to load dashboard teams", error);
     return [];
   }
 
-  return (data || []).filter((team) => team.is_active !== false);
+  return data || [];
 }
 
 async function loadScopedMatchData(scopeData) {

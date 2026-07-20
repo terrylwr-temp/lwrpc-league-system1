@@ -30,8 +30,14 @@
 .pendingStat { border-color: #fecaca !important; background: #fff1f2 !important; }
 .pendingStat > div { background: #fee2e2 !important; color: #b91c1c !important; }
 .pendingStat strong,.pendingStat small { color: #b91c1c !important; }
+.pendingAlert { border-color: #fca5a5; background: #fff1f2; box-shadow: 0 10px 28px rgba(185,28,28,.12); }
 .pendingAlert > div:first-child { border-color: #b91c1c; background: linear-gradient(120deg,#b91c1c,#dc2626); }
 .pendingAlert > div:first-child span,.pendingAlert > div:first-child h3,.pendingAlert > div:first-child button { color: #fff; }
+.pendingAlert .compactList > button { border-color: #fecaca; }
+.pendingAlert .compactList > button:hover { background: #ffe4e6; }
+.pendingAlert .compactList strong { color: #7f1d1d; }
+.pendingAlert .compactList small { color: #9f1239; }
+.pendingAlert .compactList > button > b { background: #b91c1c; color: #fff; }
 .actionsCard,.matchesCard,.resultsCard { grid-column: 1; }
 .pendingCard,.standingsCard { grid-column: 2; }
 .pendingCard { grid-row: 1; }

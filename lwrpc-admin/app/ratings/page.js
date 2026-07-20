@@ -63,11 +63,7 @@ export default function RatingsPage() {
     }
 
     setRatingsLoading(true);
-
-    const { data, error } = await supabase
-      .from("member_season_ratings")
-      .select(RATING_SELECT)
-      .eq("season_id", seasonId);
+    const { rows, error } = await loadAllSeasonRatingRows(seasonId);
 
     if (error) {
       alert(error.message);
@@ -75,31 +71,24 @@ export default function RatingsPage() {
       return;
     }
 
-    setRatings(data || []);
+    setRatings(rows);
     setRatingsLoading(false);
   }, []);
 
   const loadAllRatings = useCallback(async function loadAllRatings() {
-    const { data, error } = await supabase
-      .from("member_season_ratings")
-      .select(RATING_SELECT);
+    const { rows, error } = await loadAllSeasonRatingRows();
 
     if (error) {
       alert(error.message);
       return;
     }
 
-    setAllRatings(data || []);
+    setAllRatings(rows);
   }, []);
-
   const loadInitialData = useCallback(async function loadInitialData() {
     setLoading(true);
 
-    const { data: memberData, error: memberError } = await supabase
-      .from("members")
-      .select("id, first_name, last_name, email, club_location, dupr_id, created_at, is_active_member")
-      .or("is_active_member.eq.true,is_active_member.is.null")
-      .order("last_name", { ascending: true });
+    const { rows: memberData, error: memberError } = await loadAllActiveRatingMembers();
 
     if (memberError) {
       alert(memberError.message);
@@ -1923,6 +1912,51 @@ function sortAria(field, memberSort) {
   return memberSort.direction === "asc" ? "ascending" : "descending";
 }
 
+async function loadAllActiveRatingMembers() {
+  const pageSize = 1000;
+  const rows = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from("members")
+      .select("id, first_name, last_name, email, club_location, dupr_id, created_at, is_active_member")
+      .or("is_active_member.eq.true,is_active_member.is.null")
+      .order("last_name", { ascending: true })
+      .order("first_name", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+    rows.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+
+  return { rows, error: null };
+}
+
+async function loadAllSeasonRatingRows(seasonId = "") {
+  const pageSize = 1000;
+  const rows = [];
+
+  for (let from = 0; ; from += pageSize) {
+    let query = supabase
+      .from("member_season_ratings")
+      .select(RATING_SELECT);
+
+    if (seasonId) query = query.eq("season_id", seasonId);
+
+    const { data, error } = await query
+      .order("member_id", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + pageSize - 1);
+    if (error) return { rows: [], error };
+
+    rows.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+
+  return { rows, error: null };
+}
 async function loadAllRatingRosterRows() {
   const pageSize = 1000;
   let from = 0;
@@ -2071,5 +2105,3 @@ function cleanedSeasonDuprRating(rawValue, highestMaxRating, reliabilityValue = 
 function truncateToTenth(value) {
   return Math.trunc(Number(value) * 10) / 10;
 }
-
-

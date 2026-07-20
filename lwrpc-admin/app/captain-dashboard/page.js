@@ -380,22 +380,6 @@ export default function CaptainDashboardPage() {
       ...new Set(captainTeams.map((team) => team.divisions?.leagues?.season_id).filter(Boolean)),
     ];
 
-    if (seasonIds.length > 0) {
-      const { data: ratingRows, error: ratingError } = await supabase
-        .from("member_season_ratings")
-        .select("member_id, season_id, season_dupr_rating, season_primetime_rating")
-        .in("season_id", seasonIds);
-
-      if (ratingError) {
-        alert(ratingError.message);
-        setLoading(false);
-        return;
-      }
-
-      setCaptainRatings(ratingRows || []);
-    } else {
-      setCaptainRatings([]);
-    }
 
     const { data: matchData, error: matchError } = await supabase
       .from("matches")
@@ -680,6 +664,33 @@ export default function CaptainDashboardPage() {
       alert(standingsError.message);
       setLoading(false);
       return;
+    }
+
+    const ratingMemberIds = [
+      ...new Set(
+        [
+          memberData.id,
+          ...(rosterRows || []).map((row) => row.members?.id),
+        ].filter(Boolean)
+      ),
+    ];
+
+    if (seasonIds.length > 0 && ratingMemberIds.length > 0) {
+      const { data: ratingRows, error: ratingError } = await supabase
+        .from("member_season_ratings")
+        .select("member_id, season_id, season_dupr_rating, season_primetime_rating")
+        .in("season_id", seasonIds)
+        .in("member_id", ratingMemberIds);
+
+      if (ratingError) {
+        alert(ratingError.message);
+        setLoading(false);
+        return;
+      }
+
+      setCaptainRatings(ratingRows || []);
+    } else {
+      setCaptainRatings([]);
     }
 
     const nextTeamStats = {};

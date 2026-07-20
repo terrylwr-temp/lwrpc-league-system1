@@ -1013,14 +1013,16 @@ export default function PlayerDashboardPage() {
           ? "My Self Rating"
           : "My Season DUPR";
 
+    const ratingValue = ratingForMember(
+      member?.id,
+      selectedTeam.divisions?.leagues?.season_id,
+      ratingType,
+      member
+    );
+
     return {
       label,
-      value: ratingForMember(
-        member?.id,
-        selectedTeam.divisions?.leagues?.season_id,
-        ratingType,
-        member
-      ),
+      value: ratingValue === "NR" ? "NR" : Number(ratingValue).toFixed(1),
     };
   }
 

@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { hasRole, roleLabel } from "../lib/permissions";
 import { APP_VERSION } from "../lib/version";
 import styles from "./page.module.css";
+import { DashboardAppearanceControls, useDashboardAppearance } from "./DashboardAppearanceControls";
 
 const paths = {
   dashboard: <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>,
@@ -155,6 +156,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
   const [showAllSchedule, setShowAllSchedule] = useState(false);
   const [showAllResults, setShowAllResults] = useState(false);
   const [standingsOpen, setStandingsOpen] = useState(false);
+  const appearance = useDashboardAppearance();
   const photoInputRef = useRef(null);
 
   const canUseCaptainDashboard = hasRole(role, "captain");
@@ -274,8 +276,8 @@ export default function DesignPreviewView({ dashboard = {} }) {
   );
 
   return (
-    <main className={`full-screen-main ${styles.page}`} id="preview-dashboard">
-      <aside className={styles.sidebar}>
+    <main className={["full-screen-main", styles.page, appearance.isLightCardHeaders ? styles.lightCardHeaders : ""].filter(Boolean).join(" ")} id="preview-dashboard">
+      <aside className={[styles.sidebar, appearance.isLightSidebar ? styles.lightSidebar : ""].filter(Boolean).join(" ")}>
         <a className={styles.brand} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer" title="Open the Lakewood Ranch Pickleball Club website">
           <Image src="/lms-icon-192.png" width={46} height={46} alt="Lakewood Ranch Pickleball Club" priority/>
           <strong>Lakewood Ranch Pickleball Club</strong>
@@ -456,6 +458,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
               <button type="button" onClick={() => dashboard.onChangePassword?.()}><Icon name="lock"/><span><strong>Change Password</strong><small>Update the password for this account</small></span><Icon name="arrow" size={17}/></button>
               <button type="button" onClick={() => photoInputRef.current?.click()} disabled={profileImageSaving}><Icon name="camera"/><span><strong>{profileImageSaving ? "Saving Picture..." : displayedProfileImage ? "Change Picture" : "Add Picture"}</strong><small>JPG, PNG, or WebP · maximum 2 MB</small></span><Icon name="arrow" size={17}/></button>
               <input ref={photoInputRef} className={styles.hiddenInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleProfileImage}/>
+              <DashboardAppearanceControls isLightSidebar={appearance.isLightSidebar} isLightCardHeaders={appearance.isLightCardHeaders} onToggleSidebar={appearance.toggleSidebarTheme} onToggleCardHeaders={appearance.toggleCardHeaderTheme}/>
               <a href={dashboard.membershipUrl || "https://lwrpickleballclub.com/manage-membership"} target="_blank" rel="noreferrer"><Icon name="external"/><span><strong>Club Membership</strong><small>Open the club membership website</small></span><Icon name="arrow" size={17}/></a>
               <button type="button" className={styles.logoutAction} onClick={() => setLogoutConfirmOpen(true)}><Icon name="logout"/><span><strong>Log Out</strong><small>Log out of this browser or device only</small></span><Icon name="arrow" size={17}/></button>
             </div>

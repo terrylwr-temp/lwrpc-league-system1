@@ -1,12 +1,11 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
-import { ROLE_LEVELS } from "../lib/permissions";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
@@ -32,9 +31,12 @@ export default function MembersPage() {
 
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState([]);
+  const [filteredMemberCount, setFilteredMemberCount] = useState(0);
+  const [totalMemberCount, setTotalMemberCount] = useState(0);
   const [clubLocations, setClubLocations] = useState([]);
   const [seasons, setSeasons] = useState([]);
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [sortConfig, setSortConfig] = useState({
     key: "member",
     direction: "asc",
@@ -73,33 +75,24 @@ export default function MembersPage() {
   );
 
   const loadMembers = useCallback(async function loadMembers() {
-    setLoading(true);
-
     const user = await requireRole(router, "league_manager");
     if (!user) return;
 
-    const [
-      { data, error },
-      { data: seasonData, error: seasonError },
-      { data: locationData, error: locationError },
-    ] = await Promise.all([
-      supabase
-        .from("members")
-        .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          phone,
-          club_location,
-          dupr_id,
-          is_active_member,
-          created_at,
-          user_roles (
-            role
-          )
-        `)
-        .order("last_name", { ascending: true }),
+    const params = new URLSearchParams({
+      mode: "members",
+      page: String(page),
+      pageSize: String(PAGE_SIZE),
+      search: deferredSearch.trim(),
+      includeInactive: String(includeInactiveMembers),
+      currentRosterOnly: String(showCurrentRosterOnly),
+      sort: sortConfig.key,
+      direction: sortConfig.direction,
+    });
+
+    const [response, seasonResult, locationResult] = await Promise.all([
+      fetch(`/api/admin/member-directory?${params.toString()}`, {
+        headers: await getRequestAuthorizationHeaders(),
+      }),
       supabase
         .from("seasons")
         .select("id, name, is_active, start_date")
@@ -110,86 +103,51 @@ export default function MembersPage() {
         .or("is_active.eq.true,is_active.is.null")
         .order("name", { ascending: true }),
     ]);
+    const result = await response.json().catch(() => ({}));
 
-    if (error) {
-      alert(error.message);
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to load members.");
       setLoading(false);
       return;
     }
 
-    if (seasonError) {
-      alert(seasonError.message);
+    if (seasonResult.error || locationResult.error) {
+      alert(seasonResult.error?.message || locationResult.error?.message);
       setLoading(false);
       return;
-    }
-
-    if (locationError) {
-      alert(locationError.message);
-      setLoading(false);
-      return;
-    }
-
-    const memberRows = data || [];
-    const memberIdSet = new Set(memberRows.map((member) => String(member.id)));
-    let teamsByMemberId = {};
-    let allTeamsByMemberId = {};
-
-    if (memberIdSet.size > 0) {
-      const { rows: teamRows, error: teamError } = await loadAllMemberTeamRows();
-
-      if (teamError) {
-        alert(teamError.message);
-        setLoading(false);
-        return;
-      }
-
-      teamsByMemberId = (teamRows || []).reduce((byMember, row) => {
-        if (!memberIdSet.has(String(row.member_id))) return byMember;
-        if (!allTeamsByMemberId[row.member_id]) allTeamsByMemberId[row.member_id] = [];
-        allTeamsByMemberId[row.member_id].push({
-          ...row.teams,
-          roster_role: memberTeamRole(row.member_id, row.teams),
-        });
-        if (!byMember[row.member_id]) byMember[row.member_id] = [];
-        if (row.teams?.is_active !== false) {
-          byMember[row.member_id].push({
-            ...row.teams,
-            roster_role: memberTeamRole(row.member_id, row.teams),
-          });
-        }
-        return byMember;
-      }, {});
-
-      teamsByMemberId = Object.fromEntries(
-        Object.entries(teamsByMemberId).map(([memberId, teams]) => [
-          memberId,
-          sortMemberTeams(teams),
-        ])
-      );
-      allTeamsByMemberId = Object.fromEntries(
-        Object.entries(allTeamsByMemberId).map(([memberId, teams]) => [
-          memberId,
-          sortMemberTeams(teams),
-        ])
-      );
     }
 
     setMembers(
-      memberRows.map((member) => ({
+      (result.rows || []).map((member) => ({
         ...member,
-        teams: teamsByMemberId[member.id] || [],
-        all_teams: allTeamsByMemberId[member.id] || teamsByMemberId[member.id] || [],
+        teams: sortMemberTeams(member.teams),
+        all_teams: sortMemberTeams(member.all_teams),
       }))
     );
-    setSeasons(seasonData || []);
-    setClubLocations(locationData || []);
+    setFilteredMemberCount(Number(result.filteredCount || 0));
+    setTotalMemberCount(Number(result.totalCount || 0));
+    setSeasons(seasonResult.data || []);
+    setClubLocations(locationResult.data || []);
     setLoading(false);
-  }, [router]);
-
+  }, [
+    deferredSearch,
+    includeInactiveMembers,
+    page,
+    router,
+    showCurrentRosterOnly,
+    sortConfig.direction,
+    sortConfig.key,
+  ]);
   async function cleanMembers() {
     if (cleaningMembers) return;
 
-    const updates = members
+    const { rows: memberRows, error: memberLoadError } = await loadAllExportMemberRows();
+    if (memberLoadError) {
+      alert(memberLoadError.message);
+      return;
+    }
+
+    const updates = memberRows
       .map((member) => {
         const cleanedPhone = formatPhoneNumberForStorage(member.phone);
         const currentPhone = String(member.phone || "").trim();
@@ -263,7 +221,13 @@ export default function MembersPage() {
   async function markAllMembersInactive() {
     if (markingAllInactive) return;
 
-    const activeMembers = members.filter((member) => member.is_active_member !== false);
+    const { rows: memberRows, error: memberLoadError } = await loadAllExportMemberRows();
+    if (memberLoadError) {
+      alert(memberLoadError.message);
+      return;
+    }
+
+    const activeMembers = memberRows.filter((member) => member.is_active_member !== false);
     const eligibleMembers = activeMembers.filter(
       (member) => member.is_active_member !== false && !memberHasInactiveProtectedRole(member)
     );
@@ -681,56 +645,12 @@ export default function MembersPage() {
     setPage(1);
   }, [includeInactiveMembers, search, showCurrentRosterOnly]);
 
-  const filteredMembers = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    const activeFilteredMembers = includeInactiveMembers
-      ? members
-      : members.filter((member) => member.is_active_member !== false);
-    const rosterFilteredMembers = showCurrentRosterOnly
-      ? activeFilteredMembers.filter((member) => (member.teams?.length || 0) > 0)
-      : activeFilteredMembers;
+  const totalPages = Math.max(1, Math.ceil(filteredMemberCount / PAGE_SIZE));
+  const pagedMembers = members;
 
-    if (!q) return rosterFilteredMembers;
-
-    return rosterFilteredMembers.filter((member) => {
-      const fullName = `${member.first_name || ""} ${member.last_name || ""}`;
-      const reverseName = `${member.last_name || ""} ${member.first_name || ""}`;
-      const role = getMemberRole(member);
-
-      return (
-        fullName.toLowerCase().includes(q) ||
-        reverseName.toLowerCase().includes(q) ||
-        (member.email || "").toLowerCase().includes(q) ||
-        (member.phone || "").toLowerCase().includes(q) ||
-        (member.club_location || "").toLowerCase().includes(q) ||
-        (member.dupr_id || "").toLowerCase().includes(q) ||
-        role.toLowerCase().includes(q)
-      );
-    });
-  }, [getMemberRole, includeInactiveMembers, members, search, showCurrentRosterOnly]);
-
-  const sortedMembers = useMemo(() => {
-    const direction = sortConfig.direction === "desc" ? -1 : 1;
-
-    return [...filteredMembers].sort((a, b) => {
-      const result = compareSortValues(
-        memberSortValue(a, sortConfig.key),
-        memberSortValue(b, sortConfig.key)
-      );
-
-      if (result !== 0) return result * direction;
-
-      return compareSortValues(memberSortValue(a, "member"), memberSortValue(b, "member"));
-    });
-  }, [filteredMembers, sortConfig]);
-
-  const totalPages = Math.max(1, Math.ceil(sortedMembers.length / PAGE_SIZE));
-
-  const pagedMembers = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return sortedMembers.slice(start, start + PAGE_SIZE);
-  }, [page, sortedMembers]);
-
+  useEffect(() => {
+    if (page > totalPages) setPage(totalPages);
+  }, [page, totalPages]);
   if (loading) {
     return <LoadingScreen subtitle="Loading Members..." />;
   }
@@ -751,7 +671,7 @@ export default function MembersPage() {
                 <h2 className="mt-1 text-xl font-black text-slate-950">Member Search</h2>
               </div>
 
-              <ListingCount label="Members" shown={filteredMembers.length} total={members.length} />
+              <ListingCount label="Members" shown={filteredMemberCount} total={totalMemberCount} />
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center md:justify-end">
@@ -893,17 +813,17 @@ export default function MembersPage() {
             <div className="text-sm text-slate-600">
               Showing{" "}
               <span className="font-semibold text-slate-900">
-                {filteredMembers.length === 0
+                {filteredMemberCount === 0
                   ? 0
                   : (page - 1) * PAGE_SIZE + 1}
               </span>{" "}
               to{" "}
               <span className="font-semibold text-slate-900">
-                {Math.min(page * PAGE_SIZE, filteredMembers.length)}
+                {Math.min(page * PAGE_SIZE, filteredMemberCount)}
               </span>{" "}
               of{" "}
               <span className="font-semibold text-slate-900">
-                {filteredMembers.length}
+                {filteredMemberCount}
               </span>{" "}
               members
             </div>
@@ -1577,45 +1497,6 @@ function SortHeader({ active, direction, label, onClick }) {
 function sortAria(key, sortConfig) {
   if (sortConfig.key !== key) return "none";
   return sortConfig.direction === "asc" ? "ascending" : "descending";
-}
-
-function memberSortValue(member, key) {
-  if (key === "location") {
-    return member.club_location || "";
-  }
-
-  if (key === "phone") {
-    return formatPhoneNumberForStorage(member.phone) || "";
-  }
-
-  if (key === "dupr_id") {
-    return member.dupr_id || "";
-  }
-
-  if (key === "status") {
-    return member.is_active_member === false ? "Inactive" : "Active";
-  }
-
-  if (key === "role") {
-    return ROLE_LEVELS[memberRole(member)] || 0;
-  }
-
-  if (key === "actions") {
-    return member.teams?.length || 0;
-  }
-
-  return `${member.last_name || ""} ${member.first_name || ""} ${member.email || ""}`;
-}
-
-function compareSortValues(aValue, bValue) {
-  if (typeof aValue === "number" && typeof bValue === "number") {
-    return aValue - bValue;
-  }
-
-  return String(aValue || "").localeCompare(String(bValue || ""), undefined, {
-    numeric: true,
-    sensitivity: "base",
-  });
 }
 
 function memberHasInactiveProtectedRole(member) {

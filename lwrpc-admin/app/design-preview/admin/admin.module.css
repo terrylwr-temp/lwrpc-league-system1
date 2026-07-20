@@ -86,3 +86,38 @@
     font-size: 12px;
   }
 }
+
+/* Match the darker content-card header treatment used by Player and Captain. */
+.tools > header {
+  border-bottom-color: #274f78;
+  background: linear-gradient(125deg, #203e63 0%, #2d5d87 100%);
+  color: #fff;
+}
+
+.tools > header > div > span {
+  color: #c9d9ea;
+}
+
+.tools > header p {
+  color: #d9e5f1;
+}
+
+.tools > header > strong {
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+}
+
+.lightCardHeaders .snapshot > header,
+.lightCardHeaders .tools > header {
+  border-bottom-color: #c7d3df;
+  background: linear-gradient(125deg, #edf1f5 0%, #dce5ee 100%);
+  color: #17345b;
+}
+
+.lightCardHeaders .snapshot > header > div > span,
+.lightCardHeaders .tools > header > div > span { color: #66788d; }
+.lightCardHeaders .snapshot > header p,
+.lightCardHeaders .tools > header p { color: #5f7085; }
+.lightCardHeaders .tools > header > strong { background: rgba(255, 255, 255, .72); color: #245d91; }
+.lightCardHeaders .snapshot > header label span { color: #536a83; }
+.lightCardHeaders .snapshot > header select { border-color: #aebdcd; background: rgba(255, 255, 255, .78); color: #17345b; }

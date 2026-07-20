@@ -1,14 +1,13 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
-import { requireRole, supabase } from "../lib/auth";
-import { ROLE_LEVELS, roleLabel } from "../lib/permissions";
-import { wouldRemoveLastCommissioner } from "../lib/roleGuards";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
+import { roleLabel } from "../lib/permissions";
 import { normalizeEmailAddress } from "../lib/email";
 import { formatDisplayTimestamp } from "../lib/dateTime";
 
@@ -19,10 +18,13 @@ export default function UsersPage() {
   const [loading, setLoading] = useState(true);
 
   const [members, setMembers] = useState([]);
+  const [filteredMemberCount, setFilteredMemberCount] = useState(0);
+  const [totalMemberCount, setTotalMemberCount] = useState(0);
   const [roles, setRoles] = useState([]);
   const [lastLoginsByEmail, setLastLoginsByEmail] = useState({});
 
   const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
   const [sortConfig, setSortConfig] = useState({
     key: "member",
     direction: "asc",
@@ -36,44 +38,45 @@ export default function UsersPage() {
   }, [router]);
 
   const loadData = useCallback(async function loadData() {
-    const { data: memberData, error: memberError } = await loadAllRoleMembers();
+    const params = new URLSearchParams({
+      mode: "roles",
+      page: String(page),
+      pageSize: String(PAGE_SIZE),
+      search: deferredSearch.trim(),
+      sort: ["role", "change_role"].includes(sortConfig.key) ? "role" : sortConfig.key,
+      direction: sortConfig.direction,
+    });
+    const response = await fetch(`/api/admin/member-directory?${params.toString()}`, {
+      headers: await getRequestAuthorizationHeaders(),
+    });
+    const result = await response.json().catch(() => ({}));
 
-    if (memberError) {
-      alert(memberError.message);
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to load user roles.");
+      setLoading(false);
       return;
     }
 
-    const { data: roleData, error: roleError } = await supabase
-      .from("user_roles")
-      .select("*");
-
-    if (roleError) {
-      alert(roleError.message);
-      return;
-    }
-
-    setMembers(memberData || []);
-    setRoles(roleData || []);
-
-    const { data: sessionData } = await supabase.auth.getSession();
-    const accessToken = sessionData?.session?.access_token;
-
-    if (accessToken) {
-      const response = await fetch("/api/user-last-logins", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-      const result = await response.json().catch(() => ({}));
-
-      if (response.ok && result.success) {
-        setLastLoginsByEmail(result.lastLoginsByEmail || {});
-      }
-    }
-
+    const memberRows = result.rows || [];
+    setMembers(memberRows);
+    setRoles(
+      memberRows.flatMap((member) =>
+        (member.user_roles || []).map((role) => ({
+          ...role,
+          member_id: member.id,
+        }))
+      )
+    );
+    setLastLoginsByEmail(result.lastLoginsByEmail || {});
+    setFilteredMemberCount(Number(result.filteredCount || 0));
+    setTotalMemberCount(Number(result.totalCount || 0));
     setLoading(false);
-  }, []);
-
+  }, [
+    deferredSearch,
+    page,
+    sortConfig.direction,
+    sortConfig.key,
+  ]);
   function getRole(memberId) {
     const role = roles.find(
       r => r.member_id === memberId
@@ -96,9 +99,21 @@ export default function UsersPage() {
     );
     const currentRole = existing?.role || "player";
 
-    if (wouldRemoveLastCommissioner(roles, currentRole, newRole, existing?.id)) {
-      alert("At least one Commissioner must remain in the system. Assign another Commissioner before changing this role.");
-      return;
+    if (currentRole === "commissioner" && newRole !== "commissioner") {
+      const { count, error: countError } = await supabase
+        .from("user_roles")
+        .select("id", { count: "exact", head: true })
+        .eq("role", "commissioner");
+
+      if (countError) {
+        alert(countError.message);
+        return;
+      }
+
+      if ((count || 0) <= 1) {
+        alert("At least one Commissioner must remain in the system. Assign another Commissioner before changing this role.");
+        return;
+      }
     }
 
     if (existing) {
@@ -144,43 +159,8 @@ const { error } = await supabase
     run();
   }, [checkAuth, loadData]);
 
-  const filteredMembers = useMemo(() => {
-    return members.filter(member => {
-      const text = `
-        ${member.first_name || ""}
-        ${member.last_name || ""}
-        ${member.email || ""}
-        ${member.club_location || ""}
-      `.toLowerCase();
-
-      return text.includes(
-        search.toLowerCase()
-      );
-    });
-  }, [members, search]);
-
-  const sortedMembers = useMemo(() => {
-    const direction = sortConfig.direction === "desc" ? -1 : 1;
-
-    return [...filteredMembers].sort((a, b) => {
-      const aValue = userSortValue(a, sortConfig.key, roles, lastLoginsByEmail);
-      const bValue = userSortValue(b, sortConfig.key, roles, lastLoginsByEmail);
-      const aMissing = aValue === null || aValue === undefined || aValue === "";
-      const bMissing = bValue === null || bValue === undefined || bValue === "";
-
-      if (sortConfig.key === "last_login" && aMissing !== bMissing) {
-        return aMissing ? 1 : -1;
-      }
-
-      return compareSortValues(aValue, bValue) * direction;
-    });
-  }, [filteredMembers, lastLoginsByEmail, roles, sortConfig]);
-
-  const totalPages = Math.max(1, Math.ceil(sortedMembers.length / PAGE_SIZE));
-  const pagedMembers = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return sortedMembers.slice(start, start + PAGE_SIZE);
-  }, [page, sortedMembers]);
+  const totalPages = Math.max(1, Math.ceil(filteredMemberCount / PAGE_SIZE));
+  const pagedMembers = members;
 
   useEffect(() => {
     setPage(1);
@@ -189,7 +169,6 @@ const { error } = await supabase
   useEffect(() => {
     if (page > totalPages) setPage(totalPages);
   }, [page, totalPages]);
-
   function goToPage(value) {
     const requestedPage = Number(value);
     if (!requestedPage || requestedPage < 1) return setPage(1);
@@ -229,7 +208,7 @@ if (loading) {
 
             </div>
 
-            <ListingCount compact className="self-end justify-self-end" label="Members" shown={filteredMembers.length} total={members.length} />
+            <ListingCount compact className="self-end justify-self-end" label="Members" shown={filteredMemberCount} total={totalMemberCount} />
 
           </div>
 
@@ -240,7 +219,7 @@ if (loading) {
           <UserPaginationBar
             page={page}
             totalPages={totalPages}
-            totalRows={sortedMembers.length}
+            totalRows={filteredMemberCount}
             setPage={setPage}
             goToPage={goToPage}
           />
@@ -271,13 +250,8 @@ if (loading) {
                   />
                 </th>
 
-                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("last_login", sortConfig)}>
-                  <SortHeader
-                    active={sortConfig.key === "last_login"}
-                    direction={sortConfig.direction}
-                    label="Last Login"
-                    onClick={() => changeSort("last_login")}
-                  />
+                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left">
+                  Last Login
                 </th>
 
                 <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("role", sortConfig)}>
@@ -417,7 +391,7 @@ if (loading) {
           <UserPaginationBar
             page={page}
             totalPages={totalPages}
-            totalRows={sortedMembers.length}
+            totalRows={filteredMemberCount}
             setPage={setPage}
             goToPage={goToPage}
             position="bottom"
@@ -432,28 +406,6 @@ if (loading) {
       </div>
     </main>
   );
-}
-
-async function loadAllRoleMembers() {
-  const batchSize = 1000;
-  const rows = [];
-
-  for (let from = 0; ; from += batchSize) {
-    const { data, error } = await supabase
-      .from("members")
-      .select("id, first_name, last_name, email, club_location")
-      .order("last_name", { ascending: true })
-      .order("first_name", { ascending: true })
-      .order("id", { ascending: true })
-      .range(from, from + batchSize - 1);
-
-    if (error) return { data: [], error };
-
-    rows.push(...(data || []));
-    if (!data || data.length < batchSize) break;
-  }
-
-  return { data: rows, error: null };
 }
 
 function SortHeader({ active, direction, label, onClick }) {
@@ -522,40 +474,4 @@ function UserPaginationBar({ page, totalPages, totalRows, setPage, goToPage, pos
 function sortAria(key, sortConfig) {
   if (sortConfig.key !== key) return "none";
   return sortConfig.direction === "asc" ? "ascending" : "descending";
-}
-
-function userSortValue(member, key, roles, lastLoginsByEmail) {
-  const role = roleForMemberId(roles, member.id);
-
-  if (key === "location") {
-    return member.club_location || "";
-  }
-
-  if (key === "last_login") {
-    const rawValue = lastLoginsByEmail[normalizeEmailAddress(member.email)];
-    const timestamp = rawValue ? Date.parse(rawValue) : null;
-    return Number.isNaN(timestamp) ? null : timestamp;
-  }
-
-  if (key === "role" || key === "change_role") {
-    return ROLE_LEVELS[role] || 0;
-  }
-
-  return `${member.last_name || ""} ${member.first_name || ""} ${member.email || ""}`;
-}
-
-function roleForMemberId(roles, memberId) {
-  const role = (roles || []).find((row) => row.member_id === memberId);
-  return role?.role || "player";
-}
-
-function compareSortValues(aValue, bValue) {
-  if (typeof aValue === "number" && typeof bValue === "number") {
-    return aValue - bValue;
-  }
-
-  return String(aValue || "").localeCompare(String(bValue || ""), undefined, {
-    numeric: true,
-    sensitivity: "base",
-  });
 }

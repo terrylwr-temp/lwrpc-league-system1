@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -227,23 +227,7 @@ export default function TeamsPage() {
       .select("id, name")
       .order("name", { ascending: true });
 
-    const { data: memberData, error: memberError } = await supabase
-      .from("members")
-      .select(`
-        id,
-        full_name,
-        first_name,
-        last_name,
-        email,
-        self_rating,
-        dupr_id,
-        is_active_member,
-        location_id,
-        club_location
-      `)
-      .or("is_active_member.eq.true,is_active_member.is.null")
-      .order("last_name", { ascending: true })
-      .range(0, 2500);
+    const { rows: memberData, error: memberError } = await loadAllTeamMemberOptions();
 
     if (memberError) {
       alert(memberError.message);
@@ -1826,6 +1810,38 @@ function CopyDivisionTeamsModal({
   );
 }
 
+async function loadAllTeamMemberOptions() {
+  const pageSize = 1000;
+  const rows = [];
+
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from("members")
+      .select(`
+        id,
+        full_name,
+        first_name,
+        last_name,
+        email,
+        self_rating,
+        dupr_id,
+        is_active_member,
+        location_id,
+        club_location
+      `)
+      .or("is_active_member.eq.true,is_active_member.is.null")
+      .order("last_name", { ascending: true })
+      .order("first_name", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (error) return { rows: [], error };
+    rows.push(...(data || []));
+    if (!data || data.length < pageSize) break;
+  }
+
+  return { rows, error: null };
+}
 async function loadAllRosterRows() {
   const pageSize = 1000;
   let from = 0;
@@ -1962,4 +1978,3 @@ function confirmTypedInactivateAction({ title, details }) {
   const typed = prompt("Type INACTIVATE to confirm.");
   return String(typed || "").trim() === "INACTIVATE";
 }
-
