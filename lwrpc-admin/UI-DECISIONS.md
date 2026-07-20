@@ -89,6 +89,7 @@ Keep this file short. Update it whenever a Design Preview choice is approved, re
 - Dashboard card headers: Player and Captain content cards and Admin tool sections use a medium-deep slate/navy header band for clean visual separation. When Captain Pending Match Verifications is greater than zero, its summary tile and detail card use a red alert treatment, with a strong red Action Needed header.
 - Dashboard appearance: immediately after Change Picture, the Profile popup shows a collapsed Dashboard Appearance header that expands/collapses on click to reveal independent Sidebar Menu and Card Headers toggles. Each persists in the current browser across Player, Captain, and Admin dashboards and does not override the Captain red pending-verification alert.
 - Player season rating display: show the Player Dashboard Season Rating to one decimal place (for example, `4.0`) while preserving two-decimal precision in match-lineup details.
+- Captain dashboard list expansion: Upcoming Matches & Byes shows four items initially and exposes Show More / Show Less when additional items exist. Recent Results retains the same control when more than three completed matches exist.
 
 ## Rejected ideas
 
