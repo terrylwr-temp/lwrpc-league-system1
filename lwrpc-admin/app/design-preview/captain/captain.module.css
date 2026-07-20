@@ -96,7 +96,7 @@ button.matchRow:focus-visible { outline: 3px solid rgba(21,88,213,.24); outline-
 .standings > div.playoffStanding strong { color: #166149; }
 .standings > div.playoffStanding i { background: #15936d; }
 .standings > p { grid-column: 1 / -1; }
-.standings strong { overflow: hidden; color: #3a465a; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.standings strong { overflow: hidden; color: #3a465a; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .standings > div > span { height: 9px; overflow: hidden; border-radius: 999px; background: #edf1f6; }
 .standings i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#1558d5,#4382e9); }
 .standings > div > b { color: #174ea6; font-size: 10px; text-align: right; }
