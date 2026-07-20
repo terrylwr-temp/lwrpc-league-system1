@@ -432,9 +432,12 @@
 .resultAudit { display: grid; gap: 2px; margin-top: 2px; }
 .resultAudit small { color: #5f6c7f; font-size: 11px; line-height: 1.35; }
 .resultAudit b { color: #26334b; }
-.resultScore { display: flex; align-items: center; gap: 4px; }
-.resultScore > span { display: grid; min-width: 52px; justify-items: center; gap: 1px; border: 1px solid rgba(38,51,75,.12); border-radius: 8px; background: rgba(255,255,255,.72); padding: 4px 7px; }
+.resultScore { display: flex; align-items: center; gap: 5px; }
+.resultScore > span { display: grid; width: 82px; min-width: 0; justify-items: center; gap: 3px; border: 1px solid rgba(38,51,75,.12); border-radius: 9px; background: rgba(255,255,255,.72); padding: 7px 8px; }
+.resultScore > .yourTeamScore { border-color: #5b8ddd; background: #fff; box-shadow: 0 0 0 2px rgba(21,88,213,.1), 0 4px 10px rgba(33,83,170,.08); }
+.resultScore > .opponentScore { color: #4a5669; }
 .resultScore small { color: #6f7b8e; font-size: 8px; font-weight: 900; letter-spacing: .09em; line-height: 1; text-transform: uppercase; }
+.resultScore .yourTeamScore small { color: #1558d5; }
 .resultScore strong { font-size: 23px; font-weight: 950; line-height: 1; letter-spacing: -.04em; }
 .resultScore i { color: #8290a3; font-size: 16px; font-style: normal; font-weight: 900; }
 .winScore, .lossScore, .tieScore, .pendingScore { letter-spacing: -.03em; }
@@ -590,10 +593,13 @@
   .mobileTeamSelect span { color: #65738a; font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
   .mobileTeamSelect select { width: 100%; min-height: 44px; border: 1px solid #c6d4e7; border-radius: 9px; background: #f8faff; padding: 8px 10px; color: #18345f; font-size: 12px; font-weight: 850; }
   .results { padding-inline: 14px; }
-  .resultRow { grid-template-columns: 27px minmax(0, 1fr) auto 14px; gap: 8px; }
+  .resultRow { grid-template-columns: 27px minmax(0, 1fr) 14px; align-items: start; gap: 8px; }
+  .resultRow > b:first-child { margin-top: 4px; }
   .resultSummary strong { font-size: 13px; }
-  .resultScore > span { min-width: 44px; padding-inline: 5px; }
-  .resultScore strong { font-size: 20px; }
+  .resultScore { display: grid; grid-column: 2 / 4; grid-row: 2; width: 100%; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 6px; }
+  .resultScore > span { width: 100%; min-height: 50px; padding: 7px 8px; }
+  .resultScore strong { font-size: 22px; }
+  .resultRow > svg { grid-column: 3; grid-row: 1; align-self: center; }
   .note { margin-top: 14px; font-size: 7px; }
   .mobileCopyright { display: block; margin: 12px 0 0; color: #7f8a9c; font-size: 10px; line-height: 1.4; text-align: center; }
 

@@ -423,6 +423,8 @@ export default function DesignPreviewView({ dashboard = {} }) {
               const isHome = String(match.home_team_id) === String(teamId);
               const selectedScore = isHome ? match.home_score : match.away_score;
               const opponentScore = isHome ? match.away_score : match.home_score;
+              const selectedTeamName = (isHome ? match.home_team?.name : match.away_team?.name) || teamName;
+              const opponentTeamName = (isHome ? match.away_team?.name : match.home_team?.name) || "Opponent";
               const verified = match.score_status === "verified";
               const won = verified && String(match.winning_team_id || "") === String(teamId);
               const tied = verified && !match.winning_team_id && Number(selectedScore) === Number(opponentScore);
@@ -430,7 +432,34 @@ export default function DesignPreviewView({ dashboard = {} }) {
               const tone = !verified ? "pending" : tied ? "tie" : won ? "win" : "loss";
               const rowTone = !verified ? styles.pendingRow : tied ? styles.tieRow : won ? styles.winRow : styles.lossRow;
               const scoreStatus = resultScoreStatusLabel(match);
-              return <button type="button" className={[styles.resultRow, rowTone].join(" ")} key={match.id} onClick={() => dashboard.onOpenMatch?.(match)} aria-label={`Open score details for ${match.home_team?.name || "Home"} versus ${match.away_team?.name || "Away"}`}><b className={styles[tone]}>{mark}</b><span className={styles.resultSummary}><strong>{match.home_team?.name || "Home"} <span>vs</span> {match.away_team?.name || "Away"}</strong><small>{shortDate(match.scheduled_date).label} - {isHome ? "Home" : "Away"}</small>{scoreStatus && <span className={styles.resultStatus}>{scoreStatus}</span>}</span><span className={[styles.resultScore, styles[`${tone}Score`]].join(" ")} aria-label={`Home score ${match.home_score ?? "not available"}, away score ${match.away_score ?? "not available"}`}><span><small>Home</small><strong>{match.home_score ?? "-"}</strong></span><i aria-hidden="true">-</i><span><small>Away</small><strong>{match.away_score ?? "-"}</strong></span></span><Icon name="arrow" size={16}/></button>;
+              return (
+                <button
+                  type="button"
+                  className={[styles.resultRow, rowTone].join(" ")}
+                  key={match.id}
+                  onClick={() => dashboard.onOpenMatch?.(match)}
+                  aria-label={`Open score details. Your team ${selectedTeamName} scored ${selectedScore ?? "not available"}; opponent ${opponentTeamName} scored ${opponentScore ?? "not available"}. ${isHome ? "Home" : "Away"} match.`}
+                >
+                  <b className={styles[tone]}>{mark}</b>
+                  <span className={styles.resultSummary}>
+                    <strong>{match.home_team?.name || "Home"} <span>vs</span> {match.away_team?.name || "Away"}</strong>
+                    <small>{shortDate(match.scheduled_date).label} - {isHome ? "Home" : "Away"} match</small>
+                    {scoreStatus && <span className={styles.resultStatus}>{scoreStatus}</span>}
+                  </span>
+                  <span className={[styles.resultScore, styles[`${tone}Score`]].join(" ")} aria-hidden="true">
+                    <span className={isHome ? styles.yourTeamScore : styles.opponentScore}>
+                      <small>{isHome ? "Your Team" : "Opponent"}</small>
+                      <strong>{match.home_score ?? "-"}</strong>
+                    </span>
+                    <i aria-hidden="true">-</i>
+                    <span className={isHome ? styles.opponentScore : styles.yourTeamScore}>
+                      <small>{isHome ? "Opponent" : "Your Team"}</small>
+                      <strong>{match.away_score ?? "-"}</strong>
+                    </span>
+                  </span>
+                  <Icon name="arrow" size={16}/>
+                </button>
+              );
             }) : <p className={styles.emptyMessage}>No completed matches are published for this team.</p>}</div>
           </section>
         </div>

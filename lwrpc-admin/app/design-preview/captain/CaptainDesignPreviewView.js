@@ -271,7 +271,67 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
 
           <section className={`${styles.card} ${captainStyles.standingsCard}`} id="captain-preview-standings"><Heading eyebrow="Division snapshot" title="Standings" action="Full view" onAction={() => openNavigationSection("standings")}/><div className={captainStyles.standings}>{playoffTeamCount > 0 && <p className={styles.playoffNote}>Top {playoffTeamCount} teams highlighted for Playoffs / Championship Day</p>}{leaders.length ? leaders.map((leader) => { const width = Math.max(7, Math.round((Number(leader.chartValue || 0) / standingsMaximum) * 100)); const selected = String(leader.teamId) === String(teamId); const playoffTeam = playoffTeamIds.has(String(leader.teamId || leader.id)); const rowClassName = [selected ? captainStyles.selectedStanding : "", playoffTeam ? captainStyles.playoffStanding : ""].filter(Boolean).join(" "); return <div className={rowClassName} key={leader.id}><strong>#{leader.rank} {leader.team}</strong><span><i style={{ width: `${width}%` }}/></span><b>{leader.chartValue}</b></div>; }) : <p className={captainStyles.empty}>No standings have been published.</p>}</div></section>
 
-          <section className={[styles.card, captainStyles.resultsCard, styles.resultsCard].join(" ")} id="captain-preview-results"><Heading eyebrow="Completed" title="Recent results" hint="Click Match for Score Details" meta={{ label: "Total Team Points", value: Number(standing?.standings_points || 0) }} action={orderedCompletedMatches.length > 3 ? (showAllResults ? "Show Less" : "Show More") : ""} onAction={() => setShowAllResults((show) => !show)}/><div className={styles.results}>{visibleCompletedMatches.length ? visibleCompletedMatches.map((match) => { const isHome = String(match.home_team_id) === String(teamId); const selectedScore = isHome ? match.home_score : match.away_score; const opponentScore = isHome ? match.away_score : match.home_score; const verified = match.score_status === "verified"; const won = verified && String(match.winning_team_id || "") === String(teamId); const tied = verified && !match.winning_team_id && Number(selectedScore) === Number(opponentScore); const mark = !verified ? "!" : tied ? "T" : won ? "W" : "L"; const tone = !verified ? "pending" : tied ? "tie" : won ? "win" : "loss"; const rowToneClass = !verified ? styles.pendingRow : tied ? styles.tieRow : won ? styles.winRow : styles.lossRow; const scoreStatus = resultScoreStatusLabel(match); const enteredBy = scoreMembersById[String(match.score_entered_by_member_id || "")]; const verifiedBy = scoreMembersById[String(match.score_verified_by_member_id || "")]; return <button type="button" className={[styles.resultRow, rowToneClass].join(" ")} key={match.id} onClick={() => dashboard.onOpenScoreDetails?.(match)} aria-label={`Open score details for ${match.home_team?.name || "Home"} versus ${match.away_team?.name || "Away"}`}><b className={styles[tone]}>{mark}</b><span className={styles.resultSummary}><strong>{match.home_team?.name || "Home"} <span>vs</span> {match.away_team?.name || "Away"}</strong><small>{shortDate(match.scheduled_date).label} - {isHome ? "Home" : "Away"}</small>{scoreStatus && <span className={styles.resultStatus}>{scoreStatus}</span>}<span className={styles.resultAudit}><small><b>Scores entered:</b> {match.score_entered_at ? `${formatDisplayTimestampShort(match.score_entered_at)}${enteredBy ? ` by ${displayName(enteredBy)}` : " by Unknown"}` : "Not entered"}</small><small><b>Scores verified:</b> {match.score_verified_at ? `${formatDisplayTimestampShort(match.score_verified_at)}${verifiedBy ? ` by ${displayName(verifiedBy)}` : " by Unknown"}` : "Not verified"}</small></span></span><span className={[styles.resultScore, styles[tone + "Score"]].join(" ")} aria-label={`Home score ${match.home_score ?? "not available"}, away score ${match.away_score ?? "not available"}`}><span><small>Home</small><strong>{match.home_score ?? "-"}</strong></span><i aria-hidden="true">-</i><span><small>Away</small><strong>{match.away_score ?? "-"}</strong></span></span><Icon name="arrow" size={16}/></button>; }) : <p className={captainStyles.empty}>No completed matches are available.</p>}</div></section>
+          <section className={[styles.card, captainStyles.resultsCard, styles.resultsCard].join(" ")} id="captain-preview-results">
+            <Heading
+              eyebrow="Completed"
+              title="Recent results"
+              hint="Click Match for Score Details"
+              meta={{ label: "Total Team Points", value: Number(standing?.standings_points || 0) }}
+              action={orderedCompletedMatches.length > 3 ? (showAllResults ? "Show Less" : "Show More") : ""}
+              onAction={() => setShowAllResults((show) => !show)}
+            />
+            <div className={styles.results}>
+              {visibleCompletedMatches.length ? visibleCompletedMatches.map((match) => {
+                const isHome = String(match.home_team_id) === String(teamId);
+                const selectedScore = isHome ? match.home_score : match.away_score;
+                const opponentScore = isHome ? match.away_score : match.home_score;
+                const selectedTeamName = (isHome ? match.home_team?.name : match.away_team?.name) || teamName;
+                const opponentTeamName = (isHome ? match.away_team?.name : match.home_team?.name) || "Opponent";
+                const verified = match.score_status === "verified";
+                const won = verified && String(match.winning_team_id || "") === String(teamId);
+                const tied = verified && !match.winning_team_id && Number(selectedScore) === Number(opponentScore);
+                const mark = !verified ? "!" : tied ? "T" : won ? "W" : "L";
+                const tone = !verified ? "pending" : tied ? "tie" : won ? "win" : "loss";
+                const rowToneClass = !verified ? styles.pendingRow : tied ? styles.tieRow : won ? styles.winRow : styles.lossRow;
+                const scoreStatus = resultScoreStatusLabel(match);
+                const enteredBy = scoreMembersById[String(match.score_entered_by_member_id || "")];
+                const verifiedBy = scoreMembersById[String(match.score_verified_by_member_id || "")];
+
+                return (
+                  <button
+                    type="button"
+                    className={[styles.resultRow, rowToneClass].join(" ")}
+                    key={match.id}
+                    onClick={() => dashboard.onOpenScoreDetails?.(match)}
+                    aria-label={`Open score details. Your team ${selectedTeamName} scored ${selectedScore ?? "not available"}; opponent ${opponentTeamName} scored ${opponentScore ?? "not available"}. ${isHome ? "Home" : "Away"} match.`}
+                  >
+                    <b className={styles[tone]}>{mark}</b>
+                    <span className={styles.resultSummary}>
+                      <strong>{match.home_team?.name || "Home"} <span>vs</span> {match.away_team?.name || "Away"}</strong>
+                      <small>{shortDate(match.scheduled_date).label} - {isHome ? "Home" : "Away"} match</small>
+                      {scoreStatus && <span className={styles.resultStatus}>{scoreStatus}</span>}
+                      <span className={styles.resultAudit}>
+                        <small><b>Scores entered:</b> {match.score_entered_at ? `${formatDisplayTimestampShort(match.score_entered_at)}${enteredBy ? ` by ${displayName(enteredBy)}` : " by Unknown"}` : "Not entered"}</small>
+                        <small><b>Scores verified:</b> {match.score_verified_at ? `${formatDisplayTimestampShort(match.score_verified_at)}${verifiedBy ? ` by ${displayName(verifiedBy)}` : " by Unknown"}` : "Not verified"}</small>
+                      </span>
+                    </span>
+                    <span className={[styles.resultScore, styles[tone + "Score"]].join(" ")} aria-hidden="true">
+                      <span className={isHome ? styles.yourTeamScore : styles.opponentScore}>
+                        <small>{isHome ? "Your Team" : "Opponent"}</small>
+                        <strong>{match.home_score ?? "-"}</strong>
+                      </span>
+                      <i aria-hidden="true">-</i>
+                      <span className={isHome ? styles.opponentScore : styles.yourTeamScore}>
+                        <small>{isHome ? "Opponent" : "Your Team"}</small>
+                        <strong>{match.away_score ?? "-"}</strong>
+                      </span>
+                    </span>
+                    <Icon name="arrow" size={16}/>
+                  </button>
+                );
+              }) : <p className={captainStyles.empty}>No completed matches are available.</p>}
+            </div>
+          </section>
         </div>
         <p className={styles.note}>Live Captain dashboard - current data, permissions, and operational tools</p><p className={styles.mobileCopyright}>&copy; {currentYear} Lakewood Ranch Pickleball Club</p>
       </section>
