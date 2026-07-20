@@ -1040,6 +1040,17 @@ export default function PlayerDashboardPage() {
     scrollDashboardSectionIntoView(PLAYER_PANEL_SECTION_IDS[panel]);
   }
 
+  function openPlayHistory() {
+    setHistoryFilter(selectedPlayerTeamId ? `team:${selectedPlayerTeamId}` : "all");
+
+    if (designPreview) {
+      setDesignPreviewHistoryOpen(true);
+      return;
+    }
+
+    selectPanel("history");
+  }
+
   async function openDivisionScheduleFromStanding(row) {
     const divisionId = selectedStandingsTeam?.division_id || selectedStandingsTeam?.divisions?.id;
     if (!divisionId) return;
@@ -1393,7 +1404,7 @@ export default function PlayerDashboardPage() {
             onOpenMatch: setMatchDetails,
             onOpenLineup: openMatchLineup,
             onOpenRoster: () => selectedVisibleTeam && setRosterTeam(selectedVisibleTeam),
-            onOpenHistory: () => setDesignPreviewHistoryOpen(true),
+            onOpenHistory: openPlayHistory,
             onOpenSchedule: () => selectedVisibleTeam && openDivisionScheduleForTeam(selectedVisibleTeam),
             onOpenLeagueDocument: (documentType) =>
               selectedVisibleTeam && openLeagueDocument(selectedVisibleTeam, documentType),
@@ -1600,7 +1611,7 @@ export default function PlayerDashboardPage() {
                 }
                 onOpenDocument={openLeagueDocument}
                 onOpenRoster={setRosterTeam}
-                onOpenHistory={() => selectPanel("history")}
+                onOpenHistory={openPlayHistory}
                 onOpenStandings={(team) =>
                   openDivisionScheduleForTeam(team)
                 }

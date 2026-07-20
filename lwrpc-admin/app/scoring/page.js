@@ -53,6 +53,7 @@ export default function ScoringPage() {
   const [deletingMatchId, setDeletingMatchId] = useState("");
   const [selectedMatchIds, setSelectedMatchIds] = useState([]);
   const [matchSearch, setMatchSearch] = useState("");
+  const [scoreStatusFilter, setScoreStatusFilter] = useState("");
   const [showUnverifiedOnly, setShowUnverifiedOnly] = useState(false);
   const [showDuprExportReadyOnly, setShowDuprExportReadyOnly] = useState(false);
   const [showDuprOptions, setShowDuprOptions] = useState(false);
@@ -65,6 +66,17 @@ export default function ScoringPage() {
   const [updatingDuprStatus, setUpdatingDuprStatus] = useState(false);
   const [includeAlreadyExported, setIncludeAlreadyExported] = useState(false);
   const [scoreMembersById, setScoreMembersById] = useState({});
+
+  useEffect(() => {
+    const requestedStatus = new URLSearchParams(window.location.search).get("scoreStatus");
+
+    if (requestedStatus === "pending_verification") {
+      setMatchView("current");
+      setScoreStatusFilter(requestedStatus);
+      setShowUnverifiedOnly(false);
+      setShowDuprExportReadyOnly(false);
+    }
+  }, []);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -300,6 +312,10 @@ export default function ScoringPage() {
   }, [activeMatches, matchSearch]);
 
   const visibleMatches = useMemo(() => {
+    if (scoreStatusFilter) {
+      return searchableMatches.filter((match) => match.score_status === scoreStatusFilter);
+    }
+
     if (showUnverifiedOnly) {
       return searchableMatches.filter((match) => match.score_status !== "verified");
     }
@@ -311,7 +327,7 @@ export default function ScoringPage() {
     }
 
     return searchableMatches;
-  }, [searchableMatches, showDuprExportReadyOnly, showUnverifiedOnly]);
+  }, [scoreStatusFilter, searchableMatches, showDuprExportReadyOnly, showUnverifiedOnly]);
 
   const selectedMatches = useMemo(() => {
     const selected = new Set(selectedMatchIds);
@@ -350,6 +366,7 @@ export default function ScoringPage() {
   function changeMatchView(nextView) {
     setMatchView(nextView);
     setSelectedMatchIds([]);
+    setScoreStatusFilter("");
     setShowUnverifiedOnly(false);
     setShowDuprExportReadyOnly(false);
   }
@@ -365,6 +382,7 @@ export default function ScoringPage() {
       .map((match) => match.id);
 
     setSelectedMatchIds(unverifiedIds);
+    setScoreStatusFilter("");
     setShowDuprExportReadyOnly(false);
     setShowUnverifiedOnly(true);
   }
@@ -380,6 +398,7 @@ export default function ScoringPage() {
       .map((match) => match.id);
 
     setSelectedMatchIds(exportReadyIds);
+    setScoreStatusFilter("");
     setShowUnverifiedOnly(false);
     setShowDuprExportReadyOnly(true);
   }
@@ -713,6 +732,18 @@ export default function ScoringPage() {
             </div>
 
             <div className="flex flex-wrap gap-2 lg:justify-end lg:pt-5">
+              {scoreStatusFilter === "pending_verification" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScoreStatusFilter("");
+                    window.history.replaceState(window.history.state, "", window.location.pathname);
+                  }}
+                  className="rounded-xl bg-red-700 px-4 py-3 text-sm font-bold text-white hover:bg-red-800"
+                >
+                  Showing Pending Verification
+                </button>
+              )}
               <button type="button" onClick={toggleUnverifiedFilter} className={`rounded-xl px-4 py-3 text-sm font-bold ${showUnverifiedOnly ? "bg-blue-700 text-white hover:bg-blue-800" : "bg-blue-100 text-blue-900 hover:bg-blue-200"}`}>
                 {showUnverifiedOnly ? "Showing Not Verified" : "Not Verified"}
               </button>
@@ -1297,7 +1328,7 @@ function ScoreStatusBadge({ value }) {
 
   return (
     <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide ${
-      verified ? "bg-green-100 text-green-800" : "bg-amber-100 text-amber-900"
+      verified ? "bg-green-100 text-green-800" : "bg-red-600 text-white"
     }`}>
       {status.replaceAll("_", " ")}
     </span>

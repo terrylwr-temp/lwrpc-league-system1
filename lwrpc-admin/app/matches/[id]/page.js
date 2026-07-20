@@ -76,6 +76,7 @@ export default function MatchDetailPage() {
   const pendingGameUpdatesRef = useRef(new Map());
   const scoreValidationSubmittingRef = useRef(false);
   const scoreSubmissionInProgressRef = useRef(false);
+  const scoreEntryActionHandlersRef = useRef({});
 
   useUnsavedChangesWarning(scoreDirty, "match scores");
 
@@ -1833,12 +1834,8 @@ export default function MatchDetailPage() {
     run();
   }, [checkAuth, id, loadData]);
 
-  if (loading || !match) {
-    return <LoadingScreen subtitle="Loading Match Operations..." />;
-  }
-
-  const scoreReviewAllowed = canReviewSubmittedScores();
-  const scoreEntryEditable = canEditScoreEntry();
+  const scoreReviewAllowed = Boolean(match) && canReviewSubmittedScores();
+  const scoreEntryEditable = Boolean(match) && canEditScoreEntry();
   const submitScoreLabel = activeScoreEntryMode === "special"
     ? isScoringOperationsOverride()
       ? "Submit/Verify Special Result"
@@ -1847,7 +1844,56 @@ export default function MatchDetailPage() {
       ? "Submit/Verify Scores"
       : "Submit Scores";
   const scoreReviewActionsVisible =
-    !isScoringOperationsOverride() && match.score_status === "pending_verification" && scoreReviewAllowed;
+    Boolean(match) &&
+    !isScoringOperationsOverride() &&
+    match.score_status === "pending_verification" &&
+    scoreReviewAllowed;
+
+  useEffect(() => {
+    scoreEntryActionHandlersRef.current = {
+      submit: completeMatch,
+      validate: verifyScores,
+      dispute: disputeScores,
+    };
+  });
+
+  useEffect(() => {
+    if (!embeddedScoreEntry || loading || !match) return;
+    window.parent?.postMessage({ type: "lwrpc-score-entry-ready", matchId: id }, window.location.origin);
+  }, [embeddedScoreEntry, id, loading, match]);
+
+  useEffect(() => {
+    if (!embeddedScoreEntry) return undefined;
+
+    function handleHeaderAction(event) {
+      if (event.origin !== window.location.origin || event.source !== window.parent) return;
+      if (event.data?.type !== "lwrpc-score-entry-action") return;
+      if (String(event.data?.matchId || "") !== String(id)) return;
+
+      scoreEntryActionHandlersRef.current[event.data?.action]?.();
+    }
+
+    window.addEventListener("message", handleHeaderAction);
+    return () => window.removeEventListener("message", handleHeaderAction);
+  }, [embeddedScoreEntry, id]);
+
+  useEffect(() => {
+    if (!embeddedScoreEntry || loading || !match) return;
+
+    const actions = [];
+    if (scoreEntryEditable) actions.push({ id: "submit", label: submitScoreLabel, tone: "success", disabled: Boolean(scoreSubmissionProgress) });
+    if (scoreReviewActionsVisible) {
+      actions.push({ id: "validate", label: scoreValidationSubmitting ? "Validating..." : "Validate Scores", tone: "success", disabled: scoreValidationSubmitting });
+      actions.push({ id: "dispute", label: "Dispute Scores", tone: "danger", disabled: false });
+    }
+
+    window.parent?.postMessage({ type: "lwrpc-score-entry-actions", matchId: id, actions }, window.location.origin);
+  }, [embeddedScoreEntry, id, loading, match, scoreEntryEditable, scoreReviewActionsVisible, scoreSubmissionProgress, scoreValidationSubmitting, submitScoreLabel]);
+
+  if (loading || !match) {
+    return <LoadingScreen subtitle="Loading Match Operations..." />;
+  }
+
   const scoreValidationIssuesByGameId = scoreValidationIssueList.reduce((grouped, issue) => {
     if (!issue.gameId) return grouped;
 
@@ -1860,8 +1906,8 @@ export default function MatchDetailPage() {
   const specialResultIssues = scoreValidationIssueList.filter((issue) => !issue.lineId && !issue.gameId);
 
   return (
-    <main className={embeddedScoreEntry ? "min-h-full bg-slate-100 p-3 pb-[calc(8rem+env(safe-area-inset-bottom))] sm:p-4" : "min-h-screen bg-slate-100 p-4 pb-[calc(8rem+env(safe-area-inset-bottom))] md:p-6"}>
-      <div className="mx-auto max-w-7xl">
+    <main className={embeddedScoreEntry ? "full-screen-main min-h-full w-full bg-slate-100 p-3 sm:p-4" : "min-h-screen bg-slate-100 p-4 pb-[calc(8rem+env(safe-area-inset-bottom))] md:p-6"}>
+      <div className={embeddedScoreEntry ? "w-full max-w-none" : "mx-auto max-w-7xl"}>
         {!embeddedScoreEntry && (
           <AppHeader
             title="Enter Match Scores"
@@ -1869,7 +1915,7 @@ export default function MatchDetailPage() {
           />
         )}
 
-        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:gap-3">
+        <div className={embeddedScoreEntry ? "hidden" : "mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:flex-wrap lg:gap-3"}>
           {!embeddedScoreEntry && (
             <button
               type="button"
@@ -1971,7 +2017,11 @@ export default function MatchDetailPage() {
                 <span className="rounded-full bg-slate-100 px-3 py-1 text-slate-700">
                   Status: {match.status || "scheduled"}
                 </span>
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-blue-900">
+                <span className={`rounded-full px-3 py-1 ${
+                  match.score_status === "verified"
+                    ? "bg-green-100 text-green-900"
+                    : "bg-red-600 text-white"
+                }`}>
                   Score: {formatMatchScoreStatus(match)}
                 </span>
                 <span className="rounded-full bg-green-100 px-3 py-1 text-green-900">
@@ -2419,7 +2469,7 @@ export default function MatchDetailPage() {
           )}
         </div>
 
-        {(scoreEntryEditable || scoreReviewActionsVisible) && (
+        {!embeddedScoreEntry && (scoreEntryEditable || scoreReviewActionsVisible) && (
           <div className="fixed inset-x-0 bottom-8 z-30 border-t border-slate-200 bg-white/95 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 shadow-2xl backdrop-blur md:hidden">
             <div className="mx-auto grid max-w-7xl grid-cols-1 gap-2">
               {scoreEntryEditable && (

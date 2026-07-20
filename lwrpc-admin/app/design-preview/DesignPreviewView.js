@@ -61,6 +61,16 @@ function shortTime(value) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
+function resultScoreStatusLabel(match) {
+  const status = match?.score_status || "not_entered";
+
+  if (status === "verified") return "";
+  if (status === "pending_verification") return "Score Details Awaiting Verification";
+  if (status === "disputed") return "Score Details Disputed";
+  if (match?.score_entered_at) return "Score Details Not Verified";
+  return "Score Details Not Entered";
+}
+
 function rosterRole(person, team) {
   if (String(person?.id) === String(team?.captain?.id)) return "Captain";
   if (String(person?.id) === String(team?.co_captain_1?.id) || String(person?.id) === String(team?.co_captain_2?.id)) return "Co-Captain";
@@ -101,10 +111,10 @@ function Avatar({ person, initials, imageUrl = "", tone = "coral", user = false 
   );
 }
 
-function Heading({ eyebrow, title, action, onAction, meta }) {
+function Heading({ eyebrow, title, hint, action, onAction, meta }) {
   return (
     <div className={styles.heading}>
-      <div><span>{eyebrow}</span><h3>{title}</h3></div>
+      <div><span>{eyebrow}</span><h3>{title}</h3>{hint && <p className={styles.headingHint}>{hint}</p>}</div>
       <div className={styles.headingAside}>
         {meta && <span className={styles.headingMeta}><small>{meta.label}</small><strong>{meta.value}</strong></span>}
         {action && <button type="button" onClick={onAction}>{action}<Icon name="arrow" size={15}/></button>}
@@ -408,16 +418,19 @@ export default function DesignPreviewView({ dashboard = {} }) {
           </section>
 
           <section className={`${styles.card} ${styles.resultsCard}`} id="preview-results">
-            <Heading eyebrow="The scoreline" title="Recent results" meta={{ label: "Total Team Points", value: Number(standing?.standings_points || 0) }} action={allResults.length > 2 ? (showAllResults ? "Show Less" : "Show More") : ""} onAction={() => setShowAllResults((show) => !show)}/>
+            <Heading eyebrow="The scoreline" title="Recent results" hint="Click Match for Score Details" meta={{ label: "Total Team Points", value: Number(standing?.standings_points || 0) }} action={allResults.length > 2 ? (showAllResults ? "Show Less" : "Show More") : ""} onAction={() => setShowAllResults((show) => !show)}/>
             <div className={styles.results}>{recentResults.length > 0 ? recentResults.map((match) => {
               const isHome = String(match.home_team_id) === String(teamId);
               const selectedScore = isHome ? match.home_score : match.away_score;
               const opponentScore = isHome ? match.away_score : match.home_score;
-              const won = String(match.winning_team_id || "") === String(teamId);
-              const tied = !match.winning_team_id && Number(selectedScore) === Number(opponentScore);
-              const mark = tied ? "T" : won ? "W" : "L";
-              const tone = tied ? "tie" : won ? "win" : "loss";
-              return <div className={[styles.resultRow, tied ? styles.tieRow : won ? styles.winRow : styles.lossRow].join(" ")} key={match.id}><b className={styles[tone]}>{mark}</b><button type="button" className={styles.resultSummary} onClick={() => dashboard.onOpenMatch?.(match)}><strong>{match.home_team?.name || "Home"} <span>vs</span> {match.away_team?.name || "Away"}</strong><small>{shortDate(match.scheduled_date).label} - {isHome ? "Home" : "Away"}</small></button><strong className={styles[`${tone}Score`]}>{match.home_score ?? "-"}-{match.away_score ?? "-"}</strong><button type="button" className={styles.detailsButton} onClick={() => dashboard.onOpenMatch?.(match)}>Match Score Details</button></div>;
+              const verified = match.score_status === "verified";
+              const won = verified && String(match.winning_team_id || "") === String(teamId);
+              const tied = verified && !match.winning_team_id && Number(selectedScore) === Number(opponentScore);
+              const mark = !verified ? "!" : tied ? "T" : won ? "W" : "L";
+              const tone = !verified ? "pending" : tied ? "tie" : won ? "win" : "loss";
+              const rowTone = !verified ? styles.pendingRow : tied ? styles.tieRow : won ? styles.winRow : styles.lossRow;
+              const scoreStatus = resultScoreStatusLabel(match);
+              return <button type="button" className={[styles.resultRow, rowTone].join(" ")} key={match.id} onClick={() => dashboard.onOpenMatch?.(match)} aria-label={`Open score details for ${match.home_team?.name || "Home"} versus ${match.away_team?.name || "Away"}`}><b className={styles[tone]}>{mark}</b><span className={styles.resultSummary}><strong>{match.home_team?.name || "Home"} <span>vs</span> {match.away_team?.name || "Away"}</strong><small>{shortDate(match.scheduled_date).label} - {isHome ? "Home" : "Away"}</small>{scoreStatus && <span className={styles.resultStatus}>{scoreStatus}</span>}</span><span className={[styles.resultScore, styles[`${tone}Score`]].join(" ")} aria-label={`Home score ${match.home_score ?? "not available"}, away score ${match.away_score ?? "not available"}`}><span><small>Home</small><strong>{match.home_score ?? "-"}</strong></span><i aria-hidden="true">-</i><span><small>Away</small><strong>{match.away_score ?? "-"}</strong></span></span><Icon name="arrow" size={16}/></button>;
             }) : <p className={styles.emptyMessage}>No completed matches are published for this team.</p>}</div>
           </section>
         </div>

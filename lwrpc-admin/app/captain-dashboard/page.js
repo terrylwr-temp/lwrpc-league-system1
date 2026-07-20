@@ -46,6 +46,8 @@ const CaptainDesignPreviewView = dynamic(() => import("../design-preview/captain
 
 const CAPTAIN_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-captain-dashboard-selected-team";
 const CAPTAIN_MATCH_SETUP_NOTES_STORAGE_PREFIX = "lwrpc-captain-match-setup-notes-seen";
+const CAPTAIN_SCORE_ENTRY_STORAGE_KEY = "lwrpc-captain-score-entry-request";
+const CAPTAIN_SCORE_ENTRY_REQUEST_MAX_AGE_MS = 2 * 60 * 1000;
 const CAPTAIN_SECTION_IDS = {
   upcoming: "captain-dashboard-upcoming-matches",
   completed: "captain-dashboard-completed-matches",
@@ -567,20 +569,23 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    const scoreSubmitterIds = [
+    const scoreMemberIds = [
       ...new Set(
         (matchData || [])
-          .map((match) => match.score_entered_by_member_id)
+          .flatMap((match) => [
+            match.score_entered_by_member_id,
+            match.score_verified_by_member_id,
+          ])
           .filter(Boolean)
           .map(String)
       ),
     ];
 
-    if (scoreSubmitterIds.length > 0) {
+    if (scoreMemberIds.length > 0) {
       const { data: scoreSubmitterRows, error: scoreSubmitterError } = await supabase
         .from("members")
         .select("id, first_name, last_name, email")
-        .in("id", scoreSubmitterIds);
+        .in("id", scoreMemberIds);
 
       if (scoreSubmitterError) {
         setScoreSubmittersById({});
@@ -786,6 +791,23 @@ export default function CaptainDashboardPage() {
     );
   }, [currentMemberId, matches]);
 
+  useEffect(() => {
+    upcomingMatches.slice(0, 6).forEach((match) => {
+      if (match?.id) router.prefetch(`/matches/${match.id}?embedded=1`);
+    });
+  }, [router, upcomingMatches]);
+
+  useEffect(() => {
+    if (loading || scoreEntryMatch || matches.length === 0) return;
+
+    const pendingRequest = readPendingScoreEntryRequest();
+    if (!pendingRequest) return;
+
+    const requestedMatch = matches.find((match) => String(match.id) === pendingRequest.matchId);
+    if (requestedMatch) setScoreEntryMatch(requestedMatch);
+    else clearPendingScoreEntryRequest();
+  }, [loading, matches, scoreEntryMatch]);
+
   const hasPreviousSeasonTeams = useMemo(
     () => teams.some((team) => team.is_active === false),
     [teams]
@@ -920,7 +942,7 @@ export default function CaptainDashboardPage() {
         String(match.home_team_id) === String(selectedTeamId) ||
         String(match.away_team_id) === String(selectedTeamId);
 
-      return isSelectedTeam && match.status === "completed" && match.score_status === "verified";
+      return isSelectedTeam && match.status === "completed";
     });
   }, [matches, selectedTeamId]);
 
@@ -1136,7 +1158,11 @@ export default function CaptainDashboardPage() {
                         return (
                           <span
                             key={team.id}
-                            className={`text-xs ${setupComplete ? "text-green-700" : "text-amber-700"}`}
+                            className={`rounded-full border px-3 py-1.5 text-xs font-bold text-white shadow-sm ${
+                              setupComplete
+                                ? "border-emerald-700 bg-emerald-600"
+                                : "border-red-700 bg-red-600"
+                            }`}
                           >
                             {team.side} - <span className="font-medium">{team.name}</span>: <span className="font-bold">{setupComplete ? "Setup Complete" : "Setup Pending"}</span>
                           </span>
@@ -2859,6 +2885,7 @@ export default function CaptainDashboardPage() {
             pendingVerification,
             matchSetupStatus,
             completedMatches,
+            scoreMembersById: scoreSubmittersById,
             standingsLeaders: selectedDivisionStandingsLeaders.leaders,
             standingsMetricLabel: selectedDivisionStandingsLeaders.metricLabel,
             leagueDocuments,
@@ -2886,7 +2913,10 @@ export default function CaptainDashboardPage() {
             onEmailOpposingCaptains: emailOpposingCaptains,
             onOpenMatchScoreSheet: openMatchScoreSheet,
             onEnterMatchScores: (match) => {
-              if (confirmUnsavedChanges()) setScoreEntryMatch(match);
+              if (!confirmUnsavedChanges()) return;
+              rememberPendingScoreEntryRequest(match.id);
+              router.prefetch(`/matches/${match.id}?embedded=1`);
+              setScoreEntryMatch(match);
             },
             onOpenMatchSetup: (match, team) => openMatchSetup(match, team || selectedCaptainTeam),
             onManageRoster: () => {
@@ -2986,11 +3016,16 @@ export default function CaptainDashboardPage() {
         {scoreEntryMatch && (
           <ScoreEntryModal
             match={scoreEntryMatch}
+            onReady={clearPendingScoreEntryRequest}
             onComplete={() => {
+              clearPendingScoreEntryRequest();
               setScoreEntryMatch(null);
               loadData();
             }}
-            onClose={() => setScoreEntryMatch(null)}
+            onClose={() => {
+              clearPendingScoreEntryRequest();
+              setScoreEntryMatch(null);
+            }}
           />
         )}
 
@@ -3147,7 +3182,7 @@ export default function CaptainDashboardPage() {
             <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
               <div>
                 <div className="text-xs font-black uppercase tracking-wide text-blue-200">
-                  Captain Workspace
+                  Captain Tools
                 </div>
                 <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <h2 className="text-2xl font-black">My Teams</h2>
@@ -3493,6 +3528,40 @@ function finishLoading(startedAt, setLoading) {
   setTimeout(() => {
     setLoading(false);
   }, remaining);
+}
+
+function rememberPendingScoreEntryRequest(matchId) {
+  if (typeof window === "undefined" || !matchId) return;
+
+  window.sessionStorage.setItem(CAPTAIN_SCORE_ENTRY_STORAGE_KEY, JSON.stringify({
+    matchId: String(matchId),
+    requestedAt: Date.now(),
+  }));
+}
+
+function readPendingScoreEntryRequest() {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const request = JSON.parse(window.sessionStorage.getItem(CAPTAIN_SCORE_ENTRY_STORAGE_KEY) || "null");
+    const requestedAt = Number(request?.requestedAt || 0);
+    const isCurrent =
+      request?.matchId &&
+      requestedAt > 0 &&
+      Date.now() - requestedAt <= CAPTAIN_SCORE_ENTRY_REQUEST_MAX_AGE_MS;
+
+    if (isCurrent) return { ...request, matchId: String(request.matchId) };
+  } catch {
+    // Clear malformed or stale recovery state below.
+  }
+
+  clearPendingScoreEntryRequest();
+  return null;
+}
+
+function clearPendingScoreEntryRequest() {
+  if (typeof window === "undefined") return;
+  window.sessionStorage.removeItem(CAPTAIN_SCORE_ENTRY_STORAGE_KEY);
 }
 
 function rosterLockedMessage() {
@@ -3889,23 +3958,40 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
   );
 }
 
-function ScoreEntryModal({ match, onComplete, onClose }) {
+function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
+  const [headerActions, setHeaderActions] = useState([]);
+  const iframeRef = useRef(null);
+
   useEffect(() => {
     function handleScoreEntryMessage(event) {
-      if (event.origin !== window.location.origin) return;
-      if (event.data?.type !== "lwrpc-score-entry-complete") return;
+      if (event.origin !== window.location.origin || event.source !== iframeRef.current?.contentWindow) return;
       if (String(event.data?.matchId || "") !== String(match.id)) return;
-      onComplete?.();
+
+      if (event.data?.type === "lwrpc-score-entry-actions") {
+        setHeaderActions(Array.isArray(event.data.actions) ? event.data.actions : []);
+        return;
+      }
+
+      if (event.data?.type === "lwrpc-score-entry-ready") onReady?.();
+      if (event.data?.type === "lwrpc-score-entry-complete") onComplete?.();
     }
 
     window.addEventListener("message", handleScoreEntryMessage);
     return () => window.removeEventListener("message", handleScoreEntryMessage);
-  }, [match.id, onComplete]);
+  }, [match.id, onComplete, onReady]);
+
+  function runHeaderAction(actionId) {
+    iframeRef.current?.contentWindow?.postMessage({
+      type: "lwrpc-score-entry-action",
+      matchId: match.id,
+      action: actionId,
+    }, window.location.origin);
+  }
 
   return (
     <div className="fixed inset-0 z-[95] flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4" role="dialog" aria-modal="true" aria-labelledby="score-entry-title">
       <div className="flex h-[94dvh] w-full max-w-7xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] px-4 py-4 text-white sm:px-5 md:flex-row md:items-start md:justify-between">
+        <div className="sticky top-0 z-10 flex shrink-0 flex-col gap-3 bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] px-4 py-4 text-white sm:px-5 md:flex-row md:items-start md:justify-between">
           <div className="min-w-0">
             <div className="text-xs font-black uppercase tracking-[.13em] text-blue-100">Week {match.week_number || "-"} | Enter Match Scores</div>
             <h2 id="score-entry-title" className="mt-1 break-words text-xl font-black sm:text-2xl">{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</h2>
@@ -3914,12 +4000,28 @@ function ScoreEntryModal({ match, onComplete, onClose }) {
               {match.locations?.name && <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1">{match.locations.name}</span>}
             </div>
           </div>
-          <button type="button" onClick={onClose} className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md">Close</button>
+          <div className="flex flex-wrap items-center gap-2 md:justify-end" aria-live="polite">
+            {headerActions.map((action) => (
+              <button
+                type="button"
+                key={action.id}
+                onClick={() => runHeaderAction(action.id)}
+                disabled={action.disabled}
+                className={`rounded-xl px-3 py-2 text-xs font-black text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-400 disabled:opacity-70 sm:px-4 sm:text-sm ${action.tone === "danger" ? "bg-red-700 hover:bg-red-800" : "bg-emerald-600 hover:bg-emerald-700"}`}
+              >
+                {action.label}
+              </button>
+            ))}
+            <button type="button" onClick={onClose} className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md sm:px-4 sm:text-sm">
+              Close
+            </button>
+          </div>
         </div>
         <iframe
+          ref={iframeRef}
           title="Enter Match Scores"
           src={"/matches/" + match.id + "?embedded=1"}
-          className="min-h-0 flex-1 border-0 bg-slate-100"
+          className="min-h-0 w-full flex-1 border-0 bg-slate-100"
         />
       </div>
     </div>
