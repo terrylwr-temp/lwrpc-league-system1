@@ -1,0 +1,24 @@
+# Keep application source and configuration files consistent across platforms.
+* text=auto eol=lf
+
+# Windows command scripts are safest with CRLF line endings.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Never perform text conversion or text diffs for binary assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.zip binary
+*.gz binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
