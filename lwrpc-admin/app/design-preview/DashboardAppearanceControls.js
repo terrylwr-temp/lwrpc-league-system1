@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 
 const SIDEBAR_THEME_KEY = "lwrpc-dashboard-sidebar-theme";
 const CARD_HEADER_THEME_KEY = "lwrpc-dashboard-card-header-theme";
+const APPEARANCE_CHANGE_EVENT = "lwrpc-dashboard-appearance-change";
 
 function storedLightPreference(key) {
   try {
@@ -19,8 +20,24 @@ export function useDashboardAppearance() {
   const [isLightCardHeaders, setIsLightCardHeaders] = useState(false);
 
   useEffect(() => {
-    setIsLightSidebar(storedLightPreference(SIDEBAR_THEME_KEY));
-    setIsLightCardHeaders(storedLightPreference(CARD_HEADER_THEME_KEY));
+    function syncStoredPreferences(event) {
+      if (event?.type === "storage" && event.key && ![SIDEBAR_THEME_KEY, CARD_HEADER_THEME_KEY].includes(event.key)) return;
+      setIsLightSidebar(storedLightPreference(SIDEBAR_THEME_KEY));
+      setIsLightCardHeaders(storedLightPreference(CARD_HEADER_THEME_KEY));
+    }
+
+    syncStoredPreferences();
+    window.addEventListener("storage", syncStoredPreferences);
+    window.addEventListener("focus", syncStoredPreferences);
+    window.addEventListener("pageshow", syncStoredPreferences);
+    window.addEventListener(APPEARANCE_CHANGE_EVENT, syncStoredPreferences);
+
+    return () => {
+      window.removeEventListener("storage", syncStoredPreferences);
+      window.removeEventListener("focus", syncStoredPreferences);
+      window.removeEventListener("pageshow", syncStoredPreferences);
+      window.removeEventListener(APPEARANCE_CHANGE_EVENT, syncStoredPreferences);
+    };
   }, []);
 
   function updatePreference(setter, key) {
@@ -28,6 +45,7 @@ export function useDashboardAppearance() {
       const next = !current;
       try {
         window.localStorage.setItem(key, next ? "light" : "dark");
+        window.setTimeout(() => window.dispatchEvent(new Event(APPEARANCE_CHANGE_EVENT)), 0);
       } catch {
         // The preference still applies for this visit if browser storage is unavailable.
       }
