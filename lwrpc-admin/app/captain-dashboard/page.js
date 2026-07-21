@@ -4417,13 +4417,10 @@ function MatchScoreDetailsModal({ match, ratingForMember, scoreMembersById, team
 
           {scoreHasBeenEntered && (
             <div className="border-y border-slate-200 bg-slate-50 px-3 pb-3 sm:px-5 sm:pb-5">
-              <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-                <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                  {formatScoreStatus(match)}
-                </div>
-                <div className="mt-2 grid gap-1 rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
-                  <span><b>Scores entered:</b> {match.score_entered_at ? `${formatDisplayTimestampShort(match.score_entered_at)} by ${enteredBy ? formatMemberName(enteredBy) : "Unknown"}` : "Not entered"}</span>
-                  <span><b>Scores verified:</b> {match.score_verified_at ? `${formatDisplayTimestampShort(match.score_verified_at)} by ${verifiedBy ? formatMemberName(verifiedBy) : "Unknown"}` : "Not verified"}</span>
+              <div className="w-full rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div className="grid gap-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  <span>Scores Entered - {match.score_entered_at ? `${formatDisplayTimestampShort(match.score_entered_at)} by ${enteredBy ? formatMemberName(enteredBy) : "Unknown"}` : "Not entered"}</span>
+                  <span>Scores Verified - {match.score_verified_at ? `${formatDisplayTimestampShort(match.score_verified_at)} by ${verifiedBy ? formatMemberName(verifiedBy) : "Unknown"}` : "Not verified"}</span>
                 </div>
                 {specialResult && (
                   <div className="mt-1 text-xs font-black uppercase tracking-wide text-amber-700">
