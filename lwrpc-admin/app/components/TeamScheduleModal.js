@@ -492,7 +492,7 @@ function ScheduleMatchCard({
                   <span className="font-black">
                     Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
                   </span>
-                  <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-black text-white">
+                  <span aria-label={duprPostedLabel(line)} className="rounded-full bg-white/15 px-3 py-1 text-[0px] font-black text-white after:content-[attr(aria-label)] after:text-xs">
                     {capitalizeLabel(line.division_lines?.line_type || "Line")} · {duprPostedLabel(line)}
                   </span>
                   <div className="flex flex-wrap gap-2">
@@ -512,6 +512,7 @@ function ScheduleMatchCard({
                     players={[line.home_player_1, line.home_player_2]}
                     line={line}
                     side="home"
+                    isWinner={lineSideWon(match, line, "home")}
                     ratingByMemberId={ratingByMemberId}
                     ratingType={ratingType}
                   />
@@ -520,6 +521,7 @@ function ScheduleMatchCard({
                     players={[line.away_player_1, line.away_player_2]}
                     line={line}
                     side="away"
+                    isWinner={lineSideWon(match, line, "away")}
                     ratingByMemberId={ratingByMemberId}
                     ratingType={ratingType}
                   />
@@ -602,11 +604,13 @@ function GameScoreCard({ game, match }) {
   );
 }
 
-function TeamPlayers({ label, players, line, side, ratingByMemberId, ratingType }) {
+function TeamPlayers({ label, players, line, side, isWinner, ratingByMemberId, ratingType }) {
   const enteredPlayers = players.filter(Boolean);
 
   return (
-    <div className="rounded-lg bg-slate-50 px-3 py-2">
+    <div className={`rounded-lg border-2 px-3 py-2 ${
+      isWinner ? "border-emerald-500 bg-emerald-50 shadow-sm" : "border-transparent bg-slate-50"
+    }`}>
       <div className="text-[10px] font-black uppercase tracking-wide text-slate-500">{label}</div>
       <div className="mt-1 space-y-1 font-semibold text-slate-800">
         {enteredPlayers.length === 0 ? (
@@ -737,6 +741,18 @@ function lineHeaderAccentClass(match, line, selectedTeamId) {
   return "bg-blue-500";
 }
 
+function lineSideWon(match, line, side) {
+  const sideTeamId = side === "home" ? match?.home_team_id : match?.away_team_id;
+
+  if (line?.winning_team_id) {
+    return String(line.winning_team_id) === String(sideTeamId);
+  }
+
+  const homeWins = Number(line?.home_team_games_won || 0);
+  const awayWins = Number(line?.away_team_games_won || 0);
+  return side === "home" ? homeWins > awayWins : awayWins > homeWins;
+}
+
 function lineResultBackgroundClass(headerAccentClass) {
   if (headerAccentClass === "bg-emerald-500") return "border-emerald-200 bg-emerald-50";
   if (headerAccentClass === "bg-red-500") return "border-red-200 bg-red-50";
@@ -749,6 +765,8 @@ function duprPostedLabel(line) {
 }
 
 function capitalizeLabel(value) {
+  if (String(value || "").trim().toLowerCase() === "line") return "";
+
   return String(value || "")
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());

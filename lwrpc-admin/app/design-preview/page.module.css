@@ -40,6 +40,7 @@
 .sidebarCollapsed .brand { justify-content: center; padding-inline: 0; }
 .sidebarCollapsed .sideNav > button,
 .sidebarCollapsed .navGroup > button { justify-content: center; padding-inline: 10px; }
+.sidebarCollapsed .sideNav button[aria-expanded]::after { display: none; margin-left: 0; }
 .sidebarCollapsed .brand strong,
 .sidebarCollapsed .sideNav button > span,
 .sidebarCollapsed .sideNav button[aria-expanded]::after,
@@ -67,6 +68,8 @@
 .sidebarCollapsed:focus-within .submenu,
 .sidebarCollapsed:focus-within .season,
 .sidebarCollapsed:focus-within .sidebarCopyright { width: auto; overflow: visible; opacity: 1; pointer-events: auto; }
+.sidebarCollapsed:hover .sideNav button[aria-expanded]::after,
+.sidebarCollapsed:focus-within .sideNav button[aria-expanded]::after { display: block; }
 
 .sidebarCollapsed .season { margin-top: auto; padding-inline: 0; border-color: transparent; background: transparent; }
 .sidebarCollapsed:hover .season,
