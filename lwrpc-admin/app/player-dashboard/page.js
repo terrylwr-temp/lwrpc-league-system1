@@ -115,6 +115,7 @@ export default function PlayerDashboardPage() {
   const [teams, setTeams] = useState([]);
   const [matchTeamRosters, setMatchTeamRosters] = useState({});
   const [matches, setMatches] = useState([]);
+  const [scoreMembersById, setScoreMembersById] = useState({});
   const [byeWeeks, setByeWeeks] = useState([]);
   const [standings, setStandings] = useState([]);
   const [playHistory, setPlayHistory] = useState([]);
@@ -294,6 +295,7 @@ export default function PlayerDashboardPage() {
     let standingsData = [];
     let historyData = [];
     let rostersByTeamId = {};
+    setScoreMembersById({});
 
     if (teamIds.length > 0) {
       const divisionIds = [...new Set(playerTeams.map((team) => team.divisions?.id).filter(Boolean))];
@@ -467,6 +469,21 @@ export default function PlayerDashboardPage() {
       }
 
       matchData = data || [];
+      const scoreMemberIds = [
+        ...new Set(
+          matchData
+            .flatMap((match) => [match.score_entered_by_member_id, match.score_verified_by_member_id])
+            .filter(Boolean)
+            .map(String)
+        ),
+      ];
+      if (scoreMemberIds.length > 0) {
+        const { data: scoreMemberRows } = await supabase
+          .from("members")
+          .select("id, first_name, last_name, email")
+          .in("id", scoreMemberIds);
+        setScoreMembersById(Object.fromEntries((scoreMemberRows || []).map((scoreMember) => [String(scoreMember.id), scoreMember])));
+      }
       byeData = filterByesForPublishedSchedule(teamByeRows || [], publishedDivisionMatches || []);
       standingsData = standingsRows || [];
       const matchTeamIds = [
@@ -1437,6 +1454,7 @@ export default function PlayerDashboardPage() {
             match={matchDetails}
             standings={standings}
             ratingForMember={ratingForMember}
+            scoreMembersById={scoreMembersById}
             teamWithRoster={teamWithRoster}
             onOpenRoster={setRosterTeam}
             onClose={() => setMatchDetails(null)}
@@ -1986,6 +2004,7 @@ export default function PlayerDashboardPage() {
             match={matchDetails}
             standings={standings}
             ratingForMember={ratingForMember}
+            scoreMembersById={scoreMembersById}
             teamWithRoster={teamWithRoster}
             onOpenRoster={setRosterTeam}
             onClose={() => setMatchDetails(null)}
@@ -2942,7 +2961,7 @@ function MatchLineupModal({ preview, ratingForMember, onClose }) {
   );
 }
 
-function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, onOpenRoster, onClose }) {
+function MatchDetailsModal({ match, standings, ratingForMember, scoreMembersById, teamWithRoster, onOpenRoster, onClose }) {
   const homeStanding = teamStanding(standings, match.home_team_id);
   const awayStanding = teamStanding(standings, match.away_team_id);
   const location = match.locations;
@@ -2956,6 +2975,8 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
     (a, b) => Number(a.line_number || 0) - Number(b.line_number || 0)
   );
   const specialResult = isSpecialMatchResult(match);
+  const enteredBy = scoreMembersById?.[String(match.score_entered_by_member_id || "")];
+  const verifiedBy = scoreMembersById?.[String(match.score_verified_by_member_id || "")];
 
   function printMatchResults() {
     window.localStorage.setItem(
@@ -3027,9 +3048,10 @@ function MatchDetailsModal({ match, standings, ratingForMember, teamWithRoster, 
 
           {isVerifiedCompleted && (
             <div className="border-y border-[#e1e7f0] bg-[#f7f9fc] px-3 pb-3 sm:px-5 sm:pb-5">
-              <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
-                <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
-                  {formatMatchScoreStatus(match)}
+              <div className="w-full rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
+                <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                  <span className="whitespace-nowrap">Entered - {match.score_entered_at ? `${formatDisplayTimestampShort(match.score_entered_at)} by ${enteredBy ? formatMemberName(enteredBy) : "Unknown"}` : "Not entered"}</span>
+                  <span className="whitespace-nowrap">Verified - {match.score_verified_at ? `${formatDisplayTimestampShort(match.score_verified_at)} by ${verifiedBy ? formatMemberName(verifiedBy) : "Unknown"}` : "Not verified"}</span>
                 </div>
                 {specialResult && (
                   <div className="mt-1 text-xs font-black uppercase tracking-wide text-amber-700">

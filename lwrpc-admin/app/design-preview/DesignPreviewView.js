@@ -119,7 +119,7 @@ function Heading({ eyebrow, title, hint, action, onAction, meta }) {
     <div className={styles.heading}>
       <div><span>{eyebrow}</span><h3>{title}</h3>{hint && <p className={styles.headingHint}>{hint}</p>}</div>
       <div className={styles.headingAside}>
-        {meta && <span className={styles.headingMeta}><small>{meta.label}</small><strong>{meta.value}</strong></span>}
+        {(Array.isArray(meta) ? meta : [meta]).filter(Boolean).map((item) => <span className={styles.headingMeta} key={item.label}><small>{item.label}</small><strong>{item.value}</strong></span>)}
         {action && <button type="button" onClick={onAction}>{action}<Icon name="arrow" size={15}/></button>}
       </div>
     </div>
@@ -453,7 +453,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
           </section>
 
           <section className={`${styles.card} ${styles.teamCard}`} id="preview-team">
-            <Heading eyebrow="The squad" title="My team" action={roster.length > 0 ? "View team" : ""} onAction={() => dashboard.onOpenRoster?.()}/>
+            <Heading eyebrow="The squad" title="My team" meta={{ label: "Players", value: roster.length }} action={roster.length > 0 ? "View team" : ""} onAction={() => dashboard.onOpenRoster?.()}/>
             <h4 className={styles.teamNameHeading}>{teamName}</h4>
             <div className={styles.roster}>{leadershipRoster.length > 0 ? leadershipRoster.map(({ person, role: teamRole }, index) => {
               const name = displayName(person);
@@ -463,7 +463,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
           </section>
 
           <section className={`${styles.card} ${styles.resultsCard}`} id="preview-results">
-            <Heading eyebrow="The scoreline" title="Recent results" hint="Click Match for Score Details" meta={{ label: "Total Team Points", value: Number(standing?.standings_points || 0) }} action={allResults.length > 2 ? (showAllResults ? "Show Less" : "Show More") : ""} onAction={() => setShowAllResults((show) => !show)}/>
+            <Heading eyebrow="The scoreline" title="Recent results" hint="Click Match for Score Details" meta={[{ label: "Total Matches", value: allResults.length }, { label: "Total Team Points", value: Number(standing?.standings_points || 0) }]} action={allResults.length > 2 ? (showAllResults ? "Show Less" : "Show More") : ""} onAction={() => setShowAllResults((show) => !show)}/>
             <div className={styles.results}>{recentResults.length > 0 ? recentResults.map((match) => {
               const isHome = String(match.home_team_id) === String(teamId);
               const selectedScore = isHome ? match.home_score : match.away_score;
