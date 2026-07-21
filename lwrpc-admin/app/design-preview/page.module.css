@@ -577,7 +577,7 @@
   .resultsCard { grid-column: auto; }
 }
 
-@media (max-width: 700px) {
+@media (max-width: 700px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
   .page { min-height: 100dvh; padding-bottom: calc(74px + env(safe-area-inset-bottom)); }
   .sidebar, .desktopHeader { display: none; }
   .content { min-height: 100dvh; margin-left: 0; padding: 0 14px 22px; }
