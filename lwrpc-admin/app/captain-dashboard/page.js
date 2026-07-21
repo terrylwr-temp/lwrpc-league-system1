@@ -3910,7 +3910,7 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
   const ratingType = team.divisions?.rating_type || "dupr";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
+    <div className="fixed inset-0 z-[95] flex items-center justify-center bg-slate-950/70 p-2 sm:p-4">
       <div className="flex max-h-[94dvh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
         <div className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] to-[#1558d5] px-4 py-4 text-white md:flex-row md:items-start md:justify-between">
           <div>
