@@ -49,9 +49,8 @@ export function buildMiniStandingsLeaders(standings = [], selectedTeam = null) {
 
 export default function MiniStandingsLeaders({ leaders, metricLabel, divisionName, selectedTeamId, framed = false }) {
   const [mobileChartOpen, setMobileChartOpen] = useState(false);
-  const [includeAllTeams, setIncludeAllTeams] = useState(false);
   const availableLeaders = leaders || [];
-  const displayedLeaders = includeAllTeams ? availableLeaders : availableLeaders.slice(0, 5);
+  const displayedLeaders = availableLeaders.slice(0, 5);
 
   if (!availableLeaders.length) return null;
 
@@ -77,18 +76,6 @@ export default function MiniStandingsLeaders({ leaders, metricLabel, divisionNam
             aria-expanded={mobileChartOpen}
           >
             {mobileChartOpen ? "Hide Chart" : "View Standings Chart"}
-          </button>
-          <button
-            type="button"
-            onClick={() => setIncludeAllTeams((current) => !current)}
-            className={`${mobileChartOpen ? "inline-flex" : "hidden"} rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide transition sm:inline-flex ${
-              includeAllTeams
-                ? "border-emerald-600 bg-emerald-600 text-white"
-                : "border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
-            }`}
-            aria-pressed={includeAllTeams}
-          >
-            Include all Teams
           </button>
         </div>
       </div>

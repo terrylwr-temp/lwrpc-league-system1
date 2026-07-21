@@ -243,7 +243,7 @@ export default function AppHeader({
 
   return (
     <>
-      <aside className={[adminShellStyles.sidebar, appearance.isLightSidebar ? adminShellStyles.lightSidebar : ""].filter(Boolean).join(" ")} style={{ "--blue": "#1558d5" }}>
+      <aside className={[adminShellStyles.sidebar, appearance.isLightSidebar ? adminShellStyles.lightSidebar : "", appearance.isSidebarCollapsed ? adminShellStyles.sidebarCollapsed : "", appearance.isSidebarCollapsed ? "lwrpc-sidebar-collapsed" : ""].filter(Boolean).join(" ")} style={{ "--blue": "#1558d5" }} aria-label="League Management navigation; hover to expand when collapsed">
         <a href={clubWebsite} target="_blank" rel="noreferrer" className={adminShellStyles.brand} title={`Open ${clubName} website`}>
           <Image src={logoUrl} alt={clubName} width={46} height={46} unoptimized/>
           <strong>{clubName}</strong>

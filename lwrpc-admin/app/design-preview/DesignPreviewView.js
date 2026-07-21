@@ -7,6 +7,7 @@ import { APP_VERSION } from "../lib/version";
 import LmsInstallButton from "../components/LmsInstallButton";
 import styles from "./page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "./DashboardAppearanceControls";
+import { standingsTiebreakDescription } from "../lib/standingsTiebreaks";
 
 const paths = {
   dashboard: <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>,
@@ -290,8 +291,8 @@ export default function DesignPreviewView({ dashboard = {} }) {
   );
 
   return (
-    <main className={["full-screen-main", styles.page, appearance.isLightCardHeaders ? styles.lightCardHeaders : ""].filter(Boolean).join(" ")} id="preview-dashboard">
-      <aside className={[styles.sidebar, appearance.isLightSidebar ? styles.lightSidebar : ""].filter(Boolean).join(" ")}>
+    <main className={["full-screen-main", styles.page, appearance.isLightCardHeaders ? styles.lightCardHeaders : "", appearance.isSidebarCollapsed ? styles.sidebarCollapsedLayout : ""].filter(Boolean).join(" ")} id="preview-dashboard">
+      <aside className={[styles.sidebar, appearance.isLightSidebar ? styles.lightSidebar : "", appearance.isSidebarCollapsed ? styles.sidebarCollapsed : ""].filter(Boolean).join(" ")} aria-label="Dashboard navigation; hover to expand when collapsed">
         <a className={styles.brand} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer" title="Open the Lakewood Ranch Pickleball Club website">
           <Image src="/lms-icon-192.png" width={46} height={46} alt="Lakewood Ranch Pickleball Club" priority/>
           <strong>Lakewood Ranch Pickleball Club</strong>
@@ -521,6 +522,10 @@ export default function DesignPreviewView({ dashboard = {} }) {
           <section className={styles.standingsDialog}>
             <header><div><span>Division standings</span><div className={styles.standingsNames}><strong>{seasonName}</strong><strong>{leagueName}</strong><h2 id="standings-dialog-title">{selectedTeam?.divisions?.name || "Division"}</h2></div><p className={styles.standingsMetric}>{dashboard.standingsMetricLabel || "Standings Points"}</p></div><button type="button" onClick={() => setStandingsOpen(false)} aria-label="Close standings">&times;</button></header>
             <div className={styles.standingsChart}>
+              <div className={styles.standingsTiebreak}>
+                <strong>Standings tiebreak order</strong>
+                <span>{standingsTiebreakDescription(selectedTeam?.divisions)}</span>
+              </div>
               {playoffTeamCount > 0 && <p className={styles.playoffNote}>Top {playoffTeamCount} teams highlighted for Playoffs / Championship Day</p>}
               {(dashboard.standingsLeaders || []).length > 0 ? dashboard.standingsLeaders.map((leader) => {
                 const width = Math.max(7, Math.round((Number(leader.chartValue || 0) / standingsMaximum) * 100));
@@ -543,7 +548,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
               <button type="button" onClick={() => dashboard.onChangePassword?.()}><Icon name="lock"/><span><strong>Change Password</strong><small>Update the password for this account</small></span><Icon name="arrow" size={17}/></button>
               <button type="button" onClick={() => photoInputRef.current?.click()} disabled={profileImageSaving}><Icon name="camera"/><span><strong>{profileImageSaving ? "Saving Picture..." : displayedProfileImage ? "Change Picture" : "Add Picture"}</strong><small>JPG, PNG, or WebP · maximum 2 MB</small></span><Icon name="arrow" size={17}/></button>
               <input ref={photoInputRef} className={styles.hiddenInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleProfileImage}/>
-              <DashboardAppearanceControls isLightSidebar={appearance.isLightSidebar} isLightCardHeaders={appearance.isLightCardHeaders} onToggleSidebar={appearance.toggleSidebarTheme} onToggleCardHeaders={appearance.toggleCardHeaderTheme}/>
+              <DashboardAppearanceControls isLightSidebar={appearance.isLightSidebar} isLightCardHeaders={appearance.isLightCardHeaders} isSidebarCollapsed={appearance.isSidebarCollapsed} onToggleSidebar={appearance.toggleSidebarTheme} onToggleCardHeaders={appearance.toggleCardHeaderTheme} onToggleSidebarCollapsed={appearance.toggleSidebarCollapsed}/>
               <a href={dashboard.membershipUrl || "https://lwrpickleballclub.com/manage-membership"} target="_blank" rel="noreferrer"><Icon name="external"/><span><strong>Club Membership</strong><small>Open the club membership website</small></span><Icon name="arrow" size={17}/></a>
               <button type="button" className={styles.logoutAction} onClick={() => setLogoutConfirmOpen(true)}><Icon name="logout"/><span><strong>Log Out</strong><small>Log out of this browser or device only</small></span><Icon name="arrow" size={17}/></button>
             </div>

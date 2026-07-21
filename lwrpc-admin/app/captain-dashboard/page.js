@@ -287,6 +287,9 @@ export default function CaptainDashboardPage() {
           min_dupr,
           max_dupr,
           team_dupr_max,
+          standings_tiebreak_1,
+          standings_tiebreak_2,
+          standings_tiebreak_3,
           score_sheet_template_id,
           score_sheet_templates (
             id,
@@ -415,6 +418,9 @@ export default function CaptainDashboardPage() {
           min_dupr,
           max_dupr,
           team_dupr_max,
+          standings_tiebreak_1,
+          standings_tiebreak_2,
+          standings_tiebreak_3,
           score_sheet_template_id,
           score_sheet_templates (
             id,
@@ -2697,6 +2703,10 @@ export default function CaptainDashboardPage() {
             <div className="mb-4 flex flex-wrap items-center gap-2">
               <div className="flex flex-wrap items-center gap-2">
                 <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-950">
+                  <span className="font-bold">Individual Range:</span>{" "}
+                  {setupTeam.divisions?.min_dupr ?? "None"} - {setupTeam.divisions?.max_dupr ?? "None"} ({setupRatingLabel()})
+                </div>
+                <div className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-950">
                   <span className="font-bold">Doubles Team Maximum:</span>{" "}
                   {setupTeam.divisions?.team_dupr_max ?? "None"} ({setupRatingLabel()})
                 </div>
@@ -2997,6 +3007,7 @@ export default function CaptainDashboardPage() {
           <MatchScoreDetailsModal
             match={scoreDetailsMatch}
             ratingForMember={ratingForMember}
+            scoreMembersById={scoreSubmittersById}
             teamWithRoster={teamWithRoster}
             onOpenRoster={openRosterModal}
             clubName={systemSettings.club_name}
@@ -3492,6 +3503,7 @@ export default function CaptainDashboardPage() {
           <MatchScoreDetailsModal
             match={scoreDetailsMatch}
             ratingForMember={ratingForMember}
+            scoreMembersById={scoreSubmittersById}
             teamWithRoster={teamWithRoster}
             onOpenRoster={openRosterModal}
             clubName={systemSettings.club_name}
@@ -4326,7 +4338,7 @@ function GameScoreCard({ game, match }) {
   );
 }
 
-function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpenRoster, clubName, onClose }) {
+function MatchScoreDetailsModal({ match, ratingForMember, scoreMembersById, teamWithRoster, onOpenRoster, clubName, onClose }) {
   const lines = [...(match.match_lines || [])].sort(
     (a, b) => Number(a.line_number || 0) - Number(b.line_number || 0)
   );
@@ -4334,6 +4346,8 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
   const awayTeam = teamWithRoster(match.away_team_id);
   const scoreHasBeenEntered = hasEnteredMatchScore(match);
   const specialResult = isSpecialMatchResult(match);
+  const enteredBy = scoreMembersById?.[String(match.score_entered_by_member_id || "")];
+  const verifiedBy = scoreMembersById?.[String(match.score_verified_by_member_id || "")];
 
   function printScoreDetails() {
     window.localStorage.setItem(
@@ -4406,6 +4420,10 @@ function MatchScoreDetailsModal({ match, ratingForMember, teamWithRoster, onOpen
               <div className="w-full max-w-2xl rounded-2xl border border-slate-200 bg-white p-3 shadow-sm">
                 <div className="text-xs font-semibold uppercase tracking-wide text-slate-600">
                   {formatScoreStatus(match)}
+                </div>
+                <div className="mt-2 grid gap-1 rounded-xl bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
+                  <span><b>Scores entered:</b> {match.score_entered_at ? `${formatDisplayTimestampShort(match.score_entered_at)} by ${enteredBy ? formatMemberName(enteredBy) : "Unknown"}` : "Not entered"}</span>
+                  <span><b>Scores verified:</b> {match.score_verified_at ? `${formatDisplayTimestampShort(match.score_verified_at)} by ${verifiedBy ? formatMemberName(verifiedBy) : "Unknown"}` : "Not verified"}</span>
                 </div>
                 {specialResult && (
                   <div className="mt-1 text-xs font-black uppercase tracking-wide text-amber-700">

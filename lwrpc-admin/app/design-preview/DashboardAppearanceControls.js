@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 
 const SIDEBAR_THEME_KEY = "lwrpc-dashboard-sidebar-theme";
 const CARD_HEADER_THEME_KEY = "lwrpc-dashboard-card-header-theme";
+const SIDEBAR_COLLAPSED_KEY = "lwrpc-dashboard-sidebar-collapsed";
 const APPEARANCE_CHANGE_EVENT = "lwrpc-dashboard-appearance-change";
 
 function storedLightPreference(key) {
@@ -18,12 +19,14 @@ function storedLightPreference(key) {
 export function useDashboardAppearance() {
   const [isLightSidebar, setIsLightSidebar] = useState(false);
   const [isLightCardHeaders, setIsLightCardHeaders] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   useEffect(() => {
     function syncStoredPreferences(event) {
-      if (event?.type === "storage" && event.key && ![SIDEBAR_THEME_KEY, CARD_HEADER_THEME_KEY].includes(event.key)) return;
+      if (event?.type === "storage" && event.key && ![SIDEBAR_THEME_KEY, CARD_HEADER_THEME_KEY, SIDEBAR_COLLAPSED_KEY].includes(event.key)) return;
       setIsLightSidebar(storedLightPreference(SIDEBAR_THEME_KEY));
       setIsLightCardHeaders(storedLightPreference(CARD_HEADER_THEME_KEY));
+      setIsSidebarCollapsed(storedLightPreference(SIDEBAR_COLLAPSED_KEY));
     }
 
     syncStoredPreferences();
@@ -56,13 +59,18 @@ export function useDashboardAppearance() {
   return {
     isLightSidebar,
     isLightCardHeaders,
+    isSidebarCollapsed,
     toggleSidebarTheme: () => updatePreference(setIsLightSidebar, SIDEBAR_THEME_KEY),
     toggleCardHeaderTheme: () => updatePreference(setIsLightCardHeaders, CARD_HEADER_THEME_KEY),
+    toggleSidebarCollapsed: () => updatePreference(setIsSidebarCollapsed, SIDEBAR_COLLAPSED_KEY),
   };
 }
 
-export function DashboardAppearanceControls({ isLightSidebar, isLightCardHeaders, onToggleSidebar, onToggleCardHeaders }) {
+export function DashboardAppearanceControls({ isLightSidebar, isLightCardHeaders, isSidebarCollapsed, onToggleSidebar, onToggleCardHeaders, onToggleSidebarCollapsed }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const fallbackAppearance = useDashboardAppearance();
+  const sidebarCollapsed = typeof isSidebarCollapsed === "boolean" ? isSidebarCollapsed : fallbackAppearance.isSidebarCollapsed;
+  const toggleSidebarCollapsed = onToggleSidebarCollapsed || fallbackAppearance.toggleSidebarCollapsed;
 
   return (
     <section className={styles.appearanceSettings}>
@@ -79,6 +87,11 @@ export function DashboardAppearanceControls({ isLightSidebar, isLightCardHeaders
         <label>
           <span><strong>Sidebar Menu</strong><small>{isLightSidebar ? "Light background / dark text" : "Dark background / light text"}</small></span>
           <input type="checkbox" checked={isLightSidebar} onChange={onToggleSidebar}/>
+          <i className={styles.appearanceSwitch} aria-hidden="true"/>
+        </label>
+        <label>
+          <span><strong>Collapse Sidebar</strong><small>{sidebarCollapsed ? "Icons until you hover over it" : "Keep sidebar expanded"}</small></span>
+          <input type="checkbox" checked={sidebarCollapsed} onChange={toggleSidebarCollapsed}/>
           <i className={styles.appearanceSwitch} aria-hidden="true"/>
         </label>
         <label>

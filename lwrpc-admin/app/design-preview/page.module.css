@@ -24,6 +24,53 @@
   box-shadow: 8px 0 30px rgba(15, 35, 74, .12);
 }
 
+.sidebarCollapsed {
+  width: 72px;
+  overflow-x: hidden;
+  padding-inline: 10px;
+  transition: width .2s ease, padding .2s ease;
+}
+
+.sidebarCollapsed:hover,
+.sidebarCollapsed:focus-within {
+  width: 248px;
+  padding-inline: 15px;
+}
+
+.sidebarCollapsed .brand { justify-content: center; padding-inline: 0; }
+.sidebarCollapsed .sideNav > button,
+.sidebarCollapsed .navGroup > button { justify-content: center; padding-inline: 10px; }
+.sidebarCollapsed .brand strong,
+.sidebarCollapsed .sideNav button > span,
+.sidebarCollapsed .sideNav button[aria-expanded]::after,
+.sidebarCollapsed .submenu,
+.sidebarCollapsed .season,
+.sidebarCollapsed .sidebarCopyright { width: 0; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity .12s ease; }
+.sidebarCollapsed:hover .brand,
+.sidebarCollapsed:focus-within .brand { justify-content: flex-start; padding-inline: 5px; }
+.sidebarCollapsed:hover .sideNav > button,
+.sidebarCollapsed:hover .navGroup > button,
+.sidebarCollapsed:focus-within .sideNav > button,
+.sidebarCollapsed:focus-within .navGroup > button { justify-content: flex-start; padding-inline: 11px; }
+.sidebarCollapsed:hover .brand strong,
+.sidebarCollapsed:hover .sideNav button > span,
+.sidebarCollapsed:hover .sideNav button[aria-expanded]::after,
+.sidebarCollapsed:hover .submenu,
+.sidebarCollapsed:hover .season,
+.sidebarCollapsed:hover .sidebarCopyright,
+.sidebarCollapsed:focus-within .brand strong,
+.sidebarCollapsed:focus-within .sideNav button > span,
+.sidebarCollapsed:focus-within .sideNav button[aria-expanded]::after,
+.sidebarCollapsed:focus-within .submenu,
+.sidebarCollapsed:focus-within .season,
+.sidebarCollapsed:focus-within .sidebarCopyright { width: auto; overflow: visible; opacity: 1; pointer-events: auto; }
+
+.sidebarCollapsed .season { margin-top: auto; padding-inline: 0; border-color: transparent; background: transparent; }
+.sidebarCollapsed:hover .season,
+.sidebarCollapsed:focus-within .season { padding-inline: 13px; border-color: rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .06); }
+
+.sidebarCollapsedLayout .content { margin-left: 72px; }
+
 .brand {
   display: flex;
   align-items: center;
@@ -471,6 +518,9 @@
 .standingsDialog > header .standingsMetric { margin: 9px 0 0; color: #d8f5eb; font-size: 11px; font-weight: 800; letter-spacing: .04em; }
 .standingsDialog > header button { display: grid; width: 36px; height: 36px; flex: none; place-items: center; border: 1px solid rgba(255, 255, 255, .3); border-radius: 50%; background: rgba(255, 255, 255, .12); color: #fff; font-size: 22px; }
 .standingsChart { display: grid; gap: 13px; padding: 22px; }
+.standingsTiebreak { display: grid; gap: 6px; border: 1px solid #b7d9cb; border-radius: 12px; background: #f2fbf7; padding: 12px 14px; color: #245847; }
+.standingsTiebreak > strong { color: #14573f; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }
+.standingsTiebreak > span { color: #41655a; font-size: 12px; font-weight: 700; line-height: 1.45; }
 .playoffNote { margin: 0; border: 1px solid #a9dec8; border-radius: 10px; background: #edf9f4; padding: 9px 11px; color: #217254; font-size: 11px; font-weight: 850; line-height: 1.4; }
 .standingsChart > div { display: grid; grid-template-columns: minmax(130px, 190px) minmax(100px, 1fr) 48px; align-items: center; gap: 12px; border-radius: 10px; padding: 8px 10px; }
 .standingsChart > div.selectedStanding { background: #eef4ff; }
@@ -516,6 +566,8 @@
   .sidebar { width: 218px; }
   .content { margin-left: 218px; padding-inline: 20px; }
   .brand strong { font-size: 11px; }
+  .sidebarCollapsed:hover,
+  .sidebarCollapsed:focus-within { width: 218px; }
   .heroArt { width: 135px; height: 135px; margin-left: 20px; transform: scale(.8); }
   .heroCopy { padding-left: 0; }
   .grid { grid-template-columns: 1fr; }
