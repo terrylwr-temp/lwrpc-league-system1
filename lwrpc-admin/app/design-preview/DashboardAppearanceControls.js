@@ -89,7 +89,7 @@ export function DashboardAppearanceControls({ isLightSidebar, isLightCardHeaders
           <input type="checkbox" checked={isLightSidebar} onChange={onToggleSidebar}/>
           <i className={styles.appearanceSwitch} aria-hidden="true"/>
         </label>
-        <label>
+        <label className={styles.appearanceCollapseSidebarOption}>
           <span><strong>Collapse Sidebar</strong><small>{sidebarCollapsed ? "Icons until you hover over it" : "Keep sidebar expanded"}</small></span>
           <input type="checkbox" checked={sidebarCollapsed} onChange={toggleSidebarCollapsed}/>
           <i className={styles.appearanceSwitch} aria-hidden="true"/>

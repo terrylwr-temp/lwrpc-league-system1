@@ -207,7 +207,7 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
     return (
       <section className={className}>
         <div><span>Match Setup</span><strong>{match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}</strong></div>
-        <div className={captainStyles.setupStatuses}>{matchSetupTeams.map((setupTeam) => { const complete = setupStatusFor(match, setupTeam.id)?.complete === true; return <span className={complete ? captainStyles.setupComplete : captainStyles.setupPending} key={setupTeam.id}>{setupTeam.side} - <b>{setupTeam.name}</b>: <strong>{complete ? "Setup Complete" : "Setup Pending"}</strong></span>; })}</div>
+        <div className={captainStyles.setupStatuses}>{matchSetupTeams.map((setupTeam) => { const complete = setupStatusFor(match, setupTeam.id)?.complete === true; return <span className={complete ? captainStyles.setupComplete : captainStyles.setupPending} key={setupTeam.id}><span className={captainStyles.setupTeamName}>{setupTeam.side} - <b>{setupTeam.name}</b></span><strong>{complete ? "Setup Complete" : "Setup Pending"}</strong></span>; })}</div>
         <div className={captainStyles.setupButtons}>{accessibleSetupTeams.map((setupTeam) => { const complete = setupStatusFor(match, setupTeam.id)?.complete === true; const team = teams.find((candidate) => String(candidate.id) === String(setupTeam.id)); return <button type="button" className={complete ? captainStyles.blueAction : captainStyles.dangerAction} key={setupTeam.id} onClick={() => { setMatchToolsMatch(null); dashboard.onOpenMatchSetup?.(match, team); }}>Match Setup</button>; })}</div>
       </section>
     );
