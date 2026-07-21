@@ -1435,6 +1435,9 @@ export default function PlayerDashboardPage() {
             onOpenLeagueDocument: (documentType) =>
               selectedVisibleTeam && openLeagueDocument(selectedVisibleTeam, documentType),
             onOpenGuide: async () => {
+              if (window.matchMedia("(max-width: 767px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)").matches) {
+                return openGuideDocument(supabase, playerGuide);
+              }
               const document = await guidePdfDocument(supabase, playerGuide);
               if (document) setPdfDocument(document);
             },

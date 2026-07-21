@@ -29,6 +29,7 @@ import {
   guidePdfDocument,
   initialGuideDocuments,
   loadGuideDocument,
+  openGuideDocument,
 } from "./lib/dashboardGuides";
 
 const LOGIN_MESSAGE_TEMPLATES = [
@@ -116,6 +117,9 @@ export default function DashboardPage() {
   const [hideSetupRemindersToday, setHideSetupRemindersToday] = useState(false);
 
   async function openAdminGuide() {
+    if (window.matchMedia("(max-width: 767px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)").matches) {
+      return openGuideDocument(supabase, adminGuide);
+    }
     const document = await guidePdfDocument(supabase, adminGuide);
     if (document) setPdfDocument(document);
   }

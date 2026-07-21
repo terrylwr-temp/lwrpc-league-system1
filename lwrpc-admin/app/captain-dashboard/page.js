@@ -2904,6 +2904,9 @@ export default function CaptainDashboardPage() {
             onSelectTeam: selectCaptainTeam,
             onChangeDashboard: (path) => router.push(path),
             onOpenGuide: async () => {
+              if (window.matchMedia("(max-width: 767px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)").matches) {
+                return openGuideDocument(supabase, captainGuide);
+              }
               const document = await guidePdfDocument(supabase, captainGuide);
               if (document) setPdfDocument(document);
             },
