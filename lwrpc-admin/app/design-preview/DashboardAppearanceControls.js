@@ -7,6 +7,7 @@ const SIDEBAR_THEME_KEY = "lwrpc-dashboard-sidebar-theme";
 const CARD_HEADER_THEME_KEY = "lwrpc-dashboard-card-header-theme";
 const SIDEBAR_COLLAPSED_KEY = "lwrpc-dashboard-sidebar-collapsed";
 const APPEARANCE_CHANGE_EVENT = "lwrpc-dashboard-appearance-change";
+const MOBILE_LAYOUT_QUERY = "(max-width: 700px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)";
 
 function storedLightPreference(key) {
   try {
@@ -68,9 +69,18 @@ export function useDashboardAppearance() {
 
 export function DashboardAppearanceControls({ isLightSidebar, isLightCardHeaders, isSidebarCollapsed, onToggleSidebar, onToggleCardHeaders, onToggleSidebarCollapsed }) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMobileLayout, setIsMobileLayout] = useState(false);
   const fallbackAppearance = useDashboardAppearance();
   const sidebarCollapsed = typeof isSidebarCollapsed === "boolean" ? isSidebarCollapsed : fallbackAppearance.isSidebarCollapsed;
   const toggleSidebarCollapsed = onToggleSidebarCollapsed || fallbackAppearance.toggleSidebarCollapsed;
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia(MOBILE_LAYOUT_QUERY);
+    const syncMobileLayout = () => setIsMobileLayout(mediaQuery.matches);
+    syncMobileLayout();
+    mediaQuery.addEventListener("change", syncMobileLayout);
+    return () => mediaQuery.removeEventListener("change", syncMobileLayout);
+  }, []);
 
   return (
     <section className={styles.appearanceSettings}>
@@ -89,11 +99,11 @@ export function DashboardAppearanceControls({ isLightSidebar, isLightCardHeaders
           <input type="checkbox" checked={isLightSidebar} onChange={onToggleSidebar}/>
           <i className={styles.appearanceSwitch} aria-hidden="true"/>
         </label>
-        <label className={styles.appearanceCollapseSidebarOption}>
+        {!isMobileLayout && <label className={styles.appearanceCollapseSidebarOption}>
           <span><strong>Collapse Sidebar</strong><small>{sidebarCollapsed ? "Icons until you hover over it" : "Keep sidebar expanded"}</small></span>
           <input type="checkbox" checked={sidebarCollapsed} onChange={toggleSidebarCollapsed}/>
           <i className={styles.appearanceSwitch} aria-hidden="true"/>
-        </label>
+        </label>}
         <label>
           <span><strong>Card Headers</strong><small>{isLightCardHeaders ? "Light background / dark text" : "Dark background / light text"}</small></span>
           <input type="checkbox" checked={isLightCardHeaders} onChange={onToggleCardHeaders}/>

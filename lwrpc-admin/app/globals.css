@@ -21,6 +21,10 @@
   body:not(:has(main.full-screen-main)) .system-footer {
     left: var(--sidebar-width);
   }
+
+  body:has(.lwrpc-sidebar-collapsed):not(:has(main.full-screen-main)) .system-footer {
+    left: 72px;
+  }
 }
 
 @media (min-width: 701px) and (max-height: 500px) and (orientation: landscape) and (pointer: coarse) {
