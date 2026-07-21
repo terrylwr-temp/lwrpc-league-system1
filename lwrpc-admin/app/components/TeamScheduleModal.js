@@ -484,9 +484,10 @@ function ScheduleMatchCard({
             .map((line) => {
               const winnerName = formatLineWinnerName(match, line);
               const lineAccentClass = lineHeaderAccentClass(match, line, selectedTeamId);
+              const lineBackgroundClass = lineResultBackgroundClass(lineAccentClass);
 
               return (
-              <div key={line.id} className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+              <div key={line.id} className={`rounded-xl border p-3 shadow-sm ${lineBackgroundClass}`}>
                 <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg ${lineAccentClass} px-3 py-2 text-sm text-white`}>
                   <span className="font-black">
                     Game {line.line_number || "-"}{line.division_lines?.line_name ? ` - ${line.division_lines.line_name}` : ""}
@@ -734,6 +735,12 @@ function lineHeaderAccentClass(match, line, selectedTeamId) {
   }
 
   return "bg-blue-500";
+}
+
+function lineResultBackgroundClass(headerAccentClass) {
+  if (headerAccentClass === "bg-emerald-500") return "border-emerald-200 bg-emerald-50";
+  if (headerAccentClass === "bg-red-500") return "border-red-200 bg-red-50";
+  return "border-blue-200 bg-blue-50";
 }
 
 function duprPostedLabel(line) {
