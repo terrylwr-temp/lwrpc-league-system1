@@ -4050,7 +4050,7 @@ function MatchDetailsModal({ match, ratingForMember, teamWithRoster, onOpenRoste
   const awayScore = match.away_score ?? null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-[#06142e]/75 p-2 backdrop-blur-sm sm:p-4">
       <div className="flex max-h-[94dvh] w-full max-w-5xl flex-col overflow-hidden rounded-[24px] border border-[#dce4ef] bg-white shadow-[0_30px_80px_rgba(3,15,39,.38)]">
         <div className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] via-[#1558d5] to-[#0e48bd] px-4 py-5 text-white sm:px-5 md:flex-row md:items-start md:justify-between">
           <div>
