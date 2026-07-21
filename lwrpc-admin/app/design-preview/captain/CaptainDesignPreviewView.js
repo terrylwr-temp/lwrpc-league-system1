@@ -230,7 +230,7 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
 
   return (
     <main className={["full-screen-main", styles.page, captainStyles.captainPage, appearance.isLightCardHeaders ? styles.lightCardHeaders : "", appearance.isSidebarCollapsed ? styles.sidebarCollapsedLayout : ""].filter(Boolean).join(" ")} id="captain-preview-dashboard">
-      <aside className={[styles.sidebar, appearance.isLightSidebar ? styles.lightSidebar : "", appearance.isSidebarCollapsed ? styles.sidebarCollapsed : ""].filter(Boolean).join(" ")} aria-label="Captain dashboard navigation; hover to expand when collapsed">
+      <aside className={[styles.sidebar, appearance.isLightSidebar ? styles.lightSidebar : "", appearance.isSidebarCollapsed ? styles.sidebarCollapsed : ""].filter(Boolean).join(" ")} aria-label="Captain dashboard navigation; hover to expand when collapsed" onMouseLeave={() => { if (appearance.isSidebarCollapsed) setExpandedMenu(""); }}>
         <a className={styles.brand} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer"><Image src="/lms-icon-192.png" width={46} height={46} alt="Lakewood Ranch Pickleball Club" priority/><strong>Lakewood Ranch Pickleball Club</strong></a>
         <nav className={styles.sideNav} aria-label="Captain dashboard navigation">
           <div className={styles.navGroup}>

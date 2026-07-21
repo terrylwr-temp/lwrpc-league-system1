@@ -46,6 +46,9 @@
 .sidebarCollapsed .submenu,
 .sidebarCollapsed .season,
 .sidebarCollapsed .sidebarCopyright { width: 0; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity .12s ease; }
+.sidebarCollapsed .submenu { display: none; }
+.sidebarCollapsed:hover .submenu,
+.sidebarCollapsed:focus-within .submenu { display: grid; }
 .sidebarCollapsed:hover .brand,
 .sidebarCollapsed:focus-within .brand { justify-content: flex-start; padding-inline: 5px; }
 .sidebarCollapsed:hover .sideNav > button,

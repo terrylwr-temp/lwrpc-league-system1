@@ -7,7 +7,7 @@ import { APP_VERSION } from "../lib/version";
 import LmsInstallButton from "../components/LmsInstallButton";
 import styles from "./page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "./DashboardAppearanceControls";
-import { standingsTiebreakDescription } from "../lib/standingsTiebreaks";
+import { standingsTiebreakLabels } from "../lib/standingsTiebreaks";
 
 const paths = {
   dashboard: <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>,
@@ -140,6 +140,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
   const divisionStandings = dashboard.divisionStandings || [];
   const standing = divisionStandings.find((row) => String(row.team_id) === String(teamId)) || null;
   const playoffTeamCount = Number(selectedTeam?.divisions?.playoff_team_count || 0);
+  const standingsTiebreakText = standingsTiebreakLabels(selectedTeam?.divisions).join(" → ");
   const playoffTeamIds = new Set(divisionStandings
     .slice(0, playoffTeamCount > 0 ? playoffTeamCount : 0)
     .map((row) => String(row.team_id || row.id)));
@@ -292,7 +293,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
 
   return (
     <main className={["full-screen-main", styles.page, appearance.isLightCardHeaders ? styles.lightCardHeaders : "", appearance.isSidebarCollapsed ? styles.sidebarCollapsedLayout : ""].filter(Boolean).join(" ")} id="preview-dashboard">
-      <aside className={[styles.sidebar, appearance.isLightSidebar ? styles.lightSidebar : "", appearance.isSidebarCollapsed ? styles.sidebarCollapsed : ""].filter(Boolean).join(" ")} aria-label="Dashboard navigation; hover to expand when collapsed">
+      <aside className={[styles.sidebar, appearance.isLightSidebar ? styles.lightSidebar : "", appearance.isSidebarCollapsed ? styles.sidebarCollapsed : ""].filter(Boolean).join(" ")} aria-label="Dashboard navigation; hover to expand when collapsed" onMouseLeave={() => { if (appearance.isSidebarCollapsed) setExpandedMenu(""); }}>
         <a className={styles.brand} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer" title="Open the Lakewood Ranch Pickleball Club website">
           <Image src="/lms-icon-192.png" width={46} height={46} alt="Lakewood Ranch Pickleball Club" priority/>
           <strong>Lakewood Ranch Pickleball Club</strong>
@@ -520,12 +521,8 @@ export default function DesignPreviewView({ dashboard = {} }) {
         <div className={styles.modalLayer} role="dialog" aria-modal="true" aria-labelledby="standings-dialog-title">
           <button type="button" className={styles.backdrop} onClick={() => setStandingsOpen(false)} aria-label="Close standings"/>
           <section className={styles.standingsDialog}>
-            <header><div><span>Division standings</span><div className={styles.standingsNames}><strong>{seasonName}</strong><strong>{leagueName}</strong><h2 id="standings-dialog-title">{selectedTeam?.divisions?.name || "Division"}</h2></div><p className={styles.standingsMetric}>{dashboard.standingsMetricLabel || "Standings Points"}</p></div><button type="button" onClick={() => setStandingsOpen(false)} aria-label="Close standings">&times;</button></header>
+            <header><div><span>Division standings</span><div className={styles.standingsNames}><strong>{seasonName}</strong><strong>{leagueName}</strong><h2 id="standings-dialog-title">{selectedTeam?.divisions?.name || "Division"}</h2></div><p className={styles.standingsMetric}>Tiebreak: {standingsTiebreakText}</p></div><button type="button" onClick={() => setStandingsOpen(false)} aria-label="Close standings">&times;</button></header>
             <div className={styles.standingsChart}>
-              <div className={styles.standingsTiebreak}>
-                <strong>Standings tiebreak order</strong>
-                <span>{standingsTiebreakDescription(selectedTeam?.divisions)}</span>
-              </div>
               {playoffTeamCount > 0 && <p className={styles.playoffNote}>Top {playoffTeamCount} teams highlighted for Playoffs / Championship Day</p>}
               {(dashboard.standingsLeaders || []).length > 0 ? dashboard.standingsLeaders.map((leader) => {
                 const width = Math.max(7, Math.round((Number(leader.chartValue || 0) / standingsMaximum) * 100));
