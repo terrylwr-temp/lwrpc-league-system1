@@ -2915,17 +2915,19 @@ function MatchLineupModal({ preview, ratingForMember, onClose }) {
                       {teamLineups.length === 0 ? (
                         <div className="rounded-xl bg-white/80 p-4 text-sm font-semibold text-slate-600">Setup is still pending for this team.</div>
                       ) : teamLineups.map((lineup) => (
-                        <article key={side.key + "-" + lineup.line_number} className="rounded-xl border border-white bg-white p-3 shadow-sm">
-                          <div className="mb-3 flex items-center justify-between gap-3">
-                            <strong className="text-sm font-black text-[#102e64]">Team {lineup.line_number || "-"}</strong>
-                            <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-black text-blue-900">Team {ratingLabel}: {lineupRating(lineup)}</span>
+                        <article key={side.key + "-" + lineup.line_number} className="overflow-hidden rounded-xl border border-white bg-white shadow-sm">
+                          <div className={`flex items-center justify-between gap-3 px-3 py-2.5 text-white ${side.key === "home" ? "bg-emerald-700" : "bg-blue-700"}`}>
+                            <strong className="text-sm font-black">Team {lineup.line_number || "-"}</strong>
+                            <span className="rounded-full bg-white/95 px-2.5 py-1 text-xs font-black text-[#102e64] shadow-sm">Team {ratingLabel}: {lineupRating(lineup)}</span>
                           </div>
-                          {[lineup.player_1, lineup.player_2].map((player, index) => (
-                            <div key={player?.id || index} className="flex items-center justify-between gap-3 border-t border-slate-100 py-2 first:border-t-0">
-                              <span className="min-w-0 truncate font-bold text-slate-900">{formatMemberName(player) || "Player TBD"}</span>
-                              <span className="flex-none rounded-lg bg-slate-100 px-2 py-1 text-xs font-black text-slate-700">{ratingLabel}: {playerRating(player)}</span>
-                            </div>
-                          ))}
+                          <div className="p-3">
+                            {[lineup.player_1, lineup.player_2].map((player, index) => (
+                              <div key={player?.id || index} className="flex items-center justify-between gap-3 border-t border-slate-100 py-2 first:border-t-0">
+                                <span className="min-w-0 truncate font-bold text-slate-900">{formatMemberName(player) || "Player TBD"}</span>
+                                <span className="flex-none rounded-lg bg-slate-100 px-2 py-1 text-xs font-black text-slate-700">{ratingLabel}: {playerRating(player)}</span>
+                              </div>
+                            ))}
+                          </div>
                         </article>
                       ))}
                     </div>

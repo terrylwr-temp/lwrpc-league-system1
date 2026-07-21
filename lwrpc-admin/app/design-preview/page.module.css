@@ -500,9 +500,9 @@
 .hiddenInput { display: none; }
 .inlineError { margin: 0 16px 16px; border: 1px solid #f3c7c4; border-radius: 10px; background: #fff1f0; padding: 10px 12px; color: #a73732; font-size: 12px; font-weight: 700; }
 .inlineSuccess { margin: 0 16px 16px; border: 1px solid #a9dec8; border-radius: 10px; background: #edf9f4; padding: 10px 12px; color: #217254; font-size: 12px; font-weight: 800; }
-.profileMeta { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px 16px; border-top: 1px solid #e8edf4; background: #f8faff; padding: 13px 16px; color: #69758a; font-size: 12px; line-height: 1.4; }
+.profileMeta { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 5px 12px; border-top: 1px solid #e8edf4; background: #f8faff; padding: 13px 16px; color: #69758a; font-size: 12px; line-height: 1.4; }
 .profileMeta span:first-child { color: #34435b; font-weight: 850; }
-.profileMeta span:last-child { font-weight: 700; }
+.profileMeta span:last-of-type { margin-left: auto; font-weight: 700; }
 .confirmLayer { z-index: 90; }
 .confirmDialog { padding: 23px; }
 .confirmDialog > span { color: var(--blue); font-size: 8px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase; }

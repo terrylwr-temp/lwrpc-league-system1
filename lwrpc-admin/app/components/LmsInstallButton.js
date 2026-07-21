@@ -27,7 +27,7 @@ function deviceInstallSteps() {
   return "Use Chrome or Edge, then choose the install icon in the address bar or open the browser menu and choose Apps or Install this site as an app.";
 }
 
-export default function LmsInstallButton({ compact = false }) {
+export default function LmsInstallButton({ compact = false, iconOnly = false }) {
   const [installPrompt, setInstallPrompt] = useState(null);
   const [showHelp, setShowHelp] = useState(false);
   const [showMobileInstall, setShowMobileInstall] = useState(false);
@@ -83,19 +83,25 @@ export default function LmsInstallButton({ compact = false }) {
 
   if (!showMobileInstall) return null;
 
+  const installLabel = installed ? "LWR PB Club System Installed" : "Install LWR PB Club System";
+
   return (
     <>
       <button
         type="button"
         onClick={installApp}
-        className={`flex w-full items-center justify-center gap-3 rounded-xl border-2 border-blue-700 bg-blue-50 px-4 py-3 text-sm font-black text-blue-950 shadow-[0_12px_26px_-18px_rgba(29,78,216,0.95)] transition hover:-translate-y-0.5 hover:bg-blue-100 hover:shadow-md ${compact ? "" : "mt-3"}`}
+        className={iconOnly
+          ? "relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-blue-200 bg-white text-blue-800 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-50 hover:shadow-md"
+          : `flex w-full items-center justify-center gap-3 rounded-xl border-2 border-blue-700 bg-blue-50 px-4 py-3 text-sm font-black text-blue-950 shadow-[0_12px_26px_-18px_rgba(29,78,216,0.95)] transition hover:-translate-y-0.5 hover:bg-blue-100 hover:shadow-md ${compact ? "" : "mt-3"}`}
+        aria-label={installLabel}
+        title={installLabel}
       >
-        <Image src="/lms-icon-192.png" alt="" width={32} height={32} className="h-8 w-8 rounded-lg bg-white object-contain shadow-sm" />
-        <span>{installed ? "LWR PB Club System Installed" : "Install LWR PB Club System"}</span>
+        <Image src="/lms-icon-192.png" alt="" width={iconOnly ? 24 : 32} height={iconOnly ? 24 : 32} className={iconOnly ? "h-6 w-6 rounded-md object-contain" : "h-8 w-8 rounded-lg bg-white object-contain shadow-sm"} />
+        {iconOnly ? <span className="absolute -bottom-1 -right-1 grid h-4 w-4 place-items-center rounded-full border border-white bg-blue-700 text-[10px] font-black leading-none text-white" aria-hidden="true">{installed ? "\u2713" : "\u2193"}</span> : <span>{installLabel}</span>}
       </button>
 
       {showHelp && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-3 sm:items-center sm:p-4">
+        <div className="fixed inset-0 z-[110] flex items-end justify-center bg-slate-950/70 p-3 sm:items-center sm:p-4">
           <div className="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)]">
             <div className="bg-[linear-gradient(135deg,#1d4ed8,#0f766e)] p-4 text-white">
               <div className="text-xs font-black uppercase tracking-wide text-blue-100">Add App Icon</div>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { hasRole, roleLabel } from "../lib/permissions";
 import { APP_VERSION } from "../lib/version";
+import LmsInstallButton from "../components/LmsInstallButton";
 import styles from "./page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "./DashboardAppearanceControls";
 
@@ -551,6 +552,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
             <footer className={styles.profileMeta}>
               <span>Version {APP_VERSION}</span>
               <span>&copy; {currentYear} Lakewood Ranch Pickleball Club</span>
+              <LmsInstallButton iconOnly/>
             </footer>
           </section>
         </div>
