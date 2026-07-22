@@ -158,7 +158,7 @@ export default function DashboardProfileDialog({
             </button>
             <button type="button" onClick={() => photoInputRef.current?.click()} disabled={profileImageSaving}>
               <Icon name="camera" />
-              <span><strong>{profileImageSaving ? "Saving Picture..." : displayedProfileImage ? "Change Picture" : "Add Picture"}</strong><small>JPG, PNG, or WebP · maximum 2 MB</small></span>
+              <span><strong>{profileImageSaving ? "Saving Profile Icon Picture..." : displayedProfileImage ? "Change Profile Icon Picture" : "Add Profile Icon Picture"}</strong><small>JPG, PNG, or WebP · maximum 2 MB</small></span>
               <Icon name="arrow" size={17} />
             </button>
             <input ref={photoInputRef} className={styles.hiddenInput} type="file" accept="image/jpeg,image/png,image/webp" onChange={handleProfileImage} />

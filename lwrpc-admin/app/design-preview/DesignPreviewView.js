@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { hasRole, roleLabel } from "../lib/permissions";
 import { APP_VERSION } from "../lib/version";
 import DashboardProfileDialog from "../components/DashboardProfileDialog";
+import DivisionStandingsBarChart from "../components/DivisionStandingsBarChart";
 import LmsInstallButton from "../components/LmsInstallButton";
 import styles from "./page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "./DashboardAppearanceControls";
@@ -187,7 +188,6 @@ export default function DesignPreviewView({ dashboard = {} }) {
   const scheduleItems = showAllSchedule ? allScheduleItems : allScheduleItems.slice(0, 3);
   const recentResults = showAllResults ? allResults : allResults.slice(0, 2);
   const availableDocuments = (dashboard.leagueDocuments || []).filter((document) => document.available);
-  const standingsMaximum = Math.max(1, ...(dashboard.standingsLeaders || []).map((leader) => Number(leader.chartValue || 0)));
   const currentYear = new Date().getFullYear();
   const savedProfileImage = profilePhotoUrl(member);
   const displayedProfileImage = profileImage || savedProfileImage;
@@ -523,13 +523,12 @@ export default function DesignPreviewView({ dashboard = {} }) {
             <header><div><span>Division standings</span><div className={styles.standingsNames}><strong>{seasonName}</strong><strong>{leagueName}</strong><h2 id="standings-dialog-title">{selectedTeam?.divisions?.name || "Division"}</h2></div><p className={styles.standingsMetric}>Tiebreak: {standingsTiebreakText}</p></div><button type="button" onClick={() => setStandingsOpen(false)} aria-label="Close standings">&times;</button></header>
             <div className={styles.standingsChart}>
               {playoffTeamCount > 0 && <p className={styles.playoffNote}>Top {playoffTeamCount} teams highlighted for Playoffs / Championship Day</p>}
-              {(dashboard.standingsLeaders || []).length > 0 ? dashboard.standingsLeaders.map((leader) => {
-                const width = Math.max(7, Math.round((Number(leader.chartValue || 0) / standingsMaximum) * 100));
-                const selected = String(leader.teamId) === String(teamId);
-                const playoffTeam = playoffTeamIds.has(String(leader.teamId || leader.id));
-                const rowClassName = [selected ? styles.selectedStanding : "", playoffTeam ? styles.playoffStanding : ""].filter(Boolean).join(" ");
-                return <div className={rowClassName} key={leader.id}><strong>#{leader.rank} {leader.team}</strong><span><i style={{ width: `${width}%` }}/></span><b>{leader.chartValue}</b></div>;
-              }) : <p className={styles.emptyMessage}>No standings have been published for this division.</p>}
+              <DivisionStandingsBarChart
+                leaders={dashboard.standingsLeaders}
+                metricLabel={dashboard.standingsMetricLabel}
+                selectedTeamId={teamId}
+                playoffTeamIds={playoffTeamIds}
+              />
             </div>
           </section>
         </div>
