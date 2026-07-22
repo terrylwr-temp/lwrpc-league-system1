@@ -40,6 +40,7 @@ import {
   matchLinePlayerRatingDisplay,
   matchLineTeamRatingDisplay,
 } from "../lib/matchRatingSnapshots";
+import { saveProfilePhoto } from "../lib/profilePhotos";
 
 const DesignPreviewView = dynamic(() => import("../design-preview/DesignPreviewView"), {
   loading: () => <LoadingScreen subtitle="Loading Player Dashboard..." />,
@@ -56,9 +57,6 @@ const PLAYER_LEAGUE_DOCUMENT_TYPES = LEAGUE_DOCUMENT_TYPES.filter((documentType)
 );
 
 const PLAYER_SELECTED_TEAM_STORAGE_PREFIX = "lwrpc-player-dashboard-selected-team";
-const PROFILE_PHOTO_BUCKET = "profile-photos";
-const PROFILE_PHOTO_URL_MARKER = `/storage/v1/object/public/${PROFILE_PHOTO_BUCKET}/`;
-const PROFILE_PHOTO_EXTENSIONS = { "image/jpeg": "jpg", "image/png": "png", "image/webp": "webp" };
 const PLAYER_PANEL_SECTION_IDS = {
   history: "player-dashboard-play-history",
   standings: "player-dashboard-division-standings",
@@ -78,19 +76,6 @@ const DASHBOARD_ACTION_BUTTON_ACTIVE_3D =
   "w-full cursor-pointer rounded-xl border border-blue-200 bg-gradient-to-b from-blue-500 to-blue-800 px-3 py-3 text-sm font-black text-white shadow-[0_5px_0_#1e3a8a,0_10px_16px_rgba(15,23,42,0.24)] transition hover:-translate-y-0.5 hover:from-blue-400 hover:to-blue-700 active:translate-y-1 active:shadow-[0_2px_0_#1e3a8a,0_5px_10px_rgba(15,23,42,0.2)]";
 const DASHBOARD_EMERALD_BUTTON_3D =
   "rounded-xl border border-emerald-300 bg-gradient-to-b from-white to-emerald-100 px-3 py-2 text-xs font-black text-emerald-950 shadow-[0_4px_0_#059669,0_8px_14px_rgba(15,23,42,0.16)] transition hover:-translate-y-0.5 hover:from-emerald-50 hover:to-emerald-200 active:translate-y-1 active:shadow-[0_2px_0_#059669,0_4px_8px_rgba(15,23,42,0.14)] disabled:cursor-not-allowed disabled:border-slate-200 disabled:bg-slate-100 disabled:bg-none disabled:text-slate-400 disabled:shadow-none disabled:hover:translate-y-0";
-
-function managedProfilePhotoPath(url) {
-  if (!url) return "";
-
-  try {
-    const parsed = new URL(url);
-    const markerIndex = parsed.pathname.indexOf(PROFILE_PHOTO_URL_MARKER);
-    if (markerIndex < 0) return "";
-    return decodeURIComponent(parsed.pathname.slice(markerIndex + PROFILE_PHOTO_URL_MARKER.length));
-  } catch {
-    return "";
-  }
-}
 
 function scrollDashboardSectionIntoView(sectionId) {
   if (!sectionId || typeof window === "undefined") return;
@@ -1312,73 +1297,9 @@ export default function PlayerDashboardPage() {
   }
 
   async function saveDesignPreviewProfileImage(file) {
-    const extension = PROFILE_PHOTO_EXTENSIONS[file?.type];
-    if (!extension) {
-      throw new Error("Choose a JPG, PNG, or WebP image.");
-    }
-    if (!member?.id) {
-      throw new Error("Your member profile could not be identified.");
-    }
-    if (file.size > 2_000_000) {
-      throw new Error("Choose an image smaller than 2 MB.");
-    }
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-    if (userError || !user?.id) {
-      throw userError || new Error("Your signed-in account could not be identified.");
-    }
-
-    const objectPath = `${user.id}/avatar-${crypto.randomUUID()}.${extension}`;
-    const existingUrls = Array.isArray(member.profile_image_urls)
-      ? member.profile_image_urls.filter(Boolean)
-      : [];
-    const previousManagedPaths = existingUrls
-      .map(managedProfilePhotoPath)
-      .filter(Boolean);
-
-    const { error: uploadError } = await supabase.storage
-      .from(PROFILE_PHOTO_BUCKET)
-      .upload(objectPath, file, {
-        cacheControl: "3600",
-        contentType: file.type,
-        upsert: false,
-      });
-    if (uploadError) throw uploadError;
-
-    const { data: publicUrlData } = supabase.storage
-      .from(PROFILE_PHOTO_BUCKET)
-      .getPublicUrl(objectPath);
-    const publicUrl = publicUrlData?.publicUrl;
-    if (!publicUrl) {
-      await supabase.storage.from(PROFILE_PHOTO_BUCKET).remove([objectPath]);
-      throw new Error("The profile picture URL could not be created.");
-    }
-
-    const nextProfileImageUrls = [
-      publicUrl,
-      ...existingUrls.filter((url) => !managedProfilePhotoPath(url)),
-    ];
-    const { data: updatedMember, error: memberUpdateError } = await supabase
-      .from("members")
-      .update({ profile_image_urls: nextProfileImageUrls })
-      .eq("id", member.id)
-      .select("id, profile_image_urls")
-      .single();
-
-    if (memberUpdateError) {
-      await supabase.storage.from(PROFILE_PHOTO_BUCKET).remove([objectPath]);
-      throw memberUpdateError;
-    }
-
-    setMember((current) => ({ ...current, profile_image_urls: updatedMember.profile_image_urls }));
-    if (previousManagedPaths.length > 0) {
-      await supabase.storage.from(PROFILE_PHOTO_BUCKET).remove(previousManagedPaths);
-    }
-
-    return publicUrl;
+    const saved = await saveProfilePhoto({ client: supabase, member, file });
+    setMember((current) => ({ ...current, profile_image_urls: saved.profileImageUrls }));
+    return saved.publicUrl;
   }
 
   async function logoutFromDesignPreview() {

@@ -38,6 +38,7 @@ import {
   matchLinePlayerRatingDisplay,
   matchLineTeamRatingDisplay,
 } from "../lib/matchRatingSnapshots";
+import { saveProfilePhoto } from "../lib/profilePhotos";
 import { currentMemberRating, divisionRatingIssue, divisionRatingStatus } from "../lib/ratingEligibility";
 
 const CaptainDesignPreviewView = dynamic(() => import("../design-preview/captain/CaptainDesignPreviewView"), {
@@ -2607,6 +2608,12 @@ export default function CaptainDashboardPage() {
     return <LoadingScreen subtitle={loadingSubtitle} />;
   }
 
+  async function saveCaptainProfileImage(file) {
+    const saved = await saveProfilePhoto({ client: supabase, member: currentMember, file });
+    setCurrentMember((current) => ({ ...current, profile_image_urls: saved.profileImageUrls }));
+    return saved.publicUrl;
+  }
+
   if (!currentMember) {
     return (
       <main className="min-h-screen bg-slate-100 p-4 md:p-6">
@@ -2911,6 +2918,7 @@ export default function CaptainDashboardPage() {
               if (document) setPdfDocument(document);
             },
             onChangePassword: () => router.push("/reset-password"),
+            onSaveProfileImage: saveCaptainProfileImage,
             onLogout: async () => {
               const { error } = await supabase.auth.signOut({ scope: "local" });
               if (error) throw error;

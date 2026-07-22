@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { hasRole, roleLabel } from "../lib/permissions";
 import { APP_VERSION } from "../lib/version";
+import DashboardProfileDialog from "../components/DashboardProfileDialog";
 import LmsInstallButton from "../components/LmsInstallButton";
 import styles from "./page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "./DashboardAppearanceControls";
@@ -252,7 +253,6 @@ export default function DesignPreviewView({ dashboard = {} }) {
 
     const previousImage = profileImage;
     setProfileImageSaving(true);
-
     try {
       const previewUrl = await new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -261,7 +261,6 @@ export default function DesignPreviewView({ dashboard = {} }) {
         reader.readAsDataURL(file);
       });
       setProfileImage(previewUrl);
-
       const savedUrl = await dashboard.onSaveProfileImage?.(file);
       setProfileImage(savedUrl || previewUrl);
       setProfileImageMessage("Profile picture saved.");
@@ -536,7 +535,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
         </div>
       )}
 
-      {profileOpen && (
+      {false && profileOpen && (
         <div className={styles.modalLayer} role="dialog" aria-modal="true" aria-labelledby="profile-dialog-title">
           <button type="button" className={styles.backdrop} onClick={() => setProfileOpen(false)} aria-label="Close profile"/>
           <section className={styles.profileDialog}>
@@ -560,12 +559,23 @@ export default function DesignPreviewView({ dashboard = {} }) {
         </div>
       )}
 
-      {logoutConfirmOpen && (
+      {false && logoutConfirmOpen && (
         <div className={`${styles.modalLayer} ${styles.confirmLayer}`} role="alertdialog" aria-modal="true" aria-labelledby="preview-logout-title">
           <button type="button" className={styles.backdrop} onClick={() => !logoutPending && setLogoutConfirmOpen(false)} aria-label="Cancel logout"/>
           <section className={styles.confirmDialog}><span>Account</span><h2 id="preview-logout-title">Log out of this device?</h2><p>You will remain signed in on your other browsers and devices.</p>{logoutError && <p className={styles.inlineError}>{logoutError}</p>}<div><button type="button" onClick={() => setLogoutConfirmOpen(false)} disabled={logoutPending}>Stay signed in</button><button type="button" className={styles.confirmLogout} onClick={confirmLogout} disabled={logoutPending}>{logoutPending ? "Logging out..." : "Log out"}</button></div></section>
         </div>
       )}
+
+      <DashboardProfileDialog
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        member={member}
+        role={role}
+        membershipUrl={dashboard.membershipUrl}
+        onChangePassword={dashboard.onChangePassword}
+        onSaveProfileImage={dashboard.onSaveProfileImage}
+        onLogout={dashboard.onLogout}
+      />
     </main>
   );
 }

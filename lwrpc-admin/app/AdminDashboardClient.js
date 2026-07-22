@@ -21,6 +21,7 @@ import AdminDesignPreviewView from "./design-preview/admin/AdminDesignPreviewVie
 import { adminNavigationSections } from "./lib/adminNavigation";
 import { requireRole, supabase } from "./lib/auth";
 import { formatDisplayTimestampShort } from "./lib/dateTime";
+import { saveProfilePhoto } from "./lib/profilePhotos";
 import {
   DEFAULT_GUIDE_BUCKET,
   DEFAULT_GUIDE_PREFIX,
@@ -122,6 +123,12 @@ export default function DashboardPage() {
     }
     const document = await guidePdfDocument(supabase, adminGuide);
     if (document) setPdfDocument(document);
+  }
+
+  async function saveAdminProfileImage(file) {
+    const saved = await saveProfilePhoto({ client: supabase, member: currentAdminMember, file });
+    setCurrentAdminMember((current) => ({ ...current, profile_image_urls: saved.profileImageUrls }));
+    return saved.publicUrl;
   }
   const [leagueAnalyticsExpanded, setLeagueAnalyticsExpanded] = useState(false);
   const [pendingVerificationModalOpen, setPendingVerificationModalOpen] = useState(false);
@@ -1306,6 +1313,7 @@ export default function DashboardPage() {
           onChangeDashboard: (path) => router.push(path),
           onOpenGuide: openAdminGuide,
           onChangePassword: () => router.push("/reset-password"),
+          onSaveProfileImage: saveAdminProfileImage,
           onLogout: async () => {
             const { error } = await supabase.auth.signOut({ scope: "local" });
             if (error) throw error;
