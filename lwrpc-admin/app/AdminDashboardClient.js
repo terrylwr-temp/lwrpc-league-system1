@@ -18,6 +18,7 @@ import {
 } from "recharts";
 import AppHeader from "./components/AppHeader";
 import AdminDesignPreviewView from "./design-preview/admin/AdminDesignPreviewView";
+import { StandingsBarChartTooltip } from "./components/DivisionStandingsBarChart";
 import { adminNavigationSections } from "./lib/adminNavigation";
 import { requireRole, supabase } from "./lib/auth";
 import { formatDisplayTimestampShort } from "./lib/dateTime";
@@ -1904,10 +1905,7 @@ function StandingsLeaderGroupChart({ group }) {
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis type="number" allowDecimals tick={{ fontSize: 11, fontWeight: 700 }} />
             <YAxis type="category" dataKey="chartLabel" width={132} tick={{ fontSize: 11, fontWeight: 800 }} />
-            <Tooltip contentStyle={chartTooltipStyle} formatter={(value, name, item) => [
-              name === "Standings Points" ? formatDecimal(value, 1) : formatCount(value),
-              `${name} (${item?.payload?.record || "0-0"})`,
-            ]} />
+            <Tooltip contentStyle={chartTooltipStyle} content={<StandingsBarChartTooltip />} />
             <Bar dataKey="chartValue" name={group.metricLabel} fill="#2563eb" minPointSize={4} radius={[0, 8, 8, 0]} />
           </BarChart>
         </ResponsiveContainer>

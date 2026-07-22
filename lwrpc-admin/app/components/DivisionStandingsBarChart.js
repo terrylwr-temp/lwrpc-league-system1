@@ -18,9 +18,23 @@ const tooltipStyle = {
   fontWeight: 700,
 };
 
-function formatValue(value) {
-  const number = Number(value || 0);
-  return Number.isInteger(number) ? String(number) : number.toFixed(1);
+function formatWholePoints(value) {
+  return Number(value || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+export function StandingsBarChartTooltip({ active, payload }) {
+  const leader = payload?.[0]?.payload;
+
+  if (!active || !leader) return null;
+
+  return (
+    <div className="rounded-xl border border-slate-300 bg-white px-3 py-2 shadow-lg">
+      <p className="m-0 text-sm font-black text-slate-900">#{leader.rank || "-"} {leader.team || "Team"}</p>
+      <p className="mt-1 text-sm font-bold text-slate-900">
+        Standings Points ({leader.record || "0-0"}): {formatWholePoints(leader.points)}
+      </p>
+    </div>
+  );
 }
 
 export default function DivisionStandingsBarChart({
@@ -53,13 +67,7 @@ export default function DivisionStandingsBarChart({
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
           <XAxis type="number" allowDecimals tick={{ fontSize: 11, fontWeight: 700 }} />
           <YAxis type="category" dataKey="chartLabel" width={132} tick={{ fontSize: 11, fontWeight: 800 }} />
-          <Tooltip
-            contentStyle={tooltipStyle}
-            formatter={(value, name, item) => [
-              formatValue(value),
-              `${name} (${item?.payload?.record || "0-0"})${item?.payload?.playoffTeam ? " · Playoff position" : ""}`,
-            ]}
-          />
+          <Tooltip contentStyle={tooltipStyle} content={<StandingsBarChartTooltip />} />
           <Bar dataKey="chartValue" name={metricLabel} minPointSize={4} radius={[0, 8, 8, 0]}>
             {data.map((leader) => (
               <Cell

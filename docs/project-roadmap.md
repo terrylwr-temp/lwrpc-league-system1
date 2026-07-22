@@ -330,3 +330,4 @@ As of 2026-05-21:
 - Admin Dashboard Club Operational Overview now labels completed match counts as verified matches and provides a three-way Average Team Rating toggle for DUPR Doubles, Season DUPR, and Age-Based team roster averages. The visible app version was bumped to `LMS-0555`.
 - Captain Dashboard next-match and upcoming-match actions now read `Match Details` instead of `View Match`. The visible app version was bumped to `LMS-0556`.
 - Admin Dashboard League Analytics now charts active teams by their home location instead of scheduled matches by location. The visible app version was bumped to `LMS-0557`.
+- Player, Captain, and Admin standings bar-chart tooltips now consistently show the ranked team first, then its `Standings Points` record and rounded whole-number points. The visible app version was bumped to `LMS-0558`.
