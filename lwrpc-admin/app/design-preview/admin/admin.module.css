@@ -121,3 +121,12 @@
 .lightCardHeaders .tools > header > strong { background: rgba(255, 255, 255, .72); color: #245d91; }
 .lightCardHeaders .snapshot > header label span { color: #536a83; }
 .lightCardHeaders .snapshot > header select { border-color: #aebdcd; background: rgba(255, 255, 255, .78); color: #17345b; }
+
+.ratingToggle {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.ratingToggle button {
+  padding-inline: 3px;
+  font-size: 9px;
+}

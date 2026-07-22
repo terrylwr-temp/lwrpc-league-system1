@@ -76,6 +76,7 @@ export default function DashboardPage() {
   const [dashboardFilter, setDashboardFilter] = useState("active");
   const [dashboardRosterCountMode, setDashboardRosterCountMode] = useState("assignments");
   const [dashboardGamesPlayedMode, setDashboardGamesPlayedMode] = useState("games");
+  const [dashboardRatingMode, setDashboardRatingMode] = useState("season");
   const [dashboardFilterOptions, setDashboardFilterOptions] = useState({
     seasons: [],
     leagues: [],
@@ -205,7 +206,12 @@ export default function DashboardPage() {
       gamesPlayed: gamesPlayedCount,
       matchesPlayed: matchesPlayedCount,
       averageRosterCount: averageRosterCount(scopedTeams, scopedRosterData),
-      averageTeamDupr: averageTeamDupr(scopedTeams, scopedRosterData, scopedRatingData),
+      averageTeamDupr: averageTeamRating(scopedTeams, scopedRosterData, scopedRatingData, "season_dupr_rating"),
+      averageTeamRatings: {
+        doubles: averageTeamRating(scopedTeams, scopedRosterData, scopedRatingData, "dupr_doubles_rating"),
+        season: averageTeamRating(scopedTeams, scopedRosterData, scopedRatingData, "season_dupr_rating"),
+        ageBased: averageTeamRating(scopedTeams, scopedRosterData, scopedRatingData, "season_primetime_rating"),
+      },
       executive: buildExecutiveAnalytics({
         teams: scopedTeams,
         rosterRows: scopedRosterData,
@@ -1290,6 +1296,8 @@ export default function DashboardPage() {
           counts: dashboardCounts,
           rosterCountMode: dashboardRosterCountMode,
           onRosterCountModeChange: setDashboardRosterCountMode,
+          ratingMode: dashboardRatingMode,
+          onRatingModeChange: setDashboardRatingMode,
           filter: dashboardFilter,
           filterOptions: dashboardFilterOptions,
           scopeLabel: scopeHelper,
@@ -2303,7 +2311,7 @@ async function loadScopedRatingData(seasonIds) {
 
   const { data, error } = await supabase
     .from("member_season_ratings")
-    .select("member_id, season_id, season_dupr_rating")
+    .select("member_id, season_id, dupr_doubles_rating, season_dupr_rating, season_primetime_rating")
     .in("season_id", seasonIds);
 
   if (error) {
@@ -2558,11 +2566,12 @@ function averageRosterCount(teams, rosterRows) {
   return rosterRows.length / teams.length;
 }
 
-function averageTeamDupr(teams, rosterRows, ratingRows) {
+function averageTeamRating(teams, rosterRows, ratingRows, ratingField) {
   const ratingsByMemberSeason = {};
 
   ratingRows.forEach((rating) => {
-    const value = Number(rating.season_dupr_rating);
+    if (rating[ratingField] === null || rating[ratingField] === undefined || rating[ratingField] === "") return;
+    const value = Number(rating[ratingField]);
     if (Number.isNaN(value)) return;
     ratingsByMemberSeason[memberSeasonKey(rating.member_id, rating.season_id)] = value;
   });
