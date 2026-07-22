@@ -47,7 +47,7 @@ export default function DivisionStandingsBarChart({
   }
 
   return (
-    <div style={{ height }}>
+    <section style={{ height }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 8, right: 24, left: 18, bottom: 0 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -70,6 +70,6 @@ export default function DivisionStandingsBarChart({
           </Bar>
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </section>
   );
 }

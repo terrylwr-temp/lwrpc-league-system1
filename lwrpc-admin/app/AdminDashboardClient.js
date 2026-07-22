@@ -821,7 +821,7 @@ export default function DashboardPage() {
       ),
     },
     { label: "Teams", value: formatCount(dashboardCounts?.teams), helper: `${scopeHelper} teams`, tone: "emerald" },
-    { label: "Average Team DUPR Rating", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Average roster DUPR by ${scopeHelper.toLowerCase()} team`, tone: "emerald" },
+    { label: "Average Team Season DUPR", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Season DUPR roster average by ${scopeHelper.toLowerCase()} team`, tone: "emerald" },
   ];
 
   const statusCards = [
