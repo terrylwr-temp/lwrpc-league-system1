@@ -1742,21 +1742,21 @@ function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onTo
           )}
         </ChartPanel>
 
-        <ChartPanel title="Matches By Location" helper="Top scheduled match locations">
+        <ChartPanel title="Teams By Location" helper="Active teams grouped by home location">
           {!chartsReady ? (
             <EmptyChartState label="Charts loading..." />
-          ) : analytics.matchesByLocation.length ? (
+          ) : analytics.teamsByLocation.length ? (
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analytics.matchesByLocation} layout="vertical" margin={{ top: 10, right: 18, left: 28, bottom: 0 }}>
+              <BarChart data={analytics.teamsByLocation} layout="vertical" margin={{ top: 10, right: 18, left: 28, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fontWeight: 700 }} />
                 <YAxis type="category" dataKey="location" width={110} tick={{ fontSize: 11, fontWeight: 700 }} />
                 <Tooltip contentStyle={chartTooltipStyle} />
-                <Bar dataKey="matches" name="Matches" fill="#7c3aed" radius={[0, 8, 8, 0]} />
+                <Bar dataKey="teams" name="Teams" fill="#7c3aed" radius={[0, 8, 8, 0]} />
               </BarChart>
             </ResponsiveContainer>
           ) : (
-            <EmptyChartState label="No locations in this scope." />
+            <EmptyChartState label="No team locations in this scope." />
           )}
         </ChartPanel>
       </div>
@@ -2073,7 +2073,12 @@ async function loadTeamsForDashboard(scopeData) {
       id,
       name,
       division_id,
+      home_location_id,
       is_active,
+      locations (
+        id,
+        name
+      ),
       divisions!inner (
         id,
         name,
@@ -2337,7 +2342,7 @@ function emptyExecutiveAnalytics() {
     teamsByDivision: [],
     playersByDivision: [],
     ratingDistributionByDivision: [],
-    matchesByLocation: [],
+    teamsByLocation: [],
     standingsLeaders: [],
     standingsLeaderGroups: [],
   };
@@ -2398,7 +2403,12 @@ function buildExecutiveAnalytics({ teams = [], rosterRows = [], ratingRows = [],
   const scheduledMatches = matches.filter((match) => Boolean(match.scheduled_date));
   const completedMatches = matches.filter(isCompletedMatch);
   const matchesByWeek = new Map();
-  const matchesByLocation = new Map();
+  const teamsByLocation = new Map();
+
+  teams.forEach((team) => {
+    const locationName = team.locations?.name || "No Location";
+    teamsByLocation.set(locationName, (teamsByLocation.get(locationName) || 0) + 1);
+  });
 
   matches.forEach((match) => {
     const weekLabel = matchWeekLabel(match);
@@ -2407,8 +2417,6 @@ function buildExecutiveAnalytics({ teams = [], rosterRows = [], ratingRows = [],
     if (isCompletedMatch(match)) week.completed += 1;
     matchesByWeek.set(weekLabel, week);
 
-    const locationName = match.locations?.name || "No Location";
-    matchesByLocation.set(locationName, (matchesByLocation.get(locationName) || 0) + 1);
   });
 
   analytics.totalTeams = teams.length;
@@ -2430,7 +2438,7 @@ function buildExecutiveAnalytics({ teams = [], rosterRows = [], ratingRows = [],
   analytics.ratingDistributionByDivision = Array.from(ratingsByDivision.entries())
     .map(([division, ratings]) => ratingDistributionRow(division, Array.from(ratings.values())))
     .sort((a, b) => a.division.localeCompare(b.division));
-  analytics.matchesByLocation = mapToChartRows(matchesByLocation, "location", "matches").slice(0, 8);
+  analytics.teamsByLocation = mapToChartRows(teamsByLocation, "location", "teams").slice(0, 8);
   analytics.standingsLeaders = standings
     .filter((row) => Number(row.rank || 0) > 0)
     .sort((a, b) => Number(a.rank || 999) - Number(b.rank || 999))
