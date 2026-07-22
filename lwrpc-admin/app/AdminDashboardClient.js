@@ -814,7 +814,7 @@ export default function DashboardPage() {
       ),
     },
     { label: "Teams", value: formatCount(dashboardCounts?.teams), helper: `${scopeHelper} teams`, tone: "emerald" },
-    { label: "This Week", value: formatCount(dashboardCounts?.matchesThisWeek), helper: `${scopeHelper} scheduled matches`, tone: "amber" },
+    { label: "Average Team DUPR Rating", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Average roster DUPR by ${scopeHelper.toLowerCase()} team`, tone: "emerald" },
   ];
 
   const statusCards = [
@@ -857,7 +857,7 @@ export default function DashboardPage() {
         </div>
       ),
     },
-    { label: "Average Team DUPR Rating", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Average roster DUPR by ${scopeHelper.toLowerCase()} team`, tone: "emerald" },
+    { label: "This Week", value: formatCount(dashboardCounts?.matchesThisWeek), helper: `${scopeHelper} scheduled matches`, tone: "amber" },
     {
       label: "Pending Verification",
       value: formatCount(dashboardCounts?.pendingVerification),
