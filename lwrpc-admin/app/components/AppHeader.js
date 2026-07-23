@@ -113,6 +113,7 @@ export default function AppHeader({
   const activeAdminGroup = useMemo(() => adminGroups.find((group) => group.links.some((link) => isPathActive(link.path))), [adminGroups, isPathActive]);
   const dashboardActive = dashboardLinks.some((link) => isPathActive(link.path, link.aliases));
   const contextLabel = activeAdminGroup?.label || (dashboardActive ? (hasRole(role, "league_manager") ? "Admin Dashboard" : "Dashboard") : "Administration");
+  const hidePageSectionLabel = ["people", "matches", "structure", "system"].includes(activeAdminGroup?.key);
   const displayName = memberDisplayName(member);
   const firstName = member?.first_name || displayName.split(" ")[0] || "User";
 
@@ -291,9 +292,9 @@ export default function AppHeader({
         <div className="flex items-center gap-1"><button type="button" onClick={() => navigate(`/help/${role}`)} className="grid h-9 w-9 place-items-center rounded-full border border-[#dce4ef] bg-white text-[#536079]" aria-label="Open User Guide"><Icon name="help" size={18}/></button><button type="button" onClick={() => setProfileOpen(true)} className="grid h-10 w-10 place-items-center rounded-full bg-transparent" aria-label="Open profile"><ProfileAvatar member={member} size={36}/></button></div>
       </header>
 
-      <section className="mx-auto mb-6 max-w-[1180px] overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-r from-[#102e64] via-[#154b9b] to-[#1558d5] px-5 py-5 text-white shadow-[0_14px_32px_rgba(20,64,145,.16)] md:px-6">
+      <section className={`mx-auto mb-6 max-w-[1180px] overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-r from-[#102e64] via-[#154b9b] to-[#1558d5] px-5 ${hidePageSectionLabel ? "py-4" : "py-5"} text-white shadow-[0_14px_32px_rgba(20,64,145,.16)] md:px-6`}>
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="min-w-0"><span className="text-[10px] font-black uppercase tracking-[.14em] text-[#bcd1f6]">{contextLabel}</span><h2 className="mt-1 text-[24px] font-black leading-tight text-white">{title}</h2><p className={`${hideSubtitleOnMobile ? "hidden sm:block" : ""} mt-1 max-w-3xl text-[14px] font-semibold leading-5 text-[#d8e5fb]`}>{subtitle}</p></div>
+          <div className="min-w-0">{!hidePageSectionLabel && <span className="text-[10px] font-black uppercase tracking-[.14em] text-[#bcd1f6]">{contextLabel}</span>}<h2 className={`${hidePageSectionLabel ? "" : "mt-1"} text-[24px] font-black leading-tight text-white`}>{title}</h2><p className={`${hideSubtitleOnMobile ? "hidden sm:block" : ""} mt-1 max-w-3xl text-[14px] font-semibold leading-5 text-[#d8e5fb]`}>{subtitle}</p></div>
           {(actions || welcomeAction) && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}{welcomeAction}</div>}
         </div>
       </section>
