@@ -341,3 +341,4 @@ As of 2026-05-21:
 - The Admin pending-score card now opens Scoring Operations with the exact counted matches selected. Initial overdue score entry is shown only on the home team's Captain dashboard, while pending validation remains visible to either captain. The visible app version was bumped to `LMS-0563`.
 - The Captain dashboard's mobile-friendly Pending Match Score Entry/Validations count card is now tappable when it has items and scrolls to the pending-match list. The visible app version was bumped to `LMS-0564`.
 - Player and Captain Division Standings dialogs now offer Tiebreak Details, showing the tied teams' cumulative verified-season metrics through the configured rule that separates them and explaining the resulting rank. The visible app version was bumped to `LMS-0565`.
+- Division Standings shows the Tiebreak Details control only when two or more teams are tied on the division's primary ranking metric. The visible app version was bumped to `LMS-0566`.

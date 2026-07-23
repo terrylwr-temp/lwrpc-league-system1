@@ -17,6 +17,18 @@ function signedValue(value) {
   return value > 0 ? `+${value}` : String(value);
 }
 
+export function hasStandingsTiebreak(leaders = [], division) {
+  const primaryRule = standingsTiebreakRules(division)[0];
+  const counts = new Map();
+
+  leaders.forEach((leader) => {
+    const value = valueForRule(leader, primaryRule);
+    counts.set(value, Number(counts.get(value) || 0) + 1);
+  });
+
+  return [...counts.values()].some((count) => count > 1);
+}
+
 export default function StandingsTiebreakDetails({ leaders = [], division }) {
   const rules = standingsTiebreakRules(division);
   const primaryRule = rules[0];
