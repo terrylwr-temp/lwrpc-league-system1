@@ -655,7 +655,10 @@ export default function CaptainDashboardPage() {
             match_wins,
             match_losses,
             match_ties,
+            line_wins,
+            game_wins,
             point_differential,
+            points_for,
             teams (
               id,
               name,

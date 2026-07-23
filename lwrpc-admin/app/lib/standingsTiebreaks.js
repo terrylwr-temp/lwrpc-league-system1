@@ -6,14 +6,20 @@ const TIEBREAK_LABELS = {
   points_for: "Total Points For",
 };
 
-export function standingsTiebreakLabels(division) {
+export function tiebreakLabel(rule) {
+  return TIEBREAK_LABELS[rule] || String(rule || "").replaceAll("_", " ");
+}
+
+export function standingsTiebreakRules(division) {
   return [
     division?.standings_tiebreak_1 || "standings_points",
     division?.standings_tiebreak_2 || "line_wins",
     division?.standings_tiebreak_3 || "point_differential",
-  ]
-    .filter(Boolean)
-    .map((rule) => TIEBREAK_LABELS[rule] || String(rule).replaceAll("_", " "));
+  ].filter(Boolean);
+}
+
+export function standingsTiebreakLabels(division) {
+  return standingsTiebreakRules(division).map(tiebreakLabel);
 }
 
 export function standingsTiebreakDescription(division) {

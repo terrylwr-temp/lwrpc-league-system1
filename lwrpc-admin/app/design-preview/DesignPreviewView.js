@@ -6,6 +6,7 @@ import { hasRole, roleLabel } from "../lib/permissions";
 import { APP_VERSION } from "../lib/version";
 import DashboardProfileDialog from "../components/DashboardProfileDialog";
 import DivisionStandingsBarChart from "../components/DivisionStandingsBarChart";
+import StandingsTiebreakDetails from "../components/StandingsTiebreakDetails";
 import LmsInstallButton from "../components/LmsInstallButton";
 import styles from "./page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "./DashboardAppearanceControls";
@@ -173,6 +174,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
   const [showAllSchedule, setShowAllSchedule] = useState(false);
   const [showAllResults, setShowAllResults] = useState(false);
   const [standingsOpen, setStandingsOpen] = useState(false);
+  const [tiebreakDetailsOpen, setTiebreakDetailsOpen] = useState(false);
   const appearance = useDashboardAppearance();
   const photoInputRef = useRef(null);
 
@@ -522,6 +524,10 @@ export default function DesignPreviewView({ dashboard = {} }) {
           <section className={styles.standingsDialog}>
             <header><div><span>Division standings</span><div className={styles.standingsNames}><strong>{seasonName}</strong><strong>{leagueName}</strong><h2 id="standings-dialog-title">{selectedTeam?.divisions?.name || "Division"}</h2></div><p className={styles.standingsMetric}>Tiebreak: {standingsTiebreakText}</p></div><button type="button" onClick={() => setStandingsOpen(false)} aria-label="Close standings">&times;</button></header>
             <div className={styles.standingsChart}>
+              <button type="button" onClick={() => setTiebreakDetailsOpen((current) => !current)} className="mb-3 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-950 hover:bg-emerald-100" aria-expanded={tiebreakDetailsOpen}>
+                {tiebreakDetailsOpen ? "Hide Tiebreak Details" : "Tiebreak Details"}
+              </button>
+              {tiebreakDetailsOpen && <StandingsTiebreakDetails leaders={dashboard.standingsLeaders} division={selectedTeam?.divisions}/>} 
               {playoffTeamCount > 0 && <p className={styles.playoffNote}>Top {playoffTeamCount} teams highlighted for Playoffs / Championship Day</p>}
               <DivisionStandingsBarChart
                 leaders={dashboard.standingsLeaders}

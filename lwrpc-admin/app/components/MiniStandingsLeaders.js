@@ -27,6 +27,9 @@ export function buildMiniStandingsLeaders(standings = [], selectedTeam = null) {
       losses: Number(row.match_losses || 0),
       ties: Number(row.match_ties || 0),
       differential: Number(row.point_differential || 0),
+      lineWins: Number(row.line_wins || 0),
+      gameWins: Number(row.game_wins || 0),
+      pointsFor: Number(row.points_for || 0),
     }))
     .sort((a, b) =>
       a.rank - b.rank ||
