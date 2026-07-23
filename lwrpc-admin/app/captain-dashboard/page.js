@@ -925,22 +925,42 @@ export default function CaptainDashboardPage() {
     });
   }, [currentMemberId, matches, selectedTeamId]);
 
-  const allPendingVerification = useMemo(() => {
-    return matches.filter((match) => {
-      const wasSubmittedByCurrentMember =
-        currentMemberId &&
-        String(match.score_entered_by_member_id || "") === String(currentMemberId);
+  const pendingScoreEntry = useMemo(() => {
+    const today = localDateString();
 
-      return match.score_status === "pending_verification" && !wasSubmittedByCurrentMember;
+    return matches.filter((match) => {
+      const isSelectedTeam =
+        !selectedTeamId ||
+        String(match.home_team_id) === String(selectedTeamId) ||
+        String(match.away_team_id) === String(selectedTeamId);
+
+      return (
+        isSelectedTeam &&
+        match.scheduled_date &&
+        match.scheduled_date < today &&
+        match.status !== "cancelled" &&
+        !hasEnteredMatchScore(match)
+      );
     });
-  }, [currentMemberId, matches]);
+  }, [matches, selectedTeamId]);
+
+  const pendingScoreEntryOrVerification = useMemo(() => {
+    return [
+      ...pendingScoreEntry.map((match) => ({ match, action: "entry" })),
+      ...pendingVerification.map((match) => ({ match, action: "verification" })),
+    ].sort((left, right) =>
+      `${left.match.scheduled_date || ""} ${left.match.scheduled_time || ""}`.localeCompare(
+        `${right.match.scheduled_date || ""} ${right.match.scheduled_time || ""}`
+      )
+    );
+  }, [pendingScoreEntry, pendingVerification]);
 
   useEffect(() => {
     if (loading || captainSectionDefaulted) return;
 
-    setCaptainSection(allPendingVerification.length > 0 ? "pending" : "upcoming");
+    setCaptainSection(pendingScoreEntryOrVerification.length > 0 ? "pending" : "upcoming");
     setCaptainSectionDefaulted(true);
-  }, [allPendingVerification.length, captainSectionDefaulted, loading]);
+  }, [captainSectionDefaulted, loading, pendingScoreEntryOrVerification.length]);
 
   const completedMatches = useMemo(() => {
     return matches.filter((match) => {
@@ -2899,7 +2919,7 @@ export default function CaptainDashboardPage() {
               "",
             teamStats,
             upcomingItems,
-            pendingVerification,
+            pendingScoreEntryOrVerification,
             matchSetupStatus,
             completedMatches,
             scoreMembersById: scoreSubmittersById,
@@ -3302,8 +3322,8 @@ export default function CaptainDashboardPage() {
                   />
                   <CaptainSectionButton
                     active={captainSection === "pending"}
-                    label="Pending Match Verifications"
-                    value={pendingVerification.length}
+                    label="Pending Match Score Entry/Validations"
+                    value={pendingScoreEntryOrVerification.length}
                     tone="red"
                     onClick={() => selectCaptainSection("pending")}
                   />
@@ -3417,16 +3437,19 @@ export default function CaptainDashboardPage() {
         </div>
 
         {captainSection === "pending" && (
-          <Section id={CAPTAIN_SECTION_IDS.pending} title={`Pending Match Verifications${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={pendingVerification.length}>
-            {pendingVerification.map((match) =>
-              matchCard(match, {
-                showSetup: false,
-                scoreButtonLabel: "Review / Validate Scores",
-                scoreButtonTitle: "Open score review, then validate or dispute",
-                scoreButtonTone: "red",
-              })
+          <Section id={CAPTAIN_SECTION_IDS.pending} title={`Pending Match Score Entry/Validations${selectedCaptainTeam ? `: ${selectedCaptainTeam.name}` : ""}`} count={pendingScoreEntryOrVerification.length}>
+            {pendingScoreEntryOrVerification.map(({ match, action }) =>
+              matchCard(match, action === "entry"
+                ? { scoreButtonTone: "red" }
+                : {
+                    showSetup: false,
+                    scoreButtonLabel: "Review / Validate Scores",
+                    scoreButtonTitle: "Open score review, then validate or dispute",
+                    scoreButtonTone: "red",
+                  }
+              )
             )}
-            {pendingVerification.length === 0 && <Empty message="No scores currently need verification." />}
+            {pendingScoreEntryOrVerification.length === 0 && <Empty message="No matches currently need score entry or validation." />}
           </Section>
         )}
 

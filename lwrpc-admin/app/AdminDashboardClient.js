@@ -172,7 +172,7 @@ export default function DashboardPage() {
       matchesThisWeekCount,
       scopedRosterData,
       scopedRatingData,
-      pendingVerificationMatches,
+      pendingScoreActionMatches,
       gamesPlayedCount,
       matchesPlayedCount,
       scopedMatches,
@@ -185,7 +185,7 @@ export default function DashboardPage() {
       ),
       loadScopedRosterData(scopedTeamIds),
       loadScopedRatingData(scopedSeasonIds),
-      loadScopedPendingVerificationMatches(leagueData),
+      loadScopedPendingScoreActionMatches(leagueData),
       countScopedPlayedGames(leagueData),
       countScopedMatches(leagueData, (query) =>
         query.eq("score_status", "verified")
@@ -204,8 +204,8 @@ export default function DashboardPage() {
       playersOnTeamsUnique: uniqueRosterPlayerCount,
       teams: teamsCount,
       matchesThisWeek: matchesThisWeekCount,
-      pendingVerification: pendingVerificationMatches.length,
-      pendingVerificationMatches,
+      pendingScoreActions: pendingScoreActionMatches.length,
+      pendingScoreActionMatches,
       gamesPlayed: gamesPlayedCount,
       matchesPlayed: matchesPlayedCount,
       averageRosterCount: averageRosterCount(scopedTeams, scopedRosterData),
@@ -875,11 +875,11 @@ export default function DashboardPage() {
     },
     { label: "This Week", value: formatCount(dashboardCounts?.matchesThisWeek), helper: `${scopeHelper} scheduled matches`, tone: "amber" },
     {
-      label: "Pending Verification",
-      value: formatCount(dashboardCounts?.pendingVerification),
-      helper: "Matches awaiting score review",
+      label: "Pending Match Score Entry/Validations",
+      value: formatCount(dashboardCounts?.pendingScoreActions),
+      helper: "Overdue score entry or score review",
       tone: "amber",
-      onClick: Number(dashboardCounts?.pendingVerification || 0) > 0
+      onClick: Number(dashboardCounts?.pendingScoreActions || 0) > 0
         ? () => setPendingVerificationModalOpen(true)
         : null,
     },
@@ -1321,6 +1321,7 @@ export default function DashboardPage() {
           ),
           onSelectFilter: setDashboardFilter,
           onNavigate: (path) => router.push(path),
+          onOpenPendingScoreActions: () => setPendingVerificationModalOpen(true),
           onChangeDashboard: (path) => router.push(path),
           onOpenGuide: openAdminGuide,
           onChangePassword: () => router.push("/reset-password"),
@@ -1525,7 +1526,7 @@ export default function DashboardPage() {
 
         {pendingVerificationModalOpen && (
           <PendingVerificationModal
-            matches={dashboardCounts?.pendingVerificationMatches || []}
+            matches={dashboardCounts?.pendingScoreActionMatches || []}
             scopeLabel={scopeHelper}
             onClose={() => setPendingVerificationModalOpen(false)}
             onOpenMatch={(matchId) => router.push(`/matches/${matchId}`)}
@@ -2143,7 +2144,7 @@ async function loadScopedMatchData(scopeData) {
   return data || [];
 }
 
-async function loadScopedPendingVerificationMatches(scopeData) {
+async function loadScopedPendingScoreActionMatches(scopeData) {
   if (!scopeData.leagueIds.length) return [];
 
   let query = supabase
@@ -2157,6 +2158,8 @@ async function loadScopedPendingVerificationMatches(scopeData) {
       scheduled_time,
       status,
       score_status,
+      score_entered_at,
+      score_verified_at,
       home_team:teams!matches_home_team_id_fkey (
         id,
         name
@@ -2179,7 +2182,6 @@ async function loadScopedPendingVerificationMatches(scopeData) {
       )
     `)
     .in("league_id", scopeData.leagueIds)
-    .eq("score_status", "pending_verification")
     .order("scheduled_date", { ascending: true })
     .order("scheduled_time", { ascending: true });
 
@@ -2190,11 +2192,26 @@ async function loadScopedPendingVerificationMatches(scopeData) {
   const { data, error } = await query;
 
   if (error) {
-    console.error("Unable to load pending verification matches", error);
+    console.error("Unable to load pending score action matches", error);
     return [];
   }
 
-  return data || [];
+  const today = localDateValue(new Date());
+  return (data || [])
+    .filter((match) => {
+      const requiresValidation = match.score_status === "pending_verification";
+      const requiresEntry =
+        match.scheduled_date &&
+        match.scheduled_date < today &&
+        match.status !== "cancelled" &&
+        !hasEnteredMatchScore(match);
+
+      return requiresValidation || requiresEntry;
+    })
+    .map((match) => ({
+      ...match,
+      scoreAction: match.score_status === "pending_verification" ? "verification" : "entry",
+    }));
 }
 
 async function loadScopedStandingsData(scopeData) {
@@ -2653,6 +2670,13 @@ function localDateValue(date) {
   return `${year}-${month}-${day}`;
 }
 
+function hasEnteredMatchScore(match) {
+  return (
+    (match?.score_status || "not_entered") !== "not_entered" ||
+    Boolean(match?.score_entered_at || match?.score_verified_at)
+  );
+}
+
 function PendingVerificationModal({ matches, scopeLabel, onClose, onOpenMatch }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
@@ -2660,9 +2684,9 @@ function PendingVerificationModal({ matches, scopeLabel, onClose, onOpenMatch })
         <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white sm:flex-row sm:items-start sm:justify-between">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-amber-200">
-              Pending Verification
+              Score Entry / Validation Needed
             </div>
-            <h2 className="mt-1 text-2xl font-black">Matches Awaiting Review</h2>
+            <h2 className="mt-1 text-2xl font-black">Pending Match Score Entry/Validations</h2>
             <p className="mt-1 text-sm font-semibold text-slate-200">
               {matches.length} match{matches.length === 1 ? "" : "es"} in {scopeLabel.toLowerCase()}.
             </p>
@@ -2709,7 +2733,7 @@ function PendingVerificationModal({ matches, scopeLabel, onClose, onOpenMatch })
                       onClick={() => onOpenMatch(match.id)}
                       className="rounded-xl bg-blue-700 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-blue-800"
                     >
-                      Open Match
+                      {match.scoreAction === "entry" ? "Enter Scores" : "Review / Validate"}
                     </button>
                   </div>
                 </div>
@@ -2717,7 +2741,7 @@ function PendingVerificationModal({ matches, scopeLabel, onClose, onOpenMatch })
             </div>
           ) : (
             <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
-              No matches are pending verification in this scope.
+              No matches currently need score entry or validation in this scope.
             </div>
           )}
         </div>
