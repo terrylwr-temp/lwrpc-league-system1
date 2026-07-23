@@ -336,3 +336,4 @@ As of 2026-05-21:
 - Team Roster Management now uses the branded typed `DELETE` confirmation for roster removals instead of a browser prompt. The visible app version was bumped to `LMS-0559`.
 - Typed-confirmation dialogs suppress a duplicate body instruction when the same typed value is already shown as the bold input label.
 - Admin Dashboard's Matches This Week helper now reads `Scheduled matches`. User Roles & Permissions restores Last Login sorting using the server-loaded Auth timestamp before pagination; Change Role remains a non-sortable action column. The visible app version was bumped to `LMS-0560`.
+- User Roles & Permissions now gathers every matching 100-record directory page on the server before sorting by Last Login, so that sort applies to the complete filtered result while retaining the database function's pagination safeguard. The visible app version was bumped to `LMS-0561`.

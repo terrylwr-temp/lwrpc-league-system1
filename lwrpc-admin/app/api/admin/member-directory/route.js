@@ -56,21 +56,29 @@ export async function GET(req) {
     if (mode === "roles" && sortKey === "last_login") {
       const filteredCount = Number(result.filtered_count || 0);
       if (filteredCount > rows.length) {
-        const { data: allData, error: allRowsError } = await authorization.supabase.rpc(
-          "admin_member_directory_page",
-          {
-            p_search: url.searchParams.get("search") || "",
-            p_include_inactive: true,
-            p_current_roster_only: false,
-            p_sort_key: "member",
-            p_sort_direction: "asc",
-            p_offset: 0,
-            p_limit: filteredCount,
-          }
-        );
-        if (allRowsError) throw allRowsError;
-        result = allData || result;
-        rows = Array.isArray(result.rows) ? result.rows : [];
+        // The database function intentionally limits every request to 100 rows.
+        // Collect each safe page before sorting by the Auth-only last-login value.
+        const allRows = [];
+        for (let offset = 0; offset < filteredCount; offset += PAGE_SIZE) {
+          const { data: pageData, error: pageError } = await authorization.supabase.rpc(
+            "admin_member_directory_page",
+            {
+              p_search: url.searchParams.get("search") || "",
+              p_include_inactive: true,
+              p_current_roster_only: false,
+              p_sort_key: "member",
+              p_sort_direction: "asc",
+              p_offset: offset,
+              p_limit: PAGE_SIZE,
+            }
+          );
+          if (pageError) throw pageError;
+
+          const pageRows = Array.isArray(pageData?.rows) ? pageData.rows : [];
+          allRows.push(...pageRows);
+          if (pageRows.length < PAGE_SIZE) break;
+        }
+        rows = allRows;
       }
 
       allLastLogins = await loadLastLogins(authorization.supabase);
