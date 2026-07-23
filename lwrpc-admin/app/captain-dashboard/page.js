@@ -930,9 +930,7 @@ export default function CaptainDashboardPage() {
 
     return matches.filter((match) => {
       const isSelectedTeam =
-        !selectedTeamId ||
-        String(match.home_team_id) === String(selectedTeamId) ||
-        String(match.away_team_id) === String(selectedTeamId);
+        selectedTeamId && String(match.home_team_id) === String(selectedTeamId);
 
       return (
         isSelectedTeam &&

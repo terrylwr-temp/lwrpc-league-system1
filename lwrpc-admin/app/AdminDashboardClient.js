@@ -833,6 +833,17 @@ export default function DashboardPage() {
     { label: "Average Team Season DUPR", value: formatDecimal(dashboardCounts?.averageTeamDupr, 3), helper: `Season DUPR roster average by ${scopeHelper.toLowerCase()} team`, tone: "emerald" },
   ];
 
+  function openPendingScoreActions() {
+    const matchIds = (dashboardCounts?.pendingScoreActionMatches || [])
+      .map((match) => match.id)
+      .filter(Boolean);
+    window.sessionStorage.setItem(
+      "lwrpc-admin-dashboard-score-action-match-ids",
+      JSON.stringify(matchIds)
+    );
+    router.push("/scoring?dashboardScoreActions=1");
+  }
+
   const statusCards = [
     { label: "Average Team Roster Count", value: formatDecimal(dashboardCounts?.averageRosterCount, 1), helper: `Players per ${scopeHelper.toLowerCase()} team`, tone: "slate" },
     {
@@ -880,7 +891,7 @@ export default function DashboardPage() {
       helper: "Overdue score entry or score review",
       tone: "amber",
       onClick: Number(dashboardCounts?.pendingScoreActions || 0) > 0
-        ? () => setPendingVerificationModalOpen(true)
+        ? openPendingScoreActions
         : null,
     },
   ];
@@ -1321,7 +1332,7 @@ export default function DashboardPage() {
           ),
           onSelectFilter: setDashboardFilter,
           onNavigate: (path) => router.push(path),
-          onOpenPendingScoreActions: () => setPendingVerificationModalOpen(true),
+          onOpenPendingScoreActions: openPendingScoreActions,
           onChangeDashboard: (path) => router.push(path),
           onOpenGuide: openAdminGuide,
           onChangePassword: () => router.push("/reset-password"),

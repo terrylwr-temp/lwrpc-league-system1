@@ -37,6 +37,7 @@ const DUPR_EXPORT_HEADERS = [
 const DUPR_EXPORT_EVENT = "LWR Pickleball Club DUPR League";
 
 const SCORE_REMINDER_TEMPLATE = getEmailTemplateConfig(TEMPLATE_KEY);
+const DASHBOARD_SCORE_ACTION_MATCH_IDS_KEY = "lwrpc-admin-dashboard-score-action-match-ids";
 
 export default function ScoringPage() {
   const router = useRouter();
@@ -66,9 +67,29 @@ export default function ScoringPage() {
   const [updatingDuprStatus, setUpdatingDuprStatus] = useState(false);
   const [includeAlreadyExported, setIncludeAlreadyExported] = useState(false);
   const [scoreMembersById, setScoreMembersById] = useState({});
+  const [dashboardScoreActionMatchIds, setDashboardScoreActionMatchIds] = useState([]);
 
   useEffect(() => {
     const requestedStatus = new URLSearchParams(window.location.search).get("scoreStatus");
+    const requestedDashboardScoreActions =
+      new URLSearchParams(window.location.search).get("dashboardScoreActions") === "1";
+
+    if (requestedDashboardScoreActions) {
+      try {
+        const matchIds = JSON.parse(
+          window.sessionStorage.getItem(DASHBOARD_SCORE_ACTION_MATCH_IDS_KEY) || "[]"
+        );
+        if (Array.isArray(matchIds)) {
+          setDashboardScoreActionMatchIds(matchIds.filter(Boolean));
+          setMatchView("current");
+          setScoreStatusFilter("");
+          setShowUnverifiedOnly(false);
+          setShowDuprExportReadyOnly(false);
+        }
+      } catch {
+        window.sessionStorage.removeItem(DASHBOARD_SCORE_ACTION_MATCH_IDS_KEY);
+      }
+    }
 
     if (requestedStatus === "pending_verification") {
       setMatchView("current");
@@ -278,12 +299,23 @@ export default function ScoringPage() {
   }, [checkAuth, loadMatches, loadMatchOptions, loadTemplate]);
 
   const activeMatches = useMemo(() => {
+    if (dashboardScoreActionMatchIds.length > 0) {
+      const selectedIds = new Set(dashboardScoreActionMatchIds);
+      return allMatches.filter((match) => selectedIds.has(match.id));
+    }
+
     if (matchView === "upcoming") {
       return allMatches.filter((match) => match.scheduled_date && match.scheduled_date > today);
     }
 
     return matches;
-  }, [allMatches, matchView, matches, today]);
+  }, [allMatches, dashboardScoreActionMatchIds, matchView, matches, today]);
+
+  useEffect(() => {
+    if (dashboardScoreActionMatchIds.length === 0 || allMatches.length === 0) return;
+    const availableIds = new Set(allMatches.map((match) => match.id));
+    setSelectedMatchIds(dashboardScoreActionMatchIds.filter((id) => availableIds.has(id)));
+  }, [allMatches, dashboardScoreActionMatchIds]);
 
   const searchableMatches = useMemo(() => {
     const q = matchSearch.trim().toLowerCase();
@@ -732,6 +764,19 @@ export default function ScoringPage() {
             </div>
 
             <div className="flex flex-wrap gap-2 lg:justify-end lg:pt-5">
+              {dashboardScoreActionMatchIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDashboardScoreActionMatchIds([]);
+                    window.sessionStorage.removeItem(DASHBOARD_SCORE_ACTION_MATCH_IDS_KEY);
+                    window.history.replaceState(window.history.state, "", window.location.pathname);
+                  }}
+                  className="rounded-xl bg-amber-700 px-4 py-3 text-sm font-bold text-white hover:bg-amber-800"
+                >
+                  Showing Dashboard Score Actions
+                </button>
+              )}
               {scoreStatusFilter === "pending_verification" && (
                 <button
                   type="button"
