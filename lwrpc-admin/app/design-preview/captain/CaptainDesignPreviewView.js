@@ -286,7 +286,7 @@ export default function CaptainDesignPreviewView({ dashboard = {} }) {
         <section className={styles.stats} aria-label="Captain team statistics">
           <article><div><Icon name="chart"/></div><span>Team record<strong>{standing ? `${Number(standing.match_wins || 0)}-${Number(standing.match_losses || 0)}` : "--"}</strong><small>{Number(standing?.standings_points || 0)} Team Points</small></span></article>
           <button type="button" className={styles.statCard} onClick={() => openNavigationSection("standings")} aria-label="Open Division Standings"><div><Icon name="trophy"/></div><span>Division rank<strong>{standing?.rank ? `#${standing.rank}` : "--"} <i>of {leaders.length || 0}</i></strong><small>{leagueName} <b>|</b> {divisionName}</small></span></button>
-          <article className={pendingScoreActions.length ? captainStyles.pendingStat : ""}><div><Icon name="verify"/></div><span>Pending Match Score Entry/Validations<strong>{pendingScoreActions.length}</strong><small>{pendingScoreActions.length ? "Captain action needed" : "Nothing awaiting action"}</small></span></article>
+          <button type="button" className={[styles.statCard, pendingScoreActions.length ? captainStyles.pendingStat : ""].filter(Boolean).join(" ")} disabled={pendingScoreActions.length === 0} onClick={() => pendingScoreActions.length > 0 && goToSection("pending")} aria-label="Open pending match score entry and validation actions"><div><Icon name="verify"/></div><span>Pending Match Score Entry/Validations<strong>{pendingScoreActions.length}</strong><small>{pendingScoreActions.length ? "Tap to view matches" : "Nothing awaiting action"}</small></span></button>
         </section>
 
         <div className={captainStyles.dashboardGrid}>
