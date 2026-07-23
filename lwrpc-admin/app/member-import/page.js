@@ -6,6 +6,7 @@ import { requireRole, supabase } from "../lib/auth";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { useRouter } from "next/navigation";
+import { appConfirm } from "../lib/appDialog";
 
 const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
 
@@ -333,8 +334,9 @@ return {
       return;
     }
 
-    const ok = confirm(
-      "Apply this import? New members will be added and existing members will be updated."
+    const ok = await appConfirm(
+      "Apply this import? New members will be added and existing members will be updated.",
+      { title: "Apply member import", confirmLabel: "Apply import", tone: "warning" }
     );
 
     if (!ok) return;
@@ -531,7 +533,7 @@ return {
       return;
     }
 
-    const ok = confirm("Mark this member inactive?");
+    const ok = await appConfirm("Mark this member inactive?", { title: "Mark member inactive", confirmLabel: "Mark inactive", tone: "warning" });
     if (!ok) return;
 
     const { error } = await supabase
@@ -558,8 +560,9 @@ return {
       return;
     }
 
-    const ok = confirm(
-      `Mark ${missingMembers.length} missing members inactive?`
+    const ok = await appConfirm(
+      `Mark ${missingMembers.length} missing members inactive?`,
+      { title: "Mark missing members inactive", confirmLabel: "Mark inactive", tone: "warning" }
     );
 
     if (!ok) return;

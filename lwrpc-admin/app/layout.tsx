@@ -1,5 +1,6 @@
 import "./globals.css";
 import BrowserTitle from "./components/BrowserTitle";
+import { AppDialogProvider } from "./components/AppDialogProvider";
 import LmsPwaRegister from "./components/LmsPwaRegister";
 import SystemFooter from "./components/SystemFooter";
 
@@ -22,7 +23,7 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col" suppressHydrationWarning>
         <BrowserTitle />
         <LmsPwaRegister />
-        {children}
+        <AppDialogProvider>{children}</AppDialogProvider>
         <SystemFooter />
       </body>
     </html>

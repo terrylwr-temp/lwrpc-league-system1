@@ -10,6 +10,7 @@ import {
   sampleTemplateValues,
 } from "../lib/emailTemplates";
 import { DEFAULT_SYSTEM_SETTINGS, emailIsActivated } from "../lib/systemSettings";
+import { appConfirm, appPrompt } from "../lib/appDialog";
 
 export default function EmailOptionsPage() {
   const router = useRouter();
@@ -133,8 +134,8 @@ export default function EmailOptionsPage() {
     }));
   }
 
-  function resetTemplate() {
-    const ok = confirm(`Reset ${activeConfig.label} to the built-in default?`);
+  async function resetTemplate() {
+    const ok = await appConfirm(`Reset ${activeConfig.label} to the built-in default?`, { title: "Reset email template", confirmLabel: "Reset", tone: "warning" });
     if (!ok) return;
 
     setTemplates((current) => ({
@@ -616,8 +617,8 @@ function RichEmailEditor({ value, onChange }) {
     syncValue();
   }
 
-  function addLink() {
-    const url = prompt("Enter the link URL");
+  async function addLink() {
+    const url = await appPrompt({ title: "Add link", message: "Enter the link URL.", inputLabel: "Link URL", confirmLabel: "Add link" });
     if (!url) return;
     runCommand("createLink", url);
   }

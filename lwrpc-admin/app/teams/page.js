@@ -3,6 +3,7 @@
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { appConfirm, appPrompt } from "../lib/appDialog";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
@@ -539,7 +540,7 @@ export default function TeamsPage() {
     const currentlyActive = team.is_active !== false;
 
     if (currentlyActive) {
-      const ok = confirmTypedInactivateAction({
+      const ok = await confirmTypedInactivateAction({
         title: `Inactivate team "${team.name}"?`,
         details: [
           "This will mark the team inactive and reset its standings record to 0.",
@@ -659,7 +660,7 @@ export default function TeamsPage() {
       return;
     }
 
-    const ok = confirm(
+    const ok = await appConfirm(
       [
         `Copy ${sourceTeams.length} team${sourceTeams.length === 1 ? "" : "s"} from "${sourceDivision?.label || "source division"}" to "${targetDivision?.label || "target division"}"?`,
         "",
@@ -668,7 +669,7 @@ export default function TeamsPage() {
           : "Team settings, captains, and club pro will be copied. Rosters will be empty.",
         "Schedules, matches, scores, byes, and standings are not copied.",
       ].join("\n")
-    );
+      , { title: "Copy teams", confirmLabel: "Copy teams", tone: "warning" });
 
     if (!ok) return;
 
@@ -1965,16 +1966,16 @@ function scheduleWeekKey(divisionId, weekNumber, date) {
   return `${divisionId || ""}:${weekNumber || ""}:${date || ""}`;
 }
 
-function confirmTypedInactivateAction({ title, details }) {
-  const firstOk = confirm([
+async function confirmTypedInactivateAction({ title, details }) {
+  const firstOk = await appConfirm([
     title,
     "",
     details,
     "This is a major administrative change and may not be fully undoable.",
-  ].join("\n"));
+  ].join("\n"), { title, confirmLabel: "Continue", tone: "warning" });
 
   if (!firstOk) return false;
 
-  const typed = prompt("Type INACTIVATE to confirm.");
+  const typed = await appPrompt({ title: "Type to confirm", message: "Type INACTIVATE to confirm.", inputLabel: "Type INACTIVATE", requiredValue: "INACTIVATE", confirmLabel: "Inactivate", tone: "error" });
   return String(typed || "").trim() === "INACTIVATE";
 }

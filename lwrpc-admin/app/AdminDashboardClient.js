@@ -17,6 +17,7 @@ import {
   YAxis,
 } from "recharts";
 import AppHeader from "./components/AppHeader";
+import { useAppDialog } from "./components/AppDialogProvider";
 import AdminDesignPreviewView from "./design-preview/admin/AdminDesignPreviewView";
 import { StandingsBarChartTooltip } from "./components/DivisionStandingsBarChart";
 import { adminNavigationSections } from "./lib/adminNavigation";
@@ -70,6 +71,7 @@ function PdfViewerModal({ document, onClose }) {
 export default function DashboardPage() {
   const designPreview = true;
   const router = useRouter();
+  const { notice, confirm: confirmDialog, prompt: promptDialog } = useAppDialog();
   const [ready, setReady] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState("");
   const [currentAdminMember, setCurrentAdminMember] = useState(null);
@@ -401,7 +403,7 @@ export default function DashboardPage() {
     const accessToken = sessionData?.session?.access_token;
 
     if (!accessToken) {
-      alert("Your session expired. Please log in again before sending match setup reminders.");
+      await notice("Your session expired. Please log in again before sending match setup reminders.", { title: "Session expired", tone: "error" });
       return;
     }
 
@@ -418,11 +420,11 @@ export default function DashboardPage() {
     setSendingSetupReminders(false);
 
     if (!response.ok || !result.success) {
-      alert(result.error || "Unable to send match setup reminders.");
+      await notice(result.error || "Unable to send match setup reminders.", { title: "Unable to send reminders", tone: "error" });
       return;
     }
 
-    alert(`Match setup reminders sent for ${result.sent || 0} team setup${Number(result.sent || 0) === 1 ? "" : "s"}.`);
+    await notice(`Match setup reminders sent for ${result.sent || 0} team setup${Number(result.sent || 0) === 1 ? "" : "s"}.`, { title: "Reminders sent", tone: "success" });
     window.localStorage.setItem(SETUP_REMINDER_HIDE_DATE_KEY, localDateValue(new Date()));
     setSetupReminderPreview(null);
     setHideSetupRemindersToday(false);
@@ -444,7 +446,7 @@ export default function DashboardPage() {
     const accessToken = sessionData?.session?.access_token;
 
     if (!accessToken) {
-      alert("Your session expired. Please log in again before saving dashboard messages.");
+      await notice("Your session expired. Please log in again before saving dashboard messages.", { title: "Session expired", tone: "error" });
       return;
     }
 
@@ -466,17 +468,17 @@ export default function DashboardPage() {
     setSavingMessageKey("");
 
     if (!response.ok || !result.success) {
-      alert(result.error || "Unable to save dashboard message.");
+      await notice(result.error || "Unable to save dashboard message.", { title: "Unable to save message", tone: "error" });
       return;
     }
 
     await loadLoginMessages();
     await loadMessageHistory();
-    alert(`${template.label} saved.`);
+    await notice(`${template.label} saved.`, { title: "Message saved", tone: "success" });
   }
 
   async function clearLoginMessage(template) {
-    const ok = confirm(`Clear the active ${template.label}? Players or captains will no longer see this popup until a new message is saved.`);
+    const ok = await confirmDialog(`Clear the active ${template.label}? Players or captains will no longer see this popup until a new message is saved.`, { title: "Clear dashboard message", confirmLabel: "Clear message", tone: "warning" });
     if (!ok) return;
 
     setLoginMessages((current) => ({
@@ -491,7 +493,7 @@ export default function DashboardPage() {
     const accessToken = sessionData?.session?.access_token;
 
     if (!accessToken) {
-      alert("Your session expired. Please log in again before clearing dashboard messages.");
+      await notice("Your session expired. Please log in again before clearing dashboard messages.", { title: "Session expired", tone: "error" });
       return;
     }
 
@@ -513,13 +515,13 @@ export default function DashboardPage() {
     setSavingMessageKey("");
 
     if (!response.ok || !result.success) {
-      alert(result.error || "Unable to clear dashboard message.");
+      await notice(result.error || "Unable to clear dashboard message.", { title: "Unable to clear message", tone: "error" });
       return;
     }
 
     await loadLoginMessages();
     await loadMessageHistory();
-    alert(`${template.label} cleared.`);
+    await notice(`${template.label} cleared.`, { title: "Message cleared", tone: "success" });
   }
 
   function editMessageHistoryItem(item) {
@@ -536,14 +538,14 @@ export default function DashboardPage() {
   }
 
   async function deleteMessageHistoryItem(item) {
-    const ok = confirm(`Delete this ${item.audience || "dashboard message"} history row? This will not change the active popup.`);
+    const ok = await confirmDialog(`Delete this ${item.audience || "dashboard message"} history row? This will not change the active popup.`, { title: "Delete history row", confirmLabel: "Delete", tone: "warning" });
     if (!ok) return;
 
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData?.session?.access_token;
 
     if (!accessToken) {
-      alert("Your session expired. Please log in again before deleting dashboard message history.");
+      await notice("Your session expired. Please log in again before deleting dashboard message history.", { title: "Session expired", tone: "error" });
       return;
     }
 
@@ -558,7 +560,7 @@ export default function DashboardPage() {
     setDeletingHistoryId("");
 
     if (!response.ok || !result.success) {
-      alert(result.error || "Unable to delete dashboard message history.");
+      await notice(result.error || "Unable to delete dashboard message history.", { title: "Unable to delete history", tone: "error" });
       return;
     }
 
@@ -618,7 +620,7 @@ export default function DashboardPage() {
     const accessToken = sessionData?.session?.access_token;
 
     if (!accessToken) {
-      alert("Your session expired. Please log in again before saving guide PDFs.");
+      await notice("Your session expired. Please log in again before saving guide PDFs.", { title: "Session expired", tone: "error" });
       return;
     }
 
@@ -640,7 +642,7 @@ export default function DashboardPage() {
     setSavingGuideKey("");
 
     if (!response.ok || !result.success) {
-      alert(result.error || "Unable to save guide PDF.");
+      await notice(result.error || "Unable to save guide PDF.", { title: "Unable to save guide", tone: "error" });
       return;
     }
 
@@ -648,16 +650,16 @@ export default function DashboardPage() {
       ...current,
       [guideType.key]: document,
     }));
-    alert(`${guideType.label} saved.`);
+    await notice(`${guideType.label} saved.`, { title: "Guide saved", tone: "success" });
   }
 
   async function runMasterResetAll() {
     if (!masterResetAcknowledged) {
-      alert("Confirm that you understand Master Reset All permanently removes generated schedules and scoring data.");
+      await notice("Confirm that you understand Master Reset All permanently removes generated schedules and scoring data.", { title: "Acknowledgement required", tone: "warning" });
       return;
     }
 
-    const firstOk = confirm([
+    const firstOk = await confirmDialog([
       "Master Reset All will permanently remove generated schedules and scoring data.",
       "",
       "It will delete all generated matches, match lines, game scores, saved match setup lineups, byes, and standings.",
@@ -665,21 +667,21 @@ export default function DashboardPage() {
       "The Schedule Editor, Match Scheduler, and Scoring (Master) will be blank until schedules are generated again.",
       "",
       "Continue?",
-    ].join("\n"));
+    ].join("\n"), { title: "Master Reset All", confirmLabel: "Continue", tone: "warning" });
 
     if (!firstOk) return;
 
-    const secondOk = confirm("This cannot be undone from the app. Are you absolutely sure you want to delete all generated schedules and scoring data?");
+    const secondOk = await confirmDialog("This cannot be undone from the app. Are you absolutely sure you want to delete all generated schedules and scoring data?", { title: "Final warning", confirmLabel: "I understand", tone: "error" });
     if (!secondOk) return;
 
-    const typed = prompt('Final confirmation: type MASTER RESET ALL to continue.');
+    const typed = await promptDialog({ title: "Type to confirm", message: "Final confirmation: type MASTER RESET ALL to continue.", inputLabel: "Type MASTER RESET ALL", requiredValue: "MASTER RESET ALL", confirmLabel: "Run Master Reset", tone: "error" });
     if (String(typed || "").trim() !== "MASTER RESET ALL") return;
 
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData?.session?.access_token;
 
     if (!accessToken) {
-      alert("Your session expired. Please log in again before running Master Reset All.");
+      await notice("Your session expired. Please log in again before running Master Reset All.", { title: "Session expired", tone: "error" });
       return;
     }
 
@@ -699,11 +701,11 @@ export default function DashboardPage() {
     setMasterResetting(false);
 
     if (!response.ok || !result.success) {
-      alert(result.error || "Master Reset All failed.");
+      await notice(result.error || "Master Reset All failed.", { title: "Master Reset failed", tone: "error" });
       return;
     }
 
-    alert("Master Reset All complete.");
+    await notice("Master Reset All complete.", { title: "Master Reset complete", tone: "success" });
     setMasterResetAcknowledged(false);
     loadDashboardCounts();
   }
@@ -712,16 +714,16 @@ export default function DashboardPage() {
     const season = seasonResetOptions.find((row) => String(row.id) === String(seasonResetSeasonId));
 
     if (!seasonResetSeasonId) {
-      alert("Select a season to reset.");
+      await notice("Select a season to reset.", { title: "Season required", tone: "warning" });
       return;
     }
 
     if (!seasonResetAcknowledged) {
-      alert("Confirm that you understand Season Reset preserves historical match results and player history.");
+      await notice("Confirm that you understand Season Reset preserves historical match results and player history.", { title: "Acknowledgement required", tone: "warning" });
       return;
     }
 
-    const firstOk = confirm([
+    const firstOk = await confirmDialog([
       `Season Reset will inactivate the leagues, divisions, and teams for "${season?.name || "the selected season"}".`,
       "",
       "It will reset affected team standings rows to zero.",
@@ -731,18 +733,18 @@ export default function DashboardPage() {
       "This does not delete historical match results or player history.",
       "",
       "Continue?",
-    ].join("\n"));
+    ].join("\n"), { title: "Season Reset", confirmLabel: "Continue", tone: "warning" });
 
     if (!firstOk) return;
 
-    const typed = prompt('Final confirmation: type RESET SEASON to continue.');
+    const typed = await promptDialog({ title: "Type to confirm", message: "Final confirmation: type RESET SEASON to continue.", inputLabel: "Type RESET SEASON", requiredValue: "RESET SEASON", confirmLabel: "Reset season", tone: "error" });
     if (String(typed || "").trim() !== "RESET SEASON") return;
 
     const { data: sessionData } = await supabase.auth.getSession();
     const accessToken = sessionData?.session?.access_token;
 
     if (!accessToken) {
-      alert("Your session expired. Please log in again before running Season Reset.");
+      await notice("Your session expired. Please log in again before running Season Reset.", { title: "Session expired", tone: "error" });
       return;
     }
 
@@ -763,11 +765,11 @@ export default function DashboardPage() {
     setSeasonResetting(false);
 
     if (!response.ok || !result.success) {
-      alert(result.error || "Season Reset failed.");
+      await notice(result.error || "Season Reset failed.", { title: "Season Reset failed", tone: "error" });
       return;
     }
 
-    alert(`Season Reset complete for ${result.season?.name || season?.name || "the selected season"}.`);
+    await notice(`Season Reset complete for ${result.season?.name || season?.name || "the selected season"}.`, { title: "Season Reset complete", tone: "success" });
     setSeasonResetAcknowledged(false);
     loadDashboardCounts();
     loadDashboardFilterOptions();

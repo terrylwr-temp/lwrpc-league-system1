@@ -7,6 +7,7 @@ import { requireRole, supabase } from "../lib/auth";
 import { browserTabTitle, DEFAULT_SYSTEM_SETTINGS, SYSTEM_SETTING_FIELDS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { useRouter } from "next/navigation";
+import { appConfirm } from "../lib/appDialog";
 
 export default function SystemSetupPage() {
   const router = useRouter();
@@ -52,8 +53,8 @@ export default function SystemSetupPage() {
     }));
   }
 
-  function resetDefaults() {
-    const ok = confirm("Reset Club Setup fields to the Lakewood Ranch Pickleball Club defaults?");
+  async function resetDefaults() {
+    const ok = await appConfirm("Reset Club Setup fields to the Lakewood Ranch Pickleball Club defaults?", { title: "Reset Club Setup", confirmLabel: "Reset", tone: "warning" });
     if (!ok) return;
     setSettings(DEFAULT_SYSTEM_SETTINGS);
   }

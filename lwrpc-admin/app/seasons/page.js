@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { appConfirm, appPrompt } from "../lib/appDialog";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
@@ -106,7 +107,7 @@ export default function SeasonsPage() {
     const currentlyActive = season.is_active !== false;
 
     if (!currentlyActive) {
-      const ok = confirm(`Activate season "${season.name}"? Teams will remain in their current active/inactive state.`);
+      const ok = await appConfirm(`Activate season "${season.name}"? Teams will remain in their current active/inactive state.`, { title: "Activate season", confirmLabel: "Activate", tone: "warning" });
       if (!ok) return;
 
       const { error } = await supabase
@@ -126,7 +127,7 @@ export default function SeasonsPage() {
       return;
     }
 
-    const ok = confirmTypedInactivateAction({
+    const ok = await confirmTypedInactivateAction({
       title: `Inactivate season "${season.name}"?`,
       details: [
         "This will mark the season inactive, mark all teams in this season inactive, and reset those division standings records to 0.",
@@ -480,17 +481,17 @@ function SeasonStatusBadge({ active }) {
   );
 }
 
-function confirmTypedInactivateAction({ title, details }) {
-  const firstOk = confirm([
+async function confirmTypedInactivateAction({ title, details }) {
+  const firstOk = await appConfirm([
     title,
     "",
     details,
     "This is a major administrative change and may not be fully undoable.",
-  ].join("\n"));
+  ].join("\n"), { title, confirmLabel: "Continue", tone: "warning" });
 
   if (!firstOk) return false;
 
-  const typed = prompt("Type INACTIVATE to confirm.");
+  const typed = await appPrompt({ title: "Type to confirm", message: "Type INACTIVATE to confirm.", inputLabel: "Type INACTIVATE", requiredValue: "INACTIVATE", confirmLabel: "Inactivate", tone: "error" });
   return String(typed || "").trim() === "INACTIVATE";
 }
 

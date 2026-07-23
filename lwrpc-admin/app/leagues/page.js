@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { appConfirm, appPrompt } from "../lib/appDialog";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import LoadingScreen from "../components/LoadingScreen";
@@ -138,7 +139,7 @@ export default function LeaguesPage() {
     const currentlyActive = league.is_active !== false;
 
     if (currentlyActive) {
-      const ok = confirmTypedInactivateAction({
+      const ok = await confirmTypedInactivateAction({
         title: `Inactivate league "${league.name}"?`,
         details: "This will hide the league from current setup dropdowns and can affect active division, team, schedule, and history workflows.",
       });
@@ -697,16 +698,16 @@ async function listPdfFiles(bucket, prefix = "", depth = 0) {
   return { files, error: null };
 }
 
-function confirmTypedInactivateAction({ title, details }) {
-  const firstOk = confirm([
+async function confirmTypedInactivateAction({ title, details }) {
+  const firstOk = await appConfirm([
     title,
     "",
     details,
     "This is a major administrative change and may not be fully undoable.",
-  ].join("\n"));
+  ].join("\n"), { title, confirmLabel: "Continue", tone: "warning" });
 
   if (!firstOk) return false;
 
-  const typed = prompt("Type INACTIVATE to confirm.");
+  const typed = await appPrompt({ title: "Type to confirm", message: "Type INACTIVATE to confirm.", inputLabel: "Type INACTIVATE", requiredValue: "INACTIVATE", confirmLabel: "Inactivate", tone: "error" });
   return String(typed || "").trim() === "INACTIVATE";
 }

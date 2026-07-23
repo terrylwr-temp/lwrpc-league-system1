@@ -7,6 +7,7 @@ import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { confirmDeleteAction } from "../lib/confirmDelete";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
+import { appConfirm } from "../lib/appDialog";
 
 export default function LocationsPage() {
   const router = useRouter();
@@ -199,8 +200,9 @@ export default function LocationsPage() {
     const fromLocation = locations.find((location) => location.id === mergeFromId);
     const toLocation = locations.find((location) => location.id === mergeToId);
 
-    const ok = confirm(
-      `Move all connected records from "${fromLocation?.name}" to "${toLocation?.name}"?\n\nThis will update members, teams, matches, and court availability records.`
+    const ok = await appConfirm(
+      `Move all connected records from "${fromLocation?.name}" to "${toLocation?.name}"?\n\nThis will update members, teams, matches, and court availability records.`,
+      { title: "Merge locations", confirmLabel: "Merge locations", tone: "warning" }
     );
 
     if (!ok) return;

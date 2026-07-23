@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { appConfirm, appPrompt } from "../lib/appDialog";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
@@ -289,7 +290,7 @@ export default function DivisionsPage() {
     const currentlyActive = division.is_active !== false;
 
     if (currentlyActive) {
-      const ok = confirmTypedInactivateAction({
+      const ok = await confirmTypedInactivateAction({
         title: `Inactivate division "${division.name}"?`,
         details: "This will hide the division from current setup dropdowns and can affect active team, schedule, standings, and history workflows.",
       });
@@ -358,14 +359,14 @@ export default function DivisionsPage() {
       return;
     }
 
-    const ok = confirm(
+    const ok = await appConfirm(
       [
         `Copy ${sourceDivisions.length} division${sourceDivisions.length === 1 ? "" : "s"} from "${sourceLeague?.name || "source league"}" to "${targetLeague?.name || "target league"}"?`,
         "",
         "This creates new divisions and copies their configured game lines.",
         "It does not copy teams, schedules, matches, scores, or standings.",
       ].join("\n")
-    );
+      , { title: "Copy divisions", confirmLabel: "Copy divisions", tone: "warning" });
 
     if (!ok) return;
 
@@ -438,14 +439,14 @@ export default function DivisionsPage() {
     }
 
     const targetLeague = leagues.find((league) => String(league.id) === String(copyTargetLeague));
-    const ok = confirm(
+    const ok = await appConfirm(
       [
         `Copy "${copyDivision.name}" to ${targetLeague?.name || "selected league"}?`,
         "",
         "This creates a new division and copies its configured game lines.",
         "It does not copy teams, schedules, matches, scores, or standings.",
       ].join("\n")
-    );
+      , { title: "Copy division", confirmLabel: "Copy division", tone: "warning" });
 
     if (!ok) return;
 
@@ -1530,16 +1531,16 @@ function copyDivisionLinePayload(line, divisionId) {
   };
 }
 
-function confirmTypedInactivateAction({ title, details }) {
-  const firstOk = confirm([
+async function confirmTypedInactivateAction({ title, details }) {
+  const firstOk = await appConfirm([
     title,
     "",
     details,
     "This is a major administrative change and may not be fully undoable.",
-  ].join("\n"));
+  ].join("\n"), { title, confirmLabel: "Continue", tone: "warning" });
 
   if (!firstOk) return false;
 
-  const typed = prompt("Type INACTIVATE to confirm.");
+  const typed = await appPrompt({ title: "Type to confirm", message: "Type INACTIVATE to confirm.", inputLabel: "Type INACTIVATE", requiredValue: "INACTIVATE", confirmLabel: "Inactivate", tone: "error" });
   return String(typed || "").trim() === "INACTIVATE";
 }
