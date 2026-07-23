@@ -128,6 +128,14 @@ function DialogWindow({ dialog, options, tone, onClose, dialogRef, primaryButton
   const canContinue = !requiredValue || inputValue.trim() === requiredValue;
   const title = options.title || (dialog.type === "notice" ? tone.label : "Please confirm");
   const confirmLabel = options.confirmLabel || (dialog.type === "notice" ? "OK" : "Continue");
+  const message = isPrompt && requiredValue
+    ? String(options.message || "")
+        .split("\n")
+        .filter((line) => !/^\s*(?:final confirmation:\s*)?type\b/i.test(line))
+        .join("\n")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim()
+    : options.message;
 
   function keepFocusInDialog(event) {
     if (event.key !== "Tab") return;
@@ -166,7 +174,7 @@ function DialogWindow({ dialog, options, tone, onClose, dialogRef, primaryButton
         </header>
         <form onSubmit={submit}>
           <div className="px-5 py-5">
-            <p id="app-dialog-message" className="whitespace-pre-line text-sm font-semibold leading-6 text-slate-700">{options.message}</p>
+            {message && <p id="app-dialog-message" className="whitespace-pre-line text-sm font-semibold leading-6 text-slate-700">{message}</p>}
             {isPrompt && <label className="mt-5 block"><span className="mb-1.5 block text-sm font-black text-slate-800">{options.inputLabel || "Confirmation"}</span><input ref={promptInputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value)} placeholder={options.placeholder || requiredValue} className="w-full rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></label>}
           </div>
           <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
