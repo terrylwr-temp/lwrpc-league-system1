@@ -115,7 +115,7 @@ export default function LeaguesPage() {
   }
 
   async function deleteLeague(id) {
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteAction({
       title: "Delete this league?",
       details: "This may delete or orphan related divisions, teams, schedules, matches, scores, standings, and roster records depending on database relationships.",
     });

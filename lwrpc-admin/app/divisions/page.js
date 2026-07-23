@@ -269,7 +269,7 @@ export default function DivisionsPage() {
   }
 
   async function deleteDivision(id) {
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteAction({
       title: "Delete this division?",
       details: "This may delete or orphan teams, schedules, matches, scores, standings, configured game lines, and roster records tied to this division.",
     });

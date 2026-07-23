@@ -6,7 +6,7 @@ import AppHeader from "../../components/AppHeader";
 import LoadingScreen from "../../components/LoadingScreen";
 import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib/auth";
 import { hasRole } from "../../lib/permissions";
-import { confirmDeleteAction } from "../../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 import { EMAIL_TEMPLATE_KEYS, escapeHtml, getEmailTemplateConfig, renderEmailTemplate } from "../../lib/emailTemplates";
 import {
@@ -880,7 +880,7 @@ function getAverageTeamRating() {
       return;
     }
 
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: "Remove this player from the roster?",
       details: "This deletes the roster membership record. It does not delete the member, but it may affect captain match setup, roster eligibility, and future lineup selections.",
     });

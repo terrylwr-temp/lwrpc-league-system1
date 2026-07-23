@@ -485,7 +485,7 @@ export default function DivisionDetailPage() {
   }
 
   async function deleteTeam(lineId) {
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteAction({
       title: "Delete this configured game line?",
       details: "This removes the configured game line from the division and default game line set. Existing generated matches may still reference older lines, and future schedules may be generated differently.",
     });
@@ -607,7 +607,7 @@ export default function DivisionDetailPage() {
           }));
 
     if (existingLineIds.length > 0) {
-      const deleteOk = confirmDeleteAction({
+      const deleteOk = await confirmDeleteAction({
         title: "Replace this division's configured game lines?",
         details:
           "This will delete the existing configured game-line rows for this division and recreate them from the selected defaults. Existing generated matches are checked first and will block the replacement if they already use these game lines.",
