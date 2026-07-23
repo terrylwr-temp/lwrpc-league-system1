@@ -43,7 +43,7 @@ export default function UsersPage() {
       page: String(page),
       pageSize: String(PAGE_SIZE),
       search: deferredSearch.trim(),
-      sort: ["role", "change_role"].includes(sortConfig.key) ? "role" : sortConfig.key,
+      sort: sortConfig.key === "role" ? "role" : sortConfig.key,
       direction: sortConfig.direction,
     });
     const response = await fetch(`/api/admin/member-directory?${params.toString()}`, {
@@ -250,8 +250,13 @@ if (loading) {
                   />
                 </th>
 
-                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left">
-                  Last Login
+                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("last_login", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "last_login"}
+                    direction={sortConfig.direction}
+                    label="Last Login"
+                    onClick={() => changeSort("last_login")}
+                  />
                 </th>
 
                 <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("role", sortConfig)}>
@@ -274,13 +279,8 @@ if (loading) {
                   </div>
                 </th>
 
-                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left" aria-sort={sortAria("change_role", sortConfig)}>
-                  <SortHeader
-                    active={sortConfig.key === "change_role"}
-                    direction={sortConfig.direction}
-                    label="Change Role"
-                    onClick={() => changeSort("change_role")}
-                  />
+                <th className="sticky top-0 z-20 bg-slate-900 p-4 text-left">
+                  Change Role
                 </th>
 
               </tr>

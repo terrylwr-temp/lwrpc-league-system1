@@ -29,6 +29,8 @@ export async function GET(req) {
       positiveInteger(url.searchParams.get("pageSize"), PAGE_SIZE),
       PAGE_SIZE
     );
+    const sortKey = allowedSortKey(url.searchParams.get("sort"));
+    const sortDirection = url.searchParams.get("direction") === "desc" ? "desc" : "asc";
     const { data, error } = await authorization.supabase.rpc(
       "admin_member_directory_page",
       {
@@ -38,9 +40,8 @@ export async function GET(req) {
         p_current_roster_only:
           mode === "members" &&
           url.searchParams.get("currentRosterOnly") === "true",
-        p_sort_key: allowedSortKey(url.searchParams.get("sort")),
-        p_sort_direction:
-          url.searchParams.get("direction") === "desc" ? "desc" : "asc",
+        p_sort_key: sortKey === "last_login" ? "member" : sortKey,
+        p_sort_direction: sortDirection,
         p_offset: (page - 1) * pageSize,
         p_limit: pageSize,
       }
@@ -48,8 +49,35 @@ export async function GET(req) {
 
     if (error) throw error;
 
-    const result = data || {};
+    let result = data || {};
     let rows = Array.isArray(result.rows) ? result.rows : [];
+    let allLastLogins = null;
+
+    if (mode === "roles" && sortKey === "last_login") {
+      const filteredCount = Number(result.filtered_count || 0);
+      if (filteredCount > rows.length) {
+        const { data: allData, error: allRowsError } = await authorization.supabase.rpc(
+          "admin_member_directory_page",
+          {
+            p_search: url.searchParams.get("search") || "",
+            p_include_inactive: true,
+            p_current_roster_only: false,
+            p_sort_key: "member",
+            p_sort_direction: "asc",
+            p_offset: 0,
+            p_limit: filteredCount,
+          }
+        );
+        if (allRowsError) throw allRowsError;
+        result = allData || result;
+        rows = Array.isArray(result.rows) ? result.rows : [];
+      }
+
+      allLastLogins = await loadLastLogins(authorization.supabase);
+      rows.sort((left, right) => compareLastLogin(left, right, allLastLogins, sortDirection));
+      rows = rows.slice((page - 1) * pageSize, page * pageSize);
+    }
+
     const memberIds = rows.map((member) => member.id).filter(Boolean);
 
     if (memberIds.length > 0) {
@@ -75,7 +103,7 @@ export async function GET(req) {
     let lastLoginsByEmail = {};
 
     if (mode === "roles") {
-      const allLastLogins = await loadLastLogins(authorization.supabase);
+      allLastLogins = allLastLogins || await loadLastLogins(authorization.supabase);
       lastLoginsByEmail = Object.fromEntries(
         rows
           .map((member) => normalizeEmailAddress(member.email))
@@ -105,11 +133,19 @@ function positiveInteger(value, fallback) {
 }
 
 function allowedSortKey(value) {
-  return ["member", "location", "phone", "dupr_id", "status", "role"].includes(
+  return ["member", "location", "phone", "dupr_id", "status", "role", "last_login"].includes(
     value
   )
     ? value
     : "member";
+}
+
+function compareLastLogin(left, right, lastLoginsByEmail, direction) {
+  const leftValue = Date.parse(lastLoginsByEmail[normalizeEmailAddress(left.email)] || "") || 0;
+  const rightValue = Date.parse(lastLoginsByEmail[normalizeEmailAddress(right.email)] || "") || 0;
+  if (leftValue === rightValue) return String(left.last_name || left.email || "").localeCompare(String(right.last_name || right.email || ""));
+  const order = leftValue - rightValue;
+  return direction === "desc" ? -order : order;
 }
 
 async function loadLastLogins(supabase) {
