@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { appConfirm, appPrompt } from "../lib/appDialog";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 const PAGE_SIZE = 100;
@@ -339,7 +340,7 @@ export default function RatingsPage() {
       (rating) => rating.season_id === selectedSeason
     ).length;
 
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: `Delete all ${seasonRatingCount} rating record(s) for ${seasonName}?`,
       details: "This removes the imported season rating records used for roster checks, match setup rating totals, and division eligibility. You would need to re-import ratings to restore them.",
     });
@@ -717,10 +718,14 @@ export default function RatingsPage() {
       return;
     }
 
-    const reliabilityThresholdText = window.prompt(
-      "Reliability Rating threshold for NR-style cleanup?\n\nIf a player in the selected Season has a Reliability Rating of the entered amount or below, this leaves the DUPR Doubles rating as-is but adjusts the Season DUPR rating as if the player has an NR rating, based on the division they're in and the rules in place for doing that adjustment.\n\nEnter 0 or leave blank to ignore Reliability Rating.",
-      "0"
-    );
+    const reliabilityThresholdText = await appPrompt({
+      title: "Reliability rating threshold",
+      message: "For a player in the selected season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.",
+      inputLabel: "Reliability Rating threshold",
+      placeholder: "0",
+      confirmLabel: "Continue",
+      tone: "warning",
+    });
 
     if (reliabilityThresholdText === null) return;
 
@@ -734,9 +739,12 @@ export default function RatingsPage() {
     const reliabilityRuleText = reliabilityThreshold > 0
       ? `Reliability Rating values of ${reliabilityThreshold} or below will leave DUPR Doubles as-is, then adjust Season DUPR using the NR rule: the player's highest division Rating Range Max minus 0.5. A DUPR Notes entry will be added for each reliability-based NR-style adjustment.`
       : "Reliability Rating will not change the cleanup rule.";
-    const ok = confirm(
-      `Clean ratings for ${selectedSeasonLabel()}?\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.\n\n${reliabilityRuleText}`
-    );
+    const ok = await appConfirm({
+      title: `Clean ratings for ${selectedSeasonLabel()}?`,
+      message: `This overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.\n\n${reliabilityRuleText}`,
+      confirmLabel: "Clean ratings",
+      tone: "warning",
+    });
 
     if (!ok) return;
 
