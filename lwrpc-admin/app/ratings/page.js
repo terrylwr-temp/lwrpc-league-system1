@@ -128,10 +128,14 @@ export default function RatingsPage() {
       activeRosterRows.reduce((rangesByMemberId, row) => {
         const division = row.teams?.divisions;
         const seasonId = division?.leagues?.season_id;
-        const minimum = Number(division?.min_dupr);
-        const maximum = Number(division?.max_dupr);
+        const minimumText = String(division?.min_dupr ?? "").trim();
+        const maximumText = String(division?.max_dupr ?? "").trim();
+        const parsedMinimum = Number(minimumText);
+        const parsedMaximum = Number(maximumText);
+        const minimum = minimumText === "" || Number.isNaN(parsedMinimum) ? null : parsedMinimum;
+        const maximum = maximumText === "" || Number.isNaN(parsedMaximum) ? null : parsedMaximum;
 
-        if (!seasonId || (Number.isNaN(minimum) && Number.isNaN(maximum))) {
+        if (!seasonId || (minimum === null && maximum === null)) {
           return rangesByMemberId;
         }
 
@@ -140,8 +144,9 @@ export default function RatingsPage() {
           ...(rangesByMemberId[memberId] || []),
           {
             seasonId: String(seasonId),
-            minimum: Number.isNaN(minimum) ? null : minimum,
-            maximum: Number.isNaN(maximum) ? null : maximum,
+            ratingType: division?.rating_type || "dupr",
+            minimum,
+            maximum,
           },
         ];
         return rangesByMemberId;
@@ -973,34 +978,39 @@ export default function RatingsPage() {
     const seasonRatingsByMemberId = new Map(
       ratings
         .filter((rating) => String(rating.season_id) === String(selectedSeason))
-        .map((rating) => {
-          const rawRating = rating.season_dupr_rating;
-          const seasonDuprRating = Number(rawRating);
-          return [
-            String(rating.member_id),
-            rawRating === null || rawRating === undefined || rawRating === "" || Number.isNaN(seasonDuprRating)
-              ? null
-              : seasonDuprRating,
-          ];
-        })
+        .map((rating) => [String(rating.member_id), rating])
     );
+    const membersById = new Map(members.map((member) => [String(member.id), member]));
 
     return new Set(
       Object.entries(teamRatingRangesByMemberId)
         .filter(([memberId, ranges]) => {
-          const seasonDuprRating = seasonRatingsByMemberId.get(memberId);
-          if (seasonDuprRating === null || seasonDuprRating === undefined) return false;
+          const seasonRating = seasonRatingsByMemberId.get(memberId);
+          const member = membersById.get(memberId);
 
           return ranges.some(
-            (range) =>
-              range.seasonId === String(selectedSeason) &&
-              ((range.minimum !== null && seasonDuprRating < range.minimum) ||
-                (range.maximum !== null && seasonDuprRating > range.maximum))
+            (range) => {
+              if (range.seasonId !== String(selectedSeason)) return false;
+
+              const rawRating = range.ratingType === "primetime"
+                ? seasonRating?.season_primetime_rating
+                : range.ratingType === "self_rating"
+                  ? member?.self_rating
+                  : seasonRating?.season_dupr_rating;
+              const teamRating = Number(rawRating);
+
+              if (rawRating === null || rawRating === undefined || rawRating === "" || Number.isNaN(teamRating)) {
+                return false;
+              }
+
+              return (range.minimum !== null && teamRating < range.minimum) ||
+                (range.maximum !== null && teamRating > range.maximum);
+            }
           );
         })
         .map(([memberId]) => memberId)
     );
-  }, [ratings, selectedSeason, teamRatingRangesByMemberId]);
+  }, [members, ratings, selectedSeason, teamRatingRangesByMemberId]);
 
   const filteredMembers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -1231,7 +1241,7 @@ function goToPage(value) {
             <div>
               <h2 className="text-lg font-bold text-slate-900">DUPR Filters</h2>
               <p className="mt-1 text-sm text-slate-600">
-                Show players with rating data that needs review, or players whose Season DUPR Rating is outside an active roster team&apos;s configured rating range.
+                Show players with rating data that needs review, or players whose applicable Season DUPR, Age-Based, or Self Rating is outside an active roster team&apos;s configured range.
               </p>
             </div>
 
@@ -1293,7 +1303,7 @@ function goToPage(value) {
                     : "bg-rose-100 text-rose-950 hover:bg-rose-200"
                 }`}
               >
-                Outside Team DUPR Range
+                Outside Team Rating Range
               </button>
             </div>
           </div>
@@ -2028,7 +2038,7 @@ async function loadAllActiveRatingMembers() {
   for (let from = 0; ; from += pageSize) {
     const { data, error } = await supabase
       .from("members")
-      .select("id, first_name, last_name, email, club_location, dupr_id, created_at, is_active_member")
+      .select("id, first_name, last_name, email, club_location, dupr_id, self_rating, created_at, is_active_member")
       .or("is_active_member.eq.true,is_active_member.is.null")
       .order("last_name", { ascending: true })
       .order("first_name", { ascending: true })
@@ -2082,6 +2092,7 @@ async function loadAllRatingRosterRows() {
           divisions (
             min_dupr,
             max_dupr,
+            rating_type,
             leagues (
               season_id
             )
