@@ -936,6 +936,24 @@ export default function CaptainDashboardPage() {
       })[0] || null;
   }, [matches, selectedTeamId]);
 
+  const nextCaptainScheduleItem = useMemo(() => {
+    const today = localDateString();
+    const items = [
+      ...(nextCaptainMatch
+        ? [{ type: "match", date: nextCaptainMatch.scheduled_date, time: nextCaptainMatch.scheduled_time || "00:00", data: nextCaptainMatch }]
+        : []),
+      ...selectedByeWeeks
+        .filter((bye) => !bye.bye_date || bye.bye_date >= today)
+        .map((bye) => ({ type: "bye", date: bye.bye_date, time: "00:00", data: bye })),
+    ];
+
+    return items.sort((a, b) => {
+      const aDate = new Date(`${a.date || "9999-12-31"}T${a.time || "00:00"}`);
+      const bDate = new Date(`${b.date || "9999-12-31"}T${b.time || "00:00"}`);
+      return aDate - bDate;
+    })[0] || null;
+  }, [nextCaptainMatch, selectedByeWeeks]);
+
   const pendingVerification = useMemo(() => {
     return matches.filter((match) => {
       const isSelectedTeam =
@@ -2942,7 +2960,7 @@ export default function CaptainDashboardPage() {
               "",
             teamStats,
             upcomingItems,
-            nextMatch: nextCaptainMatch,
+            nextScheduleItem: nextCaptainScheduleItem,
             pendingScoreEntryOrVerification,
             matchSetupStatus,
             completedMatches,
