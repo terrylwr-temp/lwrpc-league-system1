@@ -1478,9 +1478,22 @@ export default function CaptainDashboardPage() {
   }
 
   function openFlexSchedule(match) {
+    const windowRange = flexScheduleWindow(match);
+
+    if (windowRange.max < windowRange.min) {
+      alert("This Flex League match can no longer be moved because its rescheduling window has passed.");
+      return;
+    }
+
+    const nextDate = match.scheduled_date && match.scheduled_date >= windowRange.min
+      ? match.scheduled_date
+      : windowRange.min;
+    const minimumTime = nextDate === windowRange.min ? windowRange.minimumTime : "";
+    const existingTime = match.scheduled_time || "";
+
     setFlexScheduleMatch(match);
-    setFlexScheduleDate(match.scheduled_date || localDateString());
-    setFlexScheduleTime(match.scheduled_time || "");
+    setFlexScheduleDate(nextDate);
+    setFlexScheduleTime(minimumTime && (!existingTime || existingTime < minimumTime) ? minimumTime : existingTime);
   }
 
   function closeFlexSchedule() {
@@ -1492,10 +1505,37 @@ export default function CaptainDashboardPage() {
 
   function flexScheduleWindow(match) {
     const baseDate = match?.scheduled_date || localDateString();
+    const currentFloor = nextSelectableDateTime();
+    const scheduledWindowMinimum = addDaysToDateString(baseDate, -7);
+
     return {
-      min: addDaysToDateString(baseDate, -7),
+      min: scheduledWindowMinimum > currentFloor.date ? scheduledWindowMinimum : currentFloor.date,
       max: addDaysToDateString(baseDate, 7),
+      minimumTime: scheduledWindowMinimum > currentFloor.date ? "" : currentFloor.time,
     };
+  }
+
+  function updateFlexScheduleDate(nextDate) {
+    if (!flexScheduleMatch) return;
+
+    const windowRange = flexScheduleWindow(flexScheduleMatch);
+    const allowedDate = nextDate < windowRange.min
+      ? windowRange.min
+      : nextDate > windowRange.max
+        ? windowRange.max
+        : nextDate;
+    const minimumTime = allowedDate === windowRange.min ? windowRange.minimumTime : "";
+
+    setFlexScheduleDate(allowedDate);
+    setFlexScheduleTime((currentTime) =>
+      minimumTime && (!currentTime || currentTime < minimumTime) ? minimumTime : currentTime
+    );
+  }
+
+  function updateFlexScheduleTime(nextTime) {
+    const windowRange = flexScheduleMatch ? flexScheduleWindow(flexScheduleMatch) : null;
+    const minimumTime = flexScheduleDate === windowRange?.min ? windowRange.minimumTime : "";
+    setFlexScheduleTime(minimumTime && nextTime < minimumTime ? minimumTime : nextTime);
   }
 
   async function saveFlexSchedule() {
@@ -1515,6 +1555,11 @@ export default function CaptainDashboardPage() {
 
     if (flexScheduleDate < min || flexScheduleDate > max) {
       alert(`Flex League match date must stay between ${formatDate(min)} and ${formatDate(max)}.`);
+      return;
+    }
+
+    if (isDateTimeBeforeNow(flexScheduleDate, flexScheduleTime)) {
+      alert("Flex League match date/time must be now or later.");
       return;
     }
 
@@ -3122,8 +3167,8 @@ export default function CaptainDashboardPage() {
           time={flexScheduleTime}
           windowRange={flexScheduleMatch ? flexScheduleWindow(flexScheduleMatch) : null}
           saving={savingFlexSchedule}
-          onDateChange={setFlexScheduleDate}
-          onTimeChange={setFlexScheduleTime}
+          onDateChange={updateFlexScheduleDate}
+          onTimeChange={updateFlexScheduleTime}
           onSave={saveFlexSchedule}
           onClose={closeFlexSchedule}
         />
@@ -3680,7 +3725,7 @@ function FlexScheduleDialog({ match, date, time, windowRange, saving, onDateChan
 
         <div className="space-y-4 p-5">
           <div className="rounded-xl border border-violet-200 bg-violet-50 px-4 py-3 text-sm font-semibold text-violet-950">
-            Select a match date from {formatDate(windowRange.min)} through {formatDate(windowRange.max)}.
+            Select a match date from {formatDate(windowRange.min)} through {formatDate(windowRange.max)}. Past date/times are not available.
           </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -3690,7 +3735,7 @@ function FlexScheduleDialog({ match, date, time, windowRange, saving, onDateChan
             </label>
             <label>
               <span className="mb-1 block text-sm font-bold text-slate-700">Match Time</span>
-              <input type="time" value={time} onChange={(event) => onTimeChange(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" />
+              <input type="time" value={time} min={date === windowRange.min ? windowRange.minimumTime || undefined : undefined} onChange={(event) => onTimeChange(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" />
             </label>
           </div>
 
@@ -4716,6 +4761,23 @@ function localDateString() {
   const month = String(date.getMonth() + 1).padStart(2, "0");
   const day = String(date.getDate()).padStart(2, "0");
   return `${date.getFullYear()}-${month}-${day}`;
+}
+
+function nextSelectableDateTime() {
+  const date = new Date();
+  date.setSeconds(0, 0);
+  date.setMinutes(date.getMinutes() + 1);
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  const hours = String(date.getHours()).padStart(2, "0");
+  const minutes = String(date.getMinutes()).padStart(2, "0");
+
+  return { date: `${date.getFullYear()}-${month}-${day}`, time: `${hours}:${minutes}` };
+}
+
+function isDateTimeBeforeNow(dateValue, timeValue) {
+  const dateTime = new Date(`${dateValue}T${timeValue}`);
+  return Number.isNaN(dateTime.getTime()) || dateTime.getTime() < Date.now();
 }
 
 function addDaysToDateString(value, days) {
