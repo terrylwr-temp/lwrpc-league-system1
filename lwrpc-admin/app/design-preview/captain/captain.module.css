@@ -78,6 +78,11 @@ button.matchRow:focus-visible { outline: 3px solid rgba(21,88,213,.24); outline-
 .matchRow p strong { overflow: hidden; color: #26334b; font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
 .matchRow p span { color: #8490a3; font-size: 12px; }
 .matchRow > small { border-radius: 999px; background: #eef4ff; padding: 6px 9px; color: #245bb6; font-size: 12px; font-weight: 850; }
+.overdueScoreRow { border: 1px solid #fca5a5; background: #fff1f2; padding: 10px; }
+button.overdueScoreRow:hover { background: #ffe4e6; }
+.overdueScoreRow time { border-color: #fecaca; background: #fff; }
+.overdueScoreRow time b,.overdueScoreRow time span,.overdueScoreRow p strong,.overdueScoreRow p span { color: #991b1b; }
+.overdueScoreRow > small { background: #b91c1c; color: #fff; }
 .matchToolsDialog { position: relative; width: min(100%, 920px); max-height: min(92dvh, 820px); overflow: hidden; border: 1px solid #dce4ef; border-radius: 22px; background: #fff; box-shadow: 0 30px 80px rgba(3,15,39,.38); }
 .matchToolsDialog > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; background: linear-gradient(120deg,#102e64,#1558d5); padding: 20px 22px; color: #fff; }
 .matchToolsDialog > header span { color: #bfd4fb; font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
