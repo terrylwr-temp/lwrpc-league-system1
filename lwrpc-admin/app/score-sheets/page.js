@@ -71,6 +71,13 @@ export default function ScoreSheetsPage() {
   const activeTemplates = useMemo(() => {
     return templates.filter((template) => template.is_active !== false);
   }, [templates]);
+  const editingTemplate = useMemo(
+    () => templates.find((template) => String(template.id) === String(editingId)) || null,
+    [editingId, templates]
+  );
+  const isRenamingTemplate = Boolean(
+    editingTemplate && name.trim() !== String(editingTemplate.name || "").trim()
+  );
   const previewDocument = useMemo(() => {
     return previewScoreSheetDocument({
       templateHtml,
@@ -116,13 +123,16 @@ export default function ScoreSheetsPage() {
       return;
     }
 
+    const copiedTemplateKeepsOriginalDefault = isRenamingTemplate && editingTemplate.is_default === true;
+    const savedAsDefault = copiedTemplateKeepsOriginalDefault ? false : isDefault;
+
     setSaving(true);
 
-    if (isDefault) {
+    if (savedAsDefault) {
       const clearDefault = await supabase
         .from("score_sheet_templates")
         .update({ is_default: false, updated_at: new Date().toISOString() })
-        .neq("id", editingId || "00000000-0000-0000-0000-000000000000");
+        .neq("id", isRenamingTemplate ? "00000000-0000-0000-0000-000000000000" : editingId || "00000000-0000-0000-0000-000000000000");
 
       if (clearDefault.error) {
         setSaving(false);
@@ -138,11 +148,11 @@ export default function ScoreSheetsPage() {
       template_html: templateHtml.trim(),
       rules_text: rulesText.trim() || null,
       is_active: isActive,
-      is_default: isDefault,
+      is_default: savedAsDefault,
       updated_at: new Date().toISOString(),
     };
 
-    const result = editingId
+    const result = editingId && !isRenamingTemplate
       ? await supabase.from("score_sheet_templates").update(payload).eq("id", editingId)
       : await supabase.from("score_sheet_templates").insert(payload);
 
@@ -155,6 +165,12 @@ export default function ScoreSheetsPage() {
 
     clearForm();
     loadTemplates();
+
+    if (isRenamingTemplate) {
+      alert(copiedTemplateKeepsOriginalDefault
+        ? "Score Sheet copy created. The original remains the Default Score Sheet."
+        : "Score Sheet copy created. The original Score Sheet was left unchanged.");
+    }
   }
 
   async function seedDefaultTemplate() {
@@ -247,6 +263,11 @@ export default function ScoreSheetsPage() {
                 <p className="mt-1 text-sm text-slate-600">
                   Download uses the current body below. Edit it in Word, save as .doc/.html/.txt, then import it back here.
                 </p>
+                {editingId && (
+                  <p className="mt-2 text-sm font-semibold text-blue-800">
+                    Changing the Name creates a new copy and preserves the original Score Sheet.
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-2">
@@ -442,7 +463,7 @@ export default function ScoreSheetsPage() {
                   disabled={saving}
                   className="rounded-xl bg-blue-700 px-5 py-3 font-bold text-white hover:bg-blue-800 disabled:opacity-50"
                 >
-                  {saving ? "Saving..." : editingId ? "Save Score Sheet" : "Create Score Sheet"}
+                  {saving ? "Saving..." : isRenamingTemplate ? "Create Score Sheet Copy" : editingId ? "Save Score Sheet" : "Create Score Sheet"}
                 </button>
                 {editingId && (
                   <button
