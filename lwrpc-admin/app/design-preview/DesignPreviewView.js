@@ -149,10 +149,12 @@ export default function DesignPreviewView({ dashboard = {} }) {
     .slice(0, playoffTeamCount > 0 ? playoffTeamCount : 0)
     .map((row) => String(row.team_id || row.id)));
   const allScheduleItems = dashboard.scheduleItems || [];
-  const nextMatch = allScheduleItems.find((item) => item.type === "match")?.data || null;
+  const nextScheduleItem = allScheduleItems[0] || null;
+  const nextMatch = nextScheduleItem?.type === "match" ? nextScheduleItem.data : null;
+  const nextBye = nextScheduleItem?.type === "bye" ? nextScheduleItem.data : null;
   const selectedIsHome = nextMatch && String(nextMatch.home_team_id) === String(teamId);
-  const opponentName = nextMatch ? (selectedIsHome ? nextMatch.away_team?.name : nextMatch.home_team?.name) || "Opponent" : "Schedule pending";
-  const nextDate = shortDate(nextMatch?.scheduled_date);
+  const opponentName = nextMatch ? (selectedIsHome ? nextMatch.away_team?.name : nextMatch.home_team?.name) || "Opponent" : "";
+  const nextDate = shortDate(nextMatch?.scheduled_date || nextBye?.bye_date);
   const allResults = useMemo(() => (dashboard.matches || [])
     .filter((match) => match.status === "completed" && (String(match.home_team_id) === String(teamId) || String(match.away_team_id) === String(teamId)))
     .sort((a, b) => String(b.scheduled_date || "").localeCompare(String(a.scheduled_date || ""))), [dashboard.matches, teamId]);
@@ -427,7 +429,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
 
         <section className={styles.hero}>
           <div className={styles.heroArt} aria-hidden="true"><Image src="/website-emblem.png" width={2048} height={2096} sizes="(max-width: 700px) 74px, 154px" className={styles.heroEmblem} alt="" priority/></div>
-          <div className={styles.heroCopy}><div className={styles.nextMatch}><span>Next match</span>{nextMatch && <span className={styles.matchType}>{selectedIsHome ? "Home Match" : "Away Match"}</span>}<b>{nextMatch ? `${nextDate.label} - ${shortTime(nextMatch.scheduled_time)}` : "No upcoming match scheduled"}</b></div><h2>{teamName} <em>vs</em> {opponentName}</h2><div className={styles.location}><Icon name="pin" size={16}/><span>{nextMatch?.locations?.name || selectedTeam?.locations?.name || "Location TBD"}</span>{nextMatch?.week_number ? <><i>-</i><span>Week {nextMatch.week_number}</span></> : null}</div><div className={styles.heroButtons}><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenMatch?.(nextMatch)}>Match details</button><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenLineup?.(nextMatch)}>Match Lineup <Icon name="team" size={17}/></button></div></div>
+          <div className={styles.heroCopy}><div className={styles.nextMatch}><span>Next match</span>{nextMatch && <span className={styles.matchType}>{selectedIsHome ? "Home Match" : "Away Match"}</span>}<b>{nextMatch ? `${nextDate.label} - ${shortTime(nextMatch.scheduled_time)}` : nextBye ? `${nextDate.label} - Bye Week` : "No upcoming match scheduled"}</b></div><h2>{nextMatch ? <>{teamName} <em>vs</em> {opponentName}</> : nextBye ? `${teamName} Bye Week` : "End of Regular Season - No More Matches"}</h2><div className={styles.location}><Icon name="pin" size={16}/><span>{nextMatch?.locations?.name || (nextBye ? "No match scheduled" : "No more match dates")}</span>{nextMatch?.week_number ? <><i>-</i><span>Week {nextMatch.week_number}</span></> : nextBye?.week_number ? <><i>-</i><span>Week {nextBye.week_number}</span></> : null}</div><div className={styles.heroButtons}><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenMatch?.(nextMatch)}>Match details</button><button type="button" className={[styles.primary, styles.secondaryPrimary].join(" ")} disabled={!nextMatch} onClick={() => nextMatch && dashboard.onOpenLineup?.(nextMatch)}>Match Lineup <Icon name="team" size={17}/></button></div></div>
         </section>
 
         <section className={styles.stats} id="preview-standings" aria-label="Team statistics">

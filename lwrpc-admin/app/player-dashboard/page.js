@@ -785,7 +785,8 @@ export default function PlayerDashboardPage() {
       if (!isSelectedTeam || match.status === "cancelled") return false;
       if (showAllTeamMatches) return true;
 
-      return match.status !== "completed";
+      return match.status !== "completed" &&
+        (!match.scheduled_date || match.scheduled_date >= localDateString());
     });
   }, [matches, selectedPlayerTeamId, showAllTeamMatches]);
 

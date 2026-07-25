@@ -914,6 +914,28 @@ export default function CaptainDashboardPage() {
     });
   }, [selectedUpcomingMatches, selectedByeWeeks]);
 
+  const nextCaptainMatch = useMemo(() => {
+    const today = localDateString();
+    const twoDaysAgo = addDaysToDateString(today, -2);
+
+    return matches
+      .filter((match) => {
+        const isSelectedTeam =
+          String(match.home_team_id) === String(selectedTeamId) ||
+          String(match.away_team_id) === String(selectedTeamId);
+
+        if (!isSelectedTeam || match.status === "cancelled" || !match.scheduled_date) return false;
+        if (hasEnteredMatchScore(match)) return false;
+
+        return match.scheduled_date >= today || match.scheduled_date > twoDaysAgo;
+      })
+      .sort((a, b) => {
+        const aDate = new Date(`${a.scheduled_date}T${a.scheduled_time || "00:00"}`);
+        const bDate = new Date(`${b.scheduled_date}T${b.scheduled_time || "00:00"}`);
+        return aDate - bDate;
+      })[0] || null;
+  }, [matches, selectedTeamId]);
+
   const pendingVerification = useMemo(() => {
     return matches.filter((match) => {
       const isSelectedTeam =
@@ -2920,6 +2942,7 @@ export default function CaptainDashboardPage() {
               "",
             teamStats,
             upcomingItems,
+            nextMatch: nextCaptainMatch,
             pendingScoreEntryOrVerification,
             matchSetupStatus,
             completedMatches,
