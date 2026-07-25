@@ -40,6 +40,9 @@ function normalizeOptions(messageOrOptions, options = {}) {
 
 function legacyAlertOptions(message) {
   const text = String(message || "").trim();
+  if (/will be added to this roster/i.test(text)) {
+    return { title: "Player Added (Temporary)", tone: "success" };
+  }
   if (/\b(unable|failed|error|expired|invalid|cannot|could not|missing|permission|not configured)\b/i.test(text)) {
     return { title: "Attention needed", tone: "error" };
   }

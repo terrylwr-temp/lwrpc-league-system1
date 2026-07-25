@@ -808,11 +808,14 @@ function getAverageTeamRating() {
     }
 
     if (missingDuprId || missingRating) {
-      const missingItems = [];
-      if (missingDuprId) missingItems.push("a DUPR ID");
-      if (missingRating) missingItems.push(`a ${getRatingLabel()} for this season`);
+      const missingInformation = missingRating
+        ? `a ${getRatingLabel()} for this season`
+        : "a DUPR ID";
+      const verificationMessage = missingRating
+        ? "We will send you an email when we verify their DUPR Rating. If their Rating is not eligible for this team, we will notify you and delete that player from this roster."
+        : "We will send you an email when their information is updated.";
 
-      alert(`${formatMemberName(member)} does not have ${missingItems.join(" or ")} entered. They will be added to this roster, and a player information check email will be sent to info@lwrpickleballclub.com. We will send you an email when their information is updated.`);
+      alert(`${formatMemberName(member)} does not currently have ${missingInformation} entered. They will be added to this roster, and a player information check email will be sent to info@lwrpickleballclub.com. ${verificationMessage}`);
     }
 
     const alreadyOnRoster = roster.find(

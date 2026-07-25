@@ -343,3 +343,5 @@ As of 2026-05-21:
 - Player and Captain Division Standings dialogs now offer Tiebreak Details, showing the tied teams' cumulative verified-season metrics through the configured rule that separates them and explaining the resulting rank. The visible app version was bumped to `LMS-0565`.
 - Division Standings shows the Tiebreak Details control only when two or more teams are tied on the division's primary ranking metric. The visible app version was bumped to `LMS-0566`.
 - Documentation screenshots are maintained in `docs/screenshots/`. The current privacy-safe pack captures role-neutral page context only: it omits signed-in identity headers and all member, roster, score-entry, contact, and profile details.
+- Team Roster Management labels players added without a required season rating as `Player Added (Temporary)` and tells captains that ineligible ratings will result in roster removal after verification.
+- Season Ratings groups DUPR-focused filters in a collapsible `DUPR Filters` panel, including a selected-season check for players whose Season DUPR Rating falls outside an active roster team's configured DUPR range.

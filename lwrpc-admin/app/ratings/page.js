@@ -21,6 +21,7 @@ export default function RatingsPage() {
 
   const [members, setMembers] = useState([]);
   const [currentRosterMemberIds, setCurrentRosterMemberIds] = useState(new Set());
+  const [teamRatingRangesByMemberId, setTeamRatingRangesByMemberId] = useState({});
   const [seasons, setSeasons] = useState([]);
   const [ratings, setRatings] = useState([]);
   const [allRatings, setAllRatings] = useState([]);
@@ -42,6 +43,8 @@ export default function RatingsPage() {
   const [showNrDoublesOnly, setShowNrDoublesOnly] = useState(false);
   const [showNrAgeOnly, setShowNrAgeOnly] = useState(false);
   const [showInvalidDuprIdsOnly, setShowInvalidDuprIdsOnly] = useState(false);
+  const [showOutsideTeamDuprRangeOnly, setShowOutsideTeamDuprRangeOnly] = useState(false);
+  const [showDuprFilterTools, setShowDuprFilterTools] = useState(false);
   const [showRatingImportTools, setShowRatingImportTools] = useState(false);
   const [memberSort, setMemberSort] = useState({
     field: "name",
@@ -117,12 +120,32 @@ export default function RatingsPage() {
     }
 
     setMembers(memberData || []);
-    setCurrentRosterMemberIds(
-      new Set(
-        (rosterRows || [])
-          .filter((row) => row.teams?.is_active !== false)
-          .map((row) => String(row.member_id))
-      )
+    const activeRosterRows = (rosterRows || []).filter(
+      (row) => row.teams?.is_active !== false
+    );
+    setCurrentRosterMemberIds(new Set(activeRosterRows.map((row) => String(row.member_id))));
+    setTeamRatingRangesByMemberId(
+      activeRosterRows.reduce((rangesByMemberId, row) => {
+        const division = row.teams?.divisions;
+        const seasonId = division?.leagues?.season_id;
+        const minimum = Number(division?.min_dupr);
+        const maximum = Number(division?.max_dupr);
+
+        if (!seasonId || (Number.isNaN(minimum) && Number.isNaN(maximum))) {
+          return rangesByMemberId;
+        }
+
+        const memberId = String(row.member_id);
+        rangesByMemberId[memberId] = [
+          ...(rangesByMemberId[memberId] || []),
+          {
+            seasonId: String(seasonId),
+            minimum: Number.isNaN(minimum) ? null : minimum,
+            maximum: Number.isNaN(maximum) ? null : maximum,
+          },
+        ];
+        return rangesByMemberId;
+      }, {})
     );
     setSeasons((seasonData || []).filter((season) => season.is_active !== false));
 
@@ -914,12 +937,14 @@ export default function RatingsPage() {
     setShowNrDoublesOnly(false);
     setShowNrAgeOnly(false);
     setShowInvalidDuprIdsOnly(false);
+    setShowOutsideTeamDuprRangeOnly(false);
+    setShowDuprFilterTools(false);
     setShowRatingImportTools(false);
   }, [isMobileRatingsView]);
 
   useEffect(() => {
     setPage(1);
-  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly, showInvalidDuprIdsOnly]);
+  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly, showInvalidDuprIdsOnly, showOutsideTeamDuprRangeOnly]);
 
   useEffect(() => {
     if (!requestedMemberId || loading) return;
@@ -930,6 +955,7 @@ export default function RatingsPage() {
     setShowNrDoublesOnly(false);
     setShowNrAgeOnly(false);
     setShowInvalidDuprIdsOnly(false);
+    setShowOutsideTeamDuprRangeOnly(false);
     setMemberSort({ field: "name", direction: "asc" });
   }, [loading, requestedMemberId]);
 
@@ -942,6 +968,39 @@ export default function RatingsPage() {
       setRatings([]);
     }
   }, [loading, loadRatings, selectedSeason]);
+
+  const outsideTeamDuprRangeMemberIds = useMemo(() => {
+    const seasonRatingsByMemberId = new Map(
+      ratings
+        .filter((rating) => String(rating.season_id) === String(selectedSeason))
+        .map((rating) => {
+          const rawRating = rating.season_dupr_rating;
+          const seasonDuprRating = Number(rawRating);
+          return [
+            String(rating.member_id),
+            rawRating === null || rawRating === undefined || rawRating === "" || Number.isNaN(seasonDuprRating)
+              ? null
+              : seasonDuprRating,
+          ];
+        })
+    );
+
+    return new Set(
+      Object.entries(teamRatingRangesByMemberId)
+        .filter(([memberId, ranges]) => {
+          const seasonDuprRating = seasonRatingsByMemberId.get(memberId);
+          if (seasonDuprRating === null || seasonDuprRating === undefined) return false;
+
+          return ranges.some(
+            (range) =>
+              range.seasonId === String(selectedSeason) &&
+              ((range.minimum !== null && seasonDuprRating < range.minimum) ||
+                (range.maximum !== null && seasonDuprRating > range.maximum))
+          );
+        })
+        .map(([memberId]) => memberId)
+    );
+  }, [ratings, selectedSeason, teamRatingRangesByMemberId]);
 
   const filteredMembers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -967,6 +1026,10 @@ export default function RatingsPage() {
 
     if (showInvalidDuprIdsOnly) {
       nextMembers = nextMembers.filter((member) => String(member.dupr_id || "").trim().length !== 6);
+    }
+
+    if (showOutsideTeamDuprRangeOnly) {
+      nextMembers = nextMembers.filter((member) => outsideTeamDuprRangeMemberIds.has(String(member.id)));
     }
 
     if (q) {
@@ -1002,7 +1065,7 @@ export default function RatingsPage() {
 
       return memberSort.direction === "desc" ? -result : result;
     });
-  }, [compareRatingValues, currentRosterMemberIds, hasDoublesRating, hasNumericRating, memberSort, members, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly]);
+  }, [compareRatingValues, currentRosterMemberIds, hasDoublesRating, hasNumericRating, memberSort, members, outsideTeamDuprRangeMemberIds, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly, showOutsideTeamDuprRangeOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
@@ -1114,6 +1177,7 @@ function goToPage(value) {
                   setShowNrDoublesOnly(false);
                   setShowNrAgeOnly(false);
                   setShowInvalidDuprIdsOnly(false);
+                  setShowOutsideTeamDuprRangeOnly(false);
                   setPage(1);
                 }}
                 className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300"
@@ -1138,50 +1202,14 @@ function goToPage(value) {
 
             <button
               type="button"
-              onClick={() => setShowMissingDoublesOnly((value) => !value)}
+              onClick={() => setShowDuprFilterTools((value) => !value)}
               className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
-                showMissingDoublesOnly
+                showDuprFilterTools
                   ? "bg-amber-600 text-white hover:bg-amber-700"
                   : "bg-amber-100 text-amber-950 hover:bg-amber-200"
               }`}
             >
-              {showMissingDoublesOnly ? "Show All Ratings" : "Missing DUPR Doubles Rating"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowNrDoublesOnly((value) => !value)}
-              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
-                showNrDoublesOnly
-                  ? "bg-red-700 text-white hover:bg-red-800"
-                  : "bg-red-100 text-red-900 hover:bg-red-200"
-              }`}
-            >
-              NR DUPR Rating
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowNrAgeOnly((value) => !value)}
-              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
-                showNrAgeOnly
-                  ? "bg-purple-700 text-white hover:bg-purple-800"
-                  : "bg-purple-100 text-purple-900 hover:bg-purple-200"
-              }`}
-            >
-              NR Age-Based Rating
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowInvalidDuprIdsOnly((value) => !value)}
-              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
-                showInvalidDuprIdsOnly
-                  ? "bg-slate-800 text-white hover:bg-slate-900"
-                  : "bg-slate-200 text-slate-900 hover:bg-slate-300"
-              }`}
-            >
-              Missing / Invalid DUPR ID
+              {showDuprFilterTools ? "Hide DUPR Filters" : "DUPR Filters"}
             </button>
 
             <button
@@ -1197,6 +1225,79 @@ function goToPage(value) {
             </button>
           </div>
         </div>
+
+        {showDuprFilterTools && !isMobileRatingsView && (
+          <div className="mt-6 rounded-2xl border border-amber-100 bg-amber-50 p-5 shadow-sm">
+            <div>
+              <h2 className="text-lg font-bold text-slate-900">DUPR Filters</h2>
+              <p className="mt-1 text-sm text-slate-600">
+                Show players with rating data that needs review, or players whose Season DUPR Rating is outside an active roster team&apos;s configured rating range.
+              </p>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setShowMissingDoublesOnly((value) => !value)}
+                className={`rounded-xl px-4 py-3 font-semibold ${
+                  showMissingDoublesOnly
+                    ? "bg-amber-600 text-white hover:bg-amber-700"
+                    : "bg-amber-100 text-amber-950 hover:bg-amber-200"
+                }`}
+              >
+                Missing DUPR Doubles Rating
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowNrDoublesOnly((value) => !value)}
+                className={`rounded-xl px-4 py-3 font-semibold ${
+                  showNrDoublesOnly
+                    ? "bg-red-700 text-white hover:bg-red-800"
+                    : "bg-red-100 text-red-900 hover:bg-red-200"
+                }`}
+              >
+                NR DUPR Rating
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowNrAgeOnly((value) => !value)}
+                className={`rounded-xl px-4 py-3 font-semibold ${
+                  showNrAgeOnly
+                    ? "bg-purple-700 text-white hover:bg-purple-800"
+                    : "bg-purple-100 text-purple-900 hover:bg-purple-200"
+                }`}
+              >
+                NR Age-Based Rating
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowInvalidDuprIdsOnly((value) => !value)}
+                className={`rounded-xl px-4 py-3 font-semibold ${
+                  showInvalidDuprIdsOnly
+                    ? "bg-slate-800 text-white hover:bg-slate-900"
+                    : "bg-slate-200 text-slate-900 hover:bg-slate-300"
+                }`}
+              >
+                Missing / Invalid DUPR ID
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowOutsideTeamDuprRangeOnly((value) => !value)}
+                className={`rounded-xl px-4 py-3 font-semibold ${
+                  showOutsideTeamDuprRangeOnly
+                    ? "bg-rose-700 text-white hover:bg-rose-800"
+                    : "bg-rose-100 text-rose-950 hover:bg-rose-200"
+                }`}
+              >
+                Outside Team DUPR Range
+              </button>
+            </div>
+          </div>
+        )}
 
         {showRatingImportTools && !isMobileRatingsView && (
         <div className="mt-6 rounded-2xl border border-blue-100 bg-blue-50 p-5 shadow-sm">
@@ -1977,7 +2078,14 @@ async function loadAllRatingRosterRows() {
         member_id,
         teams (
           id,
-          is_active
+          is_active,
+          divisions (
+            min_dupr,
+            max_dupr,
+            leagues (
+              season_id
+            )
+          )
         )
       `)
       .range(from, from + pageSize - 1);
