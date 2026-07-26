@@ -6,7 +6,8 @@ import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayTime, formatDisplayTimestamp } from "../lib/dateTime";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
+import { appConfirm } from "../lib/appDialog";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 export default function SchedulingPage() {
@@ -375,7 +376,7 @@ export default function SchedulingPage() {
   }
 
   async function deleteSetting(settingId) {
-    if (!confirmDeleteAction({
+    if (!await confirmDeleteActionAsync({
       title: "Delete this schedule setting?",
       details: "This deletes the saved schedule generation settings only. Existing generated matches are not deleted, but you will lose this reusable scheduling setup.",
     })) return;
@@ -414,7 +415,7 @@ export default function SchedulingPage() {
   }
 
   async function deleteAvailability(rowId) {
-    if (!confirmDeleteAction({
+    if (!await confirmDeleteActionAsync({
       title: "Delete this court unavailability / blackout record?",
       details: "This removes the court availability restriction. Future generated schedules may use this location/date/time again.",
     })) return;
@@ -450,7 +451,7 @@ export default function SchedulingPage() {
   }
 
   async function deleteLeagueBlackout(id) {
-    if (!confirmDeleteAction({
+    if (!await confirmDeleteActionAsync({
       title: "Delete this league blackout date?",
       details: "This removes the blackout restriction. Future generated schedules may place matches on this date again.",
     })) return;
@@ -759,15 +760,24 @@ export default function SchedulingPage() {
     });
 
     if (existingDivisionMatches.length > 0) {
-      const ok = confirm(
-        `This league/division already has ${existingDivisionMatches.length} match(es) in this season window.\n\nGenerate additional matches anyway?`
-      );
+      const ok = await appConfirm({
+        title: "Generate additional matches?",
+        message: `This league/division already has ${existingDivisionMatches.length} match(es) in this season window.\n\nGenerate additional matches anyway?`,
+        confirmLabel: "Generate schedule",
+        tone: "warning",
+      });
       if (!ok) return;
     }
 
     const scheduleWeekCount = Number(setting.actual_schedule_weeks || getSeasonWeeks(setting.season_start_date, setting.season_end_date) || 0);
 
-    if (!confirm(`Generate season schedule for ${divisionTeams.length} teams?\n\nActual weeks to schedule: ${scheduleWeekCount || "Full round robin"}\nCourts needed per match: ${courtsNeeded}`)) return;
+    const confirmed = await appConfirm({
+      title: "Generate season schedule?",
+      message: `Generate a season schedule for ${divisionTeams.length} teams?\n\nActual weeks to schedule: ${scheduleWeekCount || "Full round robin"}\nCourts needed per match: ${courtsNeeded}`,
+      confirmLabel: "Generate schedule",
+      tone: "warning",
+    });
+    if (!confirmed) return;
 
     setIsGeneratingSchedule(true);
 
@@ -935,7 +945,7 @@ export default function SchedulingPage() {
       return;
     }
 
-    if (!confirmDeleteAction({
+    if (!await confirmDeleteActionAsync({
       title: `Delete all scheduled matches for ${setting.name || "Unnamed Schedule"}?`,
       details: "This will find matches for this league/division/season window and then ask for final confirmation after counting them. It will delete matches, match lines, game score rows, and related bye rows.",
     })) return;
@@ -955,7 +965,7 @@ export default function SchedulingPage() {
     const matchIds = (matchesToDelete || []).map((match) => match.id);
     if (matchIds.length === 0) return alert("No matches found for this league/division/season.");
 
-    if (!confirmDeleteAction({
+    if (!await confirmDeleteActionAsync({
       title: `Delete ${matchIds.length} generated match(es)?`,
       details: "This will delete the selected generated matches, match lines, game score rows, and related bye rows. Entered players, scores, verification status, and standings impact for those matches will be lost.",
     })) return;

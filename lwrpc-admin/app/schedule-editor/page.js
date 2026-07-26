@@ -6,7 +6,8 @@ import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDate, formatDisplayTimestampShort } from "../lib/dateTime";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
+import { appConfirm, appPrompt } from "../lib/appDialog";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
 
 const COMPLETE_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
@@ -391,7 +392,13 @@ export default function ScheduleEditorPage() {
     }
 
     const action = shouldPublish ? "publish" : "unpublish";
-    if (!confirm(`${action === "publish" ? "Publish" : "Unpublish"} ${selected.length} selected match(es)?`)) return;
+    const confirmed = await appConfirm({
+      title: `${action === "publish" ? "Publish" : "Unpublish"} selected matches?`,
+      message: `${action === "publish" ? "Publish" : "Unpublish"} ${selected.length} selected match(es)?`,
+      confirmLabel: action === "publish" ? "Publish matches" : "Unpublish matches",
+      tone: "warning",
+    });
+    if (!confirmed) return;
 
     setIsBulkUpdating(true);
 
@@ -435,7 +442,13 @@ export default function ScheduleEditorPage() {
       return;
     }
 
-    if (!confirm(`Balance home/away across ${selected.length} selected match(es)?`)) return;
+    const confirmed = await appConfirm({
+      title: "Balance home and away matches?",
+      message: `Balance home/away across ${selected.length} selected match(es)?`,
+      confirmLabel: "Balance matches",
+      tone: "warning",
+    });
+    if (!confirmed) return;
 
     setIsBulkUpdating(true);
 
@@ -700,7 +713,7 @@ export default function ScheduleEditorPage() {
       return;
     }
 
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: "Delete this match and its generated game rows?",
       details: "This deletes the match, match lines, and individual game score rows. Any entered players, scores, verification state, DUPR export readiness, and standings impact for this match will be lost.",
     });
@@ -755,15 +768,18 @@ export default function ScheduleEditorPage() {
   }
 
   async function resetMatch(match) {
-    const response = window.prompt(
-      [
-        `Reset ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}?`,
+    const response = await appPrompt({
+      title: `Reset ${match.home_team?.name || "Home"} vs ${match.away_team?.name || "Away"}?`,
+      message: [
         "This clears selected score-entry players, all game scores, winners, score verification/dispute state, and DUPR export status.",
         "Saved Match Setup teams will remain.",
         "The scheduled match, date, time, location, teams, week, and published status will remain.",
-        'Type "RESET" to continue.',
-      ].join("\n\n")
-    );
+      ].join("\n\n"),
+      inputLabel: "Type RESET to continue",
+      requiredValue: "RESET",
+      confirmLabel: "Reset match",
+      tone: "error",
+    });
 
     if (response !== "RESET") return;
 
