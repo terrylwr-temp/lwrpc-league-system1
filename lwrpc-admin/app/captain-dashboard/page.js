@@ -917,6 +917,11 @@ export default function CaptainDashboardPage() {
   const nextCaptainMatch = useMemo(() => {
     const today = localDateString();
     const twoDaysAgo = addDaysToDateString(today, -2);
+    const byeScheduleKeys = new Set(
+      selectedByeWeeks.map((bye) =>
+        scheduleWeekKey(bye.division_id, bye.week_number, bye.bye_date)
+      )
+    );
 
     return matches
       .filter((match) => {
@@ -926,6 +931,8 @@ export default function CaptainDashboardPage() {
 
         if (!isSelectedTeam || match.status === "cancelled" || !match.scheduled_date) return false;
         if (hasEnteredMatchScore(match)) return false;
+        // A team bye never has scores to enter, even if an obsolete match row exists for its slot.
+        if (byeScheduleKeys.has(scheduleWeekKey(match.division_id, match.week_number, match.scheduled_date))) return false;
 
         return match.scheduled_date >= today || match.scheduled_date > twoDaysAgo;
       })
@@ -934,7 +941,7 @@ export default function CaptainDashboardPage() {
         const bDate = new Date(`${b.scheduled_date}T${b.scheduled_time || "00:00"}`);
         return aDate - bDate;
       })[0] || null;
-  }, [matches, selectedTeamId]);
+  }, [matches, selectedByeWeeks, selectedTeamId]);
 
   const nextCaptainScheduleItem = useMemo(() => {
     const today = localDateString();
