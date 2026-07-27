@@ -19,34 +19,61 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
-function escapeRegExp(value) {
-  return String(value || "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function highlightedText(value, itemIndex, pageNumber, matches, activeMatchIndex) {
+  const segments = matches
+    .flatMap((match, matchIndex) =>
+      match.pageNumber === pageNumber
+        ? match.segments
+            .filter((segment) => segment.itemIndex === itemIndex)
+            .map((segment) => ({ ...segment, active: matchIndex === activeMatchIndex }))
+        : []
+    )
+    .sort((a, b) => a.start - b.start);
+
+  if (segments.length === 0) return escapeHtml(value);
+
+  let cursor = 0;
+  let output = "";
+
+  segments.forEach((segment) => {
+    if (segment.end <= cursor) return;
+    const start = Math.max(segment.start, cursor);
+    const style = segment.active
+      ? "background:#fb923c;color:#0f172a;outline:2px solid #c2410c;outline-offset:1px;"
+      : "background:#fde047;color:#0f172a;";
+    const activeAttribute = segment.active ? ' data-active-search-match="true"' : "";
+
+    output += escapeHtml(value.slice(cursor, start));
+    output += `<mark${activeAttribute} style="${style}">${escapeHtml(value.slice(start, segment.end))}</mark>`;
+    cursor = segment.end;
+  });
+
+  return output + escapeHtml(value.slice(cursor));
 }
 
-function highlightedText(value, searchTerm) {
-  const escapedValue = escapeHtml(value);
-  const escapedSearchTerm = escapeHtml(searchTerm);
-  if (!escapedSearchTerm) return escapedValue;
-
-  return escapedValue.replace(
-    new RegExp(escapeRegExp(escapedSearchTerm), "gi"),
-    (match) => `<mark style="background:#fde047;color:#0f172a;border-radius:2px;padding:0 1px;">${match}</mark>`
-  );
-}
-
-function textMatches(pageTexts, searchTerm) {
+function textMatches(pageSearchData, searchTerm) {
   const normalizedTerm = searchTerm.trim().toLocaleLowerCase();
   if (!normalizedTerm) return [];
 
-  return pageTexts.flatMap((pageText, pageIndex) => {
-    const normalizedText = pageText.toLocaleLowerCase();
+  return pageSearchData.flatMap((pageData, pageIndex) => {
+    const normalizedText = pageData.text.toLocaleLowerCase();
     const matches = [];
     let startIndex = 0;
 
     while (startIndex < normalizedText.length) {
       const matchIndex = normalizedText.indexOf(normalizedTerm, startIndex);
       if (matchIndex === -1) break;
-      matches.push({ pageNumber: pageIndex + 1, matchIndex });
+      const matchEnd = matchIndex + normalizedTerm.length;
+      const segments = pageData.itemRanges
+        .filter((range) => range.end > matchIndex && range.start < matchEnd)
+        .map((range) => ({
+          itemIndex: range.itemIndex,
+          start: Math.max(0, matchIndex - range.start),
+          end: Math.min(range.end, matchEnd) - range.start,
+        }))
+        .filter((segment) => segment.end > segment.start);
+
+      matches.push({ pageNumber: pageIndex + 1, matchIndex, segments });
       startIndex = matchIndex + Math.max(normalizedTerm.length, 1);
     }
 
@@ -64,7 +91,7 @@ export default function PdfDocumentModalClient({
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageWidth, setPageWidth] = useState(900);
-  const [pageTexts, setPageTexts] = useState([]);
+  const [pageSearchData, setPageSearchData] = useState([]);
   const [indexing, setIndexing] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
@@ -78,8 +105,9 @@ export default function PdfDocumentModalClient({
     "Document Preview";
 
   const customTextRenderer = useCallback(
-    ({ str }) => highlightedText(str, searchTerm),
-    [searchTerm]
+    ({ str, itemIndex }) =>
+      highlightedText(str, itemIndex, pageNumber, matches, activeMatchIndex),
+    [activeMatchIndex, matches, pageNumber]
   );
 
   useEffect(() => {
@@ -101,24 +129,45 @@ export default function PdfDocumentModalClient({
     searchInputRef.current?.focus();
   }, [searchOpen]);
 
+  useEffect(() => {
+    if (activeMatchIndex < 0) return undefined;
+
+    const timer = window.setTimeout(() => {
+      viewerRef.current
+        ?.querySelector('mark[data-active-search-match="true"]')
+        ?.scrollIntoView({ behavior: "smooth", block: "center", inline: "nearest" });
+    }, 200);
+
+    return () => window.clearTimeout(timer);
+  }, [activeMatchIndex, pageNumber, searchTerm]);
+
   async function loadDocument(pdf) {
     setNumPages(pdf.numPages);
     setPageNumber(1);
-    setPageTexts([]);
+    setPageSearchData([]);
     setIndexing(true);
     setLoadError("");
 
     try {
-      const textPages = await Promise.all(
+      const searchData = await Promise.all(
         Array.from({ length: pdf.numPages }, async (_, index) => {
           const page = await pdf.getPage(index + 1);
           const content = await page.getTextContent();
-          return content.items
-            .map((item) => item.str || "")
-            .join(" ");
+          const itemRanges = [];
+          let text = "";
+
+          content.items.forEach((item, itemIndex) => {
+            if (itemIndex > 0) text += " ";
+            const value = item.str || "";
+            const start = text.length;
+            text += value;
+            itemRanges.push({ itemIndex, start, end: text.length });
+          });
+
+          return { text, itemRanges };
         })
       );
-      setPageTexts(textPages);
+      setPageSearchData(searchData);
     } catch {
       setLoadError("The document opened, but its text could not be indexed for searching.");
     } finally {
@@ -129,7 +178,7 @@ export default function PdfDocumentModalClient({
   function runSearch(event) {
     event?.preventDefault();
     const nextSearchTerm = query.trim();
-    const nextMatches = textMatches(pageTexts, nextSearchTerm);
+    const nextMatches = textMatches(pageSearchData, nextSearchTerm);
 
     setSearchTerm(nextSearchTerm);
     setMatches(nextMatches);
@@ -165,7 +214,7 @@ export default function PdfDocumentModalClient({
     if (indexing) return "Preparing document search...";
     if (!searchTerm) return "Enter a word or phrase, then select Find.";
     if (matches.length === 0) return `No matches found for "${searchTerm}".`;
-    return `${activeMatchIndex + 1} of ${matches.length} - Page ${matches[activeMatchIndex]?.pageNumber || pageNumber}`;
+    return `${activeMatchIndex + 1} of ${matches.length} - Page ${matches[activeMatchIndex]?.pageNumber || pageNumber} - Active match is orange`;
   }, [activeMatchIndex, indexing, matches, pageNumber, searchTerm]);
 
   return (
@@ -260,7 +309,7 @@ export default function PdfDocumentModalClient({
           >
             {numPages > 0 && (
               <Page
-                key={`${pageNumber}:${searchTerm}`}
+                key={`${pageNumber}:${searchTerm}:${activeMatchIndex}`}
                 pageNumber={pageNumber}
                 width={pageWidth}
                 customTextRenderer={customTextRenderer}
