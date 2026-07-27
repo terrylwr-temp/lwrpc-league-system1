@@ -39,8 +39,8 @@ function highlightedText(value, itemIndex, pageNumber, matches, activeMatchIndex
     if (segment.end <= cursor) return;
     const start = Math.max(segment.start, cursor);
     const style = segment.active
-      ? "background:#fb923c;color:#0f172a;outline:2px solid #c2410c;outline-offset:1px;"
-      : "background:#fde047;color:#0f172a;";
+      ? "background:rgba(251,146,60,0.58);color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;outline:2px solid #c2410c;outline-offset:1px;"
+      : "background:rgba(253,224,71,0.55);color:transparent;-webkit-text-fill-color:transparent;text-shadow:none;";
     const activeAttribute = segment.active ? ' data-active-search-match="true"' : "";
 
     output += escapeHtml(value.slice(cursor, start));
