@@ -135,7 +135,7 @@ export async function sendSmsMessages({ phones, body, preferAppNotifications = f
   };
 }
 
-export async function sendEmailMessages({ emails, subject, text, html }) {
+export async function sendEmailMessages({ emails, subject, text, html, attachments = [] }) {
   const recipients = cleanList(emails);
   const replyToEmail = String(process.env.BREVO_REPLY_TO_EMAIL || "").trim();
 
@@ -172,6 +172,7 @@ export async function sendEmailMessages({ emails, subject, text, html }) {
       to: recipients.map((email) => ({ email })),
       subject,
       ...(html ? { htmlContent: html } : { textContent: text }),
+      ...(attachments.length > 0 ? { attachment: attachments } : {}),
     }),
   });
 

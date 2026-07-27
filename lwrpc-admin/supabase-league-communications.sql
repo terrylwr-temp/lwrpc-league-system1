@@ -12,4 +12,6 @@ create table if not exists public.league_communication_history (
   sent_by_email text,
   created_at timestamptz not null default now()
 );
+alter table public.league_communication_history
+  add column if not exists attachment_names text[] not null default '{}';
 create index if not exists league_communication_history_created_at_idx on public.league_communication_history (created_at desc);
