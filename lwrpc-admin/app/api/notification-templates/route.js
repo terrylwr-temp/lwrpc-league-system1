@@ -5,8 +5,8 @@ import { hasRole } from "../../lib/permissions";
 export const runtime = "nodejs";
 
 const DASHBOARD_MESSAGE_AUDIENCES = {
-  captain_login_popup: "Captain Message",
-  player_login_popup: "Player Message",
+  captain_login_popup: "Login - All Captains",
+  player_login_popup: "Login - All Players",
 };
 
 // These two messages are intentionally shown immediately after a user signs in.

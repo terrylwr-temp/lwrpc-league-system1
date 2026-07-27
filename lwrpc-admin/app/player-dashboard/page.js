@@ -1600,7 +1600,7 @@ export default function PlayerDashboardPage() {
 
         <LoginMessageModal
           templateKey="player_login_popup"
-          audienceLabel="Player Message"
+          audienceLabel="Login - All Players"
         />
 
         {activePanel === "standings" && (

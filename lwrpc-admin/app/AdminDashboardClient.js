@@ -38,13 +38,13 @@ import {
 const LOGIN_MESSAGE_TEMPLATES = [
   {
     key: "captain_login_popup",
-    label: "Captain Message",
-    defaultSubject: "Captain Message",
+    label: "Login - All Captains",
+    defaultSubject: "Login - All Captains",
   },
   {
     key: "player_login_popup",
-    label: "Player Message",
-    defaultSubject: "Player Message",
+    label: "Login - All Players",
+    defaultSubject: "Login - All Players",
   },
 ];
 
@@ -97,6 +97,7 @@ export default function DashboardPage() {
     )
   );
   const [messageHistory, setMessageHistory] = useState([]);
+  const [selectedLoginMessageKey, setSelectedLoginMessageKey] = useState(LOGIN_MESSAGE_TEMPLATES[0].key);
   const [loadingMessageHistory, setLoadingMessageHistory] = useState(false);
   const [savingMessageKey, setSavingMessageKey] = useState("");
   const [deletingHistoryId, setDeletingHistoryId] = useState("");
@@ -460,7 +461,7 @@ export default function DashboardPage() {
       body: JSON.stringify({
         template_key: template.key,
         audience: template.label,
-        subject: message.subject?.trim() || template.defaultSubject,
+        subject: template.defaultSubject,
         body: message.body || "",
       }),
     });
@@ -533,7 +534,9 @@ export default function DashboardPage() {
       },
     }));
 
-    const editor = document.getElementById(`dashboard-message-${item.template_key}`);
+    setSelectedLoginMessageKey(item.template_key);
+
+    const editor = document.getElementById("dashboard-message-editor");
     if (editor) editor.scrollIntoView({ behavior: "smooth", block: "center" });
   }
 
@@ -1023,29 +1026,31 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 p-4 md:grid-cols-2 md:p-6">
-            {LOGIN_MESSAGE_TEMPLATES.map((template) => {
+          <div className="p-4 md:p-6">
+            {(() => {
+              const template = templateConfig(selectedLoginMessageKey) || LOGIN_MESSAGE_TEMPLATES[0];
               const message = loginMessages[template.key] || {};
 
               return (
-                <div id={`dashboard-message-${template.key}`} key={template.key} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <div className="text-sm font-black uppercase tracking-wide text-slate-500">
-                    {template.label}
-                  </div>
-
-                  <input
-                    type="text"
-                    value={message.subject || ""}
-                    onChange={(event) => updateLoginMessage(template.key, "subject", event.target.value)}
-                    placeholder={`${template.label} subject`}
-                    className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
-                  />
+                <div id="dashboard-message-editor" className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <label className="block text-sm font-black uppercase tracking-wide text-slate-500">
+                    Message type
+                    <select
+                      value={template.key}
+                      onChange={(event) => setSelectedLoginMessageKey(event.target.value)}
+                      className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-950"
+                    >
+                      {LOGIN_MESSAGE_TEMPLATES.map((option) => (
+                        <option key={option.key} value={option.key}>{option.label}</option>
+                      ))}
+                    </select>
+                  </label>
 
                   <textarea
                     value={message.body || ""}
                     onChange={(event) => updateLoginMessage(template.key, "body", event.target.value)}
-                    placeholder={`Enter the ${template.label.toLowerCase()} to show on login. Leave blank to hide the popup.`}
-                    rows={5}
+                    placeholder={`Enter the message to show to ${template.label.replace("Login - All ", "").toLowerCase()} on login. Leave blank to hide the popup.`}
+                    rows={6}
                     className="mt-3 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold"
                   />
 
@@ -1069,7 +1074,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
               );
-            })}
+            })()}
           </div>
 
           <div className="border-t border-slate-200 p-4 md:p-6">

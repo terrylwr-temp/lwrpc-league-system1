@@ -3235,7 +3235,7 @@ export default function CaptainDashboardPage() {
 
         <LoginMessageModal
           templateKey="captain_login_popup"
-          audienceLabel="Captain Message"
+          audienceLabel="Login - All Captains"
         />
 
         {matchSetupModal}
