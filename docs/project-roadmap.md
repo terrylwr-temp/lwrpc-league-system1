@@ -352,3 +352,7 @@ As of 2026-05-21:
 - Captain Dashboard Next Match treats a recorded team bye as a zero-day score grace period. It advances beyond the bye immediately after its date, and an obsolete scoreless match row for the same team-bye schedule slot cannot delay the following match. The visible app version was bumped to `LMS-0574`.
 - Scheduling Administration now uses the branded, accessible in-app dialogs for every schedule-generation confirmation and typed `DELETE` safeguard, instead of browser-native confirmation or prompt windows. The visible app version was bumped to `LMS-0575`.
 - Visual Schedule Editor now uses the branded, accessible in-app dialogs for publish/unpublish, home/away balancing, match deletion, and typed `RESET` score clearing confirmations. The visible app version was bumped to `LMS-0576`.
+
+- League Communications adds a League Manager Match Operations tool for composing rich-text email, previewing the rendered message, selecting audience and the Admin Dashboard-equivalent scope, checking unique active recipient counts, sending through Brevo, and recording sender/content/count/status history. Apply lwrpc-admin/supabase-league-communications.sql before deploying. The visible app version was bumped to LMS-0577.
+
+- Admin Dashboard System Setup now has a distinct gear icon rather than reusing League Structure's hierarchy icon. The visible app version was bumped to LMS-0578.

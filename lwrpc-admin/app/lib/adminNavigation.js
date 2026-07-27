@@ -25,6 +25,7 @@ const ADMIN_SECTIONS = [
       { title: "Schedule Editor", desc: "Review, edit, publish, and reset matches.", path: "/schedule-editor", code: "SE", tone: "amber", role: "league_manager" },
       { title: "Scoring Operations", desc: "Create and manage matches, send score reminders, review verification, and export to DUPR.", path: "/scoring", code: "SC", tone: "emerald", role: "league_manager" },
       { title: "Dashboard Messages", desc: "Create dashboard login messages and review message history.", path: "#dashboard-messages", code: "DM", tone: "blue", role: "league_manager", dialog: "messages" },
+      { title: "League Communications", desc: "Compose, preview, send, and review scoped league emails.", path: "/league-communications", code: "LC", tone: "amber", role: "league_manager" },
     ],
   },
   {
@@ -75,3 +76,5 @@ export function adminNavigationSections(role) {
     cards: section.cards.filter((card) => hasRole(role, card.role)),
   })).filter((section) => section.cards.length > 0);
 }
+
+
