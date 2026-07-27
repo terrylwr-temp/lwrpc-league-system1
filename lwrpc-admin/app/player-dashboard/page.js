@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
+import PdfDocumentModal from "../components/PdfDocumentModal";
 import MiniStandingsLeaders, { buildMiniStandingsLeaders } from "../components/MiniStandingsLeaders";
 import TeamScheduleModal from "../components/TeamScheduleModal";
 import { requireRole, supabase } from "../lib/auth";
@@ -2512,77 +2513,7 @@ function rosterRatingLabel(ratingType) {
 }
 
 function PdfViewerModal({ document, onClose }) {
-  const [viewerReady, setViewerReady] = useState(false);
-
-  useEffect(() => {
-    setViewerReady(true);
-  }, []);
-
-  function printDocument() {
-    const printWindow = window.open(document.url, "_blank", "width=1000,height=800");
-
-    if (!printWindow) {
-      alert("Unable to open the PDF for printing. Please allow popups for this site.");
-      return;
-    }
-
-    printWindow.focus();
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-4">
-      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
-          <div>
-            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">
-              {document.leagueName} / {document.teamName}
-            </div>
-            <h2 className="mt-1 text-2xl font-black">{document.title}</h2>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            <a
-              href={document.url}
-              target="_blank"
-              rel="noreferrer"
-              download
-              className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
-            >
-              Download
-            </a>
-
-            <button
-              type="button"
-              onClick={printDocument}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
-            >
-              Print
-            </button>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-
-        {viewerReady ? (
-          <iframe
-            title={document.title}
-            src={document.url}
-            className="h-[75vh] w-full bg-slate-100"
-          />
-        ) : (
-          <div className="flex h-[75vh] items-center justify-center bg-slate-100 text-sm font-semibold text-slate-600">
-            Loading PDF viewer...
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  return <PdfDocumentModal document={document} onClose={onClose} />;
 }
 
 function teamCaptainContacts(team) {

@@ -17,6 +17,7 @@ import {
   YAxis,
 } from "recharts";
 import AppHeader from "./components/AppHeader";
+import PdfDocumentModal from "./components/PdfDocumentModal";
 import { useAppDialog } from "./components/AppDialogProvider";
 import AdminDesignPreviewView from "./design-preview/admin/AdminDesignPreviewView";
 import { StandingsBarChartTooltip } from "./components/DivisionStandingsBarChart";
@@ -51,21 +52,7 @@ const LOGIN_MESSAGE_TEMPLATES = [
 const SETUP_REMINDER_HIDE_DATE_KEY = "lwrpc-match-setup-reminder-hide-date";
 
 function PdfViewerModal({ document, onClose }) {
-  const [viewerReady, setViewerReady] = useState(false);
-
-  useEffect(() => setViewerReady(true), []);
-
-  return (
-    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true" aria-labelledby="guide-pdf-title">
-      <div className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <header className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
-          <div><span className="text-xs font-black uppercase tracking-wide text-emerald-200">{document.leagueName} / {document.teamName}</span><h2 id="guide-pdf-title" className="mt-1 text-2xl font-black">{document.title}</h2></div>
-          <div className="flex flex-wrap gap-2"><a href={document.url} target="_blank" rel="noreferrer" download className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100">Download</a><button type="button" onClick={() => window.open(document.url, "_blank", "width=1000,height=800")?.focus()} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">Print</button><button type="button" onClick={onClose} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">Close</button></div>
-        </header>
-        {viewerReady ? <iframe title={document.title} src={document.url} className="h-[75vh] w-full bg-slate-100" /> : <div className="flex h-[75vh] items-center justify-center bg-slate-100 text-sm font-semibold text-slate-600">Loading PDF viewer...</div>}
-      </div>
-    </div>
-  );
+  return <PdfDocumentModal document={document} onClose={onClose} />;
 }
 
 export default function DashboardPage() {
