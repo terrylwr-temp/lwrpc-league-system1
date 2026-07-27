@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { APP_VERSION } from "../lib/version";
 
 const LMS_HEAD_ELEMENTS = [
   { id: "lms-pwa-manifest", tag: "link", attrs: { rel: "manifest", href: "/lms-manifest.webmanifest" } },
@@ -52,7 +53,17 @@ export default function LmsPwaRegister() {
         }
       } else {
         navigator.serviceWorker.register("/lms-sw.js", { scope: "/", updateViaCache: "none" })
-          .then((registration) => registration.update())
+          .then((registration) => {
+            let refreshing = false;
+            const reloadKey = `lms-pwa-reloaded-${APP_VERSION}`;
+            navigator.serviceWorker.addEventListener("controllerchange", () => {
+              if (refreshing || window.sessionStorage.getItem(reloadKey) === "true") return;
+              refreshing = true;
+              window.sessionStorage.setItem(reloadKey, "true");
+              window.location.reload();
+            });
+            return registration.update();
+          })
           .catch(console.error);
       }
     }

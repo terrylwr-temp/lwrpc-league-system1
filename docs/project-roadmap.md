@@ -356,3 +356,4 @@ As of 2026-05-21:
 - League Communications adds a League Manager Match Operations tool for composing rich-text email, previewing the rendered message, selecting audience and the Admin Dashboard-equivalent scope, checking unique active recipient counts, sending through Brevo, and recording sender/content/count/status history. Apply lwrpc-admin/supabase-league-communications.sql before deploying. The visible app version was bumped to LMS-0577.
 
 - Admin Dashboard System Setup now has a distinct gear icon rather than reusing League Structure's hierarchy icon. The visible app version was bumped to LMS-0578.
+- Admin Dashboard System Setup now uses a conventional cog icon. LMS PWA registrations reload the active page once when a newly deployed service worker takes control, preventing an already-open installed app from continuing to display an older JavaScript bundle after deployment. The visible app version was bumped to `LMS-0580`.

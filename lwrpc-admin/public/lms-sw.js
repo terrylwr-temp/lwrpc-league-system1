@@ -1,4 +1,4 @@
-const CACHE_NAME = "lms-pwa-static-v2";
+const CACHE_NAME = "lms-pwa-static-v3";
 const STATIC_CACHE_PREFIX = "lms-pwa-static-";
 const PRECACHE_URLS = [
   "/lms-manifest.webmanifest",
