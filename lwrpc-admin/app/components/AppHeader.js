@@ -11,6 +11,7 @@ import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from
 import { saveProfilePhoto } from "../lib/profilePhotos";
 import { APP_VERSION } from "../lib/version";
 import { adminNavigationSections } from "../lib/adminNavigation";
+import { GUIDE_DOCUMENT_TYPES, guidePdfDocument, openGuideDocument } from "../lib/dashboardGuides";
 import adminShellStyles from "../design-preview/page.module.css";
 import { useDashboardAppearance } from "../design-preview/DashboardAppearanceControls";
 import DashboardProfileDialog from "./DashboardProfileDialog";
@@ -62,6 +63,29 @@ function ProfileAvatar({ member, size = 40 }) {
   );
 }
 
+const ADMIN_GUIDE = GUIDE_DOCUMENT_TYPES.find((guide) => guide.key === "admin_guide_pdf");
+
+function GuidePdfModal({ document, onClose }) {
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-4" role="dialog" aria-modal="true" aria-labelledby="shared-guide-title">
+      <section className="flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <header className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-5 py-4 text-white md:flex-row md:items-center md:justify-between">
+          <div>
+            <span className="text-xs font-black uppercase tracking-wide text-emerald-200">Dashboard Guide</span>
+            <h2 id="shared-guide-title" className="mt-1 text-2xl font-black">{document.title}</h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a href={document.url} target="_blank" rel="noreferrer" download className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100">Download</a>
+            <button type="button" onClick={() => window.open(document.url, "_blank", "width=1000,height=800")?.focus()} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">Print</button>
+            <button type="button" onClick={onClose} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">Close</button>
+          </div>
+        </header>
+        <iframe title={document.title} src={document.url} className="h-[75vh] w-full bg-slate-100"/>
+      </section>
+    </div>
+  );
+}
+
 export default function AppHeader({
   title = "League Management",
   subtitle = "League operations and administration.",
@@ -82,6 +106,7 @@ export default function AppHeader({
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const [guideDocument, setGuideDocument] = useState(null);
   const appearance = useDashboardAppearance();
 
   const dashboardLinks = useMemo(() => [
@@ -153,6 +178,7 @@ export default function AppHeader({
       if (event.key !== "Escape") return;
       setMenuOpen(false);
       setProfileOpen(false);
+      setGuideDocument(null);
       if (!logoutPending) setLogoutDialogOpen(false);
     }
     window.addEventListener("keydown", closeDialogs);
@@ -164,6 +190,21 @@ export default function AppHeader({
     setMenuOpen(false);
     setProfileOpen(false);
     router.push(path);
+  }
+
+  async function openUserGuide() {
+    if (!hasRole(role, "league_manager")) {
+      navigate(`/help/${role}`);
+      return;
+    }
+
+    if (window.matchMedia("(max-width: 767px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)").matches) {
+      await openGuideDocument(supabase, ADMIN_GUIDE);
+      return;
+    }
+
+    const document = await guidePdfDocument(supabase, ADMIN_GUIDE);
+    if (document) setGuideDocument(document);
   }
 
   function toggleGroup(key) {
@@ -279,7 +320,7 @@ export default function AppHeader({
           <h1 className="mt-1 truncate text-[25px] font-black leading-tight tracking-[-.02em] text-[#102e64]">Welcome, {firstName}</h1>
         </div>
         <div className="flex items-center gap-2.5">
-          <button type="button" onClick={() => navigate(`/help/${role}`)} className="grid h-11 w-11 place-items-center rounded-full border border-[#e3e8f0] bg-white text-[#536079] transition hover:-translate-y-0.5 hover:border-[#99b7ed] hover:text-[#1558d5]" aria-label="Open User Guide" title="User Guide"><Icon name="help" size={20}/></button>
+          <button type="button" onClick={openUserGuide} className="grid h-11 w-11 place-items-center rounded-full border border-[#e3e8f0] bg-white text-[#536079] transition hover:-translate-y-0.5 hover:border-[#99b7ed] hover:text-[#1558d5]" aria-label="Open Admin User Guide" title="Admin User Guide"><Icon name="help" size={20}/></button>
           <a href={`mailto:${contactEmail}`} className="grid h-11 w-11 place-items-center rounded-full border border-[#e3e8f0] bg-white text-[#536079] transition hover:-translate-y-0.5 hover:border-[#99b7ed] hover:text-[#1558d5]" aria-label="Email League Management" title="Email League Management"><Icon name="mail" size={20}/></a>
           <div className="ml-2 grid min-w-[112px] text-right"><strong className="truncate text-[14px] font-black text-[#102e64]">{displayName}</strong><small className="text-[12px] font-semibold text-[#76839a]">{roleLabel(role)}</small></div>
           <button type="button" onClick={() => setProfileOpen(true)} className="grid h-12 w-12 place-items-center rounded-full border border-[#e3e8f0] bg-white p-1 shadow-sm transition hover:border-[#b8cbec] hover:shadow-md" aria-label="Open profile" aria-haspopup="dialog"><ProfileAvatar member={member} size={40}/></button>
@@ -289,7 +330,7 @@ export default function AppHeader({
       <header className="sticky top-0 z-30 -mx-4 -mt-4 mb-3 grid min-h-[72px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-[#dce4ef] bg-[#f7f9fc]/95 px-4 py-[env(safe-area-inset-top)] shadow-sm backdrop-blur-xl min-[701px]:hidden">
         <div className="flex items-center gap-2"><button type="button" onClick={() => setMenuOpen(true)} className="grid h-10 w-10 place-items-center rounded-full border border-[#dce4ef] bg-white text-[#102e64]" aria-label="Open navigation">{"\u2630"}</button><a href={clubWebsite} target="_blank" rel="noreferrer"><Image src={logoUrl} alt="" width={36} height={36} className="h-9 w-9 rounded-full bg-white object-contain" unoptimized/></a></div>
         <div className="min-w-0 text-center"><strong className="block truncate text-[13px] font-black text-[#102e64]">{title}</strong><span className="block truncate text-[14px] font-black text-[#102e64]">{contextLabel}</span></div>
-        <div className="flex items-center gap-1"><button type="button" onClick={() => navigate(`/help/${role}`)} className="grid h-9 w-9 place-items-center rounded-full border border-[#dce4ef] bg-white text-[#536079]" aria-label="Open User Guide"><Icon name="help" size={18}/></button><button type="button" onClick={() => setProfileOpen(true)} className="grid h-10 w-10 place-items-center rounded-full bg-transparent" aria-label="Open profile"><ProfileAvatar member={member} size={36}/></button></div>
+        <div className="flex items-center gap-1"><button type="button" onClick={openUserGuide} className="grid h-9 w-9 place-items-center rounded-full border border-[#dce4ef] bg-white text-[#536079]" aria-label="Open Admin User Guide"><Icon name="help" size={18}/></button><button type="button" onClick={() => setProfileOpen(true)} className="grid h-10 w-10 place-items-center rounded-full bg-transparent" aria-label="Open profile"><ProfileAvatar member={member} size={36}/></button></div>
       </header>
 
       <section className={`mx-auto mb-6 max-w-[1180px] overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-r from-[#102e64] via-[#154b9b] to-[#1558d5] px-5 ${hidePageSectionLabel ? "py-4" : "py-5"} text-white shadow-[0_14px_32px_rgba(20,64,145,.16)] md:px-6`}>
@@ -310,6 +351,7 @@ export default function AppHeader({
       </div><footer className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 text-[12px] font-semibold text-slate-500"><span>Version {APP_VERSION}</span><span className="ml-auto">{"\u00A9"} {new Date().getFullYear()} {clubName}</span><LmsInstallButton iconOnly/></footer></section></div>}
 
       {false && logoutDialogOpen && <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title"><button type="button" className="absolute inset-0 bg-slate-950/65 backdrop-blur-sm" onClick={() => !logoutPending && setLogoutDialogOpen(false)} aria-label="Close logout dialog"/><section className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"><div className="border-b border-slate-200 bg-slate-50 px-6 py-5"><span className="text-xs font-black uppercase tracking-[.16em] text-blue-700">Account</span><h2 id="logout-dialog-title" className="mt-1 text-2xl font-black text-slate-950">Log out of this device?</h2></div><div className="px-6 py-5"><div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong className="block font-black text-slate-950">{displayName}</strong><span className="mt-1 block text-sm font-semibold text-slate-600">{roleLabel(role)}</span></div><p className="mt-4 text-sm font-semibold leading-6 text-slate-600">You will remain signed in on your other devices.</p>{logoutError && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-800">{logoutError}</div>}<div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><button type="button" onClick={() => setLogoutDialogOpen(false)} disabled={logoutPending} className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-50">Stay signed in</button><button type="button" onClick={logout} disabled={logoutPending} className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black text-white hover:bg-red-700 disabled:opacity-60">{logoutPending ? "Logging out..." : "Log out"}</button></div></div></section></div>}
+      {guideDocument && <GuidePdfModal document={guideDocument} onClose={() => setGuideDocument(null)}/>}
       <DashboardProfileDialog isOpen={profileOpen} onClose={() => setProfileOpen(false)} member={member} role={role} membershipUrl={membershipUrl} onChangePassword={() => navigate(`/reset-password?returnTo=${encodeURIComponent(pathname)}`)} onSaveProfileImage={saveHeaderProfileImage} onLogout={logoutFromProfile}/>
     </>
   );

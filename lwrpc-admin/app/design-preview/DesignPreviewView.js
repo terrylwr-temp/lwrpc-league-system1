@@ -67,6 +67,13 @@ function shortTime(value) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
 }
 
+function localDateString() {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
 function resultScoreStatusLabel(match) {
   const status = match?.score_status || "not_entered";
 
@@ -74,7 +81,7 @@ function resultScoreStatusLabel(match) {
   if (status === "pending_verification") return "Score Details Awaiting Verification";
   if (status === "disputed") return "Score Details Disputed";
   if (match?.score_entered_at) return "Score Details Not Verified";
-  return "Score Details Not Entered";
+  return "Scores Not Entered";
 }
 
 function rosterRole(person, team) {
@@ -155,9 +162,22 @@ export default function DesignPreviewView({ dashboard = {} }) {
   const selectedIsHome = nextMatch && String(nextMatch.home_team_id) === String(teamId);
   const opponentName = nextMatch ? (selectedIsHome ? nextMatch.away_team?.name : nextMatch.home_team?.name) || "Opponent" : "";
   const nextDate = shortDate(nextMatch?.scheduled_date || nextBye?.bye_date);
-  const allResults = useMemo(() => (dashboard.matches || [])
-    .filter((match) => match.status === "completed" && (String(match.home_team_id) === String(teamId) || String(match.away_team_id) === String(teamId)))
-    .sort((a, b) => String(b.scheduled_date || "").localeCompare(String(a.scheduled_date || ""))), [dashboard.matches, teamId]);
+  const allResults = useMemo(() => {
+    const today = localDateString();
+
+    return (dashboard.matches || [])
+      .filter((match) => {
+        const belongsToSelectedTeam =
+          String(match.home_team_id) === String(teamId) ||
+          String(match.away_team_id) === String(teamId);
+        const isPastMatch = Boolean(match.scheduled_date && match.scheduled_date < today);
+
+        return belongsToSelectedTeam &&
+          match.status !== "cancelled" &&
+          (match.status === "completed" || isPastMatch);
+      })
+      .sort((a, b) => String(b.scheduled_date || "").localeCompare(String(a.scheduled_date || "")));
+  }, [dashboard.matches, teamId]);
   const roster = useMemo(() => (dashboard.rosters?.[teamId] || [])
     .map((person) => ({ person, role: rosterRole(person, selectedTeam) }))
     .sort((a, b) => roleRank(a.role) - roleRank(b.role) || rosterSortName(a.person).localeCompare(rosterSortName(b.person))), [dashboard.rosters, selectedTeam, teamId]);

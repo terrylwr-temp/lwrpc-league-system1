@@ -45,7 +45,7 @@ const ADMIN_SECTIONS = [
     key: "system",
     title: "System Setup",
     navLabel: "System Setup",
-    icon: "structure",
+    icon: "settings",
     desc: "Configure system-wide communication, score sheets, club settings, and controlled reset operations.",
     cards: [
       { title: "Email Options", desc: "Edit automated email templates and send test notifications.", path: "/email-options", code: "EO", tone: "blue", role: "commissioner" },

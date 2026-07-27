@@ -357,3 +357,5 @@ As of 2026-05-21:
 
 - Admin Dashboard System Setup now has a distinct gear icon rather than reusing League Structure's hierarchy icon. The visible app version was bumped to LMS-0578.
 - Admin Dashboard System Setup now uses a conventional cog icon. LMS PWA registrations reload the active page once when a newly deployed service worker takes control, preventing an already-open installed app from continuing to display an older JavaScript bundle after deployment. The visible app version was bumped to `LMS-0580`.
+- Shared Admin-area headers now open the configured Admin User Guide PDF for League Managers and Commissioners instead of routing to an empty role Help Center. The shared sidebar now correctly maps League Structure to the hierarchy icon and System Setup to the settings cog. The visible app version was bumped to `LMS-0581`.
+- Player Dashboard Recent Results now includes past, published team matches even when their scores have not been entered, with a clear `Scores Not Entered` status. Those overdue matches remain excluded from Upcoming Schedule. The visible app version was bumped to `LMS-0582`.
