@@ -581,6 +581,7 @@ export default function PlayerDashboardPage() {
           scheduled_date,
           scheduled_time,
           status,
+          score_status,
           home_team_id,
           away_team_id,
             home_team:teams!matches_home_team_id_fkey (
@@ -897,7 +898,9 @@ export default function PlayerDashboardPage() {
 
         stats.games += 1;
 
-        if (!rowCountsForIndividualWinLoss(row) || rowHasSpecialGame(row)) {
+        if (historyScoresNeedPosting([row])) {
+          stats.pendingScores += 1;
+        } else if (!rowCountsForIndividualWinLoss(row) || rowHasSpecialGame(row)) {
           stats.other += 1;
         } else if (details.result === "W") {
           stats.wins += 1;
@@ -914,6 +917,7 @@ export default function PlayerDashboardPage() {
         wins: 0,
         losses: 0,
         ties: 0,
+        pendingScores: 0,
         other: 0,
       }
     );
@@ -1420,10 +1424,15 @@ export default function PlayerDashboardPage() {
             resultCount={filteredPlayHistory.length}
             memberId={member?.id}
             ratingForMember={ratingForMember}
-            details={playerHistoryDetails}
-            showMorePlayerDetails={showMorePlayerDetails}
-            onToggleMorePlayerDetails={() => setShowMorePlayerDetails((value) => !value)}
+            onOpenPlayerDetails={() => setShowMorePlayerDetails(true)}
             onClose={() => setDesignPreviewHistoryOpen(false)}
+          />
+        )}
+
+        {showMorePlayerDetails && (
+          <PlayerHistoryDetailsModal
+            details={playerHistoryDetails}
+            onClose={() => setShowMorePlayerDetails(false)}
           />
         )}
 
@@ -1850,16 +1859,17 @@ export default function PlayerDashboardPage() {
               <h2 className="mt-1 text-xl font-black">My Play History</h2>
             </div>
 
-            <label className="w-full md:w-96">
-              <span className="mb-1 block text-xs font-black uppercase tracking-wide text-blue-100">
-                Play History Scope
-              </span>
-              <select
-                value={historyFilter}
-                onChange={(e) => setHistoryFilter(e.target.value)}
-                className="w-full rounded-xl border border-white/40 bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm"
-                aria-label="Filter play history by dashboard scope"
-              >
+            <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row md:items-end">
+              <label className="w-full md:w-96">
+                <span className="mb-1 block text-xs font-black uppercase tracking-wide text-blue-100">
+                  Play History Scope
+                </span>
+                <select
+                  value={historyFilter}
+                  onChange={(e) => setHistoryFilter(e.target.value)}
+                  className="w-full rounded-xl border border-white/40 bg-white px-4 py-2.5 text-sm font-bold text-slate-950 shadow-sm"
+                  aria-label="Filter play history by dashboard scope"
+                >
                 <option value="all">All Seasons/All Teams</option>
                 {playHistoryOptions.seasons.length > 0 && (
                   <optgroup label="Seasons">
@@ -1897,27 +1907,23 @@ export default function PlayerDashboardPage() {
                     ))}
                   </optgroup>
                 )}
-              </select>
-            </label>
+                </select>
+              </label>
+              <button
+                type="button"
+                onClick={() => setShowMorePlayerDetails(true)}
+                className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20"
+              >
+                More Player Details
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2 bg-slate-50 p-3 md:grid-cols-4 md:gap-3 md:p-5">
             <HistoryStat label="Games Played" value={playHistoryStats.games} tone="slate" />
             <HistoryStat label="Wins" value={playHistoryStats.wins} tone="emerald" />
             <HistoryStat label="Losses" value={playHistoryStats.losses} tone="red" />
-            <HistoryStat label="Other" value={playHistoryStats.other} tone="amber" />
-          </div>
-
-          <div className="border-b border-slate-200 bg-slate-50 px-3 pb-4 md:px-5">
-            <button
-              type="button"
-              onClick={() => setShowMorePlayerDetails((value) => !value)}
-              aria-expanded={showMorePlayerDetails}
-              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-900 shadow-sm hover:bg-blue-50"
-            >
-              {showMorePlayerDetails ? "Hide Player Details" : "More Player Details"}
-            </button>
-            {showMorePlayerDetails && <PlayerHistoryDetails details={playerHistoryDetails} />}
+            <HistoryStat label="Scores Pending" value={playHistoryStats.pendingScores} tone="amber" />
           </div>
 
           <div className="space-y-3 p-5">
@@ -2105,8 +2111,8 @@ function writeDashboardTeamSelection(prefix, memberId, teamId) {
 
 function PlayerHistoryDetails({ details }) {
   return (
-    <div className="mt-3 space-y-3 rounded-xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm">
-      <div className="grid gap-3 md:grid-cols-3">
+    <div className="space-y-4 text-slate-900">
+      <div className="grid items-stretch gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <PlayerDetailGroup title="Matches" metrics={[
           ["Wins", details.matchWins],
           ["Losses", details.matchLosses],
@@ -2122,23 +2128,21 @@ function PlayerHistoryDetails({ details }) {
           ["Against", details.pointsAgainst],
           ["Diff %", formatPointDifference(details.pointsEarned, details.pointsAgainst)],
         ]} />
-      </div>
-
-      <PlayerDetailGroup title="Ratings" metrics={[
-        ["Partner", formatRatingMetric(details.partnerRating)],
-        ["Opponent", formatRatingMetric(details.opponentRating)],
-        ["Adjusted", formatRatingMetric(details.adjustedRating)],
-        ["Overall", formatRatingMetric(details.overallRating)],
-      ]} />
-
-      <div>
-        <div className="text-xs font-black uppercase tracking-wide text-slate-500">Last 5 Matchups</div>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {details.lastFive.length > 0 ? details.lastFive.map((match) => (
-            <span key={match.id} className={`rounded-lg px-3 py-2 text-sm font-black ${match.result === "W" ? "bg-emerald-100 text-emerald-900" : match.result === "L" ? "bg-red-100 text-red-900" : "bg-slate-100 text-slate-700"}`}>
-              {match.result} · {match.opponent}
-            </span>
-          )) : <span className="text-sm font-semibold text-slate-500">No completed match results in this scope.</span>}
+        <PlayerDetailGroup title="Ratings" metrics={[
+          ["Partner", formatRatingMetric(details.partnerRating)],
+          ["Opponent", formatRatingMetric(details.opponentRating)],
+          ["Adjusted", formatRatingMetric(details.adjustedRating)],
+          ["Overall", formatRatingMetric(details.overallRating)],
+        ]} />
+        <div className="flex min-h-full flex-col rounded-xl border border-slate-200 bg-slate-50 p-3">
+          <div className="text-xs font-black uppercase tracking-wide text-slate-500">Last 5 Matchups</div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {details.lastFive.length > 0 ? details.lastFive.map((match) => (
+              <span key={match.id} className={`rounded-lg px-3 py-2 text-sm font-black ${match.result === "W" ? "bg-emerald-100 text-emerald-900" : match.result === "L" ? "bg-red-100 text-red-900" : "bg-slate-100 text-slate-700"}`}>
+                {match.result}{" \u00b7 "}{match.opponent}
+              </span>
+            )) : <span className="text-sm font-semibold text-slate-500">No completed match results in this scope.</span>}
+          </div>
         </div>
       </div>
       <p className="text-xs font-semibold leading-5 text-slate-500">
@@ -2150,10 +2154,29 @@ function PlayerHistoryDetails({ details }) {
 
 function PlayerDetailGroup({ title, metrics }) {
   return (
-    <div className="rounded-xl bg-slate-50 p-3">
+    <div className="min-h-full rounded-xl border border-slate-200 bg-slate-50 p-3">
       <div className="text-xs font-black uppercase tracking-wide text-slate-500">{title}</div>
       <div className="mt-2 grid gap-1 text-sm">
         {metrics.map(([label, value]) => <div key={label} className="flex items-center justify-between gap-3"><span className="font-semibold text-slate-600">{label}</span><span className="font-black text-slate-950">{value}</span></div>)}
+      </div>
+    </div>
+  );
+}
+
+function PlayerHistoryDetailsModal({ details, onClose }) {
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/75 p-2 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="player-history-details-title">
+      <div className="flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex items-center justify-between gap-4 bg-gradient-to-r from-blue-700 to-indigo-700 p-5 text-white">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-blue-100">Match Results</div>
+            <h2 id="player-history-details-title" className="mt-1 text-2xl font-black">More Player Details</h2>
+          </div>
+          <button type="button" onClick={onClose} className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20">Close</button>
+        </div>
+        <div className="overflow-y-auto overscroll-contain p-4 sm:p-5">
+          <PlayerHistoryDetails details={details} />
+        </div>
       </div>
     </div>
   );
@@ -2266,9 +2289,7 @@ function PreviewPlayHistoryModal({
   resultCount,
   memberId,
   ratingForMember,
-  details,
-  showMorePlayerDetails,
-  onToggleMorePlayerDetails,
+  onOpenPlayerDetails,
   onClose,
 }) {
   return (
@@ -2296,6 +2317,7 @@ function PreviewPlayHistoryModal({
                 {options.teams.length > 0 && <optgroup label="Teams">{options.teams.map((team) => <option key={team.id} value={`team:${team.id}`}>{historyTeamOptionLabel(team)}</option>)}</optgroup>}
               </select>
             </label>
+            <button type="button" onClick={onOpenPlayerDetails} className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20">More Player Details</button>
             <button type="button" onClick={onClose} className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20">Close</button>
           </div>
         </div>
@@ -2304,19 +2326,7 @@ function PreviewPlayHistoryModal({
           <HistoryStat label="Games Played" value={stats.games} tone="slate" />
           <HistoryStat label="Wins" value={stats.wins} tone="emerald" />
           <HistoryStat label="Losses" value={stats.losses} tone="red" />
-          <HistoryStat label="Other" value={stats.other} tone="amber" />
-        </div>
-
-        <div className="border-b border-slate-200 bg-slate-50 px-3 pb-4 md:px-5">
-          <button
-            type="button"
-            onClick={onToggleMorePlayerDetails}
-            aria-expanded={showMorePlayerDetails}
-            className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-900 shadow-sm hover:bg-blue-50"
-          >
-            {showMorePlayerDetails ? "Hide Player Details" : "More Player Details"}
-          </button>
-          {showMorePlayerDetails && <PlayerHistoryDetails details={details} />}
+          <HistoryStat label="Scores Pending" value={stats.pendingScores} tone="amber" />
         </div>
 
         <div className="flex-1 space-y-3 overflow-y-auto p-4 md:p-5">
@@ -3812,6 +3822,7 @@ function PlayerHistoryMatchGroup({ group, memberId, ratingForMember }) {
     (total, row) => total + formatGameScores(row, playerLineDetails(row, memberId).sideLabel, ratingForMember).length,
     0
   );
+  const scoresNeedPosting = historyScoresNeedPosting(sortedRows);
 
   return (
     <div className="overflow-hidden rounded-2xl border-2 border-slate-500 bg-slate-50 shadow-md">
@@ -3835,6 +3846,11 @@ function PlayerHistoryMatchGroup({ group, memberId, ratingForMember }) {
           <span className="rounded-full bg-white px-2 py-0.5 text-xs font-black uppercase text-slate-900">
             {gameCount} game{gameCount === 1 ? "" : "s"}
           </span>
+          {scoresNeedPosting && (
+            <span className="rounded-full bg-amber-300 px-2 py-0.5 text-xs font-black uppercase text-slate-950">
+              Scores Not Entered
+            </span>
+          )}
         </div>
         <div className="mt-1 text-sm font-semibold text-slate-200">
           {match?.leagues?.seasons?.name || "No Season"} / {match?.leagues?.name || "No League"} / {match?.divisions?.name || "No Division"}
@@ -3858,10 +3874,13 @@ function PlayerHistoryMatchGroup({ group, memberId, ratingForMember }) {
 function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
   const details = playerLineDetails(row, memberId);
   const gameScores = formatGameScores(row, details.sideLabel, ratingForMember);
+  const scoresNeedPosting = historyScoresNeedPosting([row]);
   const countsForIndividualWinLoss = rowCountsForIndividualWinLoss(row);
-  const isWin = countsForIndividualWinLoss && details.result === "W";
-  const isLoss = countsForIndividualWinLoss && details.result === "L";
-  const resultLabel = !countsForIndividualWinLoss
+  const isWin = !scoresNeedPosting && countsForIndividualWinLoss && details.result === "W";
+  const isLoss = !scoresNeedPosting && countsForIndividualWinLoss && details.result === "L";
+  const resultLabel = scoresNeedPosting
+    ? "Scores Not Entered"
+    : !countsForIndividualWinLoss
     ? "Picklebreaker"
     : isWin
     ? "Win"
@@ -3885,7 +3904,7 @@ function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
         bar: "bg-rose-600",
         badge: "bg-rose-700 text-white",
       }
-    : !countsForIndividualWinLoss
+    : scoresNeedPosting || !countsForIndividualWinLoss
     ? {
         shell: "border-amber-200 bg-amber-50",
         bar: "bg-amber-500",
@@ -3915,6 +3934,12 @@ function PlayerHistoryLineWithScores({ row, memberId, ratingForMember }) {
       {!countsForIndividualWinLoss && (
         <div className="mt-2 text-sm font-bold text-amber-900">
           Picklebreaker team result only; excluded from individual W/L.
+        </div>
+      )}
+
+      {scoresNeedPosting && (
+        <div className="mt-2 text-sm font-bold text-amber-900">
+          Match scores still need to be entered and posted.
         </div>
       )}
 
@@ -4004,6 +4029,20 @@ function groupPlayHistoryRows(rows) {
   });
 
   return groups;
+}
+
+function historyScoresNeedPosting(rows) {
+  const firstRow = rows?.[0];
+  const match = firstRow?.matches;
+  if (!firstRow || isSpecialMatchResult(match)) return false;
+  if (match?.score_status === "not_entered") return true;
+  if (match?.score_status) return false;
+  if (match?.status !== "completed") return false;
+
+  return rows.every((row) => (row.line_games || []).every((game) => {
+    const hasScore = game.home_score !== null && game.home_score !== undefined && game.away_score !== null && game.away_score !== undefined;
+    return !hasScore && !specialGameStatus(game.game_status);
+  }));
 }
 
 function formatGameScores(row, sideLabel, ratingForMember) {
