@@ -2317,8 +2317,10 @@ function PreviewPlayHistoryModal({
                 {options.teams.length > 0 && <optgroup label="Teams">{options.teams.map((team) => <option key={team.id} value={`team:${team.id}`}>{historyTeamOptionLabel(team)}</option>)}</optgroup>}
               </select>
             </label>
-            <button type="button" onClick={onOpenPlayerDetails} className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20">More Player Details</button>
-            <button type="button" onClick={onClose} className="rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20">Close</button>
+            <div className="flex w-full gap-3 md:w-auto">
+              <button type="button" onClick={onOpenPlayerDetails} className="flex-1 rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20 md:flex-none">More Player Details</button>
+              <button type="button" onClick={onClose} className="flex-1 rounded-xl border border-white/30 bg-white/10 px-4 py-2.5 text-sm font-black text-white hover:bg-white/20 md:flex-none">Close</button>
+            </div>
           </div>
         </div>
 
