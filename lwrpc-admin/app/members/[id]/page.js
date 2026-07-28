@@ -14,6 +14,7 @@ import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } fr
 import { hasRole } from "../../lib/permissions";
 import { hasAnotherCommissioner } from "../../lib/roleGuards";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
+import { appConfirm } from "../../lib/appDialog";
 import { sortHistoryRows } from "../../lib/playHistory";
 
 export default function MemberDetailPage() {
@@ -289,7 +290,11 @@ setUserRole(roleData?.role || "player");
   }
 
   async function copyContactField(field) {
-    const value = String(form[field] || "").trim();
+    await copyContactValue(form[field], field);
+  }
+
+  async function copyContactValue(contactValue, field) {
+    const value = String(contactValue || "").trim();
     if (!value) return;
 
     try {
@@ -299,6 +304,15 @@ setUserRole(roleData?.role || "player");
     } catch {
       window.prompt(`Copy member ${field}`, value);
     }
+  }
+
+  async function returnToMembers() {
+    const canLeave = !editMode || await appConfirm(
+      "You have unsaved changes to this member. Leave without saving?",
+      { title: "Discard member changes?", confirmLabel: "Leave without saving", cancelLabel: "Keep editing", tone: "warning" }
+    );
+
+    if (canLeave) router.push("/members");
   }
 
   async function saveMember() {
@@ -543,9 +557,7 @@ function printCurrentHistory() {
 
         <div className="mb-6 flex flex-wrap gap-3">
           <button
-            onClick={() => {
-              if (confirmUnsavedChanges()) router.back();
-            }}
+            onClick={returnToMembers}
             className="rounded-xl bg-slate-200 px-4 py-2 font-semibold hover:bg-slate-300"
           >
             ← Members
@@ -598,14 +610,16 @@ function printCurrentHistory() {
                   </h1>
 
                   <div className="mt-4 space-y-2 text-slate-600">
-                    <div>
+                    <div className="flex items-center gap-1">
+                      <CopyContactButton field="email" value={member.email} copiedField={copiedField} onCopy={(field) => copyContactValue(member.email, field)} compact />
                       <span className="font-semibold text-slate-800">
                         Email:
                       </span>{" "}
                       {member.email || "—"}
                     </div>
 
-                    <div>
+                    <div className="flex items-center gap-1">
+                      <CopyContactButton field="phone" value={member.phone} copiedField={copiedField} onCopy={(field) => copyContactValue(member.phone, field)} compact />
                       <span className="font-semibold text-slate-800">
                         Phone:
                       </span>{" "}
@@ -1094,7 +1108,7 @@ function printCurrentHistory() {
   );
 }
 
-function CopyContactButton({ field, value, copiedField, onCopy }) {
+function CopyContactButton({ field, value, copiedField, onCopy, compact = false }) {
   const copied = copiedField === field;
   const label = copied ? `${field === "email" ? "Email" : "Phone"} copied` : `Copy ${field}`;
 
@@ -1105,7 +1119,7 @@ function CopyContactButton({ field, value, copiedField, onCopy }) {
       disabled={!String(value || "").trim()}
       aria-label={label}
       title={label}
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-40"
+      className={`flex shrink-0 items-center justify-center border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-40 ${compact ? "h-7 w-7 rounded-md" : "h-12 w-12 rounded-xl"}`}
     >
       {copied ? (
         <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">

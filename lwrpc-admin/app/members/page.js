@@ -13,6 +13,7 @@ import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } fr
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 const PAGE_SIZE = 100;
+const MEMBER_DIRECTORY_VIEW_STATE_KEY = "lwrpc-member-directory-view";
 const CLEAN_MEMBERS_BATCH_SIZE = 25;
 const ROLE_CORRECTION_BATCH_SIZE = 25;
 const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
@@ -28,6 +29,7 @@ const MEMBER_EXPORT_TYPES = [
 
 export default function MembersPage() {
   const router = useRouter();
+  const [directoryViewState] = useState(readMemberDirectoryViewState);
 
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState([]);
@@ -35,15 +37,12 @@ export default function MembersPage() {
   const [totalMemberCount, setTotalMemberCount] = useState(0);
   const [clubLocations, setClubLocations] = useState([]);
   const [seasons, setSeasons] = useState([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(directoryViewState.search);
   const deferredSearch = useDeferredValue(search);
-  const [sortConfig, setSortConfig] = useState({
-    key: "member",
-    direction: "asc",
-  });
-  const [showCurrentRosterOnly, setShowCurrentRosterOnly] = useState(false);
-  const [includeInactiveMembers, setIncludeInactiveMembers] = useState(false);
-  const [page, setPage] = useState(1);
+  const [sortConfig, setSortConfig] = useState(directoryViewState.sortConfig);
+  const [showCurrentRosterOnly, setShowCurrentRosterOnly] = useState(directoryViewState.showCurrentRosterOnly);
+  const [includeInactiveMembers, setIncludeInactiveMembers] = useState(directoryViewState.includeInactiveMembers);
+  const [page, setPage] = useState(directoryViewState.page);
   const [cleaningMembers, setCleaningMembers] = useState(false);
   const [markingAllInactive, setMarkingAllInactive] = useState(false);
   const [resettingPasswordMemberId, setResettingPasswordMemberId] = useState("");
@@ -644,6 +643,13 @@ export default function MembersPage() {
   useEffect(() => {
     setPage(1);
   }, [includeInactiveMembers, search, showCurrentRosterOnly]);
+
+  useEffect(() => {
+    window.sessionStorage.setItem(
+      MEMBER_DIRECTORY_VIEW_STATE_KEY,
+      JSON.stringify({ search, sortConfig, showCurrentRosterOnly, includeInactiveMembers, page })
+    );
+  }, [includeInactiveMembers, page, search, showCurrentRosterOnly, sortConfig]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMemberCount / PAGE_SIZE));
   const pagedMembers = members;
@@ -1869,6 +1875,29 @@ function MemberTeamsModal({ member, onClose }) {
       </div>
     </div>
   );
+}
+
+function readMemberDirectoryViewState() {
+  const fallback = {
+    search: "",
+    sortConfig: { key: "member", direction: "asc" },
+    showCurrentRosterOnly: false,
+    includeInactiveMembers: false,
+    page: 1,
+  };
+
+  try {
+    const saved = JSON.parse(window.sessionStorage.getItem(MEMBER_DIRECTORY_VIEW_STATE_KEY) || "{}");
+    return {
+      search: typeof saved.search === "string" ? saved.search : fallback.search,
+      sortConfig: saved.sortConfig?.key && saved.sortConfig?.direction ? saved.sortConfig : fallback.sortConfig,
+      showCurrentRosterOnly: saved.showCurrentRosterOnly === true,
+      includeInactiveMembers: saved.includeInactiveMembers === true,
+      page: Number(saved.page) > 0 ? Number(saved.page) : fallback.page,
+    };
+  } catch {
+    return fallback;
+  }
 }
 
 function FormField({ label, children }) {
