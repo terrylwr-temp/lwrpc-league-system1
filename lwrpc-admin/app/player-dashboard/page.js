@@ -113,6 +113,7 @@ export default function PlayerDashboardPage() {
   const [mobileStandingsView, setMobileStandingsView] = useState("summary");
   const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
   const [historyFilter, setHistoryFilter] = useState("all");
+  const [showMorePlayerDetails, setShowMorePlayerDetails] = useState(false);
   const [pdfDocument, setPdfDocument] = useState(null);
   const [matchDetails, setMatchDetails] = useState(null);
   const [matchLineupPreview, setMatchLineupPreview] = useState(null);
@@ -918,6 +919,11 @@ export default function PlayerDashboardPage() {
     );
   }, [filteredPlayHistory, member]);
 
+  const playerHistoryDetails = useMemo(
+    () => calculatePlayerHistoryDetails(filteredPlayHistory, member?.id),
+    [filteredPlayHistory, member?.id]
+  );
+
   function ratingForMember(memberId, seasonId, ratingType, fallbackMember = null) {
     const ratingRow = playerRatings.find(
       (rating) =>
@@ -1414,6 +1420,9 @@ export default function PlayerDashboardPage() {
             resultCount={filteredPlayHistory.length}
             memberId={member?.id}
             ratingForMember={ratingForMember}
+            details={playerHistoryDetails}
+            showMorePlayerDetails={showMorePlayerDetails}
+            onToggleMorePlayerDetails={() => setShowMorePlayerDetails((value) => !value)}
             onClose={() => setDesignPreviewHistoryOpen(false)}
           />
         )}
@@ -1899,6 +1908,18 @@ export default function PlayerDashboardPage() {
             <HistoryStat label="Other" value={playHistoryStats.other} tone="amber" />
           </div>
 
+          <div className="border-b border-slate-200 bg-slate-50 px-3 pb-4 md:px-5">
+            <button
+              type="button"
+              onClick={() => setShowMorePlayerDetails((value) => !value)}
+              aria-expanded={showMorePlayerDetails}
+              className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-900 shadow-sm hover:bg-blue-50"
+            >
+              {showMorePlayerDetails ? "Hide Player Details" : "More Player Details"}
+            </button>
+            {showMorePlayerDetails && <PlayerHistoryDetails details={playerHistoryDetails} />}
+          </div>
+
           <div className="space-y-3 p-5">
             {groupedPlayHistory.map((group) => (
               <PlayerHistoryMatchGroup
@@ -2082,6 +2103,141 @@ function writeDashboardTeamSelection(prefix, memberId, teamId) {
   }
 }
 
+function PlayerHistoryDetails({ details }) {
+  return (
+    <div className="mt-3 space-y-3 rounded-xl border border-slate-200 bg-white p-4 text-slate-900 shadow-sm">
+      <div className="grid gap-3 md:grid-cols-3">
+        <PlayerDetailGroup title="Matches" metrics={[
+          ["Wins", details.matchWins],
+          ["Losses", details.matchLosses],
+          ["Win %", formatHistoryPercent(details.matchWins, details.matchWins + details.matchLosses)],
+        ]} />
+        <PlayerDetailGroup title="Games" metrics={[
+          ["Wins", details.gameWins],
+          ["Losses", details.gameLosses],
+          ["Win %", formatHistoryPercent(details.gameWins, details.gameWins + details.gameLosses)],
+        ]} />
+        <PlayerDetailGroup title="Points" metrics={[
+          ["Earned", details.pointsEarned],
+          ["Against", details.pointsAgainst],
+          ["Diff %", formatPointDifference(details.pointsEarned, details.pointsAgainst)],
+        ]} />
+      </div>
+
+      <PlayerDetailGroup title="Ratings" metrics={[
+        ["Partner", formatRatingMetric(details.partnerRating)],
+        ["Opponent", formatRatingMetric(details.opponentRating)],
+        ["Adjusted", formatRatingMetric(details.adjustedRating)],
+        ["Overall", formatRatingMetric(details.overallRating)],
+      ]} />
+
+      <div>
+        <div className="text-xs font-black uppercase tracking-wide text-slate-500">Last 5 Matchups</div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {details.lastFive.length > 0 ? details.lastFive.map((match) => (
+            <span key={match.id} className={`rounded-lg px-3 py-2 text-sm font-black ${match.result === "W" ? "bg-emerald-100 text-emerald-900" : match.result === "L" ? "bg-red-100 text-red-900" : "bg-slate-100 text-slate-700"}`}>
+              {match.result} · {match.opponent}
+            </span>
+          )) : <span className="text-sm font-semibold text-slate-500">No completed match results in this scope.</span>}
+        </div>
+      </div>
+      <p className="text-xs font-semibold leading-5 text-slate-500">
+        Ratings use the recorded ratings at the time of play. Adjusted and Overall are estimated from game performance and partner/opponent strength within the selected History Scope.
+      </p>
+    </div>
+  );
+}
+
+function PlayerDetailGroup({ title, metrics }) {
+  return (
+    <div className="rounded-xl bg-slate-50 p-3">
+      <div className="text-xs font-black uppercase tracking-wide text-slate-500">{title}</div>
+      <div className="mt-2 grid gap-1 text-sm">
+        {metrics.map(([label, value]) => <div key={label} className="flex items-center justify-between gap-3"><span className="font-semibold text-slate-600">{label}</span><span className="font-black text-slate-950">{value}</span></div>)}
+      </div>
+    </div>
+  );
+}
+
+function calculatePlayerHistoryDetails(rows, memberId) {
+  const matchResults = new Map();
+  const ratingValues = { player: [], partner: [], opponent: [] };
+  const totals = { matchWins: 0, matchLosses: 0, gameWins: 0, gameLosses: 0, pointsEarned: 0, pointsAgainst: 0 };
+
+  (rows || []).forEach((row) => {
+    const details = playerLineDetails(row, memberId);
+    const matchId = String(row.matches?.id || row.id);
+    if (!matchResults.has(matchId)) {
+      matchResults.set(matchId, { id: matchId, result: details.result, opponent: details.opponentName });
+      if (details.result === "W") totals.matchWins += 1;
+      if (details.result === "L") totals.matchLosses += 1;
+    }
+
+    const isHome = details.sideLabel === "Home";
+    (row.line_games || []).forEach((game) => {
+      if (game.home_score === null || game.home_score === undefined || game.away_score === null || game.away_score === undefined) return;
+      const earned = Number(isHome ? game.home_score : game.away_score);
+      const against = Number(isHome ? game.away_score : game.home_score);
+      totals.pointsEarned += earned;
+      totals.pointsAgainst += against;
+      if (earned > against) totals.gameWins += 1;
+      if (earned < against) totals.gameLosses += 1;
+    });
+
+    const playerSlots = isHome ? ["home_player_1", "home_player_2"] : ["away_player_1", "away_player_2"];
+    const opponentSlots = isHome ? ["away_player_1", "away_player_2"] : ["home_player_1", "home_player_2"];
+    const playerSlot = playerSlots.find((slot) => String(row[`${slot}_id`] || row[slot]?.id || "") === String(memberId || ""));
+    const partnerSlot = playerSlots.find((slot) => slot !== playerSlot);
+    const playerRating = playerSlot ? ratingAtPlay(row, playerSlot) : null;
+    const partnerRating = partnerSlot ? ratingAtPlay(row, partnerSlot) : null;
+    const opponentRatings = opponentSlots.map((slot) => ratingAtPlay(row, slot)).filter(Number.isFinite);
+    if (Number.isFinite(playerRating)) ratingValues.player.push(playerRating);
+    if (Number.isFinite(partnerRating)) ratingValues.partner.push(partnerRating);
+    if (opponentRatings.length) ratingValues.opponent.push(average(opponentRatings));
+  });
+
+  const playerRating = average(ratingValues.player);
+  const partnerRating = average(ratingValues.partner);
+  const opponentRating = average(ratingValues.opponent);
+  const gameTotal = totals.gameWins + totals.gameLosses;
+  const gameWinRate = gameTotal ? totals.gameWins / gameTotal : null;
+  const adjustedRating = Number.isFinite(playerRating) && gameWinRate !== null
+    ? playerRating + ((gameWinRate - 0.5) * 0.5) + ((Number.isFinite(opponentRating) ? opponentRating : playerRating) - (Number.isFinite(partnerRating) ? partnerRating : playerRating)) * 0.2
+    : null;
+
+  return {
+    ...totals,
+    partnerRating,
+    opponentRating,
+    adjustedRating,
+    overallRating: Number.isFinite(playerRating) && Number.isFinite(adjustedRating) ? (playerRating + adjustedRating) / 2 : playerRating,
+    lastFive: [...matchResults.values()].slice(0, 5),
+  };
+}
+
+function ratingAtPlay(row, slot) {
+  const rawValue = row[`${slot}_rating_at_play`];
+  if (rawValue === null || rawValue === undefined || rawValue === "") return null;
+  const value = Number(rawValue);
+  return Number.isFinite(value) && value > 0 ? value : null;
+}
+
+function average(values) {
+  return values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
+}
+
+function formatHistoryPercent(numerator, denominator) {
+  return denominator ? `${Math.round((numerator / denominator) * 100)}%` : "—";
+}
+
+function formatPointDifference(earned, against) {
+  return earned + against ? `${Math.round(((earned - against) / (earned + against)) * 100)}%` : "—";
+}
+
+function formatRatingMetric(value) {
+  return Number.isFinite(value) ? value.toFixed(2) : "NR";
+}
+
 function HistoryStat({ label, value, tone = "slate" }) {
   const tones = {
     slate: "bg-slate-950 text-white",
@@ -2110,6 +2266,9 @@ function PreviewPlayHistoryModal({
   resultCount,
   memberId,
   ratingForMember,
+  details,
+  showMorePlayerDetails,
+  onToggleMorePlayerDetails,
   onClose,
 }) {
   return (
@@ -2146,6 +2305,18 @@ function PreviewPlayHistoryModal({
           <HistoryStat label="Wins" value={stats.wins} tone="emerald" />
           <HistoryStat label="Losses" value={stats.losses} tone="red" />
           <HistoryStat label="Other" value={stats.other} tone="amber" />
+        </div>
+
+        <div className="border-b border-slate-200 bg-slate-50 px-3 pb-4 md:px-5">
+          <button
+            type="button"
+            onClick={onToggleMorePlayerDetails}
+            aria-expanded={showMorePlayerDetails}
+            className="w-full rounded-xl border border-blue-200 bg-white px-4 py-3 text-sm font-black text-blue-900 shadow-sm hover:bg-blue-50"
+          >
+            {showMorePlayerDetails ? "Hide Player Details" : "More Player Details"}
+          </button>
+          {showMorePlayerDetails && <PlayerHistoryDetails details={details} />}
         </div>
 
         <div className="flex-1 space-y-3 overflow-y-auto p-4 md:p-5">
