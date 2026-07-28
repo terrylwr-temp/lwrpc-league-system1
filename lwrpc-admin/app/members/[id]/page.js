@@ -39,6 +39,7 @@ export default function MemberDetailPage() {
   const [saving, setSaving] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [roleHelpOpen, setRoleHelpOpen] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
 
   useUnsavedChangesWarning(editMode, "member");
 
@@ -285,6 +286,19 @@ setUserRole(roleData?.role || "player");
       ...current,
       [field]: value,
     }));
+  }
+
+  async function copyContactField(field) {
+    const value = String(form[field] || "").trim();
+    if (!value) return;
+
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedField(field);
+      window.setTimeout(() => setCopiedField((current) => (current === field ? null : current)), 2000);
+    } catch {
+      window.prompt(`Copy member ${field}`, value);
+    }
   }
 
   async function saveMember() {
@@ -691,28 +705,34 @@ function printCurrentHistory() {
                       <label className="mb-1 block text-sm font-semibold text-slate-700">
                         Email
                       </label>
-                      <input
-                        type="email"
-                        value={form.email}
-                        onChange={(e) => updateForm("email", e.target.value)}
-                        onBlur={(e) => updateForm("email", normalizeEmailAddress(e.target.value))}
-                        placeholder="name@example.com"
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="email"
+                          value={form.email}
+                          onChange={(e) => updateForm("email", e.target.value)}
+                          onBlur={(e) => updateForm("email", normalizeEmailAddress(e.target.value))}
+                          placeholder="name@example.com"
+                          className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3"
+                        />
+                        <CopyContactButton field="email" value={form.email} copiedField={copiedField} onCopy={copyContactField} />
+                      </div>
                     </div>
 
                     <div>
                       <label className="mb-1 block text-sm font-semibold text-slate-700">
                         Phone
                       </label>
-                      <input
-                        value={form.phone}
-                        onChange={(e) => updateForm("phone", formatPhoneNumberInput(e.target.value))}
-                        onBlur={(e) => updateForm("phone", formatPhoneNumberForStorage(e.target.value))}
-                        inputMode="tel"
-                        placeholder="(999) 999-9999"
-                        className="w-full rounded-xl border border-slate-300 px-4 py-3"
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          value={form.phone}
+                          onChange={(e) => updateForm("phone", formatPhoneNumberInput(e.target.value))}
+                          onBlur={(e) => updateForm("phone", formatPhoneNumberForStorage(e.target.value))}
+                          inputMode="tel"
+                          placeholder="(999) 999-9999"
+                          className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-3"
+                        />
+                        <CopyContactButton field="phone" value={form.phone} copiedField={copiedField} onCopy={copyContactField} />
+                      </div>
                     </div>
 
                     <div>
@@ -1071,6 +1091,33 @@ function printCurrentHistory() {
         )}
       </div>
     </main>
+  );
+}
+
+function CopyContactButton({ field, value, copiedField, onCopy }) {
+  const copied = copiedField === field;
+  const label = copied ? `${field === "email" ? "Email" : "Phone"} copied` : `Copy ${field}`;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onCopy(field)}
+      disabled={!String(value || "").trim()}
+      aria-label={label}
+      title={label}
+      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-700 shadow-sm transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-40"
+    >
+      {copied ? (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+          <path d="m5 12 4 4L19 6" />
+        </svg>
+      ) : (
+        <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5">
+          <rect x="9" y="9" width="11" height="11" rx="2" />
+          <path d="M15 9V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4" />
+        </svg>
+      )}
+    </button>
   );
 }
 
