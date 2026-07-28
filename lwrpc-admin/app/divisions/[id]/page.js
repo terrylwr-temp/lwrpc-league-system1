@@ -739,8 +739,8 @@ export default function DivisionDetailPage() {
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <button
             type="button"
-            onClick={() => {
-              if (confirmUnsavedChanges()) router.push("/divisions");
+            onClick={async () => {
+              if (await confirmUnsavedChanges()) router.push("/divisions");
             }}
             className="rounded-xl bg-slate-200 px-4 py-2 font-semibold hover:bg-slate-300"
           >

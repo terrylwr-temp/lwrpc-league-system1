@@ -1003,7 +1003,7 @@ export default function TeamsPage() {
     setExpandedGroupKeys([]);
   }
 
-  function openRoster(team) {
+  async function openRoster(team) {
     if (
       team.divisions?.leagues?.rosters_locked === true &&
       !hasRole(currentUser?.role, "league_manager")
@@ -1012,7 +1012,7 @@ export default function TeamsPage() {
       return;
     }
 
-    if (confirmUnsavedChanges()) router.push(`/teams/${team.id}`);
+    if (await confirmUnsavedChanges()) router.push(`/teams/${team.id}`);
   }
 
 if (loading) {

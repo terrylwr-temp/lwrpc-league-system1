@@ -1192,8 +1192,8 @@ export default function DivisionsPage() {
                               <div className="flex flex-wrap gap-2 sm:justify-end">
                                 <button
                                   type="button"
-                                  onClick={() => {
-                                    if (confirmUnsavedChanges()) router.push(`/divisions/${division.id}`);
+                                  onClick={async () => {
+                                    if (await confirmUnsavedChanges()) router.push(`/divisions/${division.id}`);
                                   }}
                                   className="rounded-lg bg-slate-900 px-3 py-1 text-sm font-semibold text-white hover:bg-slate-800"
                                 >

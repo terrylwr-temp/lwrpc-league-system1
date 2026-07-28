@@ -57,6 +57,7 @@ export function AppDialogProvider({ children }) {
   const queueRef = useRef([]);
   const activeRef = useRef(false);
   const primaryButtonRef = useRef(null);
+  const cancelButtonRef = useRef(null);
   const promptInputRef = useRef(null);
   const dialogRef = useRef(null);
 
@@ -87,7 +88,11 @@ export function AppDialogProvider({ children }) {
 
   useEffect(() => {
     if (!dialog) return undefined;
-    const focusTarget = dialog.type === "prompt" ? promptInputRef.current : primaryButtonRef.current;
+    const focusTarget = dialog.type === "prompt"
+      ? promptInputRef.current
+      : dialog.type === "confirm" && dialog.options.defaultAction !== "confirm"
+      ? cancelButtonRef.current
+      : primaryButtonRef.current;
     focusTarget?.focus();
 
     function handleKeyDown(event) {
@@ -119,12 +124,12 @@ export function AppDialogProvider({ children }) {
   return (
     <AppDialogContext.Provider value={contextValue}>
       {children}
-      {dialog && <DialogWindow dialog={dialog} options={options} tone={tone} onClose={closeDialog} dialogRef={dialogRef} primaryButtonRef={primaryButtonRef} promptInputRef={promptInputRef} />}
+      {dialog && <DialogWindow dialog={dialog} options={options} tone={tone} onClose={closeDialog} dialogRef={dialogRef} primaryButtonRef={primaryButtonRef} cancelButtonRef={cancelButtonRef} promptInputRef={promptInputRef} />}
     </AppDialogContext.Provider>
   );
 }
 
-function DialogWindow({ dialog, options, tone, onClose, dialogRef, primaryButtonRef, promptInputRef }) {
+function DialogWindow({ dialog, options, tone, onClose, dialogRef, primaryButtonRef, cancelButtonRef, promptInputRef }) {
   const [inputValue, setInputValue] = useState("");
   const requiredValue = options.requiredValue || "";
   const isPrompt = dialog.type === "prompt";
@@ -181,7 +186,7 @@ function DialogWindow({ dialog, options, tone, onClose, dialogRef, primaryButton
             {isPrompt && <label className="mt-5 block"><span className="mb-1.5 block text-sm font-black text-slate-800">{options.inputLabel || "Confirmation"}</span><input ref={promptInputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value)} placeholder={options.placeholder || requiredValue} className="w-full rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></label>}
           </div>
           <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
-            {dialog.type !== "notice" && <button type="button" onClick={() => onClose(null)} className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-slate-200">{options.cancelLabel || "Cancel"}</button>}
+            {dialog.type !== "notice" && <button ref={cancelButtonRef} type="button" onClick={() => onClose(null)} className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-slate-200">{options.cancelLabel || "Cancel"}</button>}
             <button ref={primaryButtonRef} type="submit" disabled={!canContinue} className={`rounded-xl px-5 py-2.5 text-sm font-black text-white transition focus:outline-none focus:ring-4 disabled:cursor-not-allowed disabled:opacity-45 ${tone.button}`}>{confirmLabel}</button>
           </footer>
         </form>

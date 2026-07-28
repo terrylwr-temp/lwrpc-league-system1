@@ -1,29 +1,33 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
+import { appConfirm } from "./appDialog";
 
 const activeWarnings = new Map();
 
 function warningMessage(itemName) {
   const name = itemName || "changes";
-  return [
-    `You have unsaved changes to this ${name}.`,
-    "",
-    `Select OK to leave without saving, or Cancel to stay and save the ${name}.`,
-  ].join("\n");
+  return `You have unsaved changes to this ${name}. Leave this screen without saving?`;
 }
 
 function currentWarning() {
   return Array.from(activeWarnings.values()).at(-1) || null;
 }
 
-export function confirmUnsavedChanges() {
+export async function confirmUnsavedChanges() {
   if (typeof window === "undefined") return true;
 
   const warning = currentWarning();
   if (!warning) return true;
 
-  return window.confirm(warning.message);
+  return Boolean(await appConfirm({
+    title: "Unsaved changes",
+    message: warning.message,
+    confirmLabel: "Leave without saving",
+    cancelLabel: "Keep editing",
+    defaultAction: "cancel",
+    tone: "warning",
+  }));
 }
 
 export function useUnsavedChangesWarning(hasUnsavedChanges, itemName) {

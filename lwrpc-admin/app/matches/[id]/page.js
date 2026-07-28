@@ -1919,8 +1919,8 @@ export default function MatchDetailPage() {
           {!embeddedScoreEntry && (
             <button
               type="button"
-              onClick={() => {
-                if (confirmUnsavedChanges()) {
+              onClick={async () => {
+                if (await confirmUnsavedChanges()) {
                   router.push(matchReturnPath());
                 }
               }}

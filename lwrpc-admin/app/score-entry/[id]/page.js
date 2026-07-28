@@ -745,8 +745,8 @@ export default function MobileScoreEntryPage() {
           </button>
 
           <button
-            onClick={() => {
-              if (confirmUnsavedChanges()) router.push(`/matches/${id}`);
+            onClick={async () => {
+              if (await confirmUnsavedChanges()) router.push(`/matches/${id}`);
             }}
             className="mt-3 w-full rounded-2xl bg-slate-200 px-5 py-3 font-semibold text-slate-900"
           >
@@ -763,6 +763,5 @@ function duprPostedLabel(line) {
   const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
   return posted ? "Posted to DUPR" : "Not Posted to DUPR";
 }
-
 
 

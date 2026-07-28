@@ -14,7 +14,6 @@ import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } fr
 import { hasRole } from "../../lib/permissions";
 import { hasAnotherCommissioner } from "../../lib/roleGuards";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
-import { appConfirm } from "../../lib/appDialog";
 import { sortHistoryRows } from "../../lib/playHistory";
 
 export default function MemberDetailPage() {
@@ -307,12 +306,7 @@ setUserRole(roleData?.role || "player");
   }
 
   async function returnToMembers() {
-    const canLeave = !editMode || await appConfirm(
-      "You have unsaved changes to this member. Leave without saving?",
-      { title: "Discard member changes?", confirmLabel: "Leave without saving", cancelLabel: "Keep editing", tone: "warning" }
-    );
-
-    if (canLeave) router.push("/members");
+    if (await confirmUnsavedChanges()) router.push("/members");
   }
 
   async function saveMember() {
@@ -543,8 +537,8 @@ function printCurrentHistory() {
     `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
     member.email ||
     "Member";
-  const openMemberRatings = () => {
-    if (confirmUnsavedChanges()) router.push(`/ratings?member=${encodeURIComponent(id)}`);
+  const openMemberRatings = async () => {
+    if (await confirmUnsavedChanges()) router.push(`/ratings?member=${encodeURIComponent(id)}`);
   };
 
   return (

@@ -368,9 +368,9 @@ export default function MembersPage() {
     }));
   }
 
-  function closeAddMember() {
+  async function closeAddMember() {
     if (savingNewMember) return;
-    if (!confirmUnsavedChanges()) return;
+    if (!await confirmUnsavedChanges()) return;
 
     setShowAddMember(false);
     setNewMemberForm(initialMemberForm());
@@ -436,8 +436,8 @@ export default function MembersPage() {
     await loadMembers();
   }
 
-  function openMember(memberId) {
-    if (confirmUnsavedChanges()) router.push(`/members/${memberId}`);
+  async function openMember(memberId) {
+    if (await confirmUnsavedChanges()) router.push(`/members/${memberId}`);
   }
 
   function openMemberTeams(member) {

@@ -860,8 +860,8 @@ function getAverageTeamRating() {
     setAddPlayerModalOpen(true);
   }
 
-  function closeAddPlayerModal() {
-    if (selectedMemberId && !confirmUnsavedChanges()) return;
+  async function closeAddPlayerModal() {
+    if (selectedMemberId && !await confirmUnsavedChanges()) return;
 
     setSelectedMemberId("");
     setAddPlayerModalOpen(false);
@@ -985,8 +985,8 @@ function getAverageTeamRating() {
         <div className="mb-6 flex flex-wrap gap-3">
 
           <button
-            onClick={() => {
-              if (!confirmUnsavedChanges()) return;
+            onClick={async () => {
+              if (!await confirmUnsavedChanges()) return;
 
               if (isCaptainOnly) {
                 router.push("/captain-dashboard");

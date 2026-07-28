@@ -1580,8 +1580,8 @@ function goToPage(value) {
 
                         <button
                           type="button"
-                          onClick={() => {
-                            if (confirmUnsavedChanges()) router.push(`/members/${member.id}`);
+                          onClick={async () => {
+                            if (await confirmUnsavedChanges()) router.push(`/members/${member.id}`);
                           }}
                           aria-label={`Edit member ${member.first_name} ${member.last_name}`}
                           title="Edit member"
@@ -1799,8 +1799,8 @@ function goToPage(value) {
 
                           <button
                             type="button"
-                            onClick={() => {
-                              if (confirmUnsavedChanges()) router.push(`/members/${member.id}`);
+                            onClick={async () => {
+                              if (await confirmUnsavedChanges()) router.push(`/members/${member.id}`);
                             }}
                             aria-label={`Edit member ${member.first_name} ${member.last_name}`}
                             title="Edit member"

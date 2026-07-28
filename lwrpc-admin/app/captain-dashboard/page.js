@@ -1367,12 +1367,12 @@ export default function CaptainDashboardPage() {
               <button
                 type="button"
                 disabled={!canEnterScores}
-                onClick={() => {
+                onClick={async () => {
                   if (scoreButtonAction) {
                     scoreButtonAction(match);
                     return;
                   }
-                  if (canEnterScores && confirmUnsavedChanges()) router.push(`/matches/${match.id}`);
+                  if (canEnterScores && await confirmUnsavedChanges()) router.push(`/matches/${match.id}`);
                 }}
                 className={`w-full rounded-lg px-3 py-2 text-sm font-bold text-white sm:w-auto ${scoreButtonClass}`}
                 title={canEnterScores ? scoreButtonTitle : "Scores unlock on the scheduled match date"}
@@ -1737,8 +1737,8 @@ export default function CaptainDashboardPage() {
     setSetupPlayerEmailConfirm(null);
   }
 
-  function closeMatchSetup() {
-    if (!confirmUnsavedChanges()) return;
+  async function closeMatchSetup() {
+    if (!await confirmUnsavedChanges()) return;
 
     resetMatchSetup();
   }
@@ -3048,8 +3048,8 @@ export default function CaptainDashboardPage() {
             onOpenCaptainTools: () => router.push("/captain-dashboard"),
             onEmailOpposingCaptains: emailOpposingCaptains,
             onOpenMatchScoreSheet: openMatchScoreSheet,
-            onEnterMatchScores: (match) => {
-              if (!confirmUnsavedChanges()) return;
+            onEnterMatchScores: async (match) => {
+              if (!await confirmUnsavedChanges()) return;
               rememberPendingScoreEntryRequest(match.id);
               router.prefetch(`/matches/${match.id}?embedded=1`);
               setScoreEntryMatch(match);
@@ -3205,8 +3205,8 @@ export default function CaptainDashboardPage() {
             <div className="grid grid-cols-2 gap-1.5 md:grid-cols-1 md:gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  if (confirmUnsavedChanges()) router.push("/reset-password");
+                onClick={async () => {
+                  if (await confirmUnsavedChanges()) router.push("/reset-password");
                 }}
                 className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-blue-500 md:rounded-xl md:px-4 md:py-2 md:text-sm"
               >
@@ -3424,14 +3424,14 @@ export default function CaptainDashboardPage() {
                   />
                   <button
                     type="button"
-                    onClick={(event) => {
+                    onClick={async (event) => {
                       event.stopPropagation();
                       if (team.divisions?.leagues?.rosters_locked === true) {
                         alert(rosterLockedMessage());
                         return;
                       }
 
-                      if (confirmUnsavedChanges()) {
+                      if (await confirmUnsavedChanges()) {
                         setLoadingSubtitle("Loading Team Roster...");
                         setLoading(true);
                         router.push(`/teams/${team.id}`);

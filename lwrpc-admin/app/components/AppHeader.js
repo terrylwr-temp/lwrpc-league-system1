@@ -169,8 +169,8 @@ export default function AppHeader({
     return () => window.removeEventListener("keydown", closeDialogs);
   }, [logoutPending]);
 
-  function navigate(path) {
-    if (!confirmUnsavedChanges()) return;
+  async function navigate(path) {
+    if (!await confirmUnsavedChanges()) return;
     setMenuOpen(false);
     setProfileOpen(false);
     router.push(path);
@@ -195,8 +195,8 @@ export default function AppHeader({
     setOpenGroup((current) => current === key ? "" : key);
   }
 
-  function requestLogout() {
-    if (!confirmUnsavedChanges()) return;
+  async function requestLogout() {
+    if (!await confirmUnsavedChanges()) return;
     setLogoutError("");
     setMenuOpen(false);
     setProfileOpen(false);
