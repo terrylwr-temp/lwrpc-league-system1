@@ -396,6 +396,9 @@
 .nextMatch span { border-radius: 999px; background: rgba(255, 255, 255, .16); padding: 5px 9px; font-size: 9px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase; }
 .nextMatch b { color: #cbdcff; font-size: 15px; }
 .nextMatch span.matchType { border: 1px solid rgba(255, 255, 255, .72); background: #fff; color: var(--navy); }
+.nextMatchHeader { display: grid; align-items: start; gap: 4px; }
+.nextMatchHeader > span:first-child { border-radius: 0; background: transparent; padding: 0; color: #dbe8ff; }
+.nextMatchHeader > div { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .hero h2 { margin: 0 0 9px; font-size: clamp(25px, 3vw, 38px); line-height: 1.08; letter-spacing: -.035em; }
 .hero h2 em { color: #a9c5ff; font-size: .54em; font-style: normal; font-weight: 500; }
 .location { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; color: #d6e3ff; font-size: 13px; font-weight: 650; }

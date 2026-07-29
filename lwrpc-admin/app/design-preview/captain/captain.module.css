@@ -20,9 +20,10 @@
 .matchSetupPanel > div:first-child span { color: #69758a; font-size: 13px; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }
 .matchSetupPanel > div:first-child strong { color: #172f5d; font-size: 16px; line-height: 1.25; }
 .setupStatuses { display: flex; flex-wrap: wrap; gap: 8px; }
-.setupStatuses > span { border: 1px solid transparent; border-radius: 999px; padding: 8px 11px; color: #fff; font-size: 13px; line-height: 1.25; box-shadow: 0 4px 10px rgba(15,23,42,.12); }
+.setupStatuses > span { display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; border-radius: 999px; padding: 8px 11px; color: #fff; font-size: 13px; line-height: 1.25; box-shadow: 0 4px 10px rgba(15,23,42,.12); }
 .setupStatuses b { font-weight: 750; }
 .setupStatuses strong { font-weight: 900; }
+.setupStatusDivider { font-weight: 900; opacity: .82; }
 .setupComplete { border-color: #047857 !important; background: #059669; }
 .setupPending { border-color: #b91c1c !important; background: #dc2626; }
 .setupButtons { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
