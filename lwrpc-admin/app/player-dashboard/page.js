@@ -3122,27 +3122,37 @@ function MatchDetailsModal({ match, standings, ratingForMember, scoreMembersById
 
           <div className="space-y-3 p-3 sm:p-5">
             {!isVerifiedCompleted && (
-              <div className="rounded-2xl border border-[#dce4ef] bg-white p-4 shadow-sm">
-                <div className="text-xs font-black uppercase tracking-wide text-slate-500">
-                  Location
+              mapUrl ? (
+                <a
+                  href={mapUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block rounded-2xl border border-[#dce4ef] bg-white p-4 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                >
+                  <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                    Location
+                  </div>
+                  <div className="mt-1 text-lg font-black text-slate-900">
+                    {location?.name || "Location TBD"}
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-600">
+                    {formatLocationAddress(location)}
+                  </div>
+                  <div className="mt-3 text-sm font-black text-blue-700">Click for Map</div>
+                </a>
+              ) : (
+                <div className="rounded-2xl border border-[#dce4ef] bg-white p-4 shadow-sm">
+                  <div className="text-xs font-black uppercase tracking-wide text-slate-500">
+                    Location
+                  </div>
+                  <div className="mt-1 text-lg font-black text-slate-900">
+                    {location?.name || "Location TBD"}
+                  </div>
+                  <div className="mt-1 text-sm font-semibold text-slate-600">
+                    {formatLocationAddress(location)}
+                  </div>
                 </div>
-                <div className="mt-1 text-lg font-black text-slate-900">
-                  {location?.name || "Location TBD"}
-                </div>
-                <div className="mt-1 text-sm font-semibold text-slate-600">
-                  {formatLocationAddress(location)}
-                </div>
-                {mapUrl && (
-                  <a
-                    href={mapUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="mt-3 inline-flex rounded-xl bg-[#1558d5] px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-[#124bb4]"
-                  >
-                    Open Home Team Address Map
-                  </a>
-                )}
-              </div>
+              )
             )}
 
             {isVerifiedCompleted && (
