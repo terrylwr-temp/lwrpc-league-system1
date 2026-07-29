@@ -1140,7 +1140,47 @@ function goToPage(value) {
               Ratings Filters
             </h2>
 
-            <ListingCount label="Players" shown={filteredMembers.length} total={members.length} />
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCurrentRosterOnly((value) => !value)}
+                  className={`rounded-xl px-4 py-3 font-semibold ${
+                    showCurrentRosterOnly
+                      ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                      : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
+                  }`}
+                >
+                  {showCurrentRosterOnly ? "Show All Players" : "Current Rosters Only"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowDuprFilterTools((value) => !value)}
+                  className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
+                    showDuprFilterTools
+                      ? "bg-amber-600 text-white hover:bg-amber-700"
+                      : "bg-amber-100 text-amber-950 hover:bg-amber-200"
+                  }`}
+                >
+                  {showDuprFilterTools ? "Hide DUPR Filters" : "DUPR Filters"}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setShowRatingImportTools((value) => !value)}
+                  className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
+                    showRatingImportTools
+                      ? "bg-blue-700 text-white hover:bg-blue-800"
+                      : "bg-blue-100 text-blue-900 hover:bg-blue-200"
+                  }`}
+                >
+                  {showRatingImportTools ? "Hide Data Tools" : "Data Tools"}
+                </button>
+              </div>
+
+              <ListingCount label="Players" shown={filteredMembers.length} total={members.length} />
+            </div>
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
@@ -1197,43 +1237,6 @@ function goToPage(value) {
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => setShowCurrentRosterOnly((value) => !value)}
-              className={`rounded-xl px-4 py-3 font-semibold ${
-                showCurrentRosterOnly
-                  ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                  : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
-              }`}
-            >
-              {showCurrentRosterOnly ? "Show All Players" : "Current Rosters Only"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowDuprFilterTools((value) => !value)}
-              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
-                showDuprFilterTools
-                  ? "bg-amber-600 text-white hover:bg-amber-700"
-                  : "bg-amber-100 text-amber-950 hover:bg-amber-200"
-              }`}
-            >
-              {showDuprFilterTools ? "Hide DUPR Filters" : "DUPR Filters"}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setShowRatingImportTools((value) => !value)}
-              className={`hidden rounded-xl px-4 py-3 font-semibold md:inline-flex md:items-center ${
-                showRatingImportTools
-                  ? "bg-blue-700 text-white hover:bg-blue-800"
-                  : "bg-blue-100 text-blue-900 hover:bg-blue-200"
-              }`}
-            >
-              {showRatingImportTools ? "Hide Data Tools" : "Data Tools"}
-            </button>
-          </div>
         </div>
 
         {showDuprFilterTools && !isMobileRatingsView && (
