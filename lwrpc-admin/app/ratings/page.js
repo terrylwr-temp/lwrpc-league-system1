@@ -1704,7 +1704,7 @@ function goToPage(value) {
             </div>
           </div>
 
-          <div className="hidden overflow-x-auto md:block">
+          <div className="hidden overflow-visible md:block">
             <table className="w-full min-w-[1040px]">
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>

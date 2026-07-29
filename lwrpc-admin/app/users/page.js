@@ -238,7 +238,7 @@ if (loading) {
             goToPage={goToPage}
           />
 
-          <div className="overflow-x-auto">
+          <div className="overflow-visible">
 
           <table className="min-w-[980px] w-full table-fixed border-collapse">
 

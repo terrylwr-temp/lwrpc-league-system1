@@ -375,4 +375,5 @@ As of 2026-05-21:
 - Captain Dashboard Match Setup now uses a blue gradient readiness heading and a soft blue panel background, giving the lineup status block stronger visual hierarchy. The visible app version was bumped to `LMS-0595`.
 - Member Administration keeps its member count to the right of its compact action row. Season Ratings and Teams & Rosters align their count cards at the right edge, while User Roles & Permissions now has a full-sized member count card and a Clear Search action that restores the default member sort. The visible app version was bumped to `LMS-0596`.
 - Season Ratings places Current Rosters Only, DUPR Filters, and Data Tools directly before the Players count card in its header. The visible app version was bumped to `LMS-0597`.
+- Season Ratings and User Roles & Permissions desktop tables now use Member Administration's sticky column-header behavior during page scrolling. The visible app version was bumped to `LMS-0598`.
 - Member Administration now keeps its member count and action controls on one desktop header row, removing excess vertical space before the Search Members field while preserving the mobile two-column controls.
