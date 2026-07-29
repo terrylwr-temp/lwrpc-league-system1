@@ -238,7 +238,63 @@ if (loading) {
             goToPage={goToPage}
           />
 
-          <div className="overflow-visible">
+          <div className="divide-y divide-slate-100 md:hidden">
+            {pagedMembers.map((member) => {
+              const currentRole = getRole(member.id);
+
+              return (
+                <div key={`${member.id}-mobile`} className="space-y-4 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="break-words font-bold text-slate-900">
+                        {member.last_name}, {member.first_name}
+                      </div>
+                      <div className="mt-1 break-all text-sm text-slate-500">
+                        {member.email || "No Email"}
+                      </div>
+                    </div>
+                    <span className="shrink-0 rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-900">
+                      {roleLabel(currentRole)}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Location</div>
+                      <div className="mt-1 font-semibold text-slate-700">{member.club_location || "—"}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold uppercase tracking-wide text-slate-500">Last Login</div>
+                      <div className="mt-1 font-semibold text-slate-700">
+                        {formatDisplayTimestamp(lastLoginsByEmail[normalizeEmailAddress(member.email)], "Never")}
+                      </div>
+                    </div>
+                  </div>
+
+                  <label className="block text-sm font-semibold text-slate-700">
+                    Change Role
+                    <select
+                      value={currentRole}
+                      onChange={(event) => updateRole(member, event.target.value)}
+                      className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3"
+                    >
+                      <option value="player">Player</option>
+                      <option value="captain">Captain</option>
+                      <option value="club_pro">Club Pro</option>
+                      <option value="league_manager">League Manager</option>
+                      <option value="commissioner">Commissioner</option>
+                    </select>
+                  </label>
+                </div>
+              );
+            })}
+
+            {pagedMembers.length === 0 && (
+              <div className="p-10 text-center text-slate-500">No members found.</div>
+            )}
+          </div>
+
+          <div className="hidden overflow-visible md:block">
 
           <table className="min-w-[980px] w-full table-fixed border-collapse">
 

@@ -1538,12 +1538,6 @@ function goToPage(value) {
           </div>
 
           <div className="md:hidden">
-            <div className="sticky top-0 z-30 grid grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2 bg-slate-900 px-4 py-3 text-xs font-black uppercase tracking-wide text-white shadow">
-              <div>Player</div>
-              <div>DUPR ID</div>
-              <div>Ratings</div>
-            </div>
-
             <div className="divide-y divide-slate-100">
               {pagedMembers.map((member) => {
                 const missingDoublesRating = !hasDoublesRating(member.id);
