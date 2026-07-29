@@ -371,3 +371,4 @@ As of 2026-05-21:
 - On mobile, the My Play History popup keeps its `More Player Details` and `Close` actions together on one equal-width row below the scope selector. The visible app version was bumped to `LMS-0592`.
 - Captain Dashboard now places Match Setup status and its action within the Next Match hero block, keeping match planning actions together. The visible app version was bumped to `LMS-0593`.
 - Player and Captain Dashboard Next Match labels now use the same eyebrow-style treatment as dashboard section labels instead of a pill. Captain Match Setup omits the duplicate matchup line and separates each team name from its setup status with an em dash. The visible app version was bumped to `LMS-0594`.
+- Captain Dashboard Match Setup now uses a blue gradient readiness heading and a soft blue panel background, giving the lineup status block stronger visual hierarchy. The visible app version was bumped to `LMS-0595`.

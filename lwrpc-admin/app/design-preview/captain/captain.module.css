@@ -14,11 +14,13 @@
 .dangerAction { background: #b91c1c; }
 .dangerAction:hover { background: #991b1b; }
 .blueAction:disabled,.successAction:disabled,.dangerAction:disabled { cursor: not-allowed; border-color: rgba(255,255,255,.18); background: #94a3b8; opacity: .72; }
-.matchSetupPanel { display: grid; max-width: 1180px; margin: 14px auto 18px; grid-template-columns: minmax(180px,.8fr) minmax(280px,1.5fr) auto; align-items: center; gap: 14px; border: 1px solid #d7dee9; border-left: 5px solid #1558d5; border-radius: 15px; background: #fff; padding: 14px 16px; box-shadow: 0 8px 24px rgba(33,53,86,.045); }
+.matchSetupPanel { display: grid; max-width: 1180px; margin: 14px auto 18px; grid-template-columns: minmax(180px,.8fr) minmax(280px,1.5fr) auto; align-items: center; gap: 14px; border: 1px solid #cbdcf3; border-left: 5px solid #1558d5; border-radius: 15px; background: linear-gradient(135deg,#eaf3ff 0%,#f8fbff 42%,#fff 100%); padding: 14px 16px; box-shadow: 0 12px 28px rgba(33,83,170,.12); }
 .heroMatchSetupPanel { max-width: none; margin: 18px 0 0; }
 .matchSetupPanel > div:first-child { display: grid; gap: 4px; }
-.matchSetupPanel > div:first-child span { color: #69758a; font-size: 13px; font-weight: 900; letter-spacing: .11em; text-transform: uppercase; }
-.matchSetupPanel > div:first-child strong { color: #172f5d; font-size: 16px; line-height: 1.25; }
+.setupHeading { position: relative; overflow: hidden; border-radius: 11px; background: linear-gradient(135deg,#123d81,#1b67cf); padding: 12px 14px; box-shadow: 0 8px 18px rgba(19,73,155,.2); }
+.setupHeading::after { position: absolute; width: 58px; height: 58px; right: -23px; top: -30px; border: 12px solid rgba(255,255,255,.15); border-radius: 50%; content: ""; }
+.matchSetupPanel > .setupHeading span { position: relative; z-index: 1; color: #dbeafe; font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.matchSetupPanel > .setupHeading strong { position: relative; z-index: 1; color: #fff; font-size: 15px; line-height: 1.25; }
 .setupStatuses { display: flex; flex-wrap: wrap; gap: 8px; }
 .setupStatuses > span { display: inline-flex; align-items: center; gap: 6px; border: 1px solid transparent; border-radius: 999px; padding: 8px 11px; color: #fff; font-size: 13px; line-height: 1.25; box-shadow: 0 4px 10px rgba(15,23,42,.12); }
 .setupStatuses b { font-weight: 750; }
