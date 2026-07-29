@@ -1135,7 +1135,7 @@ function goToPage(value) {
         />
 
         <div className="rounded-2xl bg-white p-4 shadow sm:p-6">
-          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <h2 className="text-xl font-bold text-slate-900">
               Ratings Filters
             </h2>

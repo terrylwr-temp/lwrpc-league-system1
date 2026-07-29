@@ -1323,9 +1323,7 @@ if (loading) {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(8rem,0.75fr)_minmax(0,1fr)]">
-                  <ListingCount label="Teams" shown={filteredTeams.length} total={teams.length} />
-
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
@@ -1343,6 +1341,8 @@ if (loading) {
                       Collapse All
                     </button>
                   </div>
+
+                  <ListingCount className="sm:ml-auto" label="Teams" shown={filteredTeams.length} total={teams.length} />
                 </div>
               </div>
             </div>

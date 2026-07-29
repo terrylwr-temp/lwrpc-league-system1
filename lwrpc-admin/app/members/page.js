@@ -678,8 +678,6 @@ export default function MembersPage() {
               </div>
 
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
-                <ListingCount label="Members" shown={filteredMemberCount} total={totalMemberCount} />
-
                 <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center md:justify-end">
                   <button
                     type="button"
@@ -721,6 +719,8 @@ export default function MembersPage() {
                     {showMaintenance ? "Hide Tools" : "Data Tools"}
                   </button>
                 </div>
+
+                <ListingCount label="Members" shown={filteredMemberCount} total={totalMemberCount} />
               </div>
 
             </div>

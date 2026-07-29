@@ -189,26 +189,40 @@ if (loading) {
 
         <div className="rounded-2xl bg-white p-6 shadow">
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
 
-            <div className="md:col-span-2">
+            <div className="w-full md:max-w-3xl">
 
               <label className="mb-1 block text-sm font-semibold text-slate-700">
                 Search Members
               </label>
 
-              <input
-                value={search}
-                onChange={e =>
-                  setSearch(e.target.value)
-                }
-                placeholder="Search by name, email, or location"
-                className="w-full rounded-xl border border-slate-300 px-4 py-3"
-              />
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <input
+                  value={search}
+                  onChange={e =>
+                    setSearch(e.target.value)
+                  }
+                  placeholder="Search by name, email, or location"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setSortConfig({ key: "member", direction: "asc" });
+                    setPage(1);
+                  }}
+                  className="min-h-12 shrink-0 rounded-xl bg-slate-200 px-5 py-3 font-bold text-slate-900 hover:bg-slate-300"
+                >
+                  Clear Search
+                </button>
+              </div>
 
             </div>
 
-            <ListingCount compact className="self-end justify-self-end" label="Members" shown={filteredMemberCount} total={totalMemberCount} />
+            <ListingCount className="self-end md:ml-auto" label="Members" shown={filteredMemberCount} total={totalMemberCount} />
 
           </div>
 
