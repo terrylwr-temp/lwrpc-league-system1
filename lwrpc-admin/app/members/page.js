@@ -670,56 +670,58 @@ export default function MembersPage() {
         />
 
         <div className="rounded-2xl bg-white p-4 shadow md:p-6">
-          <div className="mb-5">
-            <div className="flex items-center justify-between gap-3">
+          <div className="mb-4">
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="text-xs font-black uppercase tracking-[0.14em] text-blue-700">Member Directory</div>
                 <h2 className="mt-1 text-xl font-black text-slate-950">Member Search</h2>
               </div>
 
-              <ListingCount label="Members" shown={filteredMemberCount} total={totalMemberCount} />
-            </div>
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-end">
+                <ListingCount label="Members" shown={filteredMemberCount} total={totalMemberCount} />
 
-            <div className="mt-4 grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center md:justify-end">
-              <button
-                type="button"
-                onClick={() => setShowAddMember(true)}
-                className="min-h-12 w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 md:w-auto"
-              >
-                Add Member
-              </button>
+                <div className="grid grid-cols-2 gap-2 md:flex md:flex-wrap md:items-center md:justify-end">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddMember(true)}
+                    className="min-h-12 w-full rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 md:w-auto"
+                  >
+                    Add Member
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => setShowCurrentRosterOnly((value) => !value)}
-                className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
-                  showCurrentRosterOnly
-                    ? "bg-emerald-700 text-white hover:bg-emerald-800"
-                    : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
-                }`}
-              >
-                {showCurrentRosterOnly ? "Show All Members" : "Current Rosters Only"}
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentRosterOnly((value) => !value)}
+                    className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
+                      showCurrentRosterOnly
+                        ? "bg-emerald-700 text-white hover:bg-emerald-800"
+                        : "bg-emerald-100 text-emerald-900 hover:bg-emerald-200"
+                    }`}
+                  >
+                    {showCurrentRosterOnly ? "Show All Members" : "Current Rosters Only"}
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => setIncludeInactiveMembers((value) => !value)}
-                className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
-                  includeInactiveMembers
-                    ? "bg-red-700 text-white hover:bg-red-800"
-                    : "bg-red-100 text-red-900 hover:bg-red-200"
-                }`}
-              >
-                {includeInactiveMembers ? "Hide Inactive" : "Include Inactive"}
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => setIncludeInactiveMembers((value) => !value)}
+                    className={`min-h-12 w-full rounded-xl px-3 py-3 text-sm font-bold leading-tight md:w-auto md:px-4 ${
+                      includeInactiveMembers
+                        ? "bg-red-700 text-white hover:bg-red-800"
+                        : "bg-red-100 text-red-900 hover:bg-red-200"
+                    }`}
+                  >
+                    {includeInactiveMembers ? "Hide Inactive" : "Include Inactive"}
+                  </button>
 
-              <button
-                type="button"
-                onClick={() => setShowMaintenance((value) => !value)}
-                className="min-h-12 w-full rounded-xl bg-blue-100 px-4 py-3 text-sm font-bold text-blue-800 hover:bg-blue-200 md:w-auto"
-              >
-                {showMaintenance ? "Hide Tools" : "Data Tools"}
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowMaintenance((value) => !value)}
+                    className="min-h-12 w-full rounded-xl bg-blue-100 px-4 py-3 text-sm font-bold text-blue-800 hover:bg-blue-200 md:w-auto"
+                  >
+                    {showMaintenance ? "Hide Tools" : "Data Tools"}
+                  </button>
+                </div>
+              </div>
 
             </div>
           </div>
