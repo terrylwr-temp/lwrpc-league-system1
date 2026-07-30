@@ -395,3 +395,4 @@ As of 2026-05-21:
 - Admin Dashboard's active design shell now dispatches Division Standings and Division Schedules to their respective popups instead of incorrectly treating them as Reset dialogs. The visible app version was bumped to `LMS-0613`.
 - Division Standings no longer shows Matchups Tied, and its Rank and Team cells stay visible while the standings table scrolls horizontally on mobile. The visible app version was bumped to `LMS-0614`.
 - Admin Division Schedules now loads the recorded home and away match-line players, so Match Details shows verified lineups rather than incorrectly reporting Players not entered. The visible app version was bumped to `LMS-0615`.
+- Division Team Standings now correctly labels its game record column as Games Won-Lost. The visible app version was bumped to `LMS-0616`.
