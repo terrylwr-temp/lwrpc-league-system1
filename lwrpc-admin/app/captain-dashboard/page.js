@@ -2849,15 +2849,15 @@ export default function CaptainDashboardPage() {
                 const warning = setupLineIssue(lineup);
 
                 return (
-                  <div key={lineup.line_number} className={`rounded-xl border p-4 ${warning ? "border-amber-300 bg-amber-50" : "border-slate-200"}`}>
-                    <div className="mb-3 flex items-center justify-between gap-2">
-                      <div className="font-bold text-slate-900">{matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)}</div>
+                  <div key={lineup.line_number} className={`overflow-hidden rounded-2xl border-2 bg-white shadow-md ${warning ? "border-amber-400" : "border-blue-300"}`}>
+                    <div className={`flex items-center justify-between gap-2 border-b px-4 py-3 ${warning ? "border-amber-300 bg-amber-100" : "border-blue-200 bg-blue-50"}`}>
+                      <div className="font-black text-slate-900">{matchSetupLineLabel(setupTeam?.divisions, lineup.line_number)}</div>
                       <div className="rounded-full bg-blue-100 px-2 py-1 text-xs font-bold text-blue-900">
                         {setupRatingLabel()}: {rating === null ? "NR" : rating.toFixed(2)}
                       </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 p-4">
                       <select
                         value={lineup.player_1_member_id}
                         onChange={(e) => updateSetupLineup(lineup.line_number, "player_1_member_id", e.target.value)}
@@ -2894,7 +2894,7 @@ export default function CaptainDashboardPage() {
                     </div>
 
                     {warning && (
-                      <div className="mt-3 rounded-lg bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-950">
+                      <div className="mx-4 mb-4 rounded-lg bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-950">
                         {warning}
                       </div>
                     )}
