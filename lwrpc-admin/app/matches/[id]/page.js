@@ -598,6 +598,10 @@ export default function MatchDetailPage() {
   }, [playerAssignmentCounts, match]);
 
   function lineWarnings(line, ratings = seasonRatings) {
+    // Picklebreaker results determine team points only; its players do not
+    // participate in individual records or lineup eligibility validation.
+    if (isPicklebreakerLine(line)) return [];
+
     const warnings = [];
     const doublesMax = match?.divisions?.team_dupr_max;
 
@@ -942,7 +946,7 @@ export default function MatchDetailPage() {
       return;
     }
 
-    if ((field === "home_score" || field === "away_score") && line && lineHasBlockingRatingWarning(line)) {
+    if ((field === "home_score" || field === "away_score") && line && !isPicklebreakerLine(line) && lineHasBlockingRatingWarning(line)) {
       alert("This game line has a current player-rating eligibility warning. Fix the players before entering scores for this line.");
       return;
     }
@@ -1195,7 +1199,7 @@ export default function MatchDetailPage() {
 
       const hasAllPlayers = linePlayerIds(line).every(Boolean);
 
-      if (!hasAllPlayers) {
+      if (!isPicklebreakerLine(line) && !hasAllPlayers) {
         issues.push(gameIssue("all players are required unless the result is a forfeit."));
       }
 
@@ -2215,9 +2219,9 @@ export default function MatchDetailPage() {
                         <span>{formatLineInfo(line, lineGames)}</span>
                         <span className="font-semibold text-slate-800">
                           Team Points: {formatLineTeamPoints(linePoints)}
-                          {isPicklebreaker && (
-                            <span className="ml-2 font-black text-red-700">
-                              Enter starting team players only
+                          {isPicklebreaker && picklebreakerNotPlayed && (
+                            <span className="ml-2 font-black text-slate-600">
+                              Not needed — regular game-line points are not tied.
                             </span>
                           )}
                         </span>
@@ -2233,6 +2237,16 @@ export default function MatchDetailPage() {
                   </div>
                 </div>
 
+                {isPicklebreaker ? (
+                  <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
+                    {[match.home_team?.name || "Home Team", match.away_team?.name || "Away Team"].map((teamName) => (
+                      <div key={teamName} className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
+                        <div className="font-bold text-slate-900">{teamName}</div>
+                        <div className="mt-1 text-sm text-slate-600">Players are not needed for a Picklebreaker.</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
                 <div className="grid grid-cols-1 gap-4 p-4 lg:grid-cols-2">
                   <TeamPlayers
                     title={match.home_team?.name || "Home Team"}
@@ -2266,6 +2280,7 @@ export default function MatchDetailPage() {
                     disabled={lineEntryDisabled}
                   />
                 </div>
+                )}
 
                 <div className="space-y-3 p-4 pt-0 md:hidden">
                   {lineGames.map((game) => {

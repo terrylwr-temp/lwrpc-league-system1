@@ -200,6 +200,8 @@ export default function MobileScoreEntryPage() {
   }
 
   function lineRatingIssues(line, ratings = seasonRatings) {
+    if (sharedIsPicklebreakerLine(line)) return [];
+
     return [...new Set([
       line.home_player_1,
       line.home_player_2,
@@ -249,7 +251,7 @@ export default function MobileScoreEntryPage() {
   async function updateGame(gameId, field, value) {
     const game = games.find((item) => String(item.id) === String(gameId));
     const line = lines.find((item) => String(item.id) === String(game?.match_line_id));
-    const ratingIssues = line ? lineRatingIssues(line) : [];
+    const ratingIssues = line && !sharedIsPicklebreakerLine(line) ? lineRatingIssues(line) : [];
 
     if (ratingIssues.length > 0) {
       alert(["Scores cannot be entered for this game line until player ratings are eligible:", "", ...ratingIssues.map((issue) => "- " + issue)].join("\n"));
@@ -619,6 +621,9 @@ export default function MobileScoreEntryPage() {
               game => game.match_line_id === line.id
             );
             const requiredGameIdsForLine = requiredLineGameIds(lineGames, line);
+            const isPicklebreaker = sharedIsPicklebreakerLine(line);
+            const linePoints = lineTeamWinPoints(line);
+            const picklebreakerNotNeeded = isPicklebreaker && linePoints.mode === "not_played";
 
             const summary = getLineSummary(line);
             const ratingIssues = lineRatingIssues(line);
@@ -637,6 +642,11 @@ export default function MobileScoreEntryPage() {
                     <div className="mt-1 text-sm text-slate-600">
                       {line.division_lines?.line_name || line.division_lines?.line_type || "Team"} · {duprPostedLabel(line)} · {lineScoreRequired(line) ? "Required" : "Optional"}
                     </div>
+                    {picklebreakerNotNeeded && (
+                      <div className="mt-2 text-sm font-bold text-slate-600">
+                        Not needed — regular game-line points are not tied.
+                      </div>
+                    )}
                   </div>
 
                   <div className="rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold text-slate-900">
@@ -659,7 +669,7 @@ export default function MobileScoreEntryPage() {
 
                 <div className="mt-4 space-y-3">
                   {lineGames.map(game => {
-                    const gameNeeded = requiredGameIdsForLine.has(String(game.id));
+                    const gameNeeded = !picklebreakerNotNeeded && requiredGameIdsForLine.has(String(game.id));
 
                     return (
                     <div
@@ -763,5 +773,4 @@ function duprPostedLabel(line) {
   const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
   return posted ? "Posted to DUPR" : "Not Posted to DUPR";
 }
-
 

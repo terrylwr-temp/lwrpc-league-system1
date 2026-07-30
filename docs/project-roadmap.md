@@ -378,3 +378,4 @@ As of 2026-05-21:
 - Season Ratings and User Roles & Permissions desktop tables now use Member Administration's sticky column-header behavior during page scrolling. The visible app version was bumped to `LMS-0598`.
 - Season Ratings mobile rows no longer repeat a column-header strip. User Roles & Permissions now uses mobile member cards with member, location, last-login, current-role, and role-change controls instead of a narrow table/header. The visible app version was bumped to `LMS-0599`.
 - Member Administration now keeps its member count and action controls on one desktop header row, removing excess vertical space before the Search Members field while preserving the mobile two-column controls.
+- Match score entry treats Picklebreaker lines as team-result-only: player selection and player-rating validation are not required, tied regular-line team points require a Picklebreaker score, and untied results clearly mark the Picklebreaker as not needed.
