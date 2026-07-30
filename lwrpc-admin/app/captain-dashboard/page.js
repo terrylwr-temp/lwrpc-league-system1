@@ -4032,7 +4032,15 @@ function RosterModal({ team, ratingForMember, playerRecordForTeam, onClose }) {
 
 function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
   const [headerActions, setHeaderActions] = useState([]);
+  const [liveMatchScore, setLiveMatchScore] = useState({
+    home: match.home_score ?? 0,
+    away: match.away_score ?? 0,
+  });
   const iframeRef = useRef(null);
+
+  useEffect(() => {
+    setLiveMatchScore({ home: match.home_score ?? 0, away: match.away_score ?? 0 });
+  }, [match.away_score, match.home_score, match.id]);
 
   useEffect(() => {
     function handleScoreEntryMessage(event) {
@@ -4041,6 +4049,14 @@ function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
 
       if (event.data?.type === "lwrpc-score-entry-actions") {
         setHeaderActions(Array.isArray(event.data.actions) ? event.data.actions : []);
+        return;
+      }
+
+      if (event.data?.type === "lwrpc-score-entry-score") {
+        setLiveMatchScore({
+          home: Number(event.data.homeScore || 0),
+          away: Number(event.data.awayScore || 0),
+        });
         return;
       }
 
@@ -4073,7 +4089,7 @@ function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
               {match.locations?.name && <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1">{match.locations.name}</span>}
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 md:justify-end" aria-live="polite">
+          <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end" aria-live="polite">
             {headerActions.map((action) => (
               <button
                 type="button"
@@ -4085,6 +4101,10 @@ function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
                 {action.label}
               </button>
             ))}
+            <div className="ml-auto flex min-w-24 items-center justify-center gap-2 rounded-xl bg-[#071536] px-3 py-2 text-white shadow-sm sm:min-w-28 sm:px-4">
+              <span className="text-[9px] font-black uppercase tracking-wide text-blue-200">Match Score</span>
+              <strong className="text-lg leading-none sm:text-xl">{liveMatchScore.home} - {liveMatchScore.away}</strong>
+            </div>
             <button type="button" onClick={() => runHeaderAction("close")} className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md sm:px-4 sm:text-sm">
               Close
             </button>

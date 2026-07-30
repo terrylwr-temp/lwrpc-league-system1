@@ -383,3 +383,5 @@ As of 2026-05-21:
 - Captain Dashboard Match Setup now gives each lineup team a distinct bordered card with a labeled header, stronger color separation, and elevation. The visible app version was bumped to `LMS-0601`.
 - The saved-but-unsubmitted score-entry close confirmation now clearly directs captains to press Submit for official score submission. The visible app version was bumped to `LMS-0602`.
 - Picklebreaker score-entry labels now change from Optional to Required as soon as entered regular-line points are tied, while untied results remain Not needed. Score-validation messages identify the lineup game and ordinal played game separately. The visible app version was bumped to `LMS-0603`.
+- Score entry now hydrates missing division-line settings for legacy matches by line number, so an unplayed Picklebreaker bonus is included in the live Match Score preview. The visible app version was bumped to `LMS-0604`.
+- The Enter Match Scores header now shows a live Match Score. Its prior large score card remains on desktop but is hidden on narrow screens to avoid duplication. The visible app version was bumped to `LMS-0605`.

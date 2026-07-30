@@ -138,7 +138,7 @@ export default function MatchDetailPage() {
       return;
     }
 
-    const { data: lineData, error: lineError } = await supabase
+    let { data: lineData, error: lineError } = await supabase
       .from("match_lines")
       .select(`
         *,
@@ -173,6 +173,47 @@ export default function MatchDetailPage() {
       alert(lineError.message);
       setLoading(false);
       return;
+    }
+
+    // Older generated matches may not retain division_line_id. Reattach the
+    // current division-line settings by line number so their Picklebreaker
+    // rule is included in the live match-score preview.
+    if (matchData.division_id && (lineData || []).some((line) => !line.division_lines)) {
+      const { data: divisionLineData, error: divisionLineError } = await supabase
+        .from("division_lines")
+        .select(`
+          id,
+          line_name,
+          line_number,
+          line_type,
+          game_format,
+          games_per_line,
+          points_to_win,
+          win_by,
+          team_win_points,
+          picklebreaker_not_played_points,
+          picklebreaker_not_played_award_rule,
+          picklebreaker_play_rule,
+          standings_points_mode,
+          posted_to_dupr,
+          uses_saved_match_lineups,
+          score_required
+        `)
+        .eq("division_id", matchData.division_id);
+
+      if (divisionLineError) {
+        alert(divisionLineError.message);
+        setLoading(false);
+        return;
+      }
+
+      const divisionLineByNumber = new Map(
+        (divisionLineData || []).map((divisionLine) => [String(divisionLine.line_number), divisionLine])
+      );
+      lineData = (lineData || []).map((line) => ({
+        ...line,
+        division_lines: line.division_lines || divisionLineByNumber.get(String(line.line_number)) || null,
+      }));
     }
 
     const { data: homeRosterData, error: homeRosterError } = await supabase
@@ -713,6 +754,16 @@ export default function MatchDetailPage() {
         winnerName: specialResultPreview.hasScore ? specialResultPreview.winnerName : specialMatchWinnerName(match),
       }
     : matchSummary;
+
+  useEffect(() => {
+    if (!embeddedScoreEntry || loading || !match) return;
+    window.parent?.postMessage({
+      type: "lwrpc-score-entry-score",
+      matchId: id,
+      homeScore: displayedMatchScore.homeWins,
+      awayScore: displayedMatchScore.awayWins,
+    }, window.location.origin);
+  }, [displayedMatchScore.awayWins, displayedMatchScore.homeWins, embeddedScoreEntry, id, loading, match]);
 
   function specialScoreNumber(value) {
     const text = String(value ?? "").trim();
@@ -2100,7 +2151,7 @@ export default function MatchDetailPage() {
               )}
             </div>
 
-            <div className="w-full rounded-2xl bg-slate-900 p-5 text-white shadow-lg lg:w-auto">
+            <div className="hidden w-full rounded-2xl bg-slate-900 p-5 text-white shadow-lg lg:block lg:w-auto">
               <div className="text-xs uppercase tracking-wide text-slate-300">Match Score</div>
               <div className="mt-1 text-4xl font-bold">
                 {displayedMatchScore.homeWins} - {displayedMatchScore.awayWins}
