@@ -17,7 +17,9 @@ import {
   YAxis,
 } from "recharts";
 import AppHeader from "./components/AppHeader";
+import DivisionStandingsModal from "./components/DivisionStandingsModal";
 import PdfDocumentModal from "./components/PdfDocumentModal";
+import TeamScheduleModal from "./components/TeamScheduleModal";
 import { useAppDialog } from "./components/AppDialogProvider";
 import AdminDesignPreviewView from "./design-preview/admin/AdminDesignPreviewView";
 import { StandingsBarChartTooltip } from "./components/DivisionStandingsBarChart";
@@ -124,6 +126,17 @@ export default function DashboardPage() {
   }
   const [leagueAnalyticsExpanded, setLeagueAnalyticsExpanded] = useState(false);
   const [pendingVerificationModalOpen, setPendingVerificationModalOpen] = useState(false);
+  const [divisionStandingsOpen, setDivisionStandingsOpen] = useState(false);
+  const [divisionScheduleOpen, setDivisionScheduleOpen] = useState(false);
+  const [selectedDivisionId, setSelectedDivisionId] = useState("");
+  const [divisionStandings, setDivisionStandings] = useState([]);
+  const [divisionStandingsLoading, setDivisionStandingsLoading] = useState(false);
+  const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
+  const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
+  const [divisionScheduleMatches, setDivisionScheduleMatches] = useState([]);
+  const [divisionScheduleByes, setDivisionScheduleByes] = useState([]);
+  const [divisionScheduleRatings, setDivisionScheduleRatings] = useState([]);
+  const [divisionScheduleLoading, setDivisionScheduleLoading] = useState(false);
   const [chartsReady, setChartsReady] = useState(false);
 
   useEffect(() => {
@@ -217,7 +230,7 @@ export default function DashboardPage() {
     const [{ data: seasonData }, { data: leagueData }, { data: divisionData }] = await Promise.all([
       supabase.from("seasons").select("id, name").order("name", { ascending: true }),
       supabase.from("leagues").select("id, name, season_id, seasons(name)").order("name", { ascending: true }),
-      supabase.from("divisions").select("id, name, league_id, leagues(name, season_id, seasons(name))").order("name", { ascending: true }),
+      supabase.from("divisions").select("id, name, league_id, is_active, rating_type, leagues(name, season_id, is_active, seasons(name, is_active))").order("name", { ascending: true }),
     ]);
 
     setDashboardFilterOptions({
@@ -903,6 +916,76 @@ export default function DashboardPage() {
     document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  const activeDivisionOptions = dashboardFilterOptions.divisions
+    .filter((division) => division.is_active !== false && division.leagues?.is_active !== false && division.leagues?.seasons?.is_active !== false)
+    .map((division) => ({
+      id: division.id,
+      divisionName: division.name || "Division",
+      leagueName: division.leagues?.name || "League",
+      label: `${division.leagues?.name || "League"} / ${division.name || "Division"}`,
+      division,
+    }));
+
+  async function loadDivisionStandings(divisionId) {
+    setSelectedDivisionId(divisionId);
+    setDivisionStandingsLoading(true);
+    const { data, error } = await supabase
+      .from("team_standings")
+      .select("*, teams(id, name, is_active)")
+      .eq("division_id", divisionId)
+      .order("rank", { ascending: true });
+    setDivisionStandingsLoading(false);
+    if (error) {
+      await notice(error.message, { title: "Unable to load standings", tone: "error" });
+      return;
+    }
+    setDivisionStandings((data || []).filter((row) => row.teams?.is_active !== false));
+  }
+
+  async function loadDivisionSchedule(divisionId) {
+    const option = activeDivisionOptions.find((item) => String(item.id) === String(divisionId));
+    if (!option) return;
+    setSelectedDivisionId(divisionId);
+    setDivisionScheduleLoading(true);
+    setDivisionScheduleTeams([]);
+    const seasonId = option.division.leagues?.season_id;
+    const [{ data: teams, error: teamsError }, { data: matches, error: matchesError }, { data: byes, error: byesError }, { data: standings, error: standingsError }, { data: ratings, error: ratingsError }] = await Promise.all([
+      supabase.from("teams").select("id, name, division_id, locations(id, name)").eq("division_id", divisionId).eq("is_active", true).order("name"),
+      supabase.from("matches").select("id, division_id, home_team_id, away_team_id, scheduled_date, scheduled_time, week_number, status, score_status, home_score, away_score, winning_team_id, result_type, result_notes, is_published, locations(id, name), home_team:teams!matches_home_team_id_fkey(id, name), away_team:teams!matches_away_team_id_fkey(id, name), match_lines(id, line_number, home_team_games_won, away_team_games_won, winning_team_id, line_games(id, game_number, home_score, away_score, game_status))").eq("division_id", divisionId).eq("is_published", true).order("scheduled_date").order("scheduled_time"),
+      supabase.from("team_byes").select("id, team_id, division_id, week_number, bye_date").eq("division_id", divisionId).order("bye_date"),
+      supabase.from("team_standings").select("team_id, rank, standings_points, match_wins, match_losses").eq("division_id", divisionId),
+      seasonId ? supabase.from("member_season_ratings").select("member_id, season_dupr_rating, season_primetime_rating").eq("season_id", seasonId) : Promise.resolve({ data: [], error: null }),
+    ]);
+    setDivisionScheduleLoading(false);
+    const error = teamsError || matchesError || byesError || standingsError || ratingsError;
+    if (error) {
+      await notice(error.message, { title: "Unable to load division schedule", tone: "error" });
+      return;
+    }
+    const standingsByTeamId = Object.fromEntries((standings || []).map((row) => [String(row.team_id), row]));
+    const populatedTeams = (teams || []).map((team) => ({ ...team, standing: standingsByTeamId[String(team.id)] || null })).sort((a, b) => Number(a.standing?.rank || 999) - Number(b.standing?.rank || 999) || a.name.localeCompare(b.name));
+    setDivisionScheduleTeams(populatedTeams);
+    setDivisionScheduleTeam({ ...(populatedTeams[0] || {}), division_id: divisionId, divisions: option.division });
+    setDivisionScheduleMatches(matches || []);
+    setDivisionScheduleByes(byes || []);
+    setDivisionScheduleRatings(ratings || []);
+  }
+
+  function openDivisionTool(type) {
+    const divisionId = selectedDivisionId || activeDivisionOptions[0]?.id;
+    if (!divisionId) {
+      notice("There are no current divisions available.", { title: "No current divisions", tone: "warning" });
+      return;
+    }
+    if (type === "standings") {
+      setDivisionStandingsOpen(true);
+      loadDivisionStandings(divisionId);
+    } else {
+      setDivisionScheduleOpen(true);
+      loadDivisionSchedule(divisionId);
+    }
+  }
+
   const dashboardGuidesPanel = (
     <section id="dashboard-guides" className="mt-6 scroll-mt-4 overflow-hidden rounded-2xl bg-white shadow">
           <div className="border-b border-slate-200 px-4 py-5 md:px-6">
@@ -1536,6 +1619,30 @@ export default function DashboardPage() {
           />
         )}
 
+        {divisionStandingsOpen && (
+          <DivisionStandingsModal divisionOptions={activeDivisionOptions} selectedDivisionId={selectedDivisionId} onSelectDivision={loadDivisionStandings} standings={divisionStandings} loading={divisionStandingsLoading} onClose={() => setDivisionStandingsOpen(false)} />
+        )}
+
+        {divisionScheduleOpen && divisionScheduleTeam && (
+          <TeamScheduleModal
+            title="Division Team Schedules"
+            subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} / ${divisionScheduleTeam.divisions?.name || "Division"}`}
+            divisionOptions={activeDivisionOptions}
+            selectedDivisionId={selectedDivisionId}
+            onSelectDivision={loadDivisionSchedule}
+            teams={divisionScheduleTeams}
+            selectedTeamId={divisionScheduleTeam.id}
+            onSelectTeam={(team) => setDivisionScheduleTeam({ ...team, division_id: selectedDivisionId, divisions: divisionScheduleTeam.divisions })}
+            matches={divisionScheduleMatches}
+            byes={divisionScheduleByes}
+            ratings={divisionScheduleRatings}
+            ratingType={divisionScheduleTeam.divisions?.rating_type || "dupr"}
+            loading={divisionScheduleLoading}
+            compact
+            onClose={() => setDivisionScheduleOpen(false)}
+          />
+        )}
+
         <div className="mt-6 space-y-6">
           {sections.map((section) => (
             <section id={`dashboard-${section.title.toLowerCase().replaceAll(" ", "-")}`} key={section.title} className="scroll-mt-4 overflow-hidden rounded-2xl bg-white shadow">
@@ -1556,7 +1663,7 @@ export default function DashboardPage() {
                   <AdminActionCard
                     key={card.path}
                     card={card}
-                    onClick={() => card.dialog === "reset" ? scrollToDashboardSection("dashboard-reset-options") : router.push(card.path)}
+                    onClick={() => card.dialog === "reset" ? scrollToDashboardSection("dashboard-reset-options") : card.dialog === "division-standings" ? openDivisionTool("standings") : card.dialog === "division-schedules" ? openDivisionTool("schedules") : router.push(card.path)}
                   />
                 ))}
               </div>
