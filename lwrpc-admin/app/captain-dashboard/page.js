@@ -4096,8 +4096,9 @@ function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
               {match.locations?.name && <span className="rounded-full border border-white/25 bg-white/10 px-3 py-1">{match.locations.name}</span>}
             </div>
           </div>
-          <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end" aria-live="polite">
-            {headerActions.map((action) => (
+          <div className="flex w-full flex-col gap-2 md:w-auto md:items-end" aria-live="polite">
+            <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end">
+              {headerActions.map((action) => (
               <button
                 type="button"
                 key={action.id}
@@ -4107,14 +4108,19 @@ function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
               >
                 {action.label}
               </button>
-            ))}
-            <div className="ml-auto flex min-w-24 items-center justify-center gap-2 rounded-xl bg-[#071536] px-3 py-2 text-white shadow-sm sm:min-w-28 sm:px-4">
+              ))}
+              <div className="ml-auto flex min-w-24 items-center justify-center gap-2 rounded-xl bg-[#071536] px-3 py-2 text-white shadow-sm md:hidden sm:min-w-28 sm:px-4">
               <span className="text-[9px] font-black uppercase tracking-wide text-blue-200">Match Score</span>
               <strong className="text-lg leading-none sm:text-xl">{liveMatchScore.home} - {liveMatchScore.away}</strong>
-            </div>
-            <button type="button" onClick={() => runHeaderAction("close")} className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md sm:px-4 sm:text-sm">
+              </div>
+              <button type="button" onClick={() => runHeaderAction("close")} className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md sm:px-4 sm:text-sm">
               Close
-            </button>
+              </button>
+            </div>
+            <div className="hidden min-w-32 items-center justify-center gap-2 rounded-xl bg-[#071536] px-4 py-2 text-white shadow-sm md:flex">
+              <span className="text-[9px] font-black uppercase tracking-wide text-blue-200">Match Score</span>
+              <strong className="text-xl leading-none">{liveMatchScore.home} - {liveMatchScore.away}</strong>
+            </div>
           </div>
         </div>
         <iframe

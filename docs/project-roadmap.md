@@ -390,3 +390,4 @@ As of 2026-05-21:
 - Captain Dashboard preview Upcoming Matches now flags same-day submitted-but-unverified scores immediately, rather than waiting until the next day. The visible app version was bumped to `LMS-0608`.
 - Match Score Entry game headers now use a stronger soft-blue background to distinguish game information from the team-entry panels. The visible app version was bumped to `LMS-0609`.
 - Match Score Entry game headers now use a deeper blue band for stronger contrast against individual game panels. The visible app version was bumped to `LMS-0610`.
+- The desktop Enter Match Scores header now places its live Match Score beneath the action buttons, aligned with the match date and location; mobile retains the compact action-row score. The visible app version was bumped to `LMS-0611`.
