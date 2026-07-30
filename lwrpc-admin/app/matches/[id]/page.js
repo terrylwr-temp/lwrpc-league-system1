@@ -1900,7 +1900,7 @@ export default function MatchDetailPage() {
           await flushPendingGameUpdates();
           const closeConfirmed = await appConfirm({
             title: "Entries saved, not submitted",
-            message: "It will save the current entries but this match has not been officially submitted for score entry.",
+            message: "Current entries have been saved but this match has not been officially submitted for score entry. Press Submit to officially save and submit scores for score entry.",
             confirmLabel: "Close",
             cancelLabel: "Keep entering scores",
             defaultAction: "cancel",
