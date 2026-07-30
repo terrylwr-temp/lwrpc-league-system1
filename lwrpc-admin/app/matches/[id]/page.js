@@ -11,6 +11,7 @@ import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
 import { rebuildDivisionStandingsForDivision } from "../../lib/standingsRebuild";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
+import { appConfirm } from "../../lib/appDialog";
 import {
   gameHasScoreEntry as sharedGameHasScoreEntry,
   getLineSummary as sharedGetLineSummary,
@@ -660,12 +661,6 @@ export default function MatchDetailPage() {
     );
   }
 
-  function clearScoreValidationIssuesForGame(gameId) {
-    setScoreValidationIssueList((current) =>
-      current.filter((issue) => String(issue.gameId || "") !== String(gameId))
-    );
-  }
-
   const matchSummary = useMemo(() => {
     return {
       homeWins: matchPointTotals.homeWins,
@@ -955,9 +950,18 @@ export default function MatchDetailPage() {
     const normalizedValue =
       field === "game_status" ? value || "completed" : numericValue === "" ? null : Number(numericValue);
     const forfeitedGame = field === "game_status" && isForfeitStatus(normalizedValue);
+    const updatedGame = {
+      ...game,
+      [field]: normalizedValue,
+      ...(forfeitedGame ? { home_score: 0, away_score: 0 } : {}),
+    };
+    const liveScoreIssues = line ? enteredGameScoreIssues(line, updatedGame) : [];
 
     setScoreDirty(true);
-    clearScoreValidationIssuesForGame(gameId);
+    setScoreValidationIssueList((current) => [
+      ...current.filter((issue) => String(issue.gameId || "") !== String(gameId)),
+      ...liveScoreIssues.map((message) => ({ lineId: line?.id || null, gameId, message })),
+    ]);
 
     setGames((currentGames) =>
       currentGames.map((game) =>
@@ -1233,8 +1237,41 @@ export default function MatchDetailPage() {
         if (winBy > 0 && highScore - lowScore < winBy) {
           issues.push(gameIssue(`winning margin must be at least ${winBy}.`));
         }
+
+        if (winBy > 1 && highScore > pointsToWin && highScore - lowScore !== winBy) {
+          issues.push(gameIssue(`once a game reaches ${pointsToWin}, an extended game must finish by exactly ${winBy} points.`));
+        }
       }
     });
+
+    return issues;
+  }
+
+  function enteredGameScoreIssues(line, game) {
+    const pointsToWin = Number(line.division_lines?.points_to_win || 0);
+    const winBy = Number(line.division_lines?.win_by || 0);
+    const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
+
+    if (isForfeitStatus(status) || isRetiredStatus(status) || pointsToWin <= 0) return [];
+    if (game.home_score === null || game.home_score === undefined || game.away_score === null || game.away_score === undefined) return [];
+
+    const homeScore = Number(game.home_score || 0);
+    const awayScore = Number(game.away_score || 0);
+    const highScore = Math.max(homeScore, awayScore);
+    const lowScore = Math.min(homeScore, awayScore);
+    const issues = [];
+
+    if (winBy === 1) {
+      if (highScore > pointsToWin) issues.push(`Win By 1 games cannot have a score higher than ${pointsToWin}.`);
+      if (homeScore !== pointsToWin && awayScore !== pointsToWin) issues.push(`Win By 1 games must have one team score exactly ${pointsToWin}.`);
+      return issues;
+    }
+
+    if (highScore < pointsToWin) issues.push(`at least one score must be ${pointsToWin} or higher for a completed game.`);
+    if (winBy > 0 && highScore - lowScore < winBy) issues.push(`winning margin must be at least ${winBy}.`);
+    if (winBy > 1 && highScore > pointsToWin && highScore - lowScore !== winBy) {
+      issues.push(`once a game reaches ${pointsToWin}, an extended game must finish by exactly ${winBy} points.`);
+    }
 
     return issues;
   }
@@ -1858,6 +1895,22 @@ export default function MatchDetailPage() {
       submit: completeMatch,
       validate: verifyScores,
       dispute: disputeScores,
+      close: async () => {
+        if (scoreDirty) {
+          await flushPendingGameUpdates();
+          const closeConfirmed = await appConfirm({
+            title: "Entries saved, not submitted",
+            message: "It will save the current entries but this match has not been officially submitted for score entry.",
+            confirmLabel: "Close",
+            cancelLabel: "Keep entering scores",
+            defaultAction: "cancel",
+            tone: "warning",
+          });
+          if (!closeConfirmed) return;
+        }
+
+        window.parent?.postMessage({ type: "lwrpc-score-entry-close", matchId: id }, window.location.origin);
+      },
     };
   });
 
@@ -2308,6 +2361,11 @@ export default function MatchDetailPage() {
                           }`}>Game {game.game_number}</div>
                           <div className="rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-700">
                             Winner: {gameWinner}
+                            {hasGameIssues && (
+                              <div className="mt-1 max-w-xs text-red-800">
+                                {gameIssues.map((issue) => <div key={issue}>{issue}</div>)}
+                              </div>
+                            )}
                           </div>
                         </div>
 
@@ -2352,13 +2410,6 @@ export default function MatchDetailPage() {
                           ))}
                         </select>
 
-                        {hasGameIssues && (
-                          <div className="mx-4 mb-4 rounded-xl border border-red-300 bg-white px-3 py-2 text-sm font-bold text-red-800">
-                            {gameIssues.map((issue) => (
-                              <div key={issue}>{issue}</div>
-                            ))}
-                          </div>
-                        )}
                       </div>
                     );
                   })}
@@ -2449,17 +2500,17 @@ export default function MatchDetailPage() {
 
                             <td className={`rounded-r-xl border-y-2 border-r-2 p-3 font-semibold ${
                               hasGameIssues ? "border-red-300 text-red-950" : "border-blue-100 text-slate-700"
-                            }`}>{gameWinner}</td>
-                          </tr>,
-                          hasGameIssues ? (
-                            <tr key={`${game.id}-issues`}>
-                              <td colSpan="5" className="rounded-xl border-2 border-red-300 bg-red-50 p-3 text-sm font-bold text-red-800">
+                            }`}>
+                              <div>{gameWinner}</div>
+                              {hasGameIssues && (
+                                <div className="mt-1 text-sm font-bold text-red-800">
                                 {gameIssues.map((issue) => (
                                   <div key={issue}>{issue}</div>
                                 ))}
-                              </td>
-                            </tr>
-                          ) : null,
+                                </div>
+                              )}
+                            </td>
+                          </tr>,
                         ];
                       })}
 

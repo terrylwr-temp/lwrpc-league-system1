@@ -4046,11 +4046,12 @@ function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
 
       if (event.data?.type === "lwrpc-score-entry-ready") onReady?.();
       if (event.data?.type === "lwrpc-score-entry-complete") onComplete?.();
+      if (event.data?.type === "lwrpc-score-entry-close") onClose?.();
     }
 
     window.addEventListener("message", handleScoreEntryMessage);
     return () => window.removeEventListener("message", handleScoreEntryMessage);
-  }, [match.id, onComplete, onReady]);
+  }, [match.id, onClose, onComplete, onReady]);
 
   function runHeaderAction(actionId) {
     iframeRef.current?.contentWindow?.postMessage({
@@ -4084,7 +4085,7 @@ function ScoreEntryModal({ match, onReady, onComplete, onClose }) {
                 {action.label}
               </button>
             ))}
-            <button type="button" onClick={onClose} className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md sm:px-4 sm:text-sm">
+            <button type="button" onClick={() => runHeaderAction("close")} className="rounded-xl bg-white px-3 py-2 text-xs font-bold text-[#102e64] shadow-sm transition hover:-translate-y-0.5 hover:bg-blue-50 hover:shadow-md sm:px-4 sm:text-sm">
               Close
             </button>
           </div>

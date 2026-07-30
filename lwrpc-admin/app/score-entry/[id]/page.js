@@ -379,6 +379,10 @@ export default function MobileScoreEntryPage() {
       if (winBy > 0 && highScore - lowScore < winBy) {
         addIssue(`winning margin must be at least ${winBy}.`);
       }
+
+      if (winBy > 1 && highScore > pointsToWin && highScore - lowScore !== winBy) {
+        addIssue(`once a game reaches ${pointsToWin}, an extended game must finish by exactly ${winBy} points.`);
+      }
     });
 
     return issues;
@@ -773,4 +777,3 @@ function duprPostedLabel(line) {
   const posted = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
   return posted ? "Posted to DUPR" : "Not Posted to DUPR";
 }
-
