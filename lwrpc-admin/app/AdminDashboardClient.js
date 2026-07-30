@@ -1408,6 +1408,8 @@ export default function DashboardPage() {
           onSelectFilter: setDashboardFilter,
           onNavigate: (path) => router.push(path),
           onOpenPendingScoreActions: openPendingScoreActions,
+          onOpenDivisionStandings: () => openDivisionTool("standings"),
+          onOpenDivisionSchedules: () => openDivisionTool("schedules"),
           onChangeDashboard: (path) => router.push(path),
           onOpenGuide: openAdminGuide,
           onChangePassword: () => router.push("/reset-password"),
@@ -1420,6 +1422,28 @@ export default function DashboardPage() {
           },
         }}
       />
+      {divisionStandingsOpen && (
+        <DivisionStandingsModal divisionOptions={activeDivisionOptions} selectedDivisionId={selectedDivisionId} onSelectDivision={loadDivisionStandings} standings={divisionStandings} loading={divisionStandingsLoading} onClose={() => setDivisionStandingsOpen(false)} />
+      )}
+      {divisionScheduleOpen && divisionScheduleTeam && (
+        <TeamScheduleModal
+          title="Division Team Schedules"
+          subtitle={`${divisionScheduleTeam.divisions?.leagues?.name || "League"} / ${divisionScheduleTeam.divisions?.name || "Division"}`}
+          divisionOptions={activeDivisionOptions}
+          selectedDivisionId={selectedDivisionId}
+          onSelectDivision={loadDivisionSchedule}
+          teams={divisionScheduleTeams}
+          selectedTeamId={divisionScheduleTeam.id}
+          onSelectTeam={(team) => setDivisionScheduleTeam({ ...team, division_id: selectedDivisionId, divisions: divisionScheduleTeam.divisions })}
+          matches={divisionScheduleMatches}
+          byes={divisionScheduleByes}
+          ratings={divisionScheduleRatings}
+          ratingType={divisionScheduleTeam.divisions?.rating_type || "dupr"}
+          loading={divisionScheduleLoading}
+          compact
+          onClose={() => setDivisionScheduleOpen(false)}
+        />
+      )}
       {pdfDocument && <PdfViewerModal document={pdfDocument} onClose={() => setPdfDocument(null)} />}
       </>
     );

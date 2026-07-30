@@ -392,3 +392,4 @@ As of 2026-05-21:
 - Match Score Entry game headers now use a deeper blue band for stronger contrast against individual game panels. The visible app version was bumped to `LMS-0610`.
 - The desktop Enter Match Scores header now places its live Match Score beneath the action buttons, aligned with the match date and location; mobile retains the compact action-row score. The visible app version was bumped to `LMS-0611`.
 - Admin Dashboard People & Teams now includes Division Standings and Division Schedules tools. Each opens a current-division selector popup; standings provides the complete division team table and schedules reuse the player-facing division schedule view. The visible app version was bumped to `LMS-0612`.
+- Admin Dashboard's active design shell now dispatches Division Standings and Division Schedules to their respective popups instead of incorrectly treating them as Reset dialogs. The visible app version was bumped to `LMS-0613`.
