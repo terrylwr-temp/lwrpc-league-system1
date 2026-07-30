@@ -2344,7 +2344,7 @@ export default function MatchDetailPage() {
                   hasDuplicate ? "border-red-300 bg-red-50" : "border-blue-200 bg-blue-50/70"
                 }`}
               >
-                <div className="border-b border-blue-200 bg-white/85 p-4">
+                <div className="border-b border-blue-300 bg-blue-100/90 p-4">
                   <div>
                     <h2 className="text-xl font-bold text-slate-900">
                       {teamSlotLabel(line)}

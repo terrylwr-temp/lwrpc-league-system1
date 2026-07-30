@@ -388,3 +388,4 @@ As of 2026-05-21:
 - Resubmitting already-submitted Match Scores now uses the branded in-app confirmation dialog instead of a browser-native popup. The visible app version was bumped to `LMS-0606`.
 - Captain Dashboard Upcoming/Unverified Matches now clearly marks pending-verification cards as `Scores Not Verified` and past unentered cards as `Scores Not Entered`, while Action Needed remains limited to the selected team's required actions. The visible app version was bumped to `LMS-0607`.
 - Captain Dashboard preview Upcoming Matches now flags same-day submitted-but-unverified scores immediately, rather than waiting until the next day. The visible app version was bumped to `LMS-0608`.
+- Match Score Entry game headers now use a stronger soft-blue background to distinguish game information from the team-entry panels. The visible app version was bumped to `LMS-0609`.
