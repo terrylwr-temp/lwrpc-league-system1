@@ -30,6 +30,12 @@ export default function MobileScoreEntryPage() {
   const [scoreDirty, setScoreDirty] = useState(false);
   const pendingGameUpdatesRef = useRef(new Map());
 
+  function playedGameLabel(gameNumber) {
+    const number = Number(gameNumber || 0);
+    const ordinals = ["first", "second", "third", "fourth", "fifth"];
+    return ordinals[number - 1] ? `the ${ordinals[number - 1]} played game` : `played game ${gameNumber || "-"}`;
+  }
+
   useUnsavedChangesWarning(scoreDirty, "match scores");
 
   const checkAuth = useCallback(async function checkAuth() {
@@ -343,7 +349,7 @@ export default function MobileScoreEntryPage() {
       if (!shouldValidateLine) return;
 
       const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
-      const gameLabel = `${lineLabel} Game ${game.game_number || ""}`.trim();
+      const gameLabel = `${lineLabel} - ${playedGameLabel(game.game_number)}`;
       const addIssue = (message) => issues.push(`${gameLabel}: ${message}`);
 
       if (isForfeitStatus(status)) return;
@@ -628,6 +634,18 @@ export default function MobileScoreEntryPage() {
             const isPicklebreaker = sharedIsPicklebreakerLine(line);
             const linePoints = lineTeamWinPoints(line);
             const picklebreakerNotNeeded = isPicklebreaker && linePoints.mode === "not_played";
+            const picklebreakerRequired = isPicklebreaker && linePoints.regularTied && lines
+              .filter((regularLine) => !sharedIsPicklebreakerLine(regularLine))
+              .some((regularLine) => games.some((game) => game.match_line_id === regularLine.id && sharedGameHasScoreEntry(game)));
+            const scoreRequirementLabel = isPicklebreaker
+              ? picklebreakerNotNeeded
+                ? "Not needed"
+                : picklebreakerRequired
+                  ? "Required"
+                  : "Optional"
+              : lineScoreRequired(line)
+                ? "Required"
+                : "Optional";
 
             const summary = getLineSummary(line);
             const ratingIssues = lineRatingIssues(line);
@@ -644,7 +662,7 @@ export default function MobileScoreEntryPage() {
                     </h2>
 
                     <div className="mt-1 text-sm text-slate-600">
-                      {line.division_lines?.line_name || line.division_lines?.line_type || "Team"} · {duprPostedLabel(line)} · {lineScoreRequired(line) ? "Required" : "Optional"}
+                      {line.division_lines?.line_name || line.division_lines?.line_type || "Team"} · {duprPostedLabel(line)} · {scoreRequirementLabel}
                     </div>
                     {picklebreakerNotNeeded && (
                       <div className="mt-2 text-sm font-bold text-slate-600">

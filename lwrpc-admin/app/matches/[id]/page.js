@@ -465,12 +465,18 @@ export default function MatchDetailPage() {
     return `Game ${slot || "-"}`;
   }
 
-  function formatLineInfo(line, lineGames) {
+  function playedGameLabel(gameNumber) {
+    const number = Number(gameNumber || 0);
+    const ordinals = ["first", "second", "third", "fourth", "fifth"];
+    return ordinals[number - 1] ? `the ${ordinals[number - 1]} played game` : `played game ${gameNumber || "-"}`;
+  }
+
+  function formatLineInfo(line, lineGames, scoreRequirement = lmsLineScoreRequired(line) ? "Required" : "Optional") {
     const divisionLine = line.division_lines;
     const pieces = [
       capitalizeFirst(divisionLine?.line_type),
       duprPostedLabel(line),
-      lmsLineScoreRequired(line) ? "Required" : "Optional",
+      scoreRequirement,
       capitalizeFirst(divisionLine?.game_format),
       `${lineGames.length || divisionLine?.games_per_line || 1} game(s)`,
     ].filter(Boolean);
@@ -1192,7 +1198,7 @@ export default function MatchDetailPage() {
       if (!lineRequiresValidation) return;
 
       const status = game.game_status && game.game_status !== "scheduled" ? game.game_status : "completed";
-      const gameLabel = `${teamSlotLabel(line)} Game ${game.game_number || ""}`.trim();
+      const gameLabel = `${teamSlotLabel(line)} - ${playedGameLabel(game.game_number)}`;
       const gameIssue = (message) => ({
         lineId: line.id,
         gameId: game.id,
@@ -2244,6 +2250,16 @@ export default function MatchDetailPage() {
             const warnings = lineWarnings(line);
             const isPicklebreaker = isPicklebreakerLine(line);
             const picklebreakerNotPlayed = linePoints.mode === "not_played";
+            const picklebreakerRequired = isPicklebreaker && linePoints.regularTied && displayedLines
+              .filter((regularLine) => !isPicklebreakerLine(regularLine))
+              .some((regularLine) => games.some((game) => game.match_line_id === regularLine.id && lmsGameHasScoreEntry(game)));
+            const scoreRequirementLabel = isPicklebreaker
+              ? picklebreakerNotPlayed
+                ? "Not needed"
+                : picklebreakerRequired
+                  ? "Required"
+                  : "Optional"
+              : undefined;
             const lineEntryDisabled = !scoreEntryEditable || picklebreakerNotPlayed;
             const scoresBlockedForLine = lineHasBlockingRatingWarning(line);
 
@@ -2269,7 +2285,7 @@ export default function MatchDetailPage() {
                     </h2>
 
                       <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-600">
-                        <span>{formatLineInfo(line, lineGames)}</span>
+                        <span>{formatLineInfo(line, lineGames, scoreRequirementLabel)}</span>
                         <span className="font-semibold text-slate-800">
                           Team Points: {formatLineTeamPoints(linePoints)}
                           {isPicklebreaker && picklebreakerNotPlayed && (
