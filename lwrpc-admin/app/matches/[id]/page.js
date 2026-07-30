@@ -1428,7 +1428,15 @@ export default function MatchDetailPage() {
     }
 
     if (match.score_status === "pending_verification" && !scoringOperationsOverride) {
-      if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
+      const resubmitConfirmed = await appConfirm({
+        title: "Resubmit scores?",
+        message: "Scores have already been submitted for verification. Save changes and resubmit?",
+        confirmLabel: "Save and resubmit",
+        cancelLabel: "Keep editing",
+        defaultAction: "cancel",
+        tone: "warning",
+      });
+      if (!resubmitConfirmed) return;
     }
 
     scoreSubmissionInProgressRef.current = true;
@@ -1554,7 +1562,15 @@ export default function MatchDetailPage() {
     }
 
     if (match.score_status === "pending_verification" && !scoringOperationsOverride) {
-      if (!confirm("Scores have already been submitted for verification. Save changes and resubmit?")) return;
+      const resubmitConfirmed = await appConfirm({
+        title: "Resubmit scores?",
+        message: "Scores have already been submitted for verification. Save changes and resubmit?",
+        confirmLabel: "Save and resubmit",
+        cancelLabel: "Keep editing",
+        defaultAction: "cancel",
+        tone: "warning",
+      });
+      if (!resubmitConfirmed) return;
     }
 
     scoreSubmissionInProgressRef.current = true;

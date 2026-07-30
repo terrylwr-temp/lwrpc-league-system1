@@ -1157,6 +1157,9 @@ export default function CaptainDashboardPage() {
     const isMatchScheduled = Boolean(match.scheduled_date);
     const needsScoreEntry = showSetup && canEnterScores && !scoreHasBeenEntered && !scoreButtonAction;
     const completedWithScores = match.status === "completed" && scoreHasBeenEntered;
+    const scoresNotVerified = match.score_status === "pending_verification";
+    const scoresNotEntered = isPastMatchDate && !scoreHasBeenEntered;
+    const scoreAttentionNeeded = scoresNotVerified || scoresNotEntered;
     const homeWon = String(match.winning_team_id || "") === String(match.home_team_id || "");
     const awayWon = String(match.winning_team_id || "") === String(match.away_team_id || "");
     const resultPanelClass =
@@ -1166,7 +1169,9 @@ export default function CaptainDashboardPage() {
           ? "border-rose-200 bg-rose-50 text-rose-950"
           : "border-blue-200 bg-blue-50 text-blue-950";
     const headingClass =
-      selectedResult === "win"
+      scoreAttentionNeeded
+        ? "bg-gradient-to-r from-red-700 to-rose-700"
+        : selectedResult === "win"
         ? "bg-gradient-to-r from-emerald-700 to-green-700"
         : selectedResult === "loss"
           ? "bg-gradient-to-r from-rose-700 to-red-700"
@@ -1183,7 +1188,9 @@ export default function CaptainDashboardPage() {
     return (
       <div
         key={match.id}
-        className="overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+        className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+          scoreAttentionNeeded ? "border-red-300 ring-1 ring-red-200" : "border-blue-100"
+        }`}
       >
         <div className={`${headingClass} px-4 py-4 text-white`}>
           <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(12rem,18rem)] md:items-start">
@@ -1274,11 +1281,11 @@ export default function CaptainDashboardPage() {
               </div>
             )}
 
-            {scoreHasBeenEntered && (
+            {(scoreHasBeenEntered || scoresNotEntered) && (
               <div className="mt-3 grid grid-cols-1 gap-2 text-sm text-slate-700">
-                <div className="rounded-xl bg-slate-50 px-3 py-2">
+                <div className={`rounded-xl px-3 py-2 ${scoreAttentionNeeded ? "border border-red-200 bg-red-50" : "bg-slate-50"}`}>
                   <div className="text-xs font-black uppercase tracking-wide text-slate-500">Score Status</div>
-                  <div className="font-bold text-slate-900">{formatScoreStatus(match)}</div>
+                  <div className={`font-bold ${scoreAttentionNeeded ? "text-red-800" : "text-slate-900"}`}>{formatScoreStatus(match)}</div>
                   {match.score_status === "pending_verification" && (
                     <div className="mt-1 text-xs font-bold text-slate-600">
                       Submitted by {scoreSubmitter ? formatMemberName(scoreSubmitter) : "Unknown"}
@@ -4693,7 +4700,8 @@ function formatEmailDate(value) {
 function formatScoreStatus(match) {
   const status = match?.score_status || "not_entered";
 
-  if (status === "not_entered") return "NOT ENTERED";
+  if (status === "not_entered") return "SCORES NOT ENTERED";
+  if (status === "pending_verification") return "SCORES NOT VERIFIED";
 
   const timestamp =
     status === "verified"
