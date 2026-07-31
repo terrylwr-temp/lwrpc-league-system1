@@ -1,16 +1,20 @@
 "use client";
 
 import { standingsTiebreakRules, tiebreakLabel } from "../lib/standingsTiebreaks";
+import { formatStandingsRuleValue, standingsRuleValue } from "../lib/standingsSort";
 
 function valueForRule(leader, rule) {
-  const values = {
-    standings_points: leader?.points,
-    line_wins: leader?.lineWins,
-    game_wins: leader?.gameWins,
-    point_differential: leader?.differential,
-    points_for: leader?.pointsFor,
-  };
-  return Number(values[rule] || 0);
+  if (rule === "standings_points") return Number(leader?.points || 0);
+  if (rule === "point_differential") return Number(leader?.differential || 0);
+  if (rule === "points_for") return Number(leader?.pointsFor || 0);
+  return standingsRuleValue(leader, rule);
+}
+
+function displayValueForRule(leader, rule) {
+  if (rule === "standings_points") return String(Number(leader?.points || 0));
+  if (rule === "point_differential") return signedValue(Number(leader?.differential || 0));
+  if (rule === "points_for") return String(Number(leader?.pointsFor || 0));
+  return formatStandingsRuleValue(leader, rule);
 }
 
 function signedValue(value) {
@@ -61,13 +65,13 @@ export default function StandingsTiebreakDetails({ leaders = [], division }) {
         const decidingRule = hasDecidingRule ? rules[decidingIndex] : null;
         const leader = [...group].sort((left, right) => Number(left.rank) - Number(right.rank))[0];
         const comparison = group
-          .map((team) => `${team.team} (${valueForRule(team, decidingRule)})`)
+          .map((team) => `${team.team} (${displayValueForRule(team, decidingRule)})`)
           .join(" vs. ");
 
         return (
           <div key={`${primaryRule}-${valueForRule(group[0], primaryRule)}`} className="mt-3 overflow-hidden rounded-lg border border-slate-200 bg-white">
             <p className="border-b border-slate-200 px-3 py-2 text-xs font-bold text-slate-700">
-              {group.length} teams tied on {tiebreakLabel(primaryRule)} ({valueForRule(group[0], primaryRule)}). {hasDecidingRule ? `#${leader.rank} ${leader.team} ranks higher on ${tiebreakLabel(decidingRule)}: ${comparison}.` : "They remain tied after all configured tiebreak metrics."}
+              {group.length} teams tied on {tiebreakLabel(primaryRule)} ({displayValueForRule(group[0], primaryRule)}). {hasDecidingRule ? `#${leader.rank} ${leader.team} ranks higher on ${tiebreakLabel(decidingRule)}: ${comparison}.` : "They remain tied after all configured tiebreak metrics."}
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
@@ -81,7 +85,7 @@ export default function StandingsTiebreakDetails({ leaders = [], division }) {
                   {[...group].sort((left, right) => Number(left.rank) - Number(right.rank)).map((team) => (
                     <tr key={team.id} className="border-t border-slate-100">
                       <td className="px-3 py-2 font-bold">#{team.rank} {team.team}</td>
-                      {visibleRules.map((rule) => <td className="px-3 py-2 text-right font-black" key={rule}>{rule === "point_differential" ? signedValue(valueForRule(team, rule)) : valueForRule(team, rule)}</td>)}
+                      {visibleRules.map((rule) => <td className="px-3 py-2 text-right font-black" key={rule}>{displayValueForRule(team, rule)}</td>)}
                     </tr>
                   ))}
                 </tbody>

@@ -718,8 +718,8 @@ export default function DivisionsPage() {
   function tiebreakLabel(value) {
     const labels = {
       standings_points: "Standings Points",
-      line_wins: "Line Wins",
-      game_wins: "Game Wins",
+      line_wins: "Line/Game Win %",
+      game_wins: "Match Win %",
       point_differential: "Point Differential",
       points_for: "Total Points For",
     };
@@ -908,8 +908,8 @@ export default function DivisionsPage() {
                     className="w-full rounded-xl border border-slate-300 px-4 py-3"
                   >
                     <option value="standings_points">Standings Points</option>
-                    <option value="line_wins">Line Wins</option>
-                    <option value="game_wins">Game Wins</option>
+                    <option value="line_wins">Line/Game Win %</option>
+                    <option value="game_wins">Match Win %</option>
                     <option value="point_differential">Point Differential</option>
                     <option value="points_for">Total Points For</option>
                   </select>
@@ -919,8 +919,8 @@ export default function DivisionsPage() {
                     onChange={(e) => setTiebreak2(e.target.value)}
                     className="w-full rounded-xl border border-slate-300 px-4 py-3"
                   >
-                    <option value="line_wins">Line Wins</option>
-                    <option value="game_wins">Game Wins</option>
+                    <option value="line_wins">Line/Game Win %</option>
+                    <option value="game_wins">Match Win %</option>
                     <option value="point_differential">Point Differential</option>
                     <option value="points_for">Total Points For</option>
                     <option value="standings_points">Standings Points</option>
@@ -932,11 +932,14 @@ export default function DivisionsPage() {
                     className="w-full rounded-xl border border-slate-300 px-4 py-3"
                   >
                     <option value="point_differential">Point Differential</option>
-                    <option value="game_wins">Game Wins</option>
+                    <option value="game_wins">Match Win %</option>
                     <option value="points_for">Total Points For</option>
-                    <option value="line_wins">Line Wins</option>
+                    <option value="line_wins">Line/Game Win %</option>
                     <option value="standings_points">Standings Points</option>
                   </select>
+                  <p className="text-xs font-semibold leading-5 text-slate-500">
+                    Line/Game Win % is line wins divided by total lines played. Match Win % is match wins divided by total matchups played.
+                  </p>
                 </div>
               </Field>
 

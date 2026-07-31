@@ -6,6 +6,7 @@ import {
   isSpecialMatchResult,
   specialMatchWinnerTeamId,
 } from "./specialMatchResults";
+import { standingsRuleValue } from "./standingsSort";
 
 function gameSummary(game) {
   if (game.game_status === "forfeit_home" || game.game_status === "retired_home") {
@@ -84,8 +85,10 @@ function sortStandingsRows(rows, division) {
 
   return rows.sort((a, b) => {
     for (const rule of rules) {
-      if ((b[rule] || 0) !== (a[rule] || 0)) {
-        return (b[rule] || 0) - (a[rule] || 0);
+      const aValue = standingsRuleValue(a, rule);
+      const bValue = standingsRuleValue(b, rule);
+      if (bValue !== aValue) {
+        return bValue - aValue;
       }
     }
 

@@ -1,7 +1,7 @@
 const TIEBREAK_LABELS = {
   standings_points: "Standings Points",
-  line_wins: "Line Wins",
-  game_wins: "Game Wins",
+  line_wins: "Line/Game Win %",
+  game_wins: "Match Win %",
   point_differential: "Point Differential",
   points_for: "Total Points For",
 };

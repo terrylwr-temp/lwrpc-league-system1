@@ -1,3 +1,33 @@
+export function standingsRuleValue(row, rule) {
+  if (rule === "line_wins") {
+    const wins = Number(row?.line_wins ?? row?.lineWins ?? 0);
+    const losses = Number(row?.line_losses ?? row?.lineLosses ?? 0);
+    const ties = Number(row?.line_ties ?? row?.lineTies ?? 0);
+    const played = wins + losses + ties;
+    return played > 0 ? wins / played : 0;
+  }
+
+  if (rule === "game_wins") {
+    const wins = Number(row?.match_wins ?? row?.wins ?? 0);
+    const losses = Number(row?.match_losses ?? row?.losses ?? 0);
+    const ties = Number(row?.match_ties ?? row?.ties ?? 0);
+    const recordedPlayed = Number(row?.matches_played ?? row?.matchesPlayed ?? 0);
+    const played = recordedPlayed > 0 ? recordedPlayed : wins + losses + ties;
+    return played > 0 ? wins / played : 0;
+  }
+
+  return Number(row?.[rule] || 0);
+}
+
+export function isPercentageTiebreakRule(rule) {
+  return rule === "line_wins" || rule === "game_wins";
+}
+
+export function formatStandingsRuleValue(row, rule) {
+  const value = standingsRuleValue(row, rule);
+  return isPercentageTiebreakRule(rule) ? `${(value * 100).toFixed(1)}%` : String(value);
+}
+
 export function sortStandingsByDivisionRules(rows, division) {
   const rules = [
     division?.standings_tiebreak_1 || "standings_points",
@@ -7,8 +37,8 @@ export function sortStandingsByDivisionRules(rows, division) {
 
   return [...(rows || [])].sort((a, b) => {
     for (const rule of rules) {
-      const aValue = Number(a[rule] || 0);
-      const bValue = Number(b[rule] || 0);
+      const aValue = standingsRuleValue(a, rule);
+      const bValue = standingsRuleValue(b, rule);
 
       if (bValue !== aValue) {
         return bValue - aValue;

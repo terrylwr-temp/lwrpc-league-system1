@@ -26,8 +26,11 @@ export function buildMiniStandingsLeaders(standings = [], selectedTeam = null) {
       wins: Number(row.match_wins || 0),
       losses: Number(row.match_losses || 0),
       ties: Number(row.match_ties || 0),
+      matchesPlayed: Number(row.matches_played ?? (Number(row.match_wins || 0) + Number(row.match_losses || 0) + Number(row.match_ties || 0))),
       differential: Number(row.point_differential || 0),
       lineWins: Number(row.line_wins || 0),
+      lineLosses: Number(row.line_losses || 0),
+      lineTies: Number(row.line_ties || 0),
       gameWins: Number(row.game_wins || 0),
       pointsFor: Number(row.points_for || 0),
     }))
