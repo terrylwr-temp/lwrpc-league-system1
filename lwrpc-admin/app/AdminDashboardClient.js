@@ -931,7 +931,7 @@ export default function DashboardPage() {
     setDivisionStandingsLoading(true);
     const { data, error } = await supabase
       .from("team_standings")
-      .select("*, teams(id, name, is_active)")
+      .select("*, teams(id, name, abbreviation, is_active)")
       .eq("division_id", divisionId)
       .order("rank", { ascending: true });
     setDivisionStandingsLoading(false);

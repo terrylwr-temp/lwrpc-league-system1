@@ -54,6 +54,7 @@ export default function StandingsPage() {
         teams (
           id,
           name,
+          abbreviation,
           is_active
         )
       `)
@@ -521,8 +522,9 @@ if (loading) {
                         type="button"
                         onClick={() => openDivisionSchedule(team)}
                         className="mt-1 text-left text-lg font-black text-blue-800 underline-offset-2 hover:underline"
+                        title={team.teams?.name || "Team"}
                       >
-                        {team.teams?.name}
+                        {team.teams?.abbreviation || team.teams?.name || "Team"}
                       </button>
                     </div>
                     <div className="rounded-xl bg-blue-700 px-3 py-2 text-center text-white">
@@ -795,7 +797,7 @@ function DivisionStandingsBarGraph({ standings, divisionName, leagueName, isPlay
               className="grid grid-cols-[minmax(7.5rem,12rem)_1fr_auto] items-center gap-2 text-xs sm:grid-cols-[minmax(10rem,16rem)_1fr_auto]"
             >
               <div className={`truncate font-black ${playoffTeam ? "text-emerald-800" : "text-slate-700"}`}>
-                #{index + 1} {team.teams?.name || "Team"}
+                #{index + 1} <span className="sm:hidden">{team.teams?.abbreviation || team.teams?.name || "Team"}</span><span className="hidden sm:inline">{team.teams?.name || "Team"}</span>
               </div>
               <div className="h-4 overflow-hidden rounded-full bg-white shadow-inner ring-1 ring-slate-200">
                 <div
