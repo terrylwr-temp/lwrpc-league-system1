@@ -945,10 +945,15 @@ export default function SchedulingPage() {
       return;
     }
 
-    if (!await confirmDeleteActionAsync({
+    const continueToMatchCount = await appConfirm({
       title: `Delete all scheduled matches for ${setting.name || "Unnamed Schedule"}?`,
-      details: "This will find matches for this league/division/season window and then ask for final confirmation after counting them. It will delete matches, match lines, game score rows, and related bye rows.",
-    })) return;
+      message: "This will first find the generated matches in this league/division/season window. You will then see the match count and type DELETE once to permanently remove the matches, match lines, game score rows, and related bye rows.",
+      confirmLabel: "Continue",
+      cancelLabel: "Keep schedule",
+      defaultAction: "cancel",
+      tone: "warning",
+    });
+    if (!continueToMatchCount) return;
 
     let query = supabase
       .from("matches")
