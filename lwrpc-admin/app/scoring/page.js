@@ -8,6 +8,7 @@ import { formatDisplayDate, formatDisplayDateWithWeekday, formatDisplayTime, for
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
 import { confirmDeleteAction } from "../lib/confirmDelete";
+import { isPicklebreakerLine } from "../lib/matchScoring";
 
 const TEMPLATE_KEY = EMAIL_TEMPLATE_KEYS.scoreReminder;
 const DUPR_EXPORT_HEADERS = [
@@ -151,6 +152,7 @@ export default function ScoringPage() {
         location_id,
         notes,
         scheduled_date,
+        result_type,
         scheduled_time,
         week_number,
         status,
@@ -578,6 +580,7 @@ export default function ScoringPage() {
           posted_to_dupr,
           division_lines (
             posted_to_dupr,
+            line_type,
             score_type
           ),
           home_player_1:members!match_lines_home_player_1_id_fkey(first_name, last_name, full_name, dupr_id),
@@ -587,7 +590,8 @@ export default function ScoringPage() {
           line_games (
             game_number,
             home_score,
-            away_score
+            away_score,
+            game_status
           )
         )
       `)
@@ -605,7 +609,9 @@ export default function ScoringPage() {
         const sourceMatch = exportMatches.find((item) => item.id === match.id) || match;
         return {
           ...sourceMatch,
-          match_lines: (match.match_lines || []).filter(linePostsToDupr),
+          match_lines: match.result_type === "forfeit"
+            ? []
+            : (match.match_lines || []).filter(lineEligibleForDuprExport),
         };
       })
       .filter((match) => match.match_lines.length > 0)
@@ -1294,6 +1300,7 @@ function dateSearchValues(value) {
 
 function duprRowsForMatch(match) {
   return [...(match.match_lines || [])]
+    .filter(lineEligibleForDuprExport)
     .sort((a, b) => Number(a.line_number || 0) - Number(b.line_number || 0))
     .map((line) => {
       const games = [...(line.line_games || [])]
@@ -1330,6 +1337,14 @@ function duprScoreType(line) {
 function linePostsToDupr(line) {
   const value = line?.posted_to_dupr ?? line?.division_lines?.posted_to_dupr;
   return value === true || value === "true" || value === 1 || value === "1";
+}
+
+function lineEligibleForDuprExport(line) {
+  return linePostsToDupr(line) &&
+    !isPicklebreakerLine(line) &&
+    !(line?.line_games || []).some((game) =>
+      game?.game_status === "forfeit_home" || game?.game_status === "forfeit_away"
+    );
 }
 
 function duprPlayerName(member) {

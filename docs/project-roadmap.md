@@ -397,3 +397,4 @@ As of 2026-05-21:
 - Admin Division Schedules now loads the recorded home and away match-line players, so Match Details shows verified lineups rather than incorrectly reporting Players not entered. The visible app version was bumped to `LMS-0615`.
 - Division Team Standings now correctly labels its game record column as Games Won-Lost. The visible app version was bumped to `LMS-0616`.
 - Delete Generated Schedule now explains the scheduled-data impact and continues to a match count first; it requires typing `DELETE` only once, after the final count is known. The destructive-flow audit confirmed no other workflow requires `DELETE` more than once. The visible app version was bumped to `LMS-0617`.
+- DUPR exports now exclude Picklebreaker lines and any line containing a forfeit-status game, preventing those results from being included in the generated CSV. The visible app version was bumped to `LMS-0618`.
