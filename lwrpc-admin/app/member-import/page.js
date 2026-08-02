@@ -16,6 +16,7 @@ export default function MemberImportPage() {
   const [fileName, setFileName] = useState("");
   const [preview, setPreview] = useState([]);
   const [missingMembers, setMissingMembers] = useState([]);
+  const [selectedMissingMemberIds, setSelectedMissingMemberIds] = useState([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [importStatus, setImportStatus] = useState("");
   const [importSummary, setImportSummary] = useState(null);
@@ -322,10 +323,25 @@ return {
       }
 
       return true;
+    }).sort((firstMember, secondMember) => {
+      const lastNameComparison = normalizeText(firstMember.last_name).localeCompare(
+        normalizeText(secondMember.last_name),
+        undefined,
+        { sensitivity: "base" }
+      );
+
+      if (lastNameComparison !== 0) return lastNameComparison;
+
+      return normalizeText(firstMember.first_name).localeCompare(
+        normalizeText(secondMember.first_name),
+        undefined,
+        { sensitivity: "base" }
+      );
     });
 
     setPreview(previewRows);
     setMissingMembers(missing);
+    setSelectedMissingMemberIds(missing.map(member => member.id));
   }
 
   async function applyImport() {
@@ -552,22 +568,29 @@ return {
     setMissingMembers(prev =>
       prev.filter(member => member.id !== memberId)
     );
+    setSelectedMissingMemberIds(prev =>
+      prev.filter(id => String(id) !== String(memberId))
+    );
   }
 
   async function markAllMissingInactive() {
-    if (missingMembers.length === 0) {
-      alert("No missing members.");
+    const selectedMembers = missingMembers.filter(member =>
+      selectedMissingMemberIds.some(id => String(id) === String(member.id))
+    );
+
+    if (selectedMembers.length === 0) {
+      alert("Select at least one missing member.");
       return;
     }
 
     const ok = await appConfirm(
-      `Mark ${missingMembers.length} missing members inactive?`,
+      `Mark ${selectedMembers.length} selected missing members inactive?`,
       { title: "Mark missing members inactive", confirmLabel: "Mark inactive", tone: "warning" }
     );
 
     if (!ok) return;
 
-    const eligibleMembers = missingMembers.filter(
+    const eligibleMembers = selectedMembers.filter(
       (member) => !memberHasInactiveProtectedRole(member)
     );
 
@@ -595,6 +618,25 @@ return {
     setMissingMembers(prev =>
       prev.filter(member => !ids.includes(member.id))
     );
+    setSelectedMissingMemberIds(prev =>
+      prev.filter(id => !ids.some(memberId => String(memberId) === String(id)))
+    );
+  }
+
+  function toggleMissingMemberSelection(memberId) {
+    setSelectedMissingMemberIds(prev =>
+      prev.some(id => String(id) === String(memberId))
+        ? prev.filter(id => String(id) !== String(memberId))
+        : [...prev, memberId]
+    );
+  }
+
+  function toggleAllMissingMembers() {
+    const allSelected = missingMembers.every(member =>
+      selectedMissingMemberIds.some(id => String(id) === String(member.id))
+    );
+
+    setSelectedMissingMemberIds(allSelected ? [] : missingMembers.map(member => member.id));
   }
 
   const stats = useMemo(() => {
@@ -606,6 +648,12 @@ return {
       missingCount: missingMembers.length
     };
   }, [preview, missingMembers]);
+
+  const allMissingMembersSelected =
+    missingMembers.length > 0 &&
+    missingMembers.every(member =>
+      selectedMissingMemberIds.some(id => String(id) === String(member.id))
+    );
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -757,7 +805,7 @@ Field names are flexible and common variations are supported automatically.`
                   onClick={markAllMissingInactive}
                   className="rounded-xl bg-red-700 px-5 py-3 font-semibold text-white hover:bg-red-800"
                 >
-                  Mark All Missing Inactive
+                  Mark Selected Missing Inactive ({selectedMissingMemberIds.length})
                 </button>
 
               </div>
@@ -769,6 +817,15 @@ Field names are flexible and common variations are supported automatically.`
 
                 <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
                   <tr>
+                    <th className="p-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={allMissingMembersSelected}
+                        onChange={toggleAllMissingMembers}
+                        aria-label="Select or unselect all missing members"
+                        className="h-4 w-4 cursor-pointer accent-red-700"
+                      />
+                    </th>
                     <th className="p-3 text-left">Member</th>
                     <th className="p-3 text-left">Email</th>
                     <th className="p-3 text-left">Status</th>
@@ -782,6 +839,16 @@ Field names are flexible and common variations are supported automatically.`
                       key={member.id}
                       className="border-b border-slate-100 hover:bg-slate-50"
                     >
+
+                      <td className="p-3 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedMissingMemberIds.some(id => String(id) === String(member.id))}
+                          onChange={() => toggleMissingMemberSelection(member.id)}
+                          aria-label={`Select ${member.first_name || ""} ${member.last_name || ""}`.trim()}
+                          className="h-4 w-4 cursor-pointer accent-red-700"
+                        />
+                      </td>
 
                       <td className="p-3 font-semibold text-slate-900">
                         {member.last_name}, {member.first_name}
