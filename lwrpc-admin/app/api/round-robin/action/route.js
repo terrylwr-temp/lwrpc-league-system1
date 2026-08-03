@@ -462,6 +462,17 @@ async function savePlayer(supabase, group, player = {}) {
       .select("*")
       .single();
     if (error) throw error;
+    // Session rosters retain a display-name copy so a player can still be
+    // identified if their saved record is later removed. Keep that copy in
+    // sync when an admin corrects the saved player's name.
+    const { error: sessionPlayersError } = await supabase
+      .from("round_robin_session_players")
+      .update({
+        display_name: data.display_name,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("player_id", data.id);
+    if (sessionPlayersError) throw sessionPlayersError;
     await addLog(supabase, group.id, null, "player", `${displayName} updated.`);
     await replacePlayerGroupMemberships(supabase, group.id, data.id, player.groupIds || player.group_ids || []);
     const shouldSendNewPlayerText = payload.is_active === true && existingPlayer?.is_active === false;
