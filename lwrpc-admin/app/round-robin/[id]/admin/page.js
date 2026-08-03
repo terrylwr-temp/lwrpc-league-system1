@@ -283,6 +283,7 @@ export default function RoundRobinAdminPage() {
 
     setAuthMessage("");
     setState(result);
+    return result;
   }
 
   async function loginWithLms(event) {
@@ -419,6 +420,7 @@ export default function RoundRobinAdminPage() {
     setHostPhone(cleanPhone);
     setActiveTab("Matches");
     setState(result);
+    return result;
   }
 
   async function runAction(action, payload = {}, options = {}) {
@@ -463,6 +465,13 @@ export default function RoundRobinAdminPage() {
     }
     setNotice(noticeForAction(action, result));
     return options.returnResult ? result : true;
+  }
+
+  async function refreshSessionPlayers(session) {
+    if (state?.accessMode === "host") {
+      return unlockHost(hostPhone, state.hostSessionId || session.id);
+    }
+    return unlock(session.id);
   }
 
   function recordPendingScore(matchId, side, value) {
@@ -878,6 +887,7 @@ export default function RoundRobinAdminPage() {
           <SessionTab
             state={state}
             runAction={runAction}
+            refreshSessionPlayers={refreshSessionPlayers}
             actionLoading={actionLoading}
             rounds={rounds}
             swapSelection={swapSelection}
@@ -903,6 +913,7 @@ function SessionTab(props) {
   const {
     state,
     runAction,
+    refreshSessionPlayers,
     actionLoading,
   } = props;
   const [form, setForm] = useState(() => newSessionForm(state));
@@ -989,8 +1000,11 @@ function SessionTab(props) {
     setForm(newSessionForm(state));
   }
 
-  function openPlayersModal(session, status = "joined") {
-    setPlayersModalSession(session);
+  async function openPlayersModal(session, status = "joined") {
+    const refreshed = await refreshSessionPlayers(session);
+    if (!refreshed) return;
+    const refreshedSession = (refreshed.sessions || []).find((item) => String(item.id) === String(session.id));
+    setPlayersModalSession(refreshedSession || session);
     setPlayersModalStatus(status);
   }
 

@@ -209,6 +209,13 @@ export default function RoundRobinPlayerPage() {
     setSelectedLadderRanking(refreshedLadder || ladder);
   }
 
+  async function openSessionPlayers(session) {
+    const refreshed = await loadPlayer(phone, { quiet: true });
+    if (!refreshed) return;
+    const refreshedSession = (refreshed.sessions || []).find((item) => String(item.id) === String(session.id));
+    setSelectedPlayersSession(refreshedSession || session);
+  }
+
   async function updateStatus(sessionId, status) {
     const cleanPhone = String(phone || "").trim();
     setActionLoading(`${sessionId}-${status}`);
@@ -628,7 +635,7 @@ export default function RoundRobinPlayerPage() {
                 onFinishSession={finishHostSession}
                 onEditSession={openHostEditSession}
                 onGameUpdate={openHostGameUpdate}
-                onPlayers={setSelectedPlayersSession}
+                onPlayers={openSessionPlayers}
               />
             ))}
           </section>
