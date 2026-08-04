@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { appConfirm, appPrompt } from "../lib/appDialog";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
-import { requireRole, supabase } from "../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import { hasRole } from "../lib/permissions";
 import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import TeamScheduleModal from "../components/TeamScheduleModal";
@@ -519,13 +519,22 @@ export default function TeamsPage() {
 
     if (!ok) return;
 
-    const { error } = await supabase
-      .from("teams")
-      .delete()
-      .eq("id", team.id);
+    let response;
+    let result;
+    try {
+      response = await fetch("/api/teams/delete", {
+        method: "POST",
+        headers: await getRequestAuthorizationHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ teamId: team.id }),
+      });
+      result = await response.json().catch(() => ({}));
+    } catch (error) {
+      alert(error.message || "Unable to delete the team.");
+      return;
+    }
 
-    if (error) {
-      alert(error.message);
+    if (!response.ok || !result.success) {
+      alert(result.error || "Unable to delete the team.");
       return;
     }
 
