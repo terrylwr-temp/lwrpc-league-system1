@@ -28,6 +28,11 @@ import { requireRole, supabase } from "./lib/auth";
 import { formatDisplayTimestampShort } from "./lib/dateTime";
 import { saveProfilePhoto } from "./lib/profilePhotos";
 import {
+  DEFAULT_LEAGUE_DOCUMENT_BUCKET,
+  LEAGUE_DOCUMENT_TYPES,
+  leagueDocumentPath,
+} from "./lib/leagueDocuments";
+import {
   DEFAULT_GUIDE_BUCKET,
   DEFAULT_GUIDE_PREFIX,
   GUIDE_DOCUMENT_TYPES,
@@ -105,6 +110,7 @@ export default function DashboardPage() {
   const [loadingGuideFiles, setLoadingGuideFiles] = useState(false);
   const [savingGuideKey, setSavingGuideKey] = useState("");
   const [pdfDocument, setPdfDocument] = useState(null);
+  const [weekdayLeague, setWeekdayLeague] = useState(null);
   const adminGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "admin_guide_pdf");
   const [setupReminderPreview, setSetupReminderPreview] = useState(null);
   const [checkingSetupReminders, setCheckingSetupReminders] = useState(false);
@@ -238,6 +244,24 @@ export default function DashboardPage() {
       leagues: leagueData || [],
       divisions: divisionData || [],
     });
+  }, []);
+
+  const loadWeekdayLeague = useCallback(async function loadWeekdayLeague() {
+    const { data, error } = await supabase
+      .from("leagues")
+      .select("id, name, is_active, league_document_bucket, code_of_conduct_pdf_path, captains_guide_pdf_path, league_rules_pdf_path, score_sheet_pdf_path, league_waiver_pdf_path")
+      .ilike("name", "%weekday%")
+      .order("is_active", { ascending: false })
+      .order("name", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Unable to load Weekday League documents", error);
+      return;
+    }
+
+    setWeekdayLeague(data || null);
   }, []);
 
   const loadLoginMessages = useCallback(async function loadLoginMessages() {
@@ -379,6 +403,7 @@ export default function DashboardPage() {
         setReady(true);
         loadDashboardCounts();
         loadDashboardFilterOptions();
+        loadWeekdayLeague();
         loadLoginMessages();
         loadMessageHistory();
         loadGuideDocuments();
@@ -388,7 +413,7 @@ export default function DashboardPage() {
     }
 
     run();
-  }, [checkMatchSetupReminderPrompt, loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, loadMessageHistory, loadSeasonResetOptions, router]);
+  }, [checkMatchSetupReminderPrompt, loadDashboardCounts, loadDashboardFilterOptions, loadGuideDocuments, loadLoginMessages, loadMessageHistory, loadSeasonResetOptions, loadWeekdayLeague, router]);
 
   function closeSetupReminderPrompt() {
     if (hideSetupRemindersToday) {
@@ -916,6 +941,62 @@ export default function DashboardPage() {
     document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  const weekdayLeagueDocuments = LEAGUE_DOCUMENT_TYPES.map((documentType) => ({
+    ...documentType,
+    available: Boolean(leagueDocumentPath(weekdayLeague, documentType)),
+  }));
+
+  async function openWeekdayLeagueDocument(documentType) {
+    const path = leagueDocumentPath(weekdayLeague, documentType);
+
+    if (!path) {
+      await notice(`${documentType.label} is not configured for the Weekday League.`, {
+        title: "League document unavailable",
+        tone: "warning",
+      });
+      return;
+    }
+
+    const useNativePdfViewer = window.matchMedia("(max-width: 767px)").matches;
+    const documentWindow = useNativePdfViewer ? window.open("", "_blank") : null;
+
+    if (useNativePdfViewer && !documentWindow) {
+      await notice("Unable to open this PDF. Please allow popups for this site and try again.", {
+        title: "League document unavailable",
+        tone: "error",
+      });
+      return;
+    }
+
+    const bucket = weekdayLeague?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET;
+    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60);
+    const documentUrl = !error && data?.signedUrl
+      ? data.signedUrl
+      : supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl || "";
+
+    if (!documentUrl) {
+      documentWindow?.close();
+      await notice("Unable to open this PDF. Check the Supabase Storage bucket and file path.", {
+        title: "League document unavailable",
+        tone: "error",
+      });
+      return;
+    }
+
+    if (documentWindow) {
+      documentWindow.opener = null;
+      documentWindow.location.replace(documentUrl);
+      return;
+    }
+
+    setPdfDocument({
+      title: documentType.label,
+      leagueName: weekdayLeague?.name || "Weekday League",
+      url: documentUrl,
+      path,
+    });
+  }
+
   const activeDivisionOptions = dashboardFilterOptions.divisions
     .filter((division) => division.is_active !== false && division.leagues?.is_active !== false && division.leagues?.seasons?.is_active !== false)
     .map((division) => ({
@@ -1390,6 +1471,7 @@ export default function DashboardPage() {
           filter: dashboardFilter,
           filterOptions: dashboardFilterOptions,
           scopeLabel: scopeHelper,
+          leagueDocuments: weekdayLeagueDocuments,
           sections,
           moduleSection,
           guidesPanel: dashboardGuidesPanel,
@@ -1411,6 +1493,7 @@ export default function DashboardPage() {
           onOpenDivisionStandings: () => openDivisionTool("standings"),
           onOpenDivisionSchedules: () => openDivisionTool("schedules"),
           onChangeDashboard: (path) => router.push(path),
+          onOpenLeagueDocument: openWeekdayLeagueDocument,
           onOpenGuide: openAdminGuide,
           onChangePassword: () => router.push("/reset-password"),
           onSaveProfileImage: saveAdminProfileImage,
