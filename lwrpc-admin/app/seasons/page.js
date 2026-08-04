@@ -402,7 +402,14 @@ export default function SeasonsPage() {
                   </div>
                   <label className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-slate-700">
                     <input type="checkbox" checked={rolloverCopyRosters} onChange={(event) => setRolloverCopyRosters(event.target.checked)} className="mt-1" />
-                    <span><strong>Copy rosters</strong><span className="mt-1 block">Copies team names, captains, co-captains, club pros, and current roster memberships. You can adjust the new season without changing the old one.</span></span>
+                    <span>
+                      <strong>Copy player rosters</strong>
+                      <span className="mt-1 block">
+                        {rolloverCopyRosters
+                          ? "Copies team names, captains, co-captains, club pros, and current player roster memberships. You can adjust the new season without changing the old one."
+                          : "Team names, captains, co-captains, and club pros will still be copied. The new teams will start with empty player rosters."}
+                      </span>
+                    </span>
                   </label>
                   <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700"><strong>Not copied:</strong> standings, schedules, byes, matches, scores, ratings, and player results. New teams begin with no standings.</div>
                   <div className="flex gap-3">
