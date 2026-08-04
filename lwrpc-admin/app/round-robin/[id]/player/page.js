@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import AppNotificationsButton from "../../../components/AppNotificationsButton";
 import PbccFooter from "../../../components/PbccFooter";
 import PbccInstallButton from "../../../components/PbccInstallButton";
@@ -213,6 +213,24 @@ export default function RoundRobinPlayerPage() {
     const refreshed = await loadPlayer(phone, { quiet: true });
     const refreshedLadder = (refreshed?.ladders || []).find((item) => String(item.id || "") === String(ladder?.id || ""));
     setSelectedLadderRanking(refreshedLadder || ladder);
+  }
+
+  async function loadPartnerHistory(partnerId) {
+    const response = await fetch("/api/round-robin/player", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "loadPartnerHistory",
+        groupId: id,
+        phone: String(phone || "").trim(),
+        partnerId,
+      }),
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || !result.success) {
+      throw new Error(result.error || "Unable to load that player's play history.");
+    }
+    return result;
   }
 
   async function openSessionPlayers(session) {
@@ -704,6 +722,7 @@ export default function RoundRobinPlayerPage() {
             history={state?.history}
             player={state?.player}
             range={playerRecordRange}
+            onLoadPartnerHistory={loadPartnerHistory}
             onClose={() => setShowPartnerComparison(false)}
           />
         )}
@@ -1897,23 +1916,6 @@ function partnerComparisonRows(history, player, sortBy = "winPct") {
     });
 }
 
-function partnerHistoryStats(history, player, partnerId, range) {
-  const regularSessions = (history?.sessions || []).filter((session) => !isLadderSession(session));
-  const filteredSessions = filterHistorySessions(regularSessions, range);
-  const row = partnerComparisonRows({ ...(history || {}), sessions: filteredSessions }, player)
-    .find((item) => String(item.partnerId) === String(partnerId));
-
-  return row || {
-    sessions: 0,
-    wins: 0,
-    losses: 0,
-    games: 0,
-    winPct: 0,
-    pointDiff: 0,
-    lastPlayedDate: "",
-  };
-}
-
 function filterPartnerComparisonSessions(sessions, timeFrame) {
   const allSessions = sessions || [];
   if (timeFrame !== "lastGame") return filterHistorySessions(allSessions, timeFrame);
@@ -2160,15 +2162,44 @@ function HistorySessionModal({ session, player, onClose }) {
   );
 }
 
-function PartnerComparisonModal({ history, player, onClose }) {
+function PartnerComparisonModal({ history, player, onLoadPartnerHistory, onClose }) {
   const [showMobilePartnerDetail, setShowMobilePartnerDetail] = useState(false);
   const [timeFrame, setTimeFrame] = useState("all");
   const [sortBy, setSortBy] = useState("winPct");
   const [selectedPartner, setSelectedPartner] = useState(null);
+  const [partnerHistoryLoading, setPartnerHistoryLoading] = useState(false);
+  const [partnerHistoryError, setPartnerHistoryError] = useState("");
+  const partnerHistoryRequestRef = useRef(0);
   const regularSessions = (history?.sessions || []).filter((session) => !isLadderSession(session));
   const filteredSessions = filterPartnerComparisonSessions(regularSessions, timeFrame);
   const rows = partnerComparisonRows({ ...(history || {}), sessions: filteredSessions }, player, sortBy);
   const rangeLabel = partnerComparisonTimeFrameLabel(timeFrame);
+
+  async function openPartnerHistory(row) {
+    const requestId = partnerHistoryRequestRef.current + 1;
+    partnerHistoryRequestRef.current = requestId;
+    setSelectedPartner({ player: { id: row.partnerId, displayName: row.partnerName }, history: null });
+    setPartnerHistoryLoading(true);
+    setPartnerHistoryError("");
+
+    try {
+      const result = await onLoadPartnerHistory(row.partnerId);
+      if (partnerHistoryRequestRef.current !== requestId) return;
+      setSelectedPartner({ player: result.player, history: result.history });
+    } catch (error) {
+      if (partnerHistoryRequestRef.current !== requestId) return;
+      setPartnerHistoryError(error.message || "Unable to load that player's play history.");
+    } finally {
+      if (partnerHistoryRequestRef.current === requestId) setPartnerHistoryLoading(false);
+    }
+  }
+
+  function closePartnerHistory() {
+    partnerHistoryRequestRef.current += 1;
+    setSelectedPartner(null);
+    setPartnerHistoryLoading(false);
+    setPartnerHistoryError("");
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
@@ -2247,7 +2278,7 @@ function PartnerComparisonModal({ history, player, onClose }) {
                       <td className="px-3 py-2 font-black text-slate-950">
                         <button
                           type="button"
-                          onClick={() => setSelectedPartner(row)}
+                          onClick={() => openPartnerHistory(row)}
                           className="rounded text-left text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
                         >
                           {row.partnerName}
@@ -2270,9 +2301,9 @@ function PartnerComparisonModal({ history, player, onClose }) {
             <div className="space-y-2 bg-white p-3 md:hidden">
               {rows.map((row) => (
                 showMobilePartnerDetail ? (
-                  <PartnerComparisonCard key={row.partnerId} row={row} onSelectPartner={setSelectedPartner} />
+                  <PartnerComparisonCard key={row.partnerId} row={row} onSelectPartner={openPartnerHistory} />
                 ) : (
-                  <PartnerComparisonSummaryRow key={row.partnerId} row={row} onSelectPartner={setSelectedPartner} />
+                  <PartnerComparisonSummaryRow key={row.partnerId} row={row} onSelectPartner={openPartnerHistory} />
                 )
               ))}
               {rows.length === 0 && (
@@ -2284,10 +2315,11 @@ function PartnerComparisonModal({ history, player, onClose }) {
       </div>
       {selectedPartner && (
         <PartnerHistoryModal
-          history={history}
-          player={player}
-          partner={selectedPartner}
-          onClose={() => setSelectedPartner(null)}
+          history={selectedPartner.history}
+          player={selectedPartner.player}
+          loading={partnerHistoryLoading}
+          error={partnerHistoryError}
+          onClose={closePartnerHistory}
         />
       )}
     </div>
@@ -2340,18 +2372,20 @@ function PartnerComparisonCard({ row, onSelectPartner }) {
   );
 }
 
-function PartnerHistoryModal({ history, player, partner, onClose }) {
+function PartnerHistoryModal({ history, player, loading, error, onClose }) {
   const [range, setRange] = useState("all");
-  const stats = partnerHistoryStats(history, player, partner?.partnerId, range);
+  const regularSessions = (history?.sessions || []).filter((session) => !isLadderSession(session));
+  const filteredSessions = filterHistorySessions(regularSessions, range);
+  const stats = aggregateHistorySessions(filteredSessions);
 
   return (
     <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-slate-950/75 p-0 sm:items-center sm:p-4">
       <div className="flex h-[100dvh] w-full max-w-5xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
         <div className={`flex shrink-0 flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
           <div className="min-w-0">
-            <div className={MODAL_EYEBROW_CHROME}>Partner Play History</div>
-            <h2 className="break-words text-xl font-black sm:text-2xl">{partner?.partnerName || "Partner"}</h2>
-            <div className={MODAL_SUPPORTING_TEXT}>Regular matches played with {player?.displayName || "Player"}</div>
+            <div className={MODAL_EYEBROW_CHROME}>Player Play History</div>
+            <h2 className="break-words text-xl font-black sm:text-2xl">{player?.displayName || "Player"}</h2>
+            <div className={MODAL_SUPPORTING_TEXT}>Complete regular-match play history</div>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
             Close
@@ -2374,17 +2408,27 @@ function PartnerHistoryModal({ history, player, partner, onClose }) {
             </div>
           </div>
 
-          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
-            <StatTile label="Dates Played" value={stats.sessions} />
-            <StatTile label="Last Played" value={stats.lastPlayedDate ? formatDate(stats.lastPlayedDate) : "-"} />
-            <StatTile label="Record" value={`${stats.wins}-${stats.losses}`} />
-            <StatTile label="Win %" value={formatPercent(stats.winPct)} />
-            <StatTile label="Point Diff" value={formatSignedNumber(stats.pointDiff)} />
-          </div>
+          {loading ? (
+            <div className="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-3 py-8 text-center text-sm font-black text-blue-900">
+              Loading play history...
+            </div>
+          ) : error ? (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-6 text-center text-sm font-bold text-red-800">
+              {error}
+            </div>
+          ) : (
+            <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
+              <StatTile label="Dates Played" value={stats.sessionsScored} />
+              <StatTile label="Last Played" value={stats.lastPlayedDate ? formatDate(stats.lastPlayedDate) : "-"} />
+              <StatTile label="Record" value={`${stats.wins}-${stats.losses}`} />
+              <StatTile label="Win %" value={formatPercent(stats.winPct)} />
+              <StatTile label="Point Diff" value={formatSignedNumber(stats.pointDiff)} />
+            </div>
+          )}
 
-          {stats.sessions === 0 && (
+          {!loading && !error && stats.sessionsScored === 0 && (
             <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-6 text-center text-sm font-bold text-slate-500">
-              No games with this partner were found for the selected time frame.
+              No games were found for this player in the selected time frame.
             </div>
           )}
         </div>

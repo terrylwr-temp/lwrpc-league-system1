@@ -53,6 +53,21 @@ export async function POST(req) {
     }
 
     const player = await findPlayerByPhone(supabase, group.id, body.phone);
+
+    if (action === "loadPartnerHistory") {
+      const [partner, comparisonHistory] = await Promise.all([
+        findPlayerById(supabase, group.id, body.partnerId),
+        loadPlayerHistory(supabase, group, player),
+      ]);
+      if (!historyIncludesPartner(comparisonHistory, player.id, partner.id)) {
+        const error = new Error("That player is not in your partner history.");
+        error.status = 403;
+        throw error;
+      }
+      const history = await loadPlayerHistory(supabase, group, partner);
+      return NextResponse.json({ success: true, player: sanitizePlayer(partner), history });
+    }
+
     const systemSettings = await loadServerSystemSettings();
 
     if (action === "updateStatus") {
@@ -125,6 +140,30 @@ async function findPlayerByPhone(supabase, groupId, phone) {
     throw duplicate;
   }
   return matches[0];
+}
+
+async function findPlayerById(supabase, groupId, playerId) {
+  const cleanPlayerId = String(playerId || "").trim();
+  if (!cleanPlayerId) {
+    const error = new Error("Select a partner.");
+    error.status = 400;
+    throw error;
+  }
+
+  const { data, error } = await supabase
+    .from("round_robin_players")
+    .select("id, display_name, first_name, phone, is_active")
+    .eq("group_id", groupId)
+    .eq("id", cleanPlayerId)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) {
+    const notFound = new Error("That partner is no longer available in PBCourtCommand.");
+    notFound.status = 404;
+    throw notFound;
+  }
+  return data;
 }
 
 async function loadPlayerSessions(supabase, group, player) {
@@ -1089,6 +1128,19 @@ function playerIdsFromMatches(matches = []) {
     });
     return ids;
   }, new Set());
+}
+
+function historyIncludesPartner(history, playerId, partnerId) {
+  const currentId = String(playerId || "");
+  const selectedId = String(partnerId || "");
+  return (history?.sessions || []).some((session) => (
+    (session.matches || []).some((match) => (
+      [match.team1_players || [], match.team2_players || []].some((team) => {
+        const ids = team.map((player) => String(player.id || player.player_id || ""));
+        return ids.includes(currentId) && ids.includes(selectedId);
+      })
+    ))
+  ));
 }
 
 function isSessionHost(session, playerId) {
