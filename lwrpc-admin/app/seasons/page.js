@@ -6,7 +6,7 @@ import { appConfirm, appPrompt } from "../lib/appDialog";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { formatDisplayDate } from "../lib/dateTime";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
@@ -83,7 +83,7 @@ export default function SeasonsPage() {
   }
 
   async function deleteSeason(id) {
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: "Delete this season?",
       details: "This may delete or orphan related leagues, divisions, teams, schedules, matches, scores, standings, and roster records depending on database relationships.",
     });

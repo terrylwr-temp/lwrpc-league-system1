@@ -406,3 +406,4 @@ As of 2026-05-21:
 - Admin Dashboard sidebar now includes a League Documents accordion that shows the published Weekday League documents and opens them through the shared PDF viewer.
 - PBCC now routes every completion, delete, reset, SMS, validation, and DUPR export prompt through the branded app dialog instead of browser-native Windows dialogs.
 - League Administration and Division Administration edit forms now expose an Active status control, so inactive leagues and divisions can be reactivated directly. The visible app version was bumped to `LMS-0624`.
+- Shared typed-delete confirmations now use the branded app dialog across League, Division, configured game line, Location, Season, Team, Score Sheet, and Scoring deletion workflows. The visible app version was bumped to `LMS-0625`.

@@ -8,7 +8,7 @@ import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
 import { hasRole } from "../lib/permissions";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import TeamScheduleModal from "../components/TeamScheduleModal";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
@@ -512,7 +512,7 @@ export default function TeamsPage() {
   }
 
   async function deleteTeam(team) {
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: `Delete team "${team.name}"?`,
       details: "This may delete or orphan roster records, schedule entries, matches, scores, standings, and captain assignments depending on database relationships. If the team is used by matches, the database may reject the delete.",
     });

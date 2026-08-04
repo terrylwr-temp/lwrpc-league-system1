@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { appConfirm } from "../lib/appDialog";
 
@@ -165,7 +165,7 @@ export default function LocationsPage() {
   }
 
   async function deleteLocation(id) {
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: "Delete this location?",
       details: "This can affect teams, matches, members, court availability, blackout records, and schedules connected to this location. If references still exist, the database may reject the delete.",
     });
@@ -208,7 +208,7 @@ export default function LocationsPage() {
     if (!ok) return;
 
     if (deleteOldLocation) {
-      const deleteOk = confirmDeleteAction({
+      const deleteOk = await confirmDeleteActionAsync({
         title: `Delete old location "${fromLocation?.name || "selected location"}" after merge?`,
         details: `Connected records will be moved to "${toLocation?.name || "the target location"}" first, then the old location record will be deleted. If any references remain, the database may reject the delete.`,
       });

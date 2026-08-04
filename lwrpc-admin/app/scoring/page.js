@@ -7,7 +7,7 @@ import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/au
 import { formatDisplayDate, formatDisplayDateWithWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { isPicklebreakerLine } from "../lib/matchScoring";
 
 const TEMPLATE_KEY = EMAIL_TEMPLATE_KEYS.scoreReminder;
@@ -443,7 +443,7 @@ export default function ScoringPage() {
       return;
     }
 
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: "Delete this non-completed match?",
       details: "This will permanently delete the match, its lineup, generated match lines, and game rows. Completed matches are protected.",
     });

@@ -7,7 +7,7 @@ import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import LoadingScreen from "../components/LoadingScreen";
 import { requireRole, supabase } from "../lib/auth";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import {
   DEFAULT_LEAGUE_DOCUMENT_BUCKET,
   DEFAULT_LEAGUE_DOCUMENT_PREFIX,
@@ -117,7 +117,7 @@ export default function LeaguesPage() {
   }
 
   async function deleteLeague(id) {
-    const ok = await confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: "Delete this league?",
       details: "This may delete or orphan related divisions, teams, schedules, matches, scores, standings, and roster records depending on database relationships.",
     });

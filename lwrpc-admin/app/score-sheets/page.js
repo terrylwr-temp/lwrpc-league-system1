@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import AppHeader from "../components/AppHeader";
 import { requireRole, supabase } from "../lib/auth";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import {
   DEFAULT_SCORE_SHEET_TEMPLATE_HTML,
   DEFAULT_SCORE_SHEET_TEMPLATE_NAME,
@@ -192,7 +192,7 @@ export default function ScoreSheetsPage() {
   }
 
   async function deleteTemplate(template) {
-    const ok = confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: `Delete "${template.name}"?`,
       details: "Divisions using this Score Sheet will fall back to the default Score Sheet.",
     });

@@ -6,7 +6,7 @@ import { appConfirm, appPrompt } from "../lib/appDialog";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { requireRole, supabase } from "../lib/auth";
-import { confirmDeleteAction } from "../lib/confirmDelete";
+import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
 const TEAM_TYPE_OPTIONS = [
@@ -271,7 +271,7 @@ export default function DivisionsPage() {
   }
 
   async function deleteDivision(id) {
-    const ok = await confirmDeleteAction({
+    const ok = await confirmDeleteActionAsync({
       title: "Delete this division?",
       details: "This may delete or orphan teams, schedules, matches, scores, standings, configured game lines, and roster records tied to this division.",
     });
