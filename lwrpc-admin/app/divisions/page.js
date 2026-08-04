@@ -273,10 +273,22 @@ export default function DivisionsPage() {
   async function deleteDivision(id) {
     const ok = await confirmDeleteActionAsync({
       title: "Delete this division?",
-      details: "This may delete or orphan teams, schedules, matches, scores, standings, configured game lines, and roster records tied to this division.",
+      details: "This may delete or orphan teams, team byes, schedules, matches, scores, standings, configured game lines, and roster records tied to this division.",
     });
 
     if (!ok) return;
+
+    // team_byes deliberately protects its division reference. Remove those
+    // generated schedule rows before removing the division itself.
+    const { error: byeError } = await supabase
+      .from("team_byes")
+      .delete()
+      .eq("division_id", id);
+
+    if (byeError) {
+      alert(byeError.message);
+      return;
+    }
 
     const { error } = await supabase.from("divisions").delete().eq("id", id);
 

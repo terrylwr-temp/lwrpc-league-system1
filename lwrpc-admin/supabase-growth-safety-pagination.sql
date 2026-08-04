@@ -176,14 +176,16 @@ begin
   select count(*) into match_lines_deleted from public.match_lines;
   select count(*) into match_lineups_deleted from public.match_lineups;
 
-  delete from public.matches;
+  -- The database's safe-update guard requires an explicit predicate even
+  -- for this commissioner-only, deliberately full-system reset.
+  delete from public.matches where true;
   get diagnostics matches_deleted = row_count;
 
-  delete from public.team_byes;
+  delete from public.team_byes where true;
   get diagnostics team_byes_deleted = row_count;
-  delete from public.team_standings;
+  delete from public.team_standings where true;
   get diagnostics team_standings_deleted = row_count;
-  delete from public.team_members;
+  delete from public.team_members where true;
   get diagnostics team_members_deleted = row_count;
 
   update public.teams
