@@ -5,14 +5,27 @@ export function suggestedRoundRobinCourts(playerCount, configuredCourtCount = 8)
   return Math.min(maxConfigured, Math.max(1, Math.floor(count / 4)));
 }
 
-const PERFECT_EIGHT_PARTNER_ROUNDS = [
-  [[0, 7], [1, 6], [2, 5], [3, 4]],
-  [[0, 6], [7, 5], [1, 4], [2, 3]],
-  [[0, 5], [6, 4], [7, 3], [1, 2]],
-  [[0, 4], [5, 3], [6, 2], [7, 1]],
-  [[0, 3], [4, 2], [5, 1], [6, 7]],
-  [[0, 2], [3, 1], [4, 7], [5, 6]],
-  [[0, 1], [2, 7], [3, 6], [4, 5]],
+// Six-round tournament designs for the most common two-court rosters. These
+// balance the entire session instead of making a locally optimal choice after
+// each game. The eight-player design gives everyone three games per court,
+// never repeats a partner, and caps opponents at three. The nine-player design
+// rotates six different byes, never repeats a partner, and caps opponents at two.
+const PERFECT_EIGHT_ROUNDS = [
+  [[[0, 1], [2, 3]], [[4, 5], [6, 7]]],
+  [[[4, 6], [5, 7]], [[0, 2], [1, 3]]],
+  [[[0, 3], [4, 7]], [[1, 2], [5, 6]]],
+  [[[1, 5], [2, 6]], [[0, 4], [3, 7]]],
+  [[[0, 7], [1, 6]], [[2, 5], [3, 4]]],
+  [[[2, 4], [3, 5]], [[0, 6], [1, 7]]],
+];
+
+const PERFECT_NINE_ROUNDS = [
+  { bye: 0, courts: [[[1, 2], [3, 4]], [[5, 6], [7, 8]]] },
+  { bye: 1, courts: [[[0, 5], [3, 7]], [[2, 6], [4, 8]]] },
+  { bye: 2, courts: [[[4, 5], [6, 8]], [[0, 3], [1, 7]]] },
+  { bye: 3, courts: [[[1, 6], [5, 7]], [[0, 8], [2, 4]]] },
+  { bye: 4, courts: [[[2, 3], [6, 7]], [[0, 1], [5, 8]]] },
+  { bye: 5, courts: [[[0, 7], [2, 8]], [[1, 3], [4, 6]]] },
 ];
 
 export function createRoundRobinSchedule({
@@ -61,7 +74,16 @@ export function createRoundRobinSchedule({
 
   for (let roundIndex = 0; roundIndex < roundsToPlay; roundIndex += 1) {
     const byeCount = Math.max(0, totalPlayers - resolvedCourtCount * 4);
-    const byes = chooseByes({
+    const perfectRound = createPerfectBalancedRound({
+      playerIndexes: workingIndexes,
+      courtCount: resolvedCourtCount,
+      roundIndex,
+      partnerHistory,
+      opponentHistory,
+      byeCounts,
+      previousByes,
+    });
+    const byes = perfectRound?.byes || chooseByes({
       playerIndexes: workingIndexes,
       byeCount,
       byeCounts,
@@ -70,16 +92,15 @@ export function createRoundRobinSchedule({
     });
     const byeSet = new Set(byes);
     const playingIndexes = workingIndexes.filter((index) => !byeSet.has(index));
-    const matches = createMatchesForRound({
+    const matches = perfectRound?.matches || createMatchesForRound({
       playingIndexes,
       courtCount: resolvedCourtCount,
-      roundIndex,
-      totalPlayers,
       partnerHistory,
       opponentHistory,
       forbiddenPartnerPairs: previousPartnerPairsFromCourts(previousCourts),
+      usedPartnerPairs: partnerPairsFromHistory(partnerHistory),
     });
-    const balancedMatches = balanceCourts(matches, courtHistory, resolvedCourtCount, previousCourts);
+    const balancedMatches = perfectRound?.matches || balanceCourts(matches, courtHistory, resolvedCourtCount, previousCourts);
     const round = {
       roundNumber: roundIndex + 1,
       courts: balancedMatches.map((match, courtIndex) => ({
@@ -200,7 +221,16 @@ export function createNextRoundRobinRound({
 
   const playerIndexes = activePlayers.map((_, index) => index);
   const byeCount = Math.max(0, totalPlayers - resolvedCourtCount * 4);
-  const byes = chooseByes({
+  const perfectRound = createPerfectBalancedRound({
+    playerIndexes,
+    courtCount: resolvedCourtCount,
+    roundIndex: previousRoundNumber,
+    partnerHistory,
+    opponentHistory,
+    byeCounts,
+    previousByes,
+  });
+  const byes = perfectRound?.byes || chooseByes({
     playerIndexes,
     byeCount,
     byeCounts,
@@ -209,17 +239,15 @@ export function createNextRoundRobinRound({
   });
   const byeSet = new Set(byes);
   const playingIndexes = playerIndexes.filter((index) => !byeSet.has(index));
-  const matches = createMatchesForRound({
+  const matches = perfectRound?.matches || createMatchesForRound({
     playingIndexes,
     courtCount: resolvedCourtCount,
-    roundIndex: previousRoundNumber,
-    totalPlayers,
     partnerHistory,
     opponentHistory,
     forbiddenPartnerPairs: previousPartnerPairs,
     usedPartnerPairs,
   });
-  const balancedMatches = balanceCourts(matches, courtHistory, resolvedCourtCount, previousCourts);
+  const balancedMatches = perfectRound?.matches || balanceCourts(matches, courtHistory, resolvedCourtCount, previousCourts);
 
   return {
     roundNumber: previousRoundNumber + 1,
@@ -347,73 +375,71 @@ function rotatePenalty(playerIndex, roundIndex, playerCount) {
   return (playerIndex - roundIndex + playerCount) % playerCount;
 }
 
+function createPerfectBalancedRound({
+  playerIndexes,
+  courtCount,
+  roundIndex,
+  partnerHistory,
+  opponentHistory,
+  byeCounts,
+  previousByes,
+}) {
+  if (courtCount !== 2) return null;
+
+  let blueprint = null;
+  if (playerIndexes.length === 8 && roundIndex < PERFECT_EIGHT_ROUNDS.length) {
+    blueprint = { courts: PERFECT_EIGHT_ROUNDS[roundIndex], bye: null };
+  } else if (playerIndexes.length === 9 && roundIndex < PERFECT_NINE_ROUNDS.length) {
+    blueprint = PERFECT_NINE_ROUNDS[roundIndex];
+  }
+  if (!blueprint) return null;
+
+  const byes = blueprint.bye === null ? [] : [playerIndexes[blueprint.bye]];
+  if (byes.length > 0) {
+    const lowestByeCount = Math.min(...playerIndexes.map((playerIndex) => byeCounts[playerIndex] || 0));
+    if ((byeCounts[byes[0]] || 0) > lowestByeCount || previousByes.has(byes[0])) return null;
+  }
+
+  const matches = blueprint.courts.map(([team1, team2]) => [
+    ...team1.map((position) => playerIndexes[position]),
+    ...team2.map((position) => playerIndexes[position]),
+  ]);
+
+  const repeatsPartner = matches.some(([a, b, c, d]) => (
+    partnerHistory[a][b] > 0 || partnerHistory[c][d] > 0
+  ));
+  const exceedsOpponentLimit = matches.some(([a, b, c, d]) => (
+    [a, b].some((playerIndex) => [c, d].some((opponentIndex) => opponentHistory[playerIndex][opponentIndex] >= 3))
+  ));
+  if (repeatsPartner || exceedsOpponentLimit) return null;
+
+  return { byes, matches };
+}
+
 function createMatchesForRound({
   playingIndexes,
   courtCount,
-  roundIndex,
-  totalPlayers,
   partnerHistory,
   opponentHistory,
   forbiddenPartnerPairs,
   usedPartnerPairs,
 }) {
-  const shouldUsePerfectEight =
-    totalPlayers === 8 &&
-    playingIndexes.length === 8 &&
-    courtCount === 2 &&
-    roundIndex < PERFECT_EIGHT_PARTNER_ROUNDS.length;
+  const strictPartnerPairs = mergeSets(
+    forbiddenPartnerPairs,
+    usedPartnerPairs || partnerPairsFromHistory(partnerHistory)
+  );
 
-  if (shouldUsePerfectEight) {
-    const perfectMatches = createPerfectEightMatches(playingIndexes, roundIndex, opponentHistory);
-    const historicalPartnerPairs = usedPartnerPairs || partnerPairsFromHistory(partnerHistory);
-    if (!matchesContainPartnerPairs(perfectMatches, historicalPartnerPairs)) return perfectMatches;
+  try {
+    return createMatchesFromPool(playingIndexes, courtCount, partnerHistory, opponentHistory, {
+      forbiddenPartnerPairs: strictPartnerPairs,
+      strictUniquePartners: true,
+    });
+  } catch {
+    return createMatchesFromPool(playingIndexes, courtCount, partnerHistory, opponentHistory, {
+      forbiddenPartnerPairs,
+      strictUniquePartners: false,
+    });
   }
-
-  const strictPartnerPairs = shouldUsePerfectEight
-    ? mergeSets(forbiddenPartnerPairs, usedPartnerPairs || partnerPairsFromHistory(partnerHistory))
-    : forbiddenPartnerPairs;
-
-  return createMatchesFromPool(playingIndexes, courtCount, partnerHistory, opponentHistory, {
-    forbiddenPartnerPairs: strictPartnerPairs,
-    strictUniquePartners: shouldUsePerfectEight,
-  });
-}
-
-function createPerfectEightMatches(playingIndexes, roundIndex, opponentHistory) {
-  const pairs = PERFECT_EIGHT_PARTNER_ROUNDS[roundIndex].map(([first, second]) => [
-    playingIndexes[first],
-    playingIndexes[second],
-  ]);
-  const pairings = [
-    [[0, 1], [2, 3]],
-    [[0, 2], [1, 3]],
-    [[0, 3], [1, 2]],
-  ];
-  let bestPairing = pairings[0];
-  let bestScore = Number.POSITIVE_INFINITY;
-
-  pairings.forEach((pairing) => {
-    const score = pairing.reduce((total, [firstPairIndex, secondPairIndex]) => {
-      const firstPair = pairs[firstPairIndex];
-      const secondPair = pairs[secondPairIndex];
-      return total + opponentScoreBetweenPairs(firstPair, secondPair, opponentHistory);
-    }, 0);
-    if (score < bestScore) {
-      bestScore = score;
-      bestPairing = pairing;
-    }
-  });
-
-  return bestPairing.map(([firstPairIndex, secondPairIndex]) => [
-    ...pairs[firstPairIndex],
-    ...pairs[secondPairIndex],
-  ]);
-}
-
-function opponentScoreBetweenPairs(firstPair, secondPair, opponentHistory) {
-  return firstPair.reduce((sum, firstPlayer) => (
-    sum + secondPair.reduce((innerSum, secondPlayer) => innerSum + opponentHistory[firstPlayer][secondPlayer], 0)
-  ), 0);
 }
 
 function createMatchesFromPool(playingIndexes, courtCount, partnerHistory, opponentHistory, options = {}) {
@@ -536,14 +562,6 @@ function partnerPairsFromHistory(partnerHistory) {
   return pairs;
 }
 
-function matchesContainPartnerPairs(matches, partnerPairs) {
-  if (!partnerPairs || partnerPairs.size === 0) return false;
-  return matches.some((match) => (
-    match.length === 4 &&
-    (partnerPairs.has(pairKey(match[0], match[1])) || partnerPairs.has(pairKey(match[2], match[3])))
-  ));
-}
-
 function mergeSets(...sets) {
   const merged = new Set();
   sets.forEach((set) => {
@@ -558,27 +576,55 @@ function pairKey(first, second) {
 }
 
 function balanceCourts(matches, courtHistory, courtCount, previousCourts) {
-  const available = [...matches];
-  const assigned = [];
+  const courtSlots = Math.min(courtCount, matches.length);
+  let bestAssignment = matches.slice(0, courtSlots);
+  let bestScore = null;
 
-  for (let courtIndex = 0; courtIndex < courtCount; courtIndex += 1) {
-    let bestIndex = 0;
-    let bestScore = Number.POSITIVE_INFINITY;
-
-    available.forEach((match, index) => {
-      const courtFatigue = match.reduce((sum, playerIndex) => sum + courtHistory[playerIndex][courtIndex], 0);
-      const previousOverlap = (previousCourts[courtIndex] || []).filter((playerIndex) => match.includes(playerIndex)).length;
-      const score = courtFatigue + (previousOverlap >= 3 ? 1000 : previousOverlap * 5) + Math.random() * 0.1;
-      if (score < bestScore) {
-        bestScore = score;
-        bestIndex = index;
-      }
+  function considerAssignment(assignment) {
+    const projectedHistory = courtHistory.map((row) => [...row]);
+    const previousOverlaps = [];
+    assignment.forEach((match, courtIndex) => {
+      match.forEach((playerIndex) => {
+        projectedHistory[playerIndex][courtIndex] += 1;
+      });
+      previousOverlaps.push((previousCourts[courtIndex] || []).filter((playerIndex) => match.includes(playerIndex)).length);
     });
 
-    assigned[courtIndex] = available.length ? available.splice(bestIndex, 1)[0] : [];
+    const courtRanges = projectedHistory.map((row) => Math.max(...row) - Math.min(...row));
+    const score = [
+      Math.max(...courtRanges),
+      courtRanges.reduce((sum, range) => sum + range, 0),
+      Math.max(0, ...previousOverlaps),
+      previousOverlaps.reduce((sum, overlap) => sum + overlap * overlap, 0),
+      projectedHistory.reduce((sum, row) => sum + row.reduce((innerSum, count) => innerSum + count * count, 0), 0),
+    ];
+
+    if (!bestScore || compareNumericScores(score, bestScore) < 0) {
+      bestScore = score;
+      bestAssignment = assignment.map((match) => [...match]);
+    }
   }
 
-  return assigned;
+  function assignCourts(assignment, remaining) {
+    if (assignment.length === courtSlots) {
+      considerAssignment(assignment);
+      return;
+    }
+    remaining.forEach((match, index) => {
+      assignCourts([...assignment, match], remaining.filter((_, remainingIndex) => remainingIndex !== index));
+    });
+  }
+
+  assignCourts([], matches.slice(0, courtSlots));
+  return bestAssignment;
+}
+
+function compareNumericScores(first, second) {
+  for (let index = 0; index < Math.max(first.length, second.length); index += 1) {
+    const difference = Number(first[index] || 0) - Number(second[index] || 0);
+    if (difference !== 0) return difference;
+  }
+  return 0;
 }
 
 function updateHistory(round, players, partnerHistory, opponentHistory, courtHistory) {

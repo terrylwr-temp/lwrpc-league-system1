@@ -70,6 +70,13 @@ function sendSmsMessages(options) {
   });
 }
 
+function sendResultSmsMessages(options) {
+  return sendSmsMessagesWithFallback({
+    ...options,
+    preferAppNotifications: false,
+  });
+}
+
 function adminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const key =
@@ -2052,7 +2059,7 @@ async function completeSession(supabase, group, body) {
         ...sessionTextCounts(session, sessionPlayers),
       }
     );
-    sms = await sendSmsMessages({
+    sms = await sendResultSmsMessages({
       phones: recipientPlayers.map((player) => player.phone).filter(Boolean),
       body: resultMessage,
     });
@@ -2124,7 +2131,7 @@ async function sendSessionResultsText(supabase, group, body) {
         ...sessionTextCounts(session, sessionPlayers),
       }
     );
-    sms = await sendSmsMessages({
+    sms = await sendResultSmsMessages({
       phones: recipientPlayers.map((player) => player.phone).filter(Boolean),
       body: resultMessage,
     });

@@ -1,4 +1,4 @@
-export const APP_VERSION = "LMS-0620";
+export const APP_VERSION = "LMS-0622";
 export const COPYRIGHT_YEAR = "2026";
 
 

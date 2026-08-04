@@ -16,6 +16,12 @@ const PLAYER_RECORD_RANGES = [
   { id: "currentYear", label: "Current Year" },
   { id: "all", label: "All" },
 ];
+const PARTNER_HISTORY_RANGES = [
+  { id: "currentMonth", label: "Current Month" },
+  { id: "lastMonth", label: "Last Month" },
+  { id: "currentYear", label: "Current Year" },
+  { id: "all", label: "All Time" },
+];
 const PARTNER_COMPARISON_TIME_FRAMES = [
   { id: "lastGame", label: "Last Game" },
   { id: "currentMonth", label: "Current Month" },
@@ -1850,11 +1856,14 @@ function partnerComparisonRows(history, player, sortBy = "winPct") {
               losses: 0,
               games: 0,
               pointDiff: 0,
+              lastPlayedDate: "",
             });
           }
 
           const row = rows.get(partnerId);
           row.sessionIds.add(String(session.id || session.session_date || ""));
+          const sessionDate = String(session.session_date || "");
+          if (sessionDate > row.lastPlayedDate) row.lastPlayedDate = sessionDate;
 
           if (hasScore) {
             row.games += 1;
@@ -1886,6 +1895,23 @@ function partnerComparisonRows(history, player, sortBy = "winPct") {
       if (b.pointDiff !== a.pointDiff) return b.pointDiff - a.pointDiff;
       return a.partnerName.localeCompare(b.partnerName);
     });
+}
+
+function partnerHistoryStats(history, player, partnerId, range) {
+  const regularSessions = (history?.sessions || []).filter((session) => !isLadderSession(session));
+  const filteredSessions = filterHistorySessions(regularSessions, range);
+  const row = partnerComparisonRows({ ...(history || {}), sessions: filteredSessions }, player)
+    .find((item) => String(item.partnerId) === String(partnerId));
+
+  return row || {
+    sessions: 0,
+    wins: 0,
+    losses: 0,
+    games: 0,
+    winPct: 0,
+    pointDiff: 0,
+    lastPlayedDate: "",
+  };
 }
 
 function filterPartnerComparisonSessions(sessions, timeFrame) {
@@ -2138,7 +2164,9 @@ function PartnerComparisonModal({ history, player, onClose }) {
   const [showMobilePartnerDetail, setShowMobilePartnerDetail] = useState(false);
   const [timeFrame, setTimeFrame] = useState("all");
   const [sortBy, setSortBy] = useState("winPct");
-  const filteredSessions = filterPartnerComparisonSessions(history?.sessions || [], timeFrame);
+  const [selectedPartner, setSelectedPartner] = useState(null);
+  const regularSessions = (history?.sessions || []).filter((session) => !isLadderSession(session));
+  const filteredSessions = filterPartnerComparisonSessions(regularSessions, timeFrame);
   const rows = partnerComparisonRows({ ...(history || {}), sessions: filteredSessions }, player, sortBy);
   const rangeLabel = partnerComparisonTimeFrameLabel(timeFrame);
 
@@ -2190,7 +2218,10 @@ function PartnerComparisonModal({ history, player, onClose }) {
 
           <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
             <div className="flex items-center justify-between gap-3 bg-slate-100 px-3 py-2">
-              <div className="text-sm font-black text-slate-700">All Partners</div>
+              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1 text-slate-700">
+                <span className="text-sm font-black">All Partners</span>
+                <span className="text-xs font-bold">Click a player&apos;s name to see their play history.</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowMobilePartnerDetail((current) => !current)}
@@ -2213,7 +2244,15 @@ function PartnerComparisonModal({ history, player, onClose }) {
                 <tbody className="divide-y divide-slate-100">
                   {rows.map((row) => (
                     <tr key={row.partnerId} className="bg-white">
-                      <td className="px-3 py-2 font-black text-slate-950">{row.partnerName}</td>
+                      <td className="px-3 py-2 font-black text-slate-950">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedPartner(row)}
+                          className="rounded text-left text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                        >
+                          {row.partnerName}
+                        </button>
+                      </td>
                       <td className="px-3 py-2 text-right font-bold text-slate-700">{row.sessions}</td>
                       <td className="px-3 py-2 text-right font-black text-slate-950">{row.wins}-{row.losses}</td>
                       <td className="px-3 py-2 text-right font-black text-teal-800">{formatPercent(row.winPct)}</td>
@@ -2231,9 +2270,9 @@ function PartnerComparisonModal({ history, player, onClose }) {
             <div className="space-y-2 bg-white p-3 md:hidden">
               {rows.map((row) => (
                 showMobilePartnerDetail ? (
-                  <PartnerComparisonCard key={row.partnerId} row={row} />
+                  <PartnerComparisonCard key={row.partnerId} row={row} onSelectPartner={setSelectedPartner} />
                 ) : (
-                  <PartnerComparisonSummaryRow key={row.partnerId} row={row} />
+                  <PartnerComparisonSummaryRow key={row.partnerId} row={row} onSelectPartner={setSelectedPartner} />
                 )
               ))}
               {rows.length === 0 && (
@@ -2243,14 +2282,28 @@ function PartnerComparisonModal({ history, player, onClose }) {
           </div>
         </div>
       </div>
+      {selectedPartner && (
+        <PartnerHistoryModal
+          history={history}
+          player={player}
+          partner={selectedPartner}
+          onClose={() => setSelectedPartner(null)}
+        />
+      )}
     </div>
   );
 }
 
-function PartnerComparisonSummaryRow({ row }) {
+function PartnerComparisonSummaryRow({ row, onSelectPartner }) {
   return (
     <div className="flex min-h-11 items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 shadow-sm">
-      <div className="min-w-0 truncate text-sm font-black text-slate-950">{row.partnerName}</div>
+      <button
+        type="button"
+        onClick={() => onSelectPartner(row)}
+        className="min-w-0 truncate rounded text-left text-sm font-black text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+      >
+        {row.partnerName}
+      </button>
       <div className="flex shrink-0 items-center gap-2">
         <span className="rounded-md bg-white px-2 py-1 text-xs font-black text-slate-700 shadow-sm">{row.wins}-{row.losses}</span>
         <span className="rounded-md bg-white px-2 py-1 text-sm font-black text-teal-800 shadow-sm">{formatPercent(row.winPct)}</span>
@@ -2259,13 +2312,19 @@ function PartnerComparisonSummaryRow({ row }) {
   );
 }
 
-function PartnerComparisonCard({ row }) {
+function PartnerComparisonCard({ row, onSelectPartner }) {
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="text-xs font-black uppercase tracking-wide text-slate-500">Partner</div>
-          <div className="mt-1 break-words text-base font-black text-slate-950">{row.partnerName}</div>
+          <button
+            type="button"
+            onClick={() => onSelectPartner(row)}
+            className="mt-1 rounded text-left text-base font-black text-blue-700 underline decoration-blue-300 underline-offset-2 hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-300"
+          >
+            {row.partnerName}
+          </button>
         </div>
         <div className="rounded-md bg-white px-2 py-1 text-sm font-black text-teal-800 shadow-sm">
           {formatPercent(row.winPct)}
@@ -2276,6 +2335,59 @@ function PartnerComparisonCard({ row }) {
         <MobileStandingStat label="Record" value={`${row.wins}-${row.losses}`} />
         <MobileStandingStat label="Win %" value={formatPercent(row.winPct)} />
         <MobileStandingStat label="Point Diff" value={formatSignedNumber(row.pointDiff)} />
+      </div>
+    </div>
+  );
+}
+
+function PartnerHistoryModal({ history, player, partner, onClose }) {
+  const [range, setRange] = useState("all");
+  const stats = partnerHistoryStats(history, player, partner?.partnerId, range);
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-stretch justify-center bg-slate-950/75 p-0 sm:items-center sm:p-4">
+      <div className="flex h-[100dvh] w-full max-w-5xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
+        <div className={`flex shrink-0 flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
+          <div className="min-w-0">
+            <div className={MODAL_EYEBROW_CHROME}>Partner Play History</div>
+            <h2 className="break-words text-xl font-black sm:text-2xl">{partner?.partnerName || "Partner"}</h2>
+            <div className={MODAL_SUPPORTING_TEXT}>Regular matches played with {player?.displayName || "Player"}</div>
+          </div>
+          <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
+            Close
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+          <div className="rounded-lg border border-teal-100 bg-teal-50 p-3">
+            <div className="mb-2 text-xs font-black uppercase tracking-wide text-teal-800">Regular Matches</div>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              {PARTNER_HISTORY_RANGES.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => setRange(item.id)}
+                  className={`rounded-lg px-3 py-2 text-xs font-black shadow-sm ${range === item.id ? "bg-teal-800 text-white" : "bg-white text-teal-950 ring-1 ring-teal-200 hover:bg-teal-100"}`}
+                >
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-2 lg:grid-cols-5">
+            <StatTile label="Dates Played" value={stats.sessions} />
+            <StatTile label="Last Played" value={stats.lastPlayedDate ? formatDate(stats.lastPlayedDate) : "-"} />
+            <StatTile label="Record" value={`${stats.wins}-${stats.losses}`} />
+            <StatTile label="Win %" value={formatPercent(stats.winPct)} />
+            <StatTile label="Point Diff" value={formatSignedNumber(stats.pointDiff)} />
+          </div>
+
+          {stats.sessions === 0 && (
+            <div className="mt-4 rounded-lg border border-slate-200 bg-slate-50 px-3 py-6 text-center text-sm font-bold text-slate-500">
+              No games with this partner were found for the selected time frame.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
