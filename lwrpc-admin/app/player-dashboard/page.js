@@ -99,6 +99,7 @@ export default function PlayerDashboardPage() {
   const [currentRole, setCurrentRole] = useState("player");
   const [member, setMember] = useState(null);
   const [teams, setTeams] = useState([]);
+  const [weekdayLeague, setWeekdayLeague] = useState(null);
   const [matchTeamRosters, setMatchTeamRosters] = useState({});
   const [matches, setMatches] = useState([]);
   const [scoreMembersById, setScoreMembersById] = useState({});
@@ -118,6 +119,24 @@ export default function PlayerDashboardPage() {
   const [matchDetails, setMatchDetails] = useState(null);
   const [matchLineupPreview, setMatchLineupPreview] = useState(null);
   const [designPreviewHistoryOpen, setDesignPreviewHistoryOpen] = useState(false);
+
+  const loadWeekdayLeague = useCallback(async function loadWeekdayLeague() {
+    const { data, error } = await supabase
+      .from("leagues")
+      .select("id, name, league_document_bucket, code_of_conduct_pdf_path, captains_guide_pdf_path, league_rules_pdf_path, score_sheet_pdf_path, league_waiver_pdf_path")
+      .ilike("name", "%weekday%")
+      .order("is_active", { ascending: false })
+      .order("name", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Unable to load Weekday League documents", error);
+      return;
+    }
+
+    setWeekdayLeague(data || null);
+  }, []);
   const [rosterTeam, setRosterTeam] = useState(null);
   const [divisionScheduleTeam, setDivisionScheduleTeam] = useState(null);
   const [divisionScheduleTeams, setDivisionScheduleTeams] = useState([]);
@@ -135,6 +154,10 @@ export default function PlayerDashboardPage() {
     setDesignPreviewHistoryOpen(true);
     router.replace("/player-dashboard", { scroll: false });
   }, [router]);
+
+  useEffect(() => {
+    loadWeekdayLeague();
+  }, [loadWeekdayLeague]);
 
   const loadData = useCallback(async function loadData() {
     const {
@@ -1324,13 +1347,18 @@ export default function PlayerDashboardPage() {
 
   const playerDisplayName = formatMemberName(member) || "Player";
   const playerTeamRatingSummary = ratingSummaryForTeam(selectedVisibleTeam);
+  const documentTeam = selectedVisibleTeam || (weekdayLeague ? {
+    id: "weekday-league-documents",
+    name: "Weekday League",
+    divisions: { leagues: weekdayLeague },
+  } : null);
   const designPreviewDocumentTypes = currentRole === "player"
     ? PLAYER_LEAGUE_DOCUMENT_TYPES
     : LEAGUE_DOCUMENT_TYPES;
-  const designPreviewLeagueDocuments = selectedVisibleTeam
+  const designPreviewLeagueDocuments = documentTeam
     ? designPreviewDocumentTypes.map((documentType) => ({
         ...documentType,
-        available: Boolean(leagueDocumentPath(selectedVisibleTeam.divisions?.leagues, documentType)),
+        available: Boolean(leagueDocumentPath(documentTeam.divisions?.leagues, documentType)),
       }))
     : [];
 
@@ -1366,7 +1394,7 @@ export default function PlayerDashboardPage() {
             onOpenHistory: openPlayHistory,
             onOpenSchedule: () => selectedVisibleTeam && openDivisionScheduleForTeam(selectedVisibleTeam),
             onOpenLeagueDocument: (documentType) =>
-              selectedVisibleTeam && openLeagueDocument(selectedVisibleTeam, documentType),
+              documentTeam && openLeagueDocument(documentTeam, documentType),
             onOpenGuide: async () => {
               if (window.matchMedia("(max-width: 767px), (max-height: 500px) and (orientation: landscape) and (pointer: coarse)").matches) {
                 return openGuideDocument(supabase, playerGuide);

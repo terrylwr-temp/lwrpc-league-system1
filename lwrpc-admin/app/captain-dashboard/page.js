@@ -98,12 +98,31 @@ export default function CaptainDashboardPage() {
   const [matchSetupStatus, setMatchSetupStatus] = useState({});
   const [scoreSubmittersById, setScoreSubmittersById] = useState({});
   const [selectedCaptainTeamId, setSelectedCaptainTeamId] = useState("");
+  const [weekdayLeague, setWeekdayLeague] = useState(null);
   const [showPreviousSeasonTeams, setShowPreviousSeasonTeams] = useState(false);
   const [captainSection, setCaptainSection] = useState("upcoming");
   const [captainSectionDefaulted, setCaptainSectionDefaulted] = useState(false);
   const [openLeagueDocuments, setOpenLeagueDocuments] = useState({});
   const [loading, setLoading] = useState(true);
   const [loadingSubtitle, setLoadingSubtitle] = useState("Loading Captain Dashboard...");
+
+  const loadWeekdayLeague = useCallback(async function loadWeekdayLeague() {
+    const { data, error } = await supabase
+      .from("leagues")
+      .select("id, name, league_document_bucket, code_of_conduct_pdf_path, captains_guide_pdf_path, league_rules_pdf_path, score_sheet_pdf_path, league_waiver_pdf_path")
+      .ilike("name", "%weekday%")
+      .order("is_active", { ascending: false })
+      .order("name", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Unable to load Weekday League documents", error);
+      return;
+    }
+
+    setWeekdayLeague(data || null);
+  }, []);
   const [setupMatch, setSetupMatch] = useState(null);
   const [setupTeam, setSetupTeam] = useState(null);
   const [setupRoster, setSetupRoster] = useState([]);
@@ -792,6 +811,10 @@ export default function CaptainDashboardPage() {
 
     run();
   }, [checkAuth, loadData, loadSystemSettings]);
+
+  useEffect(() => {
+    loadWeekdayLeague();
+  }, [loadWeekdayLeague]);
 
   const currentMemberId = currentMember?.id || "";
 
@@ -2999,11 +3022,16 @@ export default function CaptainDashboardPage() {
   );
 
   if (designPreview) {
+    const documentTeam = selectedCaptainTeam || (weekdayLeague ? {
+      id: "weekday-league-documents",
+      name: "Weekday League",
+      divisions: { leagues: weekdayLeague },
+    } : null);
     const leagueDocuments = LEAGUE_DOCUMENT_TYPES.map((documentType) => ({
       ...documentType,
       available: Boolean(
-        selectedCaptainTeam &&
-          leagueDocumentPath(selectedCaptainTeam.divisions?.leagues, documentType)
+        documentTeam &&
+          leagueDocumentPath(documentTeam.divisions?.leagues, documentType)
       ),
     }));
 
@@ -3082,8 +3110,8 @@ export default function CaptainDashboardPage() {
             onOpenCaptains: () =>
               selectedCaptainTeam && displayDivisionCaptains(selectedCaptainTeam),
             onOpenLeagueDocument: (documentType) =>
-              selectedCaptainTeam &&
-              openLeagueDocument(selectedCaptainTeam, documentType),
+              documentTeam &&
+              openLeagueDocument(documentTeam, documentType),
           }}
         />
 
