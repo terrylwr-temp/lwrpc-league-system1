@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { appConfirm, appPrompt } from "../lib/appDialog";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
-import { requireRole, supabase } from "../lib/auth";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { formatDisplayDate } from "../lib/dateTime";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
@@ -20,6 +20,15 @@ export default function SeasonsPage() {
   const [editingSeasonId, setEditingSeasonId] = useState(null);
   const [seasonFormOpen, setSeasonFormOpen] = useState(false);
   const [seasonSearch, setSeasonSearch] = useState("");
+  const [showInactiveSeasons, setShowInactiveSeasons] = useState(false);
+  const [rolloverOpen, setRolloverOpen] = useState(false);
+  const [rolloverSourceSeasonId, setRolloverSourceSeasonId] = useState("");
+  const [rolloverName, setRolloverName] = useState("");
+  const [rolloverAbbreviation, setRolloverAbbreviation] = useState("");
+  const [rolloverStartDate, setRolloverStartDate] = useState("");
+  const [rolloverEndDate, setRolloverEndDate] = useState("");
+  const [rolloverCopyRosters, setRolloverCopyRosters] = useState(true);
+  const [rollingOver, setRollingOver] = useState(false);
 
   useUnsavedChangesWarning(
     Boolean(seasonFormOpen && (editingSeasonId || seasonName.trim() || seasonAbbreviation.trim() || seasonStart || seasonEnd)),
@@ -130,8 +139,8 @@ export default function SeasonsPage() {
     const ok = await confirmTypedInactivateAction({
       title: `Inactivate season "${season.name}"?`,
       details: [
-        "This will mark the season inactive, mark all teams in this season inactive, and reset those division standings records to 0.",
-        "Historical matches and player history will not be deleted.",
+        "This will archive the season and mark its teams inactive.",
+        "Historical standings, matches, scores, rosters, and player history will be kept exactly as they are.",
       ].join("\n"),
     });
 
@@ -188,37 +197,56 @@ export default function SeasonsPage() {
       if (teamError) return { error: teamError };
     }
 
-    const resetError = await resetSeasonStandings(seasonDivisions || [], seasonTeams || [], now);
-    return { error: resetError };
+    return { error: null };
   }
 
-  async function resetSeasonStandings(divisions, teams, updatedAt) {
-    const divisionIds = divisions.map((division) => division.id);
+  function openRollover() {
+    setRolloverSourceSeasonId(seasons.find((season) => season.is_active !== false)?.id || seasons[0]?.id || "");
+    setRolloverName("");
+    setRolloverAbbreviation("");
+    setRolloverStartDate("");
+    setRolloverEndDate("");
+    setRolloverCopyRosters(true);
+    setRolloverOpen(true);
+  }
 
-    if (divisionIds.length > 0) {
-      const { error: deleteError } = await supabase
-        .from("team_standings")
-        .delete()
-        .in("division_id", divisionIds);
-
-      if (deleteError) return deleteError;
+  async function runRollover() {
+    if (!rolloverSourceSeasonId || !rolloverName.trim()) {
+      alert("Choose a source season and enter the new season name.");
+      return;
     }
 
-    const leagueByDivisionId = Object.fromEntries(
-      divisions.map((division) => [String(division.id), division.league_id])
+    const sourceSeason = seasons.find((season) => String(season.id) === String(rolloverSourceSeasonId));
+    const ok = await appConfirm(
+      `Create "${rolloverName.trim()}" from "${sourceSeason?.name || "the selected season"}"?\n\nThis copies leagues, divisions, configured game lines, teams, captains, and${rolloverCopyRosters ? " rosters" : " no rosters"}. It does not copy standings, schedules, byes, matches, scores, ratings, or player results.`,
+      { title: "Create next season", confirmLabel: "Copy Forward", tone: "warning" }
     );
-    const rows = teams.map((team, index) => zeroStandingRow({
-      leagueId: leagueByDivisionId[String(team.division_id)],
-      divisionId: team.division_id,
-      teamId: team.id,
-      rank: index + 1,
-      updatedAt,
-    }));
+    if (!ok) return;
 
-    if (rows.length === 0) return null;
-
-    const { error: insertError } = await supabase.from("team_standings").insert(rows);
-    return insertError;
+    setRollingOver(true);
+    try {
+      const response = await fetch("/api/season-rollover", {
+        method: "POST",
+        headers: await getRequestAuthorizationHeaders({ "Content-Type": "application/json" }),
+        body: JSON.stringify({
+          sourceSeasonId: rolloverSourceSeasonId,
+          name: rolloverName.trim(),
+          abbreviation: rolloverAbbreviation.trim(),
+          startDate: rolloverStartDate || null,
+          endDate: rolloverEndDate || null,
+          copyRosters: rolloverCopyRosters,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.success) throw new Error(result.error || "Unable to copy the season forward.");
+      await appConfirm(`New season created with ${result.copied.leagues} leagues, ${result.copied.divisions} divisions, ${result.copied.teams} teams, and ${result.copied.rosterMemberships} roster memberships. Standings and schedules were not copied.`, { title: "Season created", confirmLabel: "OK", tone: "success" });
+      setRolloverOpen(false);
+      await loadSeasons();
+    } catch (error) {
+      alert(error.message || "Unable to copy the season forward.");
+    } finally {
+      setRollingOver(false);
+    }
   }
 
   function editSeason(season) {
@@ -262,14 +290,13 @@ export default function SeasonsPage() {
 
   const filteredSeasons = useMemo(() => {
     const search = seasonSearch.trim().toLowerCase();
-    if (!search) return seasons;
-
-    return seasons.filter((season) =>
-      [season.name, season.abbreviation, season.start_date, season.end_date]
+    return seasons.filter((season) => {
+      if (!showInactiveSeasons && season.is_active === false) return false;
+      return !search || [season.name, season.abbreviation, season.start_date, season.end_date]
         .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(search))
-    );
-  }, [seasonSearch, seasons]);
+        .some((value) => String(value).toLowerCase().includes(search));
+    });
+  }, [seasonSearch, seasons, showInactiveSeasons]);
 
   return (
     <main className="min-h-screen bg-slate-100 p-6">
@@ -355,6 +382,38 @@ export default function SeasonsPage() {
           </div>
           )}
 
+          {rolloverOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/70 p-3 sm:p-6">
+              <section className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl">
+                <h2 className="text-xl font-bold text-slate-900">Create Next Season</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-600">This creates a fresh season from an existing setup. Historical standings, schedules, matches, scores, and player results stay only with the source season.</p>
+                <div className="mt-5 space-y-4">
+                  <Field label="Copy setup from">
+                    <select value={rolloverSourceSeasonId} onChange={(event) => setRolloverSourceSeasonId(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3">
+                      <option value="">Select source season</option>
+                      {seasons.map((season) => <option key={season.id} value={season.id}>{season.name}{season.abbreviation ? ` (${season.abbreviation})` : ""}</option>)}
+                    </select>
+                  </Field>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="New season name"><input value={rolloverName} onChange={(event) => setRolloverName(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="e.g. Fall 2026" /></Field>
+                    <Field label="Abbreviation"><input value={rolloverAbbreviation} onChange={(event) => setRolloverAbbreviation(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" placeholder="e.g. F26" /></Field>
+                    <Field label="Start date"><input type="date" value={rolloverStartDate} onChange={(event) => setRolloverStartDate(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" /></Field>
+                    <Field label="End date"><input type="date" value={rolloverEndDate} onChange={(event) => setRolloverEndDate(event.target.value)} className="w-full rounded-xl border border-slate-300 px-4 py-3" /></Field>
+                  </div>
+                  <label className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4 text-sm text-slate-700">
+                    <input type="checkbox" checked={rolloverCopyRosters} onChange={(event) => setRolloverCopyRosters(event.target.checked)} className="mt-1" />
+                    <span><strong>Copy rosters</strong><span className="mt-1 block">Copies team names, captains, co-captains, club pros, and current roster memberships. You can adjust the new season without changing the old one.</span></span>
+                  </label>
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700"><strong>Not copied:</strong> standings, schedules, byes, matches, scores, ratings, and player results. New teams begin with no standings.</div>
+                  <div className="flex gap-3">
+                    <button type="button" onClick={runRollover} disabled={rollingOver} className="flex-1 rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 disabled:opacity-50">{rollingOver ? "Copying..." : "Create Next Season"}</button>
+                    <button type="button" onClick={() => setRolloverOpen(false)} disabled={rollingOver} className="rounded-xl bg-slate-200 px-5 py-3 font-semibold hover:bg-slate-300 disabled:opacity-50">Cancel</button>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
+
           <section className="rounded-2xl bg-white p-6 shadow">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -367,6 +426,13 @@ export default function SeasonsPage() {
                   className="rounded-xl bg-blue-700 px-4 py-3 text-sm font-bold text-white hover:bg-blue-800"
                 >
                   Add Season
+                </button>
+                <button
+                  type="button"
+                  onClick={openRollover}
+                  className="rounded-xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800"
+                >
+                  Create Next Season
                 </button>
                 <ListingCount label="Seasons" shown={filteredSeasons.length} total={seasons.length} />
               </div>
@@ -383,13 +449,26 @@ export default function SeasonsPage() {
                 />
               </div>
               <div className="flex items-end">
-                <button
-                  type="button"
-                  onClick={() => setSeasonSearch("")}
-                  className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 sm:w-auto"
-                >
-                  Clear
-                </button>
+                <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => setSeasonSearch("")}
+                    className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300 sm:w-auto"
+                  >
+                    Clear
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowInactiveSeasons((value) => !value)}
+                    className={`w-full rounded-xl px-4 py-3 font-semibold sm:w-auto ${
+                      showInactiveSeasons
+                        ? "bg-slate-200 text-slate-900 hover:bg-slate-300"
+                        : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                    }`}
+                  >
+                    {showInactiveSeasons ? "Hide Inactive Seasons" : "Include Inactive Seasons"}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -493,33 +572,4 @@ async function confirmTypedInactivateAction({ title, details }) {
 
   const typed = await appPrompt({ title: "Type to confirm", message: "Type INACTIVATE to confirm.", inputLabel: "Type INACTIVATE", requiredValue: "INACTIVATE", confirmLabel: "Inactivate", tone: "error" });
   return String(typed || "").trim() === "INACTIVATE";
-}
-
-function zeroStandingRow({ leagueId, divisionId, teamId, rank, updatedAt }) {
-  return {
-    league_id: leagueId,
-    division_id: divisionId,
-    team_id: teamId,
-    rank,
-    matches_played: 0,
-    match_wins: 0,
-    match_losses: 0,
-    match_ties: 0,
-    line_wins: 0,
-    line_losses: 0,
-    line_ties: 0,
-    game_wins: 0,
-    game_losses: 0,
-    points_for: 0,
-    points_against: 0,
-    point_differential: 0,
-    standings_points: 0,
-    home_wins: 0,
-    home_losses: 0,
-    away_wins: 0,
-    away_losses: 0,
-    recent_form: "",
-    current_streak: "-",
-    updated_at: updatedAt,
-  };
 }

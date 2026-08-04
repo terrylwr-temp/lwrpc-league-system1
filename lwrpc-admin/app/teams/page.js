@@ -23,6 +23,7 @@ export default function TeamsPage() {
   const [members, setMembers] = useState([]);
   const [teams, setTeams] = useState([]);
   const [teamSearch, setTeamSearch] = useState("");
+  const [showInactiveTeams, setShowInactiveTeams] = useState(false);
   const [expandedGroupKeys, setExpandedGroupKeys] = useState([]);
   const [scheduleTeam, setScheduleTeam] = useState(null);
   const [scheduleTeams, setScheduleTeams] = useState([]);
@@ -141,9 +142,16 @@ export default function TeamsPage() {
       return String(a.id || "").localeCompare(String(b.id || ""));
     });
 
-    if (!q) return sortedTeams;
-
     return sortedTeams.filter((team) => {
+      const matchesActiveScope = showInactiveTeams || (
+        team.is_active !== false &&
+        team.divisions?.is_active !== false &&
+        team.divisions?.leagues?.is_active !== false &&
+        team.divisions?.leagues?.seasons?.is_active !== false
+      );
+      if (!matchesActiveScope) return false;
+      if (!q) return true;
+
       const searchText = [
         team.name,
         team.abbreviation,
@@ -159,7 +167,7 @@ export default function TeamsPage() {
 
       return searchText.includes(q);
     });
-  }, [teams, teamSearch]);
+  }, [showInactiveTeams, teams, teamSearch]);
 
   const groupedTeams = useMemo(() => {
     const groups = [];
@@ -1310,6 +1318,18 @@ if (loading) {
                       Clear
                     </button>
                   )}
+
+                  <button
+                    type="button"
+                    onClick={() => setShowInactiveTeams((value) => !value)}
+                    className={`rounded-xl px-4 py-3 font-semibold ${
+                      showInactiveTeams
+                        ? "bg-slate-200 text-slate-900 hover:bg-slate-300"
+                        : "bg-blue-100 text-blue-800 hover:bg-blue-200"
+                    }`}
+                  >
+                    {showInactiveTeams ? "Hide Inactive Teams" : "Include Inactive Teams"}
+                  </button>
                 </div>
               </div>
 
