@@ -7,6 +7,7 @@ import AppNotificationsButton from "../../../components/AppNotificationsButton";
 import PbccFooter from "../../../components/PbccFooter";
 import PbccInstallButton from "../../../components/PbccInstallButton";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
+import { appConfirm } from "../../../lib/appDialog";
 import { publicRoundRobinUrl as roundRobinPublicUrl, roundRobinPath } from "../../../lib/roundRobins";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
 
@@ -412,7 +413,11 @@ export default function RoundRobinPlayerPage() {
       setError("Enter the full phone number saved for you by the host.");
       return;
     }
-    if (!window.confirm(`Finish ${session.session_name || "this match"}? This will close scoring and text results if SMS is enabled.`)) return;
+    if (!(await appConfirm(`Finish ${session.session_name || "this match"}? This will close scoring and text results if SMS is enabled.`, {
+      title: "Finish match",
+      confirmLabel: "Finish match",
+      tone: "warning",
+    }))) return;
 
     setActionLoading(`${session.id}-finish`);
     setError("");

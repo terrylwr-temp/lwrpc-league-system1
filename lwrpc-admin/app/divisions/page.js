@@ -45,6 +45,7 @@ export default function DivisionsPage() {
   const [sortOrder, setSortOrder] = useState("");
   const [playoffTeamCount, setPlayoffTeamCount] = useState("");
   const [flexLeague, setFlexLeague] = useState(false);
+  const [divisionIsActive, setDivisionIsActive] = useState(true);
 
   const [numberOfTeams, setNumberOfTeams] = useState("3");
   const [teamType, setTeamType] = useState("gender_doubles");
@@ -227,6 +228,7 @@ export default function DivisionsPage() {
       sort_order: sortOrder ? Number(sortOrder) : 0,
       playoff_team_count: playoffTeamCount ? Number(playoffTeamCount) : null,
       flex_league: flexLeague,
+      is_active: divisionIsActive,
 
       number_of_lines: Number(numberOfTeams || 3),
       primary_team_type: primaryType,
@@ -512,6 +514,7 @@ export default function DivisionsPage() {
       division.playoff_team_count == null ? "" : String(division.playoff_team_count)
     );
     setFlexLeague(division.flex_league === true);
+    setDivisionIsActive(division.is_active !== false);
 
     setNumberOfTeams(
       division.number_of_lines == null ? "3" : String(division.number_of_lines)
@@ -606,6 +609,7 @@ export default function DivisionsPage() {
     setSortOrder("");
     setPlayoffTeamCount("");
     setFlexLeague(false);
+    setDivisionIsActive(true);
 
     setNumberOfTeams("3");
     setTeamType("gender_doubles");
@@ -826,6 +830,21 @@ export default function DivisionsPage() {
                   />
                 </div>
               </Field>
+
+              <label className="flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={divisionIsActive}
+                  onChange={(e) => setDivisionIsActive(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  Active division
+                  <span className="mt-1 block text-xs font-normal text-slate-500">
+                    Active divisions appear in current setup lists. Turn this on to reactivate an inactive division.
+                  </span>
+                </span>
+              </label>
 
               <Field label="Doubles Team DUPR Maximum">
                 <input

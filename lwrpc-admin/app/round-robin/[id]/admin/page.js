@@ -8,6 +8,7 @@ import { createPortal } from "react-dom";
 import PbccFooter from "../../../components/PbccFooter";
 import PbccPwaRegister from "../../../components/PbccPwaRegister";
 import TurnstileWidget from "../../../components/TurnstileWidget";
+import { appConfirm, appNotice, appPrompt } from "../../../lib/appDialog";
 import { supabase } from "../../../lib/auth";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../../lib/email";
 import { passkeyErrorMessage } from "../../../lib/passkeyErrors";
@@ -226,7 +227,10 @@ export default function RoundRobinAdminPage() {
 
   function canLeaveCurrentTab() {
     if (!dirtyTabs.has(activeTab)) return true;
-    window.alert("Save or cancel your changes before moving to another screen.");
+    void appNotice("Save or cancel your changes before moving to another screen.", {
+      title: "Unsaved changes",
+      tone: "warning",
+    });
     return false;
   }
 
@@ -561,9 +565,13 @@ export default function RoundRobinAdminPage() {
     router.push(roundRobinPath(state?.group || id, "player"));
   }
 
-  function exitToDashboard() {
+  async function exitToDashboard() {
     if (!canLeaveCurrentTab()) return;
-    if (!window.confirm("Exit to LMS? Your PBCC admin access will be closed.")) return;
+    if (!(await appConfirm("Exit to LMS? Your PBCC admin access will be closed.", {
+      title: "Exit PBCC",
+      confirmLabel: "Exit to LMS",
+      tone: "warning",
+    }))) return;
     window.sessionStorage.removeItem(hostPhoneStorageKey);
     window.sessionStorage.removeItem(hostSessionStorageKey);
     setState(null);
@@ -1013,7 +1021,7 @@ function SessionTab(props) {
     const message = hasPlayedGames
       ? `Delete ${session.session_name || "this match"}? It will be removed from active matches and kept as cancelled history because games were played.`
       : `Delete ${session.session_name || "this match"}? No games have been played, so it will be permanently removed.`;
-    if (!window.confirm(message)) return;
+    if (!(await appConfirm(message, { title: "Delete match", confirmLabel: "Delete", tone: "warning" }))) return;
     await runAction("deleteSession", { sessionId: session.id });
   }
 
@@ -1023,7 +1031,7 @@ function SessionTab(props) {
   }
 
   async function exportSessionDupr(session) {
-    const exported = exportSessionDuprCsv(state, session);
+    const exported = await exportSessionDuprCsv(state, session);
     if (!exported) return;
     await runAction("markSessionDuprExported", {
       sessionId: session.id,
@@ -1543,7 +1551,11 @@ function ActiveSessionControls({ session, state, runAction, saveCurrentRoundScor
 
   async function finishSession() {
     if (!(await saveScoresForTopAction())) return;
-    if (!window.confirm(`Finish ${session.session_name || "this match"}? This will close scoring and save final results.`)) return;
+    if (!(await appConfirm(`Finish ${session.session_name || "this match"}? This will close scoring and save final results.`, {
+      title: "Finish match",
+      confirmLabel: "Finish match",
+      tone: "warning",
+    }))) return;
     setProgressMessage("Saving scores and preparing final stats...");
     try {
       const completed = await runAction("completeSession", { sessionId: session.id, smsEnabled: false }, { returnResult: true });
@@ -1970,13 +1982,13 @@ function PastMatchEditModal({ state, session, match, runAction, actionLoading, o
   async function save() {
     const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, session?.settings?.scoring);
     if (scoreError) {
-      window.alert(scoreError);
+      await appNotice(scoreError, { title: "Score needs attention", tone: "warning" });
       return;
     }
 
     const playerIds = [...team1Players, ...team2Players].map((player) => String(player?.id || "")).filter(Boolean);
     if (playerIds.length !== new Set(playerIds).size) {
-      window.alert("Each player can appear only once in a game.");
+      await appNotice("Each player can appear only once in a game.", { title: "Lineup needs attention", tone: "warning" });
       return;
     }
 
@@ -2988,14 +3000,14 @@ function LiveRoundPlayerEditor({ state, session, round, runAction, actionLoading
 
   async function savePlayerChanges() {
     if (selectedPlayerIds.length !== slotCount) {
-      window.alert(`Choose exactly ${slotCount} player${slotCount === 1 ? "" : "s"} to refill this round's existing court slots.`);
+      await appNotice(`Choose exactly ${slotCount} player${slotCount === 1 ? "" : "s"} to refill this round's existing court slots.`, { title: "Player selection needed", tone: "warning" });
       return;
     }
 
     const playerById = new Map(joinedPlayers.map((player) => [String(player.player_id || player.id || ""), player]));
     const selectedPlayers = selectedPlayerIds.map((playerId) => playerById.get(String(playerId))).filter(Boolean);
     if (selectedPlayers.length !== slotCount) {
-      window.alert("Please wait for the added player to appear, then save the updated player list.");
+      await appNotice("Please wait for the added player to appear, then save the updated player list.", { title: "Player list updating", tone: "info" });
       return;
     }
 
@@ -3098,7 +3110,7 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
   async function saveScore() {
     const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, scoreRules);
     if (scoreError) {
-      window.alert(scoreError);
+      await appNotice(scoreError, { title: "Score needs attention", tone: "warning" });
       return;
     }
     await runAction("updateMatchScore", {
@@ -3352,7 +3364,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
 
   async function deleteSavedPlayer(player) {
     const playerName = player.display_name || "this player";
-    if (!window.confirm(`Delete ${playerName} from saved PBCC players? Upcoming match roster entries will be removed. Completed match history will keep the saved display name.`)) return;
+    if (!(await appConfirm(`Delete ${playerName} from saved PBCC players? Upcoming match roster entries will be removed. Completed match history will keep the saved display name.`, { title: "Delete player", confirmLabel: "Delete", tone: "warning" }))) return;
 
     const deleted = await runAction("deletePlayer", { playerId: player.id });
     if (deleted && String(form.id) === String(player.id)) {
@@ -3787,12 +3799,12 @@ function LaddersTab({ state, runAction, actionLoading, setTabDirty }) {
   async function recalculateLadderRankings(ladderForm = form) {
     if (!ladderForm.id) return;
     const label = ladderForm.name || "this ladder";
-    if (!window.confirm(`Recalculate all completed match rankings for ${label}?`)) return;
+    if (!(await appConfirm(`Recalculate all completed match rankings for ${label}?`, { title: "Recalculate rankings", confirmLabel: "Recalculate", tone: "warning" }))) return;
     await runAction("recalculateLadderRankings", { ladderId: ladderForm.id, ladder: { ...ladderForm, format: "ladder" } });
   }
 
   async function deleteLadder(ladder) {
-    if (!window.confirm(`Delete ${ladder.name || "this ladder"}? If no games have been played, all match dates for this ladder will also be deleted.`)) return;
+    if (!(await appConfirm(`Delete ${ladder.name || "this ladder"}? If no games have been played, all match dates for this ladder will also be deleted.`, { title: "Delete ladder", confirmLabel: "Delete", tone: "warning" }))) return;
     await runAction("deleteLadder", { ladderId: ladder.id });
     if (form.id === ladder.id) closeLadderModal();
   }
@@ -4473,7 +4485,7 @@ function GroupsTab({ state, runAction, actionLoading }) {
   }
 
   async function deleteGroup(group) {
-    if (!window.confirm(`Delete ${group.name}? Players and past matches will stay saved.`)) return;
+    if (!(await appConfirm(`Delete ${group.name}? Players and past matches will stay saved.`, { title: "Delete group", confirmLabel: "Delete", tone: "warning" }))) return;
     const deleted = await runAction("deletePlayerGroup", { playerGroupId: group.id });
     if (deleted) {
       if (String(form.id) === String(group.id)) setForm(emptyPlayerGroupForm());
@@ -4644,16 +4656,22 @@ function SettingsTab({ state, runAction, actionLoading, setTabDirty }) {
   }, [form, formBaseline, setTabDirty]);
 
   async function masterResetRoundRobin() {
-    const firstOk = window.confirm([
+    const firstOk = await appConfirm([
       "Master Reset will permanently delete all Round Robin and Ladder matches for this group.",
       "",
       "This removes match history, joined/declined/waitlist match responses, generated rounds, scores, rankings, player stats, and match activity logs.",
       "",
       "Saved Players, Groups, and the players assigned to those Groups will be kept.",
-    ].join("\n"));
+    ].join("\n"), { title: "Master Reset", confirmLabel: "Continue", tone: "warning" });
     if (!firstOk) return;
 
-    const typed = window.prompt('Final confirmation: type MASTER RESET to continue.');
+    const typed = await appPrompt("Type MASTER RESET to permanently delete the PBCC match data.", {
+      title: "Final confirmation",
+      inputLabel: "Type MASTER RESET to continue",
+      requiredValue: "MASTER RESET",
+      confirmLabel: "Permanently delete",
+      tone: "warning",
+    });
     if (String(typed || "").trim() !== "MASTER RESET") return;
 
     await runAction("masterResetRoundRobin");
@@ -4816,7 +4834,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
     if (!selectedLaunchGroup || launchGroupPlayers.length === 0) return;
     const verb = smsEnabled ? "Send" : "Log";
     const playerText = `${launchGroupPlayers.length} active saved player${launchGroupPlayers.length === 1 ? "" : "s"}`;
-    if (!window.confirm(`${verb} the New Player text to ${playerText} in ${selectedLaunchGroup.name}? This is not tied to a match.`)) return;
+    if (!(await appConfirm(`${verb} the New Player text to ${playerText} in ${selectedLaunchGroup.name}? This is not tied to a match.`, { title: `${verb} New Player text`, confirmLabel: verb, tone: "warning" }))) return;
 
     await runAction("sendGroupNewPlayerText", {
       playerGroupId: selectedLaunchGroup.id,
@@ -6023,15 +6041,20 @@ function playerRoundRobinUrl(group) {
   return `${publicRoundRobinUrl(group)}/player`;
 }
 
-function exportSessionDuprCsv(state, session) {
+async function exportSessionDuprCsv(state, session) {
   const defaultEventName = session.session_name || `${state.group?.name || "PBCC"} Match`;
-  const eventName = window.prompt("DUPR event name", defaultEventName);
+  const eventName = await appPrompt("Enter the DUPR event name for this export.", {
+    title: "DUPR event name",
+    inputLabel: "Event name",
+    placeholder: defaultEventName,
+    confirmLabel: "Export CSV",
+  });
   if (eventName === null) return null;
 
   const cleanEventName = String(eventName || "").trim() || defaultEventName;
   const rows = duprRowsForSession(state, session, cleanEventName);
   if (rows.length === 0) {
-    window.alert("No completed PBCC games with scores were found for this match.");
+    await appNotice("No completed PBCC games with scores were found for this match.", { title: "DUPR export unavailable", tone: "warning" });
     return null;
   }
 

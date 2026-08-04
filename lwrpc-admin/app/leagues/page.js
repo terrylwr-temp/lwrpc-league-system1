@@ -26,6 +26,7 @@ export default function LeaguesPage() {
   const [leagueAbbreviation, setLeagueAbbreviation] = useState("");
   const [selectedSeason, setSelectedSeason] = useState("");
   const [rostersLocked, setRostersLocked] = useState(false);
+  const [leagueIsActive, setLeagueIsActive] = useState(true);
   const [onlyHomeCommunityPlayers, setOnlyHomeCommunityPlayers] = useState(false);
   const [matchSetupReminderDaysBefore, setMatchSetupReminderDaysBefore] = useState("2");
   const [documentBucket, setDocumentBucket] = useState(DEFAULT_LEAGUE_DOCUMENT_BUCKET);
@@ -41,7 +42,7 @@ export default function LeaguesPage() {
   const [hydrated, setHydrated] = useState(false);
 
   useUnsavedChangesWarning(
-    Boolean(leagueFormOpen && (editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || rostersLocked || onlyHomeCommunityPlayers || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean))),
+    Boolean(leagueFormOpen && (editingLeagueId || leagueName.trim() || leagueAbbreviation.trim() || selectedSeason || rostersLocked || !leagueIsActive || onlyHomeCommunityPlayers || matchSetupReminderDaysBefore !== "2" || documentBucket !== DEFAULT_LEAGUE_DOCUMENT_BUCKET || documentPrefix !== DEFAULT_LEAGUE_DOCUMENT_PREFIX || Object.values(leagueDocuments).some(Boolean))),
     "league"
   );
 
@@ -85,6 +86,7 @@ export default function LeaguesPage() {
       name: leagueName,
       abbreviation: leagueAbbreviation.trim() || null,
       season_id: selectedSeason,
+      is_active: leagueIsActive,
       rosters_locked: rostersLocked,
       only_home_community_players: onlyHomeCommunityPlayers,
       match_setup_reminder_days_before: Number(matchSetupReminderDaysBefore || 0),
@@ -167,6 +169,7 @@ export default function LeaguesPage() {
     setLeagueName(league.name || "");
     setLeagueAbbreviation(league.abbreviation || "");
     setSelectedSeason(league.season_id || "");
+    setLeagueIsActive(league.is_active !== false);
     setRostersLocked(league.rosters_locked === true);
     setOnlyHomeCommunityPlayers(league.only_home_community_players === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
@@ -187,6 +190,7 @@ export default function LeaguesPage() {
     setLeagueName(league.name || "");
     setLeagueAbbreviation(league.abbreviation || "");
     setSelectedSeason("");
+    setLeagueIsActive(true);
     setRostersLocked(league.rosters_locked === true);
     setOnlyHomeCommunityPlayers(league.only_home_community_players === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
@@ -217,6 +221,7 @@ export default function LeaguesPage() {
     setLeagueName("");
     setLeagueAbbreviation("");
     setSelectedSeason("");
+    setLeagueIsActive(true);
     setRostersLocked(false);
     setOnlyHomeCommunityPlayers(false);
     setMatchSetupReminderDaysBefore("2");
@@ -362,6 +367,21 @@ export default function LeaguesPage() {
                   </option>
                 ))}
               </select>
+
+              <label className="flex items-start gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={leagueIsActive}
+                  onChange={(e) => setLeagueIsActive(e.target.checked)}
+                  className="mt-1"
+                />
+                <span>
+                  Active league
+                  <span className="mt-1 block text-xs font-normal text-slate-500">
+                    Active leagues appear in current setup lists. Turn this on to reactivate an inactive league.
+                  </span>
+                </span>
+              </label>
 
               <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-sm font-semibold text-slate-700">
                 <input

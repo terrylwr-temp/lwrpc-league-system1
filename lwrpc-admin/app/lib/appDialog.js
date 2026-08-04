@@ -13,6 +13,13 @@ export function appConfirm(messageOrOptions, options) {
   return Promise.resolve(window.confirm(message));
 }
 
+export function appNotice(messageOrOptions, options) {
+  if (dialogApi) return dialogApi.notice(messageOrOptions, options);
+  const message = typeof messageOrOptions === "string" ? messageOrOptions : messageOrOptions?.message || "";
+  window.alert(message);
+  return Promise.resolve(true);
+}
+
 export function appPrompt(messageOrOptions, options) {
   if (dialogApi) return dialogApi.prompt(messageOrOptions, options);
   const message = typeof messageOrOptions === "string" ? messageOrOptions : messageOrOptions?.message || "";
