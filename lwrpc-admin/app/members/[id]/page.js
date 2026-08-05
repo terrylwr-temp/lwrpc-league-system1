@@ -15,6 +15,7 @@ import { hasRole } from "../../lib/permissions";
 import { hasAnotherCommissioner } from "../../lib/roleGuards";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 import { sortHistoryRows } from "../../lib/playHistory";
+import { appConfirm } from "../../lib/appDialog";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
@@ -477,9 +478,12 @@ async function updateUserRole(newRole) {
 
 async function updateMemberActiveStatus(nextIsActive) {
   if (!nextIsActive) {
-    const ok = confirm(
-      "Deactivate this member? They will be hidden from normal member, roster, and rating workflows unless inactive members are included."
-    );
+    const ok = await appConfirm({
+      title: "Deactivate member",
+      message: "Deactivate this member? They will be hidden from normal member, roster, and rating workflows unless inactive members are included.",
+      confirmLabel: "Deactivate",
+      tone: "warning",
+    });
 
     if (!ok) return;
   }

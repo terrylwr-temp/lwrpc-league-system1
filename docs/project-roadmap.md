@@ -411,3 +411,4 @@ As of 2026-05-21:
 - PBCC now routes every completion, delete, reset, SMS, validation, and DUPR export prompt through the branded app dialog instead of browser-native Windows dialogs.
 - League Administration and Division Administration edit forms now expose an Active status control, so inactive leagues and divisions can be reactivated directly. The visible app version was bumped to `LMS-0624`.
 - Shared typed-delete confirmations now use the branded app dialog across League, Division, configured game line, Location, Season, Team, Score Sheet, and Scoring deletion workflows. The visible app version was bumped to `LMS-0625`.
+- Member Detail deactivation now uses the shared branded in-app confirmation dialog instead of a browser-native confirmation window. The native-dialog audit still identifies other legacy confirmations on unrelated screens for separate migration.
