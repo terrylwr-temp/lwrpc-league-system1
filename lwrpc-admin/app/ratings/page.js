@@ -408,7 +408,7 @@ export default function RatingsPage() {
     try {
       await navigator.clipboard.writeText(name);
     } catch {
-      window.prompt("Copy player name", name);
+      await appPrompt({ title: "Copy player name", message: "Copy the value below.", inputLabel: "Player name", defaultValue: name, selectOnFocus: true, confirmLabel: "Done" });
     }
   }
 
@@ -563,7 +563,7 @@ export default function RatingsPage() {
       return;
     }
 
-    if (!confirm(`Import ratings for ${readyRows.length} matched member(s)?`)) return;
+    if (!(await appConfirm(`Import ratings for ${readyRows.length} matched member(s)?`, { title: "Import ratings", confirmLabel: "Import", tone: "warning" }))) return;
 
     setIsImportingRatings(true);
     setRatingImportStatus("Importing ratings...");
@@ -668,9 +668,7 @@ export default function RatingsPage() {
       return;
     }
 
-    const ok = confirm(
-      `Copy ${sourceRows.length} rating record(s) from ${sourceName} to ${targetName}?\n\nExisting target-season ratings for matching players will be updated. Missing target-season rows will be created.`
-    );
+    const ok = await appConfirm(`Copy ${sourceRows.length} rating record(s) from ${sourceName} to ${targetName}?\n\nExisting target-season ratings for matching players will be updated. Missing target-season rows will be created.`, { title: "Copy ratings", confirmLabel: "Copy", tone: "warning" });
 
     if (!ok) return;
 

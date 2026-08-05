@@ -6,6 +6,7 @@ import AppHeader from "../../components/AppHeader";
 import { supabase } from "../../lib/auth";
 import { confirmDeleteActionAsync } from "../../lib/confirmDelete";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
+import { appConfirm } from "../../lib/appDialog";
 
 const GLOBAL_DEFAULT_LINES_KEY = "lwrpc-default-lines-config";
 
@@ -511,9 +512,7 @@ export default function DivisionDetailPage() {
 
   async function saveConfiguredLinesAsDefault() {
     if (lines.length === 0) {
-      const okToClear = confirm(
-        "There are no configured game lines. Clear the saved default game line set for this division?"
-      );
+      const okToClear = await appConfirm("There are no configured game lines. Clear the saved default game line set for this division?", { title: "Clear default game lines", confirmLabel: "Clear", tone: "warning" });
 
       if (!okToClear) return;
 
@@ -522,9 +521,7 @@ export default function DivisionDetailPage() {
       return;
     }
 
-    const ok = confirm(
-      `Save all ${lines.length} configured game lines as the default game line set for this division?`
-    );
+    const ok = await appConfirm(`Save all ${lines.length} configured game lines as the default game line set for this division?`, { title: "Save default game lines", confirmLabel: "Save", tone: "warning" });
 
     if (!ok) return;
 
@@ -568,12 +565,13 @@ export default function DivisionDetailPage() {
         ? `Replace the ${lines.length} currently configured game lines with ${count} game lines from the ${sourceLabel}?`
         : `Generate ${count} default game lines from the ${sourceLabel}?`;
 
-    const ok = confirm(
+    const ok = await appConfirm(
       `${actionLabel}${
         lines.length > 0
           ? " Existing generated matches will not be changed."
           : ""
-      }`
+      }`,
+      { title: "Generate game lines", confirmLabel: lines.length > 0 ? "Replace" : "Generate", tone: "warning" }
     );
 
     if (!ok) return;

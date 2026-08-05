@@ -9,6 +9,7 @@ import { splitNotificationRecipients } from "../lib/notificationPreferences";
 import { EMAIL_TEMPLATE_KEYS, getEmailTemplateConfig, renderEmailTemplate } from "../lib/emailTemplates";
 import { confirmDeleteActionAsync } from "../lib/confirmDelete";
 import { isPicklebreakerLine } from "../lib/matchScoring";
+import { appConfirm } from "../lib/appDialog";
 
 const TEMPLATE_KEY = EMAIL_TEMPLATE_KEYS.scoreReminder;
 const DUPR_EXPORT_HEADERS = [
@@ -496,9 +497,7 @@ export default function ScoringPage() {
     const emailCount = reminderJobs.reduce((total, job) => total + job.emails.length, 0);
     const phoneCount = reminderJobs.reduce((total, job) => total + job.phones.length, 0);
     const skippedCount = selectedMatches.length - reminderJobs.length;
-    const ok = confirm(
-      `Send ${reminderJobs.length} separate score reminder email${reminderJobs.length === 1 ? "" : "s"} for ${reminderJobs.length} match${reminderJobs.length === 1 ? "" : "es"}?\n\nRecipients across all reminders: ${emailCount} email recipient${emailCount === 1 ? "" : "s"} and ${phoneCount} text recipient${phoneCount === 1 ? "" : "s"}.${skippedCount > 0 ? `\n\nSkipped ${skippedCount} selected match${skippedCount === 1 ? "" : "es"} because it is verified or has no reminder recipients.` : ""}`
-    );
+    const ok = await appConfirm(`Send ${reminderJobs.length} separate score reminder email${reminderJobs.length === 1 ? "" : "s"} for ${reminderJobs.length} match${reminderJobs.length === 1 ? "" : "es"}?\n\nRecipients across all reminders: ${emailCount} email recipient${emailCount === 1 ? "" : "s"} and ${phoneCount} text recipient${phoneCount === 1 ? "" : "s"}.${skippedCount > 0 ? `\n\nSkipped ${skippedCount} selected match${skippedCount === 1 ? "" : "es"} because it is verified or has no reminder recipients.` : ""}`, { title: "Send score reminders", confirmLabel: "Send reminders", tone: "warning" });
     if (!ok) return;
 
     setSending(true);
@@ -638,9 +637,7 @@ export default function ScoringPage() {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Export ${gameCount} completed game${gameCount === 1 ? "" : "s"} from ${rows.length} selected match${rows.length === 1 ? "" : "es"}?\n\nA DUPR CSV file will be downloaded and ${rows.length === 1 ? "this match" : "these matches"} will be marked as exported.`
-    );
+    const confirmed = await appConfirm(`Export ${gameCount} completed game${gameCount === 1 ? "" : "s"} from ${rows.length} selected match${rows.length === 1 ? "" : "es"}?\n\nA DUPR CSV file will be downloaded and ${rows.length === 1 ? "this match" : "these matches"} will be marked as exported.`, { title: "Export to DUPR", confirmLabel: "Export", tone: "warning" });
 
     if (!confirmed) {
       setExportingScores(false);
@@ -675,9 +672,7 @@ export default function ScoringPage() {
       return;
     }
 
-    const confirmed = window.confirm(
-      `Mark ${selectedAlreadyExportedMatches.length} selected match${selectedAlreadyExportedMatches.length === 1 ? "" : "es"} as not exported?\n\n${selectedAlreadyExportedMatches.length === 1 ? "It" : "They"} will become eligible for DUPR export again.`
-    );
+    const confirmed = await appConfirm(`Mark ${selectedAlreadyExportedMatches.length} selected match${selectedAlreadyExportedMatches.length === 1 ? "" : "es"} as not exported?\n\n${selectedAlreadyExportedMatches.length === 1 ? "It" : "They"} will become eligible for DUPR export again.`, { title: "Mark as not exported", confirmLabel: "Mark not exported", tone: "warning" });
 
     if (!confirmed) return;
 
@@ -928,7 +923,7 @@ function MatchEditorDialog({ open, match, leagues, divisions, teams, locations, 
       awayTeamId !== match.away_team_id
     );
 
-    if (structuralChange && !confirm("Changing the league, division, or teams will clear saved lineups and rebuild the generated scoring rows for this match. Continue?")) {
+    if (structuralChange && !(await appConfirm("Changing the league, division, or teams will clear saved lineups and rebuild the generated scoring rows for this match. Continue?", { title: "Change match structure", confirmLabel: "Continue", tone: "warning" }))) {
       return;
     }
 

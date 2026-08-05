@@ -27,6 +27,7 @@ import {
 } from "../../../lib/tournaments";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../../lib/systemSettings";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../../lib/phone";
+import { appConfirm, appPrompt } from "../../../lib/appDialog";
 
 const TABS = ["Courts", "Queue", "Standings", "Teams", "Admin Setup", "SMS", "Log"];
 const OPEN_STATUSES = new Set(["pending", "not_played"]);
@@ -204,8 +205,8 @@ export default function TournamentAdminPage() {
     return options.returnResult ? result : true;
   }
 
-  function exitToLms() {
-    if (!window.confirm("Exit the tournament Main System and return to the LMS Admin Dashboard?")) return;
+  async function exitToLms() {
+    if (!(await appConfirm("Exit the tournament Main System and return to the LMS Admin Dashboard?", { title: "Exit tournament system", confirmLabel: "Exit", tone: "warning" }))) return;
 
     window.sessionStorage.removeItem(storageKey);
     setState(null);
@@ -1315,7 +1316,7 @@ function TeamsTab({ state, setState, runAction, actionLoading }) {
   }
 
   async function deleteTeam(team) {
-    if (!confirmTypedAction(`Delete ${team.name || "this team"} from the tournament?`, "DELETE")) return;
+    if (!(await confirmTypedAction(`Delete ${team.name || "this team"} from the tournament?`, "DELETE"))) return;
     setEditingTeam(null);
     const completed = await runAction("deleteTournamentTeam", { teamId: team.id });
     window.alert(completed ? "Delete completed." : "Delete was not completed.");
@@ -1897,7 +1898,7 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
       window.alert("Type CHANGE CODE to confirm this event entry code change.");
       return;
     }
-    if (!confirmTypedAction("Change the event entry code for this tournament? The current admin session will immediately switch to the new code.", "CHANGE CODE")) return;
+    if (!(await confirmTypedAction("Change the event entry code for this tournament? The current admin session will immediately switch to the new code.", "CHANGE CODE"))) return;
 
     const saved = await runAction("updateTournamentSettings", {
       ...tournamentSettingsPayload,
@@ -1961,8 +1962,8 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => {
-                if (confirmTypedAction("Refresh tournament divisions and teams from the main system? This may add or update tournament setup data.", "REFRESH")) {
+              onClick={async () => {
+                if (await confirmTypedAction("Refresh tournament divisions and teams from the main system? This may add or update tournament setup data.", "REFRESH")) {
                   runAction("syncLeagueDivisions").then((completed) => {
                     window.alert(completed ? "Refresh completed." : "Refresh was not completed.");
                   });
@@ -2012,8 +2013,8 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
                         </button>
                       <button
                         type="button"
-                        onClick={() => {
-                          if (confirmTypedAction(`Delete the ${division.name} division from this tournament? This cannot be undone.`, "DELETE")) {
+                        onClick={async () => {
+                          if (await confirmTypedAction(`Delete the ${division.name} division from this tournament? This cannot be undone.`, "DELETE")) {
                             runAction("deleteDivision", { divisionId: division.id }).then((completed) => {
                               window.alert(completed ? "Delete completed." : "Delete was not completed.");
                             });
@@ -2096,9 +2097,9 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
         <div className="mt-8 flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={() => {
+            onClick={async () => {
               const action = isEliminationFormat ? "generateEliminationBracket" : "generateRoundRobin";
-              if (confirmTypedAction(`Generate ${currentFormatLabel.toLowerCase()} matches for ${selectedDivisionNames || "the selected divisions"}? This replaces generated matches in those divisions.`, "GENERATE")) {
+              if (await confirmTypedAction(`Generate ${currentFormatLabel.toLowerCase()} matches for ${selectedDivisionNames || "the selected divisions"}? This replaces generated matches in those divisions.`, "GENERATE")) {
                 runAction(action, { divisionIds: selectedDivisionIds }).then((completed) => {
                   window.alert(completed ? `${currentFormatLabel} generation completed.` : `${currentFormatLabel} generation was not completed.`);
                 });
@@ -2112,8 +2113,8 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           {isTop4Format && (
             <button
               type="button"
-              onClick={() => {
-                if (confirmTypedAction(`Generate top 4 playoff matches for ${selectedDivisionNames || "the selected divisions"}? This keeps completed round robin matches and replaces any existing playoff bracket in those divisions.`, "PLAYOFF")) {
+              onClick={async () => {
+                if (await confirmTypedAction(`Generate top 4 playoff matches for ${selectedDivisionNames || "the selected divisions"}? This keeps completed round robin matches and replaces any existing playoff bracket in those divisions.`, "PLAYOFF")) {
                   runAction("generateTop4Playoff", { divisionIds: selectedDivisionIds }).then((completed) => {
                     window.alert(completed ? "Top 4 Playoff generation completed." : "Top 4 Playoff generation was not completed.");
                   });
@@ -2127,8 +2128,8 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           )}
           <button
             type="button"
-            onClick={() => {
-              if (confirmTypedAction("Reset all tournament matches? This removes generated matches and clears court assignments.", "RESET")) {
+            onClick={async () => {
+              if (await confirmTypedAction("Reset all tournament matches? This removes generated matches and clears court assignments.", "RESET")) {
                 runAction("resetMatches").then((completed) => {
                   window.alert(completed ? "Reset completed." : "Reset was not completed.");
                 });
@@ -2141,8 +2142,8 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
           </button>
           <button
             type="button"
-            onClick={() => {
-              if (confirmTypedAction("Start the tournament and reset wait-time tracking for active matches?", "START")) {
+            onClick={async () => {
+              if (await confirmTypedAction("Start the tournament and reset wait-time tracking for active matches?", "START")) {
                 runAction("startTournament").then((completed) => {
                   window.alert(completed ? "Start tournament completed." : "Start tournament was not completed.");
                 });
@@ -2392,8 +2393,8 @@ function AdminSetupTab({ state, runAction, actionLoading }) {
         </div>
         <button
           type="button"
-          onClick={() => {
-            if (confirmTypedAction("Reset the entire tournament system? Confirm that all matches have been exported and recorded before continuing. This deletes all history, divisions, teams, standings data, and logs for this tournament.", "RESET TOURNAMENT")) {
+          onClick={async () => {
+            if (await confirmTypedAction("Reset the entire tournament system? Confirm that all matches have been exported and recorded before continuing. This deletes all history, divisions, teams, standings data, and logs for this tournament.", "RESET TOURNAMENT")) {
               runAction("resetTournamentSystem").then((completed) => {
                 window.alert(completed ? "Tournament system reset completed." : "Tournament system reset was not completed.");
               });
@@ -2690,8 +2691,8 @@ function LogTab({ state, runAction, actionLoading }) {
           </button>
           <button
             type="button"
-            onClick={() => {
-              if (confirmTypedAction("Clear the tournament activity log? This cannot be undone.", "CLEAR")) {
+            onClick={async () => {
+              if (await confirmTypedAction("Clear the tournament activity log? This cannot be undone.", "CLEAR")) {
                 runAction("clearLog");
               }
             }}
@@ -4204,18 +4205,17 @@ function bracketTeamDisplayName(match, side) {
   return sourceLabel ? `(${sourceLabel}) ${name}` : name;
 }
 
-function confirmTypedAction(message, requiredWord) {
+async function confirmTypedAction(message, requiredWord) {
   const word = String(requiredWord || "").trim().toUpperCase();
-  if (!window.confirm(`${message}\n\nYou will be asked to type ${word} to continue.`)) {
-    window.alert("Action was not completed.");
-    return false;
-  }
-  const typed = window.prompt(`Type ${word} to continue.`);
-  if (String(typed || "").trim().toUpperCase() !== word) {
-    window.alert(`Action was not completed. You must type ${word} exactly.`);
-    return false;
-  }
-  return true;
+  const typed = await appPrompt({
+    title: "Confirm tournament action",
+    message,
+    inputLabel: `Type ${word} to continue`,
+    requiredValue: word,
+    confirmLabel: "Continue",
+    tone: "warning",
+  });
+  return typed === word;
 }
 
 function sortDivisionsByName(divisions = []) {

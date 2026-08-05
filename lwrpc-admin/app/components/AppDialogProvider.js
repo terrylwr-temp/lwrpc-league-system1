@@ -130,7 +130,7 @@ export function AppDialogProvider({ children }) {
 }
 
 function DialogWindow({ dialog, options, tone, onClose, dialogRef, primaryButtonRef, cancelButtonRef, promptInputRef }) {
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState(() => options.defaultValue || "");
   const requiredValue = options.requiredValue || "";
   const isPrompt = dialog.type === "prompt";
   const canContinue = !requiredValue || inputValue.trim() === requiredValue;
@@ -183,7 +183,7 @@ function DialogWindow({ dialog, options, tone, onClose, dialogRef, primaryButton
         <form onSubmit={submit}>
           <div className="px-5 py-5">
             {message && <p id="app-dialog-message" className="whitespace-pre-line text-sm font-semibold leading-6 text-slate-700">{message}</p>}
-            {isPrompt && <label className="mt-5 block"><span className="mb-1.5 block text-sm font-black text-slate-800">{options.inputLabel || "Confirmation"}</span><input ref={promptInputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value)} placeholder={options.placeholder || requiredValue} className="w-full rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></label>}
+            {isPrompt && <label className="mt-5 block"><span className="mb-1.5 block text-sm font-black text-slate-800">{options.inputLabel || "Confirmation"}</span><input ref={promptInputRef} value={inputValue} onChange={(event) => setInputValue(event.target.value)} onFocus={(event) => { if (options.selectOnFocus) event.currentTarget.select(); }} placeholder={options.placeholder || requiredValue} className="w-full rounded-xl border border-slate-300 px-4 py-3 font-semibold text-slate-950 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100" /></label>}
           </div>
           <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
             {dialog.type !== "notice" && <button ref={cancelButtonRef} type="button" onClick={() => onClose(null)} className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-black text-slate-700 transition hover:bg-slate-100 focus:outline-none focus:ring-4 focus:ring-slate-200">{options.cancelLabel || "Cancel"}</button>}

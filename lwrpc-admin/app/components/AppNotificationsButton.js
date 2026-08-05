@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { appConfirm } from "../lib/appDialog";
 
 function isMobileDevice() {
   if (typeof window === "undefined") return false;
@@ -144,7 +145,7 @@ export default function AppNotificationsButton({ phone = "", groupId = "", compa
       return;
     }
 
-    const confirmed = window.confirm("Turn off App Notifications on this device? Text messages will still be used as backup.");
+    const confirmed = await appConfirm("Turn off App Notifications on this device? Text messages will still be used as backup.", { title: "Turn off App Notifications", confirmLabel: "Turn off", tone: "warning" });
     if (!confirmed) return;
 
     setStatus("working-off");

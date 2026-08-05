@@ -15,7 +15,7 @@ import { hasRole } from "../../lib/permissions";
 import { hasAnotherCommissioner } from "../../lib/roleGuards";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 import { sortHistoryRows } from "../../lib/playHistory";
-import { appConfirm } from "../../lib/appDialog";
+import { appConfirm, appPrompt } from "../../lib/appDialog";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
@@ -302,7 +302,7 @@ setUserRole(roleData?.role || "player");
       setCopiedField(field);
       window.setTimeout(() => setCopiedField((current) => (current === field ? null : current)), 2000);
     } catch {
-      window.prompt(`Copy member ${field}`, value);
+      await appPrompt({ title: `Copy member ${field}`, message: "Copy the value below.", inputLabel: field, defaultValue: value, selectOnFocus: true, confirmLabel: "Done" });
     }
   }
 

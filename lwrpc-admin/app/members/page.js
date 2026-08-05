@@ -11,6 +11,7 @@ import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phon
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../lib/notificationPreferences";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
+import { appConfirm } from "../lib/appDialog";
 
 const PAGE_SIZE = 100;
 const MEMBER_DIRECTORY_VIEW_STATE_KEY = "lwrpc-member-directory-view";
@@ -167,7 +168,7 @@ export default function MembersPage() {
       return;
     }
 
-    const ok = confirm(
+    const ok = await appConfirm(
       [
         "Clean Members will standardize member phone numbers only.",
         "",
@@ -180,7 +181,8 @@ export default function MembersPage() {
         "It will not change names, emails, DUPR IDs, roles, locations, or phone numbers it cannot safely interpret.",
         "",
         "Continue?",
-      ].join("\n")
+      ].join("\n"),
+      { title: "Clean member phone numbers", confirmLabel: "Clean members", tone: "warning" }
     );
 
     if (!ok) return;
@@ -241,7 +243,7 @@ export default function MembersPage() {
       return;
     }
 
-    const ok = confirm(
+    const ok = await appConfirm(
       [
         `Mark ${activeCount} active member${activeCount === 1 ? "" : "s"} inactive?`,
         "",
@@ -249,7 +251,8 @@ export default function MembersPage() {
         "League Managers, Club Pros, and Commissioners will be left active.",
         "",
         "Continue?",
-      ].join("\n")
+      ].join("\n"),
+      { title: "Mark members inactive", confirmLabel: "Mark inactive", tone: "warning" }
     );
 
     if (!ok) return;
@@ -320,7 +323,7 @@ export default function MembersPage() {
       return;
     }
 
-    const ok = confirm(
+    const ok = await appConfirm(
       [
         `Change ${staleCaptainRoles.length} stale Captain role${staleCaptainRoles.length === 1 ? "" : "s"} back to Player?`,
         "",
@@ -328,7 +331,8 @@ export default function MembersPage() {
         "Members who are no longer assigned as a captain or co-captain on an active team will be changed to Player.",
         "",
         "Continue?",
-      ].join("\n")
+      ].join("\n"),
+      { title: "Correct Captain roles", confirmLabel: "Change to Player", tone: "warning" }
     );
 
     if (!ok) {

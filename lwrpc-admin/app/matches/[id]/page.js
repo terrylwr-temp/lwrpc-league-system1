@@ -11,7 +11,7 @@ import { splitNotificationRecipients } from "../../lib/notificationPreferences";
 import { hasRole } from "../../lib/permissions";
 import { rebuildDivisionStandingsForDivision } from "../../lib/standingsRebuild";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
-import { appConfirm } from "../../lib/appDialog";
+import { appConfirm, appPrompt } from "../../lib/appDialog";
 import {
   gameHasScoreEntry as sharedGameHasScoreEntry,
   getLineSummary as sharedGetLineSummary,
@@ -1775,7 +1775,13 @@ export default function MatchDetailPage() {
       return;
     }
 
-    const notes = prompt("Enter dispute notes");
+    const notes = await appPrompt({
+      title: "Dispute scores",
+      message: "Enter dispute notes.",
+      inputLabel: "Dispute notes",
+      confirmLabel: "Submit dispute",
+      tone: "warning",
+    });
 
     if (notes === null) return;
 

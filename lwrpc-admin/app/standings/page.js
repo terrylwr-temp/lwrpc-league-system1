@@ -8,6 +8,7 @@ import { requireRole, supabase } from "../lib/auth";
 import { rebuildDivisionStandingsForDivision } from "../lib/standingsRebuild";
 import { sortStandingsByDivisionRules } from "../lib/standingsSort";
 import { defaultDashboardForRole } from "../lib/permissions";
+import { appPrompt } from "../lib/appDialog";
 import { useRouter } from "next/navigation";
 
 export default function StandingsPage() {
@@ -187,9 +188,14 @@ export default function StandingsPage() {
 
     const selectedDivisionName =
       divisions.find((division) => String(division.id) === String(selectedDivision))?.name || "this division";
-    const confirmation = prompt(
-      `This will recalculate match scores, W-L, points, and rankings for ${selectedDivisionName} using verified matches only.\n\nType REBUILD to continue.`
-    );
+    const confirmation = await appPrompt({
+      title: "Rebuild league statistics",
+      message: `This will recalculate match scores, W-L, points, and rankings for ${selectedDivisionName} using verified matches only.`,
+      inputLabel: "Type REBUILD to continue",
+      requiredValue: "REBUILD",
+      confirmLabel: "Rebuild",
+      tone: "warning",
+    });
 
     if (confirmation !== "REBUILD") return;
 
