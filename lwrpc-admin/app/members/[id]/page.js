@@ -32,6 +32,8 @@ export default function MemberDetailPage() {
   const [form, setForm] = useState({});
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [teamMemberships, setTeamMemberships] = useState([]);
+  const [inactiveTeamMemberships, setInactiveTeamMemberships] = useState([]);
+  const [showInactiveTeams, setShowInactiveTeams] = useState(false);
   const [playerTeams, setPlayerTeams] = useState([]);
   const [playHistory, setPlayHistory] = useState([]);
   const [historyModalTeam, setHistoryModalTeam] = useState(null);
@@ -254,6 +256,8 @@ setUserRole(roleData?.role || "player");
     });
     setSeasonRatings(ratingData || []);
     setTeamMemberships((teamData || []).filter((row) => row.teams?.is_active !== false));
+    setInactiveTeamMemberships((teamData || []).filter((row) => row.teams?.is_active === false));
+    setShowInactiveTeams(false);
     setPlayerTeams((teamData || []).map((row) => row.teams).filter(Boolean));
     setPlayHistory(historyData || []);
   }, [id]);
@@ -527,8 +531,16 @@ function openTeamPlayHistory(team) {
   if (!team?.id) return;
 
   setHistoryFilter(`team:${team.id}`);
+  setIncludeInactiveHistory(team.is_active === false);
   setPrintableHistory(null);
   setHistoryModalTeam(team);
+}
+
+function openPlayerHistory() {
+  setHistoryFilter("all");
+  setIncludeInactiveHistory(true);
+  setPrintableHistory(null);
+  setHistoryModalTeam({});
 }
 
 function closeTeamPlayHistory() {
@@ -554,6 +566,9 @@ function printCurrentHistory() {
     `${member.first_name || ""} ${member.last_name || ""}`.trim() ||
     member.email ||
     "Member";
+  const displayedTeamMemberships = showInactiveTeams
+    ? inactiveTeamMemberships
+    : teamMemberships;
   const openMemberRatings = async () => {
     if (await confirmUnsavedChanges()) router.push(`/ratings?member=${encodeURIComponent(id)}`);
   };
@@ -588,6 +603,14 @@ function printCurrentHistory() {
                 className="rounded-xl bg-emerald-700 px-4 py-2 font-semibold text-white hover:bg-emerald-800"
               >
                 Edit Ratings
+              </button>
+
+              <button
+                type="button"
+                onClick={openPlayerHistory}
+                className="rounded-xl bg-indigo-700 px-4 py-2 font-semibold text-white hover:bg-indigo-800"
+              >
+                Show Player History
               </button>
             </>
           ) : (
@@ -984,16 +1007,28 @@ function printCurrentHistory() {
         <div className="mt-6 rounded-2xl bg-white p-6 shadow">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-2xl font-bold text-slate-900">
-              Current Teams
+              {showInactiveTeams ? "Inactive Teams" : "Current Teams"}
             </h2>
 
-            <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
-              <div className="text-xs uppercase tracking-wide text-slate-300">
-                Teams
-              </div>
+            <div className="flex flex-wrap items-center gap-3">
+              {inactiveTeamMemberships.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setShowInactiveTeams((current) => !current)}
+                  className="rounded-xl border-2 border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-800 hover:border-slate-400 hover:bg-slate-50"
+                >
+                  {showInactiveTeams ? "Show Current Teams" : "Show Inactive Teams"}
+                </button>
+              )}
 
-              <div className="text-2xl font-bold">
-                {teamMemberships.length}
+              <div className="rounded-xl bg-slate-900 px-5 py-3 text-white">
+                <div className="text-xs uppercase tracking-wide text-slate-300">
+                  Teams
+                </div>
+
+                <div className="text-2xl font-bold">
+                  {displayedTeamMemberships.length}
+                </div>
               </div>
             </div>
           </div>
@@ -1003,6 +1038,7 @@ function printCurrentHistory() {
               <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
                 <tr>
                   <th className="p-4 text-left">Team</th>
+                  <th className="p-4 text-left">Season</th>
                   <th className="p-4 text-left">League</th>
                   <th className="p-4 text-left">Division</th>
                   <th className="p-4 text-left">Role</th>
@@ -1010,7 +1046,7 @@ function printCurrentHistory() {
               </thead>
 
               <tbody>
-                {teamMemberships.map((teamMembership) => {
+                {displayedTeamMemberships.map((teamMembership) => {
                   const team = teamMembership.teams;
 
                   return (
@@ -1030,6 +1066,10 @@ function printCurrentHistory() {
                       </td>
 
                       <td className="p-4 text-slate-700">
+                        {team?.divisions?.leagues?.seasons?.name || "—"}
+                      </td>
+
+                      <td className="p-4 text-slate-700">
                         {team?.divisions?.leagues?.name || "—"}
                       </td>
 
@@ -1046,13 +1086,15 @@ function printCurrentHistory() {
                   );
                 })}
 
-                {teamMemberships.length === 0 && (
+                {displayedTeamMemberships.length === 0 && (
                   <tr>
                     <td
-                      colSpan="4"
+                      colSpan="5"
                       className="p-10 text-center text-slate-500"
                     >
-                      This member is not currently on any teams.
+                      {showInactiveTeams
+                        ? "This member has no inactive team history."
+                        : "This member is not currently on any teams."}
                     </td>
                   </tr>
                 )}
