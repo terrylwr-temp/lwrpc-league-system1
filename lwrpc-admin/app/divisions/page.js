@@ -69,6 +69,7 @@ export default function DivisionsPage() {
   const [tiebreak1, setTiebreak1] = useState("standings_points");
   const [tiebreak2, setTiebreak2] = useState("line_wins");
   const [tiebreak3, setTiebreak3] = useState("point_differential");
+  const [showStandingsTiebreakHelp, setShowStandingsTiebreakHelp] = useState(false);
 
   useUnsavedChangesWarning(
     Boolean(
@@ -931,8 +932,53 @@ export default function DivisionsPage() {
                 </p>
               </Field>
 
-              <Field label="Standings Tiebreak Order">
+              <Field
+                label="Standings Tiebreak Order"
+                labelAction={(
+                  <button
+                    type="button"
+                    onClick={() => setShowStandingsTiebreakHelp((isOpen) => !isOpen)}
+                    aria-expanded={showStandingsTiebreakHelp}
+                    aria-controls="standings-tiebreak-help"
+                    aria-label="Explain standings tiebreak calculations"
+                    title="How tiebreaks are calculated"
+                    className="grid h-5 w-5 place-items-center rounded-full bg-blue-700 text-xs font-black text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  >
+                    ?
+                  </button>
+                )}
+              >
                 <div className="space-y-3">
+                  {showStandingsTiebreakHelp && (
+                    <div id="standings-tiebreak-help" className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-xs leading-5 text-blue-950">
+                      <p className="font-bold">
+                        Teams are compared using these choices in order. The next choice is used only if teams are still tied.
+                      </p>
+                      <dl className="mt-2 space-y-2">
+                        <div>
+                          <dt className="font-bold">Standings Points</dt>
+                          <dd>All standings points earned from verified match results, using each line&apos;s configured point value and scoring rule, including any applicable Picklebreaker award.</dd>
+                        </div>
+                        <div>
+                          <dt className="font-bold">Line/Game Win %</dt>
+                          <dd>Line wins divided by completed line results: line wins + line losses + line ties.</dd>
+                        </div>
+                        <div>
+                          <dt className="font-bold">Match Win %</dt>
+                          <dd>Match wins divided by matches played. Tied matches count as played but do not add a win.</dd>
+                        </div>
+                        <div>
+                          <dt className="font-bold">Point Differential</dt>
+                          <dd>Total points scored minus total points allowed across verified matches.</dd>
+                        </div>
+                        <div>
+                          <dt className="font-bold">Total Points For</dt>
+                          <dd>The total points the team scored across verified matches.</dd>
+                        </div>
+                      </dl>
+                    </div>
+                  )}
+
                   <select
                     value={tiebreak1}
                     onChange={(e) => setTiebreak1(e.target.value)}
@@ -968,9 +1014,6 @@ export default function DivisionsPage() {
                     <option value="line_wins">Line/Game Win %</option>
                     <option value="standings_points">Standings Points</option>
                   </select>
-                  <p className="text-xs font-semibold leading-5 text-slate-500">
-                    Line/Game Win % is line wins divided by total lines played. Match Win % is match wins divided by total matchups played.
-                  </p>
                 </div>
               </Field>
 
@@ -1491,12 +1534,13 @@ export default function DivisionsPage() {
   );
 }
 
-function Field({ label, children }) {
+function Field({ label, labelAction, children }) {
   return (
     <div>
-      <label className="mb-1 block text-sm font-semibold text-slate-700">
-        {label}
-      </label>
+      <div className="mb-1 flex items-center gap-1.5">
+        <label className="text-sm font-semibold text-slate-700">{label}</label>
+        {labelAction}
+      </div>
 
       {children}
     </div>
