@@ -5,8 +5,8 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import RoleCapabilityModal from "../../components/RoleCapabilityModal";
 import PlayerHistoryPanel, { printPlayerHistory } from "../../components/PlayerHistoryPanel";
-import { requireRole, supabase } from "../../lib/auth";
-import { formatDisplayDate } from "../../lib/dateTime";
+import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib/auth";
+import { formatDisplayDate, formatDisplayTimestamp } from "../../lib/dateTime";
 import LoadingScreen from "../../components/LoadingScreen";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
@@ -28,6 +28,7 @@ export default function MemberDetailPage() {
   const [locations, setLocations] = useState([]);
 
   const [member, setMember] = useState(null);
+  const [lastLogin, setLastLogin] = useState(undefined);
   const [form, setForm] = useState({});
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [teamMemberships, setTeamMemberships] = useState([]);
@@ -59,6 +60,17 @@ export default function MemberDetailPage() {
 
     if (memberError) {
       alert(memberError.message);
+      return;
+    }
+
+    const lastLoginResponse = await fetch(
+      `/api/admin/member-last-login?memberId=${encodeURIComponent(id)}`,
+      { headers: await getRequestAuthorizationHeaders() }
+    );
+    const lastLoginResult = await lastLoginResponse.json().catch(() => ({}));
+
+    if (!lastLoginResponse.ok || !lastLoginResult.success) {
+      alert(lastLoginResult.error || "Unable to load the member's last login.");
       return;
     }
 
@@ -229,6 +241,7 @@ setRoleRow(roleData || null);
 setUserRole(roleData?.role || "player");
 
     setMember(memberData);
+    setLastLogin(lastLoginResult.lastLogin || null);
     setForm({
       first_name: memberData.first_name || "",
       last_name: memberData.last_name || "",
@@ -643,6 +656,14 @@ function printCurrentHistory() {
                         DUPR ID:
                       </span>{" "}
                       {member.dupr_id || "—"}
+                    </div>
+                    <div>
+                      <span className="font-semibold text-slate-800">
+                        Last Login:
+                      </span>{" "}
+                      {lastLogin === undefined
+                        ? "Loading..."
+                        : formatDisplayTimestamp(lastLogin, "Never")}
                     </div>
 	<div>
 	  <span className="font-semibold text-slate-800">
