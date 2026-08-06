@@ -21,6 +21,9 @@ export default function PlayerHistoryPanel({
   onClose,
   className = "mt-4",
   closeOnPanelClick = true,
+  showHeader = true,
+  emptyMessage = "No game play history found for this player.",
+  emptyClassName = "rounded-lg bg-white p-4 text-center text-sm text-slate-500",
   printTitle = "Play History",
   printSubtitle = "",
   includeInactiveScopes = true,
@@ -92,7 +95,7 @@ export default function PlayerHistoryPanel({
       className={`${className} ${closeOnPanelClick ? "cursor-pointer" : ""} rounded-xl border border-slate-200 bg-slate-50 p-4`}
       {...clickToCloseProps}
     >
-      <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+      {showHeader && <div className="mb-3 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="font-bold text-slate-900">
             Game Play History
@@ -169,7 +172,7 @@ export default function PlayerHistoryPanel({
             </label>
           )}
         </div>
-      </div>
+      </div>}
 
       <div className="space-y-2">
         {filteredRows.map((row) => {
@@ -221,8 +224,8 @@ export default function PlayerHistoryPanel({
         })}
 
         {filteredRows.length === 0 && (
-          <div className="rounded-lg bg-white p-4 text-center text-sm text-slate-500">
-            No game play history found for this player.
+          <div className={emptyClassName}>
+            {emptyMessage}
           </div>
         )}
       </div>

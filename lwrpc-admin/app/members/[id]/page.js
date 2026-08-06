@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import RoleCapabilityModal from "../../components/RoleCapabilityModal";
+import DashboardPlayHistoryModal from "../../components/DashboardPlayHistoryModal";
 import PlayerHistoryPanel, { printPlayerHistory } from "../../components/PlayerHistoryPanel";
 import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTimestamp } from "../../lib/dateTime";
@@ -37,6 +38,7 @@ export default function MemberDetailPage() {
   const [playerTeams, setPlayerTeams] = useState([]);
   const [playHistory, setPlayHistory] = useState([]);
   const [historyModalTeam, setHistoryModalTeam] = useState(null);
+  const [showDashboardHistory, setShowDashboardHistory] = useState(false);
   const [historyFilter, setHistoryFilter] = useState("all");
   const [includeInactiveHistory, setIncludeInactiveHistory] = useState(false);
   const [printableHistory, setPrintableHistory] = useState(null);
@@ -540,7 +542,16 @@ function openPlayerHistory() {
   setHistoryFilter("all");
   setIncludeInactiveHistory(true);
   setPrintableHistory(null);
-  setHistoryModalTeam({});
+  setShowDashboardHistory(true);
+}
+
+function closeDashboardHistory() {
+  setShowDashboardHistory(false);
+}
+
+function showMemberDetailsFromHistory() {
+  setShowDashboardHistory(false);
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function closeTeamPlayHistory() {
@@ -1159,6 +1170,18 @@ function printCurrentHistory() {
               />
             </div>
           </div>
+        )}
+
+        {showDashboardHistory && (
+          <DashboardPlayHistoryModal
+            memberId={id}
+            historyRows={sortedPlayHistory}
+            playerTeams={playerTeams}
+            historyFilter={historyFilter}
+            onChangeHistoryFilter={setHistoryFilter}
+            onClose={closeDashboardHistory}
+            onOpenPlayerDetails={showMemberDetailsFromHistory}
+          />
         )}
 
         {roleHelpOpen && (
