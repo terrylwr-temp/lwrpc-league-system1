@@ -88,6 +88,9 @@ export default function PdfDocumentModalClient({
 }) {
   const viewerRef = useRef(null);
   const searchInputRef = useRef(null);
+  const pageScrollPositionRef = useRef("top");
+  const wheelNavigationLockedRef = useRef(false);
+  const wheelNavigationTimerRef = useRef(null);
   const [numPages, setNumPages] = useState(0);
   const [pageNumber, setPageNumber] = useState(1);
   const [pageWidth, setPageWidth] = useState(900);
@@ -125,6 +128,24 @@ export default function PdfDocumentModalClient({
   }, []);
 
   useEffect(() => {
+    const viewer = viewerRef.current;
+    if (!viewer) return undefined;
+
+    const frame = window.requestAnimationFrame(() => {
+      viewer.scrollTop = pageScrollPositionRef.current === "bottom" ? viewer.scrollHeight : 0;
+      pageScrollPositionRef.current = "top";
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [pageNumber]);
+
+  useEffect(() => () => {
+    if (wheelNavigationTimerRef.current) {
+      window.clearTimeout(wheelNavigationTimerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!searchOpen) return;
     searchInputRef.current?.focus();
   }, [searchOpen]);
@@ -143,6 +164,7 @@ export default function PdfDocumentModalClient({
 
   async function loadDocument(pdf) {
     setNumPages(pdf.numPages);
+    pageScrollPositionRef.current = "top";
     setPageNumber(1);
     setPageSearchData([]);
     setIndexing(true);
@@ -183,14 +205,47 @@ export default function PdfDocumentModalClient({
     setSearchTerm(nextSearchTerm);
     setMatches(nextMatches);
     setActiveMatchIndex(nextMatches.length > 0 ? 0 : -1);
-    if (nextMatches.length > 0) setPageNumber(nextMatches[0].pageNumber);
+    if (nextMatches.length > 0) {
+      pageScrollPositionRef.current = "top";
+      setPageNumber(nextMatches[0].pageNumber);
+    }
   }
 
   function moveToMatch(direction) {
     if (matches.length === 0) return;
     const nextIndex = (activeMatchIndex + direction + matches.length) % matches.length;
     setActiveMatchIndex(nextIndex);
+    pageScrollPositionRef.current = "top";
     setPageNumber(matches[nextIndex].pageNumber);
+  }
+
+  function changePage(nextPage, scrollPosition = "top") {
+    pageScrollPositionRef.current = scrollPosition;
+    setPageNumber(Math.max(1, Math.min(numPages, nextPage)));
+  }
+
+  function handleViewerWheel(event) {
+    const viewer = viewerRef.current;
+    if (!viewer || !numPages || event.deltaY === 0) return;
+
+    const movingForward = event.deltaY > 0;
+    const isAtBoundary = movingForward
+      ? viewer.scrollTop + viewer.clientHeight >= viewer.scrollHeight - 2
+      : viewer.scrollTop <= 2;
+
+    if (!isAtBoundary) return;
+
+    event.preventDefault();
+    if (wheelNavigationLockedRef.current) return;
+
+    const nextPage = movingForward ? pageNumber + 1 : pageNumber - 1;
+    if (nextPage < 1 || nextPage > numPages) return;
+
+    wheelNavigationLockedRef.current = true;
+    changePage(nextPage, movingForward ? "top" : "bottom");
+    wheelNavigationTimerRef.current = window.setTimeout(() => {
+      wheelNavigationLockedRef.current = false;
+    }, 250);
   }
 
   function closeSearch() {
@@ -290,16 +345,16 @@ export default function PdfDocumentModalClient({
         )}
 
         <div className="flex items-center justify-center gap-3 border-b border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
-          <button type="button" onClick={() => setPageNumber((page) => Math.max(1, page - 1))} disabled={pageNumber <= 1} className="rounded-lg border border-slate-300 px-3 py-1 disabled:opacity-40">
+          <button type="button" onClick={() => changePage(pageNumber - 1)} disabled={pageNumber <= 1} className="rounded-lg border border-slate-300 px-3 py-1 disabled:opacity-40">
             Previous Page
           </button>
           <span>Page {pageNumber} of {numPages || "-"}</span>
-          <button type="button" onClick={() => setPageNumber((page) => Math.min(numPages, page + 1))} disabled={!numPages || pageNumber >= numPages} className="rounded-lg border border-slate-300 px-3 py-1 disabled:opacity-40">
+          <button type="button" onClick={() => changePage(pageNumber + 1)} disabled={!numPages || pageNumber >= numPages} className="rounded-lg border border-slate-300 px-3 py-1 disabled:opacity-40">
             Next Page
           </button>
         </div>
 
-        <div ref={viewerRef} className="h-[72vh] overflow-auto bg-slate-200 p-4">
+        <div ref={viewerRef} onWheel={handleViewerWheel} className="h-[72vh] overflow-auto bg-slate-200 p-4">
           <Document
             file={document.url}
             onLoadSuccess={loadDocument}
