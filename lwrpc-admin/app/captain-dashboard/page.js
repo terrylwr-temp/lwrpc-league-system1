@@ -398,7 +398,6 @@ export default function CaptainDashboardPage() {
       setTeamStats({});
       setDivisionStandings([]);
       setScoreSubmittersById({});
-      router.push("/standings");
       finishLoading(startedAt, setLoading);
       return;
     }
