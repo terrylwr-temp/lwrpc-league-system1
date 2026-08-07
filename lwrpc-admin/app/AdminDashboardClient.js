@@ -31,6 +31,7 @@ import {
   DEFAULT_LEAGUE_DOCUMENT_BUCKET,
   LEAGUE_DOCUMENT_TYPES,
   leagueDocumentPath,
+  normalizeLeagueDocumentBucket,
 } from "./lib/leagueDocuments";
 import {
   DEFAULT_GUIDE_BUCKET,
@@ -627,7 +628,7 @@ export default function DashboardPage() {
 
     if (error) {
       setGuideFiles([]);
-      setGuideFilesStatus(error.message);
+      setGuideFilesStatus(`Unable to load PDFs${prefix ? ` from ${prefix}/` : ""}: ${error.message || "Unknown Supabase Storage error."}`);
       return;
     }
 
@@ -968,11 +969,11 @@ export default function DashboardPage() {
       return;
     }
 
-    const bucket = weekdayLeague?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET;
-    const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60);
-    const documentUrl = !error && data?.signedUrl
-      ? data.signedUrl
-      : supabase.storage.from(bucket).getPublicUrl(path).data?.publicUrl || "";
+    const bucket = normalizeLeagueDocumentBucket(
+      weekdayLeague?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET
+    );
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    const documentUrl = data?.publicUrl || "";
 
     if (!documentUrl) {
       documentWindow?.close();
@@ -1091,7 +1092,7 @@ export default function DashboardPage() {
                   value={guideBucket}
                   onChange={(event) => setGuideBucket(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
-                  placeholder="league-documents"
+                  placeholder="documents"
                 />
               </GuideField>
 
@@ -1101,7 +1102,7 @@ export default function DashboardPage() {
                   value={guidePrefix}
                   onChange={(event) => setGuidePrefix(event.target.value)}
                   className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
-                  placeholder="private"
+                  placeholder="league-documents"
                 />
               </GuideField>
 
@@ -3055,7 +3056,7 @@ function GuideField({ label, children }) {
   );
 }
 
-async function listPdfFiles(bucket, prefix = "", depth = 0) {
+async function listPdfFiles(bucket, prefix = "") {
   const { data, error } = await supabase.storage
     .from(bucket)
     .list(prefix, {
@@ -3068,23 +3069,10 @@ async function listPdfFiles(bucket, prefix = "", depth = 0) {
 
   if (error) return { files: [], error };
 
-  const files = [];
-
-  for (const item of data || []) {
-    const path = prefix ? `${prefix}/${item.name}` : item.name;
-    const isPdf = item.name.toLowerCase().endsWith(".pdf");
-
-    if (isPdf) {
-      files.push(path);
-      continue;
-    }
-
-    if (!item.name.includes(".") && depth < 3) {
-      const nested = await listPdfFiles(bucket, path, depth + 1);
-      if (nested.error) return nested;
-      files.push(...nested.files);
-    }
-  }
+  const files = (data || [])
+    .filter((item) => item.name.toLowerCase().endsWith(".pdf"))
+    .map((item) => (prefix ? `${prefix}/${item.name}` : item.name))
+    .sort((left, right) => left.localeCompare(right, undefined, { sensitivity: "base" }));
 
   return { files, error: null };
 }

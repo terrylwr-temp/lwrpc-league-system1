@@ -1,7 +1,3 @@
-import {
-  DEFAULT_LEAGUE_DOCUMENT_BUCKET,
-  DEFAULT_LEAGUE_DOCUMENT_PREFIX,
-} from "./leagueDocuments";
 import { getRequestAuthorizationHeaders } from "./auth";
 
 export const GUIDE_DOCUMENT_TYPES = [
@@ -22,8 +18,12 @@ export const GUIDE_DOCUMENT_TYPES = [
   },
 ];
 
-export const DEFAULT_GUIDE_BUCKET = DEFAULT_LEAGUE_DOCUMENT_BUCKET;
-export const DEFAULT_GUIDE_PREFIX = DEFAULT_LEAGUE_DOCUMENT_PREFIX;
+// Dashboard guides live in the public documents bucket. These values stay
+// separate from league-document settings, which can be customized per league.
+export const DEFAULT_GUIDE_BUCKET =
+  process.env.NEXT_PUBLIC_SUPABASE_DASHBOARD_GUIDES_BUCKET || "documents";
+export const DEFAULT_GUIDE_PREFIX =
+  process.env.NEXT_PUBLIC_SUPABASE_DASHBOARD_GUIDES_PREFIX || "league-documents";
 
 export function initialGuideDocuments() {
   return Object.fromEntries(
@@ -41,23 +41,36 @@ export function parseGuideDocument(template) {
   try {
     const parsed = JSON.parse(template?.body || "{}");
 
-    return {
-      bucket: parsed.bucket || DEFAULT_GUIDE_BUCKET,
-      path: parsed.path || "",
-    };
+    return normalizeGuideDocument(parsed);
   } catch {
-    return {
-      bucket: DEFAULT_GUIDE_BUCKET,
-      path: template?.body || "",
-    };
+    return normalizeGuideDocument({ path: template?.body || "" });
   }
 }
 
 export function guideDocumentBody(document) {
+  const normalized = normalizeGuideDocument(document);
+
   return JSON.stringify({
-    bucket: document?.bucket || DEFAULT_GUIDE_BUCKET,
-    path: document?.path || "",
+    bucket: normalized.bucket,
+    path: normalized.path,
   });
+}
+
+export function normalizeGuideDocument(document) {
+  const bucket = String(document?.bucket || "").trim();
+  const path = String(document?.path || "")
+    .trim()
+    .replace(/^\/+/, "");
+  const normalizedPath = path.startsWith("private/")
+    ? `${DEFAULT_GUIDE_PREFIX}/${path.slice("private/".length)}`
+    : path && !path.includes("/")
+      ? `${DEFAULT_GUIDE_PREFIX}/${path}`
+      : path;
+
+  return {
+    bucket: bucket === "league-documents" ? DEFAULT_GUIDE_BUCKET : bucket || DEFAULT_GUIDE_BUCKET,
+    path: normalizedPath,
+  };
 }
 
 export async function loadGuideDocument(templateKey) {
@@ -102,24 +115,10 @@ export async function guidePdfDocument(supabase, guideType) {
     return null;
   }
 
-  const { data, error } = await supabase.storage
-    .from(guideDocument.bucket || DEFAULT_GUIDE_BUCKET)
-    .createSignedUrl(guideDocument.path, 60 * 60);
-
-  if (!error && data?.signedUrl) {
-    return {
-      title: guideType.label,
-      leagueName: "Dashboard Guide",
-      teamName: guideType.buttonLabel,
-      url: data.signedUrl,
-      path: guideDocument.path,
-    };
-  }
-
-  const publicUrl = supabase.storage
+  const { data } = supabase.storage
     .from(guideDocument.bucket || DEFAULT_GUIDE_BUCKET)
     .getPublicUrl(guideDocument.path);
-  const documentUrl = publicUrl.data?.publicUrl || "";
+  const documentUrl = data?.publicUrl || "";
 
   if (!documentUrl) {
     alert("Unable to open this guide. Check the Supabase Storage bucket and file path.");

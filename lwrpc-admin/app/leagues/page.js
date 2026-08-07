@@ -14,6 +14,8 @@ import {
   LEAGUE_DOCUMENT_TYPES,
   initialLeagueDocuments,
   leagueDocumentPayload,
+  leagueDocumentPath,
+  normalizeLeagueDocumentBucket,
 } from "../lib/leagueDocuments";
 import { useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 
@@ -90,7 +92,7 @@ export default function LeaguesPage() {
       rosters_locked: rostersLocked,
       only_home_community_players: onlyHomeCommunityPlayers,
       match_setup_reminder_days_before: Number(matchSetupReminderDaysBefore || 0),
-      league_document_bucket: documentBucket.trim() || null,
+      league_document_bucket: normalizeLeagueDocumentBucket(documentBucket),
       ...leagueDocumentPayload(leagueDocuments),
     };
 
@@ -173,12 +175,12 @@ export default function LeaguesPage() {
     setRostersLocked(league.rosters_locked === true);
     setOnlyHomeCommunityPlayers(league.only_home_community_players === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
-    setDocumentBucket(league.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET);
+    setDocumentBucket(normalizeLeagueDocumentBucket(league.league_document_bucket));
     setLeagueDocuments(
       Object.fromEntries(
         LEAGUE_DOCUMENT_TYPES.map((documentType) => [
           documentType.column,
-          league[documentType.column] || "",
+          leagueDocumentPath(league, documentType),
         ])
       )
     );
@@ -194,12 +196,12 @@ export default function LeaguesPage() {
     setRostersLocked(league.rosters_locked === true);
     setOnlyHomeCommunityPlayers(league.only_home_community_players === true);
     setMatchSetupReminderDaysBefore(String(league.match_setup_reminder_days_before ?? 2));
-    setDocumentBucket(league.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET);
+    setDocumentBucket(normalizeLeagueDocumentBucket(league.league_document_bucket));
     setLeagueDocuments(
       Object.fromEntries(
         LEAGUE_DOCUMENT_TYPES.map((documentType) => [
           documentType.column,
-          league[documentType.column] || "",
+          leagueDocumentPath(league, documentType),
         ])
       )
     );
@@ -251,7 +253,7 @@ export default function LeaguesPage() {
 
     if (!sessionData.session) {
       setDocumentFiles([]);
-      setDocumentFilesStatus("You must be signed in before loading private league documents.");
+      setDocumentFilesStatus("You must be signed in before loading league documents.");
       return;
     }
 
@@ -264,14 +266,14 @@ export default function LeaguesPage() {
 
     if (error) {
       setDocumentFiles([]);
-      setDocumentFilesStatus(error.message);
+      setDocumentFilesStatus(`Unable to load PDFs${prefix ? ` from ${prefix}/` : ""}: ${error.message || "Unknown Supabase Storage error."}`);
       return;
     }
 
     setDocumentFiles(files);
     setDocumentFilesStatus(
       files.length === 0
-        ? `No PDFs found${prefix ? ` in ${prefix}/` : " in this bucket"}. Confirm the files are stored under that folder and the bucket has a SELECT policy for authenticated users.`
+        ? `No PDFs found${prefix ? ` in ${prefix}/` : " in this bucket"}. Confirm the files are stored directly in that folder.`
         : `${files.length} PDF file${files.length === 1 ? "" : "s"} found.`
     );
   }
@@ -431,7 +433,7 @@ export default function LeaguesPage() {
                       value={documentBucket}
                       onChange={(e) => setDocumentBucket(e.target.value)}
                       className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
-                      placeholder="league-documents"
+                      placeholder="documents"
                     />
                   </Field>
 
@@ -441,7 +443,7 @@ export default function LeaguesPage() {
                       value={documentPrefix}
                       onChange={(e) => setDocumentPrefix(e.target.value)}
                       className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
-                      placeholder="private"
+                      placeholder="league-documents"
                     />
                   </Field>
 
@@ -684,7 +686,7 @@ function Field({ label, children }) {
   );
 }
 
-async function listPdfFiles(bucket, prefix = "", depth = 0) {
+async function listPdfFiles(bucket, prefix = "") {
   const { data, error } = await supabase.storage
     .from(bucket)
     .list(prefix, {
@@ -697,23 +699,10 @@ async function listPdfFiles(bucket, prefix = "", depth = 0) {
 
   if (error) return { files: [], error };
 
-  const files = [];
-
-  for (const item of data || []) {
-    const path = prefix ? `${prefix}/${item.name}` : item.name;
-    const isPdf = item.name.toLowerCase().endsWith(".pdf");
-
-    if (isPdf) {
-      files.push(path);
-      continue;
-    }
-
-    if (!item.name.includes(".") && depth < 3) {
-      const nested = await listPdfFiles(bucket, path, depth + 1);
-      if (nested.error) return nested;
-      files.push(...nested.files);
-    }
-  }
+  const files = (data || [])
+    .filter((item) => item.name.toLowerCase().endsWith(".pdf"))
+    .map((item) => (prefix ? `${prefix}/${item.name}` : item.name))
+    .sort((left, right) => left.localeCompare(right, undefined, { sensitivity: "base" }));
 
   return { files, error: null };
 }

@@ -18,6 +18,7 @@ import {
   DEFAULT_LEAGUE_DOCUMENT_BUCKET,
   LEAGUE_DOCUMENT_TYPES,
   leagueDocumentPath,
+  normalizeLeagueDocumentBucket,
 } from "../lib/leagueDocuments";
 import { GUIDE_DOCUMENT_TYPES, guidePdfDocument, openGuideDocument } from "../lib/dashboardGuides";
 import { specialGameStatus } from "../lib/playHistory";
@@ -2716,19 +2717,11 @@ export default function CaptainDashboardPage() {
       return;
     }
 
-    const bucket = league?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET;
-    let documentUrl = "";
-
-    const { data, error } = await supabase.storage
-      .from(bucket)
-      .createSignedUrl(path, 60 * 60);
-
-    if (!error && data?.signedUrl) {
-      documentUrl = data.signedUrl;
-    } else {
-      const publicUrl = supabase.storage.from(bucket).getPublicUrl(path);
-      documentUrl = publicUrl.data?.publicUrl || "";
-    }
+    const bucket = normalizeLeagueDocumentBucket(
+      league?.league_document_bucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET
+    );
+    const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+    const documentUrl = data?.publicUrl || "";
 
     if (!documentUrl) {
       documentWindow?.close();

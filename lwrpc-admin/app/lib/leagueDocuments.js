@@ -1,8 +1,8 @@
 export const DEFAULT_LEAGUE_DOCUMENT_BUCKET =
-  process.env.NEXT_PUBLIC_SUPABASE_LEAGUE_DOCUMENTS_BUCKET || "league-documents";
+  process.env.NEXT_PUBLIC_SUPABASE_LEAGUE_DOCUMENTS_BUCKET || "documents";
 
 export const DEFAULT_LEAGUE_DOCUMENT_PREFIX =
-  process.env.NEXT_PUBLIC_SUPABASE_LEAGUE_DOCUMENTS_PREFIX || "private";
+  process.env.NEXT_PUBLIC_SUPABASE_LEAGUE_DOCUMENTS_PREFIX || "league-documents";
 
 export const LEAGUE_DOCUMENT_TYPES = [
   {
@@ -42,11 +42,33 @@ export function leagueDocumentPayload(documents) {
   return Object.fromEntries(
     LEAGUE_DOCUMENT_TYPES.map((documentType) => [
       documentType.column,
-      documents?.[documentType.column]?.trim() || null,
+      normalizeLeagueDocumentPath(documents?.[documentType.column]) || null,
     ])
   );
 }
 
 export function leagueDocumentPath(league, documentType) {
-  return league?.[documentType.column] || "";
+  return normalizeLeagueDocumentPath(league?.[documentType.column]);
+}
+
+export function normalizeLeagueDocumentPath(path) {
+  const normalizedPath = String(path || "")
+    .trim()
+    .replace(/^\/+/, "");
+
+  if (normalizedPath.startsWith("private/")) {
+    return `${DEFAULT_LEAGUE_DOCUMENT_PREFIX}/${normalizedPath.slice("private/".length)}`;
+  }
+
+  return normalizedPath && !normalizedPath.includes("/")
+    ? `${DEFAULT_LEAGUE_DOCUMENT_PREFIX}/${normalizedPath}`
+    : normalizedPath;
+}
+
+export function normalizeLeagueDocumentBucket(bucket) {
+  const normalizedBucket = String(bucket || "").trim();
+
+  return normalizedBucket === "league-documents"
+    ? DEFAULT_LEAGUE_DOCUMENT_BUCKET
+    : normalizedBucket || DEFAULT_LEAGUE_DOCUMENT_BUCKET;
 }
