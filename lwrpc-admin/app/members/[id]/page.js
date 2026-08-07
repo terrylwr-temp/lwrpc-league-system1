@@ -5,6 +5,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import RoleCapabilityModal from "../../components/RoleCapabilityModal";
 import DashboardPlayHistoryModal from "../../components/DashboardPlayHistoryModal";
+import PlayerHistoryDetailsModal, { calculatePlayerHistoryDetails } from "../../components/PlayerHistoryDetailsModal";
 import PlayerHistoryPanel, { printPlayerHistory } from "../../components/PlayerHistoryPanel";
 import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTimestamp } from "../../lib/dateTime";
@@ -15,7 +16,7 @@ import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } fr
 import { hasRole } from "../../lib/permissions";
 import { hasAnotherCommissioner } from "../../lib/roleGuards";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
-import { sortHistoryRows } from "../../lib/playHistory";
+import { filterHistoryRows, sortHistoryRows } from "../../lib/playHistory";
 import { appConfirm, appPrompt } from "../../lib/appDialog";
 
 export default function MemberDetailPage() {
@@ -39,6 +40,7 @@ export default function MemberDetailPage() {
   const [playHistory, setPlayHistory] = useState([]);
   const [historyModalTeam, setHistoryModalTeam] = useState(null);
   const [showDashboardHistory, setShowDashboardHistory] = useState(false);
+  const [showHistoryDetails, setShowHistoryDetails] = useState(false);
   const [historyFilter, setHistoryFilter] = useState("all");
   const [includeInactiveHistory, setIncludeInactiveHistory] = useState(false);
   const [printableHistory, setPrintableHistory] = useState(null);
@@ -155,6 +157,10 @@ export default function MemberDetailPage() {
         home_team_games_won,
         away_team_games_won,
         winning_team_id,
+        home_player_1_rating_at_play,
+        home_player_2_rating_at_play,
+        away_player_1_rating_at_play,
+        away_player_2_rating_at_play,
         line_games (
           id,
           game_number,
@@ -300,6 +306,13 @@ setUserRole(roleData?.role || "player");
   }, [seasonRatings]);
 
   const sortedPlayHistory = useMemo(() => sortHistoryRows(playHistory), [playHistory]);
+  const historyDetails = useMemo(
+    () => calculatePlayerHistoryDetails(
+      filterHistoryRows(sortedPlayHistory, historyFilter, id, playerTeams),
+      id
+    ),
+    [historyFilter, id, playerTeams, sortedPlayHistory]
+  );
 
   function updateForm(field, value) {
     setForm((current) => ({
@@ -542,16 +555,17 @@ function openPlayerHistory() {
   setHistoryFilter("all");
   setIncludeInactiveHistory(true);
   setPrintableHistory(null);
+  setShowHistoryDetails(false);
   setShowDashboardHistory(true);
 }
 
 function closeDashboardHistory() {
+  setShowHistoryDetails(false);
   setShowDashboardHistory(false);
 }
 
 function showMemberDetailsFromHistory() {
-  setShowDashboardHistory(false);
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  setShowHistoryDetails(true);
 }
 
 function closeTeamPlayHistory() {
@@ -1181,6 +1195,13 @@ function printCurrentHistory() {
             onChangeHistoryFilter={setHistoryFilter}
             onClose={closeDashboardHistory}
             onOpenPlayerDetails={showMemberDetailsFromHistory}
+          />
+        )}
+
+        {showHistoryDetails && (
+          <PlayerHistoryDetailsModal
+            details={historyDetails}
+            onClose={() => setShowHistoryDetails(false)}
           />
         )}
 

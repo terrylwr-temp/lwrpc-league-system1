@@ -1,19 +1,20 @@
 "use client";
 
 import LoadingScreen from "../components/LoadingScreen";
-import { useCallback, useDeferredValue, useEffect, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
 import DashboardPlayHistoryModal from "../components/DashboardPlayHistoryModal";
+import PlayerHistoryDetailsModal, { calculatePlayerHistoryDetails } from "../components/PlayerHistoryDetailsModal";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../lib/notificationPreferences";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { appConfirm } from "../lib/appDialog";
-import { sortHistoryRows } from "../lib/playHistory";
+import { filterHistoryRows, sortHistoryRows } from "../lib/playHistory";
 
 const PAGE_SIZE = 100;
 const MEMBER_DIRECTORY_VIEW_STATE_KEY = "lwrpc-member-directory-view";
@@ -62,6 +63,7 @@ export default function MembersPage() {
   const [historyRows, setHistoryRows] = useState([]);
   const [historyTeams, setHistoryTeams] = useState([]);
   const [historyFilter, setHistoryFilter] = useState("all");
+  const [showHistoryDetails, setShowHistoryDetails] = useState(false);
   const [historyLoadingMemberId, setHistoryLoadingMemberId] = useState("");
   const [ratingsMember, setRatingsMember] = useState(null);
   const [seasonRatings, setSeasonRatings] = useState([]);
@@ -83,6 +85,17 @@ export default function MembersPage() {
     )),
     "member"
   );
+
+  const historyDetails = useMemo(() => {
+    if (!historyMember) return null;
+    const filteredRows = filterHistoryRows(
+      historyRows,
+      historyFilter,
+      historyMember.id,
+      historyTeams
+    );
+    return calculatePlayerHistoryDetails(filteredRows, historyMember.id);
+  }, [historyFilter, historyMember, historyRows, historyTeams]);
 
   const loadMembers = useCallback(async function loadMembers() {
     const user = await requireRole(router, "league_manager");
@@ -511,6 +524,10 @@ export default function MembersPage() {
           home_team_games_won,
           away_team_games_won,
           winning_team_id,
+          home_player_1_rating_at_play,
+          home_player_2_rating_at_play,
+          away_player_1_rating_at_play,
+          away_player_2_rating_at_play,
           line_games (
             id,
             game_number,
@@ -579,6 +596,7 @@ export default function MembersPage() {
     setHistoryRows(sortHistoryRows(rows || []));
     setHistoryTeams((teamRows || []).map((row) => row.teams).filter(Boolean));
     setHistoryFilter("all");
+    setShowHistoryDetails(false);
   }
 
   async function openMemberRatings(member) {
@@ -1324,8 +1342,18 @@ export default function MembersPage() {
             playerTeams={historyTeams}
             historyFilter={historyFilter}
             onChangeHistoryFilter={setHistoryFilter}
-            onClose={() => setHistoryMember(null)}
-            onOpenPlayerDetails={() => router.push(`/members/${historyMember.id}`)}
+            onClose={() => {
+              setHistoryMember(null);
+              setShowHistoryDetails(false);
+            }}
+            onOpenPlayerDetails={() => setShowHistoryDetails(true)}
+          />
+        )}
+
+        {showHistoryDetails && historyDetails && (
+          <PlayerHistoryDetailsModal
+            details={historyDetails}
+            onClose={() => setShowHistoryDetails(false)}
           />
         )}
 
