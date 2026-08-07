@@ -746,6 +746,19 @@ export default function MembersPage() {
       return;
     }
 
+    const memberName = memberFullName(member) || "this member";
+    const confirmed = await appConfirm(
+      [
+        `Send a login email to ${memberName}?`,
+        "",
+        `It will be sent to ${normalizedEmail}.`,
+        "The member will receive either a password-reset email or an account-setup invitation, depending on their account.",
+      ].join("\n"),
+      { title: "Send login email", confirmLabel: "Send email", tone: "warning" }
+    );
+
+    if (!confirmed) return;
+
     setResettingPasswordMemberId(member.id);
 
     const response = await fetch("/api/member-password-reset-check", {
