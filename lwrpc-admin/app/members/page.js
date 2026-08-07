@@ -7,11 +7,13 @@ import AppHeader from "../components/AppHeader";
 import ListingCount from "../components/ListingCount";
 import { getRequestAuthorizationHeaders, requireRole, supabase } from "../lib/auth";
 import RoleCapabilityModal from "../components/RoleCapabilityModal";
+import DashboardPlayHistoryModal from "../components/DashboardPlayHistoryModal";
 import { formatPhoneNumberForStorage, formatPhoneNumberInput } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } from "../lib/notificationPreferences";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { appConfirm } from "../lib/appDialog";
+import { sortHistoryRows } from "../lib/playHistory";
 
 const PAGE_SIZE = 100;
 const MEMBER_DIRECTORY_VIEW_STATE_KEY = "lwrpc-member-directory-view";
@@ -56,6 +58,14 @@ export default function MembersPage() {
   const [exportingMembers, setExportingMembers] = useState(false);
   const [correctingRoles, setCorrectingRoles] = useState(false);
   const [teamsMember, setTeamsMember] = useState(null);
+  const [historyMember, setHistoryMember] = useState(null);
+  const [historyRows, setHistoryRows] = useState([]);
+  const [historyTeams, setHistoryTeams] = useState([]);
+  const [historyFilter, setHistoryFilter] = useState("all");
+  const [historyLoadingMemberId, setHistoryLoadingMemberId] = useState("");
+  const [ratingsMember, setRatingsMember] = useState(null);
+  const [seasonRatings, setSeasonRatings] = useState([]);
+  const [ratingsLoadingMemberId, setRatingsLoadingMemberId] = useState("");
   const [savingNewMember, setSavingNewMember] = useState(false);
   const [newMemberForm, setNewMemberForm] = useState(initialMemberForm());
 
@@ -446,6 +456,158 @@ export default function MembersPage() {
 
   function openMemberTeams(member) {
     setTeamsMember(member);
+  }
+
+  async function openMemberHistory(member) {
+    if (historyLoadingMemberId) return;
+
+    const memberId = String(member.id);
+    const playerFilter = [
+      `home_player_1_id.eq.${memberId}`,
+      `home_player_2_id.eq.${memberId}`,
+      `away_player_1_id.eq.${memberId}`,
+      `away_player_2_id.eq.${memberId}`,
+    ].join(",");
+
+    setHistoryLoadingMemberId(memberId);
+    const [{ data: teamRows, error: teamError }, { data: rows, error: historyError }] = await Promise.all([
+      supabase
+        .from("team_members")
+        .select(`
+          teams (
+            id,
+            name,
+            is_active,
+            divisions (
+              id,
+              name,
+              is_active,
+              leagues (
+                id,
+                name,
+                abbreviation,
+                season_id,
+                is_active,
+                seasons (
+                  id,
+                  name,
+                  abbreviation,
+                  is_active
+                )
+              )
+            )
+          )
+        `)
+        .eq("member_id", memberId),
+      supabase
+        .from("match_lines")
+        .select(`
+          id,
+          line_number,
+          home_player_1_id,
+          home_player_2_id,
+          away_player_1_id,
+          away_player_2_id,
+          home_team_games_won,
+          away_team_games_won,
+          winning_team_id,
+          line_games (
+            id,
+            game_number,
+            home_score,
+            away_score,
+            game_status
+          ),
+          division_lines (
+            id,
+            line_name,
+            line_type
+          ),
+          matches (
+            id,
+            scheduled_date,
+            scheduled_time,
+            status,
+            score_status,
+            home_score,
+            away_score,
+            winning_team_id,
+            result_type,
+            result_notes,
+            home_team_id,
+            away_team_id,
+            home_team:teams!matches_home_team_id_fkey (
+              id,
+              name,
+              is_active
+            ),
+            away_team:teams!matches_away_team_id_fkey (
+              id,
+              name,
+              is_active
+            ),
+            divisions (
+              id,
+              name,
+              is_active
+            ),
+            leagues (
+              id,
+              name,
+              abbreviation,
+              season_id,
+              is_active,
+              seasons (
+                id,
+                name,
+                abbreviation,
+                is_active
+              )
+            )
+          )
+        `)
+        .or(playerFilter),
+    ]);
+    setHistoryLoadingMemberId("");
+
+    if (teamError || historyError) {
+      alert(teamError?.message || historyError?.message || "Unable to load play history.");
+      return;
+    }
+
+    setHistoryMember(member);
+    setHistoryRows(sortHistoryRows(rows || []));
+    setHistoryTeams((teamRows || []).map((row) => row.teams).filter(Boolean));
+    setHistoryFilter("all");
+  }
+
+  async function openMemberRatings(member) {
+    if (ratingsLoadingMemberId) return;
+
+    const memberId = String(member.id);
+    setRatingsLoadingMemberId(memberId);
+    const { data, error } = await supabase
+      .from("member_season_ratings")
+      .select(`
+        *,
+        seasons (
+          id,
+          name,
+          start_date,
+          end_date
+        )
+      `)
+      .eq("member_id", memberId)
+      .order("created_at", { ascending: false });
+    setRatingsLoadingMemberId("");
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    setRatingsMember(member);
+    setSeasonRatings(data || []);
   }
 
   async function exportMembers() {
@@ -991,16 +1153,43 @@ export default function MembersPage() {
                   </td>
 
                   <td className="sticky right-0 z-20 bg-white px-4 py-4 text-right align-middle group-hover:bg-slate-50">
-                    <div className="flex flex-nowrap justify-end gap-2">
+                    <div className="flex flex-nowrap justify-end gap-1.5">
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           openMemberTeams(member);
                         }}
-                        className="h-9 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white hover:bg-emerald-800"
+                        title={`Show teams for ${member.first_name} ${member.last_name}`}
+                        className="h-8 whitespace-nowrap rounded-lg bg-emerald-700 px-2 text-xs font-bold text-white hover:bg-emerald-800"
                       >
                         Teams ({activeTeamCount(member)})
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openMemberHistory(member);
+                        }}
+                        disabled={historyLoadingMemberId === String(member.id)}
+                        title={`Show play history for ${member.first_name} ${member.last_name}`}
+                        className="h-8 whitespace-nowrap rounded-lg bg-indigo-700 px-2 text-xs font-bold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {historyLoadingMemberId === String(member.id) ? "Loading..." : "History"}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openMemberRatings(member);
+                        }}
+                        disabled={ratingsLoadingMemberId === String(member.id)}
+                        title={`Show ratings for ${member.first_name} ${member.last_name}`}
+                        className="h-8 whitespace-nowrap rounded-lg bg-amber-400 px-2 text-xs font-bold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        {ratingsLoadingMemberId === String(member.id) ? "Loading..." : "Ratings"}
                       </button>
 
                       <button
@@ -1010,9 +1199,10 @@ export default function MembersPage() {
                           resetMemberPassword(member);
                         }}
                         disabled={resettingPasswordMemberId === member.id}
-                        className="h-9 whitespace-nowrap rounded-lg bg-blue-700 px-3 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        title={`Send a password-reset email to ${member.first_name} ${member.last_name}`}
+                        className="h-8 whitespace-nowrap rounded-lg bg-blue-700 px-2 text-xs font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        {resettingPasswordMemberId === member.id ? "Sending..." : "Reset Password"}
+                        {resettingPasswordMemberId === member.id ? "Sending..." : "Reset"}
                       </button>
 
                     </div>
@@ -1053,13 +1243,31 @@ export default function MembersPage() {
                   </button>
                 </div>
 
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="mt-3 grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => openMemberTeams(member)}
                     className="h-10 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white hover:bg-emerald-800"
                   >
                     Teams ({activeTeamCount(member)})
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openMemberHistory(member)}
+                    disabled={historyLoadingMemberId === String(member.id)}
+                    className="h-10 whitespace-nowrap rounded-lg bg-indigo-700 px-3 text-sm font-semibold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {historyLoadingMemberId === String(member.id) ? "Loading..." : "History"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => openMemberRatings(member)}
+                    disabled={ratingsLoadingMemberId === String(member.id)}
+                    className="h-10 whitespace-nowrap rounded-lg bg-amber-400 px-3 text-sm font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {ratingsLoadingMemberId === String(member.id) ? "Loading..." : "Ratings"}
                   </button>
 
                   <button
@@ -1106,6 +1314,27 @@ export default function MembersPage() {
           <MemberTeamsModal
             member={teamsMember}
             onClose={() => setTeamsMember(null)}
+          />
+        )}
+
+        {historyMember && (
+          <DashboardPlayHistoryModal
+            memberId={historyMember.id}
+            historyRows={historyRows}
+            playerTeams={historyTeams}
+            historyFilter={historyFilter}
+            onChangeHistoryFilter={setHistoryFilter}
+            onClose={() => setHistoryMember(null)}
+            onOpenPlayerDetails={() => router.push(`/members/${historyMember.id}`)}
+          />
+        )}
+
+        {ratingsMember && (
+          <MemberRatingsModal
+            member={ratingsMember}
+            ratings={seasonRatings}
+            onClose={() => setRatingsMember(null)}
+            onEditRatings={() => router.push(`/ratings?member=${encodeURIComponent(ratingsMember.id)}`)}
           />
         )}
 
@@ -1881,6 +2110,83 @@ function MemberTeamsModal({ member, onClose }) {
       </div>
     </div>
   );
+}
+
+function MemberRatingsModal({ member, ratings, onClose, onEditRatings }) {
+  const memberName = memberFullName(member) || "Member";
+
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/75 p-4" role="dialog" aria-modal="true" aria-labelledby="member-ratings-title">
+      <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="flex flex-col gap-3 bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-4 text-slate-950 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <div className="text-xs font-black uppercase tracking-wide text-slate-800">Member Ratings</div>
+            <h2 id="member-ratings-title" className="mt-1 text-2xl font-black">{memberName}</h2>
+          </div>
+          <div className="flex flex-wrap gap-2 sm:justify-end">
+            <button
+              type="button"
+              onClick={onEditRatings}
+              className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-black text-white hover:bg-slate-800"
+            >
+              Edit Ratings
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-slate-950/20 bg-white/50 px-4 py-2 text-sm font-black text-slate-950 hover:bg-white/70"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-auto p-5">
+          <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <table className="w-full min-w-[620px] border-collapse">
+              <thead className="bg-slate-900 text-left text-xs uppercase tracking-wide text-white">
+                <tr>
+                  <th className="px-4 py-3">Season</th>
+                  <th className="px-4 py-3">DUPR Rating</th>
+                  <th className="px-4 py-3">PrimeTime Rating</th>
+                  <th className="px-4 py-3">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ratings.map((rating) => (
+                  <tr key={rating.id} className="border-t border-slate-100 hover:bg-slate-50">
+                    <td className="px-4 py-3 font-semibold text-slate-900">{rating.seasons?.name || "Unknown Season"}</td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-900">
+                        {formatMemberRating(rating.season_dupr_rating)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="rounded-full bg-emerald-100 px-3 py-1 text-sm font-semibold text-emerald-900">
+                        {formatMemberRating(rating.season_primetime_rating)}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-slate-700">{rating.notes || "—"}</td>
+                  </tr>
+                ))}
+                {ratings.length === 0 && (
+                  <tr>
+                    <td colSpan="4" className="px-4 py-10 text-center text-slate-500">No season ratings found.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function formatMemberRating(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toFixed(3) : String(value);
 }
 
 function readMemberDirectoryViewState() {
