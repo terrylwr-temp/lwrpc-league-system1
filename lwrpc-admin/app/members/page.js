@@ -1205,7 +1205,7 @@ export default function MembersPage() {
                         }}
                         disabled={ratingsLoadingMemberId === String(member.id)}
                         title={`Show ratings for ${member.first_name} ${member.last_name}`}
-                        className="h-8 whitespace-nowrap rounded-lg bg-amber-400 px-2 text-xs font-bold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-8 whitespace-nowrap rounded-lg bg-emerald-700 px-2 text-xs font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {ratingsLoadingMemberId === String(member.id) ? "Loading..." : "Ratings"}
                       </button>
@@ -1283,7 +1283,7 @@ export default function MembersPage() {
                     type="button"
                     onClick={() => openMemberRatings(member)}
                     disabled={ratingsLoadingMemberId === String(member.id)}
-                    className="h-10 whitespace-nowrap rounded-lg bg-amber-400 px-3 text-sm font-semibold text-slate-950 hover:bg-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="h-10 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {ratingsLoadingMemberId === String(member.id) ? "Loading..." : "Ratings"}
                   </button>
@@ -2146,23 +2146,23 @@ function MemberRatingsModal({ member, ratings, onClose, onEditRatings }) {
   return (
     <div className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/75 p-4" role="dialog" aria-modal="true" aria-labelledby="member-ratings-title">
       <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
-        <div className="flex flex-col gap-3 bg-gradient-to-r from-amber-400 to-orange-500 px-5 py-4 text-slate-950 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3 bg-emerald-700 px-5 py-4 text-white sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="text-xs font-black uppercase tracking-wide text-slate-800">Member Ratings</div>
+            <div className="text-xs font-black uppercase tracking-wide text-emerald-200">Member Ratings</div>
             <h2 id="member-ratings-title" className="mt-1 text-2xl font-black">{memberName}</h2>
           </div>
           <div className="flex flex-wrap gap-2 sm:justify-end">
             <button
               type="button"
               onClick={onEditRatings}
-              className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-black text-white hover:bg-slate-800"
+              className="rounded-xl bg-white/10 px-4 py-2 text-sm font-black text-white hover:bg-white/20"
             >
               Edit Ratings
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl border border-slate-950/20 bg-white/50 px-4 py-2 text-sm font-black text-slate-950 hover:bg-white/70"
+              className="rounded-xl border border-white/30 bg-white/10 px-4 py-2 text-sm font-black text-white hover:bg-white/20"
             >
               Close
             </button>
