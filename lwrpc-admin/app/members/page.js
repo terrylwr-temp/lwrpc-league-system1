@@ -1045,16 +1045,16 @@ export default function MembersPage() {
           </div>
 
           <div className="hidden overflow-visible md:block">
-          <table className="min-w-[1430px] table-fixed">
+          <table className="min-w-[1240px] table-fixed">
             <colgroup>
-              <col className="w-[250px]" />
-              <col className="w-[160px]" />
-              <col className="w-[190px]" />
-              <col className="w-[145px]" />
-              <col className="w-[115px]" />
-              <col className="w-[155px]" />
+              <col className="w-[240px]" />
               <col className="w-[150px]" />
-              <col className="w-[215px]" />
+              <col className="w-[135px]" />
+              <col className="w-[115px]" />
+              <col className="w-[115px]" />
+              <col className="w-[125px]" />
+              <col className="w-[190px]" />
+              <col className="w-[170px]" />
             </colgroup>
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
@@ -1171,11 +1171,11 @@ export default function MembersPage() {
                     {member.club_location || "—"}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm tabular-nums text-slate-700">
+                  <td className="whitespace-nowrap px-3 py-4 align-middle text-sm tabular-nums text-slate-700">
                     {formatPhoneNumberForStorage(member.phone) || "—"}
                   </td>
 
-                  <td className="whitespace-nowrap px-4 py-4 align-middle text-sm text-slate-700">
+                  <td className="whitespace-nowrap px-3 py-4 align-middle text-sm text-slate-700">
                     {member.dupr_id || "—"}
                   </td>
 
@@ -1191,7 +1191,7 @@ export default function MembersPage() {
                     </span>
                   </td>
 
-                  <td className="whitespace-nowrap bg-white px-4 py-4 align-middle text-sm font-semibold text-slate-700 group-hover:bg-slate-50">
+                  <td className="whitespace-nowrap bg-white px-3 py-4 align-middle text-sm font-semibold text-slate-700 group-hover:bg-slate-50">
                     {getMemberRole(member)}
                   </td>
 
@@ -1202,7 +1202,7 @@ export default function MembersPage() {
                     )}
                   </td>
 
-                  <td className="sticky right-0 z-20 bg-white px-4 py-4 text-right align-middle group-hover:bg-slate-50">
+                  <td className="sticky right-0 z-20 bg-white px-3 py-4 text-right align-middle group-hover:bg-slate-50">
                     <div className="grid grid-cols-2 gap-1.5">
                       <button
                         type="button"
