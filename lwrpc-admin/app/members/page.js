@@ -1052,9 +1052,9 @@ export default function MembersPage() {
               <col className="w-[135px]" />
               <col className="w-[115px]" />
               <col className="w-[115px]" />
-              <col className="w-[105px]" />
+              <col className="w-[75px]" />
               <col className="w-[190px]" />
-              <col className="w-[190px]" />
+              <col className="w-[220px]" />
             </colgroup>
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
@@ -1098,8 +1098,8 @@ export default function MembersPage() {
                     onClick={() => changeSort("status")}
                   />
                 </th>
-                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("role", sortConfig)}>
-                  <div className="flex items-center gap-2">
+                <th className="sticky top-0 z-20 bg-slate-900 px-2 py-4 text-left" aria-sort={sortAria("role", sortConfig)}>
+                  <div className="flex items-center gap-1">
                     <SortHeader
                       active={sortConfig.key === "role"}
                       direction={sortConfig.direction}
@@ -1111,7 +1111,7 @@ export default function MembersPage() {
                       onClick={() => setRoleHelpOpen(true)}
                       aria-label="Show role capability matrix"
                       title="Show role capability matrix"
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-sm font-black text-slate-900 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white text-xs font-black text-slate-900 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
                     >
                       ?
                     </button>
@@ -1125,7 +1125,7 @@ export default function MembersPage() {
                     onClick={() => changeSort("last_login")}
                   />
                 </th>
-                <th className="sticky right-0 top-0 z-40 bg-slate-900 px-4 py-4 text-right">
+                <th className="sticky right-0 top-0 z-40 w-[220px] min-w-[220px] bg-slate-900 px-2 py-4 text-right">
                   <div className="font-black text-white">
                     Actions
                   </div>
@@ -1191,7 +1191,7 @@ export default function MembersPage() {
                     </span>
                   </td>
 
-                  <td className="whitespace-nowrap bg-white px-1.5 py-4 align-middle text-xs font-semibold text-slate-700 group-hover:bg-slate-50">
+                  <td className="break-words bg-white px-1.5 py-4 align-middle text-xs font-semibold leading-4 text-slate-700 group-hover:bg-slate-50">
                     {getMemberRole(member)}
                   </td>
 
@@ -1202,8 +1202,8 @@ export default function MembersPage() {
                     )}
                   </td>
 
-                  <td className="sticky right-0 z-20 bg-white px-3 py-4 text-right align-middle group-hover:bg-slate-50">
-                    <div className="grid grid-cols-2 gap-1.5">
+                  <td className="sticky right-0 z-20 w-[220px] min-w-[220px] bg-white px-2 py-4 text-right align-middle group-hover:bg-slate-50">
+                    <div className="grid w-full grid-cols-2 gap-2">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1211,7 +1211,7 @@ export default function MembersPage() {
                           openMemberTeams(member);
                         }}
                         title={`Show teams for ${member.first_name} ${member.last_name}`}
-                        className="h-9 whitespace-nowrap rounded-lg bg-emerald-700 px-2.5 text-xs font-bold text-white hover:bg-emerald-800"
+                        className="h-10 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-bold text-white hover:bg-emerald-800"
                       >
                         Teams ({activeTeamCount(member)})
                       </button>
@@ -1224,7 +1224,7 @@ export default function MembersPage() {
                         }}
                         disabled={historyLoadingMemberId === String(member.id)}
                         title={`Show play history for ${member.first_name} ${member.last_name}`}
-                        className="h-9 whitespace-nowrap rounded-lg bg-indigo-700 px-2.5 text-xs font-bold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-10 whitespace-nowrap rounded-lg bg-indigo-700 px-3 text-sm font-bold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {historyLoadingMemberId === String(member.id) ? "Loading..." : "History"}
                       </button>
@@ -1237,7 +1237,7 @@ export default function MembersPage() {
                         }}
                         disabled={ratingsLoadingMemberId === String(member.id)}
                         title={`Show ratings for ${member.first_name} ${member.last_name}`}
-                        className="h-9 whitespace-nowrap rounded-lg bg-emerald-700 px-2.5 text-xs font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-10 whitespace-nowrap rounded-lg bg-emerald-700 px-3 text-sm font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {ratingsLoadingMemberId === String(member.id) ? "Loading..." : "Ratings"}
                       </button>
@@ -1250,7 +1250,7 @@ export default function MembersPage() {
                         }}
                         disabled={resettingPasswordMemberId === member.id}
                         title={`Send a password-reset email to ${member.first_name} ${member.last_name}`}
-                        className="h-9 whitespace-nowrap rounded-lg bg-blue-700 px-2.5 text-xs font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-10 whitespace-nowrap rounded-lg bg-blue-700 px-3 text-sm font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {resettingPasswordMemberId === member.id ? "Sending..." : "Reset"}
                       </button>
