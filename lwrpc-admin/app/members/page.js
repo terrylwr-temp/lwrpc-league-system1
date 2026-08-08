@@ -1052,9 +1052,9 @@ export default function MembersPage() {
               <col className="w-[135px]" />
               <col className="w-[115px]" />
               <col className="w-[115px]" />
-              <col className="w-[125px]" />
+              <col className="w-[105px]" />
               <col className="w-[190px]" />
-              <col className="w-[170px]" />
+              <col className="w-[190px]" />
             </colgroup>
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
@@ -1191,7 +1191,7 @@ export default function MembersPage() {
                     </span>
                   </td>
 
-                  <td className="whitespace-nowrap bg-white px-3 py-4 align-middle text-sm font-semibold text-slate-700 group-hover:bg-slate-50">
+                  <td className="whitespace-nowrap bg-white px-1.5 py-4 align-middle text-xs font-semibold text-slate-700 group-hover:bg-slate-50">
                     {getMemberRole(member)}
                   </td>
 
@@ -1211,7 +1211,7 @@ export default function MembersPage() {
                           openMemberTeams(member);
                         }}
                         title={`Show teams for ${member.first_name} ${member.last_name}`}
-                        className="h-8 whitespace-nowrap rounded-lg bg-emerald-700 px-2 text-xs font-bold text-white hover:bg-emerald-800"
+                        className="h-9 whitespace-nowrap rounded-lg bg-emerald-700 px-2.5 text-xs font-bold text-white hover:bg-emerald-800"
                       >
                         Teams ({activeTeamCount(member)})
                       </button>
@@ -1224,7 +1224,7 @@ export default function MembersPage() {
                         }}
                         disabled={historyLoadingMemberId === String(member.id)}
                         title={`Show play history for ${member.first_name} ${member.last_name}`}
-                        className="h-8 whitespace-nowrap rounded-lg bg-indigo-700 px-2 text-xs font-bold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-9 whitespace-nowrap rounded-lg bg-indigo-700 px-2.5 text-xs font-bold text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {historyLoadingMemberId === String(member.id) ? "Loading..." : "History"}
                       </button>
@@ -1237,7 +1237,7 @@ export default function MembersPage() {
                         }}
                         disabled={ratingsLoadingMemberId === String(member.id)}
                         title={`Show ratings for ${member.first_name} ${member.last_name}`}
-                        className="h-8 whitespace-nowrap rounded-lg bg-emerald-700 px-2 text-xs font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-9 whitespace-nowrap rounded-lg bg-emerald-700 px-2.5 text-xs font-bold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {ratingsLoadingMemberId === String(member.id) ? "Loading..." : "Ratings"}
                       </button>
@@ -1250,7 +1250,7 @@ export default function MembersPage() {
                         }}
                         disabled={resettingPasswordMemberId === member.id}
                         title={`Send a password-reset email to ${member.first_name} ${member.last_name}`}
-                        className="h-8 whitespace-nowrap rounded-lg bg-blue-700 px-2 text-xs font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="h-9 whitespace-nowrap rounded-lg bg-blue-700 px-2.5 text-xs font-bold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {resettingPasswordMemberId === member.id ? "Sending..." : "Reset"}
                       </button>
