@@ -18,7 +18,7 @@ export const ROLE_CAPABILITIES = [
     roles: ["league_manager", "commissioner"],
   },
   {
-    label: "User role management and all System Setup options (Locations, Score Sheets, Email Options, Club Setup)",
+    label: "Member role management and all System Setup options (Locations, Score Sheets, Email Options, Club Setup)",
     roles: ["commissioner"],
   },
 ];
@@ -30,7 +30,7 @@ export default function RoleCapabilityModal({ onClose }) {
         <div className="flex flex-col gap-3 bg-slate-950 px-5 py-5 text-white md:flex-row md:items-start md:justify-between">
           <div>
             <div className="text-xs font-black uppercase tracking-wide text-blue-200">
-              User Roles
+              Member Roles
             </div>
             <h2 className="mt-1 text-2xl font-black">Role Capability Matrix</h2>
             <p className="mt-1 text-sm font-semibold text-slate-300">

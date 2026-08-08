@@ -13,7 +13,6 @@ const ADMIN_SECTIONS = [
       { title: "Teams & Rosters", desc: "Create teams and manage rosters.", path: "/teams", code: "TR", tone: "emerald", role: "league_manager" },
       { title: "Division Standings", desc: "Review every current division's standings.", path: "#division-standings", code: "DS", tone: "blue", role: "league_manager", dialog: "division-standings" },
       { title: "Division Schedules", desc: "Review team schedules for any current division.", path: "#division-schedules", code: "SC", tone: "amber", role: "league_manager", dialog: "division-schedules" },
-      { title: "User Roles", desc: "Manage role-based access permissions.", path: "/users", code: "UR", tone: "blue", role: "commissioner" },
     ],
   },
   {

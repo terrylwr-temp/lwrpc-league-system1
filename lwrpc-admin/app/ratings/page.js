@@ -1981,9 +1981,11 @@ function SortHeader({ active, direction, label, onClick }) {
       onClick={onClick}
       className="inline-flex flex-col items-start gap-1 rounded-lg px-2 py-1 text-left font-black text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-300"
     >
-      <span className={`rounded-full px-2 py-0.5 text-[10px] ${active ? "bg-blue-300 text-slate-950" : "bg-white/10 text-slate-300"}`}>
-        {active ? (direction === "asc" ? "ASC" : "DESC") : "SORT"}
-      </span>
+      {active && (
+        <span className="rounded-full bg-blue-300 px-2 py-0.5 text-[10px] text-slate-950">
+          {direction === "asc" ? "ASC" : "DESC"}
+        </span>
+      )}
       <span>{label}</span>
     </button>
   );

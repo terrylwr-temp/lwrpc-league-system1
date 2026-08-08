@@ -53,7 +53,7 @@ export async function GET(req) {
     let rows = Array.isArray(result.rows) ? result.rows : [];
     let allLastLogins = null;
 
-    if (mode === "roles" && sortKey === "last_login") {
+    if (sortKey === "last_login") {
       const filteredCount = Number(result.filtered_count || 0);
       if (filteredCount > rows.length) {
         // The database function intentionally limits every request to 100 rows.
@@ -110,15 +110,13 @@ export async function GET(req) {
 
     let lastLoginsByEmail = {};
 
-    if (mode === "roles") {
-      allLastLogins = allLastLogins || await loadLastLogins(authorization.supabase);
-      lastLoginsByEmail = Object.fromEntries(
-        rows
-          .map((member) => normalizeEmailAddress(member.email))
-          .filter(Boolean)
-          .map((email) => [email, allLastLogins[email] || null])
-      );
-    }
+    allLastLogins = allLastLogins || await loadLastLogins(authorization.supabase);
+    lastLoginsByEmail = Object.fromEntries(
+      rows
+        .map((member) => normalizeEmailAddress(member.email))
+        .filter(Boolean)
+        .map((email) => [email, allLastLogins[email] || null])
+    );
 
     return NextResponse.json({
       success: true,

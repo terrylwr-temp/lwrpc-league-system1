@@ -15,6 +15,7 @@ import { NOTIFICATION_EMAIL, NOTIFICATION_TEXT, notificationPreferenceLabel } fr
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../lib/useUnsavedChangesWarning";
 import { appConfirm } from "../lib/appDialog";
 import { filterHistoryRows, sortHistoryRows } from "../lib/playHistory";
+import { formatDisplayTimestamp } from "../lib/dateTime";
 
 const PAGE_SIZE = 100;
 const MEMBER_DIRECTORY_VIEW_STATE_KEY = "lwrpc-member-directory-view";
@@ -37,6 +38,7 @@ export default function MembersPage() {
 
   const [loading, setLoading] = useState(true);
   const [members, setMembers] = useState([]);
+  const [lastLoginsByEmail, setLastLoginsByEmail] = useState({});
   const [filteredMemberCount, setFilteredMemberCount] = useState(0);
   const [totalMemberCount, setTotalMemberCount] = useState(0);
   const [clubLocations, setClubLocations] = useState([]);
@@ -147,6 +149,7 @@ export default function MembersPage() {
         all_teams: sortMemberTeams(member.all_teams),
       }))
     );
+    setLastLoginsByEmail(result.lastLoginsByEmail || {});
     setFilteredMemberCount(Number(result.filteredCount || 0));
     setTotalMemberCount(Number(result.totalCount || 0));
     setSeasons(seasonResult.data || []);
@@ -1042,7 +1045,7 @@ export default function MembersPage() {
           </div>
 
           <div className="hidden overflow-visible md:block">
-          <table className="min-w-[1265px] table-fixed">
+          <table className="min-w-[1430px] table-fixed">
             <colgroup>
               <col className="w-[250px]" />
               <col className="w-[160px]" />
@@ -1050,7 +1053,8 @@ export default function MembersPage() {
               <col className="w-[145px]" />
               <col className="w-[115px]" />
               <col className="w-[155px]" />
-              <col className="w-[250px]" />
+              <col className="w-[150px]" />
+              <col className="w-[215px]" />
             </colgroup>
             <thead className="bg-slate-900 text-sm uppercase tracking-wide text-white">
               <tr>
@@ -1112,6 +1116,14 @@ export default function MembersPage() {
                       ?
                     </button>
                   </div>
+                </th>
+                <th className="sticky top-0 z-20 bg-slate-900 px-4 py-4 text-left" aria-sort={sortAria("last_login", sortConfig)}>
+                  <SortHeader
+                    active={sortConfig.key === "last_login"}
+                    direction={sortConfig.direction}
+                    label="Last Login"
+                    onClick={() => changeSort("last_login")}
+                  />
                 </th>
                 <th className="sticky right-0 top-0 z-40 bg-slate-900 px-4 py-4 text-right">
                   <div className="font-black text-white">
@@ -1183,8 +1195,15 @@ export default function MembersPage() {
                     {getMemberRole(member)}
                   </td>
 
+                  <td className="whitespace-nowrap bg-white px-4 py-4 align-middle text-sm text-slate-700 group-hover:bg-slate-50">
+                    {formatDisplayTimestamp(
+                      lastLoginsByEmail[normalizeEmailAddress(member.email)],
+                      "Never"
+                    )}
+                  </td>
+
                   <td className="sticky right-0 z-20 bg-white px-4 py-4 text-right align-middle group-hover:bg-slate-50">
-                    <div className="flex flex-nowrap justify-end gap-1.5">
+                    <div className="grid grid-cols-2 gap-1.5">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -1244,7 +1263,7 @@ export default function MembersPage() {
               {pagedMembers.length === 0 && (
                 <tr>
                   <td
-                    colSpan="7"
+                    colSpan="8"
                     className="px-4 py-10 text-center text-slate-500"
                   >
                     No members found.
@@ -1768,9 +1787,11 @@ function SortHeader({ active, direction, label, onClick }) {
       onClick={onClick}
       className="inline-flex flex-col items-start gap-1 rounded-lg px-2 py-1 text-left font-black text-white transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-blue-300"
     >
-      <span className={`rounded-full px-2 py-0.5 text-[10px] ${active ? "bg-blue-300 text-slate-950" : "bg-white/10 text-slate-300"}`}>
-        {active ? (direction === "asc" ? "ASC" : "DESC") : "SORT"}
-      </span>
+      {active && (
+        <span className="rounded-full bg-blue-300 px-2 py-0.5 text-[10px] text-slate-950">
+          {direction === "asc" ? "ASC" : "DESC"}
+        </span>
+      )}
       <span>{label}</span>
     </button>
   );
