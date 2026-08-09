@@ -1252,39 +1252,55 @@ function SessionCard({ session, actionLoading, updateStatus, onHostSession, onFi
 }
 
 function SessionPlayersViewModal({ session, onClose }) {
-  const groups = [
-    { id: "joined", label: "Joined", tone: "teal" },
-    { id: "waitlist", label: "Waitlist", tone: "amber" },
-    { id: "invited", label: "Invited", tone: "blue" },
-    { id: "declined", label: "Declined", tone: "red" },
-  ];
-  const players = session.sessionPlayers || [];
+  const [status, setStatus] = useState("joined");
+  const statuses = ["joined", "declined", "waitlist", "invited"];
+  const players = sessionPlayersForStatusView(session.sessionPlayers || [], status);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/70 p-2 sm:items-center sm:p-4">
-      <div className="max-h-[94vh] w-full max-w-3xl overflow-hidden rounded-lg bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:max-h-[90vh]">
-        <div className={`flex flex-col gap-3 p-4 ${MODAL_HEADER_CHROME} sm:flex-row sm:items-start sm:justify-between`}>
-          <div className="min-w-0">
-            <div className={MODAL_EYEBROW_CHROME}>Match Players</div>
-            <h2 className="break-words text-xl font-black sm:text-2xl">{formatSessionHeadlineWithYear(session)}</h2>
-            <div className={MODAL_SUPPORTING_TEXT}>{session.session_name || "Round Robin Match"}</div>
+    <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
+      <div className="flex h-[100dvh] w-full max-w-2xl flex-col overflow-hidden rounded-none bg-white shadow-[0_28px_80px_-36px_rgba(15,23,42,0.95)] sm:h-auto sm:max-h-[90vh] sm:rounded-lg">
+        <div className={`shrink-0 p-4 ${MODAL_HEADER_CHROME}`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <div className={MODAL_EYEBROW_CHROME}>Match Players</div>
+              <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
+              <div className={MODAL_SUPPORTING_TEXT}>{formatSessionHeadline(session)}</div>
+            </div>
+            <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
+              Close
+            </button>
           </div>
-          <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
-            Close
-          </button>
-        </div>
-        <div className="max-h-[78vh] overflow-y-auto p-3 sm:p-4">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {groups.map((group) => (
-              <SessionPlayerStatusGroup
-                key={group.id}
-                label={group.label}
-                tone={group.tone}
-                players={sessionPlayersForStatusView(players, group.id)}
-              />
+          <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
+            {statuses.map((item) => (
+              <button key={item} type="button" onClick={() => setStatus(item)} className={`rounded-lg border px-3 py-2 text-sm font-black capitalize shadow-sm ${
+                status === item ? "border-white bg-white text-slate-950" : "border-white/35 bg-white/10 text-white hover:bg-white/20"
+              }`}>
+                {item} ({sessionPlayersForStatusView(session.sessionPlayers || [], item).length})
+              </button>
             ))}
           </div>
-          {players.length === 0 && (
+        </div>
+        <div className="flex-1 overflow-y-auto p-3 sm:p-4">
+          <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
+            {players.map((player) => (
+              <div key={player.id} className="border-b border-slate-100 px-3 py-3 last:border-b-0">
+                <div className="min-w-0">
+                  <div className="font-black text-slate-950">{player.displayName}</div>
+                  {sessionPlayerLadderPositionText(player) && (
+                    <div className="mt-0.5 text-xs font-black text-violet-700">
+                      Current Position {sessionPlayerLadderPositionText(player)}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+            {players.length === 0 && (
+              <div className="px-3 py-8 text-center text-sm font-bold text-slate-500">
+                No {status} players for this match.
+              </div>
+            )}
+          </div>
+          {(session.sessionPlayers || []).length === 0 && (
             <div className="mt-4 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3 py-8 text-center text-sm font-bold text-slate-500">
               No players are listed for this match yet.
             </div>
@@ -1593,41 +1609,6 @@ function ModalTextInput({ label, value, onChange, placeholder = "", type = "text
       {label}{required ? " *" : ""}
       <input type={type} value={value} placeholder={placeholder} required={required} onChange={(event) => onChange(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950" />
     </label>
-  );
-}
-
-function SessionPlayerStatusGroup({ label, tone, players }) {
-  const toneClass = {
-    teal: "border-teal-200 bg-teal-50 text-teal-950",
-    amber: "border-amber-200 bg-amber-50 text-amber-950",
-    blue: "border-blue-200 bg-blue-50 text-blue-950",
-    red: "border-red-200 bg-red-50 text-red-950",
-  }[tone] || "border-slate-200 bg-slate-50 text-slate-950";
-
-  return (
-    <section className={`rounded-lg border p-3 shadow-sm ${toneClass}`}>
-      <div className="flex items-center justify-between gap-3">
-        <h3 className="text-sm font-black uppercase tracking-wide">{label}</h3>
-        <span className="rounded-md bg-white/80 px-2 py-1 text-xs font-black shadow-sm">{players.length}</span>
-      </div>
-      <div className="mt-3 space-y-2">
-        {players.map((player) => (
-          <div key={player.id || player.playerId || player.displayName} className="rounded-md bg-white px-3 py-2 text-sm font-black text-slate-900 shadow-sm">
-            <div>{player.displayName || "Player"}</div>
-            {sessionPlayerLadderPositionText(player) && (
-              <div className="mt-0.5 text-xs font-black text-violet-700">
-                Current Position {sessionPlayerLadderPositionText(player)}
-              </div>
-            )}
-          </div>
-        ))}
-        {players.length === 0 && (
-          <div className="rounded-md border border-dashed border-slate-300 bg-white/70 px-3 py-5 text-center text-sm font-bold text-slate-500">
-            None
-          </div>
-        )}
-      </div>
-    </section>
   );
 }
 
