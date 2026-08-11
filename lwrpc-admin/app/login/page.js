@@ -250,7 +250,7 @@ export default function LoginPage() {
               <input
                 ref={emailInputRef}
                 type="email"
-                className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
@@ -267,7 +267,7 @@ export default function LoginPage() {
               <div className="relative col-span-2 mt-1">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="w-full rounded-xl border border-slate-300 py-3 pl-4 pr-12 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                  className="w-full rounded-xl border border-slate-300 py-3 pl-4 pr-12 text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
