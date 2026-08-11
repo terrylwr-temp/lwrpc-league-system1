@@ -6,6 +6,7 @@ import { roleLabel } from "../lib/permissions";
 import { APP_VERSION } from "../lib/version";
 import { formatDisplayDate } from "../lib/dateTime";
 import { formatPhoneNumberForStorage } from "../lib/phone";
+import { DEFAULT_SYSTEM_SETTINGS } from "../lib/systemSettings";
 import LmsInstallButton from "./LmsInstallButton";
 import styles from "../design-preview/page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "../design-preview/DashboardAppearanceControls";
@@ -69,6 +70,7 @@ export default function DashboardProfileDialog({
   const [logoutPending, setLogoutPending] = useState(false);
   const [logoutError, setLogoutError] = useState("");
   const [memberDetailsOpen, setMemberDetailsOpen] = useState(false);
+  const [supportEmail, setSupportEmail] = useState(DEFAULT_SYSTEM_SETTINGS.main_email);
 
   const savedProfileImage = profilePhotoUrl(member);
   const displayedProfileImage = profileImage || savedProfileImage;
@@ -81,6 +83,28 @@ export default function DashboardProfileDialog({
     setLogoutConfirmOpen(false);
     setLogoutError("");
     setMemberDetailsOpen(false);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    let active = true;
+
+    async function loadSupportEmail() {
+      try {
+        const response = await fetch("/api/system-settings");
+        const result = await response.json().catch(() => ({}));
+        const configuredEmail = String(result?.settings?.main_email || "").trim();
+        if (active && configuredEmail) setSupportEmail(configuredEmail);
+      } catch {
+        // Keep the configured default email available if settings cannot be loaded.
+      }
+    }
+
+    loadSupportEmail();
+    return () => {
+      active = false;
+    };
   }, [isOpen]);
 
   async function handleProfileImage(event) {
@@ -227,7 +251,10 @@ export default function DashboardProfileDialog({
               <div><dt>DUPR ID</dt><dd>{member?.dupr_id || "Not on file"}</dd></div>
               <div><dt>Membership Renewal</dt><dd>{formatDisplayDate(member?.renewal_date, "Not on file")}</dd></div>
             </dl>
-            <footer><button type="button" onClick={() => setMemberDetailsOpen(false)}>Close</button></footer>
+            <footer>
+              <p>If you need any of this information changed, please <a href={`mailto:${supportEmail}`}>contact us</a>.</p>
+              <button type="button" onClick={() => setMemberDetailsOpen(false)}>Close</button>
+            </footer>
           </section>
         </div>
       )}

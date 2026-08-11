@@ -582,7 +582,9 @@
 .profileInfoGrid > div { display: grid; grid-template-columns: minmax(120px, .9fr) minmax(0, 1.1fr); gap: 12px; border: 1px solid #e1e7f0; border-radius: 10px; background: #f8faff; padding: 11px 12px; }
 .profileInfoGrid dt { color: #69758a; font-size: 12px; font-weight: 800; }
 .profileInfoGrid dd { min-width: 0; margin: 0; color: #1b2b47; font-size: 13px; font-weight: 850; overflow-wrap: anywhere; text-align: right; }
-.profileInfoDialog footer { display: flex; justify-content: flex-end; margin-top: 18px; }
+.profileInfoDialog footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 18px; }
+.profileInfoDialog footer p { flex: 1; margin: 0; color: #69758a; font-size: 12px; font-weight: 650; line-height: 1.45; }
+.profileInfoDialog footer a { color: #1558d5; font-weight: 850; }
 .profileInfoDialog footer button { border: 1px solid #1558d5; border-radius: 10px; background: #1558d5; padding: 10px 16px; color: #fff; font-size: 14px; font-weight: 850; }
 
 @media (max-width: 900px) {
@@ -692,6 +694,8 @@
   .confirmDialog > div button { width: 100%; }
   .profileInfoGrid > div { grid-template-columns: 1fr; gap: 3px; }
   .profileInfoGrid dd { text-align: left; }
+  .profileInfoDialog footer { align-items: flex-start; flex-direction: column; }
+  .profileInfoDialog footer button { align-self: flex-end; }
   .standingsDialog > header { padding: 18px; }
   .standingsDialog > header .standingsNames > strong, .standingsDialog > header .standingsNames > h2 { font-size: 20px; }
   .standingsChart { gap: 10px; padding: 14px; }
