@@ -173,7 +173,7 @@ export default function PlayerDashboardPage() {
     const { data: memberRows, error: memberError } = await findMembersByEmail(
       supabase,
       user.email,
-      "id, first_name, last_name, email, is_active_member, self_rating, profile_image_urls"
+      "id, first_name, last_name, email, phone, club_location, dupr_id, renewal_date, is_active_member, self_rating, profile_image_urls"
     );
 
     if (memberError) {

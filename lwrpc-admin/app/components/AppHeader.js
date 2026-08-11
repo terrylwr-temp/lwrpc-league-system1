@@ -130,7 +130,7 @@ export default function AppHeader({
     async function load() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) return;
-      const { data: memberRows } = await findMembersByEmail(supabase, user.email, "id, first_name, last_name, email, is_active_member, profile_image_urls, user_roles(role)");
+      const { data: memberRows } = await findMembersByEmail(supabase, user.email, "id, first_name, last_name, email, phone, club_location, dupr_id, renewal_date, is_active_member, profile_image_urls, user_roles(role)");
       const { activeMembers, duplicateCount, hasDuplicateMemberships, selectedMember } = memberEmailResolution(memberRows);
       const selected = selectedMember || { email: user.email, profile_image_urls: [] };
       setMember(selected);

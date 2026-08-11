@@ -385,7 +385,7 @@ export default function DashboardPage() {
         if (user.memberId) {
           const { data } = await supabase
             .from("members")
-            .select("id, first_name, last_name, email, profile_image_urls")
+            .select("id, first_name, last_name, email, phone, club_location, dupr_id, renewal_date, profile_image_urls")
             .eq("id", user.memberId)
             .maybeSingle();
           adminMember = data || null;

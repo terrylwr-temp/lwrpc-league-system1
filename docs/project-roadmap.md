@@ -422,3 +422,4 @@ As of 2026-05-21:
 - Captain Dashboard no longer redirects to League Standings when the signed-in user has no current captain-team assignment; it remains on the Captain Dashboard and displays its empty-team state.
 - PBCC non-host Match Players now uses the host-style selectable Joined, Declined, Waitlist, and Invited count tabs. Its player roster remains read-only, with no host response-management controls. The visible app version was bumped to `LMS-0637`.
 - Login email and password fields explicitly use dark text, keeping typed credentials readable when the device is set to dark mode while the sign-in card remains light. The visible app version was bumped to `LMS-0638`.
+- The shared signed-in Profile dialog now places a `?` beside the member's name. It opens a member-information popup showing the signed-in player's phone, community, DUPR ID, and membership renewal date. The visible app version was bumped to `LMS-0639`.

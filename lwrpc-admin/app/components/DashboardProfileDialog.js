@@ -4,6 +4,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { roleLabel } from "../lib/permissions";
 import { APP_VERSION } from "../lib/version";
+import { formatDisplayDate } from "../lib/dateTime";
+import { formatPhoneNumberForStorage } from "../lib/phone";
 import LmsInstallButton from "./LmsInstallButton";
 import styles from "../design-preview/page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "../design-preview/DashboardAppearanceControls";
@@ -66,6 +68,7 @@ export default function DashboardProfileDialog({
   const [logoutConfirmOpen, setLogoutConfirmOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const [logoutError, setLogoutError] = useState("");
+  const [memberDetailsOpen, setMemberDetailsOpen] = useState(false);
 
   const savedProfileImage = profilePhotoUrl(member);
   const displayedProfileImage = profileImage || savedProfileImage;
@@ -77,6 +80,7 @@ export default function DashboardProfileDialog({
     setProfileImageMessage("");
     setLogoutConfirmOpen(false);
     setLogoutError("");
+    setMemberDetailsOpen(false);
   }, [isOpen]);
 
   async function handleProfileImage(event) {
@@ -145,7 +149,10 @@ export default function DashboardProfileDialog({
             <Avatar person={member} imageUrl={displayedProfileImage} />
             <div>
               <span>Signed-in profile</span>
-              <h2 id="profile-dialog-title">{displayName(member)}</h2>
+              <div className={styles.profileNameRow}>
+                <h2 id="profile-dialog-title">{displayName(member)}</h2>
+                <button type="button" className={styles.profileInfoButton} onClick={() => setMemberDetailsOpen(true)} aria-label="View member information" title="Member information">?</button>
+              </div>
               <p>{roleLabel(role)}{member?.email ? ` · ${member.email}` : ""}</p>
             </div>
             <button type="button" onClick={onClose} aria-label="Close profile">×</button>
@@ -203,6 +210,24 @@ export default function DashboardProfileDialog({
               <button type="button" onClick={() => setLogoutConfirmOpen(false)} disabled={logoutPending}>Stay signed in</button>
               <button type="button" className={styles.confirmLogout} onClick={confirmLogout} disabled={logoutPending}>{logoutPending ? "Logging out..." : "Log out"}</button>
             </div>
+          </section>
+        </div>
+      )}
+
+      {memberDetailsOpen && (
+        <div className={`${styles.modalLayer} ${styles.confirmLayer}`} role="dialog" aria-modal="true" aria-labelledby="profile-member-information-title">
+          <button type="button" className={styles.backdrop} onClick={() => setMemberDetailsOpen(false)} aria-label="Close member information" />
+          <section className={styles.profileInfoDialog}>
+            <span>Signed-in member</span>
+            <h2 id="profile-member-information-title">Member Information</h2>
+            <p>Details on file for {displayName(member)}.</p>
+            <dl className={styles.profileInfoGrid}>
+              <div><dt>Phone</dt><dd>{formatPhoneNumberForStorage(member?.phone) || "Not on file"}</dd></div>
+              <div><dt>Community</dt><dd>{member?.club_location || "Not on file"}</dd></div>
+              <div><dt>DUPR ID</dt><dd>{member?.dupr_id || "Not on file"}</dd></div>
+              <div><dt>Membership Renewal</dt><dd>{formatDisplayDate(member?.renewal_date, "Not on file")}</dd></div>
+            </dl>
+            <footer><button type="button" onClick={() => setMemberDetailsOpen(false)}>Close</button></footer>
           </section>
         </div>
       )}
