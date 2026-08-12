@@ -747,7 +747,7 @@ export default function RatingsPage() {
     const seasonName = selectedSeasonLabel();
     const reliabilityThresholdText = await appPrompt({
       title: `Reliability rating threshold — ${seasonName}`,
-      message: `Selected Season: ${seasonName}\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
+      message: `Selected Season: ${seasonName}\n\nClean Ratings recalculates and overwrites each eligible player's Season DUPR Rating. A numeric DUPR Doubles Rating becomes the Season DUPR Rating, rounded down to one decimal place. A player with a DUPR Doubles Rating of NR uses their highest active division Rating Range Max minus 0.5 instead. DUPR Doubles and Age-Based ratings are not changed.\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
       inputLabel: "Reliability Rating threshold",
       placeholder: "0",
       confirmLabel: "Continue",
