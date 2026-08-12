@@ -281,8 +281,8 @@ export default function RatingsPage() {
     const numberValue = Number(value);
     if (Number.isNaN(numberValue)) return null;
 
-    if (field === "season_dupr_rating") {
-      return Math.trunc(numberValue * 10) / 10;
+    if (field === "season_dupr_rating" || field === "season_primetime_rating") {
+      return truncateToTenth(numberValue);
     }
 
     return numberValue;
@@ -433,7 +433,19 @@ export default function RatingsPage() {
     return "";
   }
 
+  function hasCsvColumn(row, names) {
+    const keys = Object.keys(row);
+    return names.some((name) =>
+      keys.some((candidate) => normalizeCsvHeader(candidate) === normalizeCsvHeader(name))
+    );
+  }
+
   function findAgeBasedRatingValue(row) {
+    if (hasCsvColumn(row, ["metrics", "metric"])) {
+      const metricsValue = findCsvValue(row, ["metrics", "metric"]);
+      return findMetricRating(metricsValue, "over_65") || findMetricRating(metricsValue, "over_50");
+    }
+
     const exactValue = findCsvValue(row, [
       "age-based rating",
       "age based rating",
@@ -464,6 +476,57 @@ export default function RatingsPage() {
     return ageKey ? row[ageKey] : "";
   }
 
+  function hasAgeBasedRatingSource(row) {
+    if (hasCsvColumn(row, [
+      "metrics",
+      "metric",
+      "age-based rating",
+      "age based rating",
+      "agebased rating",
+      "age-based dupr rating",
+      "age based dupr rating",
+      "age dupr rating",
+      "age rating",
+      "age doubles rating",
+      "age-based doubles rating",
+      "age based doubles rating",
+      "age bracket rating",
+      "primetime rating",
+      "prime time rating",
+    ])) return true;
+
+    return Object.keys(row).some((key) => {
+      const normalized = normalizeCsvHeader(key);
+      return (
+        (normalized.includes("age") && normalized.includes("rating")) ||
+        normalized.includes("primetime") ||
+        normalized.includes("primetimerating")
+      );
+    });
+  }
+
+  function findMetricRating(metricsValue, metricName) {
+    const metricsText = normalizeText(metricsValue);
+    if (!metricsText) return "";
+
+    try {
+      const metrics = JSON.parse(metricsText);
+      const rating = metrics?.subscores?.doubles?.[metricName];
+      if (rating !== null && rating !== undefined && String(rating).trim() !== "") {
+        return String(rating);
+      }
+    } catch {
+      // Keep supporting legacy non-JSON Metrics values below.
+    }
+
+    const normalizedMetric = metricName.replace("_", "[_\\s-]*");
+    const match = metricsText.match(
+      new RegExp(`(?:^|[^a-z0-9])"?${normalizedMetric}(?:[_\\s-]*rating)?"?\\s*(?::|=|,|\\||-)?\\s*"?([0-9]+(?:\\.[0-9]+)?)`, "i")
+    );
+
+    return match?.[1] || "";
+  }
+
   function normalizeCsvHeader(value) {
     return String(value || "").toLowerCase().replace(/[^a-z0-9]/g, "");
   }
@@ -473,6 +536,11 @@ export default function RatingsPage() {
     if (!cleaned) return null;
     const rating = Number(cleaned);
     return Number.isNaN(rating) ? null : rating;
+  }
+
+  function parseAgeBasedRating(value) {
+    const rating = parseRating(value);
+    return rating === null ? null : truncateToTenth(rating);
   }
 
   function parseDuprDoublesRating(value) {
@@ -506,6 +574,11 @@ export default function RatingsPage() {
     const parsedRows = parseCsv(text);
     const byEmail = {};
     const byName = {};
+    const selectedSeasonRatingsByMemberId = Object.fromEntries(
+      allRatings
+        .filter((rating) => String(rating.season_id) === String(selectedSeason))
+        .map((rating) => [String(rating.member_id), rating])
+    );
 
     members.forEach((member) => {
       if (member.email) byEmail[normalizeEmail(member.email)] = member;
@@ -521,11 +594,20 @@ export default function RatingsPage() {
       const duprId = normalizeText(findCsvValue(row, ["dupr id", "duprid", "dupr", "dupr number"]));
       const duprDoublesRating = parseDuprDoublesRating(findCsvValue(row, ["doubles rating", "doubles", "dupr doubles", "dupr doubles rating", "doubles dupr", "rating"]));
       const duprReliabilityRating = parseReliabilityRating(findCsvValue(row, ["doublesReliability", "doubles reliability", "doubles reliability rating", "reliability", "reliability rating", "dupr reliability"]));
-      const ageRating = parseRating(findAgeBasedRatingValue(row));
+      const ageRating = parseAgeBasedRating(findAgeBasedRatingValue(row));
+      const ageRatingSourcePresent = hasAgeBasedRatingSource(row);
       const lookupName = name || `${firstName} ${lastName}`.trim();
       const member = (email && byEmail[email]) || byName[normalizeName(lookupName)] || null;
+      const existingSeasonRating = member ? selectedSeasonRatingsByMemberId[String(member.id)] : null;
+      const shouldClearAgeRating = Boolean(
+        member &&
+        ageRatingSourcePresent &&
+        ageRating === null &&
+        existingSeasonRating?.season_primetime_rating !== null &&
+        existingSeasonRating?.season_primetime_rating !== undefined
+      );
 
-      const hasRating = duprDoublesRating !== null || duprReliabilityRating !== null || ageRating !== null;
+      const hasRating = duprDoublesRating !== null || duprReliabilityRating !== null || ageRating !== null || shouldClearAgeRating;
 
       return {
         rowNumber: index + 1,
@@ -533,7 +615,9 @@ export default function RatingsPage() {
         message: !member
           ? "No matching member by email or name."
           : hasRating
-            ? "Matched member."
+            ? shouldClearAgeRating
+              ? "Matched member; Age-Based rating will be cleared."
+              : "Matched member."
             : "Matched member, but no numeric rating or reliability was found in this CSV row.",
         memberId: member?.id || null,
         memberName: member ? memberFullName(member) : lookupName,
@@ -543,6 +627,7 @@ export default function RatingsPage() {
         duprDoublesRating,
         duprReliabilityRating,
         ageRating,
+        ageRatingSourcePresent,
       };
     });
 
@@ -600,7 +685,9 @@ export default function RatingsPage() {
 
         if (row.duprDoublesRating !== null) payload.dupr_doubles_rating = row.duprDoublesRating;
         if (row.duprReliabilityRating !== null) payload.dupr_reliability_rating = row.duprReliabilityRating;
-        if (row.ageRating !== null) payload.season_primetime_rating = row.ageRating;
+        if (row.ageRating !== null || (row.ageRatingSourcePresent && existing)) {
+          payload.season_primetime_rating = row.ageRating;
+        }
         const existing = existingByMember[row.memberId];
 
         if (existing) {
@@ -747,7 +834,7 @@ export default function RatingsPage() {
     const seasonName = selectedSeasonLabel();
     const reliabilityThresholdText = await appPrompt({
       title: `Reliability rating threshold — ${seasonName}`,
-      message: `Selected Season: ${seasonName}\n\nClean Ratings recalculates and overwrites each eligible player's Season DUPR Rating. A numeric DUPR Doubles Rating becomes the Season DUPR Rating, rounded down to one decimal place. A player with a DUPR Doubles Rating of NR uses their highest active division Rating Range Max minus 0.5 instead. DUPR Doubles and Age-Based ratings are not changed.\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
+      message: `Selected Season: ${seasonName}\n\nClean Ratings recalculates and overwrites each eligible player's Season DUPR Rating. A numeric DUPR Doubles Rating becomes the Season DUPR Rating, rounded down to one decimal place. A player with a DUPR Doubles Rating of NR uses their highest active division Rating Range Max minus 0.5 instead. Existing Age-Based ratings are also rounded down to one decimal place. DUPR Doubles ratings are not changed.\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
       inputLabel: "Reliability Rating threshold",
       placeholder: "0",
       confirmLabel: "Continue",
@@ -768,7 +855,7 @@ export default function RatingsPage() {
       : "Reliability Rating will not change the cleanup rule.";
     const ok = await appConfirm({
       title: `Clean ratings for Season: ${seasonName}?`,
-      message: `Selected Season: ${seasonName}\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.\n\n${reliabilityRuleText}`,
+      message: `Selected Season: ${seasonName}\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5. Existing Age-Based ratings are also rounded down to one decimal place.\n\n${reliabilityRuleText}`,
       confirmLabel: "Clean ratings",
       tone: "warning",
     });
@@ -829,7 +916,8 @@ export default function RatingsPage() {
     );
     const inserts = [];
     const updateRequests = [];
-    let cleanedCount = 0;
+    let cleanedSeasonDuprCount = 0;
+    let cleanedAgeBasedCount = 0;
     let skippedCount = 0;
     let reliabilityAdjustedCount = 0;
 
@@ -846,18 +934,19 @@ export default function RatingsPage() {
         existing?.dupr_reliability_rating,
         reliabilityThreshold
       );
+      const cleanedAgeBasedValue = cleanedAgeBasedRating(existing?.season_primetime_rating);
 
-      if (cleanedValue === null) {
+      if (cleanedValue === null && cleanedAgeBasedValue === null) {
         skippedCount += 1;
         return;
       }
 
-      cleanedCount += 1;
+      if (cleanedValue !== null) cleanedSeasonDuprCount += 1;
+      if (cleanedAgeBasedValue !== null) cleanedAgeBasedCount += 1;
 
-      const payload = {
-        season_dupr_rating: cleanedValue,
-        updated_at: now,
-      };
+      const payload = { updated_at: now };
+      if (cleanedValue !== null) payload.season_dupr_rating = cleanedValue;
+      if (cleanedAgeBasedValue !== null) payload.season_primetime_rating = cleanedAgeBasedValue;
 
       if (reliabilityTriggered) {
         reliabilityAdjustedCount += 1;
@@ -905,7 +994,7 @@ export default function RatingsPage() {
 
     await loadRatings(selectedSeason);
     await loadAllRatings();
-    setRatingImportStatus(`Cleaned ${cleanedCount} Season DUPR rating(s). Skipped ${skippedCount} player(s) without a numeric DUPR Doubles Rating or usable NR team range.${reliabilityThreshold > 0 ? ` Reliability threshold applied at ${reliabilityThreshold} or below; ${reliabilityAdjustedCount} player(s) were treated as NR for Season DUPR cleanup with DUPR Notes updated.` : ""}`);
+    setRatingImportStatus(`Cleaned ${cleanedSeasonDuprCount} Season DUPR rating(s) and truncated ${cleanedAgeBasedCount} Age-Based rating(s). Skipped ${skippedCount} player(s) without a usable Season DUPR or Age-Based rating.${reliabilityThreshold > 0 ? ` Reliability threshold applied at ${reliabilityThreshold} or below; ${reliabilityAdjustedCount} player(s) were treated as NR for Season DUPR cleanup with DUPR Notes updated.` : ""}`);
     setIsCleaningRatings(false);
   }
 
@@ -1319,7 +1408,7 @@ function goToPage(value) {
                 Ratings Import
               </h2>
               <p className="mt-1 text-sm text-slate-600">
-                Import a CSV with member name/email, DUPR ID, doubles rating, reliability rating, and age-based rating for the selected season.
+                Import a CSV with member name/email, DUPR ID, doubles rating, reliability rating, and age-based rating for the selected season. Age-Based rating is read from `Metrics.subscores.doubles.over_65`, falling back to `over_50`.
               </p>
               <p className="mt-1 text-xs text-slate-500">
                 DUPR IDs are only written when the member does not already have one.
@@ -2225,6 +2314,14 @@ function cleanedSeasonDuprRating(rawValue, highestMaxRating, reliabilityValue = 
   if (Number.isNaN(numberValue)) return null;
 
   return truncateToTenth(numberValue);
+}
+
+function cleanedAgeBasedRating(rawValue) {
+  const text = String(rawValue ?? "").trim();
+  if (!text) return null;
+
+  const numberValue = Number(text);
+  return Number.isNaN(numberValue) ? null : truncateToTenth(numberValue);
 }
 
 function truncateToTenth(value) {

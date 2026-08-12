@@ -1,6 +1,6 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-06-05
+Last updated: 2026-08-12
 
 ## Purpose
 
@@ -297,6 +297,7 @@ As of 2026-05-21:
 - User-facing timestamp displays should format stored Supabase UTC timestamps through the shared `formatDisplayTimestamp` helper, which renders them in `America/New_York`; date-only schedule fields continue to use the date-only display helpers.
 - Team schedule popups and player/captain schedule views include `team_byes` alongside published matches, filtered to published division schedule weeks so draft byes stay hidden with draft matches.
 - Season Ratings now separates raw `DUPR Doubles Rating` from cleaned numeric `Season DUPR Rating`. CSV imports write the raw doubles value, and Data Tools can clean selected-season ratings by truncating numeric raw DUPR to tenths or using the player's highest selected-season division max minus 0.5 for NR values.
+- Season Ratings imports Age-Based ratings from a rating-export `Metrics` JSON field: it uses `subscores.doubles.over_65`, falls back to `over_50`, and leaves the value blank when neither is present. Imported, manually edited, and Clean Ratings Age-Based values are truncated to one decimal place.
 - Team Roster Management now hard-blocks adding players whose current rating is outside the team's rating range. If a roster add succeeds for a player missing the required rating or carrying an `NR` DUPR Doubles value, the app emails `info@lwrpickleballclub.com` with the player, team, captain names, and captain emails for league follow-up.
 - Team Roster Management shows roster-add player eligibility in the Available Players dropdown, includes the rating season in the compressed team summary block, and keeps DUPR IDs out of that dropdown. Login popup reads now go through the server notification-template route so captain/player messages are not blocked by template-table RLS.
 - Score workflows track `matches.score_entered_by_member_id` along with existing entered/verified timestamps. Team schedule popups show non-empty score status with the relevant timestamp, while Schedule Editor and Scoring Operations show entered/verified timestamp plus member name for completed matches. Apply `lwrpc-admin/supabase-score-audit-updates.sql` before relying on entered-by tracking in production.
