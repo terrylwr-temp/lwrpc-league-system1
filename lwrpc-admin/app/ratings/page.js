@@ -744,9 +744,10 @@ export default function RatingsPage() {
       return;
     }
 
+    const seasonName = selectedSeasonLabel();
     const reliabilityThresholdText = await appPrompt({
-      title: "Reliability rating threshold",
-      message: "For a player in the selected season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.",
+      title: `Reliability rating threshold — ${seasonName}`,
+      message: `Selected Season: ${seasonName}\n\nFor a player in this season whose Reliability Rating is at or below this number, keep their DUPR Doubles rating but calculate their Season DUPR rating using the NR rule for their division.\n\nEnter 0 or leave this blank to ignore Reliability Rating.`,
       inputLabel: "Reliability Rating threshold",
       placeholder: "0",
       confirmLabel: "Continue",
@@ -766,8 +767,8 @@ export default function RatingsPage() {
       ? `Reliability Rating values of ${reliabilityThreshold} or below will leave DUPR Doubles as-is, then adjust Season DUPR using the NR rule: the player's highest division Rating Range Max minus 0.5. A DUPR Notes entry will be added for each reliability-based NR-style adjustment.`
       : "Reliability Rating will not change the cleanup rule.";
     const ok = await appConfirm({
-      title: `Clean ratings for ${selectedSeasonLabel()}?`,
-      message: `This overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.\n\n${reliabilityRuleText}`,
+      title: `Clean ratings for Season: ${seasonName}?`,
+      message: `Selected Season: ${seasonName}\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5.\n\n${reliabilityRuleText}`,
       confirmLabel: "Clean ratings",
       tone: "warning",
     });
