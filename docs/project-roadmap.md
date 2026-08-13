@@ -1,6 +1,6 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-08-12
+Last updated: 2026-08-13
 
 ## Purpose
 
@@ -277,7 +277,7 @@ As of 2026-05-21:
 - Admin Dashboard active-season metrics now scope players-on-teams, teams, this-week matches, pending verifications, average roster count, and average team DUPR rating to leagues whose season start/end dates include the current date.
 - Admin Dashboard now includes an Active Season / Not Active (Current Entries) scope toggle so preseason teams and rosters can be counted before the season date window opens.
 - Members use `members.is_active_member` for active/inactive status. Member Administration hides inactive members by default with an Include Inactive toggle, member edit supports deactivate/reactivate for League Manager and Commissioner roles, MembershipWorks import reactivates imported members, and ratings/team selection workflows exclude inactive members.
-- Member Administration now shows active/inactive status in the listing, includes a Data Tools action to mark all members inactive before a fresh MembershipWorks import, and the MembershipWorks import protects existing member fields by only overwriting email, phone, renewal date, active flag, and membership status while filling blank identifiers/profile fields.
+- Member Administration now shows active/inactive status in the listing, includes a Data Tools action to mark all members inactive before a fresh MembershipWorks import, and the MembershipWorks import protects existing member fields by only overwriting email, phone, renewal date, active flag, and membership status while filling blank identifiers/profile fields. Existing DUPR IDs are retained; the import only supplies a DUPR ID when the member record currently has none.
 - Season Ratings hides the Ratings Import panel behind a Data Tools toggle by default. Player Dashboard and Captain Dashboard division schedule modals received a visual cleanup with stronger colored headers, status blocks, and more polished match/result cards.
 - Player Dashboard upcoming matches now use a purple visual treatment, player/captain team cards use stronger blue information panels, Captain Dashboard pending verification is red, and Season Ratings truncates entered DUPR doubles ratings to one decimal place before saving.
 - Manual member creation now satisfies the non-null MembershipWorks account constraint with a generated `manual:` account id. Future MembershipWorks CSV imports can match those members by email and replace the placeholder with the real MembershipWorks account id. Captain Dashboard upcoming match cards were restyled with Week headers, and Player Dashboard upcoming matches now separate Current Scores from a Match Details popup with team records/ranks and a map link.

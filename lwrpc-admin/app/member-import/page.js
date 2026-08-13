@@ -98,6 +98,7 @@ export default function MemberImportPage() {
         first_name,
         last_name,
         phone,
+        dupr_id,
         membershipworks_id,
         membershipworks_account_id,
         membership_status,
