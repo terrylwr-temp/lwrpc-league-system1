@@ -425,3 +425,4 @@ As of 2026-05-21:
 - Login email and password fields explicitly use dark text, keeping typed credentials readable when the device is set to dark mode while the sign-in card remains light. The visible app version was bumped to `LMS-0638`.
 - The shared signed-in Profile dialog now places a `?` beside the member's name. It opens a member-information popup showing the signed-in player's phone, community, DUPR ID, and membership renewal date. The visible app version was bumped to `LMS-0639`.
 - Profile member-information popups now include a bottom-left help note with a `contact us` mailto link that uses the configured support email. The visible app version was bumped to `LMS-0640`.
+- Every My Play History `More Player Details` popup now uses shared animated Recharts analytics: a match-outcome donut, match/game win-loss comparison, recent point-differential trend, and recorded-rating context. The visible app version was bumped to `LMS-0641`.

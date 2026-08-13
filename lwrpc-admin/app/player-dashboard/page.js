@@ -10,6 +10,7 @@ import LmsInstallButton from "../components/LmsInstallButton";
 import PdfDocumentModal from "../components/PdfDocumentModal";
 import MiniStandingsLeaders, { buildMiniStandingsLeaders } from "../components/MiniStandingsLeaders";
 import TeamScheduleModal from "../components/TeamScheduleModal";
+import SharedPlayerHistoryDetailsModal, { calculatePlayerHistoryDetails as calculateSharedPlayerHistoryDetails } from "../components/PlayerHistoryDetailsModal";
 import { requireRole, supabase } from "../lib/auth";
 import { formatDisplayDateWithLeadingWeekday, formatDisplayTime, formatDisplayTimestampShort } from "../lib/dateTime";
 import {
@@ -948,7 +949,7 @@ export default function PlayerDashboardPage() {
   }, [filteredPlayHistory, member]);
 
   const playerHistoryDetails = useMemo(
-    () => calculatePlayerHistoryDetails(filteredPlayHistory, member?.id),
+    () => calculateSharedPlayerHistoryDetails(filteredPlayHistory, member?.id),
     [filteredPlayHistory, member?.id]
   );
 
@@ -1451,7 +1452,7 @@ export default function PlayerDashboardPage() {
         )}
 
         {showMorePlayerDetails && (
-          <PlayerHistoryDetailsModal
+          <SharedPlayerHistoryDetailsModal
             details={playerHistoryDetails}
             onClose={() => setShowMorePlayerDetails(false)}
           />
