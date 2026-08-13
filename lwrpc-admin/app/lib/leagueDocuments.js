@@ -22,7 +22,7 @@ export const LEAGUE_DOCUMENT_TYPES = [
   },
   {
     key: "score_sheet",
-    label: "Blank Score Sheet",
+    label: "League Important Dates",
     column: "score_sheet_pdf_path",
   },
   {
