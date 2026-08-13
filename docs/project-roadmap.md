@@ -428,3 +428,4 @@ As of 2026-05-21:
 - Every My Play History `More Player Details` popup now uses shared animated Recharts analytics: a match-outcome donut, match/game win-loss comparison, recent point-differential trend, and recorded-rating context. The visible app version was bumped to `LMS-0641`.
 - League Administration now labels the existing league document slot `League Important Dates` instead of `Blank Score Sheet`. The visible app version was bumped to `LMS-0642`.
 - Player Dashboard League Documents now consistently excludes the Captains Guide, including when a captain views the Player Dashboard. The visible app version was bumped to `LMS-0643`.
+- Player Dashboard League Documents includes League Important Dates while continuing to exclude the Captains Guide. The visible app version was bumped to `LMS-0644`.

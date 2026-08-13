@@ -52,6 +52,7 @@ const DesignPreviewView = dynamic(() => import("../design-preview/DesignPreviewV
 const PLAYER_DOCUMENT_KEYS = new Set([
   "code_of_conduct",
   "league_rules",
+  "score_sheet",
   "league_waiver",
 ]);
 
