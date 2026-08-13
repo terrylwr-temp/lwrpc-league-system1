@@ -1346,9 +1346,7 @@ export default function PlayerDashboardPage() {
     name: "Weekday League",
     divisions: { leagues: weekdayLeague },
   } : null);
-  const designPreviewDocumentTypes = currentRole === "player"
-    ? PLAYER_LEAGUE_DOCUMENT_TYPES
-    : LEAGUE_DOCUMENT_TYPES;
+  const designPreviewDocumentTypes = PLAYER_LEAGUE_DOCUMENT_TYPES;
   const designPreviewLeagueDocuments = documentTeam
     ? designPreviewDocumentTypes.map((documentType) => ({
         ...documentType,
