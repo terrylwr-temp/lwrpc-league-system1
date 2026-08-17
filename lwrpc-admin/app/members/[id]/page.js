@@ -261,6 +261,7 @@ setUserRole(roleData?.role || "player");
       club_location: memberData.club_location || "",
       dupr_id: memberData.dupr_id || "",
       renewal_date: memberData.renewal_date || "",
+      notes: memberData.notes || "",
     });
     setSeasonRatings(ratingData || []);
     setTeamMemberships((teamData || []).filter((row) => row.teams?.is_active !== false));
@@ -364,6 +365,7 @@ setUserRole(roleData?.role || "player");
         location_id: locationIdForName(locations, form.club_location),
         dupr_id: form.dupr_id || null,
         renewal_date: form.renewal_date || null,
+        notes: form.notes.trim() || null,
       })
       .eq("id", id)
       .select("*")
@@ -386,6 +388,7 @@ setUserRole(roleData?.role || "player");
       club_location: data.club_location || "",
       dupr_id: data.dupr_id || "",
       renewal_date: data.renewal_date || "",
+      notes: data.notes || "",
     });
     setEditMode(false);
   }
@@ -400,6 +403,7 @@ setUserRole(roleData?.role || "player");
       club_location: member.club_location || "",
       dupr_id: member.dupr_id || "",
       renewal_date: member.renewal_date || "",
+      notes: member.notes || "",
     });
     setEditMode(false);
   }
@@ -449,6 +453,7 @@ function setMemberFormFromRow(row) {
     club_location: row.club_location || "",
     dupr_id: row.dupr_id || "",
     renewal_date: row.renewal_date || "",
+    notes: row.notes || "",
   });
 }
 
@@ -902,6 +907,18 @@ function printCurrentHistory() {
                         onChange={(e) =>
                           updateForm("renewal_date", e.target.value)
                         }
+                        className="w-full rounded-xl border border-slate-300 px-4 py-3"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="mb-1 block text-sm font-semibold text-slate-700">
+                        Notes
+                      </label>
+                      <textarea
+                        value={form.notes || ""}
+                        onChange={(e) => updateForm("notes", e.target.value)}
+                        rows={4}
                         className="w-full rounded-xl border border-slate-300 px-4 py-3"
                       />
                     </div>
