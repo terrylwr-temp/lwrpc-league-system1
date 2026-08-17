@@ -752,6 +752,14 @@ function printCurrentHistory() {
                       </span>{" "}
                       {formatDate(member.renewal_date)}
                     </div>
+                    <div>
+                      <span className="font-semibold text-slate-800">
+                        Notes:
+                      </span>{" "}
+                      <span className="whitespace-pre-line">
+                        {member.notes || "—"}
+                      </span>
+                    </div>
                   </div>
                 </>
               ) : (

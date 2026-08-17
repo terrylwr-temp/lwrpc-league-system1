@@ -430,3 +430,4 @@ As of 2026-05-21:
 - Player Dashboard League Documents now consistently excludes the Captains Guide, including when a captain views the Player Dashboard. The visible app version was bumped to `LMS-0643`.
 - Player Dashboard League Documents includes League Important Dates while continuing to exclude the Captains Guide. The visible app version was bumped to `LMS-0644`.
 - Member Detail now provides a private Notes field only while editing a member. The accompanying CSV import maps every source row by normalized email and records each unique `League / Division / Team` value on its own Notes line, preserving any existing Notes text. Apply `lwrpc-admin/supabase-member-notes.sql` before running `scripts/import-member-notes.mjs`. The visible app version was bumped to `LMS-0645`.
+- Member Detail now also displays the member Notes value in its standard information panel, preserving line breaks. The visible app version was bumped to `LMS-0646`.
