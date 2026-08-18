@@ -6,7 +6,7 @@ import { requireRole, supabase } from "../lib/auth";
 import { formatPhoneNumberForStorage } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { useRouter } from "next/navigation";
-import { appConfirm } from "../lib/appDialog";
+import { appConfirm, appNotice } from "../lib/appDialog";
 
 const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
 
@@ -429,17 +429,26 @@ return {
       setImportStatus("Processing members with protected updates...");
       const result = await processMemberImportRows();
 
-      setImportSummary({
+      const summary = {
         newMembers: result?.newMembers || 0,
         updatedMembers: result?.updatedMembers || 0,
         skippedRows: result?.skippedRows || 0,
         missingMembers: missingMembers.length,
         totalRows: preview.length
-      });
+      };
+
+      setImportSummary(summary);
 
       setImportStatus(
         `Import completed successfully. ${preview.length} records processed.`
       );
+
+      await appNotice(
+        `MembershipWorks import completed successfully.\n\nRows processed: ${summary.totalRows}\nNew members: ${summary.newMembers}\nUpdated members: ${summary.updatedMembers}\nSkipped rows: ${summary.skippedRows}\nMembers missing from import: ${summary.missingMembers}`,
+        { title: "Import completed", confirmLabel: "OK", tone: "success" }
+      );
+
+      router.replace("/members");
     } catch (err) {
       console.error(err);
       setImportStatus(`Import failed: ${err.message}`);
