@@ -301,7 +301,7 @@ export default function AppHeader({
       <header className="-mt-4 mx-auto mb-2 hidden min-h-[68px] max-w-[1180px] items-center justify-between gap-5 md:-mt-6 min-[701px]:flex">
         <div className="min-w-0">
           <span className="block text-[11px] font-black uppercase tracking-[.13em] text-[#76839a]">{contextLabel}</span>
-          <h1 className="mt-1 truncate text-[25px] font-black leading-tight tracking-[-.02em] text-[#102e64]">Welcome, {firstName}</h1>
+          <h1 className="mt-1 truncate text-[25px] font-black leading-tight tracking-[-.02em] text-[#102e64]">Welcome {firstName}</h1>
         </div>
         <div className="flex items-center gap-2.5">
           <button type="button" onClick={openUserGuide} className="grid h-11 w-11 place-items-center rounded-full border border-[#e3e8f0] bg-white text-[#536079] transition hover:-translate-y-0.5 hover:border-[#99b7ed] hover:text-[#1558d5]" aria-label="Open Admin User Guide" title="Admin User Guide"><Icon name="help" size={20}/></button>

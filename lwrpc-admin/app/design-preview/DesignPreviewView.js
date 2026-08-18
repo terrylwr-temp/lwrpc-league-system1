@@ -407,7 +407,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
 
       <section className={styles.content}>
         <header className={styles.desktopHeader}>
-          <div><span>Player dashboard</span><h1>Welcome, {firstName}</h1></div>
+          <div><span>Player dashboard</span><h1>Welcome {firstName}</h1></div>
           <div className={styles.headerActions}>
             <button type="button" className={styles.helpButton} onClick={() => dashboard.onOpenGuide?.()} aria-label="Open User Guide" title="User Guide"><Icon name="help"/></button>
             <a className={styles.helpButton} href={`mailto:${dashboard.contactEmail || "info@lwrpickleballclub.com"}`} aria-label="Email League Management" title="Email League Management"><Icon name="mail"/></a>
