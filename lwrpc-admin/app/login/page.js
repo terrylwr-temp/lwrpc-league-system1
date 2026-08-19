@@ -40,6 +40,10 @@ export default function LoginPage() {
     }
 
     setMounted(true);
+    if (window.sessionStorage.getItem("lwrpc-inactivity-logout-notice") === "true") {
+      window.sessionStorage.removeItem("lwrpc-inactivity-logout-notice");
+      setMessage("For your security, you were signed out after 4 hours of inactivity.");
+    }
     loadSystemSettings();
     routeExistingSession();
     // eslint-disable-next-line react-hooks/exhaustive-deps

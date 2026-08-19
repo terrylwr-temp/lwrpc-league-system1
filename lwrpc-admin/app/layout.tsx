@@ -1,6 +1,7 @@
 import "./globals.css";
 import BrowserTitle from "./components/BrowserTitle";
 import { AppDialogProvider } from "./components/AppDialogProvider";
+import InactivitySessionTimeout from "./components/InactivitySessionTimeout";
 import LmsPwaRegister from "./components/LmsPwaRegister";
 import SystemFooter from "./components/SystemFooter";
 
@@ -24,6 +25,7 @@ export default function RootLayout({
         <BrowserTitle />
         <LmsPwaRegister />
         <AppDialogProvider>{children}</AppDialogProvider>
+        <InactivitySessionTimeout />
         <SystemFooter />
       </body>
     </html>
