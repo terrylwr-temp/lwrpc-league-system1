@@ -25,7 +25,9 @@ export default function LoginPage() {
   const [turnstileToken, setTurnstileToken] = useState("");
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const [showPasswordResetSecurity, setShowPasswordResetSecurity] = useState(false);
-  const [pendingPasswordResetEmail, setPendingPasswordResetEmail] = useState("");
+const [pendingPasswordResetEmail, setPendingPasswordResetEmail] = useState("");
+
+  const inactivityLogoutMessage = "For your security, you were signed out after 4 hours of inactivity.";
 
   useEffect(() => {
     async function loadSystemSettings() {
@@ -42,7 +44,7 @@ export default function LoginPage() {
     setMounted(true);
     if (window.sessionStorage.getItem("lwrpc-inactivity-logout-notice") === "true") {
       window.sessionStorage.removeItem("lwrpc-inactivity-logout-notice");
-      setMessage("For your security, you were signed out after 4 hours of inactivity.");
+      setMessage(inactivityLogoutMessage);
     }
     loadSystemSettings();
     routeExistingSession();
@@ -430,7 +432,7 @@ export default function LoginPage() {
                 !
               </div>
               <h2 id="login-error-title" className="mt-4 text-xl font-black text-slate-950">
-                Sign In Problem
+                {message === inactivityLogoutMessage ? "Signed Out" : "Sign In Problem"}
               </h2>
               <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
                 {message}
