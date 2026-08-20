@@ -17,7 +17,7 @@ export default function ResetPasswordPage() {
   const [passkeyMessage, setPasskeyMessage] = useState("");
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [returnTo, setReturnTo] = useState("");
-  const returnLabel = returnTo ? "Return to Admin Setup" : "Return to Login";
+  const returnLabel = "Return to System";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);

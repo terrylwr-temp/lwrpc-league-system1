@@ -3,7 +3,7 @@
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoginMessageModal from "../components/LoginMessageModal";
 import LmsInstallButton from "../components/LmsInstallButton";
@@ -84,6 +84,8 @@ function scrollDashboardSectionIntoView(sectionId) {
 
 export default function CaptainDashboardPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const passwordSettingsPath = `/reset-password?returnTo=${encodeURIComponent(pathname)}`;
   const designPreview = true;
   const captainGuide = GUIDE_DOCUMENT_TYPES.find((guideType) => guideType.key === "captain_guide_pdf");
 
@@ -3062,7 +3064,7 @@ export default function CaptainDashboardPage() {
               const document = await guidePdfDocument(supabase, captainGuide);
               if (document) setPdfDocument(document);
             },
-            onChangePassword: () => router.push("/reset-password"),
+            onChangePassword: () => router.push(passwordSettingsPath),
             onSaveProfileImage: saveCaptainProfileImage,
             onLogout: async () => {
               const { error } = await supabase.auth.signOut({ scope: "local" });
@@ -3236,7 +3238,7 @@ export default function CaptainDashboardPage() {
               <button
                 type="button"
                 onClick={async () => {
-                  if (await confirmUnsavedChanges()) router.push("/reset-password");
+                  if (await confirmUnsavedChanges()) router.push(passwordSettingsPath);
                 }}
                 className="rounded-lg bg-blue-600 px-2.5 py-1.5 text-xs font-bold text-white hover:bg-blue-500 md:rounded-xl md:px-4 md:py-2 md:text-sm"
               >

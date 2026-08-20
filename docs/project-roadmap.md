@@ -433,3 +433,4 @@ As of 2026-05-21:
 - Member Detail now also displays the member Notes value in its standard information panel, preserving line breaks. The visible app version was bumped to `LMS-0646`.
 - Every authenticated LMS role, including Players, Captains, League Managers, and Commissioners, now has a four-hour inactivity timeout. A persistent branded warning appears with 15 minutes remaining and offers Stay Signed In; expiry signs out only the current browser session and returns the member to sign-in. The visible app version was bumped to `LMS-0647`.
 - The inactivity sign-out notice now uses the dialog title `Signed Out`, while genuine sign-in errors continue to show `Sign In Problem`.
+- Account Security now uses a neutral `Return to System` label and returns members to the screen that opened it. The visible app version was bumped to `LMS-0648`.

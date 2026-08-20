@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bar,
   BarChart,
@@ -66,6 +66,8 @@ function PdfViewerModal({ document, onClose }) {
 export default function DashboardPage() {
   const designPreview = true;
   const router = useRouter();
+  const pathname = usePathname();
+  const passwordSettingsPath = `/reset-password?returnTo=${encodeURIComponent(pathname)}`;
   const { notice, confirm: confirmDialog, prompt: promptDialog } = useAppDialog();
   const [ready, setReady] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState("");
@@ -1496,7 +1498,7 @@ export default function DashboardPage() {
           onChangeDashboard: (path) => router.push(path),
           onOpenLeagueDocument: openWeekdayLeagueDocument,
           onOpenGuide: openAdminGuide,
-          onChangePassword: () => router.push("/reset-password"),
+          onChangePassword: () => router.push(passwordSettingsPath),
           onSaveProfileImage: saveAdminProfileImage,
           onLogout: async () => {
             const { error } = await supabase.auth.signOut({ scope: "local" });
