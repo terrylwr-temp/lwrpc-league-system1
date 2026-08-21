@@ -1,6 +1,6 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-08-13
+Last updated: 2026-08-21
 
 ## Purpose
 
@@ -434,3 +434,4 @@ As of 2026-05-21:
 - Every authenticated LMS role, including Players, Captains, League Managers, and Commissioners, now has a four-hour inactivity timeout. A persistent branded warning appears with 15 minutes remaining and offers Stay Signed In; expiry signs out only the current browser session and returns the member to sign-in. The visible app version was bumped to `LMS-0647`.
 - The inactivity sign-out notice now uses the dialog title `Signed Out`, while genuine sign-in errors continue to show `Sign In Problem`.
 - Account Security now uses a neutral `Return to System` label and returns members to the screen that opened it. The visible app version was bumped to `LMS-0648`.
+- Tournament Public Display standings now use a compact layout, keeping its ranking explanation alongside the title and active-division count. Every rotating display view can hide the sticky display header and restore it from that view's top information strip. The visible app version was bumped to `LMS-0649`.

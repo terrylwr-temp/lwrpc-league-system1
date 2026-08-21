@@ -30,6 +30,7 @@ export default function TournamentDisplayPage() {
   const [error, setError] = useState("");
   const [view, setView] = useState("courtsDetail");
   const [rotating, setRotating] = useState(true);
+  const [headerHidden, setHeaderHidden] = useState(false);
   const [selectedStandingTeam, setSelectedStandingTeam] = useState(null);
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
@@ -121,25 +122,44 @@ export default function TournamentDisplayPage() {
       adminHref={`/tourney/${tournamentKey}/admin`}
       systemSettings={systemSettings}
       headerActions={displayControls}
+      headerHidden={headerHidden}
+      onHideHeader={() => setHeaderHidden(true)}
     >
       {view === "standings" ? (
         isEliminationTournament(state.tournament.settings) ? (
-          <DisplayBracket bracketDivisions={bracketDivisions} settings={state.tournament.settings} />
+          <DisplayBracket
+            bracketDivisions={bracketDivisions}
+            settings={state.tournament.settings}
+            headerHidden={headerHidden}
+            onRestoreHeader={() => setHeaderHidden(false)}
+          />
         ) : (
-          <div className="space-y-5">
+          <div className="space-y-3">
             <StandingsGrid
               standings={standings}
               matches={state.matches}
               onSelectTeam={(team) => setSelectedStandingTeam(team)}
+              headerHidden={headerHidden}
+              onRestoreHeader={() => setHeaderHidden(false)}
             />
             {isTop4 && bracketDivisions.length > 0 && (
-              <DisplayBracket bracketDivisions={bracketDivisions} settings={state.tournament.settings} />
+              <DisplayBracket
+                bracketDivisions={bracketDivisions}
+                settings={state.tournament.settings}
+                headerHidden={headerHidden}
+                onRestoreHeader={() => setHeaderHidden(false)}
+              />
             )}
           </div>
         )
       ) : (
         <>
-          <TournamentDisplayQueueSummary queueStatus={queueStatus} insights={queueInsights} />
+          <TournamentDisplayQueueSummary
+            queueStatus={queueStatus}
+            insights={queueInsights}
+            headerHidden={headerHidden}
+            onRestoreHeader={() => setHeaderHidden(false)}
+          />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             {state.courts.map((court) => {
               const match = playingMatchesByCourtId[String(court.id)];
@@ -242,10 +262,10 @@ function TournamentDisplayControls({ view, rotating, setView, setRotating, tourn
   );
 }
 
-function TournamentDisplayQueueSummary({ queueStatus, insights }) {
+function TournamentDisplayQueueSummary({ queueStatus, insights, headerHidden, onRestoreHeader }) {
   return (
     <div className="mb-3 overflow-x-auto rounded-2xl border border-white/10 bg-slate-900/90 p-3 shadow">
-      <div className="flex min-w-[760px] items-center gap-4">
+      <div className="flex min-w-[920px] items-center gap-4">
         <div className="shrink-0 rounded-full bg-amber-400/25 px-4 py-2 text-sm font-black text-amber-100">
           Estimated Finish: {insights.finishTime} | Avg Game Length: {formatDurationMinutes(insights.averageMatchMinutes)}
         </div>
@@ -260,46 +280,83 @@ function TournamentDisplayQueueSummary({ queueStatus, insights }) {
             />
           </div>
         </div>
+        <RestoreDisplayHeaderButton visible={headerHidden} onClick={onRestoreHeader} />
       </div>
     </div>
   );
 }
 
-function PublicShell({ title, error = "", children, adminHref = "", systemSettings = DEFAULT_SYSTEM_SETTINGS, headerActions = null }) {
+function RestoreDisplayHeaderButton({ visible, onClick }) {
+  if (!visible) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="shrink-0 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-black text-white hover:bg-white/20"
+    >
+      Show Display Header
+    </button>
+  );
+}
+
+function PublicShell({
+  title,
+  error = "",
+  children,
+  adminHref = "",
+  systemSettings = DEFAULT_SYSTEM_SETTINGS,
+  headerActions = null,
+  headerHidden = false,
+  onHideHeader,
+}) {
   const logoUrl = systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
 
   return (
     <main className="full-screen-main show-system-footer min-h-screen bg-slate-950 p-2 text-white sm:p-3">
       <div className="w-full">
-        <div className="sticky top-0 z-40 mb-4 rounded-2xl border border-white/10 bg-slate-950/95 p-3 shadow-xl backdrop-blur sm:p-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-              <Image
-                src={logoUrl}
-                alt={`${clubName} logo`}
-                width={56}
-                height={56}
-                unoptimized
-                className="size-14 shrink-0 rounded-full bg-white object-contain p-1"
-              />
-              <div className="min-w-0">
-                <div className="text-xs font-black uppercase tracking-wide text-blue-200">Tournament Display</div>
-                <h1 className="mt-1 break-words text-2xl font-black leading-tight sm:text-3xl md:text-4xl">{title}</h1>
+        {!headerHidden && (
+          <div className="sticky top-0 z-40 mb-4 rounded-2xl border border-white/10 bg-slate-950/95 p-3 shadow-xl backdrop-blur sm:p-4">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+              <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+                <Image
+                  src={logoUrl}
+                  alt={`${clubName} logo`}
+                  width={56}
+                  height={56}
+                  unoptimized
+                  className="size-14 shrink-0 rounded-full bg-white object-contain p-1"
+                />
+                <div className="min-w-0">
+                  <div className="text-xs font-black uppercase tracking-wide text-blue-200">Tournament Display</div>
+                  <h1 className="mt-1 break-words text-2xl font-black leading-tight sm:text-3xl md:text-4xl">{title}</h1>
+                </div>
               </div>
-            </div>
-            {(headerActions || adminHref) && (
-              <div className="w-full lg:w-auto">
-                {headerActions}
-                {!headerActions && adminHref && (
-                  <Link href={adminHref} className="rounded-xl bg-amber-400 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-amber-300 sm:py-2">
-                    Main System
-                  </Link>
+              <div className="flex w-full flex-col gap-2 lg:w-auto lg:items-end">
+                {onHideHeader && (
+                  <button
+                    type="button"
+                    onClick={onHideHeader}
+                    className="w-fit self-end rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-black text-white hover:bg-white/20"
+                  >
+                    Hide Display Header
+                  </button>
+                )}
+                {(headerActions || adminHref) && (
+                  <div className="w-full">
+                    {headerActions}
+                    {!headerActions && adminHref && (
+                      <Link href={adminHref} className="rounded-xl bg-amber-400 px-4 py-3 text-center text-sm font-black text-slate-950 hover:bg-amber-300 sm:py-2">
+                        Main System
+                      </Link>
+                    )}
+                  </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
-        </div>
+        )}
         {error ? (
           <div className="rounded-2xl bg-red-50 p-5 font-bold text-red-800">{error}</div>
         ) : children}
@@ -323,69 +380,75 @@ function matchLineLabel(match) {
   return match.legacy_id?.startsWith("BR|") ? "Bracket" : `Line ${match.line_number || 1}`;
 }
 
-function StandingsGrid({ standings, matches, onSelectTeam }) {
+function StandingsGrid({ standings, matches, onSelectTeam, headerHidden, onRestoreHeader }) {
   const entries = Object.entries(standings);
   const completedMatchesByDivision = completedMatchCounts(matches);
 
   if (entries.length === 0) {
-    return <div className="rounded-2xl bg-white p-8 text-center font-bold text-slate-500">No completed scores yet.</div>;
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-5 text-slate-500">
+        <span className="font-bold">No completed scores yet.</span>
+        <RestoreDisplayHeaderButton visible={headerHidden} onClick={onRestoreHeader} />
+      </div>
+    );
   }
 
   return (
     <section>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-3xl font-black leading-tight text-white">Current Standings</h2>
+      <div className="mb-3 flex flex-wrap items-center gap-2 sm:gap-3">
+        <h2 className="mr-auto text-3xl font-black leading-tight text-white">Current Standings</h2>
+        <span className="rounded-full border border-blue-300/20 bg-white/10 px-3 py-1.5 text-xs font-semibold text-blue-100 sm:text-sm">
+          Ranked by wins, regular season standing, point differential, points for, then team name
+        </span>
         <span className="rounded-full bg-amber-400/25 px-4 py-2 text-sm font-black text-amber-100">{entries.length} Active Divisions</span>
+        <RestoreDisplayHeaderButton visible={headerHidden} onClick={onRestoreHeader} />
       </div>
-      <div className="mb-4 rounded-2xl border border-blue-300/20 bg-white/10 px-4 py-3 text-sm font-semibold text-blue-100">
-        Standings are ranked by wins, regular season standing, point differential, points for, and team name.
-      </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 2xl:grid-cols-3">
         {entries.map(([division, rows]) => {
           const colors = tournamentDivisionColors(division);
 
           return (
-          <div key={division} className={`rounded-2xl border p-4 shadow-xl ${colors.standingsPanel}`}>
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <h3 className="text-2xl font-black text-white">{division}</h3>
-              <span className="rounded-full bg-blue-400/25 px-3 py-1 text-sm font-black text-blue-100">{rows.length} teams</span>
+          <div key={division} className={`rounded-2xl border p-3 shadow-xl ${colors.standingsPanel}`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3 className="text-xl font-black text-white">{division}</h3>
+              <span className="rounded-full bg-blue-400/25 px-3 py-1 text-xs font-black text-blue-100">{rows.length} teams</span>
             </div>
-            <div className="mt-4 flex flex-wrap gap-2 text-sm font-black">
-              <span className="rounded-full bg-emerald-400/25 px-3 py-1 text-emerald-100">
+            <div className="mt-2 flex flex-wrap gap-2 text-xs font-black">
+              <span className="rounded-full bg-emerald-400/25 px-2.5 py-1 text-emerald-100">
                 {completedMatchesByDivision[division] || 0} matches completed
               </span>
-              <span className="rounded-full bg-blue-400/25 px-3 py-1 text-blue-100">{rows.length} ranked</span>
+              <span className="rounded-full bg-blue-400/25 px-2.5 py-1 text-blue-100">{rows.length} ranked</span>
             </div>
 
-            <div className="mt-4 overflow-hidden rounded-2xl bg-slate-950/30">
-              <table className="w-full text-sm text-white">
+            <div className="mt-3 overflow-hidden rounded-xl bg-slate-950/30">
+              <table className="w-full text-[13px] text-white">
                 <thead className="bg-blue-900/60 text-left text-xs uppercase tracking-wide text-blue-100">
                   <tr>
-                    <th className="px-3 py-3">Rank</th>
-                    <th className="px-3 py-3">Team</th>
-                    <th className="px-3 py-3 text-center">W</th>
-                    <th className="px-3 py-3 text-center">L</th>
-                    <th className="px-3 py-3 text-center">Diff</th>
+                    <th className="px-2 py-2">Rank</th>
+                    <th className="px-2 py-2">Team</th>
+                    <th className="px-2 py-2 text-center">W</th>
+                    <th className="px-2 py-2 text-center">L</th>
+                    <th className="px-2 py-2 text-center">Diff</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.map((row, index) => (
                     <tr key={row.team} className="border-t border-blue-300/10">
-                      <td className="px-3 py-3">
-                        <span className="inline-flex size-8 items-center justify-center rounded-full bg-amber-400/25 font-black text-amber-100">{index + 1}</span>
+                      <td className="px-2 py-2">
+                        <span className="inline-flex size-7 items-center justify-center rounded-full bg-amber-400/25 font-black text-amber-100">{index + 1}</span>
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="px-2 py-2">
                         <button
                           type="button"
                           onClick={() => onSelectTeam({ ...row, division })}
-                          className="rounded-xl border border-blue-300/40 bg-blue-900/70 px-4 py-3 text-left font-black text-white hover:bg-blue-800"
+                          className="rounded-lg border border-blue-300/40 bg-blue-900/70 px-3 py-1.5 text-left font-black text-white hover:bg-blue-800"
                         >
                           {tournamentStandingLabel(row)}
                         </button>
                       </td>
-                      <td className="px-3 py-3 text-center font-black">{row.w}</td>
-                      <td className="px-3 py-3 text-center font-black">{row.l}</td>
-                      <td className="px-3 py-3 text-center font-black">{row.pf - row.pa > 0 ? `+${row.pf - row.pa}` : row.pf - row.pa}</td>
+                      <td className="px-2 py-2 text-center font-black">{row.w}</td>
+                      <td className="px-2 py-2 text-center font-black">{row.l}</td>
+                      <td className="px-2 py-2 text-center font-black">{row.pf - row.pa > 0 ? `+${row.pf - row.pa}` : row.pf - row.pa}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -399,16 +462,22 @@ function StandingsGrid({ standings, matches, onSelectTeam }) {
   );
 }
 
-function DisplayBracket({ bracketDivisions, settings }) {
+function DisplayBracket({ bracketDivisions, settings, headerHidden, onRestoreHeader }) {
   if (bracketDivisions.length === 0) {
-    return <div className="rounded-2xl bg-white p-8 text-center font-bold text-slate-500">Bracket has not been generated yet.</div>;
+    return (
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-5 text-slate-500">
+        <span className="font-bold">Bracket has not been generated yet.</span>
+        <RestoreDisplayHeaderButton visible={headerHidden} onClick={onRestoreHeader} />
+      </div>
+    );
   }
 
   return (
     <section className="space-y-5">
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-3xl font-black leading-tight text-white">{tournamentFormatLabel(settings)} Bracket</h2>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <h2 className="mr-auto text-3xl font-black leading-tight text-white">{tournamentFormatLabel(settings)} Bracket</h2>
         <span className="rounded-full bg-amber-400/25 px-4 py-2 text-sm font-black text-amber-100">{bracketDivisions.length} Active Divisions</span>
+        <RestoreDisplayHeaderButton visible={headerHidden} onClick={onRestoreHeader} />
       </div>
       {bracketDivisions.map((divisionGroup) => {
         const colors = tournamentDivisionColors(divisionGroup.division.name);
