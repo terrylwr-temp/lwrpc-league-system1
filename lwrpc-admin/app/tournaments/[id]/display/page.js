@@ -113,6 +113,7 @@ export default function TournamentDisplayPage() {
       setView={setView}
       setRotating={setRotating}
       tournamentKey={tournamentKey}
+      onHideHeader={() => setHeaderHidden(true)}
     />
   );
 
@@ -123,7 +124,6 @@ export default function TournamentDisplayPage() {
       systemSettings={systemSettings}
       headerActions={displayControls}
       headerHidden={headerHidden}
-      onHideHeader={() => setHeaderHidden(true)}
     >
       {view === "standings" ? (
         isEliminationTournament(state.tournament.settings) ? (
@@ -215,12 +215,12 @@ export default function TournamentDisplayPage() {
   );
 }
 
-function TournamentDisplayControls({ view, rotating, setView, setRotating, tournamentKey }) {
+function TournamentDisplayControls({ view, rotating, setView, setRotating, tournamentKey, onHideHeader }) {
   const controlClass = "rounded-xl px-2 py-2 text-center text-xs font-black sm:px-4 sm:text-sm";
 
   return (
-    <div className="grid w-full gap-2 sm:min-w-[520px] sm:max-w-[680px]">
-      <div className="grid grid-cols-3 gap-2">
+    <div className="grid w-full grid-cols-[repeat(3,minmax(0,1fr))_2.5rem] gap-2 sm:min-w-[520px] sm:max-w-[680px]">
+      <div className="col-span-3 grid grid-cols-3 gap-2">
         <button
           type="button"
           onClick={() => setView("courtsDetail")}
@@ -243,7 +243,16 @@ function TournamentDisplayControls({ view, rotating, setView, setRotating, tourn
           Current Standings
         </button>
       </div>
-      <div className="grid grid-cols-3 gap-2">
+      <button
+        type="button"
+        onClick={onHideHeader}
+        aria-label="Hide display header"
+        title="Hide display header"
+        className="col-start-4 row-span-2 row-start-1 flex size-10 items-center justify-center self-center rounded-xl border border-white/20 bg-white/10 text-lg font-black leading-none text-white hover:bg-white/20"
+      >
+        <span aria-hidden="true">⌃</span>
+      </button>
+      <div className="col-span-3 row-start-2 grid grid-cols-3 gap-2">
         <button
           type="button"
           onClick={() => setRotating((value) => !value)}
@@ -308,7 +317,6 @@ function PublicShell({
   systemSettings = DEFAULT_SYSTEM_SETTINGS,
   headerActions = null,
   headerHidden = false,
-  onHideHeader,
 }) {
   const logoUrl = systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url;
   const clubName = systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name;
@@ -334,15 +342,6 @@ function PublicShell({
                 </div>
               </div>
               <div className="flex w-full flex-col gap-2 lg:w-auto lg:items-end">
-                {onHideHeader && (
-                  <button
-                    type="button"
-                    onClick={onHideHeader}
-                    className="w-fit self-end rounded-xl border border-white/20 bg-white/10 px-3 py-2 text-xs font-black text-white hover:bg-white/20"
-                  >
-                    Hide Display Header
-                  </button>
-                )}
                 {(headerActions || adminHref) && (
                   <div className="w-full">
                     {headerActions}
