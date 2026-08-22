@@ -21,7 +21,6 @@ const PAGE_SIZE = 100;
 const MEMBER_DIRECTORY_VIEW_STATE_KEY = "lwrpc-member-directory-view";
 const CLEAN_MEMBERS_BATCH_SIZE = 25;
 const ROLE_CORRECTION_BATCH_SIZE = 25;
-const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
 const MEMBER_EXPORT_TYPES = [
   { value: "membership_all", label: "Membership (All)" },
   { value: "league", label: "League" },
@@ -50,7 +49,6 @@ export default function MembersPage() {
   const [includeInactiveMembers, setIncludeInactiveMembers] = useState(directoryViewState.includeInactiveMembers);
   const [page, setPage] = useState(directoryViewState.page);
   const [cleaningMembers, setCleaningMembers] = useState(false);
-  const [markingAllInactive, setMarkingAllInactive] = useState(false);
   const [resettingPasswordMemberId, setResettingPasswordMemberId] = useState("");
   const [showMaintenance, setShowMaintenance] = useState(false);
   const [showAddMember, setShowAddMember] = useState(false);
@@ -242,66 +240,6 @@ export default function MembersPage() {
     await loadMembers();
     setCleaningMembers(false);
     alert(`Cleaned ${updates.length} member phone number${updates.length === 1 ? "" : "s"}.`);
-  }
-
-  async function markAllMembersInactive() {
-    if (markingAllInactive) return;
-
-    const { rows: memberRows, error: memberLoadError } = await loadAllExportMemberRows();
-    if (memberLoadError) {
-      alert(memberLoadError.message);
-      return;
-    }
-
-    const activeMembers = memberRows.filter((member) => member.is_active_member !== false);
-    const eligibleMembers = activeMembers.filter(
-      (member) => member.is_active_member !== false && !memberHasInactiveProtectedRole(member)
-    );
-    const activeCount = eligibleMembers.length;
-
-    if (activeCount === 0) {
-      alert(
-        activeMembers.length === 0
-          ? "All members are already inactive."
-          : "No eligible active members. League Managers, Club Pros, and Commissioners are protected."
-      );
-      return;
-    }
-
-    const ok = await appConfirm(
-      [
-        `Mark ${activeCount} active member${activeCount === 1 ? "" : "s"} inactive?`,
-        "",
-        "Use this before a fresh MembershipWorks import when you want the import file to reactivate current members.",
-        "League Managers, Club Pros, and Commissioners will be left active.",
-        "",
-        "Continue?",
-      ].join("\n"),
-      { title: "Mark members inactive", confirmLabel: "Mark inactive", tone: "warning" }
-    );
-
-    if (!ok) return;
-
-    setMarkingAllInactive(true);
-
-    const { error } = await supabase
-      .from("members")
-      .update({
-        is_active_member: false,
-        updated_at: new Date().toISOString(),
-      })
-      .in("id", eligibleMembers.map((member) => member.id));
-
-    setMarkingAllInactive(false);
-
-    if (error) {
-      alert(error.message);
-      return;
-    }
-
-    await loadMembers();
-    setIncludeInactiveMembers(true);
-    alert(`${activeCount} member${activeCount === 1 ? "" : "s"} marked inactive.`);
   }
 
   async function correctRoles() {
@@ -999,14 +937,6 @@ export default function MembersPage() {
                   {correctingRoles ? "Correcting..." : "Correct Roles"}
                 </button>
 
-                <button
-                  type="button"
-                  onClick={markAllMembersInactive}
-                  disabled={markingAllInactive}
-                  className="rounded-xl bg-red-700 px-5 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {markingAllInactive ? "Updating..." : "Mark All Inactive"}
-                </button>
               </div>
             </div>
           </div>
@@ -1796,12 +1726,6 @@ function SortHeader({ active, direction, label, onClick }) {
 function sortAria(key, sortConfig) {
   if (sortConfig.key !== key) return "none";
   return sortConfig.direction === "asc" ? "ascending" : "descending";
-}
-
-function memberHasInactiveProtectedRole(member) {
-  return (member.user_roles || []).some((roleRow) =>
-    INACTIVE_PROTECTED_ROLES.has(roleRow.role)
-  );
 }
 
 function MemberExportModal({
