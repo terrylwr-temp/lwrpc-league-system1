@@ -167,6 +167,24 @@ export default function MembersPage() {
   async function cleanMembers() {
     if (cleaningMembers) return;
 
+    const ok = await appConfirm(
+      [
+        "Clean Members will standardize member phone numbers only.",
+        "",
+        "It will:",
+        "- Format 10-digit US numbers as (###) ###-####.",
+        "- Remove a leading 1 from 11-digit US numbers.",
+        "- Preserve extensions like x123.",
+        "",
+        "It will not change names, emails, DUPR IDs, roles, locations, or phone numbers it cannot safely interpret.",
+        "",
+        "Continue?",
+      ].join("\n"),
+      { title: "Clean member phone numbers", confirmLabel: "Clean members", tone: "warning" }
+    );
+
+    if (!ok) return;
+
     const { rows: memberRows, error: memberLoadError } = await loadAllExportMemberRows();
     if (memberLoadError) {
       alert(memberLoadError.message);
@@ -193,25 +211,6 @@ export default function MembersPage() {
       alert("No member phone numbers need cleanup.");
       return;
     }
-
-    const ok = await appConfirm(
-      [
-        "Clean Members will standardize member phone numbers only.",
-        "",
-        "It will:",
-        `- Update ${updates.length} phone number${updates.length === 1 ? "" : "s"} that can be safely cleaned.`,
-        "- Format 10-digit US numbers as (###) ###-####.",
-        "- Remove a leading 1 from 11-digit US numbers.",
-        "- Preserve extensions like x123.",
-        "",
-        "It will not change names, emails, DUPR IDs, roles, locations, or phone numbers it cannot safely interpret.",
-        "",
-        "Continue?",
-      ].join("\n"),
-      { title: "Clean member phone numbers", confirmLabel: "Clean members", tone: "warning" }
-    );
-
-    if (!ok) return;
 
     setCleaningMembers(true);
 
@@ -308,6 +307,20 @@ export default function MembersPage() {
   async function correctRoles() {
     if (correctingRoles) return;
 
+    const ok = await appConfirm(
+      [
+        "Correct Roles checks every active team captain and co-captain assignment.",
+        "",
+        "Members with a Captain role who are no longer assigned as a captain or co-captain on an active team will be changed back to Player.",
+        "It does not add roles or change active captain and co-captain assignments.",
+        "",
+        "Continue?",
+      ].join("\n"),
+      { title: "Correct Captain roles", confirmLabel: "Correct roles", tone: "warning" }
+    );
+
+    if (!ok) return;
+
     setCorrectingRoles(true);
 
     const [
@@ -345,23 +358,6 @@ export default function MembersPage() {
 
     if (staleCaptainRoles.length === 0) {
       alert("No stale Captain roles found. Every Captain role is tied to an active team captain or co-captain assignment.");
-      setCorrectingRoles(false);
-      return;
-    }
-
-    const ok = await appConfirm(
-      [
-        `Change ${staleCaptainRoles.length} stale Captain role${staleCaptainRoles.length === 1 ? "" : "s"} back to Player?`,
-        "",
-        "This checks active team captain and co-captain assignments, including captain-only assignments outside the roster.",
-        "Members who are no longer assigned as a captain or co-captain on an active team will be changed to Player.",
-        "",
-        "Continue?",
-      ].join("\n"),
-      { title: "Correct Captain roles", confirmLabel: "Change to Player", tone: "warning" }
-    );
-
-    if (!ok) {
       setCorrectingRoles(false);
       return;
     }
@@ -968,7 +964,7 @@ export default function MembersPage() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:w-[25rem]">
                 <button
                   type="button"
                   onClick={() => router.push("/member-import")}

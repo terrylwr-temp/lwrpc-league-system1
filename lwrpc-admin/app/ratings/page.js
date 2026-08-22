@@ -33,6 +33,8 @@ export default function RatingsPage() {
   const [copyTargetSeason, setCopyTargetSeason] = useState("");
   const [isCopyingRatings, setIsCopyingRatings] = useState(false);
   const [isCleaningRatings, setIsCleaningRatings] = useState(false);
+  const [cleanRatingsDialog, setCleanRatingsDialog] = useState(null);
+  const [ratingCleanupReview, setRatingCleanupReview] = useState(null);
 
   useUnsavedChangesWarning(Boolean(copySourceSeason || copyTargetSeason), "ratings copy setup");
 
@@ -850,21 +852,14 @@ export default function RatingsPage() {
       return;
     }
 
-    const reliabilityRuleText = reliabilityThreshold > 0
-      ? `Reliability Rating values of ${reliabilityThreshold} or below will leave DUPR Doubles as-is, then adjust Season DUPR using the NR rule: the player's highest division Rating Range Max minus 0.5. A DUPR Notes entry will be added for each reliability-based NR-style adjustment.`
-      : "Reliability Rating will not change the cleanup rule.";
-    const ok = await appConfirm({
-      title: `Clean ratings for Season: ${seasonName}?`,
-      message: `Selected Season: ${seasonName}\n\nThis overwrites Season DUPR Rating for players in this season using DUPR Doubles Rating. NR values use the player's highest division Rating Range Max minus 0.5. Existing Age-Based ratings are also rounded down to one decimal place.\n\n${reliabilityRuleText}`,
-      confirmLabel: "Clean ratings",
-      tone: "warning",
+    setCleanRatingsDialog({
+      seasonName,
+      reliabilityThreshold,
+      startOfSeasonClean: true,
     });
+  }
 
-    if (!ok) return;
-
-    setIsCleaningRatings(true);
-    setRatingImportStatus("Cleaning ratings...");
-
+  async function buildRatingCleanupChanges(reliabilityThreshold) {
     const { data: rosterRows, error: rosterError } = await supabase
       .from("team_members")
       .select(`
@@ -883,11 +878,7 @@ export default function RatingsPage() {
         )
       `);
 
-    if (rosterError) {
-      alert(rosterError.message);
-      setIsCleaningRatings(false);
-      return;
-    }
+    if (rosterError) return { error: rosterError };
 
     const maxRatingByMemberId = {};
 
@@ -908,18 +899,13 @@ export default function RatingsPage() {
       maxRatingByMemberId[key] = Math.max(maxRatingByMemberId[key] ?? 0, maxDupr);
     });
 
-    const now = new Date().toISOString();
     const rowsByMemberId = Object.fromEntries(
       ratings
         .filter((rating) => String(rating.season_id) === String(selectedSeason))
         .map((rating) => [String(rating.member_id), rating])
     );
-    const inserts = [];
-    const updateRequests = [];
-    let cleanedSeasonDuprCount = 0;
-    let cleanedAgeBasedCount = 0;
+    const changes = [];
     let skippedCount = 0;
-    let reliabilityAdjustedCount = 0;
 
     members.forEach((member) => {
       const existing = rowsByMemberId[String(member.id)];
@@ -941,44 +927,63 @@ export default function RatingsPage() {
         return;
       }
 
-      if (cleanedValue !== null) cleanedSeasonDuprCount += 1;
-      if (cleanedAgeBasedValue !== null) cleanedAgeBasedCount += 1;
-
-      const payload = { updated_at: now };
+      const payload = {};
       if (cleanedValue !== null) payload.season_dupr_rating = cleanedValue;
       if (cleanedAgeBasedValue !== null) payload.season_primetime_rating = cleanedAgeBasedValue;
 
       if (reliabilityTriggered) {
-        reliabilityAdjustedCount += 1;
         payload.notes = ratingNotesWithReliabilityAdjustment(
           existing?.notes,
           reliabilityThreshold
         );
       }
 
-      if (existing) {
-        updateRequests.push(
-          supabase.from("member_season_ratings").update(payload).eq("id", existing.id)
-        );
-      } else {
-        inserts.push({
-          member_id: member.id,
-          season_id: selectedSeason,
-          dupr_doubles_rating: null,
-          dupr_reliability_rating: null,
-          season_primetime_rating: null,
-          ...payload,
-        });
-      }
+      const changedFields = Object.keys(payload).filter(
+        (field) => !ratingCleanupValuesMatch(existing?.[field], payload[field])
+      );
+
+      changes.push({
+        id: existing?.id || `new-${member.id}`,
+        member,
+        existing,
+        payload,
+        changedFields,
+        hasChanges: !existing || changedFields.length > 0,
+        reliabilityTriggered,
+      });
     });
+
+    return { changes, skippedCount, error: null };
+  }
+
+  async function applyRatingCleanupChanges(changes, reliabilityThreshold, reviewMode = false) {
+    const now = new Date().toISOString();
+    const updateRequests = changes
+      .filter((change) => change.existing)
+      .map((change) =>
+        supabase
+          .from("member_season_ratings")
+          .update({ ...change.payload, updated_at: now })
+          .eq("id", change.existing.id)
+      );
+    const inserts = changes
+      .filter((change) => !change.existing)
+      .map((change) => ({
+        member_id: change.member.id,
+        season_id: selectedSeason,
+        dupr_doubles_rating: null,
+        dupr_reliability_rating: null,
+        season_primetime_rating: null,
+        ...change.payload,
+        updated_at: now,
+      }));
 
     for (let i = 0; i < updateRequests.length; i += 25) {
       const results = await Promise.all(updateRequests.slice(i, i + 25));
       const failed = results.find((result) => result.error);
       if (failed?.error) {
         alert(failed.error.message);
-        setIsCleaningRatings(false);
-        return;
+        return false;
       }
     }
 
@@ -987,15 +992,74 @@ export default function RatingsPage() {
 
       if (error) {
         alert(error.message);
-        setIsCleaningRatings(false);
-        return;
+        return false;
       }
     }
 
     await loadRatings(selectedSeason);
     await loadAllRatings();
-    setRatingImportStatus(`Cleaned ${cleanedSeasonDuprCount} Season DUPR rating(s) and truncated ${cleanedAgeBasedCount} Age-Based rating(s). Skipped ${skippedCount} player(s) without a usable Season DUPR or Age-Based rating.${reliabilityThreshold > 0 ? ` Reliability threshold applied at ${reliabilityThreshold} or below; ${reliabilityAdjustedCount} player(s) were treated as NR for Season DUPR cleanup with DUPR Notes updated.` : ""}`);
+    const seasonDuprCount = changes.filter((change) => "season_dupr_rating" in change.payload).length;
+    const ageBasedCount = changes.filter((change) => "season_primetime_rating" in change.payload).length;
+    const reliabilityAdjustedCount = changes.filter((change) => change.reliabilityTriggered).length;
+    setRatingImportStatus(`${reviewMode ? "Applied" : "Cleaned"} ${seasonDuprCount} Season DUPR rating(s) and ${reviewMode ? "updated" : "truncated"} ${ageBasedCount} Age-Based rating(s).${reliabilityThreshold > 0 ? ` Reliability threshold applied at ${reliabilityThreshold} or below; ${reliabilityAdjustedCount} player(s) were treated as NR for Season DUPR cleanup with DUPR Notes updated.` : ""}`);
+    return true;
+  }
+
+  async function continueCleanRatings() {
+    if (!cleanRatingsDialog) return;
+
+    const { reliabilityThreshold, startOfSeasonClean } = cleanRatingsDialog;
+    setCleanRatingsDialog(null);
+    setIsCleaningRatings(true);
+    setRatingImportStatus(startOfSeasonClean ? "Cleaning ratings..." : "Finding potential rating changes...");
+
+    const cleanup = await buildRatingCleanupChanges(reliabilityThreshold);
+    if (cleanup.error) {
+      alert(cleanup.error.message);
+      setIsCleaningRatings(false);
+      return;
+    }
+
+    if (startOfSeasonClean) {
+      await applyRatingCleanupChanges(cleanup.changes, reliabilityThreshold);
+      setIsCleaningRatings(false);
+      return;
+    }
+
+    const potentialChanges = cleanup.changes.filter((change) => change.hasChanges);
     setIsCleaningRatings(false);
+
+    if (potentialChanges.length === 0) {
+      setRatingImportStatus(`Reviewed all players. No potential rating changes were found. Skipped ${cleanup.skippedCount} player(s) without a usable Season DUPR or Age-Based rating.`);
+      return;
+    }
+
+    setRatingCleanupReview({
+      seasonName: selectedSeasonLabel(),
+      reliabilityThreshold,
+      skippedCount: cleanup.skippedCount,
+      changes: potentialChanges.map((change) => ({ ...change, selected: true })),
+    });
+    setRatingImportStatus(`Found ${potentialChanges.length} potential rating change(s). Review and select the changes to apply.`);
+  }
+
+  async function applyReviewedRatingChanges() {
+    if (!ratingCleanupReview) return;
+    const selectedChanges = ratingCleanupReview.changes.filter((change) => change.selected);
+
+    if (selectedChanges.length === 0) {
+      alert("Select at least one potential change to apply.");
+      return;
+    }
+
+    setIsCleaningRatings(true);
+    const applied = await applyRatingCleanupChanges(
+      selectedChanges,
+      ratingCleanupReview.reliabilityThreshold,
+      true
+    );
+    setIsCleaningRatings(false);
+    if (applied) setRatingCleanupReview(null);
   }
 
   useEffect(() => {
@@ -1215,6 +1279,7 @@ function goToPage(value) {
   }
 
   return (
+    <>
     <main className="min-h-screen bg-slate-100 px-3 pb-24 pt-4 sm:px-6 sm:pb-16 sm:pt-6">
       <div className="mx-auto max-w-7xl">
         <AppHeader
@@ -2061,6 +2126,123 @@ function goToPage(value) {
         </div>
       </div>
     </main>
+
+    {cleanRatingsDialog && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm" role="presentation">
+        <section className="w-full max-w-lg overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="clean-ratings-title" aria-describedby="clean-ratings-message">
+          <header className="flex items-start gap-3 bg-gradient-to-r from-[#102e64] to-[#1558d5] px-5 py-4 text-white">
+            <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-amber-100 text-base font-black text-amber-900" aria-hidden="true">!</span>
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[.14em] text-blue-100">League Management System</span>
+              <h2 id="clean-ratings-title" className="mt-0.5 text-xl font-black leading-tight">Clean ratings for {cleanRatingsDialog.seasonName}</h2>
+            </div>
+          </header>
+          <div className="px-5 py-5">
+            <p id="clean-ratings-message" className="text-sm font-semibold leading-6 text-slate-700">
+              Season DUPR Ratings are calculated from DUPR Doubles Ratings, with NR values using the player&apos;s highest active division maximum minus 0.5. Age-Based Ratings are rounded down to one decimal place. DUPR Doubles Ratings are not changed.
+            </p>
+            <label className="mt-5 flex cursor-pointer items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-slate-800">
+              <input
+                type="checkbox"
+                checked={cleanRatingsDialog.startOfSeasonClean}
+                onChange={(event) => setCleanRatingsDialog((current) => ({ ...current, startOfSeasonClean: event.target.checked }))}
+                className="mt-0.5 h-4 w-4 rounded border-slate-300"
+              />
+              <span>
+                <span className="block font-black">Start of Season Clean</span>
+                <span className="mt-1 block leading-5">Apply the cleanup to every eligible player now, as the existing Clean Ratings action does. Uncheck this to review each potential change before any ratings are updated.</span>
+              </span>
+            </label>
+            {cleanRatingsDialog.reliabilityThreshold > 0 && (
+              <p className="mt-4 text-sm font-semibold leading-6 text-slate-700">
+                Reliability Ratings of {cleanRatingsDialog.reliabilityThreshold} or below will use the NR division-based calculation and add a DUPR Note.
+              </p>
+            )}
+          </div>
+          <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end">
+            <button type="button" onClick={() => setCleanRatingsDialog(null)} className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-black text-slate-700 hover:bg-slate-100">Cancel</button>
+            <button type="button" onClick={continueCleanRatings} className="rounded-xl bg-amber-600 px-5 py-2.5 text-sm font-black text-white hover:bg-amber-700">
+              {cleanRatingsDialog.startOfSeasonClean ? "Clean ratings" : "Review changes"}
+            </button>
+          </footer>
+        </section>
+      </div>
+    )}
+
+    {ratingCleanupReview && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/65 p-2 backdrop-blur-sm sm:p-4" role="presentation">
+        <section className="flex max-h-[94dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="rating-cleanup-review-title">
+          <header className="flex flex-col gap-3 bg-gradient-to-r from-[#102e64] to-[#1558d5] px-5 py-4 text-white sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[.14em] text-blue-100">Review before applying</span>
+              <h2 id="rating-cleanup-review-title" className="mt-0.5 text-xl font-black leading-tight">Potential rating changes — {ratingCleanupReview.seasonName}</h2>
+              <p className="mt-1 text-sm font-semibold text-blue-100">{ratingCleanupReview.changes.length} potential change(s) found; {ratingCleanupReview.skippedCount} player(s) had no usable rating to clean.</p>
+            </div>
+            <label className="flex shrink-0 items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-sm font-bold">
+              <input
+                type="checkbox"
+                checked={ratingCleanupReview.changes.every((change) => change.selected)}
+                onChange={(event) => setRatingCleanupReview((current) => ({
+                  ...current,
+                  changes: current.changes.map((change) => ({ ...change, selected: event.target.checked })),
+                }))}
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              Select all
+            </label>
+          </header>
+          <div className="overflow-auto">
+            <table className="w-full min-w-[760px] border-collapse text-sm">
+              <thead className="sticky top-0 z-10 bg-slate-900 text-left text-xs uppercase tracking-wide text-white">
+                <tr>
+                  <th className="w-14 px-4 py-3">Apply</th>
+                  <th className="px-4 py-3">Player</th>
+                  <th className="px-4 py-3">Season DUPR</th>
+                  <th className="px-4 py-3">Age-Based</th>
+                  <th className="px-4 py-3">Also changed</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ratingCleanupReview.changes.map((change) => (
+                  <tr key={change.id} className="border-b border-slate-200 align-top even:bg-slate-50">
+                    <td className="px-4 py-4">
+                      <input
+                        type="checkbox"
+                        checked={change.selected}
+                        onChange={(event) => setRatingCleanupReview((current) => ({
+                          ...current,
+                          changes: current.changes.map((row) => row.id === change.id ? { ...row, selected: event.target.checked } : row),
+                        }))}
+                        aria-label={`Apply rating cleanup for ${memberFullName(change.member)}`}
+                        className="h-4 w-4 rounded border-slate-300"
+                      />
+                    </td>
+                    <td className="px-4 py-4 font-bold text-slate-900">{memberFullName(change.member) || "Unnamed player"}</td>
+                    <td className="px-4 py-4 text-slate-700">
+                      {change.changedFields.includes("season_dupr_rating") ? <><span>{formatRatingCleanupValue(change.existing?.season_dupr_rating)}</span><span className="mx-2 text-slate-400">→</span><span className="font-bold text-emerald-800">{formatRatingCleanupValue(change.payload.season_dupr_rating)}</span></> : "No change"}
+                    </td>
+                    <td className="px-4 py-4 text-slate-700">
+                      {change.changedFields.includes("season_primetime_rating") ? <><span>{formatRatingCleanupValue(change.existing?.season_primetime_rating)}</span><span className="mx-2 text-slate-400">→</span><span className="font-bold text-emerald-800">{formatRatingCleanupValue(change.payload.season_primetime_rating)}</span></> : "No change"}
+                    </td>
+                    <td className="px-4 py-4 text-slate-700">{change.changedFields.includes("notes") ? "DUPR Note" : "—"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <footer className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-sm font-semibold text-slate-600">{ratingCleanupReview.changes.filter((change) => change.selected).length} selected</span>
+            <div className="flex flex-col-reverse gap-2 sm:flex-row">
+              <button type="button" disabled={isCleaningRatings} onClick={() => setRatingCleanupReview(null)} className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-black text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60">Cancel</button>
+              <button type="button" disabled={isCleaningRatings || ratingCleanupReview.changes.every((change) => !change.selected)} onClick={applyReviewedRatingChanges} className="rounded-xl bg-emerald-700 px-5 py-2.5 text-sm font-black text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60">
+                {isCleaningRatings ? "Applying..." : "Apply selected changes"}
+              </button>
+            </div>
+          </footer>
+        </section>
+      </div>
+    )}
+    </>
   );
 }
 
@@ -2326,4 +2508,22 @@ function cleanedAgeBasedRating(rawValue) {
 
 function truncateToTenth(value) {
   return Math.trunc(Number(value) * 10) / 10;
+}
+
+function ratingCleanupValuesMatch(currentValue, proposedValue) {
+  const currentText = String(currentValue ?? "").trim();
+  const proposedText = String(proposedValue ?? "").trim();
+  const currentNumber = Number(currentText);
+  const proposedNumber = Number(proposedText);
+
+  if (currentText && proposedText && !Number.isNaN(currentNumber) && !Number.isNaN(proposedNumber)) {
+    return currentNumber === proposedNumber;
+  }
+
+  return currentText === proposedText;
+}
+
+function formatRatingCleanupValue(value) {
+  const text = String(value ?? "").trim();
+  return text || "—";
 }
