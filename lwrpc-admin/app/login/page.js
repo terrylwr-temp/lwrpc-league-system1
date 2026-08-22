@@ -11,6 +11,13 @@ import { passkeyErrorMessage } from "../lib/passkeyErrors";
 import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } from "../lib/systemSettings";
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 
+const PBCC_RETURN_TO = "/pbcc/player";
+
+function requestedPostSignInPath() {
+  const returnTo = new URLSearchParams(window.location.search).get("returnTo");
+  return returnTo === PBCC_RETURN_TO ? returnTo : null;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const emailInputRef = useRef(null);
@@ -95,7 +102,7 @@ const [pendingPasswordResetEmail, setPendingPasswordResetEmail] = useState("");
 
     const role = highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [selectedMember]);
 
-    router.push(defaultDashboardForRole(role));
+    router.push(requestedPostSignInPath() || defaultDashboardForRole(role));
   }
 
   async function routeExistingSession() {

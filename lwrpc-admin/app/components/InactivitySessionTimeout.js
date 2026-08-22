@@ -1,13 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 
 const INACTIVITY_LIMIT_MS = 4 * 60 * 60 * 1000;
 const WARNING_LEAD_MS = 15 * 60 * 1000;
 const ACTIVITY_STORAGE_KEY = "lwrpc-session-last-activity";
 const LOGOUT_NOTICE_STORAGE_KEY = "lwrpc-inactivity-logout-notice";
+const PBCC_RETURN_TO = "/pbcc/player";
+
+function isPbccPath(pathname) {
+  return pathname?.startsWith("/pbcc") || pathname?.startsWith("/round-robin/rpro");
+}
 
 function storedActivityFor(userId) {
   try {
@@ -32,6 +37,7 @@ function formatRemainingTime(seconds) {
 
 export default function InactivitySessionTimeout() {
   const router = useRouter();
+  const pathname = usePathname();
   const lastActivityRef = useRef(null);
   const userIdRef = useRef(null);
   const signingOutRef = useRef(false);
@@ -59,10 +65,13 @@ export default function InactivitySessionTimeout() {
       // Clearing the local session state and returning to sign-in still protects this browser.
     } finally {
       clearTrackedSession();
-      router.replace("/login");
+      const signInPath = isPbccPath(pathname)
+        ? `/login?returnTo=${encodeURIComponent(PBCC_RETURN_TO)}`
+        : "/login";
+      router.replace(signInPath);
       signingOutRef.current = false;
     }
-  }, [clearTrackedSession, router]);
+  }, [clearTrackedSession, pathname, router]);
 
   const recordActivity = useCallback(() => {
     const userId = userIdRef.current;
