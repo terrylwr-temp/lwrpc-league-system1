@@ -462,12 +462,14 @@ export default function RoundRobinAdminPage() {
       return options.returnResult ? { success: false, error: result.error } : false;
     }
 
-    if (isHostAccess) {
-      await unlockHost(cleanHostPhone, cleanHostSessionId);
-    } else {
-      await unlock(preferredSessionId);
+    if (options.refresh !== false) {
+      if (isHostAccess) {
+        await unlockHost(cleanHostPhone, cleanHostSessionId);
+      } else {
+        await unlock(preferredSessionId);
+      }
     }
-    setNotice(noticeForAction(action, result));
+    if (!options.silent) setNotice(noticeForAction(action, result));
     return options.returnResult ? result : true;
   }
 
@@ -3247,6 +3249,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
   const [memberPickerOpen, setMemberPickerOpen] = useState(false);
   const [playerSearch, setPlayerSearch] = useState("");
   const [statsPlayer, setStatsPlayer] = useState(null);
+  const [phoneLookupMessage, setPhoneLookupMessage] = useState("");
   const savedPlayers = useMemo(
     () => state.players || [],
     [state.players]
@@ -3272,6 +3275,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
     setFormBaseline(emptyForm);
     setMemberSearch("");
     setMemberPickerOpen(false);
+    setPhoneLookupMessage("");
   }
 
   function openAddPlayer() {
@@ -3301,6 +3305,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
     setFormBaseline(nextForm);
     setMemberSearch(linkedMember ? memberLabel(linkedMember) : "");
     setMemberPickerOpen(false);
+    setPhoneLookupMessage("");
     setPlayerModalOpen(true);
   }
 
@@ -3317,6 +3322,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
     }));
     setMemberSearch(memberLabel(member));
     setMemberPickerOpen(false);
+    setPhoneLookupMessage("");
   }
 
   function updateMemberSearch(value) {
@@ -3331,6 +3337,40 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
     setForm((current) => ({ ...current, memberId: "" }));
     setMemberSearch("");
     setMemberPickerOpen(false);
+  }
+
+  async function lookUpPhoneForPlayerName(displayName) {
+    if (form.id || form.memberId || form.phone.trim() || !normalizePlayerLookupName(displayName)) return;
+
+    const lookupName = normalizePlayerLookupName(displayName);
+    setPhoneLookupMessage("Checking PBCC Players and past matches...");
+    const result = await runAction(
+      "lookupPlayerContact",
+      { displayName },
+      { returnResult: true, refresh: false, silent: true }
+    );
+    if (!result || result.success === false) {
+      setPhoneLookupMessage("");
+      return;
+    }
+
+    setForm((current) => {
+      if (
+        current.id ||
+        current.memberId ||
+        current.phone.trim() ||
+        normalizePlayerLookupName(current.displayName) !== lookupName ||
+        !result.found
+      ) return current;
+      return { ...current, phone: formatPhoneInput(result.phone) };
+    });
+    setPhoneLookupMessage(
+      result.found
+        ? `Phone number filled from ${result.source === "past_game" ? "a past PBCC match" : "PBCC Players"}.`
+        : result.ambiguous
+          ? "More than one phone number matches this name. Enter the phone number manually."
+          : "No saved PBCC phone number found for this name."
+    );
   }
 
   function togglePlayerGroup(groupId) {
@@ -3482,6 +3522,9 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
           clearMemberLink={clearMemberLink}
           setMemberPickerOpen={setMemberPickerOpen}
           togglePlayerGroup={togglePlayerGroup}
+          lookUpPhoneForPlayerName={lookUpPhoneForPlayerName}
+          phoneLookupMessage={phoneLookupMessage}
+          setPhoneLookupMessage={setPhoneLookupMessage}
           save={save}
           onClose={closePlayerModal}
         />
@@ -3491,7 +3534,7 @@ function PlayersTab({ state, runAction, actionLoading, setTabDirty }) {
   );
 }
 
-function PlayerFormModal({ state, form, setForm, formDirty, memberSearch, memberPickerOpen, memberOptions, actionLoading, chooseMember, updateMemberSearch, clearMemberLink, setMemberPickerOpen, togglePlayerGroup, save, onClose }) {
+function PlayerFormModal({ state, form, setForm, formDirty, memberSearch, memberPickerOpen, memberOptions, actionLoading, chooseMember, updateMemberSearch, clearMemberLink, setMemberPickerOpen, togglePlayerGroup, lookUpPhoneForPlayerName, phoneLookupMessage, setPhoneLookupMessage, save, onClose }) {
   const saving = actionLoading === "savePlayer";
   const canSave = !saving && form.displayName.trim() && normalizePhone(form.phone).length >= 10;
 
@@ -3559,7 +3602,17 @@ function PlayerFormModal({ state, form, setForm, formDirty, memberSearch, member
                 )}
               </div>
 
-              <TextInput label="Name" value={form.displayName} onChange={(value) => setForm((current) => ({ ...current, displayName: value }))} required />
+              <TextInput
+                label="Name"
+                value={form.displayName}
+                onChange={(value) => {
+                  setPhoneLookupMessage("");
+                  setForm((current) => ({ ...current, displayName: value }));
+                }}
+                onBlur={() => lookUpPhoneForPlayerName(form.displayName)}
+                required
+              />
+              {phoneLookupMessage && <p className="-mt-1 text-xs font-semibold text-slate-500" aria-live="polite">{phoneLookupMessage}</p>}
               <TextInput label="DUPR ID" value={form.duprId} onChange={(value) => setForm((current) => ({ ...current, duprId: normalizeDuprId(value) }))} />
               <TextInput label="Email" value={form.email} onChange={(value) => setForm((current) => ({ ...current, email: value }))} />
               <TextInput label="Phone" type="tel" value={form.phone} onChange={(value) => setForm((current) => ({ ...current, phone: formatPhoneInput(value) }))} required />
@@ -5021,11 +5074,11 @@ function TemplateTextarea({ label, value, onChange, onTest = null, testDisabled 
   );
 }
 
-function TextInput({ label, value, onChange, placeholder = "", type = "text", required = false }) {
+function TextInput({ label, value, onChange, onBlur = undefined, placeholder = "", type = "text", required = false }) {
   return (
     <label className="block text-sm font-bold text-slate-600">
       {label}{required ? " *" : ""}
-      <input type={type} value={value} placeholder={placeholder} required={required} onChange={(event) => onChange(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950" />
+      <input type={type} value={value} placeholder={placeholder} required={required} onChange={(event) => onChange(event.target.value)} onBlur={onBlur} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950" />
     </label>
   );
 }
@@ -6532,6 +6585,16 @@ function normalizePhone(value) {
   const digits = String(value || "").replace(/\D/g, "");
   if (digits.length > 10 && digits.startsWith("1")) return digits.slice(-10);
   return digits;
+}
+
+function normalizePlayerLookupName(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/gi, " ")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 }
 
 function timeInputValue(value) {

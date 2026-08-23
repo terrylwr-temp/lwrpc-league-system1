@@ -23,6 +23,7 @@ const HOST_ALLOWED_ACTIONS = new Set([
   "sendBroadcastText",
 ]);
 const CLUB_PRO_ALLOWED_ACTIONS = new Set([
+  "lookupPlayerContact",
   "savePlayer",
   "deletePlayer",
   "savePlayerGroup",
@@ -128,6 +129,11 @@ export async function POST(req) {
 
     if (action === "savePlayer") {
       const result = await savePlayer(supabase, group, body.player);
+      return NextResponse.json({ success: true, ...result });
+    }
+
+    if (action === "lookupPlayerContact") {
+      const result = await lookupPlayerContact(supabase, group, body);
       return NextResponse.json({ success: true, ...result });
     }
 
@@ -498,6 +504,48 @@ async function savePlayer(supabase, group, player = {}) {
   await addLog(supabase, group.id, null, "player", `${displayName} added.`);
   const sms = payload.is_active ? await sendNewPlayerText(supabase, group, data, player.publicUrl) : null;
   return { player: data, sms, newPlayerTextSent: payload.is_active };
+}
+
+async function lookupPlayerContact(supabase, group, body) {
+  const displayName = String(body.displayName || "").trim();
+  const normalizedName = normalizePlayerLookupName(displayName);
+  if (!normalizedName) return { found: false };
+
+  // Escape Postgres ILIKE wildcards so this remains an exact-name lookup and
+  // cannot be used to browse the PBCC contact directory.
+  const exactNamePattern = displayName.replace(/[\\%_]/g, "\\\\$&");
+  const [savedPlayersResult, pastGamePlayersResult] = await Promise.all([
+    supabase
+      .from("round_robin_players")
+      .select("display_name, phone, updated_at")
+      .eq("group_id", group.id)
+      .ilike("display_name", exactNamePattern),
+    supabase
+      .from("round_robin_session_players")
+      .select("display_name, phone, updated_at, round_robin_sessions!inner(group_id)")
+      .eq("round_robin_sessions.group_id", group.id)
+      .ilike("display_name", exactNamePattern),
+  ]);
+  if (savedPlayersResult.error) throw savedPlayersResult.error;
+  if (pastGamePlayersResult.error) throw pastGamePlayersResult.error;
+
+  const candidates = [
+    ...(savedPlayersResult.data || []).map((player) => ({ ...player, source: "saved_player" })),
+    ...(pastGamePlayersResult.data || []).map((player) => ({ ...player, source: "past_game" })),
+  ].filter((player) => (
+    normalizePlayerLookupName(player.display_name) === normalizedName &&
+    normalizePhone(player.phone).length >= 10
+  ));
+  const phones = [...new Set(candidates.map((player) => normalizePhone(player.phone)))];
+
+  if (phones.length === 0) return { found: false };
+  if (phones.length > 1) return { found: false, ambiguous: true };
+
+  return {
+    found: true,
+    phone: formatPhoneInput(phones[0]),
+    source: candidates.some((player) => player.source === "saved_player") ? "saved_player" : "past_game",
+  };
 }
 
 async function sendNewPlayerText(supabase, group, player, publicUrl = "") {
@@ -3471,6 +3519,16 @@ function normalizePhone(value) {
   const digits = String(value || "").replace(/\D/g, "");
   if (digits.length > 10 && digits.startsWith("1")) return digits.slice(-10);
   return digits;
+}
+
+function normalizePlayerLookupName(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/gi, " ")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 }
 
 function formatPhoneInput(value) {
