@@ -282,7 +282,7 @@ export default function RoundRobinPlayerPage() {
     setShowPartnerComparison(false);
   }
 
-  async function runHostAction(action, payload = {}, loadingKey = action) {
+  async function runHostAction(action, payload = {}, loadingKey = action, options = {}) {
     const cleanPhone = normalizePhone(phone);
     if (!cleanPhone || cleanPhone.length < 10) {
       setError("Enter the full phone number saved for you by the host.");
@@ -314,8 +314,8 @@ export default function RoundRobinPlayerPage() {
       return null;
     }
 
-    await loadPlayer(cleanPhone, { quiet: true });
-    setNotice(hostNoticeForAction(action, result));
+    if (options.refresh !== false) await loadPlayer(cleanPhone, { quiet: true });
+    if (!options.silent) setNotice(hostNoticeForAction(action, result));
     return result;
   }
 
@@ -363,6 +363,15 @@ export default function RoundRobinPlayerPage() {
       displayName: player.displayName,
       phone: player.phone,
     }, "addSessionNewPlayer");
+  }
+
+  function lookupHostSessionPlayerContact(session, displayName) {
+    return runHostAction(
+      "lookupPlayerContact",
+      { sessionId: session.id, displayName },
+      "lookupPlayerContact",
+      { refresh: false, silent: true }
+    );
   }
 
   function openHostGameUpdate(session) {
@@ -688,6 +697,7 @@ export default function RoundRobinPlayerPage() {
               actionLoading={actionLoading}
               onUpdateStatus={updateHostSessionPlayerStatus}
               onAddNewPlayer={addHostSessionNewPlayer}
+              onLookupPlayerContact={lookupHostSessionPlayerContact}
               onClose={() => setSelectedPlayersSession(null)}
             />
           ) : (
@@ -1311,10 +1321,16 @@ function SessionPlayersViewModal({ session, onClose }) {
   );
 }
 
-function HostSessionPlayersModal({ session, status, setStatus, actionLoading, onUpdateStatus, onAddNewPlayer, onClose }) {
+function HostSessionPlayersModal({ session, status, setStatus, actionLoading, onUpdateStatus, onAddNewPlayer, onLookupPlayerContact, onClose }) {
   const [showAddPlayer, setShowAddPlayer] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [newPlayerPhone, setNewPlayerPhone] = useState("");
+  const [phoneLookupMessage, setPhoneLookupMessage] = useState("");
+  const [phoneLookupPending, setPhoneLookupPending] = useState(false);
+  const newPlayerNameRef = useRef("");
+  const newPlayerPhoneRef = useRef("");
+  const phoneLookupTimerRef = useRef(null);
+  const phoneLookupInFlightRef = useRef(false);
   const statuses = ["joined", "declined", "waitlist", "invited"];
   const players = sessionPlayersForStatusView(session.sessionPlayers || [], status);
   const statusActionLoading = actionLoading === "updateSessionPlayerStatus";
@@ -1328,12 +1344,69 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
       phone: newPlayerPhone,
     });
     if (added) {
+      newPlayerNameRef.current = "";
+      newPlayerPhoneRef.current = "";
       setNewPlayerName("");
       setNewPlayerPhone("");
       setShowAddPlayer(false);
       setStatus("joined");
     }
   }
+
+  async function lookUpPhoneForPlayerName(nameToLookUp = newPlayerNameRef.current) {
+    const lookupName = normalizePlayerLookupName(nameToLookUp);
+    if (
+      phoneLookupInFlightRef.current ||
+      newPlayerPhoneRef.current.trim() ||
+      lookupName.split(" ").length < 2
+    ) return;
+
+    if (phoneLookupTimerRef.current) window.clearTimeout(phoneLookupTimerRef.current);
+    phoneLookupInFlightRef.current = true;
+    setPhoneLookupPending(true);
+    setPhoneLookupMessage("Checking PBCC Players and past matches...");
+    try {
+      const result = await onLookupPlayerContact(session, nameToLookUp);
+      if (!result || result.success === false) {
+        setPhoneLookupMessage("");
+        return;
+      }
+
+      if (
+        result.found &&
+        !newPlayerPhoneRef.current.trim() &&
+        normalizePlayerLookupName(newPlayerNameRef.current) === lookupName
+      ) {
+        const nextPhone = formatPhoneInput(result.phone);
+        newPlayerPhoneRef.current = nextPhone;
+        setNewPlayerPhone(nextPhone);
+      }
+      setPhoneLookupMessage(
+        result.found
+          ? `Phone number filled from ${result.source === "past_game" ? "a past PBCC match" : "PBCC Players"}.`
+          : result.ambiguous
+            ? "More than one phone number matches this name. Enter the phone number manually."
+            : "No saved PBCC phone number found for this name."
+      );
+    } catch {
+      setPhoneLookupMessage("Unable to check saved PBCC contacts. Enter the phone number manually.");
+    } finally {
+      phoneLookupInFlightRef.current = false;
+      setPhoneLookupPending(false);
+    }
+  }
+
+  useEffect(() => {
+    const lookupName = normalizePlayerLookupName(newPlayerName);
+    if (!showAddPlayer || newPlayerPhone || lookupName.split(" ").length < 2) return undefined;
+
+    phoneLookupTimerRef.current = window.setTimeout(() => {
+      void lookUpPhoneForPlayerName(newPlayerName);
+    }, 350);
+    return () => window.clearTimeout(phoneLookupTimerRef.current);
+    // The request is intentionally scheduled only when the entered name changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [newPlayerName, showAddPlayer]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-stretch justify-center bg-slate-950/70 p-0 sm:items-center sm:p-4">
@@ -1379,14 +1452,24 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
                   <ModalTextInput
                     label="Player name"
                     value={newPlayerName}
-                    onChange={setNewPlayerName}
+                    onChange={(value) => {
+                      newPlayerNameRef.current = value;
+                      setNewPlayerName(value);
+                      setPhoneLookupMessage("");
+                    }}
+                    onBlur={lookUpPhoneForPlayerName}
                     required
                   />
+                  {phoneLookupMessage && <p className="-mt-1 text-xs font-semibold text-slate-500 sm:col-span-2" aria-live="polite">{phoneLookupMessage}</p>}
                   <ModalTextInput
                     label="Phone #"
                     type="tel"
                     value={newPlayerPhone}
-                    onChange={(value) => setNewPlayerPhone(formatPhoneInput(value))}
+                    onChange={(value) => {
+                      const nextPhone = formatPhoneInput(value);
+                      newPlayerPhoneRef.current = nextPhone;
+                      setNewPlayerPhone(nextPhone);
+                    }}
                     placeholder="(941) 555-1212"
                     required
                   />
@@ -1396,8 +1479,11 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
                     type="button"
                     onClick={() => {
                       setShowAddPlayer(false);
+                      newPlayerNameRef.current = "";
+                      newPlayerPhoneRef.current = "";
                       setNewPlayerName("");
                       setNewPlayerPhone("");
+                      setPhoneLookupMessage("");
                     }}
                     className="rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-black text-slate-800 shadow-sm hover:bg-slate-50"
                   >
@@ -1406,7 +1492,7 @@ function HostSessionPlayersModal({ session, status, setStatus, actionLoading, on
                   <button
                     type="button"
                     onClick={addNewPlayer}
-                    disabled={addPlayerLoading || !newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10}
+                    disabled={addPlayerLoading || phoneLookupPending || !newPlayerName.trim() || normalizePhone(newPlayerPhone).length < 10}
                     className="rounded-lg bg-teal-700 px-4 py-3 text-sm font-black text-white shadow-sm hover:bg-teal-800 disabled:bg-slate-300"
                   >
                     {addPlayerLoading ? "Adding..." : "Add Player"}
@@ -1603,11 +1689,11 @@ function HostGameUpdateModal({ session, message, setMessage, actionLoading, onSe
   );
 }
 
-function ModalTextInput({ label, value, onChange, placeholder = "", type = "text", required = false }) {
+function ModalTextInput({ label, value, onChange, onBlur = undefined, placeholder = "", type = "text", required = false }) {
   return (
     <label className="block text-sm font-bold text-slate-600">
       {label}{required ? " *" : ""}
-      <input type={type} value={value} placeholder={placeholder} required={required} onChange={(event) => onChange(event.target.value)} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950" />
+      <input type={type} value={value} placeholder={placeholder} required={required} onChange={(event) => onChange(event.target.value)} onBlur={onBlur} className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-semibold text-slate-950" />
     </label>
   );
 }
@@ -2760,4 +2846,14 @@ function normalizePhone(value) {
   const digits = String(value || "").replace(/\D/g, "");
   if (digits.length > 10 && digits.startsWith("1")) return digits.slice(-10);
   return digits;
+}
+
+function normalizePlayerLookupName(value) {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/gi, " ")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 }

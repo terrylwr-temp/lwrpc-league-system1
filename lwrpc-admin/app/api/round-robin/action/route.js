@@ -9,6 +9,7 @@ import { createNextRoundRobinRound, createRoundRobinSchedule, roundRobinPlayerLa
 export const runtime = "nodejs";
 
 const HOST_ALLOWED_ACTIONS = new Set([
+  "lookupPlayerContact",
   "updatePlannedSession",
   "updateSessionPlayerStatus",
   "addSessionPlayer",
