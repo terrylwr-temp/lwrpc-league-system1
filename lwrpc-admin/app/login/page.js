@@ -428,29 +428,46 @@ const [pendingPasswordResetEmail, setPendingPasswordResetEmail] = useState("");
         )}
 
         {isErrorMessage && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 p-4 backdrop-blur-sm">
             <div
               role="alertdialog"
               aria-modal="true"
               aria-labelledby="login-error-title"
-              className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-2xl"
+              className="w-full max-w-sm overflow-hidden rounded-3xl border border-slate-200 bg-white text-center shadow-2xl"
             >
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-xl font-black text-red-700">
-                !
+              <div className="border-b border-slate-100 bg-slate-50 px-6 pb-5 pt-6">
+                {message === inactivityLogoutMessage ? (
+                  <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl border border-blue-100 bg-white p-1.5 shadow-sm">
+                    <Image
+                      src={logoUrl}
+                      alt={clubName}
+                      width={52}
+                      height={52}
+                      className="h-[52px] w-[52px] object-contain"
+                      unoptimized
+                    />
+                  </div>
+                ) : (
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-red-100 text-xl font-black text-red-700">
+                    !
+                  </div>
+                )}
+                <h2 id="login-error-title" className="mt-4 text-xl font-black text-slate-950">
+                  {message === inactivityLogoutMessage ? "Signed Out" : "Sign In Problem"}
+                </h2>
               </div>
-              <h2 id="login-error-title" className="mt-4 text-xl font-black text-slate-950">
-                {message === inactivityLogoutMessage ? "Signed Out" : "Sign In Problem"}
-              </h2>
-              <p className="mt-2 text-sm font-semibold leading-6 text-slate-700">
-                {message}
-              </p>
-              <button
-                type="button"
-                onClick={() => setMessage("")}
-                className="mt-5 w-full rounded-xl bg-blue-700 px-5 py-3 font-bold text-white transition hover:bg-blue-800"
-              >
-                OK
-              </button>
+              <div className="px-6 py-5">
+                <p className="text-sm font-semibold leading-6 text-slate-700">
+                  {message}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setMessage("")}
+                  className="mt-5 w-full rounded-xl bg-blue-700 px-5 py-3 font-bold text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-300 focus:ring-offset-2"
+                >
+                  OK
+                </button>
+              </div>
             </div>
           </div>
         )}
