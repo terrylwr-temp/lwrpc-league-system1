@@ -236,6 +236,8 @@ export default function TournamentDisplayPage() {
         <StandingCelebrationScreen
           team={celebratingStandingTeam}
           tournamentName={tournamentDisplayName(state.tournament)}
+          logoUrl={systemSettings.logo_url || DEFAULT_SYSTEM_SETTINGS.logo_url}
+          logoAlt={`${systemSettings.club_name || DEFAULT_SYSTEM_SETTINGS.club_name} logo`}
           onClose={() => {
             setCelebratingStandingTeam(null);
             setView("standings");
@@ -500,8 +502,7 @@ function StandingsGrid({ standings, matches, onSelectTeam, onCelebrateTeam, head
   );
 }
 
-function StandingCelebrationScreen({ team, tournamentName, onClose }) {
-  const colors = tournamentDivisionColors(team.division);
+function StandingCelebrationScreen({ team, tournamentName, logoUrl, logoAlt, onClose }) {
   const players = Array.from(new Set([
     ...(team.player_names || []),
     team.player_1_name,
@@ -531,15 +532,24 @@ function StandingCelebrationScreen({ team, tournamentName, onClose }) {
 
       <div className="relative flex min-h-full flex-col items-center justify-between px-5 py-7 text-center sm:px-10 sm:py-10">
         <header className="max-w-[92vw]">
-          <p className="text-[clamp(0.75rem,1.6vw,1.25rem)] font-black uppercase tracking-[0.32em] text-amber-200">Tournament Celebration</p>
-          <h1 className="mt-2 text-[clamp(1.6rem,4vw,4.5rem)] font-black leading-tight text-white">{tournamentName}</h1>
-          <span className={`mt-5 inline-flex max-w-[92vw] rounded-full border-2 border-white/40 px-[clamp(2rem,5vw,5rem)] py-[clamp(0.85rem,1.8vw,1.75rem)] text-center text-[clamp(1.15rem,3vw,3.25rem)] font-black uppercase tracking-[0.16em] shadow-2xl ${colors.publicBadge}`}>
+          <h1 className="text-[clamp(1.6rem,4vw,4.5rem)] font-black leading-tight text-white">{tournamentName}</h1>
+          <p className="mt-4 max-w-[92vw] text-center text-[clamp(0.95rem,2.1vw,2.25rem)] font-black uppercase tracking-[0.18em] text-amber-200 drop-shadow-[0_2px_10px_rgba(251,191,36,0.35)]">
             {team.division}
-          </span>
+          </p>
         </header>
 
-        <div className="my-2 flex flex-col items-center sm:my-3">
+        <div className="my-2 flex items-center justify-center gap-[clamp(1rem,3vw,4rem)] sm:my-3">
           <RankTrophy rank={team.rank} rankLabel={rankLabel} />
+          <div className="relative size-[clamp(8rem,18vw,17rem)] overflow-hidden rounded-[clamp(1.25rem,3vw,3rem)] bg-white shadow-[0_1.5rem_1.25rem_rgba(0,0,0,0.48)]">
+            <Image
+              src={logoUrl}
+              alt={logoAlt}
+              fill
+              sizes="(max-width: 640px) 8rem, 18vw"
+              unoptimized
+              className="object-contain p-[clamp(0.4rem,1.2vw,1.25rem)]"
+            />
+          </div>
         </div>
 
         <section className="max-w-[96vw]">
