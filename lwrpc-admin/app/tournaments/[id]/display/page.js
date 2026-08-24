@@ -508,6 +508,8 @@ function StandingCelebrationScreen({ team, tournamentName, onClose }) {
     team.player_2_name,
   ].map((name) => String(name || "").trim()).filter(Boolean)));
   const rankLabel = ordinalRank(team.rank);
+  const teamNameClass = celebrationTeamNameClass(team.team);
+  const playerListClass = celebrationPlayerListClass(players.length);
 
   return (
     <div
@@ -536,19 +538,23 @@ function StandingCelebrationScreen({ team, tournamentName, onClose }) {
           </span>
         </header>
 
-        <div className="my-4 flex flex-col items-center">
+        <div className="my-2 flex flex-col items-center sm:my-3">
           <RankTrophy rank={team.rank} rankLabel={rankLabel} />
-          <p className="mt-4 text-[clamp(2rem,5.5vw,6rem)] font-black uppercase tracking-[0.12em] text-amber-200">{rankLabel} Place</p>
         </div>
 
         <section className="max-w-[96vw]">
-          <h2 className="break-words text-[clamp(3rem,11vw,12rem)] font-black leading-[0.9] tracking-[-0.065em] text-white [text-wrap:balance]">
+          <h2 className={`break-words font-black leading-[0.9] tracking-[-0.065em] text-white [text-wrap:balance] ${teamNameClass}`}>
             {team.team || "Team"}
           </h2>
           {players.length > 0 && (
-            <ul className="mx-auto mt-7 flex max-w-[92vw] flex-wrap justify-center gap-x-8 gap-y-3 text-[clamp(1.35rem,3.6vw,4.25rem)] font-bold leading-tight text-blue-100">
-              {players.map((player) => <li key={player}>{player}</li>)}
-            </ul>
+            <div className={`mx-auto mt-5 flex max-w-[94vw] flex-wrap justify-center gap-y-2 font-bold leading-tight text-blue-100 sm:mt-6 ${playerListClass}`}>
+              {players.map((player, index) => (
+                <span key={player} className="whitespace-nowrap">
+                  {index > 0 && <span aria-hidden="true" className="mx-3 text-amber-200">|</span>}
+                  {player}
+                </span>
+              ))}
+            </div>
           )}
         </section>
       </div>
@@ -558,8 +564,8 @@ function StandingCelebrationScreen({ team, tournamentName, onClose }) {
 
 function RankTrophy({ rank, rankLabel }) {
   return (
-    <div className="relative grid size-[clamp(11rem,25vw,24rem)] place-items-center">
-      <span aria-hidden="true" className="text-[clamp(9rem,23vw,22rem)] leading-none drop-shadow-[0_1.5rem_1.25rem_rgba(0,0,0,0.48)]">🏆</span>
+    <div className="relative grid size-[clamp(8rem,18vw,17rem)] place-items-center">
+      <span aria-hidden="true" className="text-[clamp(7rem,17vw,16rem)] leading-none drop-shadow-[0_1.5rem_1.25rem_rgba(0,0,0,0.48)]">🏆</span>
       <div className="absolute bottom-[3%] grid min-w-[44%] place-items-center rounded-2xl border-2 border-amber-100 bg-gradient-to-b from-amber-300 to-amber-600 px-5 py-2 text-amber-950 shadow-xl">
         <span className="text-[clamp(2rem,5vw,5rem)] font-black leading-none">{rank}</span>
         <span className="mt-1 text-[clamp(0.6rem,1.3vw,1.1rem)] font-black uppercase tracking-[0.14em]">{rankLabel}</span>
@@ -574,6 +580,20 @@ function ordinalRank(rank) {
     ? "th"
     : ({ 1: "st", 2: "nd", 3: "rd" }[value % 10] || "th");
   return `${value}${suffix}`;
+}
+
+function celebrationTeamNameClass(teamName) {
+  const length = String(teamName || "").trim().length;
+  if (length > 38) return "text-[clamp(1.75rem,4.5vw,5rem)]";
+  if (length > 26) return "text-[clamp(2.1rem,6vw,7rem)]";
+  if (length > 16) return "text-[clamp(2.5rem,8vw,9rem)]";
+  return "text-[clamp(3rem,11vw,12rem)]";
+}
+
+function celebrationPlayerListClass(playerCount) {
+  if (playerCount >= 6) return "text-[clamp(1rem,2.15vw,2.4rem)]";
+  if (playerCount >= 4) return "text-[clamp(1.1rem,2.7vw,3rem)]";
+  return "text-[clamp(1.35rem,3.6vw,4.25rem)]";
 }
 
 function DisplayBracket({ bracketDivisions, settings, headerHidden, onRestoreHeader }) {
