@@ -567,6 +567,14 @@ export default function RatingsPage() {
     return rating === null ? null : rating;
   }
 
+  function getReadyRatingsImportRows(rows) {
+    const readyRowsByMemberId = new Map();
+    rows
+      .filter((row) => row.action === "ready")
+      .forEach((row) => readyRowsByMemberId.set(String(row.memberId), row));
+    return Array.from(readyRowsByMemberId.values());
+  }
+
   async function chooseRatingsImportFile() {
     if (!selectedSeason) {
       alert("Select a season before importing ratings.");
@@ -673,25 +681,31 @@ export default function RatingsPage() {
     setRatingImportRows(rows);
     setRatingImportStatus(`Previewed ${rows.length} row(s).`);
     event.target.value = "";
+
+    const readyRows = getReadyRatingsImportRows(rows);
+    if (readyRows.length === 0) return;
+
+    const ok = await appConfirm([
+      `Apply ratings for ${readyRows.length} matched member(s) to ${selectedSeasonLabel()}?`,
+      "",
+      "Existing DUPR Doubles values will be kept; only blank DUPR Doubles fields will be filled.",
+      "Continue to apply this ratings import.",
+    ].join("\n"), { title: "Apply Ratings Import", confirmLabel: "Apply Ratings Import", tone: "warning" });
+
+    if (ok) await applyRatingsImport(readyRows);
   }
 
-  async function applyRatingsImport() {
+  async function applyRatingsImport(importRows = ratingImportRows) {
     if (!selectedSeason) {
       alert("Select a season before importing ratings.");
       return;
     }
 
-    const readyRowsByMemberId = new Map();
-    ratingImportRows
-      .filter((row) => row.action === "ready")
-      .forEach((row) => readyRowsByMemberId.set(String(row.memberId), row));
-    const readyRows = Array.from(readyRowsByMemberId.values());
+    const readyRows = getReadyRatingsImportRows(importRows);
     if (readyRows.length === 0) {
       alert("No matched rating rows to import.");
       return;
     }
-
-    if (!(await appConfirm(`Import ratings for ${readyRows.length} matched member(s)?`, { title: "Import ratings", confirmLabel: "Import", tone: "warning" }))) return;
 
     setIsImportingRatings(true);
     setRatingImportStatus("Importing ratings...");
@@ -1494,9 +1508,10 @@ function goToPage(value) {
               <button
                 type="button"
                 onClick={chooseRatingsImportFile}
-                className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800"
+                disabled={isImportingRatings}
+                className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Upload Ratings CSV
+                {isImportingRatings ? "Importing..." : "Upload Ratings CSV"}
               </button>
               <input
                 ref={ratingsImportInputRef}
@@ -1505,15 +1520,6 @@ function goToPage(value) {
                 onChange={handleRatingsImportFile}
                 className="hidden"
               />
-
-              <button
-                type="button"
-                onClick={applyRatingsImport}
-                disabled={isImportingRatings || ratingImportRows.filter((row) => row.action === "ready").length === 0}
-                className="rounded-xl bg-blue-700 px-5 py-3 font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {isImportingRatings ? "Importing..." : "Apply Ratings Import"}
-              </button>
             </div>
 
             <div className="flex items-end">
