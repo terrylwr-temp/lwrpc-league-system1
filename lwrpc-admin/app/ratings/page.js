@@ -658,8 +658,10 @@ export default function RatingsPage() {
     try {
       const now = new Date().toISOString();
       const existingByMember = {};
-      ratings.forEach((rating) => {
-        if (rating.season_id === selectedSeason) existingByMember[rating.member_id] = rating;
+      allRatings.forEach((rating) => {
+        if (String(rating.season_id) === String(selectedSeason)) {
+          existingByMember[String(rating.member_id)] = rating;
+        }
       });
 
       const memberUpdates = readyRows
