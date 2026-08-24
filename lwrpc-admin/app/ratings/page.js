@@ -644,7 +644,11 @@ export default function RatingsPage() {
       return;
     }
 
-    const readyRows = ratingImportRows.filter((row) => row.action === "ready");
+    const readyRowsByMemberId = new Map();
+    ratingImportRows
+      .filter((row) => row.action === "ready")
+      .forEach((row) => readyRowsByMemberId.set(String(row.memberId), row));
+    const readyRows = Array.from(readyRowsByMemberId.values());
     if (readyRows.length === 0) {
       alert("No matched rating rows to import.");
       return;
@@ -657,13 +661,6 @@ export default function RatingsPage() {
 
     try {
       const now = new Date().toISOString();
-      const existingByMember = {};
-      allRatings.forEach((rating) => {
-        if (String(rating.season_id) === String(selectedSeason)) {
-          existingByMember[String(rating.member_id)] = rating;
-        }
-      });
-
       const memberUpdates = readyRows
         .filter((row) => row.shouldUpdateDuprId)
         .map((row) =>
@@ -679,46 +676,26 @@ export default function RatingsPage() {
         if (failed?.error) throw new Error(failed.error.message);
       }
 
-      const inserts = [];
-      const updateRequests = [];
-
-      readyRows.forEach((row) => {
-        const existing = existingByMember[row.memberId];
+      const ratingUpserts = readyRows.map((row) => {
         const payload = {
+          member_id: row.memberId,
+          season_id: selectedSeason,
           updated_at: now,
         };
 
         if (row.duprDoublesRating !== null) payload.dupr_doubles_rating = row.duprDoublesRating;
         if (row.duprReliabilityRating !== null) payload.dupr_reliability_rating = row.duprReliabilityRating;
-        if (row.ageRating !== null || (row.ageRatingSourcePresent && existing)) {
+        if (row.ageRatingSourcePresent) {
           payload.season_primetime_rating = row.ageRating;
         }
 
-        if (existing) {
-          updateRequests.push(
-            supabase.from("member_season_ratings").update(payload).eq("id", existing.id)
-          );
-        } else {
-          inserts.push({
-            member_id: row.memberId,
-            season_id: selectedSeason,
-            dupr_doubles_rating: row.duprDoublesRating,
-            dupr_reliability_rating: row.duprReliabilityRating,
-            season_dupr_rating: null,
-            season_primetime_rating: row.ageRating,
-            updated_at: now,
-          });
-        }
+        return payload;
       });
 
-      for (let i = 0; i < updateRequests.length; i += 25) {
-        const results = await Promise.all(updateRequests.slice(i, i + 25));
-        const failed = results.find((result) => result.error);
-        if (failed?.error) throw new Error(failed.error.message);
-      }
-
-      if (inserts.length > 0) {
-        const { error } = await supabase.from("member_season_ratings").insert(inserts);
+      if (ratingUpserts.length > 0) {
+        const { error } = await supabase
+          .from("member_season_ratings")
+          .upsert(ratingUpserts, { onConflict: "member_id,season_id" });
         if (error) throw new Error(error.message);
       }
 
