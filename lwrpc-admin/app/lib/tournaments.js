@@ -653,6 +653,8 @@ function roundTitle(bracket, round, format, roundIndex = 0, roundTotal = 0) {
 function blankStanding(team, teamRecord = {}) {
   return {
     team,
+    player_1_name: teamRecord?.player_1_name || "",
+    player_2_name: teamRecord?.player_2_name || "",
     regularSeasonStanding: regularSeasonStandingValue(teamRecord),
     w: 0,
     l: 0,

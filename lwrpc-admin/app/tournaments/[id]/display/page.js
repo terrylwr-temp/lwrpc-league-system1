@@ -32,6 +32,7 @@ export default function TournamentDisplayPage() {
   const [rotating, setRotating] = useState(true);
   const [headerHidden, setHeaderHidden] = useState(false);
   const [selectedStandingTeam, setSelectedStandingTeam] = useState(null);
+  const [celebratingStandingTeam, setCelebratingStandingTeam] = useState(null);
   const [systemSettings, setSystemSettings] = useState(DEFAULT_SYSTEM_SETTINGS);
 
   useEffect(() => {
@@ -139,6 +140,10 @@ export default function TournamentDisplayPage() {
               standings={standings}
               matches={state.matches}
               onSelectTeam={(team) => setSelectedStandingTeam(team)}
+              onCelebrateTeam={(team) => {
+                setView("standings");
+                setCelebratingStandingTeam(team);
+              }}
               headerHidden={headerHidden}
               onRestoreHeader={() => setHeaderHidden(false)}
             />
@@ -213,6 +218,16 @@ export default function TournamentDisplayPage() {
           team={selectedStandingTeam}
           matches={matchesForStandingTeam(state.matches, selectedStandingTeam)}
           onClose={() => setSelectedStandingTeam(null)}
+        />
+      )}
+      {celebratingStandingTeam && (
+        <StandingCelebrationScreen
+          team={celebratingStandingTeam}
+          tournamentName={tournamentDisplayName(state.tournament)}
+          onClose={() => {
+            setCelebratingStandingTeam(null);
+            setView("standings");
+          }}
         />
       )}
     </PublicShell>
@@ -383,7 +398,7 @@ function matchLineLabel(match) {
   return match.legacy_id?.startsWith("BR|") ? "Bracket" : `Line ${match.line_number || 1}`;
 }
 
-function StandingsGrid({ standings, matches, onSelectTeam, headerHidden, onRestoreHeader }) {
+function StandingsGrid({ standings, matches, onSelectTeam, onCelebrateTeam, headerHidden, onRestoreHeader }) {
   const entries = Object.entries(standings);
   const completedMatchesByDivision = completedMatchCounts(matches);
 
@@ -438,7 +453,15 @@ function StandingsGrid({ standings, matches, onSelectTeam, headerHidden, onResto
                   {rows.map((row, index) => (
                     <tr key={row.team} className="border-t border-blue-300/10">
                       <td className="px-2 py-2">
-                        <span className="inline-flex size-7 items-center justify-center rounded-full bg-amber-400/25 font-black text-amber-100">{index + 1}</span>
+                        <button
+                          type="button"
+                          onClick={() => onCelebrateTeam({ ...row, division, rank: index + 1 })}
+                          className="inline-flex size-8 items-center justify-center rounded-full border border-amber-200/50 bg-amber-400/25 font-black text-amber-100 transition hover:scale-110 hover:bg-amber-400 hover:text-slate-950 focus:outline-none focus:ring-4 focus:ring-amber-200/70"
+                          aria-label={`Show ${row.team} in the full-screen rank ${index + 1} celebration`}
+                          title="Show full-screen team celebration"
+                        >
+                          {index + 1}
+                        </button>
                       </td>
                       <td className="px-2 py-2">
                         <button
@@ -463,6 +486,83 @@ function StandingsGrid({ standings, matches, onSelectTeam, headerHidden, onResto
       </div>
     </section>
   );
+}
+
+function StandingCelebrationScreen({ team, tournamentName, onClose }) {
+  const colors = tournamentDivisionColors(team.division);
+  const players = [team.player_1_name, team.player_2_name].filter(Boolean);
+  const rankLabel = ordinalRank(team.rank);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      aria-label="Return to Current Standings"
+      onClick={onClose}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " " || event.key === "Escape") {
+          event.preventDefault();
+          onClose();
+        }
+      }}
+      className="fixed inset-0 z-[100] cursor-pointer overflow-auto bg-slate-950 text-white outline-none focus:ring-8 focus:ring-amber-300/70"
+    >
+      <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(251,191,36,0.28),transparent_27%),radial-gradient(circle_at_12%_88%,rgba(59,130,246,0.3),transparent_28%),radial-gradient(circle_at_88%_82%,rgba(244,63,94,0.24),transparent_28%)]" />
+      <div aria-hidden="true" className="absolute -left-[18vw] top-[28%] size-[48vw] rounded-full border-[clamp(2rem,5vw,6rem)] border-white/5" />
+      <div aria-hidden="true" className="absolute -right-[16vw] top-[8%] size-[42vw] rounded-full border-[clamp(2rem,5vw,6rem)] border-amber-300/10" />
+
+      <div className="relative flex min-h-full flex-col items-center justify-between px-5 py-7 text-center sm:px-10 sm:py-10">
+        <header className="max-w-[92vw]">
+          <p className="text-[clamp(0.75rem,1.6vw,1.25rem)] font-black uppercase tracking-[0.32em] text-amber-200">Tournament Celebration</p>
+          <h1 className="mt-2 text-[clamp(1.6rem,4vw,4.5rem)] font-black leading-tight text-white">{tournamentName}</h1>
+          <span className={`mt-4 inline-flex rounded-full border border-white/30 px-5 py-2 text-[clamp(0.75rem,1.7vw,1.2rem)] font-black uppercase tracking-[0.16em] shadow-lg ${colors.publicBadge}`}>
+            {team.division}
+          </span>
+        </header>
+
+        <div className="my-4 flex flex-col items-center">
+          <RankMedal rank={team.rank} rankLabel={rankLabel} />
+          <p className="mt-3 text-[clamp(0.9rem,2vw,1.5rem)] font-black uppercase tracking-[0.25em] text-amber-200">{rankLabel} Place</p>
+        </div>
+
+        <section className="max-w-[96vw]">
+          <h2 className="break-words text-[clamp(3rem,11vw,12rem)] font-black leading-[0.9] tracking-[-0.065em] text-white [text-wrap:balance]">
+            {team.team || "Team"}
+          </h2>
+          {players.length > 0 && (
+            <div className="mx-auto mt-7 flex max-w-[92vw] flex-wrap justify-center gap-x-8 gap-y-3 text-[clamp(1.35rem,3.6vw,4.25rem)] font-bold leading-tight text-blue-100">
+              {players.map((player) => <span key={player}>{player}</span>)}
+            </div>
+          )}
+        </section>
+
+        <p className="mt-8 text-sm font-black uppercase tracking-[0.18em] text-white/70 sm:text-base">Click anywhere to return to Current Standings</p>
+      </div>
+    </div>
+  );
+}
+
+function RankMedal({ rank, rankLabel }) {
+  return (
+    <div className="relative grid size-[clamp(10rem,23vw,22rem)] place-items-center">
+      <div aria-hidden="true" className="absolute top-[4%] h-[56%] w-[22%] -translate-x-[58%] rotate-[27deg] rounded-b-2xl bg-gradient-to-b from-blue-400 to-blue-800 shadow-xl" />
+      <div aria-hidden="true" className="absolute top-[4%] h-[56%] w-[22%] translate-x-[58%] -rotate-[27deg] rounded-b-2xl bg-gradient-to-b from-rose-400 to-rose-800 shadow-xl" />
+      <div className="relative grid size-[70%] place-items-center rounded-full border-[clamp(0.55rem,1.3vw,1.3rem)] border-amber-100 bg-[radial-gradient(circle_at_35%_28%,#fff8cb_0%,#facc15_28%,#d97706_68%,#78350f_100%)] shadow-[0_0_0_clamp(0.35rem,0.9vw,0.9rem)_rgba(251,191,36,0.2),0_1.5rem_3rem_rgba(0,0,0,0.45)]">
+        <div className="grid size-[78%] place-items-center rounded-full border-2 border-amber-950/45 bg-amber-300/25 text-amber-950 shadow-inner">
+          <span className="text-[clamp(3.5rem,10vw,10rem)] font-black leading-none">{rank}</span>
+          <span className="-mt-[18%] text-[clamp(0.65rem,1.5vw,1.2rem)] font-black uppercase tracking-[0.18em]">{rankLabel}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ordinalRank(rank) {
+  const value = Number(rank) || 0;
+  const suffix = value % 100 >= 11 && value % 100 <= 13
+    ? "th"
+    : ({ 1: "st", 2: "nd", 3: "rd" }[value % 10] || "th");
+  return `${value}${suffix}`;
 }
 
 function DisplayBracket({ bracketDivisions, settings, headerHidden, onRestoreHeader }) {
