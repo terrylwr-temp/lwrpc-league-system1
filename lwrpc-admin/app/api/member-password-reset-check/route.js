@@ -33,6 +33,7 @@ function adminClient() {
 
   return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
+      flowType: "implicit",
       persistSession: false,
       autoRefreshToken: false,
     },

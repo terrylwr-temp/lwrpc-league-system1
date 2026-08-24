@@ -17,11 +17,33 @@ export default function ResetPasswordPage() {
   const [passkeyMessage, setPasskeyMessage] = useState("");
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [returnTo, setReturnTo] = useState("");
+  const [checkingSession, setCheckingSession] = useState(true);
   const returnLabel = "Return to System";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     setReturnTo(safeInternalReturnPath(params.get("returnTo")));
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const resetLinkWasUsed = window.location.hash.includes("access_token")
+      || new URLSearchParams(window.location.search).has("code");
+
+    async function confirmRecoverySession() {
+      const { data, error } = await supabase.auth.getSession();
+      if (!mounted) return;
+
+      setCheckingSession(false);
+      if (error || (!data.session && resetLinkWasUsed)) {
+        setMessage("This password reset link is no longer valid. Please request a new reset email and use the newest link in that same browser.");
+      }
+    }
+
+    confirmRecoverySession();
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   async function updatePassword(e) {
@@ -34,6 +56,13 @@ export default function ResetPasswordPage() {
 
     setLoading(true);
     setMessage("Updating password...");
+
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !sessionData.session) {
+      setMessage("Your secure password-reset session is not available. Please request a new reset email and use the newest link in the same browser where you opened it.");
+      setLoading(false);
+      return;
+    }
 
     const { error } = await supabase.auth.updateUser({
       password
@@ -129,10 +158,10 @@ export default function ResetPasswordPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || checkingSession}
               className="mt-7 w-full rounded-xl bg-blue-700 px-5 py-3 font-bold text-white transition hover:bg-blue-800 disabled:opacity-50"
             >
-              {loading ? "Updating..." : "Update Password"}
+              {checkingSession ? "Checking Secure Link..." : loading ? "Updating..." : "Update Password"}
             </button>
 
             {message && (

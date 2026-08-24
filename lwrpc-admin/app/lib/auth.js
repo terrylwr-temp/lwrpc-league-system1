@@ -9,6 +9,7 @@ export const supabase =
   globalThis.__lwrpcSupabaseClient ||
   createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
+      flowType: "implicit",
       experimental: {
         passkey: true,
       },

@@ -454,3 +454,4 @@ As of 2026-05-21:
 - Tournament rank celebrations now present the division as a compact amber text label rather than a large pill, preserving more space for the team and roster. The visible app version was bumped to `LMS-0664`.
 - Tournament rank celebrations now remove the redundant top heading and place the club's main logo beside the trophy at the same responsive size. The visible app version was bumped to `LMS-0665`.
 - Tournament rank celebrations now use a larger compact division label for clearer distance viewing. The visible app version was bumped to `LMS-0666`.
+- Password-reset recovery now explicitly uses Supabase's implicit browser flow and verifies the recovery session before enabling a password update. An unavailable or expired reset session now gives a clear request-a-new-link message rather than exposing the raw `Auth session missing!` error. The visible app version was bumped to `LMS-0667`.
