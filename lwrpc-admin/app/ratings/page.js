@@ -56,6 +56,7 @@ export default function RatingsPage() {
   const [requestedMemberId, setRequestedMemberId] = useState("");
   const [isMobileRatingsView, setIsMobileRatingsView] = useState(false);
   const requestedMemberRowRef = useRef(null);
+  const ratingsImportInputRef = useRef(null);
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "league_manager");
@@ -418,6 +419,10 @@ export default function RatingsPage() {
     return String(value || "").trim();
   }
 
+  function isBlankRating(value) {
+    return value === null || value === undefined || String(value).trim() === "";
+  }
+
   function normalizeEmail(value) {
     return normalizeText(value).toLowerCase();
   }
@@ -562,6 +567,29 @@ export default function RatingsPage() {
     return rating === null ? null : rating;
   }
 
+  async function chooseRatingsImportFile() {
+    if (!selectedSeason) {
+      alert("Select a season before importing ratings.");
+      return;
+    }
+
+    const ok = await appConfirm([
+      `Upload ratings for ${selectedSeasonLabel()}?`,
+      "",
+      "Choose a CSV with member name/email, DUPR ID, doubles rating, reliability rating, and age-based rating.",
+      "Age-Based rating is read from Metrics.subscores.doubles.over_65, falling back to over_50.",
+      "",
+      "DUPR Doubles values only fill blank rating fields. Existing DUPR Doubles values are never overwritten.",
+      "DUPR IDs are only written when the member does not already have one.",
+      "",
+      "To replace all ratings for this season, use Delete Season Ratings first, then upload a new CSV.",
+      "",
+      "Continue to choose a CSV file.",
+    ].join("\n"), { title: "Upload Ratings CSV", confirmLabel: "Continue", tone: "warning" });
+
+    if (ok) ratingsImportInputRef.current?.click();
+  }
+
   async function handleRatingsImportFile(event) {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -609,7 +637,13 @@ export default function RatingsPage() {
         existingSeasonRating?.season_primetime_rating !== undefined
       );
 
-      const hasRating = duprDoublesRating !== null || duprReliabilityRating !== null || ageRating !== null || shouldClearAgeRating;
+      const shouldUpdateDuprDoublesRating = Boolean(
+        member &&
+        duprDoublesRating !== null &&
+        (!existingSeasonRating || isBlankRating(existingSeasonRating.dupr_doubles_rating))
+      );
+
+      const hasRating = shouldUpdateDuprDoublesRating || duprReliabilityRating !== null || ageRating !== null || shouldClearAgeRating;
 
       return {
         rowNumber: index + 1,
@@ -620,13 +654,16 @@ export default function RatingsPage() {
             ? shouldClearAgeRating
               ? "Matched member; Age-Based rating will be cleared."
               : "Matched member."
-            : "Matched member, but no numeric rating or reliability was found in this CSV row.",
+            : duprDoublesRating !== null && existingSeasonRating && !isBlankRating(existingSeasonRating.dupr_doubles_rating)
+              ? "Matched member; existing DUPR Doubles rating will be kept."
+              : "Matched member, but no rating or reliability will be imported from this CSV row.",
         memberId: member?.id || null,
         memberName: member ? memberFullName(member) : lookupName,
         email,
         duprId,
         shouldUpdateDuprId: Boolean(member && duprId && !member.dupr_id),
         duprDoublesRating,
+        shouldUpdateDuprDoublesRating,
         duprReliabilityRating,
         ageRating,
         ageRatingSourcePresent,
@@ -683,7 +720,7 @@ export default function RatingsPage() {
           updated_at: now,
         };
 
-        if (row.duprDoublesRating !== null) payload.dupr_doubles_rating = row.duprDoublesRating;
+        if (row.shouldUpdateDuprDoublesRating) payload.dupr_doubles_rating = row.duprDoublesRating;
         if (row.duprReliabilityRating !== null) payload.dupr_reliability_rating = row.duprReliabilityRating;
         if (row.ageRatingSourcePresent) {
           payload.season_primetime_rating = row.ageRating;
@@ -1451,24 +1488,23 @@ function goToPage(value) {
               <h2 className="text-lg font-bold text-slate-900">
                 Ratings Import
               </h2>
-              <p className="mt-1 text-sm text-slate-600">
-                Import a CSV with member name/email, DUPR ID, doubles rating, reliability rating, and age-based rating for the selected season. Age-Based rating is read from `Metrics.subscores.doubles.over_65`, falling back to `over_50`.
-              </p>
-              <p className="mt-1 text-xs text-slate-500">
-                DUPR IDs are only written when the member does not already have one.
-              </p>
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <label className="cursor-pointer rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800">
+              <button
+                type="button"
+                onClick={chooseRatingsImportFile}
+                className="rounded-xl bg-slate-900 px-5 py-3 font-semibold text-white hover:bg-slate-800"
+              >
                 Upload Ratings CSV
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleRatingsImportFile}
-                  className="hidden"
-                />
-              </label>
+              </button>
+              <input
+                ref={ratingsImportInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleRatingsImportFile}
+                className="hidden"
+              />
 
               <button
                 type="button"
