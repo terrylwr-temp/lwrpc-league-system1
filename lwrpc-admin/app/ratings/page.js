@@ -681,6 +681,7 @@ export default function RatingsPage() {
       const updateRequests = [];
 
       readyRows.forEach((row) => {
+        const existing = existingByMember[row.memberId];
         const payload = {
           updated_at: now,
         };
@@ -690,7 +691,6 @@ export default function RatingsPage() {
         if (row.ageRating !== null || (row.ageRatingSourcePresent && existing)) {
           payload.season_primetime_rating = row.ageRating;
         }
-        const existing = existingByMember[row.memberId];
 
         if (existing) {
           updateRequests.push(
