@@ -141,12 +141,19 @@ export default function TournamentDisplayPage() {
               matches={state.matches}
               onSelectTeam={(team) => setSelectedStandingTeam(team)}
               onCelebrateTeam={(team) => {
-                const teamRecord = (state.teams || []).find((candidate) => candidate.name === team.team);
+                const divisionsById = Object.fromEntries((state.divisions || []).map((division) => [String(division.id), division.name]));
+                const matchingTeamRecords = (state.teams || []).filter((candidate) =>
+                  candidate.name === team.team &&
+                  (divisionsById[String(candidate.division_id)] || "Unassigned") === team.division
+                );
+                const playerNames = Array.from(new Set([
+                  ...(team.player_names || []),
+                  ...matchingTeamRecords.flatMap((candidate) => [candidate.player_1_name, candidate.player_2_name]),
+                ].map((name) => String(name || "").trim()).filter(Boolean)));
                 setView("standings");
                 setCelebratingStandingTeam({
                   ...team,
-                  player_1_name: team.player_1_name || teamRecord?.player_1_name || "",
-                  player_2_name: team.player_2_name || teamRecord?.player_2_name || "",
+                  player_names: playerNames,
                 });
               }}
               headerHidden={headerHidden}
@@ -495,7 +502,11 @@ function StandingsGrid({ standings, matches, onSelectTeam, onCelebrateTeam, head
 
 function StandingCelebrationScreen({ team, tournamentName, onClose }) {
   const colors = tournamentDivisionColors(team.division);
-  const players = Array.from(new Set([team.player_1_name, team.player_2_name].filter(Boolean)));
+  const players = Array.from(new Set([
+    ...(team.player_names || []),
+    team.player_1_name,
+    team.player_2_name,
+  ].map((name) => String(name || "").trim()).filter(Boolean)));
   const rankLabel = ordinalRank(team.rank);
 
   return (

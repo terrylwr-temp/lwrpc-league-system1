@@ -223,6 +223,7 @@ export function standingsByDivision(matches, teams = [], divisions = [], setting
       const teamName = team.name || "Team";
       standings[divisionName] ||= {};
       standings[divisionName][teamName] ||= blankStanding(teamName, team);
+      addStandingPlayers(standings[divisionName][teamName], team);
     });
 
   (matches || [])
@@ -235,6 +236,8 @@ export function standingsByDivision(matches, teams = [], divisions = [], setting
       if (!standings[divisionName]) standings[divisionName] = {};
       if (!standings[divisionName][homeName]) standings[divisionName][homeName] = blankStanding(homeName, match.home_team || teamRecords[String(match.home_team_id)]);
       if (!standings[divisionName][awayName]) standings[divisionName][awayName] = blankStanding(awayName, match.away_team || teamRecords[String(match.away_team_id)]);
+      addStandingPlayers(standings[divisionName][homeName], match.home_team || teamRecords[String(match.home_team_id)]);
+      addStandingPlayers(standings[divisionName][awayName], match.away_team || teamRecords[String(match.away_team_id)]);
 
       const homeScore = Number(match.home_score || 0);
       const awayScore = Number(match.away_score || 0);
@@ -655,12 +658,27 @@ function blankStanding(team, teamRecord = {}) {
     team,
     player_1_name: teamRecord?.player_1_name || "",
     player_2_name: teamRecord?.player_2_name || "",
+    player_names: standingPlayerNames(teamRecord),
     regularSeasonStanding: regularSeasonStandingValue(teamRecord),
     w: 0,
     l: 0,
     pf: 0,
     pa: 0,
   };
+}
+
+function standingPlayerNames(teamRecord = {}) {
+  return [teamRecord?.player_1_name, teamRecord?.player_2_name]
+    .map((name) => String(name || "").trim())
+    .filter(Boolean);
+}
+
+function addStandingPlayers(standing, teamRecord) {
+  if (!standing) return;
+  standing.player_names = Array.from(new Set([
+    ...(standing.player_names || []),
+    ...standingPlayerNames(teamRecord),
+  ]));
 }
 
 function sortTournamentStandings(rows, rules = []) {
