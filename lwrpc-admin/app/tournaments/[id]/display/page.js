@@ -141,8 +141,13 @@ export default function TournamentDisplayPage() {
               matches={state.matches}
               onSelectTeam={(team) => setSelectedStandingTeam(team)}
               onCelebrateTeam={(team) => {
+                const teamRecord = (state.teams || []).find((candidate) => candidate.name === team.team);
                 setView("standings");
-                setCelebratingStandingTeam(team);
+                setCelebratingStandingTeam({
+                  ...team,
+                  player_1_name: team.player_1_name || teamRecord?.player_1_name || "",
+                  player_2_name: team.player_2_name || teamRecord?.player_2_name || "",
+                });
               }}
               headerHidden={headerHidden}
               onRestoreHeader={() => setHeaderHidden(false)}
@@ -490,7 +495,7 @@ function StandingsGrid({ standings, matches, onSelectTeam, onCelebrateTeam, head
 
 function StandingCelebrationScreen({ team, tournamentName, onClose }) {
   const colors = tournamentDivisionColors(team.division);
-  const players = [team.player_1_name, team.player_2_name].filter(Boolean);
+  const players = Array.from(new Set([team.player_1_name, team.player_2_name].filter(Boolean)));
   const rankLabel = ordinalRank(team.rank);
 
   return (
@@ -515,14 +520,14 @@ function StandingCelebrationScreen({ team, tournamentName, onClose }) {
         <header className="max-w-[92vw]">
           <p className="text-[clamp(0.75rem,1.6vw,1.25rem)] font-black uppercase tracking-[0.32em] text-amber-200">Tournament Celebration</p>
           <h1 className="mt-2 text-[clamp(1.6rem,4vw,4.5rem)] font-black leading-tight text-white">{tournamentName}</h1>
-          <span className={`mt-4 inline-flex rounded-full border border-white/30 px-5 py-2 text-[clamp(0.75rem,1.7vw,1.2rem)] font-black uppercase tracking-[0.16em] shadow-lg ${colors.publicBadge}`}>
+          <span className={`mt-5 inline-flex max-w-[92vw] rounded-full border-2 border-white/40 px-[clamp(2rem,5vw,5rem)] py-[clamp(0.85rem,1.8vw,1.75rem)] text-center text-[clamp(1.15rem,3vw,3.25rem)] font-black uppercase tracking-[0.16em] shadow-2xl ${colors.publicBadge}`}>
             {team.division}
           </span>
         </header>
 
         <div className="my-4 flex flex-col items-center">
-          <RankMedal rank={team.rank} rankLabel={rankLabel} />
-          <p className="mt-3 text-[clamp(0.9rem,2vw,1.5rem)] font-black uppercase tracking-[0.25em] text-amber-200">{rankLabel} Place</p>
+          <RankTrophy rank={team.rank} rankLabel={rankLabel} />
+          <p className="mt-4 text-[clamp(2rem,5.5vw,6rem)] font-black uppercase tracking-[0.12em] text-amber-200">{rankLabel} Place</p>
         </div>
 
         <section className="max-w-[96vw]">
@@ -530,28 +535,23 @@ function StandingCelebrationScreen({ team, tournamentName, onClose }) {
             {team.team || "Team"}
           </h2>
           {players.length > 0 && (
-            <div className="mx-auto mt-7 flex max-w-[92vw] flex-wrap justify-center gap-x-8 gap-y-3 text-[clamp(1.35rem,3.6vw,4.25rem)] font-bold leading-tight text-blue-100">
-              {players.map((player) => <span key={player}>{player}</span>)}
-            </div>
+            <ul className="mx-auto mt-7 flex max-w-[92vw] flex-wrap justify-center gap-x-8 gap-y-3 text-[clamp(1.35rem,3.6vw,4.25rem)] font-bold leading-tight text-blue-100">
+              {players.map((player) => <li key={player}>{player}</li>)}
+            </ul>
           )}
         </section>
-
-        <p className="mt-8 text-sm font-black uppercase tracking-[0.18em] text-white/70 sm:text-base">Click anywhere to return to Current Standings</p>
       </div>
     </div>
   );
 }
 
-function RankMedal({ rank, rankLabel }) {
+function RankTrophy({ rank, rankLabel }) {
   return (
-    <div className="relative grid size-[clamp(10rem,23vw,22rem)] place-items-center">
-      <div aria-hidden="true" className="absolute top-[4%] h-[56%] w-[22%] -translate-x-[58%] rotate-[27deg] rounded-b-2xl bg-gradient-to-b from-blue-400 to-blue-800 shadow-xl" />
-      <div aria-hidden="true" className="absolute top-[4%] h-[56%] w-[22%] translate-x-[58%] -rotate-[27deg] rounded-b-2xl bg-gradient-to-b from-rose-400 to-rose-800 shadow-xl" />
-      <div className="relative grid size-[70%] place-items-center rounded-full border-[clamp(0.55rem,1.3vw,1.3rem)] border-amber-100 bg-[radial-gradient(circle_at_35%_28%,#fff8cb_0%,#facc15_28%,#d97706_68%,#78350f_100%)] shadow-[0_0_0_clamp(0.35rem,0.9vw,0.9rem)_rgba(251,191,36,0.2),0_1.5rem_3rem_rgba(0,0,0,0.45)]">
-        <div className="grid size-[78%] place-items-center rounded-full border-2 border-amber-950/45 bg-amber-300/25 text-amber-950 shadow-inner">
-          <span className="text-[clamp(3.5rem,10vw,10rem)] font-black leading-none">{rank}</span>
-          <span className="-mt-[18%] text-[clamp(0.65rem,1.5vw,1.2rem)] font-black uppercase tracking-[0.18em]">{rankLabel}</span>
-        </div>
+    <div className="relative grid size-[clamp(11rem,25vw,24rem)] place-items-center">
+      <span aria-hidden="true" className="text-[clamp(9rem,23vw,22rem)] leading-none drop-shadow-[0_1.5rem_1.25rem_rgba(0,0,0,0.48)]">🏆</span>
+      <div className="absolute bottom-[3%] grid min-w-[44%] place-items-center rounded-2xl border-2 border-amber-100 bg-gradient-to-b from-amber-300 to-amber-600 px-5 py-2 text-amber-950 shadow-xl">
+        <span className="text-[clamp(2rem,5vw,5rem)] font-black leading-none">{rank}</span>
+        <span className="mt-1 text-[clamp(0.6rem,1.3vw,1.1rem)] font-black uppercase tracking-[0.14em]">{rankLabel}</span>
       </div>
     </div>
   );
