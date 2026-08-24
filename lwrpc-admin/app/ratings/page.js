@@ -447,10 +447,16 @@ export default function RatingsPage() {
     );
   }
 
-  function findAgeBasedRatingValue(row) {
+  function findAgeBasedRating(row) {
     if (hasCsvColumn(row, ["metrics", "metric"])) {
       const metricsValue = findCsvValue(row, ["metrics", "metric"]);
-      return findMetricRating(metricsValue, "over_65") || findMetricRating(metricsValue, "over_50");
+      const over65Rating = findMetricRating(metricsValue, "over_65");
+      if (parseAgeBasedRating(over65Rating) !== null) {
+        return { value: over65Rating, source: "over_65" };
+      }
+
+      const over50Rating = findMetricRating(metricsValue, "over_50");
+      return { value: over50Rating, source: over50Rating ? "over_50" : null };
     }
 
     const exactValue = findCsvValue(row, [
@@ -469,7 +475,7 @@ export default function RatingsPage() {
       "prime time rating",
     ]);
 
-    if (exactValue !== "") return exactValue;
+    if (exactValue !== "") return { value: exactValue, source: null };
 
     const ageKey = Object.keys(row).find((key) => {
       const normalized = normalizeCsvHeader(key);
@@ -480,7 +486,7 @@ export default function RatingsPage() {
       );
     });
 
-    return ageKey ? row[ageKey] : "";
+    return { value: ageKey ? row[ageKey] : "", source: null };
   }
 
   function hasAgeBasedRatingSource(row) {
@@ -586,6 +592,7 @@ export default function RatingsPage() {
       "",
       "Choose a CSV with member name/email, DUPR ID, doubles rating, reliability rating, and age-based rating.",
       "Age-Based rating is read from Metrics.subscores.doubles.over_65, falling back to over_50.",
+      "When the 50+ rating is used, DUPR Notes will indicate the fallback.",
       "",
       "DUPR Doubles values only fill blank rating fields. Existing DUPR Doubles values are never overwritten.",
       "DUPR IDs are only written when the member does not already have one.",
@@ -632,7 +639,8 @@ export default function RatingsPage() {
       const duprId = normalizeText(findCsvValue(row, ["dupr id", "duprid", "dupr", "dupr number"]));
       const duprDoublesRating = parseDuprDoublesRating(findCsvValue(row, ["doubles rating", "doubles", "dupr doubles", "dupr doubles rating", "doubles dupr", "rating"]));
       const duprReliabilityRating = parseReliabilityRating(findCsvValue(row, ["doublesReliability", "doubles reliability", "doubles reliability rating", "reliability", "reliability rating", "dupr reliability"]));
-      const ageRating = parseAgeBasedRating(findAgeBasedRatingValue(row));
+      const ageBasedRating = findAgeBasedRating(row);
+      const ageRating = parseAgeBasedRating(ageBasedRating.value);
       const ageRatingSourcePresent = hasAgeBasedRatingSource(row);
       const lookupName = name || `${firstName} ${lastName}`.trim();
       const member = (email && byEmail[email]) || byName[normalizeName(lookupName)] || null;
@@ -650,6 +658,7 @@ export default function RatingsPage() {
         duprDoublesRating !== null &&
         (!existingSeasonRating || isBlankRating(existingSeasonRating.dupr_doubles_rating))
       );
+      const usesOver50AgeBasedRating = ageBasedRating.source === "over_50" && ageRating !== null;
 
       const hasRating = shouldUpdateDuprDoublesRating || duprReliabilityRating !== null || ageRating !== null || shouldClearAgeRating;
 
@@ -661,6 +670,8 @@ export default function RatingsPage() {
           : hasRating
             ? shouldClearAgeRating
               ? "Matched member; Age-Based rating will be cleared."
+              : usesOver50AgeBasedRating
+                ? "Matched member; Age-Based rating uses the 50+ fallback and DUPR Notes will be updated."
               : "Matched member."
             : duprDoublesRating !== null && existingSeasonRating && !isBlankRating(existingSeasonRating.dupr_doubles_rating)
               ? "Matched member; existing DUPR Doubles rating will be kept."
@@ -675,6 +686,8 @@ export default function RatingsPage() {
         duprReliabilityRating,
         ageRating,
         ageRatingSourcePresent,
+        usesOver50AgeBasedRating,
+        existingNotes: existingSeasonRating?.notes || "",
       };
     });
 
@@ -738,6 +751,9 @@ export default function RatingsPage() {
         if (row.duprReliabilityRating !== null) payload.dupr_reliability_rating = row.duprReliabilityRating;
         if (row.ageRatingSourcePresent) {
           payload.season_primetime_rating = row.ageRating;
+        }
+        if (row.usesOver50AgeBasedRating) {
+          payload.notes = ratingNotesWithAgeBasedFallback(row.existingNotes);
         }
 
         return payload;
@@ -1520,35 +1536,30 @@ function goToPage(value) {
                 onChange={handleRatingsImportFile}
                 className="hidden"
               />
-            </div>
+              <button
+                type="button"
+                onClick={cleanRatingsForSelectedSeason}
+                disabled={!selectedSeason || ratingsLoading || isCleaningRatings || ratings.length === 0}
+                className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isCleaningRatings ? "Cleaning..." : "Clean Ratings"}
+              </button>
 
-            <div className="flex items-end">
-              <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  onClick={cleanRatingsForSelectedSeason}
-                  disabled={!selectedSeason || ratingsLoading || isCleaningRatings || ratings.length === 0}
-                  className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isCleaningRatings ? "Cleaning..." : "Clean Ratings"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={deleteRatingsForSelectedSeason}
-                  disabled={
-                    !selectedSeason ||
-                    ratingsLoading ||
-                    isDeletingSeasonRatings ||
-                    ratings.length === 0
-                  }
-                  className="rounded-xl bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isDeletingSeasonRatings
-                    ? "Deleting..."
-                    : "Delete Season Ratings"}
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={deleteRatingsForSelectedSeason}
+                disabled={
+                  !selectedSeason ||
+                  ratingsLoading ||
+                  isDeletingSeasonRatings ||
+                  ratings.length === 0
+                }
+                className="rounded-xl bg-red-700 px-4 py-3 font-semibold text-white hover:bg-red-800 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {isDeletingSeasonRatings
+                  ? "Deleting..."
+                  : "Delete Season Ratings"}
+              </button>
             </div>
           </div>
 
@@ -2496,6 +2507,17 @@ function ratingNotesWithReliabilityAdjustment(existingNotes, reliabilityThreshol
       (line) =>
         !/^Season DUPR rating is adjusted based on the Reliability rating (of|threshold of) .+ (and automatically adjusted to NR|and treated as NR for the division-based Season DUPR adjustment)\.$/.test(line)
     );
+
+  return [...cleanedLines, note].join("\n");
+}
+
+function ratingNotesWithAgeBasedFallback(existingNotes) {
+  const note = "Age-Based rating imported from the 50+ DUPR rating because no 65+ DUPR rating was available.";
+  const cleanedLines = String(existingNotes || "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => line !== note);
 
   return [...cleanedLines, note].join("\n");
 }
