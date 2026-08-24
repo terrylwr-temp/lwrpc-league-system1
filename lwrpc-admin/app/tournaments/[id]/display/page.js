@@ -174,9 +174,6 @@ export default function TournamentDisplayPage() {
                     </div>
                     {match && (
                       <div className="flex max-w-[62%] flex-wrap justify-end gap-2 text-[11px] font-black uppercase tracking-wide sm:text-xs">
-                        <span className={`inline-flex items-center rounded-lg border border-white/90 px-3 py-1.5 shadow-sm ring-1 ring-slate-900/10 ${colors.publicBadge}`}>
-                          {match.division?.name || "Division"}
-                        </span>
                         <span className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-900 px-3 py-1.5 text-white shadow-sm ring-1 ring-white/40">
                           {matchLineLabel(match)}
                         </span>
@@ -185,6 +182,11 @@ export default function TournamentDisplayPage() {
                   </div>
                   {match ? (
                     <>
+                      <div className="mt-3 flex justify-center">
+                        <span className={`inline-flex max-w-full items-center justify-center rounded-full border border-white/90 px-5 py-2 text-center text-sm font-black uppercase tracking-wide shadow-md ring-1 ring-slate-900/10 sm:px-6 sm:py-2.5 sm:text-base ${colors.publicBadge}`}>
+                          {match.division?.name || "Division"}
+                        </span>
+                      </div>
                       <h2 className="mt-2 text-xl font-black leading-tight text-slate-950 sm:text-2xl">
                         {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
                       </h2>
