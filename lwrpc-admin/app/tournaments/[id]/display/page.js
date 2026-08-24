@@ -166,7 +166,7 @@ export default function TournamentDisplayPage() {
               const colors = match ? tournamentDivisionColors(match.division?.name) : null;
 
               return (
-                <div key={court.id} className={`rounded-2xl border-l-8 p-4 shadow sm:p-5 ${match ? `${colors.border} bg-white` : "border-l-slate-400 bg-slate-50"}`}>
+                <div key={court.id} className={`relative rounded-2xl border-l-8 p-4 shadow sm:p-5 ${match ? `${colors.border} bg-white` : "border-l-slate-400 bg-slate-50"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <div className="text-xs font-black uppercase tracking-wide text-slate-500">Court</div>
@@ -180,13 +180,15 @@ export default function TournamentDisplayPage() {
                       </div>
                     )}
                   </div>
+                  {match && (
+                    <div className="pointer-events-none absolute left-1/2 top-4 z-10 flex w-[min(58%,18rem)] -translate-x-1/2 justify-center sm:top-5">
+                      <span className={`inline-flex max-w-full items-center justify-center rounded-full border border-white/90 px-5 py-1.5 text-center text-xs font-black uppercase tracking-wide shadow-md ring-1 ring-slate-900/10 sm:px-6 sm:text-sm ${colors.publicBadge}`}>
+                        {match.division?.name || "Division"}
+                      </span>
+                    </div>
+                  )}
                   {match ? (
                     <>
-                      <div className="mt-3 flex justify-center">
-                        <span className={`inline-flex max-w-full items-center justify-center rounded-full border border-white/90 px-5 py-2 text-center text-sm font-black uppercase tracking-wide shadow-md ring-1 ring-slate-900/10 sm:px-6 sm:py-2.5 sm:text-base ${colors.publicBadge}`}>
-                          {match.division?.name || "Division"}
-                        </span>
-                      </div>
                       <h2 className="mt-2 text-xl font-black leading-tight text-slate-950 sm:text-2xl">
                         {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
                       </h2>
