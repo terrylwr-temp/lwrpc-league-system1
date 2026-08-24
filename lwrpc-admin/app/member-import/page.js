@@ -746,28 +746,34 @@ Field names are flexible and common variations are supported automatically.`
 
         {importStatus && (
           <div
-            className={`mt-6 rounded-xl p-4 text-sm ${
+            role="status"
+            aria-live="polite"
+            className={`mt-6 rounded-xl border p-4 text-sm shadow-md ${
               importStatus.toLowerCase().includes("failed")
-                ? "bg-red-50 text-red-900"
+                ? "border-red-900 bg-red-900 text-white"
                 : importStatus.toLowerCase().includes("completed")
-                  ? "bg-green-50 text-green-900"
-                  : "bg-blue-50 text-blue-900"
+                  ? "border-emerald-900 bg-emerald-900 text-white"
+                  : "border-blue-900 bg-blue-900 text-white"
             }`}
           >
-            <div className="font-bold">
+            <div className="text-xs font-black uppercase tracking-[0.14em] text-white/75">
               Import Status
             </div>
 
-            <div className="mt-1">
+            <div className="mt-1 font-bold leading-6">
               {importStatus}
             </div>
           </div>
         )}
 
         {importSummary && (
-          <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-5">
+          <div className="mt-6 rounded-2xl border border-emerald-900 bg-emerald-900 p-5 text-white shadow-lg">
 
-            <div className="text-lg font-bold text-green-900">
+            <div className="text-xs font-black uppercase tracking-[0.14em] text-emerald-100">
+              Membership Administration
+            </div>
+
+            <div className="mt-1 text-lg font-bold">
               Import Completed Successfully
             </div>
 
@@ -1078,12 +1084,12 @@ function StatCard({ label, value }) {
 
 function SummaryBox({ label, value }) {
   return (
-    <div className="rounded-xl bg-white p-4 shadow-sm">
-      <div className="text-xs uppercase tracking-wide text-slate-500">
+    <div className="rounded-xl border border-emerald-700 bg-emerald-950/50 p-4 shadow-sm">
+      <div className="text-xs font-semibold uppercase tracking-wide text-emerald-100">
         {label}
       </div>
 
-      <div className="mt-2 text-2xl font-bold text-slate-900">
+      <div className="mt-2 text-2xl font-bold text-white">
         {value}
       </div>
     </div>

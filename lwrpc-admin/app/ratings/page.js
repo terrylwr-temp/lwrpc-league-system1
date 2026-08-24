@@ -1611,8 +1611,23 @@ function goToPage(value) {
           </div>
 
           {ratingImportStatus && (
-            <div className="mt-3 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-slate-700">
-              {ratingImportStatus}
+            <div
+              role="status"
+              aria-live="polite"
+              className={`mt-3 rounded-xl border px-4 py-3 shadow-md ${
+                ratingImportStatus.toLowerCase().includes("failed")
+                  ? "border-red-900 bg-red-900 text-white"
+                  : /importing|cleaning|finding/.test(ratingImportStatus.toLowerCase())
+                    ? "border-blue-900 bg-blue-900 text-white"
+                    : "border-emerald-900 bg-emerald-900 text-white"
+              }`}
+            >
+              <div className="text-xs font-black uppercase tracking-[0.14em] text-white/75">
+                Season Ratings Status
+              </div>
+              <div className="mt-1 text-sm font-bold leading-6">
+                {ratingImportStatus}
+              </div>
             </div>
           )}
 
