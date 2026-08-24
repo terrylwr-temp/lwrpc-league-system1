@@ -533,7 +533,7 @@ function StandingCelebrationScreen({ team, tournamentName, logoUrl, logoAlt, onC
       <div className="relative flex min-h-full flex-col items-center justify-between px-5 py-7 text-center sm:px-10 sm:py-10">
         <header className="max-w-[92vw]">
           <h1 className="text-[clamp(1.6rem,4vw,4.5rem)] font-black leading-tight text-white">{tournamentName}</h1>
-          <p className="mt-4 max-w-[92vw] text-center text-[clamp(0.95rem,2.1vw,2.25rem)] font-black uppercase tracking-[0.18em] text-amber-200 drop-shadow-[0_2px_10px_rgba(251,191,36,0.35)]">
+          <p className="mt-4 max-w-[92vw] text-center text-[clamp(1.2rem,2.6vw,2.75rem)] font-black uppercase tracking-[0.18em] text-amber-200 drop-shadow-[0_2px_10px_rgba(251,191,36,0.35)]">
             {team.division}
           </p>
         </header>

@@ -453,3 +453,4 @@ As of 2026-05-21:
 - Tournament rank celebrations now adapt team-name size to its length, reduce the trophy footprint for compact display layouts, and scale roster text for larger teams so names remain visible. The separate placement heading was removed, and player names are separated with vertical bars. The visible app version was bumped to `LMS-0663`.
 - Tournament rank celebrations now present the division as a compact amber text label rather than a large pill, preserving more space for the team and roster. The visible app version was bumped to `LMS-0664`.
 - Tournament rank celebrations now remove the redundant top heading and place the club's main logo beside the trophy at the same responsive size. The visible app version was bumped to `LMS-0665`.
+- Tournament rank celebrations now use a larger compact division label for clearer distance viewing. The visible app version was bumped to `LMS-0666`.
