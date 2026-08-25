@@ -66,7 +66,10 @@ export function createRoundRobinSchedule({
   const workingIndexes = shuffle ? shuffleArray([...playerIndexes]) : [...playerIndexes];
   const partnerHistory = createMatrix(totalPlayers);
   const opponentHistory = createMatrix(totalPlayers);
+  const groupHistory = createMatrix(totalPlayers);
+  const groupSignatureHistory = new Map();
   const courtHistory = createCourtMatrix(totalPlayers, resolvedCourtCount);
+  const courtGroupHistory = Array.from({ length: resolvedCourtCount }, () => []);
   const byeCounts = Array(totalPlayers).fill(0);
   let previousByes = new Set();
   let previousCourts = [];
@@ -97,10 +100,13 @@ export function createRoundRobinSchedule({
       courtCount: resolvedCourtCount,
       partnerHistory,
       opponentHistory,
+      groupHistory,
+      groupSignatureHistory,
+      courtHistory,
       forbiddenPartnerPairs: previousPartnerPairsFromCourts(previousCourts),
       usedPartnerPairs: partnerPairsFromHistory(partnerHistory),
     });
-    const balancedMatches = perfectRound?.matches || balanceCourts(matches, courtHistory, resolvedCourtCount, previousCourts);
+    const balancedMatches = perfectRound?.matches || balanceCourts(matches, courtHistory, resolvedCourtCount, previousCourts, courtGroupHistory);
     const round = {
       roundNumber: roundIndex + 1,
       courts: balancedMatches.map((match, courtIndex) => ({
@@ -114,7 +120,7 @@ export function createRoundRobinSchedule({
     };
 
     rounds.push(round);
-    updateHistory(round, activePlayers, partnerHistory, opponentHistory, courtHistory);
+    updateHistory(round, activePlayers, partnerHistory, opponentHistory, groupHistory, groupSignatureHistory, courtHistory, courtGroupHistory);
     byes.forEach((index) => {
       byeCounts[index] += 1;
     });
@@ -161,7 +167,10 @@ export function createNextRoundRobinRound({
   const playersById = new Map(activePlayers.map((player, index) => [String(player.id), index]));
   const partnerHistory = createMatrix(totalPlayers);
   const opponentHistory = createMatrix(totalPlayers);
+  const groupHistory = createMatrix(totalPlayers);
+  const groupSignatureHistory = new Map();
   const courtHistory = createCourtMatrix(totalPlayers, resolvedCourtCount);
+  const courtGroupHistory = Array.from({ length: resolvedCourtCount }, () => []);
   const byeCounts = Array(totalPlayers).fill(0);
   const previousRoundNumber = Math.max(0, ...existingMatches.map((match) => Number(match.round_number || match.roundNumber || 0)));
   const previousRoundMatches = existingMatches.filter((match) => Number(match.round_number || match.roundNumber || 0) === previousRoundNumber);
@@ -189,6 +198,7 @@ export function createNextRoundRobinRound({
     allPlayers.forEach((index) => {
       courtHistory[index][courtIndex] += 1;
     });
+    recordGroupHistory(allPlayers, groupHistory, groupSignatureHistory, courtGroupHistory[courtIndex]);
 
     partnerHistory[team1[0]][team1[1]] += 1;
     partnerHistory[team1[1]][team1[0]] += 1;
@@ -244,10 +254,13 @@ export function createNextRoundRobinRound({
     courtCount: resolvedCourtCount,
     partnerHistory,
     opponentHistory,
+    groupHistory,
+    groupSignatureHistory,
+    courtHistory,
     forbiddenPartnerPairs: previousPartnerPairs,
     usedPartnerPairs,
   });
-  const balancedMatches = perfectRound?.matches || balanceCourts(matches, courtHistory, resolvedCourtCount, previousCourts);
+  const balancedMatches = perfectRound?.matches || balanceCourts(matches, courtHistory, resolvedCourtCount, previousCourts, courtGroupHistory);
 
   return {
     roundNumber: previousRoundNumber + 1,
@@ -421,6 +434,9 @@ function createMatchesForRound({
   courtCount,
   partnerHistory,
   opponentHistory,
+  groupHistory,
+  groupSignatureHistory,
+  courtHistory,
   forbiddenPartnerPairs,
   usedPartnerPairs,
 }) {
@@ -433,11 +449,17 @@ function createMatchesForRound({
     return createMatchesFromPool(playingIndexes, courtCount, partnerHistory, opponentHistory, {
       forbiddenPartnerPairs: strictPartnerPairs,
       strictUniquePartners: true,
+      groupHistory,
+      groupSignatureHistory,
+      courtHistory,
     });
   } catch {
     return createMatchesFromPool(playingIndexes, courtCount, partnerHistory, opponentHistory, {
       forbiddenPartnerPairs,
       strictUniquePartners: false,
+      groupHistory,
+      groupSignatureHistory,
+      courtHistory,
     });
   }
 }
@@ -448,7 +470,16 @@ function createMatchesFromPool(playingIndexes, courtCount, partnerHistory, oppon
   for (let attempt = 0; attempt < 200; attempt += 1) {
     const pool = choosePlayablePool(shuffleArray(playingIndexes), requiredPlayers, forbiddenPartnerPairs);
     const pairs = createPartnerPairs(pool, partnerHistory, opponentHistory, forbiddenPartnerPairs);
-    if (pairs.length * 2 === requiredPlayers) return createMatchesFromPairs(pairs, partnerHistory, opponentHistory);
+    if (pairs.length * 2 === requiredPlayers) {
+      return createMatchesFromPairs(
+        pairs,
+        partnerHistory,
+        opponentHistory,
+        options.groupHistory,
+        options.groupSignatureHistory,
+        options.courtHistory
+      );
+    }
   }
 
   throw new Error(
@@ -526,35 +557,74 @@ function partnerPairScore(first, second, partnerHistory, opponentHistory) {
   return partnerHistory[first][second] * 1000 + opponentHistory[first][second];
 }
 
-function createMatchesFromPairs(pairs, partnerHistory, opponentHistory) {
-  const availablePairs = shuffleArray(pairs);
-  const matches = [];
+function createMatchesFromPairs(pairs, partnerHistory, opponentHistory, groupHistory, groupSignatureHistory, courtHistory) {
+  let bestMatches = null;
+  let bestScore = Number.POSITIVE_INFINITY;
 
-  while (availablePairs.length >= 2) {
-    const firstPair = availablePairs.pop();
-    let bestIndex = 0;
-    let bestScore = Number.POSITIVE_INFINITY;
-
-    availablePairs.forEach((candidatePair, index) => {
-      const allOpponents = [
-        [firstPair[0], candidatePair[0]],
-        [firstPair[0], candidatePair[1]],
-        [firstPair[1], candidatePair[0]],
-        [firstPair[1], candidatePair[1]],
-      ];
-      const opponentScore = allOpponents.reduce((sum, [a, b]) => sum + opponentHistory[a][b], 0);
-      const totalInteraction = allOpponents.reduce((sum, [a, b]) => sum + partnerHistory[a][b] + opponentHistory[a][b], 0);
-      const score = totalInteraction + opponentScore * 0.1 + Math.random() * 0.5;
+  function search(remainingPairs, matches, score) {
+    if (remainingPairs.length === 0) {
       if (score < bestScore) {
         bestScore = score;
-        bestIndex = index;
+        bestMatches = matches;
       }
-    });
+      return;
+    }
 
-    matches.push([...firstPair, ...availablePairs.splice(bestIndex, 1)[0]]);
+    const [firstPair, ...otherPairs] = remainingPairs;
+    otherPairs.forEach((opposingPair, opposingIndex) => {
+      const match = [...firstPair, ...opposingPair];
+      const matchScore = courtGroupScore(match, partnerHistory, opponentHistory, groupHistory, groupSignatureHistory, courtHistory);
+      if (score + matchScore >= bestScore) return;
+      search(
+        otherPairs.filter((_, index) => index !== opposingIndex),
+        [...matches, match],
+        score + matchScore
+      );
+    });
   }
 
-  return matches;
+  search(shuffleArray(pairs), [], 0);
+  return bestMatches || [];
+}
+
+function courtGroupScore(match, partnerHistory, opponentHistory, groupHistory, groupSignatureHistory, courtHistory) {
+  const exactGroupRepeats = groupSignatureHistory?.get(playerGroupKey(match)) || 0;
+  const courtFitScore = matchCourtFitScore(match, courtHistory);
+  let coCourtHistory = 0;
+  let opponentHistoryScore = 0;
+  let partnerHistoryScore = 0;
+
+  match.forEach((playerIndex, firstIndex) => {
+    match.slice(firstIndex + 1).forEach((otherPlayerIndex, offset) => {
+      coCourtHistory += groupHistory?.[playerIndex]?.[otherPlayerIndex] || 0;
+      const secondIndex = firstIndex + offset + 1;
+      const teammates = (firstIndex < 2 && secondIndex < 2) || (firstIndex >= 2 && secondIndex >= 2);
+      if (teammates) {
+        partnerHistoryScore += partnerHistory[playerIndex][otherPlayerIndex];
+      } else {
+        opponentHistoryScore += opponentHistory[playerIndex][otherPlayerIndex];
+      }
+    });
+  });
+
+  // A full repeated four-player court is the least desirable outcome. Repeated
+  // two- and three-player clusters are then minimized through pair history.
+  return exactGroupRepeats * 1_000_000 + courtFitScore * 10_000 + coCourtHistory * 1_000 + opponentHistoryScore * 10 + partnerHistoryScore;
+}
+
+function matchCourtFitScore(match, courtHistory) {
+  if (!courtHistory?.length || !courtHistory[0]?.length) return 0;
+
+  return Math.min(...courtHistory[0].map((_, courtIndex) => {
+    const projected = match.map((playerIndex) => {
+      const counts = [...courtHistory[playerIndex]];
+      counts[courtIndex] += 1;
+      return counts;
+    });
+    const ranges = projected.map((counts) => Math.max(...counts) - Math.min(...counts));
+    return Math.max(...ranges) * 100 + ranges.reduce((sum, range) => sum + range, 0) * 10
+      + projected.reduce((sum, counts) => sum + counts.reduce((innerSum, count) => innerSum + count * count, 0), 0);
+  }));
 }
 
 function previousPartnerPairsFromCourts(previousCourts = []) {
@@ -590,7 +660,7 @@ function pairKey(first, second) {
   return [Number(first), Number(second)].sort((a, b) => a - b).join(":");
 }
 
-function balanceCourts(matches, courtHistory, courtCount, previousCourts) {
+function balanceCourts(matches, courtHistory, courtCount, previousCourts, courtGroupHistory = []) {
   const courtSlots = Math.min(courtCount, matches.length);
   let bestAssignment = matches.slice(0, courtSlots);
   let bestScore = null;
@@ -598,17 +668,27 @@ function balanceCourts(matches, courtHistory, courtCount, previousCourts) {
   function considerAssignment(assignment) {
     const projectedHistory = courtHistory.map((row) => [...row]);
     const previousOverlaps = [];
+    const historicalGroupOverlaps = [];
     assignment.forEach((match, courtIndex) => {
       match.forEach((playerIndex) => {
         projectedHistory[playerIndex][courtIndex] += 1;
       });
       previousOverlaps.push((previousCourts[courtIndex] || []).filter((playerIndex) => match.includes(playerIndex)).length);
+      historicalGroupOverlaps.push((courtGroupHistory[courtIndex] || []).reduce((sum, previousGroup) => {
+        const sharedPlayers = previousGroup.filter((playerIndex) => match.includes(playerIndex)).length;
+        if (sharedPlayers === 4) return sum + 1000;
+        if (sharedPlayers === 3) return sum + 100;
+        if (sharedPlayers === 2) return sum + 1;
+        return sum;
+      }, 0));
     });
 
     const courtRanges = projectedHistory.map((row) => Math.max(...row) - Math.min(...row));
     const score = [
       Math.max(...courtRanges),
       courtRanges.reduce((sum, range) => sum + range, 0),
+      historicalGroupOverlaps.reduce((sum, overlap) => sum + overlap, 0),
+      Math.max(0, ...historicalGroupOverlaps),
       Math.max(0, ...previousOverlaps),
       previousOverlaps.reduce((sum, overlap) => sum + overlap * overlap, 0),
       projectedHistory.reduce((sum, row) => sum + row.reduce((innerSum, count) => innerSum + count * count, 0), 0),
@@ -642,7 +722,7 @@ function compareNumericScores(first, second) {
   return 0;
 }
 
-function updateHistory(round, players, partnerHistory, opponentHistory, courtHistory) {
+function updateHistory(round, players, partnerHistory, opponentHistory, groupHistory, groupSignatureHistory, courtHistory, courtGroupHistory) {
   round.courts.forEach((court, courtIndex) => {
     const team1 = normalizePlayerList(court.team1).map((player) => players.findIndex((item) => item.id === player.id));
     const team2 = normalizePlayerList(court.team2).map((player) => players.findIndex((item) => item.id === player.id));
@@ -653,6 +733,7 @@ function updateHistory(round, players, partnerHistory, opponentHistory, courtHis
     [a, b, c, d].forEach((playerIndex) => {
       courtHistory[playerIndex][courtIndex] += 1;
     });
+    recordGroupHistory([a, b, c, d], groupHistory, groupSignatureHistory, courtGroupHistory[courtIndex]);
 
     partnerHistory[a][b] += 1;
     partnerHistory[b][a] += 1;
@@ -666,6 +747,22 @@ function updateHistory(round, players, partnerHistory, opponentHistory, courtHis
       });
     });
   });
+}
+
+function recordGroupHistory(playerIndexes, groupHistory, groupSignatureHistory, courtGroups) {
+  if (!Array.isArray(playerIndexes) || playerIndexes.length !== 4) return;
+  groupSignatureHistory.set(playerGroupKey(playerIndexes), (groupSignatureHistory.get(playerGroupKey(playerIndexes)) || 0) + 1);
+  playerIndexes.forEach((playerIndex, firstIndex) => {
+    playerIndexes.slice(firstIndex + 1).forEach((otherPlayerIndex) => {
+      groupHistory[playerIndex][otherPlayerIndex] += 1;
+      groupHistory[otherPlayerIndex][playerIndex] += 1;
+    });
+  });
+  courtGroups?.push([...playerIndexes]);
+}
+
+function playerGroupKey(playerIndexes) {
+  return [...playerIndexes].map(Number).sort((a, b) => a - b).join(":");
 }
 
 function numericScore(value) {

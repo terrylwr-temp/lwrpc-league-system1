@@ -3101,12 +3101,15 @@ function liveRoundPlayerPayload(player) {
 function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked = false, runAction, swapSelection, setSwapSelection, onPendingScoreChange }) {
   const [team1Score, setTeam1Score] = useState(match.team1_score ?? "");
   const [team2Score, setTeam2Score] = useState(match.team2_score ?? "");
+  const [editingScore, setEditingScore] = useState(false);
   const team2ScoreRef = useRef(null);
   const scoreRules = normalizeRoundRobinScoring(scoring);
+  const hasSavedScore = matchHasSavedScore(match);
 
   useEffect(() => {
     setTeam1Score(match.team1_score ?? "");
     setTeam2Score(match.team2_score ?? "");
+    setEditingScore(false);
   }, [match.team1_score, match.team2_score]);
 
   async function saveScore() {
@@ -3115,11 +3118,33 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
       await appNotice(scoreError, { title: "Score needs attention", tone: "warning" });
       return;
     }
-    await runAction("updateMatchScore", {
+    const saved = await runAction("updateMatchScore", {
       matchId: match.id,
       team1Score,
       team2Score,
     });
+    if (saved) setEditingScore(false);
+  }
+
+  async function deleteScore() {
+    if (!(await appConfirm(`Delete the saved scores for ${match.court_name || `Court ${match.court_number}`}?`, {
+      title: "Delete scores",
+      confirmLabel: "Delete scores",
+      tone: "warning",
+    }))) return;
+
+    const deleted = await runAction("updateMatchScore", {
+      matchId: match.id,
+      team1Score: "",
+      team2Score: "",
+    });
+    if (deleted) {
+      setTeam1Score("");
+      setTeam2Score("");
+      onPendingScoreChange?.(match.id, "team1Score", undefined);
+      onPendingScoreChange?.(match.id, "team2Score", undefined);
+      setEditingScore(false);
+    }
   }
 
   function moveToSecondScore(event) {
@@ -3149,7 +3174,17 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
       <div className="flex flex-col gap-2 bg-[linear-gradient(90deg,#0f3b36,#166b61)] px-3 py-2 text-white sm:flex-row sm:items-center sm:justify-between">
         <div className="font-black">{match.court_name || `Court ${match.court_number}`}</div>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:items-center">
-          {matchHasSavedScore(match) && <div className="rounded-md bg-emerald-300 px-2 py-1 text-xs font-black text-emerald-950">Score Saved</div>}
+          {hasSavedScore && <div className="rounded-md bg-emerald-300 px-2 py-1 text-xs font-black text-emerald-950">Score Saved</div>}
+          {hasSavedScore && !editingScore && (
+            <button type="button" onClick={() => setEditingScore(true)} className="rounded-md border border-white/40 bg-white/15 px-3 py-1 text-xs font-black text-white hover:bg-white/25">
+              Edit Score
+            </button>
+          )}
+          {hasSavedScore && editingScore && (
+            <button type="button" onClick={deleteScore} className="rounded-md border border-red-200/70 bg-red-500/85 px-3 py-1 text-xs font-black text-white hover:bg-red-600">
+              Delete Scores
+            </button>
+          )}
         </div>
       </div>
       <div className="relative min-h-48 overflow-hidden bg-[#163f38] p-2 sm:p-3" style={{ perspective: "900px" }}>
@@ -3162,18 +3197,25 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
         </div>
         <div className="relative z-10 grid min-h-44 grid-cols-[minmax(0,1fr)_0.75rem_minmax(0,1fr)] items-stretch gap-2 p-2 sm:gap-3 sm:p-3">
           <div className="flex min-w-0 flex-col items-center justify-start gap-3 pt-2">
-            <input value={team1Score} onChange={(event) => { setTeam1Score(event.target.value); onPendingScoreChange?.(match.id, "team1Score", event.target.value); }} onKeyDown={moveToSecondScore} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4" />
+            <input value={team1Score} disabled={hasSavedScore && !editingScore} onChange={(event) => { setTeam1Score(event.target.value); onPendingScoreChange?.(match.id, "team1Score", event.target.value); }} onKeyDown={moveToSecondScore} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4 disabled:cursor-default disabled:bg-slate-100" />
             <SlotSide match={match} side="team1" align="center" pickSlot={pickSlot} selected={swapSelection} tone="teal" locked={lineupLocked} />
           </div>
           <div className="flex items-center justify-center">
             <div className="h-full w-1.5 rounded-full bg-white/90 shadow-[0_0_18px_rgba(255,255,255,0.8)]" />
           </div>
           <div className="flex min-w-0 flex-col items-center justify-start gap-3 pt-2">
-            <input ref={team2ScoreRef} value={team2Score} onChange={(event) => { setTeam2Score(event.target.value); onPendingScoreChange?.(match.id, "team2Score", event.target.value); }} onKeyDown={submitScoreFromKeyboard} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4" />
+            <input ref={team2ScoreRef} value={team2Score} disabled={hasSavedScore && !editingScore} onChange={(event) => { setTeam2Score(event.target.value); onPendingScoreChange?.(match.id, "team2Score", event.target.value); }} onKeyDown={submitScoreFromKeyboard} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4 disabled:cursor-default disabled:bg-slate-100" />
             <SlotSide match={match} side="team2" align="center" pickSlot={pickSlot} selected={swapSelection} tone="blue" locked={lineupLocked} />
           </div>
         </div>
       </div>
+      {hasSavedScore && editingScore && (
+        <div className="flex justify-end border-t border-slate-200 bg-slate-50 px-3 py-2">
+          <button type="button" onClick={saveScore} className="rounded-md bg-teal-700 px-4 py-2 text-sm font-black text-white shadow-sm hover:bg-teal-800">
+            Save Score Changes
+          </button>
+        </div>
+      )}
     </div>
   );
 }
