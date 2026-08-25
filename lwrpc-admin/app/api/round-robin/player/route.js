@@ -178,17 +178,33 @@ async function loadPlayerSessions(supabase, group, player) {
   const sessionIds = playerRows.map((row) => row.session_id).filter(Boolean);
   const invitedSessionIds = new Set(sessionIds.map(String));
 
-  const sessionsResult = await supabase
-    .from("round_robin_sessions")
-    .select("id, session_name, location, session_date, starts_at, status, max_players, repeats_weekly, invited_group_ids, host_player_id, cohost_player_id, mode, settings, updated_at")
-    .eq("group_id", group.id)
-    .gte("session_date", today)
-    .in("status", ["draft", "open", "playing"])
-    .order("session_date", { ascending: true })
-    .order("starts_at", { ascending: true });
-  if (sessionsResult.error) throw sessionsResult.error;
+  const sessionFields = "id, session_name, location, session_date, starts_at, status, max_players, repeats_weekly, invited_group_ids, host_player_id, cohost_player_id, mode, settings, updated_at";
+  const [scheduledSessionsResult, playingSessionsResult] = await Promise.all([
+    supabase
+      .from("round_robin_sessions")
+      .select(sessionFields)
+      .eq("group_id", group.id)
+      .gte("session_date", today)
+      .in("status", ["draft", "open", "playing"])
+      .order("session_date", { ascending: true })
+      .order("starts_at", { ascending: true }),
+    supabase
+      .from("round_robin_sessions")
+      .select(sessionFields)
+      .eq("group_id", group.id)
+      .eq("status", "playing")
+      .order("session_date", { ascending: true })
+      .order("starts_at", { ascending: true }),
+  ]);
+  if (scheduledSessionsResult.error) throw scheduledSessionsResult.error;
+  if (playingSessionsResult.error) throw playingSessionsResult.error;
 
-  const sessions = (sessionsResult.data || []).filter((session) => (
+  // A host must always be able to resume a match that is still Playing. Keep
+  // those sessions visible even when a UTC date boundary has passed locally.
+  const sessions = [...new Map([
+    ...(scheduledSessionsResult.data || []),
+    ...(playingSessionsResult.data || []),
+  ].map((session) => [String(session.id), session])).values()].filter((session) => (
     invitedSessionIds.has(String(session.id)) || isSessionHost(session, player.id)
   ));
   if (sessions.length === 0) return [];

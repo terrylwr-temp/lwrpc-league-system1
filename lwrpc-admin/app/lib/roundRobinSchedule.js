@@ -482,33 +482,48 @@ function canPairWithoutForbiddenPartners(playerIndexes, forbiddenPartnerPairs) {
 }
 
 function createPartnerPairs(playerIndexes, partnerHistory, opponentHistory, forbiddenPartnerPairs) {
-  const pool = [...playerIndexes];
-  const pairs = [];
+  let bestPairs = null;
+  let bestScore = Number.POSITIVE_INFINITY;
 
-  while (pool.length >= 2) {
-    const player = pool.pop();
-    let bestIndex = 0;
-    let bestScore = Number.POSITIVE_INFINITY;
-    let foundAllowedPartner = false;
-
-    pool.forEach((candidate, index) => {
-      if (forbiddenPartnerPairs.has(pairKey(player, candidate))) return;
-      const score =
-        partnerHistory[player][candidate] * 1000 +
-        opponentHistory[player][candidate] +
-        Math.random() * 0.5;
+  function search(remainingPlayers, pairs, score) {
+    if (remainingPlayers.length === 0) {
       if (score < bestScore) {
         bestScore = score;
-        bestIndex = index;
-        foundAllowedPartner = true;
+        bestPairs = pairs;
       }
-    });
+      return;
+    }
 
-    if (!foundAllowedPartner) return [];
-    pairs.push([player, pool.splice(bestIndex, 1)[0]]);
+    let player = null;
+    let candidates = [];
+    for (const candidatePlayer of remainingPlayers) {
+      const eligiblePartners = remainingPlayers
+        .filter((candidate) => candidate !== candidatePlayer && !forbiddenPartnerPairs.has(pairKey(candidatePlayer, candidate)))
+        .sort((first, second) => partnerPairScore(candidatePlayer, first, partnerHistory, opponentHistory) - partnerPairScore(candidatePlayer, second, partnerHistory, opponentHistory));
+      if (eligiblePartners.length === 0) return;
+      if (player === null || eligiblePartners.length < candidates.length) {
+        player = candidatePlayer;
+        candidates = eligiblePartners;
+      }
+    }
+
+    candidates.forEach((partner) => {
+      const pairScore = partnerPairScore(player, partner, partnerHistory, opponentHistory);
+      if (score + pairScore >= bestScore) return;
+      search(
+        remainingPlayers.filter((candidate) => candidate !== player && candidate !== partner),
+        [...pairs, [player, partner]],
+        score + pairScore
+      );
+    });
   }
 
-  return pairs;
+  search([...playerIndexes], [], 0);
+  return bestPairs || [];
+}
+
+function partnerPairScore(first, second, partnerHistory, opponentHistory) {
+  return partnerHistory[first][second] * 1000 + opponentHistory[first][second];
 }
 
 function createMatchesFromPairs(pairs, partnerHistory, opponentHistory) {
