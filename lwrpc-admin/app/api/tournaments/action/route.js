@@ -703,7 +703,7 @@ async function syncLeagueDivisions(supabase, tournament) {
       .order("name", { ascending: true }),
     supabase
       .from("tournament_divisions")
-      .select("id, name, seed")
+      .select("id, name")
       .eq("tournament_id", tournament.id),
   ]);
 
