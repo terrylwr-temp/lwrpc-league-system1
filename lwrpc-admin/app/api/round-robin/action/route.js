@@ -1813,13 +1813,16 @@ async function generateNextGame(supabase, group, body) {
   if (courtsResult.error) throw courtsResult.error;
 
   const sessionPlayers = await filterActiveSessionPlayers(supabase, group.id, sessionPlayersSnapshot);
-  let joinedSessionPlayers = sessionPlayers.filter((player) => player.response_status === "joined");
+  const joinedSessionPlayers = sessionPlayers.filter((player) => player.response_status === "joined");
+  let selectedSessionPlayers = joinedSessionPlayers;
+  let manuallyByedSessionPlayers = [];
   if (Array.isArray(body.selectedSessionPlayerIds)) {
     const selectedIds = new Set(body.selectedSessionPlayerIds.map((id) => String(id || "")).filter(Boolean));
-    joinedSessionPlayers = joinedSessionPlayers.filter((player) => selectedIds.has(String(player.id || "")));
+    selectedSessionPlayers = joinedSessionPlayers.filter((player) => selectedIds.has(String(player.id || "")));
+    manuallyByedSessionPlayers = joinedSessionPlayers.filter((player) => !selectedIds.has(String(player.id || "")));
   }
 
-  const joinedPlayers = joinedSessionPlayers
+  const joinedPlayers = selectedSessionPlayers
     .map((player) => ({
       id: player.player_id,
       displayName: player.display_name,
@@ -1827,9 +1830,15 @@ async function generateNextGame(supabase, group, body) {
       phone: player.phone || "",
       email: player.email || "",
     }));
+  const manualByePlayers = manuallyByedSessionPlayers.map((player) => ({
+    id: player.player_id,
+    displayName: player.display_name,
+    firstLabel: roundRobinPlayerLabel(player.display_name),
+    duprId: player.dupr_id || "",
+  }));
 
   if (isLadderSession(session)) {
-    return generateNextLadderGame(supabase, group, session, joinedPlayers, existingMatches, courtsResult.data || []);
+    return generateNextLadderGame(supabase, group, session, joinedPlayers, existingMatches, courtsResult.data || [], manualByePlayers);
   }
 
   const historyMatches = await loadLadderSeasonHistoryMatches(supabase, group, session);
@@ -1849,7 +1858,7 @@ async function generateNextGame(supabase, group, body) {
     court_name: court.courtName,
     team1_players: court.team1.map(publicPlayerPayload),
     team2_players: court.team2.map(publicPlayerPayload),
-    bye_players: courtIndex === 0 ? nextRound.byes.map(publicPlayerPayload) : [],
+    bye_players: courtIndex === 0 ? [...nextRound.byes, ...manualByePlayers].map(publicPlayerPayload) : [],
     status: "scheduled",
   }));
 
@@ -1872,11 +1881,11 @@ async function generateNextGame(supabase, group, body) {
   if (sessionError) throw sessionError;
 
   await rebuildResults(supabase, group, session.id);
-  await addLog(supabase, group.id, session.id, "session", `Generated round ${nextRound.roundNumber}.`);
+  await addLog(supabase, group.id, session.id, "session", `Generated round ${nextRound.roundNumber}${manualByePlayers.length > 0 ? ` with ${manualByePlayers.length} selected bye${manualByePlayers.length === 1 ? "" : "s"}` : ""}.`);
   return { session: updatedSession, matches: matchesResult.data || [], roundNumber: nextRound.roundNumber };
 }
 
-async function generateNextLadderGame(supabase, group, session, joinedPlayers, existingMatches, courts = []) {
+async function generateNextLadderGame(supabase, group, session, joinedPlayers, existingMatches, courts = [], manualByePlayers = []) {
   const ladder = await loadCurrentLadderForSession(supabase, group, session);
   if (!ladder) throw new Error("Ladder settings were not found for this match.");
   if (joinedPlayers.length < 4) throw new Error("Confirm at least 4 joined players before generating a ladder round.");
@@ -1910,7 +1919,7 @@ async function generateNextLadderGame(supabase, group, session, joinedPlayers, e
     court_name: court.courtName || `Ladder Court ${courtIndex + 1}`,
     team1_players: court.team1.map(publicPlayerPayload),
     team2_players: court.team2.map(publicPlayerPayload),
-    bye_players: round.byes.map(publicPlayerPayload),
+    bye_players: [...round.byes, ...(courtIndex === 0 ? manualByePlayers : [])].map(publicPlayerPayload),
     status: "scheduled",
   })));
 
@@ -1943,7 +1952,7 @@ async function generateNextLadderGame(supabase, group, session, joinedPlayers, e
   if (sessionError) throw sessionError;
 
   await rebuildResults(supabase, group, session.id);
-  await addLog(supabase, group.id, session.id, "session", `Generated ladder round ${roundNumber} across ${ladderCourts.length} court${ladderCourts.length === 1 ? "" : "s"}.`);
+  await addLog(supabase, group.id, session.id, "session", `Generated ladder round ${roundNumber} across ${ladderCourts.length} court${ladderCourts.length === 1 ? "" : "s"}${manualByePlayers.length > 0 ? ` with ${manualByePlayers.length} selected bye${manualByePlayers.length === 1 ? "" : "s"}` : ""}.`);
   return { session: updatedSession, matches: matchesResult.data || [], roundNumber };
 }
 

@@ -2594,6 +2594,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
   const [newPlayerPhone, setNewPlayerPhone] = useState("");
   const checkedSet = new Set((checkedPlayerIds || []).map(String));
   const checkedCount = checkedSet.size;
+  const selectedByeCount = Math.max(0, joinedPlayers.length - checkedCount);
   const courtLabel = `${courts.length} court${courts.length === 1 ? "" : "s"}`;
   const initialMode = mode === "initial";
   const busy = ["startSessionAndGenerateFirstGame", "generateNextGame", "updateMatchScore"].includes(actionLoading);
@@ -2650,7 +2651,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
             <div className={MODAL_EYEBROW_CHROME}>Start Match</div>
             <h2 className="break-words text-xl font-black sm:text-2xl">{session.session_name || "Match"}</h2>
             <div className={MODAL_SUPPORTING_TEXT}>
-              {checkedCount} checked players{initialMode ? ` - ${courtLabel}` : ""} - {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
+              {checkedCount} checked players{!initialMode && selectedByeCount > 0 ? ` - ${selectedByeCount} selected bye${selectedByeCount === 1 ? "" : "s"}` : ""}{initialMode ? ` - ${courtLabel}` : ""} - {formatDate(session.session_date)} {session.starts_at ? `- ${formatTime(session.starts_at)}` : ""}
             </div>
           </div>
           <button type="button" onClick={onClose} className="w-full rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 shadow-sm hover:bg-slate-100 sm:w-auto">
@@ -2665,7 +2666,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
                 <div>
                   <div className="text-sm font-black text-blue-950">Verify Players - Round {roundNumber}</div>
                   <div className="mt-1 text-xs font-bold text-blue-800">
-                    {initialMode ? "Uncheck anyone who did not show up." : "Uncheck anyone not playing this round."}
+                    {initialMode ? "Uncheck anyone who did not show up." : "Uncheck anyone taking a bye this round."}
                   </div>
                 </div>
                 <div className="rounded-md bg-white px-2 py-1 text-xs font-black text-blue-900 shadow-sm">
@@ -2686,7 +2687,8 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
                         onChange={() => togglePlayer(playerId)}
                         className="h-5 w-5 rounded border-slate-300 text-teal-700"
                       />
-                      <span className="min-w-0 break-words">{player.display_name || "Player"}</span>
+                      <span className="min-w-0 flex-1 break-words">{player.display_name || "Player"}</span>
+                      {!checked && !initialMode && <span className="shrink-0 rounded-full bg-amber-200 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-amber-950">Bye this round</span>}
                     </label>
                   );
                 })}
