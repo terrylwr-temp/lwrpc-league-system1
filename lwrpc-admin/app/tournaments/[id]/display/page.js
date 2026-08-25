@@ -22,6 +22,10 @@ import {
 } from "../../../lib/tournaments";
 
 const DISPLAY_VIEWS = ["courtsDetail", "courtsSimple", "standings"];
+const DISPLAY_ROTATION_MS = 30000;
+const DISPLAY_SCROLL_START_DELAY_MS = 1200;
+const DISPLAY_SCROLL_END_DWELL_MS = 1200;
+const DISPLAY_SCROLL_OVERFLOW_TOLERANCE_PX = 8;
 
 export default function TournamentDisplayPage() {
   const { id } = useParams();
@@ -71,10 +75,15 @@ export default function TournamentDisplayPage() {
         const index = DISPLAY_VIEWS.indexOf(current);
         return DISPLAY_VIEWS[(index + 1) % DISPLAY_VIEWS.length];
       });
-    }, 30000);
+    }, DISPLAY_ROTATION_MS);
 
     return () => window.clearInterval(interval);
-  }, [rotating]);
+  }, [rotating, headerHidden]);
+
+  useRotatingDisplayOverflowScroll({
+    enabled: rotating && headerHidden && !selectedStandingTeam && !celebratingStandingTeam,
+    view,
+  });
 
   const standings = useMemo(
     () => standingsByDivision(state?.matches || [], state?.teams || [], state?.divisions || [], state?.tournament?.settings || {}),
@@ -246,6 +255,79 @@ export default function TournamentDisplayPage() {
       )}
     </PublicShell>
   );
+}
+
+function useRotatingDisplayOverflowScroll({ enabled, view }) {
+  useEffect(() => {
+    let animationFrame = null;
+    let layoutFrame = null;
+    let disposed = false;
+
+    function cancelAnimation() {
+      if (animationFrame !== null) window.cancelAnimationFrame(animationFrame);
+      if (layoutFrame !== null) window.cancelAnimationFrame(layoutFrame);
+      animationFrame = null;
+      layoutFrame = null;
+    }
+
+    function scrollToTop() {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+
+    if (!enabled) {
+      scrollToTop();
+      return cancelAnimation;
+    }
+
+    function maxScrollTop() {
+      const pageHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+      return Math.max(0, pageHeight - window.innerHeight);
+    }
+
+    function startScroll() {
+      if (disposed) return;
+      scrollToTop();
+
+      const scrollDistance = maxScrollTop();
+      if (scrollDistance <= DISPLAY_SCROLL_OVERFLOW_TOLERANCE_PX) return;
+
+      const scrollStart = performance.now() + DISPLAY_SCROLL_START_DELAY_MS;
+      const scrollDuration = DISPLAY_ROTATION_MS - DISPLAY_SCROLL_START_DELAY_MS - DISPLAY_SCROLL_END_DWELL_MS;
+
+      function scrollFrame(now) {
+        if (disposed) return;
+
+        if (now < scrollStart) {
+          animationFrame = window.requestAnimationFrame(scrollFrame);
+          return;
+        }
+
+        const progress = Math.min(1, (now - scrollStart) / scrollDuration);
+        window.scrollTo({ top: Math.round(maxScrollTop() * progress), left: 0, behavior: "auto" });
+
+        if (progress < 1) animationFrame = window.requestAnimationFrame(scrollFrame);
+      }
+
+      animationFrame = window.requestAnimationFrame(scrollFrame);
+    }
+
+    function scheduleScroll() {
+      cancelAnimation();
+      layoutFrame = window.requestAnimationFrame(startScroll);
+    }
+
+    const resizeObserver = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(scheduleScroll);
+    resizeObserver?.observe(document.body);
+    window.addEventListener("resize", scheduleScroll);
+    scheduleScroll();
+
+    return () => {
+      disposed = true;
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", scheduleScroll);
+      cancelAnimation();
+    };
+  }, [enabled, view]);
 }
 
 function TournamentDisplayControls({ view, rotating, setView, setRotating, tournamentKey, onHideHeader }) {
