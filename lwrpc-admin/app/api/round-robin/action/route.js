@@ -3283,13 +3283,9 @@ function sessionTextCounts(session, sessionPlayers = []) {
 
 function resultRankingsForSms(standings = []) {
   if (!standings.length) return "Results pending.";
-  return standings.map((row, index) => {
-    const diff = Number(row.pointDiff || 0);
-    const diffText = diff > 0 ? `+${diff}` : String(diff);
-    const positionText = row.previousPosition && row.newPosition
-      ? `, Position #${row.previousPosition} -> #${row.newPosition} out of ${row.positionCount || "?"}`
-      : "";
-    return `${index + 1}. ${row.displayName || "Player"}: ${row.wins || 0}-${row.losses || 0}, Points ${row.pointsFor || 0}-${row.pointsAgainst || 0}, Diff ${diffText}, Byes ${row.byes || 0}${positionText}`;
+  return standings.map((row) => {
+    const playerName = roundRobinPlayerLabel(row.displayName);
+    return `${playerName}: ${row.wins || 0}-${row.losses || 0}, Byes: ${row.byes || 0}`;
   }).join("\n");
 }
 
