@@ -1,6 +1,6 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-08-27
+Last updated: 2026-08-30
 
 ## Purpose
 
@@ -462,4 +462,5 @@ As of 2026-05-21:
 - Tournament Division refresh from the Main System no longer requests a nonexistent `tournament_divisions.seed` column; it now loads only the division fields used by the sync. The visible app version was bumped to `LMS-0672`.
 - PBCC next-round selection now treats every unchecked joined player as an explicit bye for that round. The planner saves those players in the round's bye list, includes the byes in standings/history, displays them in the live round, and labels them in the player-selection dialog. The visible app version was bumped to `LMS-0673`.
 - Tournament Public Display expanded mode can now be exited with Escape or a pointer click anywhere in the display, restoring the display header and its controls while returning the display to the top. Court Detail and Courts Only now render the `vs` separator in contrasting blue text for better distance viewing. The visible app version was bumped to `LMS-0675`.
+- Tournament Public Display expanded mode now waits for the next pointer interaction before restoring the header, so activating Expand Display does not immediately undo itself as its own click finishes bubbling. The visible app version was bumped to `LMS-0676`.
 - PBCC final match-night result texts now list each player by first name and last initial with only their win-loss record and bye count; points, point differential, rank, and ladder-position details are omitted.

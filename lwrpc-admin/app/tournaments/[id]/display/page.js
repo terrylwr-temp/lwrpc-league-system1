@@ -98,16 +98,16 @@ export default function TournamentDisplayPage() {
       exitExpandedDisplay();
     }
 
-    function exitExpandedDisplayOnClick(event) {
-      if (event.detail === 0) return;
+    function exitExpandedDisplayOnPointerDown(event) {
+      if (event.button !== 0) return;
       exitExpandedDisplay();
     }
 
     window.addEventListener("keydown", handleExpandedDisplayEscape);
-    window.addEventListener("click", exitExpandedDisplayOnClick);
+    window.addEventListener("pointerdown", exitExpandedDisplayOnPointerDown);
     return () => {
       window.removeEventListener("keydown", handleExpandedDisplayEscape);
-      window.removeEventListener("click", exitExpandedDisplayOnClick);
+      window.removeEventListener("pointerdown", exitExpandedDisplayOnPointerDown);
     };
   }, [headerHidden]);
 
