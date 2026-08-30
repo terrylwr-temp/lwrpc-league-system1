@@ -88,14 +88,27 @@ export default function TournamentDisplayPage() {
   useEffect(() => {
     if (!headerHidden) return undefined;
 
-    function exitExpandedDisplay(event) {
-      if (event.key !== "Escape") return;
-      event.preventDefault();
+    function exitExpandedDisplay() {
       setHeaderHidden(false);
     }
 
-    window.addEventListener("keydown", exitExpandedDisplay);
-    return () => window.removeEventListener("keydown", exitExpandedDisplay);
+    function handleExpandedDisplayEscape(event) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      exitExpandedDisplay();
+    }
+
+    function exitExpandedDisplayOnClick(event) {
+      if (event.detail === 0) return;
+      exitExpandedDisplay();
+    }
+
+    window.addEventListener("keydown", handleExpandedDisplayEscape);
+    window.addEventListener("click", exitExpandedDisplayOnClick);
+    return () => {
+      window.removeEventListener("keydown", handleExpandedDisplayEscape);
+      window.removeEventListener("click", exitExpandedDisplayOnClick);
+    };
   }, [headerHidden]);
 
   const standings = useMemo(
@@ -230,7 +243,7 @@ export default function TournamentDisplayPage() {
                     <>
                       <h2 className="mt-2 text-xl font-black leading-tight text-slate-950 sm:text-2xl">
                         <span>{match.home_team?.name || "Home"}</span>{" "}
-                        <span className="font-black uppercase tracking-wide text-blue-700">vs</span>{" "}
+                        <span className="font-black tracking-wide text-blue-700">vs</span>{" "}
                         <span>{match.away_team?.name || "Away"}</span>
                       </h2>
                       {view === "courtsDetail" && (
@@ -376,8 +389,8 @@ function TournamentDisplayControls({ view, rotating, setView, setRotating, tourn
       <button
         type="button"
         onClick={onHideHeader}
-        aria-label="Enter expanded display mode; press Escape to restore the display header"
-        title="Expand display (Esc restores controls)"
+        aria-label="Enter expanded display mode; click anywhere or press Escape to restore the display header"
+        title="Expand display (click anywhere or press Esc to restore controls)"
         className="col-start-4 row-span-2 row-start-1 flex size-10 items-center justify-center self-center rounded-xl border border-white/20 bg-white/10 text-lg font-black leading-none text-white hover:bg-white/20"
       >
         <span aria-hidden="true">⌃</span>
