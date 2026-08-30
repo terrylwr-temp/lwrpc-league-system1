@@ -230,7 +230,7 @@ export default function TournamentDisplayPage() {
                     <>
                       <h2 className="mt-2 text-xl font-black leading-tight text-slate-950 sm:text-2xl">
                         <span>{match.home_team?.name || "Home"}</span>{" "}
-                        <span className="inline-flex rounded-full bg-blue-700 px-2 py-0.5 text-sm font-black uppercase tracking-wide text-white shadow-sm sm:text-base">vs</span>{" "}
+                        <span className="font-black uppercase tracking-wide text-blue-700">vs</span>{" "}
                         <span>{match.away_team?.name || "Away"}</span>
                       </h2>
                       {view === "courtsDetail" && (
