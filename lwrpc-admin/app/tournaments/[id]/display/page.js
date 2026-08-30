@@ -85,6 +85,19 @@ export default function TournamentDisplayPage() {
     view,
   });
 
+  useEffect(() => {
+    if (!headerHidden) return undefined;
+
+    function exitExpandedDisplay(event) {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setHeaderHidden(false);
+    }
+
+    window.addEventListener("keydown", exitExpandedDisplay);
+    return () => window.removeEventListener("keydown", exitExpandedDisplay);
+  }, [headerHidden]);
+
   const standings = useMemo(
     () => standingsByDivision(state?.matches || [], state?.teams || [], state?.divisions || [], state?.tournament?.settings || {}),
     [state]
@@ -216,7 +229,9 @@ export default function TournamentDisplayPage() {
                   {match ? (
                     <>
                       <h2 className="mt-2 text-xl font-black leading-tight text-slate-950 sm:text-2xl">
-                        {match.home_team?.name || "Home"} vs {match.away_team?.name || "Away"}
+                        <span>{match.home_team?.name || "Home"}</span>{" "}
+                        <span className="inline-flex rounded-full bg-blue-700 px-2 py-0.5 text-sm font-black uppercase tracking-wide text-white shadow-sm sm:text-base">vs</span>{" "}
+                        <span>{match.away_team?.name || "Away"}</span>
                       </h2>
                       {view === "courtsDetail" && (
                         <div className="mt-4 grid grid-cols-1 gap-2 text-sm font-semibold text-slate-700">
@@ -361,8 +376,8 @@ function TournamentDisplayControls({ view, rotating, setView, setRotating, tourn
       <button
         type="button"
         onClick={onHideHeader}
-        aria-label="Hide display header"
-        title="Hide display header"
+        aria-label="Enter expanded display mode; press Escape to restore the display header"
+        title="Expand display (Esc restores controls)"
         className="col-start-4 row-span-2 row-start-1 flex size-10 items-center justify-center self-center rounded-xl border border-white/20 bg-white/10 text-lg font-black leading-none text-white hover:bg-white/20"
       >
         <span aria-hidden="true">⌃</span>
