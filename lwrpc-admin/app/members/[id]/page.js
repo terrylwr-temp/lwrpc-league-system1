@@ -17,7 +17,7 @@ import { hasRole } from "../../lib/permissions";
 import { hasAnotherCommissioner } from "../../lib/roleGuards";
 import { confirmUnsavedChanges, useUnsavedChangesWarning } from "../../lib/useUnsavedChangesWarning";
 import { filterHistoryRows, sortHistoryRows } from "../../lib/playHistory";
-import { appConfirm, appPrompt } from "../../lib/appDialog";
+import { appConfirm, appNotice, appPrompt } from "../../lib/appDialog";
 
 export default function MemberDetailPage() {
   const { id } = useParams();
@@ -513,7 +513,7 @@ async function updateUserRole(newRole) {
   }
 }
 
-async function updateMemberActiveStatus(nextIsActive) {
+  async function updateMemberActiveStatus(nextIsActive) {
   if (!nextIsActive) {
     const ok = await appConfirm({
       title: "Deactivate member",
@@ -544,8 +544,59 @@ async function updateMemberActiveStatus(nextIsActive) {
     return;
   }
 
-  setMemberFormFromRow(data);
-}
+    setMemberFormFromRow(data);
+  }
+
+  async function deleteInactiveMember() {
+    if (memberIsActive || saving) return;
+
+    const typed = await appPrompt({
+      title: "Permanently delete member",
+      message: [
+        `This permanently deletes ${memberDisplayName}, their ratings, roster assignments, match-line history, saved lineups, roles, and other member-linked records.`,
+        "",
+        "This cannot be undone. Type DELETE to continue.",
+      ].join("\n"),
+      inputLabel: "Type DELETE to confirm",
+      requiredValue: "DELETE",
+      confirmLabel: "Delete member",
+      tone: "error",
+    });
+
+    if (String(typed || "").trim() !== "DELETE") return;
+
+    setSaving(true);
+
+    try {
+      const response = await fetch("/api/admin/delete-member", {
+        method: "POST",
+        headers: await getRequestAuthorizationHeaders({
+          "Content-Type": "application/json",
+        }),
+        body: JSON.stringify({ memberId: id }),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.error || "Unable to permanently delete this member.");
+      }
+
+      const cleanupNote = result.cleanupWarnings?.length
+        ? `\n\nNote: ${result.cleanupWarnings.join(" ")}`
+        : "";
+      await appNotice({
+        title: "Member permanently deleted",
+        message: `${memberDisplayName} and their member-linked data have been permanently deleted.${cleanupNote}`,
+        confirmLabel: "Return to members",
+        tone: "success",
+      });
+      router.replace("/members");
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setSaving(false);
+    }
+  }
 
 function openTeamPlayHistory(team) {
   if (!team?.id) return;
@@ -951,21 +1002,34 @@ function printCurrentHistory() {
                           <div className="mt-1 text-sm text-red-800">
                             {memberIsActive
                               ? "Deactivate this member to hide them from normal member, roster, and rating workflows."
-                              : "Reactivate this member to return them to normal member, roster, and rating workflows."}
+                              : "Reactivate this member to return them to normal member, roster, and rating workflows. You can also permanently delete the inactive member and their member-linked history."}
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => updateMemberActiveStatus(!memberIsActive)}
-                          disabled={saving}
-                          className={`rounded-xl px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60 ${
-                            memberIsActive
-                              ? "bg-red-700 hover:bg-red-800"
-                              : "bg-green-700 hover:bg-green-800"
-                          }`}
-                        >
-                          {memberIsActive ? "Deactivate" : "Reactivate"}
-                        </button>
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => updateMemberActiveStatus(!memberIsActive)}
+                            disabled={saving}
+                            className={`rounded-xl px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60 ${
+                              memberIsActive
+                                ? "bg-red-700 hover:bg-red-800"
+                                : "bg-green-700 hover:bg-green-800"
+                            }`}
+                          >
+                            {memberIsActive ? "Deactivate" : "Reactivate"}
+                          </button>
+
+                          {!memberIsActive && (
+                            <button
+                              type="button"
+                              onClick={deleteInactiveMember}
+                              disabled={saving}
+                              className="rounded-xl bg-red-950 px-4 py-2 text-sm font-bold text-white hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                              Delete Member
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )}
