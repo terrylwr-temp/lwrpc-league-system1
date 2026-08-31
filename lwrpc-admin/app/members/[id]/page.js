@@ -693,6 +693,17 @@ function printCurrentHistory() {
               >
                 Show Player History
               </button>
+
+              {!memberIsActive && (
+                <button
+                  type="button"
+                  onClick={deleteInactiveMember}
+                  disabled={saving}
+                  className="rounded-xl bg-red-950 px-4 py-2 font-semibold text-white hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Delete Member
+                </button>
+              )}
             </>
           ) : (
             <>
@@ -1002,34 +1013,21 @@ function printCurrentHistory() {
                           <div className="mt-1 text-sm text-red-800">
                             {memberIsActive
                               ? "Deactivate this member to hide them from normal member, roster, and rating workflows."
-                              : "Reactivate this member to return them to normal member, roster, and rating workflows. You can also permanently delete the inactive member and their member-linked history."}
+                              : "Reactivate this member to return them to normal member, roster, and rating workflows."}
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => updateMemberActiveStatus(!memberIsActive)}
-                            disabled={saving}
-                            className={`rounded-xl px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60 ${
-                              memberIsActive
-                                ? "bg-red-700 hover:bg-red-800"
-                                : "bg-green-700 hover:bg-green-800"
-                            }`}
-                          >
-                            {memberIsActive ? "Deactivate" : "Reactivate"}
-                          </button>
-
-                          {!memberIsActive && (
-                            <button
-                              type="button"
-                              onClick={deleteInactiveMember}
-                              disabled={saving}
-                              className="rounded-xl bg-red-950 px-4 py-2 text-sm font-bold text-white hover:bg-red-900 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                              Delete Member
-                            </button>
-                          )}
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => updateMemberActiveStatus(!memberIsActive)}
+                          disabled={saving}
+                          className={`rounded-xl px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60 ${
+                            memberIsActive
+                              ? "bg-red-700 hover:bg-red-800"
+                              : "bg-green-700 hover:bg-green-800"
+                          }`}
+                        >
+                          {memberIsActive ? "Deactivate" : "Reactivate"}
+                        </button>
                       </div>
                     </div>
                   )}
