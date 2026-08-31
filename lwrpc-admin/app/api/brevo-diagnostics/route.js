@@ -53,6 +53,27 @@ function envSummary(name) {
   };
 }
 
+function smsSenderCheck(sender, apiKey) {
+  if (!apiKey || !sender) {
+    return {
+      ok: false,
+      message: "Missing BREVO_API_KEY or BREVO_SMS_SENDER.",
+    };
+  }
+
+  if (/^\d{1,15}$/.test(sender) || /^[A-Za-z0-9]{1,11}$/.test(sender)) {
+    return {
+      ok: true,
+      message: "The configured sender has a valid Brevo SMS format. Send a test text to confirm it is registered and approved in Brevo.",
+    };
+  }
+
+  return {
+    ok: false,
+    message: "BREVO_SMS_SENDER must be a numeric sender (up to 15 digits) or an alphanumeric sender ID (up to 11 letters/numbers).",
+  };
+}
+
 async function checkBrevoSender(apiKey, fromEmail) {
   if (!apiKey || !fromEmail) return { checked: false, ok: false, status: null, message: "Missing BREVO_API_KEY or BREVO_FROM_EMAIL." };
   const response = await fetch("https://api.brevo.com/v3/senders", {
@@ -83,12 +104,18 @@ export async function GET(req) {
     const apiKey = String(process.env.BREVO_API_KEY || "").trim();
     const fromEmail = String(process.env.BREVO_FROM_EMAIL || "").trim();
     const replyToEmail = String(process.env.BREVO_REPLY_TO_EMAIL || "").trim();
+    const smsSender = String(process.env.BREVO_SMS_SENDER || "").trim();
+    const smsOrganizationPrefix = String(process.env.BREVO_SMS_ORGANIZATION_PREFIX || "").trim();
     return NextResponse.json({
       success: true,
       fromEmail,
       replyToEmail,
+      smsSender,
+      smsOrganizationPrefix,
       variables: [envSummary("BREVO_API_KEY"), envSummary("BREVO_FROM_EMAIL"), envSummary("BREVO_FROM_NAME"), envSummary("BREVO_REPLY_TO_EMAIL")],
+      smsVariables: [envSummary("BREVO_API_KEY"), envSummary("BREVO_SMS_SENDER"), envSummary("BREVO_SMS_ORGANIZATION_PREFIX")],
       brevoSenderCheck: await checkBrevoSender(apiKey, fromEmail),
+      brevoSmsSenderCheck: smsSenderCheck(smsSender, apiKey),
     });
   } catch (error) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });

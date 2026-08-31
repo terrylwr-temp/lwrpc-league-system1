@@ -18,20 +18,19 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Notification Delivery
 
-The app sends SMS through Twilio Programmable Messaging and transactional email through Brevo.
+The app sends transactional email and SMS through Brevo, using the same API key for both.
 
 Add these values to `.env.local`:
 
 ```bash
-TWILIO_ACCOUNT_SID=your_twilio_account_sid
-TWILIO_AUTH_TOKEN=your_twilio_auth_token
-TWILIO_FROM_PHONE_NUMBER=+15551234567
-# or use TWILIO_MESSAGING_SERVICE_SID instead of TWILIO_FROM_PHONE_NUMBER
-
 BREVO_API_KEY=your_brevo_api_key
 BREVO_FROM_EMAIL=verified-sender@example.com
 BREVO_FROM_NAME=LWRPC League Management
 BREVO_REPLY_TO_EMAIL=info@lwrpickleballclub.com
+# An approved Brevo sender: numeric (up to 15 digits) or alphanumeric (up to 11 letters/numbers).
+BREVO_SMS_SENDER=LWRPC
+# Recommended for US messages; use your Brevo-approved organization prefix.
+BREVO_SMS_ORGANIZATION_PREFIX=LWRPC
 ```
 
 Restart `npm run dev` after changing `.env.local`.

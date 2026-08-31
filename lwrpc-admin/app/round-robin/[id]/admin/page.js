@@ -4954,7 +4954,7 @@ function SmsTab({ state, latestSession, runAction, actionLoading }) {
     <section className="mt-4 w-full rounded-lg border border-white/80 bg-white/95 p-4 shadow-[0_18px_48px_-36px_rgba(15,23,42,0.75)]">
       <h2 className="text-xl font-black">Text Players</h2>
       <p className="mt-1 text-sm font-semibold text-slate-500">
-        PBCC texts use PBCourtCommand app notifications when available, then Twilio SMS fallback. Match texts use the selected match recipients; New Player texts are sent when active saved players are added and can be sent to every active saved player in a selected group for launch.
+        PBCC texts use PBCourtCommand app notifications when available, then Brevo SMS fallback. Match texts use the selected match recipients; New Player texts are sent when active saved players are added and can be sent to every active saved player in a selected group for launch.
       </p>
       <div className="mt-3 grid grid-cols-1 gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 lg:grid-cols-[minmax(16rem,1fr)_minmax(16rem,1fr)_auto] lg:items-end">
         <label className="block text-sm font-bold text-slate-600">

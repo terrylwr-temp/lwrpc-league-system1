@@ -111,11 +111,11 @@ Display dates/times should use `app/lib/dateTime.js` helpers so dates render as 
 
 League setup now supports a `leagues.rosters_locked` flag. When enabled, captains can view rosters but only `league_manager` and `commissioner` roles can add or remove roster players.
 
-Scoring reminders use the existing notification route and SendGrid/Twilio helper stack. The scoring reminder email template can be stored in `notification_templates` when the schema update has been applied, with browser local storage as a fallback.
+Scoring reminders use the existing notification route and Brevo helper stack. The scoring reminder email template can be stored in `notification_templates` when the schema update has been applied, with browser local storage as a fallback.
 
-Notifications use server-only environment variables for Twilio Programmable Messaging and Twilio SendGrid. Required SMS vars are `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, and either `TWILIO_FROM_PHONE_NUMBER` or `TWILIO_MESSAGING_SERVICE_SID`. Required email vars are `SENDGRID_API_KEY` and `SENDGRID_FROM_EMAIL`; `SENDGRID_FROM_NAME` defaults to Lakewood Ranch Pickleball Club. Keep actual secret values in Vercel/server environment settings, not committed files.
+Notifications use server-only Brevo environment variables. `BREVO_API_KEY` is shared by email and SMS; SMS also requires a Brevo-approved `BREVO_SMS_SENDER` and may include `BREVO_SMS_ORGANIZATION_PREFIX` for US delivery. Email requires `BREVO_FROM_EMAIL`; `BREVO_FROM_NAME` defaults to Lakewood Ranch Pickleball Club. Keep actual secret values in Vercel/server environment settings, not committed files.
 
-The Admin Dashboard includes a Notification Test panel that sends test email and/or SMS messages through `/api/notifications`, using the same SendGrid and Twilio environment variables as live score reminder workflows.
+The Admin Dashboard includes a Notification Test panel that sends test email and/or SMS messages through `/api/notifications`, using the same Brevo environment variables as live score reminder workflows.
 
 Print workflows should use the generic `/print` page so print previews open on an app URL and include the LWRPC copyright/page footer inside the document. Browser print dialogs may still show their own headers/footers unless disabled by the user.
 
@@ -175,8 +175,8 @@ As of 2026-05-21:
 
 ## Known Issues And Cleanup
 
-1. Reconcile notification documentation and implementation.
-   The README mentions Twilio and SendGrid, while the app dependency list includes `resend` and `.env.local` uses `RESEND_API_KEY`. Confirm the intended provider stack and update code/docs accordingly.
+1. Keep notification delivery configuration current.
+   Brevo delivers both email and SMS. Keep its API key and sender configuration server-only.
 
 2. Replace default Next.js README content.
    `lwrpc-admin/README.md` still contains mostly default create-next-app text. It should become project-specific setup and operations documentation.
@@ -203,7 +203,7 @@ As of 2026-05-21:
 ### Phase 2: Reliability Pass
 
 - Keep lint at zero warnings as new pages are added.
-- Confirm notification provider implementation.
+- Keep Brevo sender registrations and US SMS compliance current.
 - Add smoke tests for critical pages or workflows.
 - Add unit-level coverage for scoring and standings helpers where possible.
 - Check all role-gated pages for consistent unauthorized handling.
@@ -244,7 +244,7 @@ As of 2026-05-21:
 1. Rewrite `C:\lwrpc-league-system\lwrpc-admin\README.md`.
 2. Create `C:\lwrpc-league-system\docs\supabase-schema.md`.
 3. Fix lint warnings in small batches.
-4. Confirm the intended email/SMS notification provider.
+4. Keep Brevo sender registrations and US SMS compliance current.
 5. Add a release checklist for league season launch.
 
 ## Development Notes For Codex
@@ -465,4 +465,5 @@ As of 2026-05-21:
 - Tournament Public Display expanded mode now waits for the next pointer interaction before restoring the header, so activating Expand Display does not immediately undo itself as its own click finishes bubbling. The visible app version was bumped to `LMS-0676`.
 - Member Detail now offers a typed-confirmation **Delete Member** action only for inactive members. It calls a service-role-protected, atomic database function that removes member-linked records and match-line/game history, preserves shared team/location/match records without the deleted member's attribution, then removes eligible profile photos and login accounts. Apply `lwrpc-admin/supabase-delete-inactive-member.sql` before deploying. The visible app version was bumped to `LMS-0677`.
 - Member Detail now places **Delete Member** beside **Show Player History** whenever the viewed member is inactive, making the permanent-action entry point easier to find while retaining its typed confirmation. The visible app version was bumped to `LMS-0678`.
+- LMS, Tournament, and PBCC now share Brevo transactional SMS delivery through `sendSmsMessages`, reusing `BREVO_API_KEY` from email and requiring a Brevo-approved `BREVO_SMS_SENDER`; PBCC retains its push-first fallback behavior. Email Options now includes a Brevo SMS configuration check and the visible app version was bumped to `LMS-0679`.
 - PBCC final match-night result texts now list each player by first name and last initial with only their win-loss record and bye count; points, point differential, rank, and ladder-position details are omitted.

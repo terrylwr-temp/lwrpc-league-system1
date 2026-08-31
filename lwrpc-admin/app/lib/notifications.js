@@ -10,14 +10,69 @@ function normalizePhoneNumber(value) {
   return normalizeAppNotificationPhone(value);
 }
 
-function twilioAuthHeader() {
-  return `Basic ${Buffer.from(
-    `${process.env.TWILIO_ACCOUNT_SID}:${process.env.TWILIO_AUTH_TOKEN}`
-  ).toString("base64")}`;
+function brevoSmsConfiguration() {
+  return {
+    apiKey: String(process.env.BREVO_API_KEY || "").trim(),
+    sender: String(process.env.BREVO_SMS_SENDER || "").trim(),
+    organizationPrefix: String(process.env.BREVO_SMS_ORGANIZATION_PREFIX || "").trim(),
+  };
 }
 
-function twilioFromPhoneNumber() {
-  return normalizePhoneNumber(process.env.TWILIO_FROM_PHONE_NUMBER);
+function brevoSmsSenderIsValid(sender) {
+  return /^\d{1,15}$/.test(sender) || /^[A-Za-z0-9]{1,11}$/.test(sender);
+}
+
+async function sendBrevoSms(recipient, body, { apiKey, sender, organizationPrefix }) {
+  try {
+    const response = await fetch("https://api.brevo.com/v3/transactionalSMS/send", {
+      method: "POST",
+      headers: {
+        "api-key": apiKey,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        recipient,
+        sender,
+        content: body,
+        type: "transactional",
+        ...(organizationPrefix ? { organizationPrefix } : {}),
+      }),
+    });
+    const data = await response.json().catch(() => ({}));
+
+    return {
+      to: recipient,
+      ok: response.ok,
+      status: response.status,
+      messageId: data.messageId || null,
+      error: response.ok ? null : data.message || data.code || "SMS send failed",
+    };
+  } catch (error) {
+    return {
+      to: recipient,
+      ok: false,
+      status: null,
+      messageId: null,
+      error: error instanceof Error ? error.message : "SMS send failed",
+    };
+  }
+}
+
+async function sendBrevoSmsMessages(recipients, body, configuration) {
+  const results = new Array(recipients.length);
+  let nextRecipientIndex = 0;
+  const workerCount = Math.min(5, recipients.length);
+
+  await Promise.all(Array.from({ length: workerCount }, async () => {
+    while (nextRecipientIndex < recipients.length) {
+      const index = nextRecipientIndex;
+      nextRecipientIndex += 1;
+      results[index] = await sendBrevoSms(recipients[index], body, configuration);
+    }
+  }));
+
+  return results;
 }
 
 function appendSmsSuffix(body, suffix) {
@@ -64,10 +119,12 @@ export async function sendSmsMessages({ phones, body, preferAppNotifications = f
     };
   }
 
-  if (!process.env.TWILIO_ACCOUNT_SID || !process.env.TWILIO_AUTH_TOKEN) {
+  const brevoConfiguration = brevoSmsConfiguration();
+
+  if (!brevoConfiguration.apiKey || !brevoConfiguration.sender) {
     return {
       skipped: (appResult.sent || 0) === 0,
-      reason: "Missing TWILIO_ACCOUNT_SID or TWILIO_AUTH_TOKEN",
+      reason: "Missing BREVO_API_KEY or BREVO_SMS_SENDER",
       sent: appResult.sent || 0,
       smsSent: 0,
       appSent: appResult.sent || 0,
@@ -76,12 +133,10 @@ export async function sendSmsMessages({ phones, body, preferAppNotifications = f
     };
   }
 
-  const fromPhoneNumber = twilioFromPhoneNumber();
-
-  if (!fromPhoneNumber && !process.env.TWILIO_MESSAGING_SERVICE_SID) {
+  if (!brevoSmsSenderIsValid(brevoConfiguration.sender)) {
     return {
       skipped: (appResult.sent || 0) === 0,
-      reason: "Missing TWILIO_FROM_PHONE_NUMBER or TWILIO_MESSAGING_SERVICE_SID",
+      reason: "BREVO_SMS_SENDER must be a numeric sender (up to 15 digits) or an alphanumeric sender ID (up to 11 letters/numbers).",
       sent: appResult.sent || 0,
       smsSent: 0,
       appSent: appResult.sent || 0,
@@ -90,40 +145,7 @@ export async function sendSmsMessages({ phones, body, preferAppNotifications = f
     };
   }
 
-  const url = `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_ACCOUNT_SID}/Messages.json`;
-
-  const results = await Promise.all(
-    smsRecipients.map(async (to) => {
-      const payload = new URLSearchParams({
-        To: to,
-        Body: smsBody,
-      });
-
-      if (process.env.TWILIO_MESSAGING_SERVICE_SID) {
-        payload.set("MessagingServiceSid", process.env.TWILIO_MESSAGING_SERVICE_SID);
-      } else {
-        payload.set("From", fromPhoneNumber);
-      }
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: twilioAuthHeader(),
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: payload,
-      });
-
-      const data = await response.json().catch(() => ({}));
-
-      return {
-        to,
-        ok: response.ok,
-        sid: data.sid || null,
-        error: response.ok ? null : data.message || "SMS send failed",
-      };
-    })
-  );
+  const results = await sendBrevoSmsMessages(smsRecipients, smsBody, brevoConfiguration);
 
   return {
     skipped: false,
