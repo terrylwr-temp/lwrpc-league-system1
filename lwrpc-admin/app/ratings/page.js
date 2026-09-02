@@ -46,6 +46,7 @@ export default function RatingsPage() {
   const [showNrAgeOnly, setShowNrAgeOnly] = useState(false);
   const [showInvalidDuprIdsOnly, setShowInvalidDuprIdsOnly] = useState(false);
   const [showOutsideTeamDuprRangeOnly, setShowOutsideTeamDuprRangeOnly] = useState(false);
+  const [showNewMembersOnly, setShowNewMembersOnly] = useState(false);
   const [showDuprFilterTools, setShowDuprFilterTools] = useState(false);
   const [showRatingImportTools, setShowRatingImportTools] = useState(false);
   const [memberSort, setMemberSort] = useState({
@@ -1141,13 +1142,14 @@ export default function RatingsPage() {
     setShowNrAgeOnly(false);
     setShowInvalidDuprIdsOnly(false);
     setShowOutsideTeamDuprRangeOnly(false);
+    setShowNewMembersOnly(false);
     setShowDuprFilterTools(false);
     setShowRatingImportTools(false);
   }, [isMobileRatingsView]);
 
   useEffect(() => {
     setPage(1);
-  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly, showInvalidDuprIdsOnly, showOutsideTeamDuprRangeOnly]);
+  }, [search, selectedSeason, showCurrentRosterOnly, showMissingDoublesOnly, showNrDoublesOnly, showNrAgeOnly, showInvalidDuprIdsOnly, showOutsideTeamDuprRangeOnly, showNewMembersOnly]);
 
   useEffect(() => {
     if (!requestedMemberId || loading) return;
@@ -1159,6 +1161,7 @@ export default function RatingsPage() {
     setShowNrAgeOnly(false);
     setShowInvalidDuprIdsOnly(false);
     setShowOutsideTeamDuprRangeOnly(false);
+    setShowNewMembersOnly(false);
     setMemberSort({ field: "name", direction: "asc" });
   }, [loading, requestedMemberId]);
 
@@ -1240,6 +1243,14 @@ export default function RatingsPage() {
       nextMembers = nextMembers.filter((member) => outsideTeamDuprRangeMemberIds.has(String(member.id)));
     }
 
+    if (showNewMembersOnly) {
+      const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      nextMembers = nextMembers.filter((member) => {
+        const createdAt = new Date(member.created_at).getTime();
+        return !Number.isNaN(createdAt) && createdAt >= oneWeekAgo;
+      });
+    }
+
     if (q) {
       nextMembers = nextMembers.filter((member) => {
       const fullName = `${member.first_name || ""} ${member.last_name || ""}`;
@@ -1273,7 +1284,7 @@ export default function RatingsPage() {
 
       return memberSort.direction === "desc" ? -result : result;
     });
-  }, [compareRatingValues, currentRosterMemberIds, hasDoublesRating, hasNumericRating, memberSort, members, outsideTeamDuprRangeMemberIds, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNrAgeOnly, showNrDoublesOnly, showOutsideTeamDuprRangeOnly]);
+  }, [compareRatingValues, currentRosterMemberIds, hasDoublesRating, hasNumericRating, memberSort, members, outsideTeamDuprRangeMemberIds, search, showCurrentRosterOnly, showInvalidDuprIdsOnly, showMissingDoublesOnly, showNewMembersOnly, showNrAgeOnly, showNrDoublesOnly, showOutsideTeamDuprRangeOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredMembers.length / PAGE_SIZE));
 
@@ -1427,6 +1438,7 @@ function goToPage(value) {
                   setShowNrAgeOnly(false);
                   setShowInvalidDuprIdsOnly(false);
                   setShowOutsideTeamDuprRangeOnly(false);
+                  setShowNewMembersOnly(false);
                   setPage(1);
                 }}
                 className="w-full rounded-xl bg-slate-200 px-4 py-3 font-semibold hover:bg-slate-300"
@@ -1443,7 +1455,7 @@ function goToPage(value) {
             <div>
               <h2 className="text-lg font-bold text-slate-900">DUPR Filters</h2>
               <p className="mt-1 text-sm text-slate-600">
-                Show players with rating data that needs review, or players whose applicable Season DUPR, Age-Based, or Self Rating is outside an active roster team&apos;s configured range.
+                Show new members, players with rating data that needs review, or players whose applicable Season DUPR, Age-Based, or Self Rating is outside an active roster team&apos;s configured range.
               </p>
             </div>
 
@@ -1506,6 +1518,18 @@ function goToPage(value) {
                 }`}
               >
                 Outside Team Rating Range
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowNewMembersOnly((value) => !value)}
+                className={`rounded-xl px-4 py-3 font-semibold ${
+                  showNewMembersOnly
+                    ? "bg-blue-700 text-white hover:bg-blue-800"
+                    : "bg-blue-100 text-blue-900 hover:bg-blue-200"
+                }`}
+              >
+                New Members
               </button>
             </div>
           </div>
