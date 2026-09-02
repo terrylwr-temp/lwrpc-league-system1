@@ -469,3 +469,4 @@ As of 2026-05-21:
 - PBCC final match-night result texts now list each player by first name and last initial with only their win-loss record and bye count; points, point differential, rank, and ladder-position details are omitted.
 - Season Ratings DUPR Filters now includes a **New Members** toggle that lists active members added in the last seven days, making their rating information easier to review. The visible app version was bumped to `LMS-0680`.
 - PBCC New Match texts now send the saved template content without automatically appending the app-notification instruction. Managers can include that instruction in the template whenever it is wanted. The visible app version was bumped to `LMS-0681`.
+- PBCC Text Template tests now force a Brevo SMS instead of using the app-notification path first, and report/log a provider failure or zero-delivery result rather than claiming that the test was sent. The visible app version was bumped to `LMS-0682`.

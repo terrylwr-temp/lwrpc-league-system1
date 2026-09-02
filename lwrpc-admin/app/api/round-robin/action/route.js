@@ -63,7 +63,7 @@ const WEEKDAY_VALUES = ["sunday", "monday", "tuesday", "wednesday", "thursday", 
 function sendSmsMessages(options) {
   return sendSmsMessagesWithFallback({
     ...options,
-    preferAppNotifications: true,
+    preferAppNotifications: options?.preferAppNotifications !== false,
     appNotificationTitle: "PBCourtCommand",
     appNotificationUrl: options?.appNotificationUrl || options?.publicUrl || "/pbcc/player",
     appNotificationIcon: "/favicon.ico",
@@ -2363,15 +2363,20 @@ async function sendTestTemplateText(supabase, group, body) {
     : renderSmsTemplate(template, { group, publicUrl: body.publicUrl });
   const smsEnabled = body.smsEnabled === true && group.settings?.smsSendingEnabled === true;
   const sms = smsEnabled
-    ? await sendSmsMessages({ phones: [phone], body: message })
+    ? await sendSmsMessages({ phones: [phone], body: message, preferAppNotifications: false })
     : smsDisabledResult(body.smsEnabled ? "SMS disabled in settings" : "SMS disabled for testing", 1, 1);
+  const testLogMessage = !smsEnabled
+    ? `Test template text logged for ${phone}.`
+    : Number(sms.sent || 0) > 0
+      ? `Test template SMS sent to ${phone} through Brevo.`
+      : `Test template SMS was not sent to ${phone}: ${smsFailureReason(sms)}.`;
 
   await addLog(
     supabase,
     group.id,
     session?.id || null,
     "sms",
-    smsEnabled ? `Test template text sent to ${phone}.` : `Test template text logged for ${phone}.`,
+    testLogMessage,
     { sms, recipientScope: "test", recipientCount: 1, phoneCount: 1 }
   );
 
@@ -3208,6 +3213,14 @@ function validateRoundRobinMatchScore(team1Score, team2Score, settings = {}) {
   if (scoring.winBy <= 1 && highScore !== scoring.pointsToWin) return `Score must be ${roundRobinScoringLabel(scoring)}. The winning score must be exactly ${scoring.pointsToWin}.`;
   if (highScore - lowScore < scoring.winBy) return `Score must be ${roundRobinScoringLabel(scoring)}. The winner must win by at least ${scoring.winBy}.`;
   return "";
+}
+
+function smsFailureReason(sms) {
+  return String(
+    sms?.reason ||
+    sms?.results?.find((result) => result?.error)?.error ||
+    "Brevo did not accept the SMS"
+  ).trim();
 }
 
 function suggestedCourtCount(playerCount) {

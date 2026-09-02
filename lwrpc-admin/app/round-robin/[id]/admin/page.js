@@ -6558,8 +6558,12 @@ function noticeForAction(action, result) {
     return `New Player launch text sent to ${result.sms?.sent || 0} recipient${Number(result.sms?.sent || 0) === 1 ? "" : "s"}.`;
   }
   if (action === "sendTestTemplateText") {
-    if (result.sms?.skipped) return "Test template text logged. SMS is off.";
-    return "Test template text sent.";
+    if (result.sms?.skipped) return `Test template SMS was not sent: ${result.sms?.reason || "SMS is off."}`;
+    if (Number(result.sms?.sent || 0) === 0) {
+      const reason = result.sms?.reason || result.sms?.results?.find((item) => item?.error)?.error || "Brevo did not accept the SMS.";
+      return `Test template SMS was not sent: ${reason}`;
+    }
+    return "Test template SMS sent through Brevo.";
   }
   if (action === "savePlayer") {
     if (result.newPlayerTextSent) {
