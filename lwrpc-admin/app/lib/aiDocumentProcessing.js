@@ -4,6 +4,32 @@ import { aiAssistantConfig } from "./aiAssistantConfig.js";
 const MAX_CHUNK_CHARACTERS = 4_000;
 const EMBEDDING_BATCH_SIZE = 40;
 
+// PDF.js 5's legacy Node build still includes display code. In a serverless
+// deployment its optional @napi-rs/canvas dependency may not be present, even
+// though this module only asks PDF.js for text. PDF.js then evaluates
+// `new DOMMatrix()` while loading that display code. This deliberately small
+// affine-matrix compatibility class lets the text-only path load without
+// introducing a browser DOM or a canvas renderer.
+class TextExtractionDOMMatrix {
+  constructor(init = [1, 0, 0, 1, 0, 0]) {
+    const values = Array.isArray(init) || ArrayBuffer.isView(init) ? [...init] : [];
+    [this.a, this.b, this.c, this.d, this.e, this.f] = values.length >= 6
+      ? values.slice(0, 6).map(Number)
+      : [1, 0, 0, 1, 0, 0];
+    this.m11 = this.a;
+    this.m12 = this.b;
+    this.m21 = this.c;
+    this.m22 = this.d;
+    this.m41 = this.e;
+    this.m42 = this.f;
+  }
+}
+
+async function loadPdfJsForTextExtraction() {
+  if (!globalThis.DOMMatrix) globalThis.DOMMatrix = TextExtractionDOMMatrix;
+  return import("pdfjs-dist/legacy/build/pdf.mjs");
+}
+
 export function sanitizePdfFilename(value) {
   const normalized = String(value || "official-document.pdf")
     .normalize("NFKD")
@@ -25,12 +51,15 @@ export function assertPdfUpload(file, bytes, config = aiAssistantConfig) {
 }
 
 export async function extractPdfPages(bytes, config = aiAssistantConfig) {
-  const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const { getDocument } = await loadPdfJsForTextExtraction();
   const task = getDocument({
     data: new Uint8Array(bytes),
     disableWorker: true,
     isEvalSupported: false,
     stopAtErrors: false,
+    // Text extraction does not render glyphs. Prefer the server's font mapping
+    // so PDF.js does not attempt to fetch browser-style standard font assets.
+    useSystemFonts: true,
   });
   const pdf = await task.promise;
 
