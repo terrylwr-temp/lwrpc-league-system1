@@ -3,8 +3,10 @@ import test from "node:test";
 import {
   assertPdfUpload,
   chunkPdfPages,
+  extractionWarnings,
   extractPdfPages,
   loadPdfJsForTextExtraction,
+  normalizePdfTextItems,
   sanitizePdfFilename,
   searchableChunksForEmbedding,
 } from "../app/lib/aiDocumentProcessing.js";
@@ -96,6 +98,45 @@ test("rejects non-PDF file signatures", () => {
   );
 });
 
+test("normalizes structural bullets and PDF whitespace while preserving meaningful Unicode", () => {
+  const result = normalizePdfTextItems([
+    { str: "\uf0b7", fontName: "subset-symbol", transform: [10, 0, 0, 10, 90, 500], width: 5, height: 10 },
+    { str: " ", fontName: "subset-symbol", transform: [10, 0, 0, 10, 95, 500], width: 12, height: 0 },
+    { str: "Golden\u00a0Rule:\u200b Treat", fontName: "body", transform: [10, 0, 0, 10, 108, 500], width: 100, height: 10, hasEOL: true },
+    { str: "Café ™ © — ‘quoted’", fontName: "body", transform: [10, 0, 0, 10, 72, 480], width: 100, height: 10, hasEOL: true },
+  ]);
+  assert.deepEqual(result.lines, ["• Golden Rule: Treat", "Café ™ © — ‘quoted’"]);
+  assert.equal(result.diagnostics.structuralBullets, 1);
+});
+
+test("repairs only the verified broken ff ligature context and safely dehyphenates soft line breaks", () => {
+  const result = normalizePdfTextItems([
+    { str: "O", transform: [16, 0, 0, 16, 228, 655], width: 12, height: 16 },
+    { str: "Ư", fontName: "subset-heading", transform: [16, 0, 0, 16, 240, 655], width: 11, height: 16 },
+    { str: "icial Code", transform: [16, 0, 0, 16, 251, 655], width: 80, height: 16, hasEOL: true },
+    { str: "co\u00ad", transform: [12, 0, 0, 12, 72, 620], width: 15, height: 12, hasEOL: true },
+    { str: "operate", transform: [12, 0, 0, 12, 72, 604], width: 40, height: 12, hasEOL: true },
+    { str: "well-", transform: [12, 0, 0, 12, 72, 588], width: 30, height: 12, hasEOL: true },
+    { str: "known", transform: [12, 0, 0, 12, 72, 572], width: 30, height: 12, hasEOL: true },
+  ]);
+  assert.deepEqual(result.lines, ["Official Code", "cooperate", "well-", "known"]);
+  assert.equal(result.diagnostics.verifiedLigatureRepairs, 1);
+  assert.deepEqual(extractionWarnings(result.diagnostics), ["Recovered 1 verified PDF ligature mapping artifact(s). Review the affected text before activation."]);
+});
+
+test("warns rather than guessing about unrecoverable replacement, private-use, and unusual embedded glyphs", () => {
+  const result = normalizePdfTextItems([
+    { str: "Bad \ufffd glyph", transform: [12, 0, 0, 12, 72, 500], width: 60, height: 12, hasEOL: true },
+    { str: "Unknown \ue123 glyph", transform: [12, 0, 0, 12, 72, 484], width: 60, height: 12, hasEOL: true },
+    { str: "AƯB", transform: [12, 0, 0, 12, 72, 468], width: 30, height: 12, hasEOL: true },
+  ]);
+  const warnings = extractionWarnings(result.diagnostics);
+  assert.equal(result.lines[2], "AƯB");
+  assert.match(warnings.join("\n"), /replacement character/i);
+  assert.match(warnings.join("\n"), /private-use glyph/i);
+  assert.match(warnings.join("\n"), /unusual character sequence/i);
+});
+
 test("extracts text from an actual PDF on the server without browser DOM globals", async () => {
   await withoutBrowserDomGlobals(async () => {
     assert.equal(globalThis.DOMMatrix, undefined);
@@ -166,4 +207,19 @@ test("creates logical rule chunks, preserves page association, and excludes a ta
   assert.ok(embeddingInputs.every((chunk) => chunk.isSearchable));
   assert.ok(!embeddingInputs.some((chunk) => chunk.heading === "Table of Contents"));
   assert.ok(embeddingInputs.some((chunk) => chunk.ruleNumber === "4.5"));
+});
+
+test("passes normalized searchable content, not raw glyph artifacts, into logical chunks and embeddings", () => {
+  const normalized = normalizePdfTextItems([
+    { str: "CONTENTS", transform: [12, 0, 0, 12, 72, 700], width: 50, height: 12, hasEOL: true },
+    { str: "4.5 RETIRED GAMES .... 2", transform: [12, 0, 0, 12, 72, 684], width: 100, height: 12, hasEOL: true },
+    { str: "4.5 RETIRED GAMES", transform: [12, 0, 0, 12, 72, 650], width: 100, height: 12, hasEOL: true },
+    { str: "\uf0b7", fontName: "subset-symbol", transform: [12, 0, 0, 12, 72, 634], width: 5, height: 12 },
+    { str: "Record the score when play stopped.", transform: [12, 0, 0, 12, 88, 634], width: 150, height: 12, hasEOL: true },
+  ]);
+  const chunks = chunkPdfPages([{ pageNumber: 1, lines: normalized.lines }]);
+  const searchable = searchableChunksForEmbedding(chunks);
+  assert.ok(chunks.some((chunk) => chunk.heading === "Table of Contents" && chunk.isSearchable === false));
+  assert.ok(searchable.every((chunk) => !/[\uf0b7\ufffd]/.test(chunk.content)));
+  assert.ok(searchable.some((chunk) => chunk.content.includes("• Record the score")));
 });

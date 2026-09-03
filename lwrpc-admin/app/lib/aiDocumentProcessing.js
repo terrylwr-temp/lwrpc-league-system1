@@ -5,6 +5,9 @@ import { aiAssistantConfig } from "./aiAssistantConfig.js";
 const MAX_CHUNK_CHARACTERS = 1_800;
 const MIN_LOGICAL_CHUNK_CHARACTERS = 320;
 const EMBEDDING_BATCH_SIZE = 40;
+const STRUCTURAL_BULLET_GLYPHS = new Set(["\u2022", "\u25aa", "\u25cf", "\u25a0", "\u25a1", "\uf0b7"]);
+const UNUSUAL_SPACE_PATTERN = /[\u00a0\u1680\u2000-\u200a\u202f\u205f\u3000]/g;
+const ZERO_WIDTH_PATTERN = /[\u200b-\u200d\u2060\ufeff]/g;
 
 // PDF.js 5's legacy Node build still includes display code. In a serverless
 // deployment its optional @napi-rs/canvas dependency may not be present, even
@@ -74,32 +77,148 @@ export async function extractPdfPages(bytes, config = aiAssistantConfig) {
   }
 
   const pages = [];
+  const diagnostics = createExtractionDiagnostics();
   for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
     const page = await pdf.getPage(pageNumber);
     const content = await page.getTextContent();
-    const lines = textLines(content.items || []);
+    const lines = textLines(content.items || [], diagnostics);
     const text = lines.join("\n").trim();
     if (text) pages.push({ pageNumber, lines, text });
   }
 
   await task.destroy();
   if (pages.length === 0) throw new Error("No readable text was found in this PDF. A text-based official PDF is required.");
-  return { pageCount: pdf.numPages, pages };
+  return { pageCount: pdf.numPages, pages, warnings: extractionWarnings(diagnostics), diagnostics };
 }
 
-function textLines(items) {
+export function normalizePdfTextItems(items, diagnostics = createExtractionDiagnostics()) {
   const lines = [];
-  let current = "";
-  for (const item of items) {
-    const value = String(item?.str || "").replace(/\s+/g, " ").trim();
-    if (value) current = current ? `${current} ${value}` : value;
+  let currentItems = [];
+  for (const item of items || []) {
+    currentItems.push(item || {});
     if (item?.hasEOL) {
-      if (current) lines.push(current);
-      current = "";
+      flush();
     }
   }
-  if (current) lines.push(current);
-  return lines;
+  flush();
+  return { lines: safelyDehyphenateLines(lines), diagnostics };
+
+  function flush() {
+    const line = reconstructVisualLine(currentItems, diagnostics);
+    if (line.text) lines.push(line);
+    currentItems = [];
+  }
+}
+
+function textLines(items, diagnostics) {
+  return normalizePdfTextItems(items, diagnostics).lines;
+}
+
+function reconstructVisualLine(items, diagnostics) {
+  let text = "";
+  let previous = null;
+  let trailingSoftHyphen = false;
+  for (let index = 0; index < items.length; index += 1) {
+    const item = items[index] || {};
+    const raw = String(item.str || "");
+    if (!raw) continue;
+    const structuralBullet = text.trim().length === 0 && isStructuralBulletItem(item, items.slice(index + 1));
+    const normalized = normalizeRawPdfText(raw, diagnostics, structuralBullet);
+    if (!normalized) continue;
+    if (text && needsInjectedSpace(previous, item, text, normalized)) text += " ";
+    text += normalized;
+    trailingSoftHyphen = /\u00ad\s*$/.test(normalized);
+    previous = item;
+  }
+  const repaired = repairVerifiedLigatureArtifact(text, diagnostics)
+    .replace(/\u00ad/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+  observeSuspiciousText(repaired, diagnostics);
+  return { text: repaired, trailingSoftHyphen };
+}
+
+function normalizeRawPdfText(value, diagnostics, structuralBullet) {
+  if (structuralBullet) {
+    diagnostics.structuralBullets += 1;
+    return "•";
+  }
+  const replacements = (value.match(/\ufffd/g) || []).length;
+  diagnostics.replacementCharacters += replacements;
+  return value
+    .replace(UNUSUAL_SPACE_PATTERN, " ")
+    .replace(ZERO_WIDTH_PATTERN, "");
+}
+
+function isStructuralBulletItem(item, followingItems) {
+  const glyph = String(item?.str || "").trim();
+  if (!STRUCTURAL_BULLET_GLYPHS.has(glyph)) return false;
+  const nextItem = (followingItems || []).find((candidate) => String(candidate?.str || "").trim());
+  const next = String(nextItem?.str || "").trim();
+  if (!next) return false;
+  const y = Number(item?.transform?.[5]);
+  const nextY = Number(nextItem?.transform?.[5]);
+  return Number.isFinite(y) && Number.isFinite(nextY) && Math.abs(y - nextY) < 0.5;
+}
+
+function needsInjectedSpace(previous, item, existingText, value) {
+  if (!previous || /\s$/.test(existingText) || /^\s/.test(value)) return false;
+  const previousEnd = Number(previous?.transform?.[4]) + Number(previous?.width || 0);
+  const nextStart = Number(item?.transform?.[4]);
+  const fontSize = Math.max(Number(previous?.height || 0), Number(item?.height || 0), 1);
+  if (!Number.isFinite(previousEnd) || !Number.isFinite(nextStart)) return true;
+  // Adjacent PDF text runs with a negligible gap are one word (for example,
+  // the three runs that form "O" + bad ligature + "icial").
+  return nextStart - previousEnd > Math.max(1.25, fontSize * 0.14);
+}
+
+function repairVerifiedLigatureArtifact(text, diagnostics) {
+  // The Code of Conduct source maps its visual `ff` ligature to U+01AF in
+  // its ToUnicode table. Restrict repair to the impossible-in-English run
+  // o/U+01AF/i so legitimate U+01AF characters remain untouched elsewhere.
+  const repaired = text.replace(/([oO])\u01af(?=[iI])/g, "$1ff");
+  const count = [...text.matchAll(/([oO])\u01af(?=[iI])/g)].length;
+  diagnostics.verifiedLigatureRepairs += count;
+  return repaired;
+}
+
+function safelyDehyphenateLines(lines) {
+  const output = [];
+  for (const line of lines) {
+    const previous = output[output.length - 1];
+    // A soft hyphen is inserted solely as a layout break. A regular hyphen is
+    // not safe to remove without guessing official language, so it is kept.
+    if (previous?.trailingSoftHyphen && /^[a-z]/.test(line.text)) {
+      previous.text = `${previous.text}${line.text}`.replace(/\s+/g, " ");
+      previous.trailingSoftHyphen = false;
+    } else output.push({ ...line });
+  }
+  return output.map((line) => line.text);
+}
+
+function createExtractionDiagnostics() {
+  return {
+    replacementCharacters: 0,
+    structuralBullets: 0,
+    verifiedLigatureRepairs: 0,
+    privateUseCharacters: 0,
+    suspiciousEmbeddedCharacters: 0,
+  };
+}
+
+export function extractionWarnings(diagnostics) {
+  const warnings = [];
+  if (diagnostics.verifiedLigatureRepairs > 0) warnings.push(`Recovered ${diagnostics.verifiedLigatureRepairs} verified PDF ligature mapping artifact(s). Review the affected text before activation.`);
+  if (diagnostics.structuralBullets > 0) warnings.push(`Normalized ${diagnostics.structuralBullets} structural list bullet glyph(s).`);
+  if (diagnostics.replacementCharacters > 0) warnings.push(`PDF extraction still contains ${diagnostics.replacementCharacters} Unicode replacement character(s); inspect this PDF before activation.`);
+  if (diagnostics.privateUseCharacters > 0) warnings.push(`PDF extraction contains ${diagnostics.privateUseCharacters} unsupported private-use glyph(s); inspect this PDF before activation.`);
+  if (diagnostics.suspiciousEmbeddedCharacters > 0) warnings.push(`PDF extraction contains ${diagnostics.suspiciousEmbeddedCharacters} unusual character sequence(s) that were not safely repaired; inspect this PDF before activation.`);
+  return warnings;
+}
+
+function observeSuspiciousText(text, diagnostics) {
+  diagnostics.privateUseCharacters += (text.match(/[\ue000-\uf8ff]/g) || []).length;
+  diagnostics.suspiciousEmbeddedCharacters += (text.match(/[A-Za-z]\u01af[A-Za-z]/g) || []).length;
 }
 
 export function chunkPdfPages(pages, {
@@ -355,9 +474,12 @@ export async function processAiDocumentVersion({ supabase, versionId, actorMembe
       if (insertError) throw insertError;
     }
 
-    const warnings = extracted.pages.length < extracted.pageCount
-      ? [`${extracted.pageCount - extracted.pages.length} page(s) contained no readable text.`]
-      : [];
+    const warnings = [
+      ...(extracted.warnings || []),
+      ...(extracted.pages.length < extracted.pageCount
+        ? [`${extracted.pageCount - extracted.pages.length} page(s) contained no readable text.`]
+        : []),
+    ];
     await updateVersion(supabase, versionId, {
       processing_status: "ready",
       processing_error: null,
