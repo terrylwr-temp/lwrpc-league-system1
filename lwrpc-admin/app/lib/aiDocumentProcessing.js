@@ -2,7 +2,8 @@ import { createHash } from "node:crypto";
 import { WorkerMessageHandler } from "pdfjs-dist/legacy/build/pdf.worker.mjs";
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 
-const MAX_CHUNK_CHARACTERS = 4_000;
+const MAX_CHUNK_CHARACTERS = 1_800;
+const MIN_LOGICAL_CHUNK_CHARACTERS = 320;
 const EMBEDDING_BATCH_SIZE = 40;
 
 // PDF.js 5's legacy Node build still includes display code. In a serverless
@@ -91,10 +92,9 @@ function textLines(items) {
   let current = "";
   for (const item of items) {
     const value = String(item?.str || "").replace(/\s+/g, " ").trim();
-    if (!value) continue;
-    current = current ? `${current} ${value}` : value;
+    if (value) current = current ? `${current} ${value}` : value;
     if (item?.hasEOL) {
-      lines.push(current);
+      if (current) lines.push(current);
       current = "";
     }
   }
@@ -102,37 +102,130 @@ function textLines(items) {
   return lines;
 }
 
-export function chunkPdfPages(pages, { maxCharacters = MAX_CHUNK_CHARACTERS } = {}) {
+export function chunkPdfPages(pages, {
+  maxCharacters = MAX_CHUNK_CHARACTERS,
+  minCharacters = MIN_LOGICAL_CHUNK_CHARACTERS,
+} = {}) {
   const chunks = [];
-  for (const page of pages) {
-    let metadata = { sectionLabel: "", ruleNumber: "", heading: "" };
-    let sectionLines = [];
+  let carriedMetadata = emptyMetadata();
+
+  for (const page of normalizePdfPages(pages)) {
+    let metadata = carriedMetadata;
+    let lines = [];
+    let isSearchable = true;
     const flush = () => {
-      const text = sectionLines.join("\n").trim();
-      if (!text) return;
-      splitChunkText(text, maxCharacters).forEach((content) => {
-        chunks.push({ pageNumber: page.pageNumber, ...metadata, content });
-      });
-      sectionLines = [];
+      const content = lines.join("\n").trim();
+      if (content) chunks.push({ pageNumber: page.pageNumber, ...metadata, content, isSearchable });
+      lines = [];
     };
 
-    for (const line of page.lines || []) {
-      const nextMetadata = headingMetadata(line);
-      if (nextMetadata) {
-        flush();
-        metadata = nextMetadata;
+    for (const entry of page.entries) {
+      if (!entry.isSearchable) {
+        if (isSearchable) flush();
+        isSearchable = false;
+        metadata = { sectionLabel: "Table of Contents", ruleNumber: "", heading: "Table of Contents" };
+        appendLine(entry.line, { force: false });
+        continue;
       }
-      sectionLines.push(line);
+
+      if (!isSearchable) {
+        flush();
+        isSearchable = true;
+        metadata = carriedMetadata;
+      }
+
+      const boundary = headingMetadata(entry.line);
+      if (boundary && shouldStartNewChunk(lines, metadata, boundary, minCharacters)) {
+        flush();
+        metadata = boundary;
+      }
+      appendLine(entry.line, { force: Boolean(boundary) });
     }
     flush();
+    carriedMetadata = isSearchable ? metadata : emptyMetadata();
+
+    function appendLine(line, { force }) {
+      const candidate = lines.length ? `${lines.join("\n")}\n${line}` : line;
+      if (lines.length && candidate.length > maxCharacters && (lines.join("\n").length >= minCharacters || force)) {
+        flush();
+      }
+      if (line.length > maxCharacters) {
+        splitChunkText(line, maxCharacters).forEach((part) => {
+          if (part !== line) chunks.push({ pageNumber: page.pageNumber, ...metadata, content: part, isSearchable });
+        });
+        if (line.length > maxCharacters) return;
+      }
+      lines.push(line);
+    }
   }
   return chunks.map((chunk, index) => ({ ...chunk, chunkOrdinal: index + 1 }));
+}
+
+export function searchableChunksForEmbedding(chunks) {
+  return chunks.filter((chunk) => chunk.isSearchable !== false);
+}
+
+function emptyMetadata() {
+  return { sectionLabel: "", ruleNumber: "", heading: "" };
+}
+
+function normalizePdfPages(pages) {
+  const edgeLineCounts = new Map();
+  const rawPages = pages.map((page) => ({
+    pageNumber: page.pageNumber,
+    lines: (page.lines || []).map((line) => String(line || "").replace(/\s+/g, " ").trim()).filter(Boolean),
+  }));
+  for (const page of rawPages) {
+    page.lines.forEach((line, index) => {
+      if (!isNearPageEdge(index, page.lines.length)) return;
+      const key = headerFooterKey(line);
+      edgeLineCounts.set(key, (edgeLineCounts.get(key) || 0) + 1);
+    });
+  }
+
+  return rawPages.map((page) => {
+    const cleanLines = page.lines.filter((line, index) => !isRepeatedHeaderOrFooter(line, index, page.lines.length, edgeLineCounts));
+    return { pageNumber: page.pageNumber, entries: annotateTableOfContents(cleanLines) };
+  });
+}
+
+function isNearPageEdge(index, length) {
+  return index < 2 || index >= Math.max(0, length - 2);
+}
+
+function headerFooterKey(line) {
+  return line.toLowerCase().replace(/page\s+\d+(?:\s+of\s+\d+)?/g, "page #").replace(/\d{1,2}\/\d{1,2}\/\d{2,4}/g, "date");
+}
+
+function isRepeatedHeaderOrFooter(line, index, length, edgeLineCounts) {
+  if (!isNearPageEdge(index, length) || isStructuralLine(line)) return false;
+  const obvious = /(?:©|copyright|\brevised\s*:|\bpage\s+\d+(?:\s+of\s+\d+)?\b)/i.test(line);
+  return obvious || (edgeLineCounts.get(headerFooterKey(line)) || 0) >= 2;
+}
+
+function annotateTableOfContents(lines) {
+  const tocStart = lines.findIndex((line) => /\b(?:table of )?contents?\b/i.test(line));
+  if (tocStart < 0) return lines.map((line) => ({ line, isSearchable: true }));
+  let inToc = true;
+  return lines.map((line, index) => {
+    if (index < tocStart) return { line, isSearchable: false };
+    if (inToc && index > tocStart && !isTocLine(line) && headingMetadata(line)) inToc = false;
+    return { line, isSearchable: !inToc };
+  });
+}
+
+function isTocLine(line) {
+  return /\.{3,}\s*\d+\s*$/.test(line) || /\b(?:table of )?contents?\b/i.test(line);
+}
+
+function isStructuralLine(line) {
+  return Boolean(headingMetadata(line));
 }
 
 function headingMetadata(line) {
   const value = String(line || "").trim();
   if (!value || value.length > 180) return null;
-  const explicit = value.match(/^(rule|section|article)\s+([A-Za-z0-9][A-Za-z0-9.\-]*)(?:\s*[:.\-]\s*|\s+)(.+)$/i);
+  const explicit = value.match(/^(rule|section|article)\s+(\d+(?:\.\d+){0,4})\.?\s*(?::|\-|\s)\s*(.+)$/i);
   if (explicit) {
     return {
       sectionLabel: `${explicit[1]} ${explicit[2]}`,
@@ -140,12 +233,42 @@ function headingMetadata(line) {
       heading: explicit[3].trim(),
     };
   }
-  const numbered = value.match(/^(\d+(?:\.\d+){0,4})[.)]\s+(.+)$/);
-  if (numbered) return { sectionLabel: numbered[1], ruleNumber: numbered[1], heading: numbered[2].trim() };
+  const numbered = value.match(/^(\d+(?:\.\d+){0,4})\.?\s+(.+)$/);
+  if (numbered) {
+    const title = numbered[2].trim();
+    return { sectionLabel: `Rule ${numbered[1]}`, ruleNumber: numbered[1], heading: headingFromRuleTitle(title) };
+  }
+  const league = value.match(/^(Weekday|Saturday|PrimeTime)\s+(?:DUPR\s+)?League\b.*$/i);
+  if (league) return { sectionLabel: league[0], ruleNumber: "", heading: league[0] };
   if (value.length <= 110 && /[A-Za-z]/.test(value) && value === value.toUpperCase() && value.split(/\s+/).length <= 12) {
     return { sectionLabel: value, ruleNumber: "", heading: value };
   }
   return null;
+}
+
+function headingFromRuleTitle(title) {
+  const labeled = title.match(/^(.{3,110}?):\s+/);
+  if (labeled) return labeled[1].trim();
+  return title.length <= 85 && title === title.toUpperCase() ? title : "";
+}
+
+function shouldStartNewChunk(lines, current, next, minCharacters) {
+  if (lines.length === 0) return true;
+  if (!next.ruleNumber || !current.ruleNumber) return true;
+  if (next.ruleNumber.startsWith(`${current.ruleNumber}.`)) return false;
+  const sharedParent = commonRuleParent(current.ruleNumber, next.ruleNumber);
+  return !(sharedParent && lines.join("\n").length < minCharacters);
+}
+
+function commonRuleParent(left, right) {
+  const leftParts = left.split(".");
+  const rightParts = right.split(".");
+  const shared = [];
+  for (let index = 0; index < Math.min(leftParts.length, rightParts.length); index += 1) {
+    if (leftParts[index] !== rightParts[index]) break;
+    shared.push(leftParts[index]);
+  }
+  return shared.length ? shared.join(".") : "";
 }
 
 function splitChunkText(text, maxCharacters) {
@@ -202,14 +325,18 @@ export async function processAiDocumentVersion({ supabase, versionId, actorMembe
 
     const extracted = await extractPdfPages(bytes);
     const chunks = chunkPdfPages(extracted.pages);
-    if (chunks.length === 0) throw new Error("No searchable sections could be created from this PDF.");
-    const embedded = await createEmbeddings(chunks.map((chunk) => chunk.content));
+    const searchableChunks = searchableChunksForEmbedding(chunks);
+    if (chunks.length === 0 || searchableChunks.length === 0) {
+      throw new Error("No searchable sections could be created from this PDF.");
+    }
+    const embedded = await createEmbeddings(searchableChunks.map((chunk) => chunk.content));
+    const embeddingByOrdinal = new Map(searchableChunks.map((chunk, index) => [chunk.chunkOrdinal, embedded.embeddings[index]]));
 
     const { error: deleteError } = await supabase.from("ai_document_chunks").delete().eq("document_version_id", versionId);
     if (deleteError) throw deleteError;
 
     for (let offset = 0; offset < chunks.length; offset += EMBEDDING_BATCH_SIZE) {
-      const rows = chunks.slice(offset, offset + EMBEDDING_BATCH_SIZE).map((chunk, index) => ({
+      const rows = chunks.slice(offset, offset + EMBEDDING_BATCH_SIZE).map((chunk) => ({
         document_version_id: versionId,
         chunk_ordinal: chunk.chunkOrdinal,
         page_number: chunk.pageNumber,
@@ -217,9 +344,12 @@ export async function processAiDocumentVersion({ supabase, versionId, actorMembe
         rule_number: chunk.ruleNumber || null,
         heading: chunk.heading || null,
         content: chunk.content,
-        embedding: embedded.embeddings[offset + index],
-        embedding_model: embedded.model,
-        is_searchable: true,
+        embedding: embeddingByOrdinal.get(chunk.chunkOrdinal) || null,
+        embedding_model: chunk.isSearchable === false ? null : embedded.model,
+        // Non-searchable chunks (such as a table of contents) stay available
+        // for administrative preview while the retrieval query must exclude
+        // them through this flag and its partial vector index.
+        is_searchable: chunk.isSearchable !== false,
       }));
       const { error: insertError } = await supabase.from("ai_document_chunks").insert(rows);
       if (insertError) throw insertError;
