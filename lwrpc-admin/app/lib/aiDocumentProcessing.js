@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { WorkerMessageHandler } from "pdfjs-dist/legacy/build/pdf.worker.mjs";
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 
 const MAX_CHUNK_CHARACTERS = 4_000;
@@ -25,8 +26,13 @@ class TextExtractionDOMMatrix {
   }
 }
 
-async function loadPdfJsForTextExtraction() {
+export async function loadPdfJsForTextExtraction() {
   if (!globalThis.DOMMatrix) globalThis.DOMMatrix = TextExtractionDOMMatrix;
+  // In PDF.js 5, Node uses a loopback "fake worker" even for text-only work.
+  // Preloading the worker module through a literal import lets Next bundle it;
+  // PDF.js then uses this handler instead of dynamically resolving its default
+  // ./pdf.worker.mjs path from .next/server/chunks at request time.
+  globalThis.pdfjsWorker = { WorkerMessageHandler };
   return import("pdfjs-dist/legacy/build/pdf.mjs");
 }
 
@@ -54,7 +60,6 @@ export async function extractPdfPages(bytes, config = aiAssistantConfig) {
   const { getDocument } = await loadPdfJsForTextExtraction();
   const task = getDocument({
     data: new Uint8Array(bytes),
-    disableWorker: true,
     isEvalSupported: false,
     stopAtErrors: false,
     // Text extraction does not render glyphs. Prefer the server's font mapping

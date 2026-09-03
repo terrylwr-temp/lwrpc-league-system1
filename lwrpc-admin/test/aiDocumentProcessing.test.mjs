@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { assertPdfUpload, chunkPdfPages, extractPdfPages, sanitizePdfFilename } from "../app/lib/aiDocumentProcessing.js";
+import {
+  assertPdfUpload,
+  chunkPdfPages,
+  extractPdfPages,
+  loadPdfJsForTextExtraction,
+  sanitizePdfFilename,
+} from "../app/lib/aiDocumentProcessing.js";
 
 function createTextPdf(text) {
   const stream = `BT\n/F1 18 Tf\n72 720 Td\n(${text.replace(/[\\()]/g, "\\$&")}) Tj\nET\n`;
@@ -68,7 +74,17 @@ test("extracts text from an actual PDF on the server without browser DOM globals
     assert.equal(globalThis.window, undefined);
     assert.equal(globalThis.document, undefined);
 
-    const extracted = await extractPdfPages(createTextPdf("Official Rule 4.2 Retired Games"));
+    const { GlobalWorkerOptions } = await loadPdfJsForTextExtraction();
+    const workerSrc = GlobalWorkerOptions.workerSrc;
+    // This is the missing Vercel path from the production failure. Successful
+    // extraction proves the preloaded same-thread worker is used instead.
+    GlobalWorkerOptions.workerSrc = "file:///var/task/lwrpc-admin/.next/server/chunks/pdf.worker.mjs";
+    let extracted;
+    try {
+      extracted = await extractPdfPages(createTextPdf("Official Rule 4.2 Retired Games"));
+    } finally {
+      GlobalWorkerOptions.workerSrc = workerSrc;
+    }
     assert.equal(extracted.pageCount, 1);
     assert.equal(extracted.pages.length, 1);
     assert.match(extracted.pages[0].text, /Official Rule 4\.2 Retired Games/);

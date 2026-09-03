@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --test",
+    "verify:ai-pdf-server-bundle": "node scripts/verify-ai-pdf-server-bundle.mjs",
     "verify:round-robin": "node scripts/verify-round-robin-balance.mjs",
     "import:tournament": "node scripts/import-tournament-json.mjs"
   },
