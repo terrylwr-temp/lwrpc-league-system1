@@ -33,15 +33,27 @@ export function selectAnswerEvidence(retrieval) {
     && hasDirectRelevance(candidate)
     && materiallyContributes(candidate, primary, retrieval.request?.question)
   ))];
+  if (!intents.length) return classifyAnswerEvidence(selected.slice(0, MAX_SELECTED_CHUNKS), retrieval.request?.question);
+
   // A compound question needs direct evidence for each independently detected
-  // official concept, even when one concept's candidate falls below the other
-  // concept's score cutoff. Put that required coverage first so optional
-  // supporting candidates cannot consume the bounded evidence budget.
-  const requiredIntentEvidence = intents.map((intent) => candidates.find((candidate) => supportsEvidenceIntent(candidate, intent))).filter(Boolean);
-  const selectedForModel = [...requiredIntentEvidence, ...selected]
+  // official concept.  Intent evidence is evaluated within a paragraph/list
+  // item, then the strongest direct passage for each intent is reserved before
+  // optional support can consume the bounded evidence budget.
+  const requiredIntentEvidence = intents.map((intent) => ({ intent, candidate: bestIntentEvidence(candidates, intent, retrieval.request?.question) })).filter(({ candidate }) => candidate);
+  const bestIntentByChunkId = new Map();
+  for (const { intent, candidate } of requiredIntentEvidence) {
+    const existing = bestIntentByChunkId.get(candidate.chunkId) || [];
+    bestIntentByChunkId.set(candidate.chunkId, [...existing, intent]);
+  }
+  const requiredCandidates = requiredIntentEvidence.map(({ candidate }) => candidate);
+  const selectedForModel = [...requiredCandidates, ...selected.filter((candidate) => (
+    requiredCandidates.some((required) => required.chunkId === candidate.chunkId)
+    || (questionRequestsProcedure(retrieval.request?.question) && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question) && materiallyContributes(candidate, primary, retrieval.request?.question))
+    || isMoreAuthoritativeThanRequired(candidate, requiredCandidates, intents, retrieval.request?.question)
+  ))]
     .filter((candidate, index, collection) => collection.findIndex((item) => item.chunkId === candidate.chunkId) === index)
-    .filter((candidate) => !intents.length || supportsAnyEvidenceIntent(candidate, intents));
-  return classifyAnswerEvidence(selectedForModel.slice(0, MAX_SELECTED_CHUNKS), retrieval.request?.question);
+    .filter((candidate) => supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question));
+  return classifyAnswerEvidence(selectedForModel.slice(0, MAX_SELECTED_CHUNKS), retrieval.request?.question, bestIntentByChunkId);
 }
 
 function detectedEvidenceIntents(question) {
@@ -54,14 +66,59 @@ function detectedEvidenceIntents(question) {
   return [roster && "Team/season roster management", match && "Individual-match Match Setup"].filter(Boolean);
 }
 
-function supportsEvidenceIntent(candidate, intent) {
-  const text = searchableEvidenceText(candidate);
-  if (intent === "Team/season roster management") return /\b(?:add|remove|delete|drop|update|updating|change|changing|lock|open|close)\b/.test(text) && /\b(?:player|players|team|rosters?)\b/.test(text) && (/\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|date|deadline|open|close|lock)\b/.test(text) || /\bmanage rosters?\b/.test(text));
-  if (intent === "Individual-match Match Setup") return /\b(?:match setup|lineup|pairings?)\b/.test(text) && /\b(?:three|3|before|submit|enter|save|match day)\b/.test(text);
-  return false;
+function bestIntentEvidence(candidates, intent, question) {
+  return candidates
+    .map((candidate, index) => ({ candidate, index, support: intentSupport(candidate, intent, question) }))
+    .filter(({ support }) => support)
+    .sort((left, right) => right.support.strength - left.support.strength || authorityRank(left.candidate) - authorityRank(right.candidate) || Number(right.candidate.combinedScore) - Number(left.candidate.combinedScore) || left.index - right.index)[0]?.candidate;
 }
 
-function supportsAnyEvidenceIntent(candidate, intents) { return intents.some((intent) => supportsEvidenceIntent(candidate, intent)); }
+function isMoreAuthoritativeThanRequired(candidate, required, intents, question) {
+  return required.some((selected) => supportsAnyEvidenceIntent(candidate, intents, question) && isMoreAuthoritative(candidate, selected));
+}
+
+function supportsEvidenceIntent(candidate, intent, question = "") { return Boolean(intentSupport(candidate, intent, question)); }
+
+function intentSupport(candidate, intent, question) {
+  const asksTiming = asksForTiming(question);
+  const structural = [candidate?.sectionLabel, candidate?.heading].filter(Boolean).join(" ").toLowerCase();
+  for (const passage of localEvidencePassages(candidate)) {
+    if (intent === "Team/season roster management") {
+      if (isMatchSpecificPassage(passage)) continue;
+      const rosterOperation = /\b(?:update|updating)\s+(?:your\s+|team\s+)?rosters?\b/.test(passage)
+        || /\b(?:add|remove|delete|drop)\b[^.\n]{0,70}\bplayers?\b/.test(passage)
+        || /\b(?:team|season)\s+roster\b[^.\n]{0,70}\b(?:add|remove|delete|drop|update|change|open|close|lock)\b/.test(passage)
+        || /\b(?:add|remove|delete|drop|update|change)\b[^.\n]{0,70}\b(?:team|season)\s+roster\b/.test(passage);
+      if (!rosterOperation) continue;
+      const calendarDate = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}\b/.test(passage);
+      const timing = calendarDate || /\b(?:date|deadline|open|close|lock|throughout\s+the\s+season|prior\s+to\s+(?:the\s+)?(?:commencement|start)\s+of\s+(?:each\s+)?season)\b/.test(passage);
+      return { intent, strength: calendarDate ? 120 : asksTiming && timing ? 100 : 75, reason: calendarDate ? "Direct roster calendar/timing passage" : timing ? "Direct roster timing passage" : "Direct team roster-management passage" };
+    }
+    if (intent === "Individual-match Match Setup") {
+      if (/\b(?:enter|verify|submit(?:ting)?)\s+(?:match\s+)?scores?|score\s+(?:entry|verification)|forfeit|weather\b/.test(structural)) continue;
+      const configuration = /\bmatch\s+setup\b|\b(?:lineups?|player\s+pairings?|upcoming\s+match\s+rosters?)\b/.test(passage);
+      if (!configuration || /\b(?:enter|verify|submit(?:ting)?)\s+(?:match\s+)?scores?\b/.test(passage)) continue;
+      const deadline = /\b(?:no\s+later\s+than|within)\b[^.\n]{0,70}\b(?:three|3|days?|hours?|weeks?)\b/.test(passage)
+        || /\b(?:must|shall)\s+submit\b[^.\n]{0,100}\b(?:match\s+setup|lineups?|rosters?)\b/.test(passage);
+      const timing = deadline || /\b(?:before|prior\s+to)\b[^.\n]{0,70}\b(?:match\s+date|match\s+day|scheduled\s+match)\b/.test(passage);
+      const procedure = /\b(?:click|save|button|screen|complete)\b/.test(passage);
+      if (!timing && !procedure) continue;
+      return { intent, strength: deadline ? 120 : questionRequestsProcedure(question) && procedure ? 115 : timing ? 95 : 75, reason: deadline ? "Direct Match Setup deadline passage" : timing ? "Direct Match Setup timing passage" : "Direct Match Setup procedure passage" };
+    }
+  }
+  return null;
+}
+
+function supportsAnyEvidenceIntent(candidate, intents, question = "") { return intents.some((intent) => supportsEvidenceIntent(candidate, intent, question)); }
+
+function localEvidencePassages(candidate) {
+  const structural = [candidate?.sectionLabel, candidate?.heading].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
+  const blocks = String(candidate?.content || "").replace(/\r/g, "").split(/\n(?=\s*(?:[•]\s*|o\s+|\d+(?:\.\d+)*\.\s))/);
+  return blocks.map((block) => `${structural}\n${block}`.replace(/\s+/g, " ").trim().toLowerCase()).filter(Boolean);
+}
+
+function isMatchSpecificPassage(passage) { return /\b(?:match\s+setup|upcoming\s+match|match\s+rosters?|match\s+lineups?|player\s+pairings?)\b/.test(passage); }
+function asksForTiming(question) { return /\b(?:when|deadline|due|date|open|close|lock|start)\b/i.test(String(question || "")); }
 
 export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = fetch, clock = performance.now.bind(performance), resolveSources = resolveOfficialSources }) {
   const started = clock();
@@ -259,17 +316,19 @@ function materiallyContributes(candidate, primary, question) {
   return addsQuestionSignal(candidate, primary, question);
 }
 
-function classifyAnswerEvidence(evidence, question) {
+function classifyAnswerEvidence(evidence, question, bestIntentByChunkId = new Map()) {
   const controlling = evidence
     .map((candidate, index) => ({ candidate, index }))
     .filter(({ candidate }) => isControllingRule(candidate))
     .sort((left, right) => authorityRank(left.candidate) - authorityRank(right.candidate) || left.index - right.index)[0]?.candidate;
   return evidence.map((candidate, index) => {
-    const intentSupport = detectedEvidenceIntents(question).filter((intent) => supportsEvidenceIntent(candidate, intent));
-    const annotated = { ...candidate, intentSupport };
-    if (candidate === controlling) return { ...annotated, evidenceRole: "Primary / controlling", evidenceSelectionReason: "Highest-authority selected rule evidence" };
-    if (index === 0 && !controlling) return { ...annotated, evidenceRole: "Primary", evidenceSelectionReason: "Highest-ranked direct evidence" };
-    return { ...annotated, evidenceRole: "Supporting", evidenceSelectionReason: supportingReason(candidate, evidence[0], question) };
+    const intentSupportDetails = detectedEvidenceIntents(question).map((intent) => intentSupport(candidate, intent, question)).filter(Boolean);
+    const bestFor = bestIntentByChunkId.get(candidate.chunkId) || [];
+    const bestIntentReason = bestFor.length ? `Best direct evidence for ${bestFor.join(" + ")}` : "";
+    const annotated = { ...candidate, intentSupport: intentSupportDetails.map(({ intent }) => intent), intentSupportDetails, intentSelectionDiagnostic: bestIntentReason || "Optional material support retained" };
+    if (candidate === controlling) return { ...annotated, evidenceRole: "Primary / controlling", evidenceSelectionReason: [bestIntentReason, "Highest-authority selected rule evidence"].filter(Boolean).join(" · ") };
+    if (index === 0 && !controlling) return { ...annotated, evidenceRole: "Primary", evidenceSelectionReason: bestIntentReason || "Highest-ranked direct evidence" };
+    return { ...annotated, evidenceRole: "Supporting", evidenceSelectionReason: bestIntentReason || supportingReason(candidate, evidence[0], question) };
   });
 }
 
@@ -325,16 +384,32 @@ function supportingReason(candidate, primary, question) {
 function annotateEvidenceSelection(retrieval, selectedEvidence) {
   const selectedById = new Map(selectedEvidence.map((candidate) => [candidate.chunkId, candidate]));
   const intents = detectedEvidenceIntents(retrieval?.request?.question);
+  const question = retrieval?.request?.question;
   for (const candidate of Array.isArray(retrieval?.suppliedEvidence) ? retrieval.suppliedEvidence : []) {
     const selected = selectedById.get(candidate.chunkId);
+    const intentSupportDetails = intents.map((intent) => intentSupport(candidate, intent, question)).filter(Boolean);
     Object.assign(candidate, selected || {
       evidenceRole: "Not selected for model",
-      intentSupport: [],
-      evidenceSelectionReason: intents.length && !supportsAnyEvidenceIntent(candidate, intents)
-        ? "Does not support a detected question intent"
-        : "Related retrieval candidate did not materially contribute beyond the selected official evidence",
+      intentSupport: intentSupportDetails.map(({ intent }) => intent),
+      intentSupportDetails,
+      intentSelectionDiagnostic: intentSupportDetails.length ? "Direct intent support was present, but stronger selected evidence fully covered that intent" : "No direct intent support",
+      evidenceSelectionReason: intents.length && !intentSupportDetails.length
+        ? rejectedIntentReason(candidate, intents)
+        : "Direct but less-specific evidence was not material beyond the selected official evidence",
     });
   }
+}
+
+function rejectedIntentReason(candidate, intents) {
+  const text = searchableEvidenceText(candidate);
+  const incidentalMatchSetup = intents.includes("Individual-match Match Setup")
+    && /\b(?:match\s+setup|lineup|pairings?)\b/.test(text)
+    && /\b(?:enter|verify|submit|score)\b/.test(text);
+  const incidentalRoster = intents.includes("Team/season roster management")
+    && /\b(?:team|player|roster)\b/.test(text)
+    && /\b(?:add|remove|delete|drop|update|change)\b/.test(text);
+  if (incidentalMatchSetup || incidentalRoster) return "Incidental or scattered related terms were rejected; no coherent local passage supports a detected question intent";
+  return "Does not support a detected question intent";
 }
 
 function answerPrompt(question, evidence) {

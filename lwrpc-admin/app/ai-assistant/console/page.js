@@ -40,6 +40,8 @@ function Chunks({ chunks }) {
     <div className="mt-2 rounded-lg bg-slate-50 p-2 text-xs font-semibold text-slate-700">
       {c.evidenceRole && <p><b>Model evidence selection:</b> {c.evidenceRole}{c.evidenceSelectionReason ? ` · ${c.evidenceSelectionReason}` : ""}</p>}
       {c.intentSupport?.length ? <p className="mt-1"><b>Selected intent support:</b> {c.intentSupport.join(" + ")}</p> : null}
+      {c.intentSupportDetails?.length ? <p className="mt-1"><b>Intent-support detail:</b> {c.intentSupportDetails.map(({ intent, reason }) => `${intent}: ${reason}`).join(" · ")}</p> : null}
+      {c.intentSelectionDiagnostic ? <p className="mt-1"><b>Intent selection diagnostic:</b> {c.intentSelectionDiagnostic}</p> : null}
       <p className={c.evidenceRole ? "mt-1" : ""}><b>Exact match reason:</b> {c.exactMatchReason || "None"}</p>
       <p className="mt-1"><b>FTS:</b> {c.ftsDiagnostic?.matched ? "Matched" : "No match"}{c.ftsDiagnostic?.candidateRank ? ` · keyword candidate #${c.ftsDiagnostic.candidateRank}` : ""} · normalized terms: {c.ftsDiagnostic?.normalizedTerms?.join(" + ") || "none"}{c.ftsDiagnostic?.retrievalExpansion?.length ? ` · retrieval expansion: ${c.ftsDiagnostic.retrievalExpansion.join(" + ")}` : ""}</p>
       <p className="mt-1"><b>Terminology expansion:</b> {c.terminologyDiagnostic || "None"}{c.ftsDiagnostic?.typoNormalization?.length ? ` · typo normalization: ${c.ftsDiagnostic.typoNormalization.map(({ from, to }) => `${from} → ${to}`).join(", ")}` : ""}</p>

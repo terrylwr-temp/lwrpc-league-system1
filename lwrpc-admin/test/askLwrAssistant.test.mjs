@@ -52,6 +52,7 @@ test("personal or live LMS questions do not enter document RAG without a future 
   for (const question of ["When can I add players to my Weekday team?", "When can I add someone to my Weekday team?", "When can I remove a player from my team?", "When can we start changing players on our Weekday team?", "When does the Weekday roster open?"]) assert.equal(isUnsupportedOperationalQuestion(question), false, question);
   for (const question of ["When can I add a player to tomorrow's lineup?", "Can I change who's playing in Friday's match?"]) assert.equal(isUnsupportedOperationalQuestion(question), false, question);
   assert.equal(isUnsupportedOperationalQuestion("Who is in my lineup?"), true);
+  assert.equal(isUnsupportedOperationalQuestion("Who is on my team?"), true);
   assert.equal(isUnsupportedOperationalQuestion("What is the lineup for tonight?"), false);
   assert.deepEqual(playerFallbackResult(), { answer: INSUFFICIENT_EVIDENCE_ANSWER, evidenceSufficient: false, conflict: false, sources: [] });
 });
@@ -134,6 +135,8 @@ test("the shared AI trigger covers every authenticated header shell without chan
   assert.doesNotMatch(assistant, />New Conversation</);
   assert.match(assistant, /if \(entry\.pending\).*Finding the official answer/s);
   assert.match(assistant, /if \(entry\.requestError\).*TECHNICAL_ERROR/);
+  assert.match(assistant, /bg-blue-100\/70.*>Question/s);
+  assert.match(assistant, /bg-emerald-50\/70.*>Answer/s);
   assert.match(assistant, /SESSION_EXCHANGES_KEY/);
   assert.match(assistant, /slice\(0, MAX_SESSION_EXCHANGES\)/);
   assert.doesNotMatch(assistant, /ask-lwr-question[^>]*disabled=\{working\}/);
