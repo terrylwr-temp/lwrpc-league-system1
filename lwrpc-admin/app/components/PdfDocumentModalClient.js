@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import { initialPdfViewerPage } from "../lib/pdfViewerPage";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
@@ -85,6 +86,8 @@ export default function PdfDocumentModalClient({
   document,
   onClose,
   eyebrow = "",
+  initialPageNumber = 1,
+  pageMode = false,
 }) {
   const viewerRef = useRef(null);
   const searchInputRef = useRef(null);
@@ -92,7 +95,7 @@ export default function PdfDocumentModalClient({
   const wheelNavigationLockedRef = useRef(false);
   const wheelNavigationTimerRef = useRef(null);
   const [numPages, setNumPages] = useState(0);
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumber, setPageNumber] = useState(initialPdfViewerPage(initialPageNumber));
   const [pageWidth, setPageWidth] = useState(900);
   const [pageSearchData, setPageSearchData] = useState([]);
   const [indexing, setIndexing] = useState(true);
@@ -106,6 +109,11 @@ export default function PdfDocumentModalClient({
   const headingEyebrow = eyebrow ||
     [document.leagueName, document.teamName].filter(Boolean).join(" / ") ||
     "Document Preview";
+
+  useEffect(() => {
+    pageScrollPositionRef.current = "top";
+    setPageNumber(initialPdfViewerPage(initialPageNumber));
+  }, [initialPageNumber]);
 
   const customTextRenderer = useCallback(
     ({ str, itemIndex }) =>
@@ -165,7 +173,7 @@ export default function PdfDocumentModalClient({
   async function loadDocument(pdf) {
     setNumPages(pdf.numPages);
     pageScrollPositionRef.current = "top";
-    setPageNumber(1);
+    setPageNumber(initialPdfViewerPage(initialPageNumber, pdf.numPages));
     setPageSearchData([]);
     setIndexing(true);
     setLoadError("");
@@ -274,12 +282,11 @@ export default function PdfDocumentModalClient({
 
   return (
     <div
-      className="fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-2 md:p-4"
-      role="dialog"
-      aria-modal="true"
+      className={pageMode ? "min-h-screen bg-slate-100 p-2 md:p-6" : "fixed inset-0 z-[90] flex items-center justify-center bg-slate-950/70 p-2 md:p-4"}
+      {...(pageMode ? {} : { role: "dialog", "aria-modal": true })}
       aria-labelledby="pdf-document-title"
     >
-      <section className="flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl md:max-h-[92vh]">
+      <section className={`flex w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ${pageMode ? "mx-auto min-h-[calc(100vh-1rem)] md:min-h-[calc(100vh-3rem)]" : "max-h-[96vh] md:max-h-[92vh]"}`}>
         <header className="flex flex-col gap-3 border-b border-slate-200 bg-slate-950 px-4 py-3 text-white md:flex-row md:items-center md:justify-between md:px-5 md:py-4">
           <div className="min-w-0">
             <span className="text-xs font-black uppercase tracking-wide text-emerald-200">
@@ -288,6 +295,7 @@ export default function PdfDocumentModalClient({
             <h2 id="pdf-document-title" className="mt-1 truncate text-xl font-black md:text-2xl">
               {document.title}
             </h2>
+            {document.citation && <p className="mt-1 text-sm font-bold text-slate-200">{document.citation}</p>}
           </div>
           <div className="flex flex-wrap gap-2">
             <button
@@ -297,7 +305,7 @@ export default function PdfDocumentModalClient({
             >
               {searchOpen ? "Hide Find" : "Find"}
             </button>
-            <a
+            {!pageMode && <a
               href={document.url}
               target="_blank"
               rel="noreferrer"
@@ -305,13 +313,13 @@ export default function PdfDocumentModalClient({
               className="rounded-xl bg-white px-4 py-2 text-sm font-bold text-slate-950 hover:bg-slate-100"
             >
               Download
-            </a>
-            <button type="button" onClick={printDocument} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">
+            </a>}
+            {!pageMode && <button type="button" onClick={printDocument} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">
               Print
-            </button>
-            <button type="button" onClick={onClose} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">
+            </button>}
+            {!pageMode && <button type="button" onClick={onClose} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">
               Close
-            </button>
+            </button>}
           </div>
         </header>
 
@@ -356,7 +364,7 @@ export default function PdfDocumentModalClient({
 
         <div ref={viewerRef} onWheel={handleViewerWheel} className="h-[72vh] overflow-auto bg-slate-200 p-4">
           <Document
-            file={document.url}
+            file={document.file || document.url}
             onLoadSuccess={loadDocument}
             onLoadError={() => setLoadError("Unable to load this PDF in the document viewer.")}
             loading={<div className="flex min-h-80 items-center justify-center font-bold text-slate-600">Loading PDF...</div>}
@@ -374,7 +382,7 @@ export default function PdfDocumentModalClient({
           </Document>
           {loadError && (
             <div className="mx-auto mt-3 max-w-3xl rounded-xl bg-amber-100 px-4 py-3 text-center text-sm font-bold text-amber-950">
-              {loadError} You can still download or print the document.
+              {loadError} {pageMode ? "You can still navigate the document page by page." : "You can still download or print the document."}
             </div>
           )}
         </div>

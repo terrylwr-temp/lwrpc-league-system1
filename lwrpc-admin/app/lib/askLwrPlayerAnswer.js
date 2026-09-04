@@ -1,4 +1,5 @@
 import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
+import { officialDocumentViewerHref } from "./aiOfficialDocumentViewer.js";
 
 const PERSONAL_OPERATIONAL_PATTERNS = [
   /\b(?:what|which|who|when|where)\b[\s\S]{0,80}\b(?:my|our|i|we)\b[\s\S]{0,80}\b(?:team|roster|standing|place|match|score|season\s+dupr|court)\b/i,
@@ -23,18 +24,18 @@ export function playerRetrievalBody(body = {}, role = "player") {
   };
 }
 
-export async function runPlayerOfficialAnswer({ body, role, supabase, retrieveOfficialEvidence, generateOfficialAnswer }) {
+export async function runPlayerOfficialAnswer({ body, role, userId, supabase, retrieveOfficialEvidence, generateOfficialAnswer }) {
   if (isUnsupportedOperationalQuestion(body?.question)) return { retrieval: null, result: playerFallbackResult() };
   const retrieval = await retrieveOfficialEvidence({ supabase, body: playerRetrievalBody(body, role) });
   const answer = await generateOfficialAnswer({ retrieval, supabase });
-  return { retrieval, result: toPlayerAnswerResult(answer) };
+  return { retrieval, result: toPlayerAnswerResult(answer, userId) };
 }
 
 export function playerFallbackResult() {
   return Object.freeze({ answer: INSUFFICIENT_EVIDENCE_ANSWER, evidenceSufficient: false, conflict: false, sources: [] });
 }
 
-export function toPlayerAnswerResult(answer) {
+export function toPlayerAnswerResult(answer, userId) {
   return {
     answer: String(answer?.answer || INSUFFICIENT_EVIDENCE_ANSWER),
     evidenceSufficient: answer?.evidenceSufficient === true,
@@ -46,7 +47,7 @@ export function toPlayerAnswerResult(answer) {
       sectionLabel: String(source.sectionLabel || ""),
       heading: String(source.heading || ""),
       citation: String(source.citation || source.documentTitle || "Official LWR Pickleball Club document"),
-      officialDocumentUrl: String(source.officialDocumentUrl || ""),
+      officialDocumentUrl: officialDocumentViewerHref(source, userId),
     })).filter((source) => source.officialDocumentUrl),
   };
 }

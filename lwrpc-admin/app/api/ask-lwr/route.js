@@ -13,7 +13,7 @@ export async function POST(req) {
     const body = await req.json().catch(() => ({}));
 
     const { result } = await runPlayerOfficialAnswer({
-      body, role: authorization.role, supabase: authorization.supabase,
+      body, role: authorization.role, userId: authorization.user.id, supabase: authorization.supabase,
       retrieveOfficialEvidence, generateOfficialAnswer,
     });
     return NextResponse.json({ success: true, result });

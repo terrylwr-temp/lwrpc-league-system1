@@ -184,11 +184,11 @@ test("uses the explicit ownership FK in the production dual-relationship schema 
   const evidence = [selectAnswerEvidence(sufficientRetrieval())[0]];
   const calls = [];
   const versionQuery = { select(value) { calls.push(["versions-select", value]); return this; }, in(column, values) { calls.push(["versions-in", column, values]); return Promise.resolve({ data: [{ id: "version-1", document_id: "document-1", storage_bucket: "ai-official-documents", storage_path: "documents/document-1/version-1/rules.pdf", processing_status: "ready", document: { id: "document-1", title: "LWR League Rules", status: "active", active_version_id: "version-1" } }], error: null }); } };
-  const chunkQuery = { select(value) { calls.push(["chunks-select", value]); return this; }, in(column, values) { calls.push(["chunks-in", column, values]); return Promise.resolve({ data: [{ id: "chunk-1", document_version_id: "version-1", is_searchable: true }], error: null }); } };
+  const chunkQuery = { select(value) { calls.push(["chunks-select", value]); return this; }, in(column, values) { calls.push(["chunks-in", column, values]); return Promise.resolve({ data: [{ id: "chunk-1", document_version_id: "version-1", is_searchable: true, page_number: 5, rule_number: "5.7", section_label: "Incomplete Matches", heading: "Incomplete Matches" }], error: null }); } };
   const supabase = { from: (table) => table === "ai_document_versions" ? versionQuery : chunkQuery, storage: { from: () => ({ createSignedUrl: async () => ({ data: { signedUrl: "https://storage.example.test/rules.pdf?token=real" }, error: null }) }) } };
   const [source] = await resolveOfficialSources(supabase, evidence);
   assert.match(calls[0][1], /ai_document_versions_document_id_fkey!inner/);
-  assert.deepEqual(calls[2], ["chunks-select", "id, document_version_id, is_searchable"]);
+  assert.deepEqual(calls[2], ["chunks-select", "id, document_version_id, is_searchable, page_number, rule_number, section_label, heading"]);
   assert.equal(source.documentVersionId, "version-1");
   assert.equal(source.officialDocumentUrl, "https://storage.example.test/rules.pdf?token=real#page=5");
 });

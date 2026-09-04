@@ -127,7 +127,7 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
     .in("id", versionIds);
   if (error) throw new Error(`Official source lookup failed: ${error.message}`);
   const { data: chunkData, error: chunkError } = await supabase.from("ai_document_chunks")
-    .select("id, document_version_id, is_searchable")
+    .select("id, document_version_id, is_searchable, page_number, rule_number, section_label, heading")
     .in("id", chunkIds);
   if (chunkError) throw new Error(`Official source chunk lookup failed: ${chunkError.message}`);
   const versions = new Map((data || []).map((version) => [version.id, version]));
@@ -141,19 +141,31 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
     }
     const { data: signed, error: signError } = await supabase.storage.from(version.storage_bucket).createSignedUrl(version.storage_path, signedUrlSeconds);
     if (signError || !signed?.signedUrl) throw new Error(`Official source link could not be created: ${signError?.message || "unknown Storage error"}`);
-    const pageNumber = citationPageNumber(chunk.pageNumber);
+    // Source metadata comes from the revalidated database chunk, not the
+    // retrieval payload. This keeps the citation bound to its live source.
+    const sourceChunk = {
+      ...chunk,
+      documentTitle: document.title,
+      pageNumber: citationPageNumber(citedChunk.page_number),
+      ruleNumber: citedChunk.rule_number || "",
+      sectionLabel: citedChunk.section_label || "",
+      heading: citedChunk.heading || "",
+    };
+    const pageNumber = sourceChunk.pageNumber;
     const officialDocumentUrl = pageAwareOfficialDocumentUrl(signed.signedUrl, pageNumber);
     return {
       documentId: chunk.documentId,
       documentVersionId: chunk.documentVersionId,
       chunkId: chunk.chunkId,
-      documentTitle: chunk.documentTitle || document.title,
+      documentTitle: sourceChunk.documentTitle,
       pageNumber,
-      ruleNumber: chunk.ruleNumber || "",
-      sectionLabel: chunk.sectionLabel || "",
-      heading: chunk.heading || "",
+      ruleNumber: sourceChunk.ruleNumber,
+      sectionLabel: sourceChunk.sectionLabel,
+      heading: sourceChunk.heading,
       officialDocumentUrl,
-      citation: citationLabel(chunk),
+      citation: citationLabel(sourceChunk),
+      storageBucket: version.storage_bucket,
+      storagePath: version.storage_path,
     };
   }));
 }

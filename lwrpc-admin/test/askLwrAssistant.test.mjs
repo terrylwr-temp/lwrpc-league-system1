@@ -2,6 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
+process.env.SUPABASE_SERVICE_ROLE_KEY = "test-viewer-secret";
+const TEST_USER_ID = "11111111-1111-4111-8111-111111111111";
+const TEST_DOCUMENT_ID = "22222222-2222-4222-8222-222222222222";
+const TEST_VERSION_ID = "33333333-3333-4333-8333-333333333333";
+const TEST_CHUNK_ID = "44444444-4444-4444-8444-444444444444";
+
 const { ASK_LWR_INITIAL_COPY, assistantPageContext, canBrowseLeagueDocument, visibleDashboardGuideKeys } = await import("../app/lib/askLwrAssistantConfig.js");
 const { INSUFFICIENT_EVIDENCE_ANSWER } = await import("../app/lib/aiAnswerGeneration.js");
 const { normalizedFtsTerms } = await import("../app/lib/aiRetrieval.js");
@@ -20,22 +26,22 @@ test("player response is deliberately limited to plain answer and trusted citati
   const result = toPlayerAnswerResult({
     answer: "A player may not continue.", evidenceSufficient: true,
     conflict: { requiresClarification: false }, model: "gpt-5.5", metrics: { totalTokens: 99 },
-    sources: [{ documentId: "secret-id", chunkId: "chunk-id", documentTitle: "League Rules", pageNumber: 5, ruleNumber: "5.7", citation: "League Rules — Rule 5.7 — Page 5", officialDocumentUrl: "https://signed.example/rules#page=5" }],
-  });
+    sources: [{ documentId: TEST_DOCUMENT_ID, documentVersionId: TEST_VERSION_ID, chunkId: TEST_CHUNK_ID, documentTitle: "League Rules", pageNumber: 5, ruleNumber: "5.7", citation: "League Rules — Rule 5.7 — Page 5", officialDocumentUrl: "https://signed.example/rules#page=5" }],
+  }, TEST_USER_ID);
   assert.deepEqual(Object.keys(result).sort(), ["answer", "conflict", "evidenceSufficient", "sources"]);
   assert.equal(result.sources[0].documentId, undefined); assert.equal(result.sources[0].chunkId, undefined);
-  assert.equal(result.sources[0].officialDocumentUrl, "https://signed.example/rules#page=5");
+  assert.match(result.sources[0].officialDocumentUrl, /^\/official-document\//);
+  assert.doesNotMatch(result.sources[0].officialDocumentUrl, /signed\.example|secret-id|chunk-id/);
 });
 
 test("player-safe sources preserve the validated page-aware URL without rebuilding it", () => {
   for (const pageNumber of [1, 10, 17]) {
-    const url = `https://signed.example/captains-guide.pdf?token=real#page=${pageNumber}`;
-    const [source] = toPlayerAnswerResult({ answer: "Grounded", evidenceSufficient: true, conflict: {}, sources: [{ documentTitle: "LWRPC-Captains Guide to the LMS", pageNumber, officialDocumentUrl: url }] }).sources;
+    const [source] = toPlayerAnswerResult({ answer: "Grounded", evidenceSufficient: true, conflict: {}, sources: [{ documentId: TEST_DOCUMENT_ID, documentVersionId: TEST_VERSION_ID, chunkId: TEST_CHUNK_ID, documentTitle: "LWRPC-Captains Guide to the LMS", pageNumber, officialDocumentUrl: "https://signed.example/captains-guide.pdf?token=real#page=10" }] }, TEST_USER_ID).sources;
     assert.equal(source.pageNumber, pageNumber);
-    assert.equal(source.officialDocumentUrl, url);
+    assert.match(source.officialDocumentUrl, /^\/official-document\//);
   }
-  const [sourceWithoutPage] = toPlayerAnswerResult({ answer: "Grounded", evidenceSufficient: true, conflict: {}, sources: [{ documentTitle: "Guide", pageNumber: null, officialDocumentUrl: "https://signed.example/guide.pdf?token=real" }] }).sources;
-  assert.equal(sourceWithoutPage.officialDocumentUrl, "https://signed.example/guide.pdf?token=real");
+  const [sourceWithoutPage] = toPlayerAnswerResult({ answer: "Grounded", evidenceSufficient: true, conflict: {}, sources: [{ documentId: TEST_DOCUMENT_ID, documentVersionId: TEST_VERSION_ID, chunkId: TEST_CHUNK_ID, documentTitle: "Guide", pageNumber: null, officialDocumentUrl: "https://signed.example/guide.pdf?token=real" }] }, TEST_USER_ID).sources;
+  assert.match(sourceWithoutPage.officialDocumentUrl, /^\/official-document\//);
 });
 
 test("personal or live LMS questions do not enter document RAG without a future data tool", () => {
@@ -96,7 +102,7 @@ test("global entry, reusable drawer, guide browser, and standalone route remain 
     readFile(new URL("../app/api/ai-assistant/answer/route.js", import.meta.url), "utf8"),
   ]);
   assert.match(header, /aria-label="Ask LWR Pickleball Club AI"/); assert.match(header, /name="sparkles"/); assert.doesNotMatch(header, /name="help"/);
-  for (const feature of ["AskLwrAssistantDrawer", "role=\"dialog\"", "aria-modal=\"true\"", "Finding the official answer", "Browse Guides &amp; Rules", "New Conversation", "openGuideDocument", "LEAGUE_DOCUMENT_TYPES", "officialDocumentUrl"]) assert.match(assistant, new RegExp(feature));
+  for (const feature of ["AskLwrAssistantDrawer", "role=\"dialog\"", "aria-modal=\"true\"", "Finding the official answer", "Browse Guides &amp; Rules", "openGuideDocument", "LEAGUE_DOCUMENT_TYPES", "officialDocumentUrl"]) assert.match(assistant, new RegExp(feature));
   for (const diagnostic of ["semanticScore", "keywordScore", "exactScore", "authorityScore", "combinedScore", "totalTokens", "estimatedGenerationCostUsd"]) assert.doesNotMatch(assistant, new RegExp(diagnostic));
   assert.match(route, /authorizeAdminRequest\(req, "player"\)/); assert.match(route, /runPlayerOfficialAnswer/); assert.doesNotMatch(route, /OPENAI_API_KEY/);
   assert.match(page, /AskLwrAssistantPage/); assert.match(page, /requireRole\(router, "player"\)/);
@@ -105,12 +111,14 @@ test("global entry, reusable drawer, guide browser, and standalone route remain 
   assert.ok(assistant.indexOf("<form onSubmit={submit}") < assistant.indexOf("exchanges.map"));
   assert.ok(assistant.indexOf("exchanges.map") < assistant.indexOf("Browse Guides &amp; Rules"));
   assert.match(assistant, /\[\{ id: exchangeId, question: nextQuestion, pending: true \}, \.\.\.current\]/);
-  assert.match(assistant, /setExchanges\(\[\]\); setQuestion\(""\);/);
+  assert.doesNotMatch(assistant, />New Conversation</);
   assert.match(assistant, /if \(entry\.pending\).*Finding the official answer/s);
   assert.match(assistant, /if \(entry\.requestError\).*TECHNICAL_ERROR/);
   assert.match(assistant, /SESSION_EXCHANGES_KEY/);
   assert.match(assistant, /slice\(0, MAX_SESSION_EXCHANGES\)/);
   assert.doesNotMatch(assistant, /ask-lwr-question[^>]*disabled=\{working\}/);
+  assert.match(assistant, /Get answers from official LWR Pickleball Club information/);
+  assert.match(assistant, /Ask a question about anything regarding LWR Pickleball Club or leagues/);
   assert.match(assistant, /href=\{source\.officialDocumentUrl\}/);
   assert.doesNotMatch(assistant, /#page=/);
 });
