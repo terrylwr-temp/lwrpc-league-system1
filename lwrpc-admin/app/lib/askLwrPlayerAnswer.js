@@ -13,13 +13,22 @@ export function isUnsupportedOperationalQuestion(question) {
   // A member can naturally use “my lineup” while asking for an official
   // deadline or how-to. That is document guidance, not a request for their
   // live lineup data, and must reach the existing evidence-gated RAG path.
-  if (isOfficialConfigurationGuidance(value)) return false;
+  if (isOfficialConfigurationGuidance(value) || isOfficialTeamRosterGuidance(value)) return false;
   return PERSONAL_OPERATIONAL_PATTERNS.some((pattern) => pattern.test(value));
 }
 
 function isOfficialConfigurationGuidance(value) {
   return /\b(?:lineups?|rosters?|pairings?)\b/i.test(value)
     && /\b(?:when|deadline|due|how|enter|submit|set|save|complete|change|assign)\b/i.test(value);
+}
+
+function isOfficialTeamRosterGuidance(value) {
+  const membershipOperation = /\b(?:add|remove|delete|drop|update|change|changing|lock|open|close)\b/i.test(value);
+  const member = /\b(?:player|players|person|someone|member|members|roster)\b/i.test(value);
+  const teamContext = /\b(?:team|league|season)\b/i.test(value);
+  const timing = /\b(?:when|deadline|due|date|dates|open|close|lock)\b/i.test(value);
+  const matchSpecific = /\b(?:match|game|lineup|pairings?|match\s+setup|tomorrow)\b/i.test(value);
+  return membershipOperation && member && teamContext && timing && !matchSpecific;
 }
 
 export function playerRetrievalBody(body = {}, role = "player") {

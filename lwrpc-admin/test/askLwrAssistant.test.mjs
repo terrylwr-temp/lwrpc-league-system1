@@ -49,6 +49,8 @@ test("personal or live LMS questions do not enter document RAG without a future 
   assert.equal(isUnsupportedOperationalQuestion("How are standings determined?"), false);
   assert.equal(isUnsupportedOperationalQuestion("What does NR mean?"), false);
   for (const question of ["When do I need to enter my match lineup?", "When is my match lineup due?", "How do I enter my match lineup?", "When do I enter my lineup and how do I do it?", "When do captains submit their roster?"]) assert.equal(isUnsupportedOperationalQuestion(question), false, question);
+  for (const question of ["When can I add players to my Weekday team?", "When can I add someone to my Weekday team?", "When can I remove a player from my team?", "When can we start changing players on our Weekday team?", "When does the Weekday roster open?"]) assert.equal(isUnsupportedOperationalQuestion(question), false, question);
+  for (const question of ["When can I add a player to tomorrow's lineup?", "Can I change who's playing in Friday's match?"]) assert.equal(isUnsupportedOperationalQuestion(question), false, question);
   assert.equal(isUnsupportedOperationalQuestion("Who is in my lineup?"), true);
   assert.equal(isUnsupportedOperationalQuestion("What is the lineup for tonight?"), false);
   assert.deepEqual(playerFallbackResult(), { answer: INSUFFICIENT_EVIDENCE_ANSWER, evidenceSufficient: false, conflict: false, sources: [] });
