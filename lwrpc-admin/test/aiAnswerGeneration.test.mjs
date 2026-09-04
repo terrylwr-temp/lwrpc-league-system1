@@ -4,7 +4,7 @@ import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
 process.env.OPENAI_API_KEY = "test-key";
-const { CONFLICT_ANSWER, INSUFFICIENT_EVIDENCE_ANSWER, generateOfficialAnswer, resolveOfficialSources, selectAnswerEvidence, validateTrustedSources } = await import("../app/lib/aiAnswerGeneration.js");
+const { CONFLICT_ANSWER, INSUFFICIENT_EVIDENCE_ANSWER, OfficialAnswerModelError, generateOfficialAnswer, resolveOfficialSources, selectAnswerEvidence, validateTrustedSources } = await import("../app/lib/aiAnswerGeneration.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 
 test("skips the answer model and returns the exact fallback when Stage 3 evidence is insufficient", async () => {
@@ -31,12 +31,17 @@ test("selects direct high-quality evidence, grounds the Responses request, and a
     resolveSources: async (_supabase, evidence) => evidence.map((chunk) => sourceFor(chunk)),
     fetchImpl: async (_url, options) => {
       request = JSON.parse(options.body);
-      return { ok: true, json: async () => ({ model: "gpt-5.5", output_text: JSON.stringify({ answer: "A player must follow the supplied official rule.", conflict: false }), usage: { input_tokens: 100, output_tokens: 20, total_tokens: 120 } }) };
+      return completedResponse({ answer: "A player must follow the supplied official rule.", conflict: false, usage: { input_tokens: 100, output_tokens: 20, total_tokens: 120 } });
     },
   });
   assert.equal(request.model, "gpt-5.5");
   assert.equal(request.store, false);
   assert.equal(request.max_output_tokens, 700);
+  assert.equal(request.text.format.type, "json_schema");
+  assert.equal(request.text.format.name, "official_lwr_answer");
+  assert.equal(request.text.format.strict, true);
+  assert.deepEqual(request.text.format.schema.required, ["answer", "conflict"]);
+  assert.deepEqual(request.text.format.schema.properties, { answer: { type: "string" }, conflict: { type: "boolean" } });
   assert.match(request.instructions, /ONLY the official LWR Pickleball Club evidence/i);
   assert.match(request.instructions, /Do not use general pickleball knowledge/i);
   assert.match(request.input[0].content, /Evidence 1/);
@@ -55,11 +60,53 @@ test("returns a conservative clarification instead of a definitive model answer 
   const result = await generateOfficialAnswer({
     retrieval: sufficientRetrieval(), supabase: null,
     resolveSources: async (_supabase, evidence) => evidence.map((chunk) => sourceFor(chunk)),
-    fetchImpl: async () => ({ ok: true, json: async () => ({ model: "gpt-5.5", output_text: JSON.stringify({ answer: "Do not return this answer.", conflict: true }), usage: {} }) }),
+    fetchImpl: async () => completedResponse({ answer: "Do not return this answer.", conflict: true }),
   });
   assert.equal(result.answer, CONFLICT_ANSWER);
   assert.equal(result.conflict.requiresClarification, true);
   assert.equal(result.sources.length, 2);
+});
+
+test("classifies a native Responses API refusal without exposing its text", async () => {
+  await assert.rejects(
+    generateWithResponse({ status: "completed", output: [messageOutput([{ type: "refusal", refusal: "I cannot answer that." }])] }),
+    modelError("model_refusal"),
+  );
+});
+
+test("classifies an incomplete max-output-token Responses result", async () => {
+  await assert.rejects(
+    generateWithResponse({ status: "incomplete", incomplete_details: { reason: "max_output_tokens" }, output: [] }),
+    modelError("incomplete_max_output_tokens"),
+  );
+});
+
+test("classifies missing, malformed, and schema-invalid native structured output", async () => {
+  await assert.rejects(generateWithResponse({ status: "completed", output: [messageOutput([])] }), modelError("missing_structured_output"));
+  await assert.rejects(generateWithResponse({ status: "completed", output: [messageOutput([{ type: "output_text", text: "```json\n{ bad json }\n```" }])] }), modelError("response_extraction_parsing_failure"));
+  await assert.rejects(generateWithResponse({ status: "completed", output: [messageOutput([{ type: "output_text", text: JSON.stringify({ answer: "An answer", conflict: "false" }) }])] }), modelError("schema_validation_failure"));
+});
+
+test("classifies an API failure separately from structured-output failures", async () => {
+  await assert.rejects(
+    generateOfficialAnswer({
+      retrieval: sufficientRetrieval(), supabase: null,
+      resolveSources: async (_supabase, evidence) => evidence.map((chunk) => sourceFor(chunk)),
+      fetchImpl: async () => ({ ok: false, status: 400, json: async () => ({ error: { code: "invalid_request_error" } }) }),
+    }),
+    (error) => error instanceof OfficialAnswerModelError && error.category === "api_request_failure" && error.safeDiagnostic.providerCode === "invalid_request_error",
+  );
+});
+
+test("classifies an unparsable successful API payload as response extraction failure", async () => {
+  await assert.rejects(
+    generateOfficialAnswer({
+      retrieval: sufficientRetrieval(), supabase: null,
+      resolveSources: async (_supabase, evidence) => evidence.map((chunk) => sourceFor(chunk)),
+      fetchImpl: async () => ({ ok: true, status: 200, json: async () => { throw new Error("not JSON"); } }),
+    }),
+    modelError("response_extraction_parsing_failure"),
+  );
 });
 
 test("rejects citations that are not from supplied exact active-version evidence", () => {
@@ -106,4 +153,31 @@ function chunk(chunkId, combinedScore, exactScore, keywordScore, content) {
 
 function sourceFor(chunk) {
   return { documentId: chunk.documentId, documentVersionId: chunk.documentVersionId, chunkId: chunk.chunkId, documentTitle: chunk.documentTitle, pageNumber: chunk.pageNumber, ruleNumber: chunk.ruleNumber, sectionLabel: chunk.sectionLabel, heading: chunk.heading, citation: `${chunk.documentTitle} — Rule ${chunk.ruleNumber} — Page ${chunk.pageNumber}`, officialDocumentUrl: `https://storage.example.test/${chunk.chunkId}#page=${chunk.pageNumber}` };
+}
+
+function completedResponse({ answer, conflict, usage = {} }) {
+  return {
+    ok: true,
+    status: 200,
+    json: async () => ({ object: "response", id: "resp_test", status: "completed", model: "gpt-5.5", output: [
+      { type: "reasoning", id: "rs_test", summary: [] },
+      messageOutput([{ type: "output_text", text: JSON.stringify({ answer, conflict }), annotations: [] }]),
+    ], usage }),
+  };
+}
+
+function messageOutput(content) {
+  return { type: "message", id: "msg_test", status: "completed", role: "assistant", content };
+}
+
+function generateWithResponse(result) {
+  return generateOfficialAnswer({
+    retrieval: sufficientRetrieval(), supabase: null,
+    resolveSources: async (_supabase, evidence) => evidence.map((chunk) => sourceFor(chunk)),
+    fetchImpl: async () => ({ ok: true, status: 200, json: async () => ({ object: "response", id: "resp_test", model: "gpt-5.5", ...result }) }),
+  });
+}
+
+function modelError(category) {
+  return (error) => error instanceof OfficialAnswerModelError && error.category === category;
 }

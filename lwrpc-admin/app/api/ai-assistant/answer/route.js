@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { generateOfficialAnswer } from "../../../lib/aiAnswerGeneration";
+import { answerGenerationDiagnostic, generateOfficialAnswer } from "../../../lib/aiAnswerGeneration";
 import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 
@@ -23,7 +23,11 @@ export async function POST(req) {
         answer: { ...answer, metrics: { ...answer.metrics, retrievalMs: retrieval.metrics.totalMs, totalMs: Math.round(performance.now() - started) } },
       },
     });
-  } catch (error) { return failure(error.message || "Official-document answer generation failed.", 400); }
+  } catch (error) {
+    const diagnostic = answerGenerationDiagnostic(error);
+    console.error("Ask LWR Pickleball AI answer generation failed", diagnostic);
+    return failure(error.message || "Official-document answer generation failed.", diagnostic.category === "server_failure" ? 400 : 502, diagnostic);
+  }
 }
 
 async function eligibleDocuments(supabase) {
@@ -35,4 +39,4 @@ async function eligibleDocuments(supabase) {
   return (data || []).map((document) => ({ id: document.id, title: document.title, type: document.document_type, authorityRank: document.authority_rank, applicability: document.scope_kind, activeVersionId: document.active_version?.id || null, activeVersionLabel: document.active_version?.version_label || "" }));
 }
 
-function failure(error, status) { return NextResponse.json({ success: false, error }, { status }); }
+function failure(error, status, diagnostic = null) { return NextResponse.json({ success: false, error, ...(diagnostic ? { diagnostic } : {}) }, { status }); }

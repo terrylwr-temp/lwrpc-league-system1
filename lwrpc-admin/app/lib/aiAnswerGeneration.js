@@ -6,6 +6,21 @@ export const CONFLICT_ANSWER = "The supplied official LWR Pickleball Club source
 const MAX_SELECTED_CHUNKS = 4;
 const DIRECT_RELEVANCE_DELTA = .10;
 
+export class OfficialAnswerModelError extends Error {
+  constructor(category, message, details = {}) {
+    super(message);
+    this.name = "OfficialAnswerModelError";
+    this.category = category;
+    this.safeDiagnostic = { category, label: diagnosticLabel(category), ...details };
+  }
+}
+
+export function answerGenerationDiagnostic(error) {
+  return error instanceof OfficialAnswerModelError
+    ? error.safeDiagnostic
+    : { category: "server_failure", label: "Server-side answer generation failure" };
+}
+
 export function selectAnswerEvidence(retrieval) {
   if (!retrieval?.evidence?.sufficient) return [];
   const candidates = Array.isArray(retrieval.suppliedEvidence) ? retrieval.suppliedEvidence : [];
@@ -30,10 +45,12 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
 
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured on the server.");
   const generationStarted = clock();
-  const response = await fetchImpl("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
-    body: JSON.stringify({
+  let response;
+  try {
+    response = await fetchImpl("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${process.env.OPENAI_API_KEY}` },
+      body: JSON.stringify({
       model: aiAssistantConfig.chatModel,
       reasoning: { effort: "low" },
       max_output_tokens: aiAssistantConfig.maxOutputTokens,
@@ -62,12 +79,21 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         "If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
       ].join(" "),
       input: [{ role: "user", content: answerPrompt(retrieval.request.question, selectedEvidence) }],
-    }),
-  });
-  const result = await response.json().catch(() => ({}));
+      }),
+    });
+  } catch {
+    throw new OfficialAnswerModelError("api_request_failure", "The answer model request could not be completed.");
+  }
+  let result;
+  try {
+    result = await response.json();
+  } catch {
+    if (!response.ok) throw new OfficialAnswerModelError("api_request_failure", "The answer model could not generate an official-document answer.", { httpStatus: Number(response.status) || null });
+    throw new OfficialAnswerModelError("response_extraction_parsing_failure", "The answer model response could not be parsed.");
+  }
   const generationMs = Math.round(clock() - generationStarted);
-  if (!response.ok) throw new Error(result?.error?.message || "The answer model could not generate an official-document answer.");
-  const modelOutput = parseModelOutput(result.output_text);
+  if (!response.ok) throw new OfficialAnswerModelError("api_request_failure", "The answer model could not generate an official-document answer.", { httpStatus: Number(response.status) || null, providerCode: cleanProviderCode(result?.error?.code) });
+  const modelOutput = extractStructuredModelOutput(result);
   const conflict = Boolean(modelOutput.conflict);
   const answer = conflict ? CONFLICT_ANSWER : sanitizeAnswer(modelOutput.answer);
   if (!answer) throw new Error("The answer model returned an empty official-document answer.");
@@ -80,6 +106,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
     sources,
     model: result.model || aiAssistantConfig.chatModel,
     conflict: { potentialConflict: conflict, requiresClarification: conflict, competingSources: conflict ? sources : [] },
+    diagnostic: { category: "validated_structured_output", label: "Structured output validated", responseStatus: result.status || "completed" },
     metrics: { generationMs, sourceResolutionMs, totalMs: Math.round(clock() - started), ...usage, estimatedGenerationCostUsd: estimateGenerationCost(result.model || aiAssistantConfig.chatModel, usage) },
   };
 }
@@ -165,12 +192,42 @@ function answerPrompt(question, evidence) {
   return `User question:\n${question}\n\nOfficial LWR evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1}]\nDocument: ${chunk.documentTitle}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
 }
 
-function parseModelOutput(value) {
+export function extractStructuredModelOutput(result) {
+  assertCompletedResponse(result);
+  const output = Array.isArray(result?.output) ? result.output : [];
+  const content = output.flatMap((item) => Array.isArray(item?.content) ? item.content : item?.type === "output_text" ? [item] : []);
+  const refusal = content.find((item) => item?.type === "refusal");
+  if (refusal) throw new OfficialAnswerModelError("model_refusal", "The answer model declined to answer from the supplied official evidence.");
+  const outputText = content.filter((item) => item?.type === "output_text" && typeof item.text === "string").map((item) => item.text).join("")
+    || (typeof result?.output_text === "string" ? result.output_text : "");
+  if (!outputText.trim()) throw new OfficialAnswerModelError("missing_structured_output", "The answer model returned no structured official-document output.");
   try {
-    const parsed = JSON.parse(String(value || ""));
-    if (typeof parsed?.answer !== "string" || typeof parsed?.conflict !== "boolean") throw new Error("invalid shape");
+    const parsed = JSON.parse(outputText);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || Object.keys(parsed).length !== 2 || typeof parsed.answer !== "string" || !parsed.answer.trim() || typeof parsed.conflict !== "boolean") throw new OfficialAnswerModelError("schema_validation_failure", "The answer model output did not match the required official-answer schema.");
     return parsed;
-  } catch { throw new Error("The answer model returned an invalid structured official-document response."); }
+  } catch (error) {
+    if (error instanceof OfficialAnswerModelError) throw error;
+    throw new OfficialAnswerModelError("response_extraction_parsing_failure", "The answer model returned structured output that could not be parsed.");
+  }
+}
+
+function assertCompletedResponse(result) {
+  if (result?.status === "incomplete") {
+    const reason = String(result?.incomplete_details?.reason || "");
+    if (reason === "max_output_tokens") throw new OfficialAnswerModelError("incomplete_max_output_tokens", "The answer model response was incomplete because it reached the output-token limit.", { incompleteReason: reason });
+    throw new OfficialAnswerModelError("incomplete_response", "The answer model response was incomplete.", { incompleteReason: cleanProviderCode(reason) });
+  }
+  if (result?.status === "failed" || result?.error) throw new OfficialAnswerModelError("api_request_failure", "The answer model failed to generate a response.", { providerCode: cleanProviderCode(result?.error?.code) });
+  if (result?.status && result.status !== "completed") throw new OfficialAnswerModelError("unexpected_response_status", "The answer model did not complete its response.", { responseStatus: cleanProviderCode(result.status) });
+}
+
+function diagnosticLabel(category) {
+  return ({ api_request_failure: "API request failure", model_refusal: "Model refusal", incomplete_max_output_tokens: "Incomplete: output-token limit", incomplete_response: "Incomplete model response", missing_structured_output: "Missing structured output", schema_validation_failure: "Schema validation failure", response_extraction_parsing_failure: "Response extraction/parsing failure", unexpected_response_status: "Unexpected model response status", validated_structured_output: "Structured output validated", server_failure: "Server-side answer generation failure" })[category] || "Answer generation diagnostic";
+}
+
+function cleanProviderCode(value) {
+  const code = String(value || "").replace(/[^a-z0-9_.-]/gi, "").slice(0, 80);
+  return code || null;
 }
 
 function sanitizeAnswer(value) {
