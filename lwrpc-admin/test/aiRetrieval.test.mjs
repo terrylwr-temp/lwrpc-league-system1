@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
-const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, evaluateEvidence, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, toPgVector } = await import("../app/lib/aiRetrieval.js");
+const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, continuationExpansionPhrases, evaluateEvidence, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, toPgVector } = await import("../app/lib/aiRetrieval.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 const vector = Array.from({ length: 1536 }, (_, i) => i / 1000);
 
@@ -24,7 +24,7 @@ test("uses one compatible embedding and the protected hybrid RPC without chat ge
   assert.equal(called.name, "search_ai_official_chunks"); assert.equal(called.args.p_query_embedding.split(",").length, 1536);
   assert.equal(output.suppliedEvidence.length, 1); assert.equal(output.evidence.sufficient, true);
   assert.equal(output.candidates[0].exactMatchReason, "Rule number: 4.5");
-  assert.deepEqual(output.candidates[0].ftsDiagnostic, { normalizedTerms: ["rule", "4", "5"], matched: true, candidateRank: 1 });
+  assert.deepEqual(output.candidates[0].ftsDiagnostic, { normalizedTerms: ["rule", "4", "5"], retrievalExpansion: [], matched: true, candidateRank: 1 });
   assert.equal(toPgVector(vector).split(",").length, 1536);
 });
 
@@ -42,14 +42,14 @@ test("retrieval SQL locks out inactive, historical, failed, and excluded content
 
 test("generic exact matching recognizes unseen official phrases without boosting generic words", async () => {
   const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
-  for (const cte of ["query_tokens", "phrase_candidates", "phrase_terms", "distinctive_terms", "acronym_terms"]) assert.match(sql, new RegExp(`\\b${cte}\\b`));
+  for (const cte of ["query_tokens", "phrase_candidates", "phrase_terms", "official_term_candidates", "acronym_terms"]) assert.match(sql, new RegExp(`\\b${cte}\\b`));
   assert.doesNotMatch(sql, /reliability factor|picklebreaker|match setup|scoring freeze|retired game|rally scoring|forfeit/i);
   assert.equal(genericExactScore("What is a medical retirement?", "A medical retirement must be recorded."), .85);
   assert.equal(genericExactScore("Can the visiting captain defer?", "The visiting captain may defer the choice."), .85);
   assert.equal(genericExactScore("Does the home team serve or receive?", "The home team may serve or receive."), .85);
   assert.equal(genericExactScore("Season DUPR", "Season DUPR determines eligibility."), .95);
-  assert.equal(genericExactScore("timeout", "Each team has one timeout."), .65);
-  assert.equal(genericExactScore("Picklebreaker", "The Picklebreaker procedure applies."), .85);
+  assert.equal(genericExactScore("timeout", "Each team has one timeout."), 0);
+  assert.equal(genericExactScore("Picklebreaker", "The Picklebreaker procedure applies.", "", { heading: "PICKLEBREAKER GAME" }), .85);
   assert.equal(genericExactScore("Reliability Factor", "The Reliability Factor is displayed."), .85);
   assert.equal(genericExactScore("Match Setup", "Complete Match Setup before play."), .85);
   assert.equal(genericExactScore("scoring freeze", "The scoring freeze is final."), .85);
@@ -57,6 +57,12 @@ test("generic exact matching recognizes unseen official phrases without boosting
   assert.equal(genericExactScore("Rule 4.5", "Rule text", "4.5"), 1);
   assert.equal(genericExactScore("NR", "The NR rating is provisional."), .95);
   assert.equal(genericExactScore("NR", "The corner rating is provisional."), 0);
+  assert.equal(genericExactScore("What is a retired game?", "6+ Points (Retired): record the current score."), .85);
+  assert.equal(genericExactScore("What type of balls will we be using?", "Match Balls: an official item is provided."), .85);
+  assert.equal(genericExactScore("What ball do we use?", "Match Balls: an official item is provided."), .85);
+  assert.equal(genericExactScore("Which pickleball is used for league matches?", "Match Balls: an official item is provided."), .85);
+  for (const ordinary of ["someone", "finish", "halfway", "through"]) assert.equal(genericExactScore(ordinary, `The ${ordinary} word appears in prose.`), 0);
+  for (const ordinary of ["using", "type", "brand"]) assert.equal(genericExactScore(ordinary, `The ${ordinary} word appears in prose.`), 0);
 });
 
 test("FTS removes generic question framing while retaining meaningful content terms", async () => {
@@ -67,6 +73,24 @@ test("FTS removes generic question framing while retaining meaningful content te
   assert.deepEqual(normalizedFtsTerms("What does NR mean?"), ["nr"]);
   assert.deepEqual(normalizedFtsTerms("What is the Reliability Factor requirement?"), ["reliability", "factor"]);
   assert.deepEqual(normalizedFtsTerms("How does scoring freeze work?"), ["scoring", "freeze"]);
+  assert.deepEqual(normalizedFtsTerms("Someone got hurt halfway through the game and can't finish. What do we do?"), ["hurt", "finish"]);
+  assert.deepEqual(normalizedFtsTerms("What type of balls will we be using?"), ["balls"]);
+});
+
+test("uses a generic interruption expansion without injecting an official outcome term", async () => {
+  const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
+  assert.match(sql, /continuation_intent/); assert.match(sql, /phraseto_tsquery\('english', 'cannot complete'\)/);
+  assert.deepEqual(continuationExpansionPhrases("Someone got hurt halfway through the game and can't finish. What do we do?"), ["cannot complete"]);
+  assert.deepEqual(continuationExpansionPhrases("A player was injured and can't continue."), ["cannot complete"]);
+  assert.deepEqual(continuationExpansionPhrases("What happens if somebody has a medical issue during a game?"), ["cannot complete"]);
+  assert.deepEqual(continuationExpansionPhrases("What is a retired game?"), []);
+  assert.deepEqual(continuationExpansionPhrases("When is an unfinished game a forfeit?"), []);
+  const output = await retrieveOfficialEvidence({
+    supabase: { rpc: async () => ({ data: [medicalRow()], error: null }) }, body: { question: "A player was injured and can't continue." },
+    embedQuery: async () => ({ embedding: vector, model: "text-embedding-3-small", inputTokens: 9 }), clock: (() => { let n = 0; return () => ++n; })(),
+  });
+  assert.equal(output.candidates[0].exactMatchReason, "Retrieval expansion: cannot complete");
+  assert.deepEqual(output.candidates[0].ftsDiagnostic.retrievalExpansion, ["cannot complete"]);
 });
 
 test("retrieval route is League Manager protected and has no answer-model path", async () => {
@@ -81,7 +105,9 @@ test("includes the approved multi-document, natural-language, typo, and unsuppor
 
 function row() { return { chunk_id: "10000000-0000-4000-8000-000000000001", document_id: "20000000-0000-4000-8000-000000000001", document_version_id: "30000000-0000-4000-8000-000000000001", document_title: "Rules", document_type: "league_rules", document_authority_rank: 1, document_scope_kind: "all", page_number: 4, section_label: "Rule 4.5", heading: "Retired Games", rule_number: "4.5", content: "Retired games", semantic_score: .8, keyword_score: .7, exact_score: 1, authority_score: .9, context_score: 0, combined_score: .85, vector_rank: 1, keyword_rank: 1, exact_match: true }; }
 
-function genericExactScore(query, content, ruleNumber = "") {
+function medicalRow() { return { ...row(), section_label: "Rule 5.7", heading: "Incomplete Matches", rule_number: "5.7", content: "If a player cannot complete a match for any reason, the match is recorded according to the score.", semantic_score: .38, keyword_score: .25, exact_score: .85, authority_score: .85, combined_score: .45, vector_rank: 7, keyword_rank: 1, exact_match: true }; }
+
+function genericExactScore(query, content, ruleNumber = "", metadata = {}) {
   const normalized = String(query).toLowerCase(); const searchable = String(content).toLowerCase();
   const requestedRule = normalized.match(/\b(?:rule\s*)?(\d+(?:\.\d+)+)\b/)?.[1] || "";
   if (requestedRule && ruleNumber === requestedRule) return 1;
@@ -97,8 +123,16 @@ function genericExactScore(query, content, ruleNumber = "") {
     if (phrase.length >= 8 && distinctive.slice(index, index + size).some(Boolean)) phrases.push(phrase);
   }
   if (phrases.some(boundary)) return .85;
-  const terms = words.filter((word, index) => distinctive[index] && word.length >= 5);
-  if (terms.some((term) => term.length >= 10 && boundary(term))) return .85;
-  if (terms.some(boundary)) return .65;
+  const terms = words.filter((word, index) => distinctive[index] && word.length >= 4);
+  if (terms.some((term) => structuralOfficialTerm(term, content, metadata))) return .85;
   return 0;
+}
+
+function structuralOfficialTerm(term, content, metadata) {
+  const structural = `${metadata.sectionLabel || ""} ${metadata.heading || ""}`;
+  const value = String(term).toLowerCase(); const variants = new Set([value.replace(/s$/, "")]);
+  if (value.length >= 8) for (let size = 4; size <= Math.min(8, value.length - 4); size += 1) variants.add(value.slice(-size));
+  return [...variants].some((variant) => new RegExp(`\\b${variant}s?\\b`, "i").test(structural)
+    || new RegExp(`\\(\\s*${variant}s?\\s*\\)`, "i").test(content)
+    || new RegExp(`\\b${variant}s?\\b[^:\\r\\n]{0,60}:`, "i").test(content));
 }

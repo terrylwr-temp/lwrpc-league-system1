@@ -44,7 +44,7 @@ as $$
       -- requiring an unrelated intent word from the question.
       trim(regexp_replace(
         left(trim(coalesce(p_query_text, '')), 1000),
-        '\m(?:what|which|who|when|where|why|how|does|do|did|is|are|was|were|can|could|would|should|will|mean|meaning|work|works|requirement|requirements|explain|explained|tell|show|say|says|define|definition|describe|described|please)\M',
+        '\m(?:what|which|who|when|where|why|how|does|do|did|is|are|was|were|can|could|would|should|will|mean|meaning|work|works|requirement|requirements|explain|explained|tell|show|say|says|define|definition|describe|described|please|someone|somebody|anyone|anybody|we|us|our|i|me|my|you|your|they|them|their|he|she|it|this|that|got|get|gets|halfway|through|then|just|really|t|game|games|match|matches)\M',
         ' ',
         'gi'
       )) as keyword_query_text,
@@ -52,8 +52,19 @@ as $$
   ),
   input as (
     select ni.*,
-      websearch_to_tsquery('english', coalesce(nullif(ni.keyword_query_text, ''), ni.query_text)) as keyword_ts_query
+      websearch_to_tsquery('english', coalesce(nullif(ni.keyword_query_text, ''), ni.query_text)) as keyword_ts_query,
+      (
+        ni.query_lower ~ '\m(?:injur(?:y|ed|ies)?|hurt|medical|illness|emergency|cannot|unable|can''?t|won''?t|stop(?:ped|ping)?|quit|leave)\M'
+        and ni.query_lower ~ '\m(?:players?|participants?|teams?|games?|matches?|play(?:ing)?|finish|continue|complete)\M'
+      ) as continuation_intent
     from normalized_input ni
+  ),
+  retrieval_expansions as (
+    -- This is generic interruption/continuation normalization, not a
+    -- document-specific synonym: it gives lexical retrieval the canonical
+    -- form used by rules that describe a participant being unable to finish.
+    select i.*, case when i.continuation_intent then phraseto_tsquery('english', 'cannot complete') else null::tsquery end as continuation_ts_query
+    from input i
   ),
   eligible as (
     select c.id as chunk_id, c.document_version_id, c.page_number, c.section_label,
@@ -88,16 +99,18 @@ as $$
     limit (select candidate_limit from input)
   ),
   keyword_candidates as (
-    select e.chunk_id, row_number() over (order by ts_rank_cd(e.search_vector, i.keyword_ts_query) desc, e.chunk_id) as keyword_rank
-    from eligible e cross join input i
+    select e.chunk_id,
+      row_number() over (order by greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real)) desc, e.chunk_id) as keyword_rank
+    from eligible e cross join retrieval_expansions i
     where e.search_vector @@ i.keyword_ts_query
-    order by ts_rank_cd(e.search_vector, i.keyword_ts_query) desc, e.chunk_id
+      or (i.continuation_intent and e.search_vector @@ i.continuation_ts_query)
+    order by greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real)) desc, e.chunk_id
     limit (select candidate_limit from input)
   ),
   query_tokens as (
     select token, ordinal_position,
       (
-        token not in ('team', 'teams', 'player', 'players', 'game', 'games', 'league', 'leagues', 'match', 'matches', 'score', 'scores', 'rule', 'rules', 'guide', 'guides')
+        token not in ('team', 'teams', 'player', 'players', 'game', 'games', 'league', 'leagues', 'match', 'matches', 'score', 'scores', 'rule', 'rules', 'guide', 'guides', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'does', 'do', 'did', 'is', 'are', 'was', 'were', 'can', 'could', 'would', 'should', 'will', 'mean', 'meaning', 'work', 'works', 'requirement', 'requirements', 'explain', 'explained', 'tell', 'show', 'say', 'says', 'define', 'definition', 'describe', 'described', 'please', 'someone', 'somebody', 'anyone', 'anybody', 'we', 'us', 'our', 'i', 'me', 'my', 'you', 'your', 'they', 'them', 'their', 'he', 'she', 'it', 'this', 'that', 'got', 'get', 'gets', 'halfway', 'through', 'then', 'just', 'really', 't', 'type', 'using', 'use', 'used', 'brand', 'playing')
         and to_tsvector('english', token) <> ''::tsvector
       ) as is_distinctive
     from input i
@@ -135,13 +148,27 @@ as $$
     order by word_count, distinctive_count desc, char_length(phrase), phrase
     limit 32
   ),
-  distinctive_terms as (
-    select token, max(case when char_length(token) >= 10 then .85::double precision else .65::double precision end) as term_score
-    from query_tokens
-    where is_distinctive and char_length(token) >= 5
-    group by token
-    order by term_score desc, char_length(token) desc, token
-    limit 8
+  official_term_candidates as (
+    -- A lone word is exact evidence only when the document itself presents it
+    -- as a heading, section label, or parenthetical official outcome label.
+    -- Ordinary prose words such as “someone” and “finish” never receive this
+    -- boost solely because of their length.
+    select distinct term, regexp_replace(term, 's$', '') as label_term
+    from (
+      select token as term
+      from query_tokens
+      where is_distinctive and char_length(token) >= 4
+      union
+      -- Let a compound question word identify a labeled component, such as a
+      -- label word embedded at the end of a longer compound. This remains
+      -- bounded and is only useful when the document presents that component
+      -- structurally as a heading or label.
+      select right(token, suffix_length) as term
+      from query_tokens
+      cross join lateral generate_series(4, least(8, char_length(token) - 4)) as suffixes(suffix_length)
+      where is_distinctive and char_length(token) >= 8
+    ) terms
+    limit 16
   ),
   acronym_terms as (
     -- Acronyms are matched at word boundaries. Preserve NR even when typed
@@ -159,7 +186,15 @@ as $$
     union
     select e.chunk_id from eligible e join phrase_terms p on e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M')
     union
-    select e.chunk_id from eligible e join distinctive_terms t on e.searchable_text ~ ('\m' || t.token || '\M')
+    select e.chunk_id from eligible e join official_term_candidates t on (
+      lower(coalesce(e.section_label, '')) ~ ('\m' || t.label_term || 's?\M')
+      or lower(coalesce(e.heading, '')) ~ ('\m' || t.label_term || 's?\M')
+      or e.content ~* ('\(\s*' || t.label_term || 's?\s*\)')
+      or e.content ~* ('\m' || t.label_term || 's?\M[^:\r\n]{0,60}:')
+    )
+    union
+    select e.chunk_id from eligible e cross join retrieval_expansions i
+    where i.continuation_intent and e.searchable_text ~ '\mcannot\s+complete\M'
   ),
   candidate_ids as (
     select chunk_id from vector_candidates union select chunk_id from keyword_candidates union select chunk_id from exact_candidates
@@ -167,18 +202,23 @@ as $$
   base_scores as (
     select e.*, vc.vector_rank, kc.keyword_rank, i.*,
       greatest(0::double precision, least(1::double precision, 1 - (e.embedding <=> p_query_embedding))) as semantic_score,
-      least(1::double precision, ts_rank_cd(e.search_vector, i.keyword_ts_query)::double precision * 2.5) as keyword_score,
+      least(1::double precision, greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real))::double precision * 2.5) as keyword_score,
       case
         when i.requested_rule <> '' and lower(coalesce(e.rule_number, '')) = i.requested_rule then 1::double precision
         when exists (select 1 from acronym_terms a where e.searchable_text ~ ('\m' || a.term || '\M')) then .95::double precision
         when exists (select 1 from phrase_terms p where e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M')) then .85::double precision
-        when exists (select 1 from distinctive_terms t where e.searchable_text ~ ('\m' || t.token || '\M') and t.term_score = .85::double precision) then .85::double precision
-        when exists (select 1 from distinctive_terms t where e.searchable_text ~ ('\m' || t.token || '\M')) then .65::double precision
+        when exists (select 1 from official_term_candidates t where
+          lower(coalesce(e.section_label, '')) ~ ('\m' || t.label_term || 's?\M')
+          or lower(coalesce(e.heading, '')) ~ ('\m' || t.label_term || 's?\M')
+          or e.content ~* ('\(\s*' || t.label_term || 's?\s*\)')
+          or e.content ~* ('\m' || t.label_term || 's?\M[^:\r\n]{0,60}:')
+        ) then .85::double precision
+        when i.continuation_intent and e.searchable_text ~ '\mcannot\s+complete\M' then .85::double precision
         else 0::double precision
       end as exact_score
     from candidate_ids ids
     join eligible e on e.chunk_id = ids.chunk_id
-    cross join input i
+    cross join retrieval_expansions i
     left join vector_candidates vc on vc.chunk_id = e.chunk_id
     left join keyword_candidates kc on kc.chunk_id = e.chunk_id
   ),

@@ -4,8 +4,8 @@ export const ASK_ABOUT_SCOPES = Object.freeze(["all", "weekday", "primetime", "s
 export const RETRIEVAL_WEIGHTS = Object.freeze({ semantic: 0.47, keyword: 0.24, exact: 0.19, authority: 0.06, context: 0.04 });
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides"]);
-const QUERY_FRAMING_TERMS = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "mean", "meaning", "work", "works", "requirement", "requirements", "explain", "explained", "tell", "show", "say", "says", "define", "definition", "describe", "described", "please"]);
-const COMMON_QUERY_STOPWORDS = new Set(["a", "an", "and", "about", "at", "be", "by", "for", "from", "have", "i", "in", "it", "of", "on", "or", "that", "the", "this", "to", "with"]);
+const QUERY_FRAMING_TERMS = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "mean", "meaning", "work", "works", "requirement", "requirements", "explain", "explained", "tell", "show", "say", "says", "define", "definition", "describe", "described", "please", "someone", "somebody", "anyone", "anybody", "we", "us", "our", "i", "me", "my", "you", "your", "they", "them", "their", "he", "she", "it", "this", "that", "got", "get", "gets", "halfway", "through", "then", "just", "really", "t", "game", "games", "match", "matches", "type", "using", "use", "used", "brand", "playing"]);
+const COMMON_QUERY_STOPWORDS = new Set(["a", "an", "and", "about", "at", "be", "by", "for", "from", "have", "in", "of", "on", "or", "the", "to", "with"]);
 
 export function normalizeRetrievalRequest(body = {}) {
   const question = clean(body.question, 1000);
@@ -98,6 +98,7 @@ function candidateFromRow(row, question) {
     exactMatchReason: exactMatchReason(question, candidate),
     ftsDiagnostic: {
       normalizedTerms: ftsTerms,
+      retrievalExpansion: continuationExpansionPhrases(question),
       matched: candidate.keywordScore > 0,
       candidateRank: candidate.keywordRank,
     },
@@ -107,6 +108,13 @@ function candidateFromRow(row, question) {
 export function normalizedFtsTerms(question) {
   return (String(question || "").toLowerCase().match(/[a-z0-9]+/g) || [])
     .filter((term) => !QUERY_FRAMING_TERMS.has(term) && !COMMON_QUERY_STOPWORDS.has(term));
+}
+
+export function continuationExpansionPhrases(question) {
+  const value = String(question || "").toLowerCase();
+  const hasInterruption = /\b(?:injur(?:y|ed|ies)?|hurt|medical|illness|emergency|cannot|unable|can['’]?t|won['’]?t|stop(?:ped|ping)?|quit|leave)\b/.test(value);
+  const hasActivity = /\b(?:players?|participants?|teams?|games?|matches?|play(?:ing)?|finish|continue|complete)\b/.test(value);
+  return hasInterruption && hasActivity ? ["cannot complete"] : [];
 }
 
 function exactMatchReason(question, candidate) {
@@ -128,8 +136,27 @@ function exactMatchReason(question, candidate) {
   }
   const phrase = phrases.find(includes);
   if (phrase) return `Phrase: ${phrase}`;
-  const term = words.find((word, index) => distinctive[index] && word.length >= 5 && includes(word));
-  return term ? `Distinctive term: ${term}` : "Exact query-term match";
+  const officialTerm = words.find((word, index) => distinctive[index] && word.length >= 4 && isStructuralOfficialTerm(word, candidate));
+  if (officialTerm) return `Official term: ${officialTerm}`;
+  if (continuationExpansionPhrases(question).includes("cannot complete") && /\bcannot\s+complete\b/i.test(candidate.content)) return "Retrieval expansion: cannot complete";
+  return "Exact query-term match";
+}
+
+function isStructuralOfficialTerm(word, candidate) {
+  const structural = [candidate.sectionLabel, candidate.heading].filter(Boolean).join(" ");
+  return officialTermVariants(word).some((term) => {
+    const boundary = `\\b${term}s?\\b`;
+    return new RegExp(boundary, "i").test(structural)
+      || new RegExp(`\\(\\s*${term}s?\\s*\\)`, "i").test(candidate.content)
+      || new RegExp(`${boundary}[^:\\r\\n]{0,60}:`, "i").test(candidate.content);
+  });
+}
+
+function officialTermVariants(word) {
+  const value = String(word || "").toLowerCase();
+  const variants = new Set([value.replace(/s$/, "")]);
+  if (value.length >= 8) for (let size = 4; size <= Math.min(8, value.length - 4); size += 1) variants.add(value.slice(-size));
+  return [...variants].filter(Boolean);
 }
 function assertEmbeddingConfiguration() { if (aiAssistantConfig.embeddingDimensions !== 1536) throw new Error("LWR_AI_EMBEDDING_DIMENSIONS must remain 1536 until the AI chunk schema is migrated and reindexed."); }
 function clean(value, max) { return String(value || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max); }
