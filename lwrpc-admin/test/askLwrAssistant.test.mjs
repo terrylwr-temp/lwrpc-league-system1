@@ -93,21 +93,36 @@ test("guide browsing mirrors existing role entry points without changing RAG sco
   assert.equal(canBrowseLeagueDocument("player", "captains_guide"), false); assert.equal(canBrowseLeagueDocument("captain", "captains_guide"), true);
 });
 
-test("global entry, reusable drawer, guide browser, and standalone route remain player focused", async () => {
-  const [header, assistant, route, page, managerRoute] = await Promise.all([
+test("the shared AI trigger covers every authenticated header shell without changing guide access", async () => {
+  const [header, trigger, playerDashboard, captainDashboard, adminDashboard, scoreEntry, assistant, route, page, managerRoute] = await Promise.all([
     readFile(new URL("../app/components/AppHeader.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/components/AskLwrTrigger.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/design-preview/DesignPreviewView.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/design-preview/captain/CaptainDesignPreviewView.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/design-preview/admin/AdminDesignPreviewView.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/score-entry/[id]/page.js", import.meta.url), "utf8"),
     readFile(new URL("../app/components/AskLwrAssistant.js", import.meta.url), "utf8"),
     readFile(new URL("../app/api/ask-lwr/route.js", import.meta.url), "utf8"),
     readFile(new URL("../app/ask-lwr/page.js", import.meta.url), "utf8"),
     readFile(new URL("../app/api/ai-assistant/answer/route.js", import.meta.url), "utf8"),
   ]);
-  assert.match(header, /aria-label="Ask LWR Pickleball Club AI"/); assert.match(header, /name="sparkles"/); assert.doesNotMatch(header, /name="help"/);
+  assert.match(trigger, /aria-label="Ask LWR Pickleball Club AI"/); assert.match(trigger, /title="Ask LWR Pickleball Club AI"/); assert.match(trigger, /AskLwrAssistantDrawer/); assert.match(trigger, /useState/);
+  assert.match(header, /AskLwrTrigger role=\{role\}/); assert.doesNotMatch(header, /AskLwrAssistantDrawer|assistantOpen|name="sparkles"/);
+  for (const dashboard of [playerDashboard, captainDashboard, adminDashboard]) {
+    assert.match(dashboard, /AskLwrTrigger/);
+    assert.doesNotMatch(dashboard, /Icon name="help"|aria-label="Open User Guide"/);
+  }
+  assert.match(playerDashboard, /AskLwrTrigger role=\{role\}/); assert.match(captainDashboard, /AskLwrTrigger role=\{role\}/); assert.match(adminDashboard, /AskLwrTrigger role=\{dashboard\.role\}/);
+  assert.match(scoreEntry, /import AskLwrTrigger from "\.\.\/\.\.\/components\/AskLwrTrigger"/);
+  assert.match(scoreEntry, /const \[currentUserRole, setCurrentUserRole\] = useState\("captain"\)/);
+  assert.match(scoreEntry, /if \(user\?\.role\) setCurrentUserRole\(user\.role\)/);
+  assert.match(scoreEntry, /<AskLwrTrigger role=\{currentUserRole\} compact \/>/);
   for (const feature of ["AskLwrAssistantDrawer", "role=\"dialog\"", "aria-modal=\"true\"", "Finding the official answer", "Browse Guides &amp; Rules", "openGuideDocument", "LEAGUE_DOCUMENT_TYPES", "officialDocumentUrl"]) assert.match(assistant, new RegExp(feature));
   for (const diagnostic of ["semanticScore", "keywordScore", "exactScore", "authorityScore", "combinedScore", "totalTokens", "estimatedGenerationCostUsd"]) assert.doesNotMatch(assistant, new RegExp(diagnostic));
   assert.match(route, /authorizeAdminRequest\(req, "player"\)/); assert.match(route, /runPlayerOfficialAnswer/); assert.doesNotMatch(route, /OPENAI_API_KEY/);
   assert.match(page, /AskLwrAssistantPage/); assert.match(page, /requireRole\(router, "player"\)/);
   assert.match(managerRoute, /authorizeAdminRequest\(req, "league_manager"\)/);
-  assert.doesNotMatch(`${header}\n${assistant}\n${route}\n${page}`, /Ask LWR Pickleball AI/);
+  assert.doesNotMatch(`${header}\n${trigger}\n${playerDashboard}\n${captainDashboard}\n${adminDashboard}\n${assistant}\n${route}\n${page}`, /Ask LWR Pickleball AI/);
   assert.ok(assistant.indexOf("<form onSubmit={submit}") < assistant.indexOf("exchanges.map"));
   assert.ok(assistant.indexOf("exchanges.map") < assistant.indexOf("Browse Guides &amp; Rules"));
   assert.match(assistant, /\[\{ id: exchangeId, question: nextQuestion, pending: true \}, \.\.\.current\]/);
@@ -121,4 +136,13 @@ test("global entry, reusable drawer, guide browser, and standalone route remain 
   assert.match(assistant, /Ask a question about anything regarding LWR Pickleball Club or leagues/);
   assert.match(assistant, /href=\{source\.officialDocumentUrl\}/);
   assert.doesNotMatch(assistant, /#page=/);
+});
+
+test("the standard authenticated route shell retains the shared AI trigger", async () => {
+  const routes = [
+    "../app/members/page.js", "../app/ratings/page.js", "../app/teams/page.js", "../app/leagues/page.js", "../app/divisions/page.js",
+    "../app/scheduling/page.js", "../app/matches/[id]/page.js", "../app/scoring/page.js", "../app/standings/page.js", "../app/ask-lwr/page.js",
+  ];
+  const pages = await Promise.all(routes.map((route) => readFile(new URL(route, import.meta.url), "utf8")));
+  for (const pageSource of pages) assert.match(pageSource, /<AppHeader\b/);
 });

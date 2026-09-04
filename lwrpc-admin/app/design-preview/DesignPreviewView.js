@@ -8,6 +8,7 @@ import DashboardProfileDialog from "../components/DashboardProfileDialog";
 import DivisionStandingsBarChart from "../components/DivisionStandingsBarChart";
 import StandingsTiebreakDetails, { hasStandingsTiebreak } from "../components/StandingsTiebreakDetails";
 import LmsInstallButton from "../components/LmsInstallButton";
+import AskLwrTrigger from "../components/AskLwrTrigger";
 import styles from "./page.module.css";
 import { DashboardAppearanceControls, useDashboardAppearance } from "./DashboardAppearanceControls";
 import { standingsTiebreakLabels } from "../lib/standingsTiebreaks";
@@ -409,7 +410,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
         <header className={styles.desktopHeader}>
           <div><span>Player dashboard</span><h1>Welcome {firstName}</h1></div>
           <div className={styles.headerActions}>
-            <button type="button" className={styles.helpButton} onClick={() => dashboard.onOpenGuide?.()} aria-label="Open User Guide" title="User Guide"><Icon name="help"/></button>
+            <AskLwrTrigger role={role}/>
             <a className={styles.helpButton} href={`mailto:${dashboard.contactEmail || "info@lwrpickleballclub.com"}`} aria-label="Email League Management" title="Email League Management"><Icon name="mail"/></a>
             <div className={styles.userIdentity}><strong>{memberName}</strong><small>{roleLabel(role)}</small></div>
             <button type="button" className={styles.profileButton} onClick={() => setProfileOpen(true)} aria-haspopup="dialog">
@@ -421,7 +422,7 @@ export default function DesignPreviewView({ dashboard = {} }) {
         <header className={styles.mobileHeader}>
           <div className={styles.mobileLeading}><button type="button" className={styles.mobileMenuButton} onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation menu" aria-expanded={mobileMenuOpen} aria-controls="player-mobile-navigation"><Icon name="menu" size={19}/></button><a className={styles.mobileLogo} href="https://lwrpickleballclub.com" target="_blank" rel="noreferrer" aria-label="Open Lakewood Ranch Pickleball Club website"><Image src="/lms-icon-192.png" width={36} height={36} alt=""/></a></div>
           <div className={styles.mobileTitle}><strong>Player Dashboard</strong><span>{teamName}</span></div>
-          <div className={styles.mobileActions}><button type="button" onClick={() => dashboard.onOpenGuide?.()} aria-label="Open User Guide" title="User Guide"><Icon name="help" size={18}/></button><a href={`mailto:${dashboard.contactEmail || "info@lwrpickleballclub.com"}`} aria-label="Email League Management" title="Email League Management"><Icon name="mail" size={18}/></a><button type="button" onClick={() => setProfileOpen(true)} aria-label="Open profile"><Avatar person={member} initials={initialsFor(member)} imageUrl={displayedProfileImage} user/></button></div>
+          <div className={styles.mobileActions}><AskLwrTrigger role={role} compact/><a href={`mailto:${dashboard.contactEmail || "info@lwrpickleballclub.com"}`} aria-label="Email League Management" title="Email League Management"><Icon name="mail" size={18}/></a><button type="button" onClick={() => setProfileOpen(true)} aria-label="Open profile"><Avatar person={member} initials={initialsFor(member)} imageUrl={displayedProfileImage} user/></button></div>
         </header>
 
         {canUseCaptainDashboard && (

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import AskLwrTrigger from "../../components/AskLwrTrigger";
 import { getRequestAuthorizationHeaders, requireRole, supabase } from "../../lib/auth";
 import { formatDisplayDate, formatDisplayTime } from "../../lib/dateTime";
 import { splitNotificationRecipients } from "../../lib/notificationPreferences";
@@ -27,6 +28,7 @@ export default function MobileScoreEntryPage() {
   const [games, setGames] = useState([]);
   const [seasonRatings, setSeasonRatings] = useState([]);
   const [currentUserMember, setCurrentUserMember] = useState(null);
+  const [currentUserRole, setCurrentUserRole] = useState("captain");
   const [scoreDirty, setScoreDirty] = useState(false);
   const pendingGameUpdatesRef = useRef(new Map());
 
@@ -40,6 +42,7 @@ export default function MobileScoreEntryPage() {
 
   const checkAuth = useCallback(async function checkAuth() {
     const user = await requireRole(router, "captain");
+    if (user?.role) setCurrentUserRole(user.role);
     return !!user;
   }, [router]);
 
@@ -608,8 +611,11 @@ export default function MobileScoreEntryPage() {
       <div className="mx-auto max-w-xl">
 
         <div className="rounded-2xl bg-slate-900 p-5 text-white shadow">
-          <div className="text-xs uppercase tracking-wide text-slate-300">
-            Mobile Score Entry
+          <div className="flex items-start justify-between gap-4">
+            <div className="text-xs uppercase tracking-wide text-slate-300">
+              Mobile Score Entry
+            </div>
+            <AskLwrTrigger role={currentUserRole} compact />
           </div>
 
           <h1 className="mt-2 text-2xl font-bold">

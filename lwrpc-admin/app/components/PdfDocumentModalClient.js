@@ -317,7 +317,7 @@ export default function PdfDocumentModalClient({
             {!pageMode && <button type="button" onClick={printDocument} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">
               Print
             </button>}
-            {!pageMode && <button type="button" onClick={onClose} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">
+            {onClose && <button type="button" onClick={onClose} className="rounded-xl bg-white/10 px-4 py-2 text-sm font-bold text-white hover:bg-white/20">
               Close
             </button>}
           </div>

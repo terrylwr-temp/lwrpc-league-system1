@@ -65,8 +65,14 @@ test("viewer routes require player authorization and render the authenticated LM
   assert.match(pdfRoute, /storage\.from\(source\.storageBucket\)\.download\(source\.storagePath\)/);
   assert.match(viewer, /\/api\/official-document-viewer\/pdf\?citation=/);
   assert.match(viewer, /httpHeaders: headers/);
+  assert.match(viewer, /function closeViewer\(\)/);
+  assert.match(viewer, /window\.close\(\)/);
+  assert.match(viewer, /router\.replace\("\/ask-lwr"\)/);
+  assert.match(viewer, /<ViewerMessage[^>]+onClose=\{closeViewer\}/);
+  assert.match(viewer, />Close<\/button>/);
   assert.match(pdfClient, /file=\{document\.file \|\| document\.url\}/);
   assert.match(pdfClient, /setPageNumber\(initialPdfViewerPage\(initialPageNumber, pdf\.numPages\)\)/);
+  assert.match(pdfClient, /onClose && <button[^>]*>\s*Close/s);
   assert.match(playerAssistant, /officialDocumentViewerHref/);
   assert.match(playerAssistant, /officialDocumentUrl:\s*officialDocumentViewerHref\(source, userId\)/);
 });

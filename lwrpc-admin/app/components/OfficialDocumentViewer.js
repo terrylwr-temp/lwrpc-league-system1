@@ -2,11 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { getRequestAuthorizationHeaders } from "../lib/auth";
 
 const PdfDocumentModalClient = dynamic(() => import("./PdfDocumentModalClient"), { ssr: false });
 
 export default function OfficialDocumentViewer({ citation }) {
+  const router = useRouter();
   const [document, setDocument] = useState(null);
   const [error, setError] = useState("");
 
@@ -34,11 +36,21 @@ export default function OfficialDocumentViewer({ citation }) {
     return () => { active = false; };
   }, [citation]);
 
-  if (error) return <ViewerMessage title="Official LWR Pickleball Club Document" message={error}/>;
-  if (!document) return <ViewerMessage title="Official LWR Pickleball Club Document" message="Loading the validated official document..."/>;
-  return <PdfDocumentModalClient document={document} eyebrow="Official LWR Pickleball Club Document" initialPageNumber={document.initialPageNumber} pageMode/>;
+  function closeViewer() {
+    window.close();
+    window.setTimeout(() => {
+      if (window.closed) return;
+      if (window.history.length > 1) window.history.back();
+      else router.replace("/ask-lwr");
+    }, 100);
+  }
+
+  if (error) return <ViewerMessage title="Official LWR Pickleball Club Document" message={error} onClose={closeViewer}/>;
+  if (!document) return <ViewerMessage title="Official LWR Pickleball Club Document" message="Loading the validated official document..." onClose={closeViewer}/>;
+
+  return <PdfDocumentModalClient document={document} eyebrow="Official LWR Pickleball Club Document" initialPageNumber={document.initialPageNumber} onClose={closeViewer} pageMode/>;
 }
 
-function ViewerMessage({ title, message }) {
-  return <main className="min-h-screen bg-slate-100 p-4 md:p-8"><section className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><p className="text-xs font-black uppercase tracking-[.14em] text-blue-700">{title}</p><p className="mt-3 text-sm font-semibold leading-6 text-slate-700">{message}</p></section></main>;
+function ViewerMessage({ title, message, onClose }) {
+  return <main className="min-h-screen bg-slate-100 p-4 md:p-8"><section className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"><div className="flex items-start justify-between gap-4"><p className="text-xs font-black uppercase tracking-[.14em] text-blue-700">{title}</p><button type="button" onClick={onClose} className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-bold text-slate-700 transition hover:border-slate-500 hover:text-slate-950 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">Close</button></div><p className="mt-3 text-sm font-semibold leading-6 text-slate-700">{message}</p></section></main>;
 }

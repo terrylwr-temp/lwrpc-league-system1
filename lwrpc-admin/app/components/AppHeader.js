@@ -15,7 +15,7 @@ import adminShellStyles from "../design-preview/page.module.css";
 import { useDashboardAppearance } from "../design-preview/DashboardAppearanceControls";
 import DashboardProfileDialog from "./DashboardProfileDialog";
 import LmsInstallButton from "./LmsInstallButton";
-import { AskLwrAssistantDrawer } from "./AskLwrAssistant";
+import AskLwrTrigger from "./AskLwrTrigger";
 
 const iconPaths = {
   dashboard: <><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></>,
@@ -26,7 +26,6 @@ const iconPaths = {
   document: <><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5M9 13h6m-6 4h6"/></>,
   modules: <><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><path d="M17 14v6m-3-3h6"/></>,
   chart: <path d="M4 20V10m6 10V4m6 16v-7m4 7H2"/>,
-  sparkles: <><path d="m12 2 .9 4.1L17 7l-4.1.9L12 12l-.9-4.1L7 7l4.1-.9L12 2Z"/><path d="m19 14 .5 2.5L22 17l-2.5.5L19 20l-.5-2.5L16 17l2.5-.5L19 14Z"/><path d="m5 14 .6 2.4L8 17l-2.4.6L5 20l-.6-2.4L2 17l2.4-.6L5 14Z"/></>,
   mail: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></>,
   lock: <><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></>,
   external: <><path d="M14 4h6v6m0-6-9 9"/><path d="M18 13v6H5V6h6"/></>,
@@ -83,7 +82,6 @@ export default function AppHeader({
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const [logoutError, setLogoutError] = useState("");
-  const [assistantOpen, setAssistantOpen] = useState(false);
   const appearance = useDashboardAppearance();
 
   const dashboardLinks = useMemo(() => [
@@ -167,8 +165,6 @@ export default function AppHeader({
     setProfileOpen(false);
     router.push(path);
   }
-
-  const closeAssistant = useCallback(() => setAssistantOpen(false), []);
 
   function toggleGroup(key) {
     setOpenGroup((current) => current === key ? "" : key);
@@ -283,7 +279,7 @@ export default function AppHeader({
           <h1 className="mt-1 truncate text-[25px] font-black leading-tight tracking-[-.02em] text-[#102e64]">Welcome {firstName}</h1>
         </div>
         <div className="flex items-center gap-2.5">
-          <button type="button" onClick={() => setAssistantOpen(true)} className="grid h-11 w-11 place-items-center rounded-full border border-[#e3e8f0] bg-white text-[#536079] transition hover:-translate-y-0.5 hover:border-[#99b7ed] hover:text-[#1558d5]" aria-label="Ask LWR Pickleball Club AI" title="Ask LWR Pickleball Club AI"><Icon name="sparkles" size={20}/></button>
+          <AskLwrTrigger role={role}/>
           <a href={`mailto:${contactEmail}`} className="grid h-11 w-11 place-items-center rounded-full border border-[#e3e8f0] bg-white text-[#536079] transition hover:-translate-y-0.5 hover:border-[#99b7ed] hover:text-[#1558d5]" aria-label="Email League Management" title="Email League Management"><Icon name="mail" size={20}/></a>
           <div className="ml-2 grid min-w-[112px] text-right"><strong className="truncate text-[14px] font-black text-[#102e64]">{displayName}</strong><small className="text-[12px] font-semibold text-[#76839a]">{roleLabel(role)}</small></div>
           <button type="button" onClick={() => setProfileOpen(true)} className="grid h-12 w-12 place-items-center rounded-full border border-[#e3e8f0] bg-white p-1 shadow-sm transition hover:border-[#b8cbec] hover:shadow-md" aria-label="Open profile" aria-haspopup="dialog"><ProfileAvatar member={member} size={40}/></button>
@@ -293,7 +289,7 @@ export default function AppHeader({
       <header className="sticky top-0 z-30 -mx-4 -mt-4 mb-3 grid min-h-[72px] grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-[#dce4ef] bg-[#f7f9fc]/95 px-4 py-[env(safe-area-inset-top)] shadow-sm backdrop-blur-xl min-[701px]:hidden">
         <div className="flex items-center gap-2"><button type="button" onClick={() => setMenuOpen(true)} className="grid h-10 w-10 place-items-center rounded-full border border-[#dce4ef] bg-white text-[#102e64]" aria-label="Open navigation">{"\u2630"}</button><a href={clubWebsite} target="_blank" rel="noreferrer"><Image src={logoUrl} alt="" width={36} height={36} className="h-9 w-9 rounded-full bg-white object-contain" unoptimized/></a></div>
         <div className="min-w-0 text-center"><strong className="block truncate text-[13px] font-black text-[#102e64]">{title}</strong><span className="block truncate text-[14px] font-black text-[#102e64]">{contextLabel}</span></div>
-        <div className="flex items-center gap-1"><button type="button" onClick={() => setAssistantOpen(true)} className="grid h-9 w-9 place-items-center rounded-full border border-[#dce4ef] bg-white text-[#536079]" aria-label="Ask LWR Pickleball Club AI" title="Ask LWR Pickleball Club AI"><Icon name="sparkles" size={18}/></button><button type="button" onClick={() => setProfileOpen(true)} className="grid h-10 w-10 place-items-center rounded-full bg-transparent" aria-label="Open profile"><ProfileAvatar member={member} size={36}/></button></div>
+        <div className="flex items-center gap-1"><AskLwrTrigger role={role} compact/><button type="button" onClick={() => setProfileOpen(true)} className="grid h-10 w-10 place-items-center rounded-full bg-transparent" aria-label="Open profile"><ProfileAvatar member={member} size={36}/></button></div>
       </header>
 
       <section className={`mx-auto mb-6 max-w-[1180px] overflow-hidden rounded-2xl border border-blue-200 bg-gradient-to-r from-[#102e64] via-[#154b9b] to-[#1558d5] px-5 ${hidePageSectionLabel ? "py-4" : "py-5"} text-white shadow-[0_14px_32px_rgba(20,64,145,.16)] md:px-6`}>
@@ -314,7 +310,6 @@ export default function AppHeader({
       </div><footer className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 bg-slate-50 px-4 py-3 text-[12px] font-semibold text-slate-500"><span>Version {APP_VERSION}</span><span className="ml-auto">{"\u00A9"} {new Date().getFullYear()} {clubName}</span><LmsInstallButton iconOnly/></footer></section></div>}
 
       {false && logoutDialogOpen && <div className="fixed inset-0 z-[80] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="logout-dialog-title"><button type="button" className="absolute inset-0 bg-slate-950/65 backdrop-blur-sm" onClick={() => !logoutPending && setLogoutDialogOpen(false)} aria-label="Close logout dialog"/><section className="relative w-full max-w-md overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl"><div className="border-b border-slate-200 bg-slate-50 px-6 py-5"><span className="text-xs font-black uppercase tracking-[.16em] text-blue-700">Account</span><h2 id="logout-dialog-title" className="mt-1 text-2xl font-black text-slate-950">Log out of this device?</h2></div><div className="px-6 py-5"><div className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3"><strong className="block font-black text-slate-950">{displayName}</strong><span className="mt-1 block text-sm font-semibold text-slate-600">{roleLabel(role)}</span></div><p className="mt-4 text-sm font-semibold leading-6 text-slate-600">You will remain signed in on your other devices.</p>{logoutError && <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-800">{logoutError}</div>}<div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end"><button type="button" onClick={() => setLogoutDialogOpen(false)} disabled={logoutPending} className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-700 hover:bg-slate-50 disabled:opacity-50">Stay signed in</button><button type="button" onClick={logout} disabled={logoutPending} className="rounded-xl bg-red-600 px-5 py-3 text-sm font-black text-white hover:bg-red-700 disabled:opacity-60">{logoutPending ? "Logging out..." : "Log out"}</button></div></div></section></div>}
-      <AskLwrAssistantDrawer open={assistantOpen} onClose={closeAssistant} role={role}/>
       <DashboardProfileDialog isOpen={profileOpen} onClose={() => setProfileOpen(false)} member={member} role={role} membershipUrl={membershipUrl} onChangePassword={() => navigate(`/reset-password?returnTo=${encodeURIComponent(pathname)}`)} onSaveProfileImage={saveHeaderProfileImage} onLogout={logoutFromProfile}/>
     </>
   );
