@@ -1,6 +1,7 @@
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
+import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER, selectGoverningEvidence } from "./aiGoverningSources.js";
 
-export const INSUFFICIENT_EVIDENCE_ANSWER = "I couldn't find an official LWR Pickleball Club rule or guide that specifically addresses this question. Please contact League Management for clarification.";
+export { INSUFFICIENT_EVIDENCE_ANSWER };
 export const CONFLICT_ANSWER = "The supplied official LWR Pickleball Club sources appear to conflict on this point. Please contact League Management for clarification.";
 
 const MAX_SELECTED_CHUNKS = 4;
@@ -22,6 +23,14 @@ export function answerGenerationDiagnostic(error) {
 }
 
 export function selectAnswerEvidence(retrieval) {
+  if (!retrieval?.evidence?.sufficient) return [];
+  if (retrieval.suppliedEvidence?.some((candidate) => candidate.documentType === "usap_rulebook")) {
+    return selectGoverningEvidence(retrieval, { detectIntents: detectedEvidenceIntents, intentSupport, selectLocal: selectLwrAnswerEvidence, limit: MAX_SELECTED_CHUNKS });
+  }
+  return selectLwrAnswerEvidence(retrieval);
+}
+
+function selectLwrAnswerEvidence(retrieval) {
   if (!retrieval?.evidence?.sufficient) return [];
   const candidates = Array.isArray(retrieval.suppliedEvidence) ? retrieval.suppliedEvidence : [];
   const primary = candidates[0];
@@ -125,8 +134,8 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
   if (!retrieval?.evidence?.sufficient) return skippedAnswer(retrieval, clock, started);
 
   const selectedEvidence = selectAnswerEvidence(retrieval);
-  if (selectedEvidence.length === 0) return skippedAnswer(retrieval, clock, started);
   annotateEvidenceSelection(retrieval, selectedEvidence);
+  if (selectedEvidence.length === 0) return skippedAnswer(retrieval, clock, started);
   const sourcesStarted = clock();
   const sources = await resolveSources(supabase, selectedEvidence);
   const sourceResolutionMs = Math.round(clock() - sourcesStarted);
@@ -160,12 +169,12 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
       },
       instructions: [
         "You are the official Lakewood Ranch Pickleball Club AI Assistant.",
-        "Answer the user's question using ONLY the official LWR Pickleball Club evidence supplied with this request.",
+        "Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request.",
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
         "Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence.",
         "Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk.",
-        "When Primary / controlling rule evidence is supplied, it controls requirements. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence.",
+        "Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play.",
         "Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
       ].join(" "),
       input: [{ role: "user", content: answerPrompt(retrieval.request.question, selectedEvidence) }],
@@ -325,7 +334,7 @@ function classifyAnswerEvidence(evidence, question, bestIntentByChunkId = new Ma
     const intentSupportDetails = detectedEvidenceIntents(question).map((intent) => intentSupport(candidate, intent, question)).filter(Boolean);
     const bestFor = bestIntentByChunkId.get(candidate.chunkId) || [];
     const bestIntentReason = bestFor.length ? `Best direct evidence for ${bestFor.join(" + ")}` : "";
-    const annotated = { ...candidate, intentSupport: intentSupportDetails.map(({ intent }) => intent), intentSupportDetails, intentSelectionDiagnostic: bestIntentReason || "Optional material support retained" };
+    const annotated = { ...candidate, sourceClassification: governingSourceClass(candidate.documentType), intentSupport: intentSupportDetails.map(({ intent }) => intent), intentSupportDetails, intentSelectionDiagnostic: bestIntentReason || "Optional material support retained" };
     if (candidate === controlling) return { ...annotated, evidenceRole: "Primary / controlling", evidenceSelectionReason: [bestIntentReason, "Highest-authority selected rule evidence"].filter(Boolean).join(" · ") };
     if (index === 0 && !controlling) return { ...annotated, evidenceRole: "Primary", evidenceSelectionReason: bestIntentReason || "Highest-ranked direct evidence" };
     return { ...annotated, evidenceRole: "Supporting", evidenceSelectionReason: bestIntentReason || supportingReason(candidate, evidence[0], question) };
@@ -388,12 +397,17 @@ function annotateEvidenceSelection(retrieval, selectedEvidence) {
   for (const candidate of Array.isArray(retrieval?.suppliedEvidence) ? retrieval.suppliedEvidence : []) {
     const selected = selectedById.get(candidate.chunkId);
     const intentSupportDetails = intents.map((intent) => intentSupport(candidate, intent, question)).filter(Boolean);
-    Object.assign(candidate, selected || {
+    const selectionMetadata = selected ? { ...selected, content: candidate.content } : null;
+    Object.assign(candidate, selectionMetadata || {
       evidenceRole: "Not selected for model",
       intentSupport: intentSupportDetails.map(({ intent }) => intent),
       intentSupportDetails,
       intentSelectionDiagnostic: intentSupportDetails.length ? "Direct intent support was present, but stronger selected evidence fully covered that intent" : "No direct intent support",
-      evidenceSelectionReason: intents.length && !intentSupportDetails.length
+      evidenceSelectionReason: candidate.governingDiagnostics?.some((detail) => detail.overridden)
+        ? "Excluded USAP evidence: directly applicable LWR rule controls the same issue"
+        : candidate.governingDiagnostics
+        ? "Not selected: no direct applicable passage or stronger evidence covers this issue"
+        : intents.length && !intentSupportDetails.length
         ? rejectedIntentReason(candidate, intents)
         : "Direct but less-specific evidence was not material beyond the selected official evidence",
     });
@@ -413,7 +427,7 @@ function rejectedIntentReason(candidate, intents) {
 }
 
 function answerPrompt(question, evidence) {
-  return `User question:\n${question}\n\nOfficial LWR evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Direct official evidence"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
+  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Direct official evidence"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
 }
 
 function cleanCitationDetail(value) {

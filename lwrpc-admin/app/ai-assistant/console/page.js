@@ -39,6 +39,8 @@ function Chunks({ chunks }) {
     <div className="mt-2 grid grid-cols-2 gap-1 text-xs font-semibold text-slate-600 sm:grid-cols-5"><span>Semantic {f(c.semanticScore)}</span><span>Keyword {f(c.keywordScore)}</span><span>Exact {f(c.exactScore)}</span><span>Authority {f(c.authorityScore)}</span><span>Context {f(c.contextScore)}</span></div>
     <div className="mt-2 rounded-lg bg-slate-50 p-2 text-xs font-semibold text-slate-700">
       {c.evidenceRole && <p><b>Model evidence selection:</b> {c.evidenceRole}{c.evidenceSelectionReason ? ` · ${c.evidenceSelectionReason}` : ""}</p>}
+      {c.sourceClassification && <p className="mt-1"><b>Governing source:</b> {c.sourceClassification}</p>}
+      {c.governingDiagnostics?.length ? <p className="mt-1"><b>Applicability / precedence:</b> {c.governingDiagnostics.map(({ intent, reason }) => `${intent}: ${reason}`).join(" · ")}</p> : null}
       {c.intentSupport?.length ? <p className="mt-1"><b>Selected intent support:</b> {c.intentSupport.join(" + ")}</p> : null}
       {c.intentSupportDetails?.length ? <p className="mt-1"><b>Intent-support detail:</b> {c.intentSupportDetails.map(({ intent, reason }) => `${intent}: ${reason}`).join(" · ")}</p> : null}
       {c.intentSelectionDiagnostic ? <p className="mt-1"><b>Intent selection diagnostic:</b> {c.intentSelectionDiagnostic}</p> : null}

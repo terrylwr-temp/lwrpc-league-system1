@@ -42,7 +42,7 @@ test("selects direct high-quality evidence, grounds the Responses request, and a
   assert.equal(request.text.format.strict, true);
   assert.deepEqual(request.text.format.schema.required, ["answer", "conflict"]);
   assert.deepEqual(request.text.format.schema.properties, { answer: { type: "string" }, conflict: { type: "boolean" } });
-  assert.match(request.instructions, /ONLY the official LWR Pickleball Club evidence/i);
+  assert.match(request.instructions, /ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence/i);
   assert.match(request.instructions, /Do not use general pickleball knowledge/i);
   assert.match(request.instructions, /Answer the question directly first/i);
   assert.match(request.instructions, /Supporting guidance may explain procedure but must never override/i);
@@ -168,6 +168,11 @@ test("uses the raw LMS-0703 production compound candidates to select only the di
     fetchImpl: async () => completedResponse({ answer: "The selected evidence covers both official timing questions.", conflict: false }),
   });
   assert.deepEqual(answer.sources.map(({ chunkId }) => chunkId), ["production-weekday-important-dates-p1", "production-rule-5-4-p4"]);
+  const withUsap = selectAnswerEvidence({ ...retrieval, suppliedEvidence: [
+    stage4Chunk("usap-general-match", .80, { documentId: "usap", documentType: "usap_rulebook", authorityRank: 2, content: "Players must follow the match rules and serve in the correct order." }),
+    ...retrieval.suppliedEvidence,
+  ] });
+  assert.deepEqual(withUsap.map(({ chunkId }) => chunkId), ["production-weekday-important-dates-p1", "production-rule-5-4-p4"]);
   const scoreEntry = retrieval.suppliedEvidence.find(({ chunkId }) => chunkId === "production-enter-verify-scores-p9");
   assert.equal(scoreEntry.evidenceRole, "Not selected for model");
   assert.deepEqual(scoreEntry.intentSupport, []);

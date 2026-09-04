@@ -1,4 +1,5 @@
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
+import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER } from "./aiGoverningSources.js";
 
 export const ASK_ABOUT_SCOPES = Object.freeze(["all", "weekday", "primetime", "saturday", "lms_help"]);
 export const RETRIEVAL_WEIGHTS = Object.freeze({ semantic: 0.47, keyword: 0.24, exact: 0.19, authority: 0.06, context: 0.04 });
@@ -86,7 +87,7 @@ export function evaluateEvidence(chunks, threshold) {
   const top = chunks[0];
   const signal = top && (top.semanticScore >= .12 || top.keywordScore >= .05 || top.exactScore > 0);
   const sufficient = Boolean(top && top.combinedScore >= threshold && signal);
-  return Object.freeze({ sufficient, threshold, topScore: top?.combinedScore ?? null, stage4Fallback: sufficient ? "Evidence meets the configured threshold." : "I couldn't find an official LWR Pickleball Club rule or guide that specifically addresses this question. Please contact League Management for clarification." });
+  return Object.freeze({ sufficient, threshold, topScore: top?.combinedScore ?? null, stage4Fallback: sufficient ? "Evidence meets the configured threshold." : INSUFFICIENT_EVIDENCE_ANSWER });
 }
 
 export function conservativeConflictDiagnostic(chunks) {
@@ -104,7 +105,7 @@ export function toPgVector(values) {
 function candidateFromRow(row, request) {
   const candidate = {
     chunkId: row.chunk_id, documentId: row.document_id, documentVersionId: row.document_version_id, documentTitle: row.document_title,
-    documentType: row.document_type, documentAuthorityRank: Number(row.document_authority_rank), documentScopeKind: row.document_scope_kind,
+    documentType: row.document_type, sourceClassification: governingSourceClass(row.document_type), documentAuthorityRank: Number(row.document_authority_rank), documentScopeKind: row.document_scope_kind,
     pageNumber: row.page_number, sectionLabel: row.section_label || "", heading: row.heading || "", ruleNumber: row.rule_number || "", content: row.content || "",
     semanticScore: number(row.semantic_score), keywordScore: number(row.keyword_score), exactScore: number(row.exact_score), authorityScore: number(row.authority_score), contextScore: number(row.context_score), combinedScore: number(row.combined_score), vectorRank: row.vector_rank ?? null, keywordRank: row.keyword_rank ?? null, exactMatch: Boolean(row.exact_match),
   };

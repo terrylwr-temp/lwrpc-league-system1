@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../components/AppHeader";
 import LoadingScreen from "../components/LoadingScreen";
 import { getRequestAuthorizationHeaders, requireRole } from "../lib/auth";
-import { documentMetadataForm, INITIAL_DOCUMENT_METADATA_FORM } from "../lib/aiDocumentMetadata";
+import { defaultDocumentAuthorityRank, documentMetadataForm, INITIAL_DOCUMENT_METADATA_FORM } from "../lib/aiDocumentMetadata";
 
 const TYPE_OPTIONS = [
   ["league_rules", "Official League Rules"],
   ["league_supplement", "League Supplemental Rules"],
+  ["usap_rulebook", "USA Pickleball Rulebook"],
   ["captain_guide", "Captain Guide"],
   ["player_guide", "Player Guide"],
   ["lms_guide", "LMS Help Guide"],
@@ -243,7 +244,7 @@ export default function AiAssistantManagementPage() {
                 <Field label="Description (optional)"><textarea value={form.description} onChange={(event) => updateForm("description", event.target.value)} className={`${inputClass} min-h-20`} /></Field>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Document type"><select value={form.documentType} onChange={(event) => updateForm("documentType", event.target.value)} className={inputClass}>{TYPE_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></Field>
-                  <Field label="Authority rank"><input type="number" min="1" max="99" value={form.authorityRank} onChange={(event) => updateForm("authorityRank", event.target.value)} className={inputClass} /><small className="mt-1 block text-xs font-semibold text-slate-500">1 is highest authority.</small></Field>
+                  <Field label="Authority rank"><input type="number" min="1" max="99" value={form.authorityRank} onChange={(event) => updateForm("authorityRank", event.target.value)} className={inputClass} /><small className="mt-1 block text-xs font-semibold text-slate-500">Direct applicability comes first. LWR rules: 1; USA Pickleball: 2; guides support procedure.</small></Field>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <Field label="Ask About applicability"><select value={form.scopeKind} onChange={(event) => updateForm("scopeKind", event.target.value)} className={inputClass}><option value="all">All leagues</option><option value="lms_help">LMS Help</option><option value="league">Specific league</option><option value="division">Specific division</option></select></Field>
@@ -280,6 +281,7 @@ export default function AiAssistantManagementPage() {
 function updateMetadataForm(setter, key, value) {
   setter((current) => {
     const next = { ...current, [key]: value };
+    if (key === "documentType") next.authorityRank = String(defaultDocumentAuthorityRank(value));
     if (key === "scopeKind") {
       if (["all", "lms_help"].includes(value)) Object.assign(next, { leagueId: "", divisionId: "" });
       if (value === "league") next.divisionId = "";

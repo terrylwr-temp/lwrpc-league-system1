@@ -1,5 +1,5 @@
 export const AI_DOCUMENT_TYPES = Object.freeze([
-  "league_rules", "league_supplement", "captain_guide", "player_guide", "lms_guide", "other",
+  "league_rules", "league_supplement", "usap_rulebook", "captain_guide", "player_guide", "lms_guide", "other",
 ]);
 export const AI_DOCUMENT_SCOPE_KINDS = Object.freeze(["all", "lms_help", "league", "division"]);
 export const INITIAL_DOCUMENT_METADATA_FORM = Object.freeze({
@@ -10,6 +10,10 @@ const TYPES = new Set(AI_DOCUMENT_TYPES);
 const SCOPES = new Set(AI_DOCUMENT_SCOPE_KINDS);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+export function defaultDocumentAuthorityRank(documentType) {
+  return documentType === "usap_rulebook" ? 2 : ["league_rules", "league_supplement"].includes(documentType) ? 1 : 3;
+}
+
 export function normalizeDocumentMetadata(source) {
   const documentType = text(value(source, "documentType"), 80);
   const scopeKind = text(value(source, "scopeKind"), 40);
@@ -19,7 +23,7 @@ export function normalizeDocumentMetadata(source) {
   if (!TYPES.has(documentType)) throw validationError("Select a valid document type.");
   if (!SCOPES.has(scopeKind)) throw validationError("Select a valid applicability scope.");
 
-  const authorityRank = Number.parseInt(String(value(source, "authorityRank") || ""), 10);
+  const authorityRank = Number.parseInt(String(value(source, "authorityRank") || (documentType === "usap_rulebook" ? defaultDocumentAuthorityRank(documentType) : "")), 10);
   if (!Number.isInteger(authorityRank) || authorityRank < 1 || authorityRank > 99) throw validationError("Authority rank must be between 1 and 99.");
 
   const description = text(value(source, "description"), 5001);
