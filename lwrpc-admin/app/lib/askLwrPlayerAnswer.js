@@ -3,12 +3,31 @@ import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
 const PERSONAL_OPERATIONAL_PATTERNS = [
   /\b(?:what|which|who|when|where)\b[\s\S]{0,80}\b(?:my|our|i|we)\b[\s\S]{0,80}\b(?:team|roster|standing|place|match|score|season\s+dupr|court)\b/i,
   /\b(?:who\s+do\s+we\s+play|our\s+next\s+match|my\s+(?:next|last)\s+match|my\s+season\s+dupr|my\s+roster|my\s+team(?:'s)?\s+(?:place|standing|record))\b/i,
+  /\bwhat\s+place\s+(?:are|is)\s+(?:we|i)\b/i,
   /\b(?:how\s+many\s+matches\s+have\s+we\s+won|what\s+was\s+our\s+last\s+score)\b/i,
 ];
 
 export function isUnsupportedOperationalQuestion(question) {
   const value = String(question || "").replace(/\s+/g, " ").trim();
   return PERSONAL_OPERATIONAL_PATTERNS.some((pattern) => pattern.test(value));
+}
+
+export function playerRetrievalBody(body = {}, role = "player") {
+  const context = body?.context && typeof body.context === "object" ? body.context : {};
+  return {
+    question: body.question,
+    askAbout: "all",
+    // Current-page fields only boost relevance. Scope IDs are deliberately not
+    // trusted from the browser, and the authenticated role is authoritative.
+    context: { currentPath: context.currentPath, featureModule: context.featureModule, userRole: role },
+  };
+}
+
+export async function runPlayerOfficialAnswer({ body, role, supabase, retrieveOfficialEvidence, generateOfficialAnswer }) {
+  if (isUnsupportedOperationalQuestion(body?.question)) return { retrieval: null, result: playerFallbackResult() };
+  const retrieval = await retrieveOfficialEvidence({ supabase, body: playerRetrievalBody(body, role) });
+  const answer = await generateOfficialAnswer({ retrieval, supabase });
+  return { retrieval, result: toPlayerAnswerResult(answer) };
 }
 
 export function playerFallbackResult() {

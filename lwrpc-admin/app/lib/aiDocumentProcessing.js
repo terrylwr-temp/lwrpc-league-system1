@@ -431,7 +431,7 @@ export async function processAiDocumentVersion({ supabase, versionId, actorMembe
   });
 
   try {
-    if (!aiAssistantConfig.enabled) throw new Error("Ask LWR Pickleball AI processing is disabled. Set LWR_AI_ENABLED=true on the server.");
+    if (!aiAssistantConfig.enabled) throw new Error("Ask LWR Pickleball Club AI processing is disabled. Set LWR_AI_ENABLED=true on the server.");
     if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured on the server.");
 
     const { data: fileBlob, error: downloadError } = await supabase.storage

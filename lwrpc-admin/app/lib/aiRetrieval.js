@@ -4,7 +4,7 @@ export const ASK_ABOUT_SCOPES = Object.freeze(["all", "weekday", "primetime", "s
 export const RETRIEVAL_WEIGHTS = Object.freeze({ semantic: 0.47, keyword: 0.24, exact: 0.19, authority: 0.06, context: 0.04 });
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);
-const QUERY_FRAMING_TERMS = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "mean", "meaning", "work", "works", "requirement", "requirements", "explain", "explained", "tell", "show", "say", "says", "define", "definition", "describe", "described", "please", "someone", "somebody", "anyone", "anybody", "we", "us", "our", "i", "me", "my", "you", "your", "they", "them", "their", "he", "she", "it", "this", "that", "got", "get", "gets", "halfway", "through", "then", "just", "really", "t", "game", "games", "match", "matches", "type", "using", "use", "used", "brand", "playing", "need", "must", "required", "deadline", "due", "latest", "early", "long", "before"]);
+const QUERY_FRAMING_TERMS = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "mean", "meaning", "work", "works", "requirement", "requirements", "explain", "explained", "tell", "show", "say", "says", "define", "definition", "describe", "described", "please", "someone", "somebody", "anyone", "anybody", "we", "us", "our", "i", "me", "my", "you", "your", "they", "them", "their", "he", "she", "it", "this", "that", "got", "get", "gets", "halfway", "through", "then", "just", "really", "t", "game", "games", "match", "matches", "type", "kind", "using", "use", "used", "brand", "playing", "need", "must", "required", "deadline", "due", "latest", "early", "long", "before"]);
 const COMMON_QUERY_STOPWORDS = new Set(["a", "an", "and", "about", "at", "be", "by", "for", "from", "have", "in", "of", "on", "or", "the", "to", "with"]);
 
 export function normalizeRetrievalRequest(body = {}) {
@@ -27,7 +27,7 @@ export function normalizeRetrievalRequest(body = {}) {
 }
 
 export async function retrieveOfficialEvidence({ supabase, body, embedQuery = createQueryEmbedding, clock = performance.now.bind(performance) }) {
-  if (!aiAssistantConfig.enabled) throw new Error("Ask LWR Pickleball AI retrieval is disabled. Set LWR_AI_ENABLED=true on the server.");
+  if (!aiAssistantConfig.enabled) throw new Error("Ask LWR Pickleball Club AI retrieval is disabled. Set LWR_AI_ENABLED=true on the server.");
   assertEmbeddingConfiguration();
   const request = normalizeRetrievalRequest(body);
   const started = clock();

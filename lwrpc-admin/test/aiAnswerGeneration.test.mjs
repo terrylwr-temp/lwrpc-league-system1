@@ -4,7 +4,7 @@ import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
 process.env.OPENAI_API_KEY = "test-key";
-const { CONFLICT_ANSWER, INSUFFICIENT_EVIDENCE_ANSWER, OfficialAnswerModelError, citationLabel, generateOfficialAnswer, resolveOfficialSources, selectAnswerEvidence, validateTrustedSources } = await import("../app/lib/aiAnswerGeneration.js");
+const { CONFLICT_ANSWER, INSUFFICIENT_EVIDENCE_ANSWER, OfficialAnswerModelError, citationLabel, citationPageNumber, generateOfficialAnswer, pageAwareOfficialDocumentUrl, resolveOfficialSources, selectAnswerEvidence, validateTrustedSources } = await import("../app/lib/aiAnswerGeneration.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 
 test("skips the answer model and returns the exact fallback when Stage 3 evidence is insufficient", async () => {
@@ -119,6 +119,18 @@ test("builds concise trusted citation labels without duplicated rule metadata", 
   assert.equal(citationLabel({ documentTitle: "LWR Pickleball Club Code of Conduct", ruleNumber: "1", heading: "Rule 1", pageNumber: 1 }), "LWR Pickleball Club Code of Conduct — Rule 1 — Page 1");
   assert.equal(citationLabel({ documentTitle: "LWR Pickleball Club DUPR League Rules", ruleNumber: "5.7", heading: "Rule 5.7 — Incomplete Matches", pageNumber: 5 }), "LWR Pickleball Club DUPR League Rules — Rule 5.7 — Incomplete Matches — Page 5");
   assert.equal(citationLabel({ documentTitle: "LWR Pickleball Club DUPR Captains Guide", sectionLabel: "League Fees and Waiver", pageNumber: 10 }), "LWR Pickleball Club DUPR Captains Guide — League Fees and Waiver — Page 10");
+});
+
+test("adds a browser-only PDF page fragment only for a valid cited chunk page", () => {
+  const signedUrl = "https://storage.example.test/object/sign/ai-official-documents/captains-guide.pdf?token=real";
+  assert.equal(pageAwareOfficialDocumentUrl(signedUrl, 1), `${signedUrl}#page=1`);
+  assert.equal(pageAwareOfficialDocumentUrl(signedUrl, 10), `${signedUrl}#page=10`);
+  assert.equal(pageAwareOfficialDocumentUrl(signedUrl, 17), `${signedUrl}#page=17`);
+  assert.equal(pageAwareOfficialDocumentUrl(signedUrl, null), signedUrl);
+  assert.equal(pageAwareOfficialDocumentUrl(signedUrl, 0), signedUrl);
+  assert.equal(pageAwareOfficialDocumentUrl(signedUrl, "not-a-page"), signedUrl);
+  assert.equal(citationPageNumber("10"), 10);
+  assert.equal(citationPageNumber(-1), null);
 });
 
 test("classifies a native Responses API refusal without exposing its text", async () => {

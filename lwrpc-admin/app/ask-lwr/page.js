@@ -11,6 +11,6 @@ export default function AskLwrPage() {
   const router = useRouter();
   const [role, setRole] = useState("");
   useEffect(() => { (async () => { const user = await requireRole(router, "player"); if (user) setRole(user.role); })(); }, [router]);
-  if (!role) return <LoadingScreen subtitle="Loading Ask LWR Pickleball AI..."/>;
-  return <main className="min-h-screen bg-slate-100 p-4 md:p-6"><div className="mx-auto max-w-7xl"><AppHeader title="Ask LWR Pickleball AI" subtitle="Official LWR Pickleball Club rules and guides."/><AskLwrAssistantPage role={role}/></div></main>;
+  if (!role) return <LoadingScreen subtitle="Loading Ask LWR Pickleball Club AI..."/>;
+  return <main className="min-h-screen bg-slate-100 p-4 md:p-6"><div className="mx-auto max-w-7xl"><AppHeader title="Ask LWR Pickleball Club AI" subtitle="Official LWR Pickleball Club rules and guides."/><AskLwrAssistantPage role={role}/></div></main>;
 }

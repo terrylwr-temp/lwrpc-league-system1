@@ -228,7 +228,7 @@ export default function AiAssistantManagementPage() {
       <div className="mx-auto max-w-7xl">
         <AppHeader
           title="AI Assistant Management"
-          subtitle="Manage official source PDFs used by Ask LWR Pickleball AI. Documents are never searchable until a ready version is explicitly activated."
+          subtitle="Manage official source PDFs used by Ask LWR Pickleball Club AI. Documents are never searchable until a ready version is explicitly activated."
           actions={<button type="button" onClick={() => router.push("/")} className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-black text-white hover:bg-emerald-400">Admin Dashboard</button>}
         />
 

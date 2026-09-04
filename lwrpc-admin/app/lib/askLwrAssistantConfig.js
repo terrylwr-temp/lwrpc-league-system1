@@ -30,7 +30,9 @@ export function assistantPageContext(pathname, role) {
   } else if (/standing/.test(normalizedPath)) {
     featureModule = "Standings";
     suggestions = STANDINGS_SUGGESTIONS;
-  } else if (/captain/.test(normalizedPath) || ["captain", "league_manager", "commissioner"].includes(role)) {
+  } else if (/members/.test(normalizedPath)) {
+    featureModule = "Member Administration";
+  } else if (/captain/.test(normalizedPath)) {
     featureModule = "Captain tools";
     suggestions = MATCH_SETUP_SUGGESTIONS;
   } else if (/score/.test(normalizedPath)) {
@@ -39,7 +41,20 @@ export function assistantPageContext(pathname, role) {
     featureModule = "Roster management";
   }
 
+  if (["captain", "club_pro", "league_manager", "commissioner"].includes(role) && suggestions === GENERAL_SUGGESTIONS) suggestions = MATCH_SETUP_SUGGESTIONS;
   return Object.freeze({ currentPath, featureModule, suggestions });
 }
 
 export const ASK_LWR_INITIAL_COPY = "Ask me about LWR Pickleball Club league rules, DUPR requirements, scoring, Match Setup, Captain procedures, league formats, guides, and other information in our official documents.";
+
+// These mirror the existing dashboard entry points. Guide browsing is separate
+// from official-document retrieval eligibility and never constrains RAG.
+export function visibleDashboardGuideKeys(role) {
+  if (["league_manager", "commissioner"].includes(role)) return ["player_guide_pdf", "captain_guide_pdf", "admin_guide_pdf"];
+  if (["captain", "club_pro"].includes(role)) return ["player_guide_pdf", "captain_guide_pdf"];
+  return ["player_guide_pdf"];
+}
+
+export function canBrowseLeagueDocument(role, documentTypeKey) {
+  return documentTypeKey !== "captains_guide" || ["captain", "club_pro", "league_manager", "commissioner"].includes(role);
+}

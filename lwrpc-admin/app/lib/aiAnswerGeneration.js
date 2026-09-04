@@ -141,13 +141,14 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
     }
     const { data: signed, error: signError } = await supabase.storage.from(version.storage_bucket).createSignedUrl(version.storage_path, signedUrlSeconds);
     if (signError || !signed?.signedUrl) throw new Error(`Official source link could not be created: ${signError?.message || "unknown Storage error"}`);
-    const officialDocumentUrl = chunk.pageNumber ? `${signed.signedUrl}#page=${encodeURIComponent(chunk.pageNumber)}` : signed.signedUrl;
+    const pageNumber = citationPageNumber(chunk.pageNumber);
+    const officialDocumentUrl = pageAwareOfficialDocumentUrl(signed.signedUrl, pageNumber);
     return {
       documentId: chunk.documentId,
       documentVersionId: chunk.documentVersionId,
       chunkId: chunk.chunkId,
       documentTitle: chunk.documentTitle || document.title,
-      pageNumber: chunk.pageNumber || null,
+      pageNumber,
       ruleNumber: chunk.ruleNumber || "",
       sectionLabel: chunk.sectionLabel || "",
       heading: chunk.heading || "",
@@ -173,9 +174,24 @@ export function citationLabel(chunk) {
   const label = cleanCitationDetail(chunk.heading || chunk.sectionLabel || "");
   const labelWithoutRepeatedRule = stripLeadingRuleReference(label, chunk.ruleNumber);
   if (labelWithoutRepeatedRule && !details.some((detail) => sameCitationDetail(detail, labelWithoutRepeatedRule))) details.push(labelWithoutRepeatedRule);
-  const page = cleanCitationDetail(chunk.pageNumber ? `Page ${chunk.pageNumber}` : "");
+  const pageNumber = citationPageNumber(chunk.pageNumber);
+  const page = cleanCitationDetail(pageNumber ? `Page ${pageNumber}` : "");
   if (page && !details.some((detail) => sameCitationDetail(detail, page))) details.push(page);
   return [chunk.documentTitle || "Official LWR Pickleball Club document", ...details].join(" — ");
+}
+
+export function citationPageNumber(value) {
+  const pageNumber = Number(value);
+  return Number.isInteger(pageNumber) && pageNumber >= 1 ? pageNumber : null;
+}
+
+export function pageAwareOfficialDocumentUrl(signedUrl, pageNumber) {
+  const url = String(signedUrl || "");
+  const validPageNumber = citationPageNumber(pageNumber);
+  if (!validPageNumber) return url;
+  // The fragment is never part of the Storage signature. Replace any fragment
+  // only after signing so exactly one browser-side PDF page directive remains.
+  return `${url.split("#", 1)[0]}#page=${validPageNumber}`;
 }
 
 function skippedAnswer(retrieval, clock, started) {

@@ -44,7 +44,7 @@ as $$
       -- requiring an unrelated intent word from the question.
       trim(regexp_replace(
         left(trim(coalesce(p_query_text, '')), 1000),
-        '\m(?:what|which|who|when|where|why|how|does|do|did|is|are|was|were|can|could|would|should|will|mean|meaning|work|works|requirement|requirements|explain|explained|tell|show|say|says|define|definition|describe|described|please|someone|somebody|anyone|anybody|we|us|our|i|me|my|you|your|they|them|their|he|she|it|this|that|got|get|gets|halfway|through|then|just|really|t|game|games|match|matches|need|must|required|deadline|due|latest|early|long|before)\M',
+        '\m(?:what|which|who|when|where|why|how|does|do|did|is|are|was|were|can|could|would|should|will|mean|meaning|work|works|requirement|requirements|explain|explained|tell|show|say|says|define|definition|describe|described|please|someone|somebody|anyone|anybody|we|us|our|i|me|my|you|your|they|them|their|he|she|it|this|that|got|get|gets|halfway|through|then|just|really|t|game|games|match|matches|type|kind|using|use|used|brand|playing|need|must|required|deadline|due|latest|early|long|before)\M',
         ' ',
         'gi'
       )) as keyword_query_text,
@@ -132,7 +132,7 @@ as $$
   query_tokens as (
     select token, ordinal_position,
       (
-        token not in ('team', 'teams', 'player', 'players', 'game', 'games', 'league', 'leagues', 'match', 'matches', 'score', 'scores', 'rule', 'rules', 'guide', 'guides', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'does', 'do', 'did', 'is', 'are', 'was', 'were', 'can', 'could', 'would', 'should', 'will', 'mean', 'meaning', 'work', 'works', 'requirement', 'requirements', 'explain', 'explained', 'tell', 'show', 'say', 'says', 'define', 'definition', 'describe', 'described', 'please', 'someone', 'somebody', 'anyone', 'anybody', 'another', 'we', 'us', 'our', 'i', 'me', 'my', 'you', 'your', 'they', 'them', 'their', 'he', 'she', 'it', 'this', 'that', 'got', 'get', 'gets', 'halfway', 'through', 'then', 'just', 'really', 't', 'type', 'using', 'use', 'used', 'brand', 'playing')
+        token not in ('team', 'teams', 'player', 'players', 'game', 'games', 'league', 'leagues', 'match', 'matches', 'score', 'scores', 'rule', 'rules', 'guide', 'guides', 'what', 'which', 'who', 'when', 'where', 'why', 'how', 'does', 'do', 'did', 'is', 'are', 'was', 'were', 'can', 'could', 'would', 'should', 'will', 'mean', 'meaning', 'work', 'works', 'requirement', 'requirements', 'explain', 'explained', 'tell', 'show', 'say', 'says', 'define', 'definition', 'describe', 'described', 'please', 'someone', 'somebody', 'anyone', 'anybody', 'another', 'we', 'us', 'our', 'i', 'me', 'my', 'you', 'your', 'they', 'them', 'their', 'he', 'she', 'it', 'this', 'that', 'got', 'get', 'gets', 'halfway', 'through', 'then', 'just', 'really', 't', 'type', 'kind', 'using', 'use', 'used', 'brand', 'playing')
         and to_tsvector('english', token) <> ''::tsvector
       ) as is_distinctive
     from input i
