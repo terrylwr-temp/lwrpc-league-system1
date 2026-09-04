@@ -55,7 +55,7 @@ as $$
       websearch_to_tsquery('english', coalesce(nullif(ni.keyword_query_text, ''), ni.query_text)) as keyword_ts_query,
       (
         ni.query_lower ~ '\m(?:injur(?:y|ed|ies)?|hurt|medical|illness|emergency|cannot|unable|can''?t|won''?t|stop(?:ped|ping)?|quit|leave)\M'
-        and ni.query_lower ~ '\m(?:players?|participants?|teams?|games?|matches?|play(?:ing)?|finish|continue|complete)\M'
+        and ni.query_lower ~ '\m(?:players?|participants?|teams?|games?|match(?:es)?|play(?:ing)?|finish|continue|complete)\M'
       ) as continuation_intent,
       (
         ni.query_lower ~ '\m(?:when|deadline|due|latest|early)\M'

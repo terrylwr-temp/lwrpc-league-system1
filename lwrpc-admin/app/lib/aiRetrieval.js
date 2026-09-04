@@ -3,6 +3,10 @@ import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER } from "./aiGovernin
 
 export const ASK_ABOUT_SCOPES = Object.freeze(["all", "weekday", "primetime", "saturday", "lms_help"]);
 export const RETRIEVAL_WEIGHTS = Object.freeze({ semantic: 0.47, keyword: 0.24, exact: 0.19, authority: 0.06, context: 0.04 });
+// Stage 4 needs a small, bounded look beyond the model-evidence handoff when
+// deciding whether a directly applicable LWR rule controls a USAP fallback.
+// Production medical-issue evidence placed the controlling rule at rank 11.
+export const AUTHORITY_REVIEW_LIMIT = 12;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);
 const QUERY_FRAMING_TERMS = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "mean", "meaning", "work", "works", "requirement", "requirements", "explain", "explained", "tell", "show", "say", "says", "define", "definition", "describe", "described", "please", "someone", "somebody", "anyone", "anybody", "we", "us", "our", "i", "me", "my", "you", "your", "they", "them", "their", "he", "she", "it", "this", "that", "got", "get", "gets", "halfway", "through", "then", "just", "really", "t", "game", "games", "match", "matches", "type", "kind", "using", "use", "used", "brand", "playing", "need", "must", "required", "deadline", "due", "latest", "early", "long", "before"]);
@@ -59,12 +63,16 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     typoNormalizations,
     terminologyExpansionEnabled: isDocumentGroundedMatchConfiguration(retrievalQuery, data || []),
   };
-  const candidates = (data || []).map((row) => candidateFromRow(row, retrievalRequest));
+  const candidates = (data || []).map((row, index) => ({ ...candidateFromRow(row, retrievalRequest), stage3Rank: index + 1 }));
   const suppliedEvidence = candidates.slice(0, aiAssistantConfig.retrievalLimit);
+  const authorityReviewCandidates = candidates.slice(0, AUTHORITY_REVIEW_LIMIT);
+  authorityReviewCandidates.forEach((candidate, index) => {
+    candidate.authorityReview = { included: true, rank: index + 1, limit: AUTHORITY_REVIEW_LIMIT };
+  });
   const evidence = evaluateEvidence(suppliedEvidence, aiAssistantConfig.evidenceThreshold);
   return {
-    request, candidates, suppliedEvidence, evidence, conflict: conservativeConflictDiagnostic(suppliedEvidence),
-    environment: { embeddingModel: embedding.model || aiAssistantConfig.embeddingModel, embeddingDimensions: aiAssistantConfig.embeddingDimensions, evidenceThreshold: aiAssistantConfig.evidenceThreshold, retrievalLimit: aiAssistantConfig.retrievalLimit },
+    request, candidates, suppliedEvidence, authorityReviewCandidates, evidence, conflict: conservativeConflictDiagnostic(suppliedEvidence),
+    environment: { embeddingModel: embedding.model || aiAssistantConfig.embeddingModel, embeddingDimensions: aiAssistantConfig.embeddingDimensions, evidenceThreshold: aiAssistantConfig.evidenceThreshold, retrievalLimit: aiAssistantConfig.retrievalLimit, authorityReviewLimit: AUTHORITY_REVIEW_LIMIT },
     metrics: { embeddingInputTokens: finiteOrNull(embedding.inputTokens), embeddingMs: Math.round(embeddingDone - started), retrievalMs: Math.round(clock() - embeddingDone), totalMs: Math.round(clock() - started) },
   };
 }
@@ -136,7 +144,7 @@ export function normalizedFtsTerms(question) {
 export function continuationExpansionPhrases(question) {
   const value = String(question || "").toLowerCase();
   const hasInterruption = /\b(?:injur(?:y|ed|ies)?|hurt|medical|illness|emergency|cannot|unable|can['’]?t|won['’]?t|stop(?:ped|ping)?|quit|leave)\b/.test(value);
-  const hasActivity = /\b(?:players?|participants?|teams?|games?|matches?|play(?:ing)?|finish|continue|complete)\b/.test(value);
+  const hasActivity = /\b(?:players?|participants?|teams?|games?|match(?:es)?|play(?:ing)?|finish|continue|complete)\b/.test(value);
   return hasInterruption && hasActivity ? ["cannot complete"] : [];
 }
 

@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
-const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, applyTypoNormalizations, continuationExpansionPhrases, deriveTypoNormalizations, detectRetrievalIntent, evaluateEvidence, intentDiagnostic, isDocumentGroundedMatchConfiguration, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, terminologyDiagnostic, toPgVector } = await import("../app/lib/aiRetrieval.js");
+const { ASK_ABOUT_SCOPES, AUTHORITY_REVIEW_LIMIT, RETRIEVAL_WEIGHTS, applyTypoNormalizations, continuationExpansionPhrases, deriveTypoNormalizations, detectRetrievalIntent, evaluateEvidence, intentDiagnostic, isDocumentGroundedMatchConfiguration, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, terminologyDiagnostic, toPgVector } = await import("../app/lib/aiRetrieval.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 const vector = Array.from({ length: 1536 }, (_, i) => i / 1000);
 
@@ -23,6 +23,8 @@ test("uses one compatible embedding and the protected hybrid RPC without chat ge
   });
   assert.equal(called.name, "search_ai_official_chunks"); assert.equal(called.args.p_query_embedding.split(",").length, 1536);
   assert.equal(output.suppliedEvidence.length, 1); assert.equal(output.evidence.sufficient, true);
+  assert.equal(output.authorityReviewCandidates.length, 1); assert.deepEqual(output.authorityReviewCandidates[0].authorityReview, { included: true, rank: 1, limit: 12 });
+  assert.equal(output.candidates[0].stage3Rank, 1); assert.equal(output.environment.authorityReviewLimit, 12);
   assert.equal(output.candidates[0].exactMatchReason, "Rule number: 4.5");
   assert.deepEqual(output.candidates[0].ftsDiagnostic, { normalizedTerms: ["rule", "4", "5"], retrievalExpansion: [], typoNormalization: [], matched: true, candidateRank: 1 });
   assert.equal(toPgVector(vector).split(",").length, 1536);
@@ -180,6 +182,8 @@ test("uses a generic interruption expansion without injecting an official outcom
   assert.match(sql, /continuation_intent/); assert.match(sql, /phraseto_tsquery\('english', 'cannot complete'\)/);
   assert.deepEqual(continuationExpansionPhrases("Someone got hurt halfway through the game and can't finish. What do we do?"), ["cannot complete"]);
   assert.deepEqual(continuationExpansionPhrases("A player was injured and can't continue."), ["cannot complete"]);
+  assert.deepEqual(continuationExpansionPhrases("Medical issue during match"), ["cannot complete"]);
+  assert.deepEqual(continuationExpansionPhrases("Medical issue during matches"), ["cannot complete"]);
   assert.deepEqual(continuationExpansionPhrases("What happens if somebody has a medical issue during a game?"), ["cannot complete"]);
   assert.deepEqual(continuationExpansionPhrases("What is a retired game?"), []);
   assert.deepEqual(continuationExpansionPhrases("When is an unfinished game a forfeit?"), []);
@@ -189,6 +193,16 @@ test("uses a generic interruption expansion without injecting an official outcom
   });
   assert.equal(output.candidates[0].exactMatchReason, "Retrieval expansion: cannot complete");
   assert.deepEqual(output.candidates[0].ftsDiagnostic.retrievalExpansion, ["cannot complete"]);
+});
+
+test("LMS-0708 keeps the singular and plural match detector identical in Stage 3 SQL", async () => {
+  const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
+  const migration = await readFile(new URL("../supabase-ai-assistant-lms-0708-medical-authority-review.sql", import.meta.url), "utf8");
+  assert.match(sql, /match\(\?:es\)\?/);
+  assert.doesNotMatch(sql, /matches\?\|play/);
+  assert.equal(AUTHORITY_REVIEW_LIMIT, 12);
+  assert.match(migration, /pg_get_functiondef/);
+  assert.match(migration, /match\(\?:es\)\?/);
 });
 
 test("retrieval route is League Manager protected and has no answer-model path", async () => {

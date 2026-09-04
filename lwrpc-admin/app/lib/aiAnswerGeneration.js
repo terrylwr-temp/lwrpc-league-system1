@@ -24,8 +24,14 @@ export function answerGenerationDiagnostic(error) {
 
 export function selectAnswerEvidence(retrieval) {
   if (!retrieval?.evidence?.sufficient) return [];
-  if (retrieval.suppliedEvidence?.some((candidate) => candidate.documentType === "usap_rulebook")) {
-    return selectGoverningEvidence(retrieval, { detectIntents: detectedEvidenceIntents, intentSupport, selectLocal: selectLwrAnswerEvidence, limit: MAX_SELECTED_CHUNKS });
+  const authorityReviewCandidates = Array.isArray(retrieval.authorityReviewCandidates) && retrieval.authorityReviewCandidates.length
+    ? retrieval.authorityReviewCandidates
+    : retrieval.suppliedEvidence;
+  if (authorityReviewCandidates?.some((candidate) => candidate.documentType === "usap_rulebook")) {
+    // The review set is bounded before this point. It is used only to decide
+    // applicability and authority; the selected evidence sent to GPT remains
+    // capped by MAX_SELECTED_CHUNKS.
+    return selectGoverningEvidence({ ...retrieval, suppliedEvidence: authorityReviewCandidates }, { detectIntents: detectedEvidenceIntents, intentSupport, selectLocal: selectLwrAnswerEvidence, limit: MAX_SELECTED_CHUNKS });
   }
   return selectLwrAnswerEvidence(retrieval);
 }
@@ -394,7 +400,9 @@ function annotateEvidenceSelection(retrieval, selectedEvidence) {
   const selectedById = new Map(selectedEvidence.map((candidate) => [candidate.chunkId, candidate]));
   const intents = detectedEvidenceIntents(retrieval?.request?.question);
   const question = retrieval?.request?.question;
-  for (const candidate of Array.isArray(retrieval?.suppliedEvidence) ? retrieval.suppliedEvidence : []) {
+  const candidates = [...(Array.isArray(retrieval?.suppliedEvidence) ? retrieval.suppliedEvidence : []), ...(Array.isArray(retrieval?.authorityReviewCandidates) ? retrieval.authorityReviewCandidates : [])]
+    .filter((candidate, index, collection) => collection.findIndex((item) => item.chunkId === candidate.chunkId) === index);
+  for (const candidate of candidates) {
     const selected = selectedById.get(candidate.chunkId);
     const intentSupportDetails = intents.map((intent) => intentSupport(candidate, intent, question)).filter(Boolean);
     const selectionMetadata = selected ? { ...selected, content: candidate.content } : null;

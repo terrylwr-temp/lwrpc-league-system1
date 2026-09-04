@@ -98,6 +98,58 @@ test("LMS-0706 a guide cannot independently override a USAP playing rule, even a
   assert.deepEqual(ids(selected), ["usap"]);
 });
 
+test("LMS-0708 authority review keeps an unrelated LWR rule from suppressing USAP fallback", () => {
+  const usapEvidence = usap("A player must not volley while touching the non-volley zone.", { ruleNumber: "11.A", combinedScore: .72 });
+  const unrelatedLwr = lwr("Captains must submit lineups through Match Setup before the scheduled match.", { ruleNumber: "5.4", combinedScore: .41 });
+  const input = { ...retrieval("Can I volley in the kitchen?", [usapEvidence]), authorityReviewCandidates: [usapEvidence, unrelatedLwr] };
+  assert.deepEqual(ids(selectAnswerEvidence(input)), ["usap"]);
+});
+
+test("LMS-0708 production-shaped medical density fixture selects the rank-11 LWR rule before model generation", async () => {
+  const question = "Medical issue during match";
+  const usapMedical = (id, ruleNumber, score, content) => evidence(id, "usap_rulebook", content, { ruleNumber, pageNumber: ruleNumber === "21.C.9" ? 59 : 58, documentAuthorityRank: 2, combinedScore: score, semanticScore: 0, keywordScore: 0, exactScore: .85 });
+  const topEight = [
+    usapMedical("usap-21-c-8", "21.C.8", .5199, "21.C.8 Medical Time-Out Validity. A medical time-out must be requested for a valid condition."),
+    usapMedical("usap-21-c-1", "21.C.1", .4927, "21.C.1 A player may request a medical time-out before a match begins."),
+    usapMedical("usap-21-c", "21.C", .4875, "21.C Medical Time-Outs. A player may request a medical time-out under this section."),
+    usapMedical("usap-21-c-5", "21.C.5", .4836, "21.C.5 A medical time-out begins when the referee announces the time-out."),
+    usapMedical("usap-21-c-10", "21.C.10", .4830, "21.C.10 An invalid medical condition may result in a technical warning."),
+    usapMedical("usap-21-c-3", "21.C.3", .4660, "21.C.3 Each player is allowed one medical time-out per match."),
+    usapMedical("usap-21-c-2", "21.C.2", .4611, "21.C.2 A medical time-out may be requested between games."),
+    usapMedical("usap-21-c-9", "21.C.9", .4518, "21.C.9 Match Retirement. A match retirement is imposed when a player is not able to continue play after the 15-minute medical time-out period expires. A player may use their available standard time-outs to allow more time before the match must be retired (Rule 21.A.4). In doubles, if the retiring player's partner decides to continue, the match will resume following all applicable rules. The retiring player must leave the playing surface."),
+  ];
+  const lwr57 = evidence("lwr-5-7", "league_rules", "5.7. Incomplete Matches: Forfeits vs. Retirements: If a player cannot complete a match for any reason, the scoring and DUPR eligibility depend on the current score: 5.7.1. Under 6 Points (Forfeit): If neither team has reached 6 points, the match is a Forfeit, recorded as 0-0, and excluded from DUPR. 5.7.2. 6+ Points (Retired): If at least one team has 6 or more points, the match is recorded as Retired. Current scores are entered, and results will be posted to DUPR. 5.7.3. Note: In both scenarios, the opposing team is credited with the win.", { ruleNumber: "5.7", pageNumber: 5, documentAuthorityRank: 1, combinedScore: .4242, keywordScore: .25, exactScore: .85 });
+  const review = [
+    ...topEight,
+    usapMedical("usap-21-c-6", "21.C.6", .4481, "21.C.6 A medical time-out may not exceed 15 minutes."),
+    usapMedical("usap-21-c-7", "21.C.7", .4328, "21.C.7 The referee starts the medical time-out when play stops."),
+    lwr57,
+    usapMedical("usap-21-a-4", "21.A.4", .4145, "21.A.4 A player may use a standard time-out as allowed by this rule."),
+  ];
+  const input = { ...retrieval(question, topEight), authorityReviewCandidates: review };
+  const { answer, request } = await generate(input, "LWR Rule 5.7 controls the recorded outcome.");
+  assert.equal(input.suppliedEvidence.length, 8);
+  assert.equal(input.authorityReviewCandidates.indexOf(lwr57), 10, "LWR Rule 5.7 is Stage 3 rank 11 in the authority-review window");
+  assert.equal(lwr57.sourceClassification, "lwr_controlling");
+  assert.match(lwr57.governingDiagnostics[0].reason, /Direct local passage/);
+  const usap219 = input.authorityReviewCandidates.find(({ ruleNumber }) => ruleNumber === "21.C.9");
+  assert.equal(usap219.sourceClassification, "usap_governing_fallback");
+  assert.equal(usap219.governingDiagnostics[0].overridden, true);
+  assert.deepEqual(ids(answer.selectedEvidence), ["lwr-5-7"]);
+  assert.deepEqual(ids(answer.sources), ["lwr-5-7"]);
+  assert.match(request.input[0].content, /Under 6 Points \(Forfeit\)/);
+  assert.doesNotMatch(request.input[0].content, /15-minute medical/);
+});
+
+test("LMS-0708 preserves the explicit medical continuation control question", () => {
+  const lwr57 = lwr("5.7. Incomplete Matches: Forfeits vs. Retirements: If a player cannot complete a match for any reason, the scoring and DUPR eligibility depend on the current score. Under 6 Points (Forfeit): if neither team has reached 6 points, the match is a Forfeit. 6+ Points (Retired): if at least one team has 6 or more points, the match is recorded as Retired.", { ruleNumber: "5.7", pageNumber: 5, combinedScore: .4878 });
+  const usap219 = usap("21.C.9 Match Retirement. A match retirement is imposed when a player is not able to continue play after the 15-minute medical time-out period expires. A player may use their available standard time-outs to allow more time before the match must be retired (Rule 21.A.4).", { ruleNumber: "21.C.9", pageNumber: 59, combinedScore: .4646 });
+  const input = { ...retrieval("What happens if a player has a medical issue and cannot finish the game?", [usap219, lwr57]), authorityReviewCandidates: [usap219, lwr57] };
+  const selected = selectAnswerEvidence(input);
+  assert.deepEqual(ids(selected), ["lwr"]);
+  assert.equal(selected[0].sourceClassification, "lwr_controlling");
+});
+
 test("LMS-0706 mixed intents retain LWR lineup and USAP volley rules independently", async () => {
   const input = retrieval("When do I submit my lineup and can I volley in the kitchen?", [lwr("Match Setup lineup must be submitted no later than three days before the scheduled match.", { ruleNumber: "5.4" }), usap("Players must not volley while touching the kitchen.")]);
   const { answer, request } = await generate(input, "Submit three days before the match. Do not volley in the kitchen.");
