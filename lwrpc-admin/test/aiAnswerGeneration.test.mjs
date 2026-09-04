@@ -4,7 +4,7 @@ import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
 process.env.OPENAI_API_KEY = "test-key";
-const { CONFLICT_ANSWER, INSUFFICIENT_EVIDENCE_ANSWER, OfficialAnswerModelError, generateOfficialAnswer, resolveOfficialSources, selectAnswerEvidence, validateTrustedSources } = await import("../app/lib/aiAnswerGeneration.js");
+const { CONFLICT_ANSWER, INSUFFICIENT_EVIDENCE_ANSWER, OfficialAnswerModelError, citationLabel, generateOfficialAnswer, resolveOfficialSources, selectAnswerEvidence, validateTrustedSources } = await import("../app/lib/aiAnswerGeneration.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 
 test("skips the answer model and returns the exact fallback when Stage 3 evidence is insufficient", async () => {
@@ -44,7 +44,10 @@ test("selects direct high-quality evidence, grounds the Responses request, and a
   assert.deepEqual(request.text.format.schema.properties, { answer: { type: "string" }, conflict: { type: "boolean" } });
   assert.match(request.instructions, /ONLY the official LWR Pickleball Club evidence/i);
   assert.match(request.instructions, /Do not use general pickleball knowledge/i);
+  assert.match(request.instructions, /Answer the question directly first/i);
+  assert.match(request.instructions, /Supporting guidance may explain procedure but must never override/i);
   assert.match(request.input[0].content, /Evidence 1/);
+  assert.match(request.input[0].content, /Primary/);
   assert.match(request.input[0].content, /official rule evidence/);
   assert.doesNotMatch(request.input[0].content, /tangential evidence/i);
   assert.equal(result.answer, "A player must follow the supplied official rule.");
@@ -65,6 +68,57 @@ test("returns a conservative clarification instead of a definitive model answer 
   assert.equal(result.answer, CONFLICT_ANSWER);
   assert.equal(result.conflict.requiresClarification, true);
   assert.equal(result.sources.length, 2);
+});
+
+test("prunes merely related deadline material while retaining same-rule and explicitly requested procedural support", () => {
+  const deadline = retrievalFor("When does Match Setup need to be completed?", [
+    stage4Chunk("rule-deadline", .66, { documentType: "league_rules", authorityRank: 1, ruleNumber: "3.4.1", intent: "Concrete timing requirement in numbered rule", content: "Match Setup must be completed no later than three days before the scheduled match." }),
+    stage4Chunk("guide-overview", .63, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", intent: "General timing language", content: "Match Setup timing and overview for captains." }),
+    stage4Chunk("guide-steps", .61, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", intent: "Procedural instructions", content: "Use the Match Setup screen to select and save the lineup." }),
+    stage4Chunk("related-rule", .59, { documentId: "rules-2", documentType: "league_rules", authorityRank: 1, ruleNumber: "6.2", intent: "General timing language", content: "Match Setup reminders for another requirement." }),
+  ]);
+  const selectedDeadline = selectAnswerEvidence(deadline);
+  assert.deepEqual(selectedDeadline.map((chunk) => chunk.chunkId), ["rule-deadline"]);
+  assert.equal(selectedDeadline[0].evidenceRole, "Primary / controlling");
+
+  const procedural = retrievalFor("When and how do I complete Match Setup?", [
+    deadline.suppliedEvidence[0],
+    stage4Chunk("guide-procedure", .63, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", intent: "Procedural instructions", content: "Click Match Setup and save the lineup." }),
+  ]);
+  const selectedProcedural = selectAnswerEvidence(procedural);
+  assert.deepEqual(selectedProcedural.map((chunk) => chunk.chunkId), ["rule-deadline", "guide-procedure"]);
+  assert.deepEqual(selectedProcedural.map((chunk) => chunk.evidenceRole), ["Primary / controlling", "Supporting"]);
+});
+
+test("marks a selected rule as controlling when a more relevant guide also supplies procedural support", () => {
+  const selected = selectAnswerEvidence(retrievalFor("How do I complete Match Setup?", [
+    stage4Chunk("guide-primary", .68, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", intent: "Procedural instructions", content: "Click Match Setup, select the lineup, and save." }),
+    stage4Chunk("rule-control", .63, { documentId: "rules", documentType: "league_rules", authorityRank: 1, ruleNumber: "3.4.1", intent: "Concrete timing requirement in numbered rule", content: "Match Setup must be completed no later than three days before the match." }),
+  ]));
+  assert.deepEqual(selected.map((chunk) => chunk.chunkId), ["guide-primary", "rule-control"]);
+  assert.deepEqual(selected.map((chunk) => chunk.evidenceRole), ["Supporting", "Primary / controlling"]);
+  assert.equal(selected[1].evidenceSelectionReason, "Highest-authority selected rule evidence");
+});
+
+test("preserves compact primary evidence for the five production Stage 4 evaluation cases", () => {
+  const cases = [
+    ["Someone got hurt halfway through the game and can't finish. What do we do?", { documentType: "league_rules", authorityRank: 1, ruleNumber: "5.7", content: "A player who cannot finish an incomplete match is recorded according to the score." }],
+    ["What does NR mean?", { documentType: "league_rules", authorityRank: 1, ruleNumber: "4.1.1", content: "A Reliability Factor below 29 is Not Rated (NR)." }],
+    ["What type of balls will we be using?", { documentId: "captains", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", content: "Match Balls: Franklin Outdoor X-40 Optic balls." }],
+    ["When does Match Setup need to be completed?", { documentType: "league_rules", authorityRank: 1, ruleNumber: "3.4.1", intent: "Concrete timing requirement in numbered rule", content: "Match Setup must be completed three days before the scheduled match." }],
+    ["Can I yell at or insult another player during a match?", { documentId: "conduct", documentType: "other", authorityRank: 2, ruleNumber: "1", intent: "Behavioral standard and prohibition", content: "Respectful conduct is required; abusive language is prohibited." }],
+  ];
+  for (const [question, options] of cases) {
+    const selected = selectAnswerEvidence(retrievalFor(question, [stage4Chunk(`case-${options.ruleNumber || options.documentId}`, .58, options)]));
+    assert.equal(selected.length, 1, question);
+    assert.equal(selected[0].chunkId, `case-${options.ruleNumber || options.documentId}`, question);
+  }
+});
+
+test("builds concise trusted citation labels without duplicated rule metadata", () => {
+  assert.equal(citationLabel({ documentTitle: "LWR Pickleball Club Code of Conduct", ruleNumber: "1", heading: "Rule 1", pageNumber: 1 }), "LWR Pickleball Club Code of Conduct — Rule 1 — Page 1");
+  assert.equal(citationLabel({ documentTitle: "LWR Pickleball Club DUPR League Rules", ruleNumber: "5.7", heading: "Rule 5.7 — Incomplete Matches", pageNumber: 5 }), "LWR Pickleball Club DUPR League Rules — Rule 5.7 — Incomplete Matches — Page 5");
+  assert.equal(citationLabel({ documentTitle: "LWR Pickleball Club DUPR Captains Guide", sectionLabel: "League Fees and Waiver", pageNumber: 10 }), "LWR Pickleball Club DUPR Captains Guide — League Fees and Waiver — Page 10");
 });
 
 test("classifies a native Responses API refusal without exposing its text", async () => {
@@ -153,6 +207,19 @@ function chunk(chunkId, combinedScore, exactScore, keywordScore, content) {
 
 function sourceFor(chunk) {
   return { documentId: chunk.documentId, documentVersionId: chunk.documentVersionId, chunkId: chunk.chunkId, documentTitle: chunk.documentTitle, pageNumber: chunk.pageNumber, ruleNumber: chunk.ruleNumber, sectionLabel: chunk.sectionLabel, heading: chunk.heading, citation: `${chunk.documentTitle} — Rule ${chunk.ruleNumber} — Page ${chunk.pageNumber}`, officialDocumentUrl: `https://storage.example.test/${chunk.chunkId}#page=${chunk.pageNumber}` };
+}
+
+function retrievalFor(question, suppliedEvidence) {
+  return { request: { question }, evidence: { sufficient: true, threshold: .35 }, suppliedEvidence };
+}
+
+function stage4Chunk(chunkId, combinedScore, options = {}) {
+  return {
+    ...chunk(chunkId, combinedScore, .85, .5, options.content || "Official evidence"),
+    documentId: options.documentId || "rules", documentVersionId: "version-1", documentType: options.documentType || "league_rules", documentAuthorityRank: options.authorityRank ?? 1,
+    ruleNumber: options.ruleNumber ?? "3.4.1", sectionLabel: options.sectionLabel || "Match Setup", heading: options.heading || "Match Setup",
+    intentDiagnostic: { evidenceMatch: options.intent || "None" },
+  };
 }
 
 function completedResponse({ answer, conflict, usage = {} }) {

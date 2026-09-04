@@ -24,12 +24,15 @@ export function answerGenerationDiagnostic(error) {
 export function selectAnswerEvidence(retrieval) {
   if (!retrieval?.evidence?.sufficient) return [];
   const candidates = Array.isArray(retrieval.suppliedEvidence) ? retrieval.suppliedEvidence : [];
-  const top = candidates[0];
-  if (!top) return [];
-  const cutoff = Math.max(Number(retrieval.evidence.threshold) || aiAssistantConfig.evidenceThreshold, Number(top.combinedScore) - DIRECT_RELEVANCE_DELTA);
-  return candidates.filter((candidate, index) => index === 0 || (
-    Number(candidate.combinedScore) >= cutoff && hasDirectRelevance(candidate)
-  )).slice(0, MAX_SELECTED_CHUNKS);
+  const primary = candidates[0];
+  if (!primary) return [];
+  const cutoff = Math.max(Number(retrieval.evidence.threshold) || aiAssistantConfig.evidenceThreshold, Number(primary.combinedScore) - DIRECT_RELEVANCE_DELTA);
+  const selected = [primary, ...candidates.slice(1).filter((candidate) => (
+    Number(candidate.combinedScore) >= cutoff
+    && hasDirectRelevance(candidate)
+    && materiallyContributes(candidate, primary, retrieval.request?.question)
+  ))].slice(0, MAX_SELECTED_CHUNKS);
+  return classifyAnswerEvidence(selected, retrieval.request?.question);
 }
 
 export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = fetch, clock = performance.now.bind(performance), resolveSources = resolveOfficialSources }) {
@@ -38,6 +41,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
 
   const selectedEvidence = selectAnswerEvidence(retrieval);
   if (selectedEvidence.length === 0) return skippedAnswer(retrieval, clock, started);
+  annotateEvidenceSelection(retrieval, selectedEvidence);
   const sourcesStarted = clock();
   const sources = await resolveSources(supabase, selectedEvidence);
   const sourceResolutionMs = Math.round(clock() - sourcesStarted);
@@ -75,8 +79,9 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
         "Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence.",
-        "Use clear conversational language for a player or captain, normally one to three short paragraphs. Do not add citations, sources, links, or source labels; the server attaches verified citations.",
-        "If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
+        "Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk.",
+        "When Primary / controlling rule evidence is supplied, it controls requirements. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence.",
+        "Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
       ].join(" "),
       input: [{ role: "user", content: answerPrompt(retrieval.request.question, selectedEvidence) }],
       }),
@@ -163,10 +168,13 @@ export function validateTrustedSources(evidence, sources) {
 
 export function citationLabel(chunk) {
   const details = [];
-  if (chunk.ruleNumber) details.push(`Rule ${chunk.ruleNumber}`);
-  if (chunk.heading) details.push(chunk.heading);
-  else if (chunk.sectionLabel) details.push(chunk.sectionLabel);
-  if (chunk.pageNumber) details.push(`Page ${chunk.pageNumber}`);
+  const rule = cleanCitationDetail(chunk.ruleNumber ? `Rule ${chunk.ruleNumber}` : "");
+  if (rule) details.push(rule);
+  const label = cleanCitationDetail(chunk.heading || chunk.sectionLabel || "");
+  const labelWithoutRepeatedRule = stripLeadingRuleReference(label, chunk.ruleNumber);
+  if (labelWithoutRepeatedRule && !details.some((detail) => sameCitationDetail(detail, labelWithoutRepeatedRule))) details.push(labelWithoutRepeatedRule);
+  const page = cleanCitationDetail(chunk.pageNumber ? `Page ${chunk.pageNumber}` : "");
+  if (page && !details.some((detail) => sameCitationDetail(detail, page))) details.push(page);
   return [chunk.documentTitle || "Official LWR Pickleball Club document", ...details].join(" — ");
 }
 
@@ -188,8 +196,102 @@ function hasDirectRelevance(candidate) {
   return Number(candidate.exactScore) > 0 || Number(candidate.keywordScore) > 0 || candidate.intentDiagnostic?.evidenceMatch && candidate.intentDiagnostic.evidenceMatch !== "None";
 }
 
+function materiallyContributes(candidate, primary, question) {
+  if (sameRule(candidate, primary) && searchableEvidenceText(candidate) !== searchableEvidenceText(primary)) return true;
+  if (isMoreAuthoritative(candidate, primary)) return true;
+  if (questionRequestsProcedure(question) && candidate.intentDiagnostic?.evidenceMatch === "Procedural instructions") return true;
+  return addsQuestionSignal(candidate, primary, question);
+}
+
+function classifyAnswerEvidence(evidence, question) {
+  const controlling = evidence
+    .map((candidate, index) => ({ candidate, index }))
+    .filter(({ candidate }) => isControllingRule(candidate))
+    .sort((left, right) => authorityRank(left.candidate) - authorityRank(right.candidate) || left.index - right.index)[0]?.candidate;
+  return evidence.map((candidate, index) => {
+    if (candidate === controlling) return { ...candidate, evidenceRole: "Primary / controlling", evidenceSelectionReason: "Highest-authority selected rule evidence" };
+    if (index === 0 && !controlling) return { ...candidate, evidenceRole: "Primary", evidenceSelectionReason: "Highest-ranked direct evidence" };
+    return { ...candidate, evidenceRole: "Supporting", evidenceSelectionReason: supportingReason(candidate, evidence[0], question) };
+  });
+}
+
+function sameRule(candidate, primary) {
+  return Boolean(candidate?.documentId && candidate.documentId === primary?.documentId && candidate?.ruleNumber && candidate.ruleNumber === primary?.ruleNumber);
+}
+
+function isMoreAuthoritative(candidate, primary) {
+  const candidateRank = authorityRank(candidate);
+  const primaryRank = authorityRank(primary);
+  return Number.isFinite(candidateRank) && Number.isFinite(primaryRank) && candidateRank < primaryRank;
+}
+
+function authorityRank(candidate) {
+  const rank = Number(candidate?.documentAuthorityRank);
+  return Number.isFinite(rank) ? rank : Number.POSITIVE_INFINITY;
+}
+
+function isControllingRule(candidate) {
+  return ["league_rules", "league_supplement"].includes(String(candidate?.documentType || ""));
+}
+
+function questionRequestsProcedure(question) {
+  return /\b(?:how\s+(?:do|can|to)|steps?|click|button|screen|where\s+(?:do|can))\b/i.test(String(question || ""));
+}
+
+function addsQuestionSignal(candidate, primary, question) {
+  const primaryText = searchableEvidenceText(primary);
+  const candidateText = searchableEvidenceText(candidate);
+  return questionTerms(question).some((term) => containsWholeTerm(candidateText, term) && !containsWholeTerm(primaryText, term));
+}
+
+function containsWholeTerm(text, term) {
+  return new RegExp(`\\b${String(term).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(String(text || ""));
+}
+
+function questionTerms(question) {
+  const ignored = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "a", "an", "and", "about", "at", "be", "by", "for", "from", "in", "of", "on", "or", "the", "to", "with", "i", "we", "you", "my", "our", "this", "that", "it", "need", "needs", "completed", "complete"]);
+  return [...new Set((String(question || "").toLowerCase().match(/[a-z0-9]+/g) || []).filter((term) => term.length >= 3 && !ignored.has(term)))];
+}
+
+function searchableEvidenceText(candidate) {
+  return [candidate?.sectionLabel, candidate?.heading, candidate?.ruleNumber, candidate?.content].filter(Boolean).join(" ").toLowerCase();
+}
+
+function supportingReason(candidate, primary, question) {
+  if (sameRule(candidate, primary)) return "Continuation or companion material from the same rule";
+  if (isMoreAuthoritative(candidate, primary)) return "Higher-authority rule evidence required to control requirements";
+  if (questionRequestsProcedure(question) && candidate.intentDiagnostic?.evidenceMatch === "Procedural instructions") return "Direct procedural guidance requested by the question";
+  return "Adds a direct question signal not present in the primary evidence";
+}
+
+function annotateEvidenceSelection(retrieval, selectedEvidence) {
+  const selectedById = new Map(selectedEvidence.map((candidate) => [candidate.chunkId, candidate]));
+  for (const candidate of Array.isArray(retrieval?.suppliedEvidence) ? retrieval.suppliedEvidence : []) {
+    const selected = selectedById.get(candidate.chunkId);
+    Object.assign(candidate, selected || {
+      evidenceRole: "Not selected for model",
+      evidenceSelectionReason: "Related retrieval candidate did not materially contribute beyond the selected official evidence",
+    });
+  }
+}
+
 function answerPrompt(question, evidence) {
-  return `User question:\n${question}\n\nOfficial LWR evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1}]\nDocument: ${chunk.documentTitle}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
+  return `User question:\n${question}\n\nOfficial LWR evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
+}
+
+function cleanCitationDetail(value) {
+  return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function stripLeadingRuleReference(label, ruleNumber) {
+  if (!label || !ruleNumber) return label;
+  const escapedRule = String(ruleNumber).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return cleanCitationDetail(label.replace(new RegExp(`^rule\\s*${escapedRule}(?:\\s*[-—:]\\s*|\\s+)?`, "i"), ""));
+}
+
+function sameCitationDetail(left, right) {
+  const normalize = (value) => cleanCitationDetail(value).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+  return normalize(left) === normalize(right);
 }
 
 export function extractStructuredModelOutput(result) {
