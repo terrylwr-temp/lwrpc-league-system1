@@ -1,0 +1,404 @@
+﻿chunk_ordinal,chunk_id,pdf_page,is_searchable,has_embedding,embedding_dimensions,characters,stored_rule_number,stored_section,stored_heading,actual_body_rule_declarations,rules_spanning_chunks,audit_flags,all_lines_verified_on_pdf_page
+1,3a27b9a6-1226-438c-8e0f-a4f4495bccef,1,True,True,1536,4,,,,,,cover;clear_noise_searchable_union;under_80_characters,True
+2,8a1ae0a2-6e01-482b-a4b7-58eee819ac33,1,True,True,1536,8,,OFFICIAL,OFFICIAL,,,cover;heading_only;clear_noise_searchable_union;under_80_characters,True
+3,6e20c6b9-cd19-465f-8ee9-e38dab486435,1,True,True,1536,8,,RULEBOOK,RULEBOOK,,,cover;heading_only;clear_noise_searchable_union;under_80_characters,True
+4,21da1132-fc4c-48c4-9ff8-870d5ff6d63d,2,True,True,1536,2,,RULEBOOK,RULEBOOK,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+5,2c198230-1b81-4153-9187-1154ce3db9b0,2,True,True,1536,91,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;numeric_metadata_not_usap_playing_rule_id,True
+6,a286ea36-1ba2-46ed-8a2d-9385d617d17f,2,True,True,1536,1532,,OFFICIAL RULEBOOK,OFFICIAL RULEBOOK,,,,True
+7,d61223f4-5ece-4f2d-9692-f5f0970cacbf,3,True,True,1536,1125,,OFFICIAL RULEBOOK,OFFICIAL RULEBOOK,,,,True
+8,6758a66a-8665-4656-9585-37a85bcfef9b,4,False,False,0,1002,,Table of Contents,Table of Contents,,,recurring_copyright_present;toc,True
+9,8c092e6b-872d-4ab0-875d-9f70e3561b4c,4,True,True,1536,124,,Section 13,The Net & Net Support System During Play,,,toc;clear_noise_searchable_union,True
+10,4a51dafe-ac3b-4326-8486-3b21e275ded9,4,True,True,1536,87,,Section 14,Variations on Standard Pickleball............... 30,,,toc;clear_noise_searchable_union,True
+11,b00cd47f-9a82-46ba-be77-15189da2f7e1,4,True,True,1536,55,,Section 15,Tournament Event and Scoring Options .... 32,,,toc;clear_noise_searchable_union;under_80_characters,True
+12,0fd4c791-a7c9-4303-968d-0eae4438d4eb,4,True,True,1536,58,,Section 16,Tournament Director Responsibilities........ 37,,,toc;clear_noise_searchable_union;under_80_characters,True
+13,e1bfc908-1e2a-456e-8632-229ca7fd0806,4,True,True,1536,69,,Section 17,Referee Responsibilities .............................. 39,,,toc;clear_noise_searchable_union;under_80_characters,True
+14,0bd58a0b-d6b1-4db7-8bd4-10b419fc426b,4,True,True,1536,62,,Section 18,Player Pre-Match Responsibilities .............. 42,,,toc;clear_noise_searchable_union;under_80_characters,True
+15,d21e5af2-bdce-4753-81fc-f5c23018a3b9,4,True,True,1536,68,,Section 19,Tournament Line Calls ................................ 44,,,toc;clear_noise_searchable_union;under_80_characters,True
+16,1de8b6fb-5449-46d0-bc2f-b2dd4a9049ed,5,True,True,1536,62,,Section 20,Tournament Match Situations .................... 47,,,toc;clear_noise_searchable_union;under_80_characters,True
+17,a21c8e63-635d-4953-9749-7bc52bf13c46,5,True,True,1536,68,,Section 21,Time-Outs and Breaks ................................. 52,,,toc;clear_noise_searchable_union;under_80_characters,True
+18,9e663576-4b81-4dff-8983-0867fe2c6afb,5,True,True,1536,114,,Section 22,Unsportsmanlike Conduct and Related,,,toc;clear_noise_searchable_union,True
+19,e9c83dc1-86f4-4f11-9866-3e3a74692623,5,True,True,1536,62,,Section 23,Retirements and Withdrawals..................... 62,,,toc;clear_noise_searchable_union;under_80_characters,True
+20,8f6f8ca5-869e-4431-8c90-70882ac78cb4,5,True,True,1536,94,,Section 24,Non-Officiated Tournament Play ................ 64,,,toc;clear_noise_searchable_union,True
+21,b5b6e0a3-2a0e-41ff-8bc0-8239b92d4b1e,5,True,True,1536,342,,Section 25,"Wheelchair, Adaptive Standing and Hybrid",,,toc;clear_noise_searchable_union,True
+22,e75b9bdd-04e9-4033-942d-2291dda83398,6,True,True,1536,1,,Section 25,"Wheelchair, Adaptive Standing and Hybrid",,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+23,bc1e828a-c1d7-44dd-a695-cd137ee41d60,6,True,True,1536,105,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+24,12c5e9ef-c556-4087-b6d6-7b2ca1c32c7e,6,True,True,1536,1729,,Section 1,The Game,,,,True
+25,e3dc544d-f704-491d-b8da-fef047b98ea1,6,True,True,1536,120,,Section 1,The Game,,,,True
+26,5568643c-1ea9-4f91-a093-c01f16e7485b,7,True,True,1536,1110,2,Rule 2,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+27,8a2f87a4-811c-49b5-9657-da92183de5b1,7,True,True,1536,874,,Section 2,Definitions,,,,True
+28,67c48c4f-058a-4092-b026-cc1cfac56e60,8,True,True,1536,1,,Section 2,Definitions,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+29,b07717bf-c871-420c-9858-0d30a51b5e0f,8,True,True,1536,1794,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+30,b9749c8f-e6f5-4762-a76f-5ada3d4f50b6,8,True,True,1536,168,2026,Rule 2026,,,,numeric_metadata_not_usap_playing_rule_id,True
+31,46de9485-9329-4331-a0a2-77132c9b57e2,9,True,True,1536,1741,4,Rule 4,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+32,528ecc2e-5e5b-4f39-a7af-d09d4d2acdce,9,True,True,1536,185,4,Rule 4,,,,numeric_metadata_not_usap_playing_rule_id,True
+33,77beeea2-780d-4317-8576-5f5735ddbbfc,10,True,True,1536,1,4,Rule 4,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+34,6a9195cd-121a-4124-a6e8-2cf444ddc0d2,10,True,True,1536,1466,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+35,ea78bde3-80cc-4939-acf7-0ec84d1664bb,10,True,True,1536,146,,Section 3,Court and Equipment,3.A,3.A,,True
+36,703eaf7b-70db-4f57-892e-5fe78802d4e3,11,True,True,1536,665,6,Rule 6,,3.A.1;3.A.2;3.A.3,3.A;3.A.3,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+37,916ae51c-9463-4353-8b59-703acd7df3fd,12,True,True,1536,1,6,Rule 6,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+38,b5d65bd6-62a9-47c2-abd1-6dbbc8d22980,12,True,True,1536,541,2026,Rule 2026,,3.A.4;3.A.4.a;3.A.4.b;3.A.4.c,3.A.3;3.A.4.c,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+39,43c2e32e-2990-4a4c-97c5-bc0d7f722678,12,True,True,1536,1272,6.08,Rule 6.08,,3.A.4.d;3.A.4.e;3.A.4.f;3.A.4.g;3.B,3.A.4.c,numeric_metadata_not_usap_playing_rule_id,True
+40,bfe67f98-a09f-456a-981f-d93cb7e2dc3d,13,True,True,1536,1771,8,Rule 8,,3.B.1;3.B.2;3.B.3;3.B.4;3.B.5;3.B.6;3.B.7;3.C;3.C.1;3.C.2,3.C.2,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+41,6e0a5444-ca56-46db-887a-0f3c13174755,13,True,True,1536,447,8,Rule 8,,3.C.3;3.C.4;3.C.5,3.C.2;3.C.5,numeric_metadata_not_usap_playing_rule_id,True
+42,dcd01c8a-cfe0-486c-85aa-f8d1dd23261f,14,True,True,1536,1,8,Rule 8,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+43,d055b40c-3906-4c97-b438-719c7d09b3cd,14,True,True,1536,1587,2026,Rule 2026,,3.D;3.D.1;3.D.2;3.D.3;3.D.4;3.D.5,3.C.5,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+44,3b67fe60-1524-44e5-8144-b30aa0db0580,15,True,True,1536,876,10,Rule 10,,3.D.5.a;3.D.5.b;3.D.5.c;3.D.5.d;3.D.5.e;3.D.5.f;3.D.5.g;3.D.5.h;3.D.6;3.D.6.a,3.D.6.a,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+45,086c3bdc-18a3-4968-9c98-5bc14e0a71d1,15,True,True,1536,957,,3.D.7).,3.D.7).,3.D.6.b;3.D.6.c;3.D.6.d;3.D.6.e;3.D.6.f;3.D.6.g;3.D.6.h;3.D.6.i;3.D.7,3.D.6.a,,True
+46,d658968d-1dd6-429b-9eb1-264d4886e031,16,True,True,1536,2,,3.D.7).,3.D.7).,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+47,bbd2d49e-d856-49dc-adc8-b9d8dee8c053,16,True,True,1536,178,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+48,6dec60c2-bbb3-412d-9482-09bceff83555,16,True,True,1536,190,14,Rule 14,,,,numeric_metadata_not_usap_playing_rule_id,True
+49,ee182a4a-c628-488f-a239-18e171249ae9,16,True,True,1536,262,,Section 4,Point Scoring,4.A;4.B,,,True
+50,665134e9-694c-46d4-98f9-33252fbacc84,17,True,True,1536,74,12,Rule 12,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+51,0ec519de-26d4-4dde-a4dc-1b9dfbb997e5,17,True,True,1536,1741,,Section 5,Player Positions and Serving,5.A;5.A.1;5.A.2;5.A.3;5.B;5.B.1;5.B.2;5.B.3,5.B.3,,True
+52,5a537b97-05d9-4251-a808-4cd76ae2d123,17,True,True,1536,493,,Section 5,Player Positions and Serving,5.B.4,5.B.3;5.B.4,,True
+53,a1495b54-2ade-4185-ba14-765b6135c6ab,18,True,True,1536,2,,Section 5,Player Positions and Serving,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+54,a2a3c21f-ea8f-4f9f-ba74-7fe806d8c405,18,True,True,1536,1783,2026,Rule 2026,,5.B.5;5.B.6;5.C;5.C.1;5.C.1.a;5.C.1.b;5.C.1.c,5.B.4;5.C.1.c,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+55,66c8b543-7965-467c-a176-66e95f0214eb,18,True,True,1536,260,2026,Rule 2026,,5.C.2,5.C.1.c,numeric_metadata_not_usap_playing_rule_id,True
+56,c17b179c-eb00-4cd1-9e5c-690fa841b0e6,19,True,True,1536,74,14,Rule 14,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+57,74106dcc-3675-4240-aec2-12b57d0abe6f,19,True,True,1536,1743,,Section 6,Player Readiness and Calling the,6.A;6.A.2;6.B;6.B.1;6.B.2;6.B.2.a;6.C;6.C.1;6.D;6.D.1,6.D.1,,True
+58,05fd6dcf-3235-4163-89b2-87ab013da1a1,19,True,True,1536,78,,Section 6,Player Readiness and Calling the,,6.D.1,under_80_characters,True
+59,48324a50-4334-4ea4-b6dd-5975f7a410ed,20,True,True,1536,2,,Section 6,Player Readiness and Calling the,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+60,54982ec2-8f58-4abd-b770-1bb1f2529967,20,True,True,1536,1529,2026,Rule 2026,,6.D.2;6.E;6.E.1;6.F;6.F.1;6.F.2;6.F.3;6.F.4,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+61,202b7bed-faad-4e93-85c5-95b576ee5258,21,True,True,1536,74,16,Rule 16,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+62,aeebf919-23c1-45d6-8cff-5f4efbaaf8d9,21,True,True,1536,1759,,Section 7,Serving,7.A;7.A.1;7.A.1.a;7.A.2;7.A.2.a;7.A.3;7.A.3.a;7.B;7.B.1;7.B.2;7.B.2.a,7.B.2.a,,True
+63,2070b70d-4356-4945-8db2-13f5935b4f30,21,True,True,1536,56,,Section 7,Serving,,7.B.2.a,under_80_characters,True
+64,1f211682-013b-489b-a42f-6109692f068c,22,True,True,1536,2,,Section 7,Serving,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+65,bb0cb0fd-fb98-4cbe-9e2f-3ddd6a9dae9d,22,True,True,1536,1758,2026,Rule 2026,,7.B.3;7.B.3.a;7.C;7.C.1;7.C.2;7.C.3;7.C.4;7.C.5;7.D;7.D.1;7.D.2;7.D.3;7.D.4,7.B.2.a;7.D.4,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+66,d549eb0f-3f58-425e-ac57-ac8327f26c58,22,True,True,1536,73,2026,Rule 2026,,,7.D.4,under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+67,5bca82f0-35f8-4090-81bc-fbe1c0a30cc9,23,True,True,1536,1366,18,Rule 18,,7.D.5;7.D.6;7.E;7.E.1;7.E.2;7.E.3;7.E.4;7.E.5,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+68,a52298d0-9e65-4f1b-a6d9-96f6f22ddbd5,24,True,True,1536,2,18,Rule 18,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+69,9e4c349c-9b30-4468-9e19-e8531ced899d,24,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+70,3f971abe-a008-4710-9a20-3284d0d4e63e,24,True,True,1536,1286,,Section 8,Line Calls,8.A;8.D;8.E,,,True
+71,797e45db-8f4f-403b-8701-3f8c8907ce92,25,True,True,1536,1682,20,Rule 20,,8.F.1;8.F.2;8.F.3;8.F.4;8.G;8.H;8.I;8.J,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+72,51aa6edf-ea41-4af0-9cce-950421a20788,26,True,True,1536,2,20,Rule 20,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+73,c2a6e678-de81-4598-b8b4-b1a63254d61e,26,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+74,b6dbe5ff-ab38-4ce9-9d39-49c78bece4ef,26,True,True,1536,463,,Section 9,"Dead Balls, Faults, and Hinders",9.A;9.A.1,9.A.1,,True
+75,271af6fa-c8eb-4fdd-990b-af76cafb27a1,26,True,True,1536,227,,6.F.1).,6.F.1).,9.B;9.B.1,9.A.1;9.B.1,,True
+76,441cfc33-5a4d-448d-9bca-18753ba2fe45,26,True,True,1536,1268,,11.A.2.),11.A.2.),9.B.2;9.B.3;9.B.3.a;9.B.3.b;9.B.3.c;9.B.4;9.C;9.C.1,9.B.1,,True
+77,2e4b2471-8eca-4442-996f-a01b185fe77b,27,True,True,1536,150,22,Rule 22,,9.C.2,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+78,f0300c2d-ba1c-433a-81c1-ef5ef182d41f,28,True,True,1536,2,22,Rule 22,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+79,35e8b438-8290-47d2-b88c-4b89006532d1,28,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+80,d8856745-bff4-4c80-aac4-70ff96853bf1,28,True,True,1536,1762,,Section 10,Rally Situations,10.A;10.A.1;10.A.2;10.B;10.B.1;10.C;10.C.1;10.C.2;10.C.3;10.C.4;10.C.5,10.C.5,,True
+81,69704503-4dcb-4757-9500-38b204129082,28,True,True,1536,262,,Section 10,Rally Situations,10.D,10.C.5,,True
+82,9bf29352-19e3-475a-bbe3-dd9d1cfe90a0,29,True,True,1536,1769,24,Rule 24,,10.D.1;10.D.2;10.E;10.F;10.G;10.G.1;10.G.2;10.H;10.I;10.J;10.K,10.K,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+83,0a84adbf-95cf-40ea-8e2d-091dc2baa40d,29,True,True,1536,96,24,Rule 24,,,10.K,numeric_metadata_not_usap_playing_rule_id,True
+84,576b3f46-8047-40dd-ac21-a37d85e03008,30,True,True,1536,2,24,Rule 24,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+85,1d39c1d1-4fee-4dbf-9eeb-0f51f0bd10db,30,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+86,3171e2db-7fae-40d3-923d-9c716e882014,30,True,True,1536,1019,,Section 11,Non-Volley Zone Infractions,11.A;11.A.1;11.A.2;11.A.3,,,True
+87,e54020b5-8b54-4b12-9328-1a4313153abe,31,True,True,1536,74,26,Rule 26,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+88,5eaa9626-ee8a-42e1-986a-5566297d2d80,31,True,True,1536,860,,Section 12,The Paddle During Play,12.A;12.A.1;12.B;12.B.1;12.C;12.C.1,,,True
+89,929ce864-e7c5-432d-b07f-e9ae37786e21,32,True,True,1536,2,,Section 12,The Paddle During Play,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+90,631b24ef-a58b-4dcb-a607-9063137e47c0,32,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+91,fb368d97-0cc5-45ed-98cd-425e32386f01,32,True,True,1536,1788,,Section 13,The Net and Net Support,13.A;13.A.1;13.B;13.B.1;13.B.2;13.C;13.D;13.D.1;13.E;13.E.1;13.F,,,True
+92,5791ded3-c0c6-4019-8207-24d139853df4,32,True,True,1536,190,,Section 13,The Net and Net Support,13.F.1,,,True
+93,c678d2c8-687a-415b-a646-d4c9b62ac9e7,33,True,True,1536,1758,28,Rule 28,,13.G;13.G.1;13.H;13.H.1;13.I;13.I.1;13.I.1.a;13.I.1.b,13.I.1.b,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+94,58b74c04-7fc9-479a-8c79-5f0913018c96,33,True,True,1536,474,28,Rule 28,,13.I.2,13.I.1.b,numeric_metadata_not_usap_playing_rule_id,True
+95,9ad69ee8-183b-41a5-af7d-c4c1ec0bb8ce,34,True,True,1536,2,28,Rule 28,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+96,624dd91a-f581-4cbf-bbc2-bbd4e1bf0a8b,34,True,True,1536,786,2026,Rule 2026,,13.I.2.a;13.I.2.b;13.J,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+97,322f119d-835a-49fa-8ae0-f7207396e7e5,35,True,True,1536,74,30,Rule 30,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+98,843e908a-5828-42b8-9a73-d1b8c9c78a9c,35,True,True,1536,1755,,Section 14,Variations on Standard,14.A;14.A.1;14.A.2;14.A.3;14.A.4;14.A.5;14.B;14.B.1;14.B.1.a;14.B.1.b;14.B.1.c,14.B.1.c,,True
+99,7fc7948e-3a23-4cb3-a771-31bfe1b21c79,35,True,True,1536,143,,Section 14,Variations on Standard,,14.B.1.c,,True
+100,e8a5a0cf-c7ad-4cfe-bb7d-f3eea0ee8dc7,36,True,True,1536,2,,Section 14,Variations on Standard,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+101,e7980547-f6a2-4308-a735-8af332879800,36,True,True,1536,216,2026,Rule 2026,,14.B.2,14.B.2,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+102,063bcc1e-32a5-40cf-879d-23eafc4eb21c,36,True,True,1536,140,,5.A),5.A),14.B.3,14.B.2,,True
+103,493a4e8f-f2c0-4fec-a45c-40b693cdd7cf,37,True,True,1536,235,32,Rule 32,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+104,f2cedc64-6170-44ba-95ab-3c9553fbbebc,37,True,True,1536,1406,,Section 15,Tournament Event and Scoring,15.A;15.A.1;15.A.2;15.A.3;15.A.3.a;15.A.3.b;15.A.3.c;15.A.4,15.A.4,,True
+105,d3b4003a-6627-4619-bb5e-c24f2ac16143,38,True,True,1536,2,,Section 15,Tournament Event and Scoring,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+106,c8be1ef3-9270-4ddb-b2cb-7fb90b951a48,38,True,True,1536,1736,2026,Rule 2026,,15.B;15.B.1;15.B.2;15.B.3,15.A.4;15.B.3,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+107,4900df3a-2fb4-4bed-b856-ddc05c12f90c,38,True,True,1536,767,2026,Rule 2026,,15.B.4;15.B.4.a,15.B.3;15.B.4.a,numeric_metadata_not_usap_playing_rule_id,True
+108,b5dde525-b4fa-4eb0-a35c-e878d9c1cb23,39,True,True,1536,719,34,Rule 34,,15.B.4.b;15.B.4.c,15.B.4.a;15.B.4.c,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+109,11da475a-c2a2-4950-b92c-95e93839a86b,39,True,True,1536,1253,2,Rule 2,,15.B.4.d;15.B.4.e;15.B.4.f;15.B.5;15.B.6,15.B.4.c,numeric_metadata_not_usap_playing_rule_id,True
+110,e1c98bf8-ba28-4a06-a455-a56c8407702b,40,True,True,1536,2,2,Rule 2,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+111,4fcc57c5-7c38-48f1-a5fd-6ca7a8f1f8f1,40,True,True,1536,1759,2026,Rule 2026,,15.B.7;15.C;15.C.1;15.C.1.a;15.C.1.b;15.C.1.c;15.C.1.d;15.C.2;15.C.2.a;15.C.2.b;15.C.2.c;15.C.2.d;15.D;15.E;15.F,15.F,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+112,5a470d58-b1a3-4f77-8ba1-f05358cee258,40,True,True,1536,120,2026,Rule 2026,,,15.F,numeric_metadata_not_usap_playing_rule_id,True
+113,772e2682-d4bb-4357-938b-dc26f35bc49b,41,True,True,1536,336,36,Rule 36,,15.G,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+114,0b8448d4-70f9-49cb-b734-699e9fc99100,42,True,True,1536,2,36,Rule 36,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+115,da1a525d-f2f2-4c42-b6ef-ce3778832bc9,42,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+116,64d5163c-a58e-4e7b-8ca5-bee90c6b98d7,42,True,True,1536,1761,,Section 16,Tournament Director,16.A;16.B;16.C;16.D;16.E;16.F;16.G;16.H;16.I,,,True
+117,d3a610a3-c5f1-465b-bece-4edaad0704ea,42,True,True,1536,307,,Section 16,Tournament Director,16.J;16.K,,,True
+118,eec5e33d-6878-4c3d-8be1-12b40ca11aa2,43,True,True,1536,1067,38,Rule 38,,16.L;16.M;16.N;16.O;16.P;16.Q,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+119,9ed457da-c8e1-471f-b900-e0f94a35f3d4,44,True,True,1536,2,38,Rule 38,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+120,b92bf30e-3f70-4d47-9b09-ccbae9674aba,44,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+121,40446912-899b-42fc-a84a-b2ebbab4c9ce,44,True,True,1536,1689,,Section 17,Referee Responsibilities,17.A;17.B;17.B.1;17.B.2;17.C;17.C.1;17.C.2;17.C.3;17.C.4;17.C.5,17.C.5,,True
+122,5b84356c-e096-4708-ba0e-44e221a7ccfe,44,True,True,1536,204,,18.C.),18.C.),17.D;17.D.1,17.C.5,,True
+123,6d10502b-904f-42aa-b8e3-4b66327595a9,45,True,True,1536,1778,40,Rule 40,,17.D.2;17.D.2.a;17.D.3;17.D.4;17.D.5;17.D.6;17.D.7;17.D.8;17.D.9;17.D.10;17.D.11;17.D.12;17.D.13;17.D.14;17.D.15,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+124,fcfabe21-b108-4b9d-84fb-74b963928c7f,45,True,True,1536,129,40,Rule 40,,17.D.16,17.D.16,numeric_metadata_not_usap_playing_rule_id,True
+125,f0427fe0-eccf-454c-9223-12ae3af89da8,46,True,True,1536,2,40,Rule 40,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+126,fac8bf02-6068-40fe-b241-4bc421665f6d,46,True,True,1536,531,2026,Rule 2026,,17.D.17,17.D.16,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+127,94c37138-1b0a-4f25-8649-fe2157a601cc,47,True,True,1536,74,42,Rule 42,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+128,2bd60a46-4771-4f86-81ff-0bc555018080,47,True,True,1536,1800,,Section 18,Player Pre-Match,18.A;18.A.1;18.A.2;18.A.3;18.B;18.B.1;18.B.2;18.B.3;18.B.4,18.B.4,,True
+129,74169e01-6b20-4cfd-906e-4bab2ae3ee68,47,True,True,1536,335,,Section 18,Player Pre-Match,18.C,18.B.4,,True
+130,bd6523e1-2a3e-4374-88c6-b6b424e95aef,48,True,True,1536,2,,Section 18,Player Pre-Match,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+131,b56b3bd0-e52a-4e01-bd83-2d2f47cac253,48,True,True,1536,1795,2026,Rule 2026,,18.C.1;18.D;18.E;18.F;18.F.1;18.F.2;18.G,18.G,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+132,066252bc-5524-47cd-8700-34105af1a025,48,True,True,1536,64,2026,Rule 2026,,,18.G,under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+133,f2d3c886-7a1a-431c-829b-0e087b6d2f78,49,True,True,1536,74,44,Rule 44,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+134,4914c6b3-47e1-4c54-9cc4-957ace7b87ee,49,True,True,1536,1780,,Section 19,Tournament Line Calls,19.A;19.A.1;19.B;19.C;19.C.1;19.C.2;19.C.3;19.D;19.D.1;19.D.2,19.D.2,,True
+135,8c7e1d31-e545-4c8c-85ab-a72a78fa7685,49,True,True,1536,124,,Section 19,Tournament Line Calls,,19.D.2,,True
+136,4b2203ef-521c-4276-ad09-1b900d529006,50,True,True,1536,2,,Section 19,Tournament Line Calls,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+137,e537e3a9-4309-49f0-834e-626f7b9ef9b3,50,True,True,1536,1739,2026,Rule 2026,,19.D.3;19.E;19.F;19.F.1;19.F.2;19.G;19.G.1;19.G.2,19.G.2,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+138,01729a31-8208-4022-8522-623c7ae57c34,50,True,True,1536,579,2026,Rule 2026,,19.G.3;19.G.4;19.H,19.G.2;19.H,numeric_metadata_not_usap_playing_rule_id,True
+139,8087b077-4a37-424f-b63c-8a4a004d4a93,51,True,True,1536,839,46,Rule 46,,19.I;19.I.1;19.I.2,19.H,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+140,2f1a58bb-f6c9-4d56-8b45-511b132c2e56,52,True,True,1536,2,46,Rule 46,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+141,500ac747-6952-4b1b-8f1e-c24f3afab3ac,52,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+142,208b2106-ca90-47b8-81f2-4c5b7ec3e792,52,True,True,1536,1798,,Section 20,Tournament Match Situations,20.A;20.B;20.C;20.D;20.E;20.E.1;20.E.1.a;20.E.1.b;20.E.1.c;20.E.1.d,,,True
+143,dd0e4ed0-90df-4ae3-a5c2-4c3b495a7787,52,True,True,1536,94,,Section 20,Tournament Match Situations,20.E.1.e,20.E.1.e,,True
+144,18e1e272-61d7-4a01-860d-320a9b0b8d8a,53,True,True,1536,1788,48,Rule 48,,20.E.1.f;20.E.1.g;20.E.2;20.E.2.a;20.E.2.b;20.E.2.c;20.E.2.d,20.E.1.e,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+145,c45d0a45-5677-46ca-8b1e-5e882960cafe,53,True,True,1536,108,48,Rule 48,,20.E.2.e,20.E.2.e,numeric_metadata_not_usap_playing_rule_id,True
+146,13b1a76a-33b0-4644-9198-800b4059fcf7,54,True,True,1536,2,48,Rule 48,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+147,856b9425-a063-4099-9944-72d8c5541534,54,True,True,1536,1769,2026,Rule 2026,,20.E.2.f;20.E.2.g;20.E.2.h;20.E.2.i;20.F;20.F.1;20.G,20.E.2.e;20.G,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+148,2d6cd4f2-b0db-4323-b955-9f8fc6d47c41,54,True,True,1536,293,2026,Rule 2026,,20.G.1,20.G,numeric_metadata_not_usap_playing_rule_id,True
+149,6169f492-f065-4ffb-9647-2037a28d0c65,55,True,True,1536,422,50,Rule 50,,20.H;20.H.1;20.H.2,20.H.2,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+150,c7e2480d-1c91-422b-a58e-5d7af007337d,55,True,True,1536,1694,,9.C.2),9.C.2),20.I;20.I.1;20.J;20.J.1;20.J.2;20.J.3;20.K;20.K.1,20.H.2,,True
+151,fdd25549-02f3-4304-b64a-fac62f1d82f4,56,True,True,1536,2,,9.C.2),9.C.2),,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+152,e6187ead-dd32-4ebc-8685-7b056804ec35,56,True,True,1536,365,2026,Rule 2026,,20.K.2;20.L,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+153,7a0641e5-61e1-49d2-bbba-c730dbe28984,57,True,True,1536,74,52,Rule 52,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+154,547f5751-c6e2-436c-ad5c-61f92fb28ce5,57,True,True,1536,1789,,Section 21,Time-Outs and Breaks,21.A;21.A.1;21.A.2;21.A.2.a;21.A.2.b;21.A.3;21.A.4;21.A.5;21.A.6;21.B,21.B,,True
+155,f8333689-3497-486d-9eb0-5a68dd708a82,57,True,True,1536,67,,Section 21,Time-Outs and Breaks,,21.B,under_80_characters,True
+156,0996273f-6932-4b78-aa02-bee55960dba6,58,True,True,1536,2,,Section 21,Time-Outs and Breaks,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+157,10824cdc-4557-4df5-8e8c-dcfbe2002898,58,True,True,1536,1774,2026,Rule 2026,,21.B.1;21.B.2;21.B.3;21.B.4;21.B.5;21.B.6;21.B.7;21.B.8;21.C;21.C.1;21.C.2,21.B,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+158,2e4c08e2-9c58-458f-90cd-713c7c0d3267,58,True,True,1536,85,2026,Rule 2026,,21.C.3,,numeric_metadata_not_usap_playing_rule_id,True
+159,7cc1e23c-b7b4-4d60-af1a-7c0c3a589a68,59,True,True,1536,1797,54,Rule 54,,21.C.4;21.C.5;21.C.6;21.C.7;21.C.8;21.C.9,21.C.9,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+160,b9dbc81a-ada5-459e-82fb-1803a9e6a876,59,True,True,1536,499,54,Rule 54,,21.C.10,21.C.9;21.C.10,numeric_metadata_not_usap_playing_rule_id,True
+161,ded52219-aa98-4d22-bbd7-cf1bb5af846d,60,True,True,1536,2,54,Rule 54,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+162,c7cb3f29-fc4e-4073-ae82-7d68bd0b906a,60,True,True,1536,1748,2026,Rule 2026,,21.C.11;21.D;21.D.1;21.D.2;21.D.3;21.D.4,21.C.10,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+163,7130e1a4-a452-4e98-acb9-169eb3e3dc21,60,True,True,1536,419,2026,Rule 2026,,21.E;21.E.1;21.E.2,,numeric_metadata_not_usap_playing_rule_id,True
+164,d50c007a-c846-44dc-9f29-d9bba1f8e511,61,True,True,1536,996,56,Rule 56,,21.F;21.F.1;21.F.2;21.F.3;21.F.4;21.G;21.H,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+165,61f817bf-b485-4427-b1b2-73b491ae2c33,62,True,True,1536,2,56,Rule 56,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+166,492a8db2-ec6c-4b3a-9473-7efa5da9ca15,62,True,True,1536,71,2026,Rule 2026,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+167,a14fd00f-59f6-4820-9f90-6c23ce615ae2,62,True,True,1536,1746,,Section 22,Unsportsmanlike Conduct and,22.A;22.A.1;22.A.2;22.B;22.B.1;22.B.2;22.B.3;22.B.4;22.B.5;22.B.6,,,True
+168,dcb8588f-c0e4-4c85-a601-f81af09b39a0,62,True,True,1536,125,,Section 22,Unsportsmanlike Conduct and,22.B.7,,,True
+169,97e828d4-9107-482d-b6bc-3baef33a636f,63,True,True,1536,1734,58,Rule 58,,22.B.8;22.B.9;22.B.10;22.C;22.C.1;22.C.2;22.D;22.D.1;22.D.2;22.D.3,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+170,c4bdf557-b257-46b7-8405-db230699fba2,63,True,True,1536,307,58,Rule 58,,22.D.4;22.D.5,,numeric_metadata_not_usap_playing_rule_id,True
+171,863555f9-c98e-4645-86dc-0f6c0974336b,64,True,True,1536,2,58,Rule 58,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+172,c917f2c5-a405-47b6-bae9-0dd7689fc044,64,True,True,1536,260,2026,Rule 2026,,22.D.6,22.D.6,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+173,e26436ce-a377-4f13-94bc-45b215eb63c7,64,True,True,1536,1763,,21.C.10.,21.C.10.,22.D.7;22.D.8;22.E;22.E.1;22.E.2;22.F;22.F.1;22.F.2;22.G;22.G.1;22.G.2;22.H,22.D.6;22.H,,True
+174,b1abff38-323f-4c08-b41d-748a328227ae,64,True,True,1536,75,,21.C.10.,21.C.10.,,22.H,under_80_characters,True
+175,f2276159-7d0e-4302-aaa5-3b0a37d35bcf,65,True,True,1536,1744,60,Rule 60,,22.I;22.I.1;22.I.2;22.I.3;22.I.4;22.I.5;22.I.6;22.I.7;22.J;22.J.1;22.J.2;22.J.3;22.J.4;22.J.5;22.K,22.H;22.K,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+176,12f14ce2-9eb9-4601-a2c0-cb6e42ae5603,65,True,True,1536,295,60,Rule 60,,,22.K,numeric_metadata_not_usap_playing_rule_id,True
+177,a0d266b5-bcdc-4355-ab93-9fcc4dc6005d,66,True,True,1536,2,60,Rule 60,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+178,c2f696b5-b07b-4be5-87c8-be8616219c54,66,True,True,1536,1501,2026,Rule 2026,,22.L;22.L.1;22.L.2;22.L.3;22.L.4;22.L.5;22.M,22.K,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+179,ade04d78-fbd6-4442-bc0e-6ea10fe1ba64,67,True,True,1536,74,62,Rule 62,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+180,b8c1bee8-12a5-4d70-aa29-048ca11bea7e,67,True,True,1536,1782,,Section 23,Retirements and Withdrawals,23.A;23.A.1;23.A.2;23.A.3;23.A.4;23.B;23.B.1;23.B.2,23.B.2,,True
+181,1bc6d948-0f5a-44c6-9462-d7eb19e4166d,67,True,True,1536,132,,Section 23,Retirements and Withdrawals,,23.B.2,,True
+182,383f5fa6-dd5f-4649-aa25-2397e1899515,68,True,True,1536,2,,Section 23,Retirements and Withdrawals,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+183,11b11508-0117-4091-b803-36f3fb8ee794,68,True,True,1536,469,2026,Rule 2026,,23.B.3;23.B.4,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+184,b940fac5-c610-492a-9d77-d31e3356bceb,69,True,True,1536,74,64,Rule 64,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+185,f683d074-3068-4399-bb28-fb574ac1fdb7,69,True,True,1536,1781,,Section 24,Non-Officiated Tournament,24.A;24.B;24.B.1;24.C;24.C.1;24.C.2;24.D;24.E;24.F,24.F,,True
+186,6cf85d0d-5492-46c0-a23f-6470c2d2c87e,69,True,True,1536,33,,Section 24,Non-Officiated Tournament,,24.F,under_80_characters,True
+187,3c7c7cbd-0f6a-43ed-9f6c-6007448ca993,70,True,True,1536,2,,Section 24,Non-Officiated Tournament,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+188,bc61d37e-4aaf-43fd-b9bf-8d841b65845a,70,True,True,1536,459,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+189,145797ab-5ca4-41df-ba8e-c8a1d4885036,70,True,True,1536,1371,,Section 25,"Wheelchair, Adaptive Standing,",25.A;25.A.1;25.A.2;25.A.3;25.A.4;25.A.5;25.A.5.a,,,True
+190,868fdf40-2e6d-4fd1-9188-0805857211a6,71,True,True,1536,1764,66,Rule 66,,25.A.6;25.A.6.a;25.A.7;25.A.7.a;25.A.8,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+191,40a04ad3-f6e8-4de6-93e9-ee81f7063def,71,True,True,1536,206,66,Rule 66,,25.A.8.a,,numeric_metadata_not_usap_playing_rule_id,True
+192,4c84a903-5339-4b0b-a610-19361e1a7d3c,72,True,True,1536,2,66,Rule 66,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+193,04473f66-7693-41f5-9881-c35df3e0827d,72,True,True,1536,1766,2026,Rule 2026,,25.A.8.b;25.A.8.c;25.A.9;25.A.9.a;25.A.10;25.A.10.a;25.A.10.b;25.A.10.c,25.A.10.c,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+194,5430b05f-5542-44d9-aa65-39bd345747bb,72,True,True,1536,153,2026,Rule 2026,,,25.A.10.c,numeric_metadata_not_usap_playing_rule_id,True
+195,2d2b2e9b-492e-43c6-aa7a-65875d973640,73,True,True,1536,129,68,Rule 68,,,25.A.10.c,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+196,91afa085-6ee3-423f-b08d-71ded315ccd7,73,True,True,1536,130,,11.A.3),11.A.3),25.A.11,25.A.10.c;25.A.11,,True
+197,70215c6f-5856-424d-b4c4-89a888c9f0c5,73,True,True,1536,1662,74,Rule 74,,25.A.12;25.A.12.a;25.A.12.b;25.A.12.c;25.B,25.A.11,numeric_metadata_not_usap_playing_rule_id,True
+198,26d70fcc-e683-434c-befc-2016f4cab26d,74,True,True,1536,2,74,Rule 74,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+199,438dddce-7878-4351-864d-5b28d071ffdd,74,True,True,1536,1780,2026,Rule 2026,,25.B.1;25.B.1.a;25.B.2;25.B.2.a;25.B.2.b;25.B.2.c;25.B.2.d,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+200,e633704e-8172-49c9-83d1-2f9e23612757,74,True,True,1536,306,2026,Rule 2026,,25.B.2.e,25.B.2.e,numeric_metadata_not_usap_playing_rule_id,True
+201,e7c6110d-bf0a-4b7b-b9a2-b7965caff99c,74,True,True,1536,7,,11.A.2),11.A.2),,25.B.2.e,heading_only;under_80_characters,True
+202,f1a60d54-b54c-4c3f-9860-f8ef2b2c47dd,75,True,True,1536,1199,70,Rule 70,,25.B.2.f;25.B.3;25.B.3.a;25.B.3.b,25.B.3.b,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+203,59c2d6ed-30b7-4eb7-80ca-e15b308066de,75,True,True,1536,686,,10.B.),10.B.),25.B.3.c;25.B.3.d;25.B.3.e;25.B.3.f,25.B.3.b;25.B.3.f,,True
+204,879849d8-fe4f-4019-ba69-80b4f77bd620,76,True,True,1536,2,,10.B.),10.B.),,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+205,56af9a89-ecde-45f6-b265-307cc2f8b23b,76,True,True,1536,1296,2026,Rule 2026,,25.B.4;25.C;25.C.1;25.C.2;25.C.3,25.B.3.f,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+206,e6b7b472-a999-4b41-8d11-fac845f09769,77,True,True,1536,345,72,Rule 72,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+207,45d2ed95-e866-4264-b514-6ccbb60d4e43,77,True,True,1536,173,,SECTION 5,– PLAYER POSITIONS AND SERVING SEQUENCE,,,,True
+208,b9871a9f-33e7-4e84-bea8-4fe418e6ba4d,77,True,True,1536,135,,SECTION 6,– PLAYER READINESS AND CALLING THE SCORE,,,,True
+209,aafe8b14-a7ee-4396-bf33-d7da3d9d43f3,77,True,True,1536,413,,SECTION 7,– SERVING,,,,True
+210,c695cb0f-3603-4d7e-8228-499f7a7bf4bc,77,True,True,1536,66,,SECTION 9,"– DEAD BALLS, FAULTS, AND HINDERS",,,under_80_characters,True
+211,eb79a2f1-a8bd-4a72-9904-0197c300606f,77,True,True,1536,63,,SECTION 10,– RALLY SITUATIONS,,,under_80_characters,True
+212,60a83869-f93e-452d-b758-596024442326,78,True,True,1536,2,,SECTION 10,– RALLY SITUATIONS,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+213,2f971de8-f517-4fa4-ab78-367752fc0540,78,True,True,1536,457,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+214,e19c021d-8a63-4f51-a7e9-ae1680c471f2,78,True,True,1536,145,,SECTION 11,– NON-VOLLEY ZONE INFRACTIONS,,,,True
+215,73d2c8d2-c52b-43ac-a399-31927fd72985,78,True,True,1536,162,,SECTION 12,– THE PADDLE DURING PLAY,,,,True
+216,afe99b4b-ae5f-4bce-b50f-78132a96a8f7,78,True,True,1536,666,,SECTION 13,– THE NET AND NET SUPPORT SYSTEM DURING PLAY,,,,True
+217,bf7756a4-1937-4ca6-99f4-25e01766e0bf,79,True,True,1536,88,74,Rule 74,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+218,84342a52-0a5c-4b9f-8eed-4124f42c8c2b,79,True,True,1536,77,,SECTION 19,– TOURNAMENT LINE CALLS,,,under_80_characters,True
+219,a04ac944-20e0-49f8-8cb3-60e97de2abe3,79,True,True,1536,122,,SECTION 20,– TOURNAMENT MATCH SITUATIONS,,,,True
+220,7b2cc514-c781-4e92-ba98-9f9bd5ecef3f,79,True,True,1536,124,,SECTION 21,– TIME-OUTS AND BREAKS,,,,True
+221,e02e664e-ce7f-4799-bca6-4b89ee751ae5,79,True,True,1536,129,,SECTION 24,– NON-OFFICIATED TOURNAMENT PLAY,,,,True
+222,61c2bcf9-94b6-4a49-afd2-d3dd72f095bf,79,True,True,1536,62,,SECTION 25,"– WHEELCHAIR, ADAPATIVE STANDING AND HYBRID DOUBLES",,,under_80_characters,True
+223,b5a6213b-da97-44fe-b991-03643ff0c7ec,79,True,True,1536,568,,PLAY,PLAY,,,,True
+224,0a063ca8-6910-456e-b543-6eb907aba1e4,80,True,True,1536,2,,PLAY,PLAY,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+225,8a64c247-ccbc-459b-9721-5195658733f0,80,True,True,1536,225,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+226,d3f72064-7bd9-45b7-8159-ff1f2670f12c,81,True,True,1536,100,76,Rule 76,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+227,74e76ed3-011d-4818-919b-3aa4e4082da5,81,True,True,1536,117,,SECTION 5,– PLAYER POSITIONS AND SERVING SEQUENCE,,,,True
+228,ac5fdf0e-f33f-4d41-9b9b-83ad1eb9f2f1,81,True,True,1536,115,,SECTION 6,– PLAYER READINESS AND SCORE CALLING,,,,True
+229,6606f2c6-80da-4363-ba53-14681e8c7882,81,True,True,1536,91,,SECTION 7,– SERVING,,,,True
+230,3fa68bfe-79f8-4408-98f7-b5de421128a0,81,True,True,1536,81,,SECTION 9,– DEAD BALL,,,,True
+231,18228733-2f17-43ac-a2b9-739573f439a5,81,True,True,1536,88,,SECTION 10,– RALLY SITUATIONS,,,,True
+232,26296cb9-caea-427d-b5d5-19fffd88db5c,81,True,True,1536,91,,SECTION 13,– THE NET,,,,True
+233,77e05e53-5c9f-4623-8125-8bccbaf11a5c,81,True,True,1536,173,,SECTION 19,– TOURNAMENT LINE CALLS,,,,True
+234,b2da2d7f-a6b2-42a0-ad92-ab8f9c1f5017,81,True,True,1536,307,,SECTION 20,– TOURNAMENT MATCH SITUATIONS,,,,True
+235,a2a8d3ff-e6f5-4556-84be-6c21d868f427,82,True,True,1536,2,,SECTION 20,– TOURNAMENT MATCH SITUATIONS,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+236,7f42b954-0261-4828-9f4b-2e393e5c3327,82,True,True,1536,85,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+237,5b10cd7a-e629-4b79-8590-1bdf5ad6cb02,82,True,True,1536,61,,SECTION 25,"– WHEELCHAIR, ADAPTIVE STANDING AND HYBRID DOUBLES",,,under_80_characters,True
+238,9b205525-e604-40c9-9ec2-faf540400394,82,True,True,1536,117,,PLAY,PLAY,,,,True
+239,b55ded19-e2b7-467b-9910-24fed80181a1,83,True,True,1536,1066,78,Rule 78,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+240,ea18e485-e321-4ba5-b66d-f741d3581416,83,True,True,1536,282,1,Rule 1,,,,numeric_metadata_not_usap_playing_rule_id,True
+241,508b638b-000c-465c-9cb4-34aebd093ce3,83,True,True,1536,402,2,Rule 2,,,,numeric_metadata_not_usap_playing_rule_id,True
+242,ef36098a-0656-4a62-96d8-5d4ce08d0599,83,True,True,1536,362,3,Rule 3,,,,numeric_metadata_not_usap_playing_rule_id,True
+243,863ff5c2-e335-4e3a-9d28-8f3db6cc84ae,84,True,True,1536,2,3,Rule 3,,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+244,3361d259-7285-4e4a-b7e7-2c2ba6b6248b,84,True,True,1536,216,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+245,5d676dd5-4ea4-4419-80d7-83982527124b,84,True,True,1536,400,1,Rule 1,Apply to all levels and categories of players,,,numeric_metadata_not_usap_playing_rule_id,True
+246,7de673d9-f8e9-42c8-a4b0-91745e65dc63,84,True,True,1536,318,2,Rule 2,,,,numeric_metadata_not_usap_playing_rule_id,True
+247,331a2f79-389d-4f53-9bf2-5102b9be8402,84,True,True,1536,181,3,Rule 3,,,,numeric_metadata_not_usap_playing_rule_id,True
+248,cbea4157-1c78-49c8-b954-685174f005c4,84,True,True,1536,308,4,Rule 4,,,,numeric_metadata_not_usap_playing_rule_id,True
+249,4a4403ae-27c4-43c4-815d-1c7706948d18,84,True,True,1536,307,5,Rule 5,,,,numeric_metadata_not_usap_playing_rule_id,True
+250,e5e8bf8e-a223-4e6a-a8c9-45c308171ed9,84,True,True,1536,157,6,Rule 6,,,,numeric_metadata_not_usap_playing_rule_id,True
+251,2adf52fe-be6e-46bc-8a43-66fae9aa85eb,84,True,True,1536,193,7,Rule 7,,,,numeric_metadata_not_usap_playing_rule_id,True
+252,fe90bb9e-1dab-4eee-afa8-84bdc9b7ea20,84,True,True,1536,189,8,Rule 8,,,,numeric_metadata_not_usap_playing_rule_id,True
+253,f4f639fa-1682-43a2-a516-df0395a1d392,84,True,True,1536,93,9,Rule 9,,,,numeric_metadata_not_usap_playing_rule_id,True
+254,49bf7f93-377e-4bdf-ad89-df5f6e7d0189,84,True,True,1536,84,10,Rule 10,,,,numeric_metadata_not_usap_playing_rule_id,True
+255,6312f2bd-4f57-4045-84b8-f61179f1ffee,85,True,True,1536,74,80,Rule 80,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+256,aad27dc8-1ea9-4474-aa21-ed2c6dc7a77d,85,True,True,1536,42,,INDEX,INDEX,,,index_navigation;under_80_characters,True
+257,9c55c986-6f15-494e-8e5d-46d25afd0b1a,85,True,True,1536,58,,17.D.16,17.D.16,,,index_navigation;under_80_characters,True
+258,826d7b1d-3585-4aef-8c91-13a8d97b7124,85,True,True,1536,25,,21.B.8,21.B.8,,,index_navigation;under_80_characters,True
+259,91e41976-b5ed-406a-b65a-2eac42707c53,85,True,True,1536,23,,21.E.2,21.E.2,,,index_navigation;under_80_characters,True
+260,fbf42bbc-f9ed-4159-9bd5-bfd41c143deb,85,True,True,1536,49,,21.C.11,21.C.11,,,index_navigation;under_80_characters,True
+261,e8afa354-322f-4b24-bb4f-d08e78d8000c,85,True,True,1536,87,,21.A.6,21.A.6,,,index_navigation,True
+262,bc8e2d35-53da-4d17-a5d6-eb7656f65542,85,True,True,1536,22,,25.B,25.B,,,index_navigation;under_80_characters,True
+263,dd59b653-d1bc-4c32-a0a4-21c2f7728a8a,85,True,True,1536,42,,25.B.2,25.B.2,,,index_navigation;under_80_characters,True
+264,112868cb-b361-451e-97eb-e61e97f99644,85,True,True,1536,23,,25.B.3,25.B.3,,,index_navigation;under_80_characters,True
+265,7ccfab05-7b54-4398-b77f-b1751fcc3f53,85,True,True,1536,25,,15.A,15.A,,,index_navigation;under_80_characters,True
+266,79d1bbba-a560-4d70-921b-14de16b26911,85,True,True,1536,74,,25.B.3,25.B.3,,,index_navigation;under_80_characters,True
+267,5ba0a53d-8b51-4247-878e-1c080253cc2e,85,True,True,1536,15,,"18.B.1, 18.B.2,","18.B.1, 18.B.2,",,,index_navigation;heading_only;under_80_characters,True
+268,4958af5d-3df7-44dc-befe-ece5a1d7ff46,85,True,True,1536,51,,"18.B.3, 18.B.4, 22.J.4","18.B.3, 18.B.4, 22.J.4",,,index_navigation;under_80_characters,True
+269,3507686f-d955-440e-bb0d-3c14674d8d39,85,True,True,1536,133,,"22.D.2, 22.I.1, 22.L.2","22.D.2, 22.I.1, 22.L.2",,,index_navigation,True
+270,e050c360-04bd-460d-b6cc-f8079ad9ac74,85,True,True,1536,128,,"20.F, 20.F.1","20.F, 20.F.1",,,index_navigation,True
+271,16f064e2-fbe8-4974-933d-ff6543b67a46,85,True,True,1536,85,,9.A.1,9.A.1,,,index_navigation,True
+272,208b28df-e43f-4149-8f29-749defecadde,86,True,True,1536,2,,9.A.1,9.A.1,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+273,8455b68d-7407-4301-99ec-75521e965c42,86,True,True,1536,239,2026,Rule 2026,,,,recurring_copyright_present;index_navigation;numeric_metadata_not_usap_playing_rule_id,True
+274,886144dc-71a1-459c-8824-75e05df8ee3a,86,True,True,1536,75,,"10.B, 10.B.1","10.B, 10.B.1",,,index_navigation;under_80_characters,True
+275,818a9cef-d6c2-40d7-9cd3-077326aa2566,86,True,True,1536,53,,10.D.1,10.D.1,,,index_navigation;under_80_characters,True
+276,00afcf89-ab88-4793-89c2-40d53e8f7e91,86,True,True,1536,27,,22.L.3,22.L.3,,,index_navigation;under_80_characters,True
+277,684cbc7d-0599-4cdf-a097-b3f79170749c,86,True,True,1536,121,,22.L.2,22.L.2,,,index_navigation,True
+278,6d2c378f-96cf-485a-9782-44fe5c954fec,86,True,True,1536,143,,21.B,21.B,,,index_navigation,True
+279,2eda9fa5-d747-4f2d-97c7-4ebbbf73145a,86,True,True,1536,49,,A.1),A.1),,,index_navigation;under_80_characters,True
+280,8c784e5b-acc6-415e-b9c1-411d9432a3c9,86,True,True,1536,23,,22.F,22.F,,,index_navigation;under_80_characters,True
+281,7abebea2-b774-4aed-9215-369a36dfa245,86,True,True,1536,74,,"22.G.1, 22.G.2","22.G.1, 22.G.2",,,index_navigation;under_80_characters,True
+282,ff4b5a4f-06bc-453a-a219-550601047ea7,86,True,True,1536,42,,22.F.1,22.F.1,,,index_navigation;under_80_characters,True
+283,474460f6-e27d-4da8-8312-f273c35b7a19,86,True,True,1536,168,,22.I,22.I,,,index_navigation,True
+284,a56c9680-1874-4b70-a4e5-5cd053883e2f,86,True,True,1536,21,,22.I.1,22.I.1,,,index_navigation;under_80_characters,True
+285,6a04cfac-ec28-4666-8edd-9c64ea79391e,86,True,True,1536,54,,17.D.17,17.D.17,,,index_navigation;under_80_characters,True
+286,593c7a07-f6f0-42b2-a291-d52afe26cd0c,87,True,True,1536,105,82,Rule 82,,,,recurring_copyright_present;index_navigation;numeric_metadata_not_usap_playing_rule_id,True
+287,3e231d03-3af2-451f-b2f9-53117afe0079,87,True,True,1536,106,,22.I.2,22.I.2,,,index_navigation,True
+288,6a3df050-6274-4ab7-9a18-4eb2f6d782a2,87,True,True,1536,23,,22.J.3,22.J.3,,,index_navigation;under_80_characters,True
+289,2aecb091-2f48-453e-8633-175f0279e314,87,True,True,1536,31,,"22.J.4, 18.B.4","22.J.4, 18.B.4",,,index_navigation;under_80_characters,True
+290,1fbb4e76-8665-491a-abf6-27a8401ab1d0,87,True,True,1536,131,,22.J.2,22.J.2,,,index_navigation,True
+291,92a96d25-a11c-4fe7-9aa0-dd157000d520,87,True,True,1536,27,,13.J,13.J,,,index_navigation;under_80_characters,True
+292,41f76d04-835f-41dc-8f21-26ebd48d4283,87,True,True,1536,38,,"17.C.2, 17.D.13","17.C.2, 17.D.13",,,index_navigation;under_80_characters,True
+293,7892f104-5f69-45e2-8b14-0d30f49b6431,87,True,True,1536,88,,20.H.2,20.H.2,,,index_navigation,True
+294,63e227f7-a5af-4ad6-b547-f1c84b6c5594,87,True,True,1536,50,,",25.C.2",",25.C.2",,,index_navigation;under_80_characters,True
+295,53625a24-b451-498f-95dc-a49bf11c2ec9,87,True,True,1536,172,,10.H,10.H,,,index_navigation,True
+296,79393dc8-1d7a-40c8-960c-56cf037361c6,87,True,True,1536,55,,"8.I, 19.I","8.I, 19.I",,,index_navigation;under_80_characters,True
+297,c31b6672-c4f9-4c90-a002-f698756d11ff,87,True,True,1536,26,,8.F.4,8.F.4,,,index_navigation;under_80_characters,True
+298,21c76a9f-ccb0-4e11-bf09-e7a934bb48e2,87,True,True,1536,81,,19.F.2,19.F.2,,,index_navigation,True
+299,67975766-4eff-478a-9561-76b046ce73c3,87,True,True,1536,88,,"8.G, 8.I","8.G, 8.I",,,index_navigation,True
+300,bec3030b-f156-480e-b1c4-54b5ace6f48b,87,True,True,1536,44,,22.B.6,22.B.6,,,index_navigation;under_80_characters,True
+301,ba929a0f-ecbc-4165-8d41-330b88948d75,87,True,True,1536,4,,19.E,19.E,,,index_navigation;heading_only;under_80_characters,True
+302,1cbad221-5a39-43b0-86bd-5f20c5210378,88,True,True,1536,2,,19.E,19.E,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+303,928c0252-a5d9-4b15-ac02-4412eb6bcd25,88,True,True,1536,90,2026,Rule 2026,,,,recurring_copyright_present;index_navigation;numeric_metadata_not_usap_playing_rule_id,True
+304,87bf9108-56e3-4b5e-8963-e9b93a578c29,88,True,True,1536,26,,19.G,19.G,,,index_navigation;under_80_characters,True
+305,da1beefe-7293-4aa9-8f98-e7128a0c5980,88,True,True,1536,17,,"19.E, 19.F, 19.G,","19.E, 19.F, 19.G,",,,index_navigation;heading_only;under_80_characters,True
+306,f84219f7-1ba0-4f8a-9993-b6ac79088c54,88,True,True,1536,87,,19.H,19.H,,,index_navigation,True
+307,bcbe3da0-3ba9-4f6a-a009-83418a5936ad,88,True,True,1536,37,,"19.I.1, 19.I.2","19.I.1, 19.I.2",,,index_navigation;under_80_characters,True
+308,6a1f7245-8bcc-42b4-b083-23910fb61a02,88,True,True,1536,36,,"19.F.1, 19.F.2","19.F.1, 19.F.2",,,index_navigation;under_80_characters,True
+309,0e98b264-8b1c-497d-8bb2-d6d7aeefa370,88,True,True,1536,140,,20.K.2,20.K.2,,,index_navigation,True
+310,891ed27e-53a3-415d-a0eb-851a5013a787,88,True,True,1536,20,,"13.A.1 13.B, 13.B.1,","13.A.1 13.B, 13.B.1,",,,index_navigation;heading_only;under_80_characters,True
+311,bd527b18-4c2a-4abb-917d-d1bced050af6,88,True,True,1536,27,,13.B.2,13.B.2,,,index_navigation;under_80_characters,True
+312,8d7260dd-fc78-40f6-ac13-7ca462a8d675,88,True,True,1536,103,,13.C,13.C,,,index_navigation,True
+313,c88faa47-0d66-455a-ad1e-163a3038c47c,88,True,True,1536,158,,13.G.1,13.G.1,,,index_navigation,True
+314,caf80421-5fee-4a9a-8a76-78e0858c64a7,88,True,True,1536,50,,"11.A.2, 11.A.3","11.A.2, 11.A.3",,,index_navigation;under_80_characters,True
+315,e66ba7cc-3116-498b-bdd1-6b1cd3698482,88,True,True,1536,118,,9.B.4,9.B.4,,,index_navigation,True
+316,532dc137-a84e-44b9-b470-0ebe34c89ae9,88,True,True,1536,51,,"3.D.6, 3.D.7","3.D.6, 3.D.7",,,index_navigation;under_80_characters,True
+317,0d429f51-e618-4a17-ac4e-dfeae91a503f,88,True,True,1536,23,,"18.A.1, 18.A.2, 18.A.3,","18.A.1, 18.A.2, 18.A.3,",,,index_navigation;heading_only;under_80_characters,True
+318,e07a5abf-48f3-4059-92d1-f6a02678c54c,88,True,True,1536,29,,22.I.5,22.I.5,,,index_navigation;under_80_characters,True
+319,a8199308-c674-4877-b47f-651967d59227,88,True,True,1536,134,,"12.B, 12.B.1","12.B, 12.B.1",,,index_navigation,True
+320,689ff7e8-b260-4315-a5d7-d56d883929a1,88,True,True,1536,6,,13.F.1,13.F.1,,,index_navigation;heading_only;under_80_characters,True
+321,8fbe91d9-255b-4263-b911-2345912e8149,89,True,True,1536,96,84,Rule 84,,,,recurring_copyright_present;index_navigation;numeric_metadata_not_usap_playing_rule_id,True
+322,64344beb-8e36-4dfc-893d-7e29adf93cc4,89,True,True,1536,76,,"13.I.1, 13.I.2","13.I.1, 13.I.2",,,index_navigation;under_80_characters,True
+323,6e37ca26-24ee-44cf-a5c9-a00a1c5da055,89,True,True,1536,127,,"22.L, 22.M","22.L, 22.M",,,index_navigation,True
+324,037b90f5-70ad-4c8f-a6fe-b0041a47d175,89,True,True,1536,47,,"22.J, 22.K","22.J, 22.K",,,index_navigation;under_80_characters,True
+325,98bc09d8-aa42-4b49-8993-5cba4930bcc9,89,True,True,1536,46,,22.E,22.E,,,index_navigation;under_80_characters,True
+326,cc9e1cf1-08cf-4cca-81c9-dd68891f3a08,89,True,True,1536,29,,"22.B, 22.C","22.B, 22.C",,,index_navigation;under_80_characters,True
+327,3b9deb87-6eab-438f-b094-3ecb4b85cffd,89,True,True,1536,28,,17.D.17,17.D.17,,,index_navigation;under_80_characters,True
+328,e8967db8-b66e-4a26-b140-8fa4081be1e9,89,True,True,1536,46,,22.C,22.C,,,index_navigation;under_80_characters,True
+329,da8441ef-1e8e-4186-a474-d9dec8b5d847,89,True,True,1536,47,,22.E.1,22.E.1,,,index_navigation;under_80_characters,True
+330,06029f5f-d8a1-4934-af29-e299eac11a61,89,True,True,1536,87,,20.C,20.C,,,index_navigation,True
+331,10fdd87d-c37a-4450-91d9-812d7c9ad9bb,89,True,True,1536,70,,5.B.3,5.B.3,,,index_navigation;under_80_characters,True
+332,f587cf75-d8dc-4d44-a56b-8885f03a46d7,89,True,True,1536,82,,6.D.2,6.D.2,,,index_navigation,True
+333,3cabf98e-7e37-4859-b062-99fe467202c0,89,True,True,1536,24,,22.D.3,22.D.3,,,index_navigation;under_80_characters,True
+334,887a297b-c6e2-4eb9-abfe-63530a3dc5d5,89,True,True,1536,118,,22.B.2,22.B.2,,,index_navigation,True
+335,89171bb6-f7ed-4eba-b986-ba846004ec39,89,True,True,1536,61,,20.C,20.C,,,index_navigation;under_80_characters,True
+336,0b0fb61b-e1f5-4a00-9f9a-db21814a1837,89,True,True,1536,112,,20.D,20.D,,,index_navigation,True
+337,3a03a960-b5ea-4b58-8d7d-002b5b163da8,89,True,True,1536,26,,A.2),A.2),,,index_navigation;under_80_characters,True
+338,7fbaae5b-4e8b-4e7c-874a-2529497ed7ac,90,True,True,1536,2,,A.2),A.2),,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+339,e5e68675-6065-4c41-9578-6b8755c8c8d3,90,True,True,1536,117,2026,Rule 2026,,,,recurring_copyright_present;index_navigation;numeric_metadata_not_usap_playing_rule_id,True
+340,d12a1d53-ce44-4f69-83d4-aa0da0ef0c67,90,True,True,1536,85,,18.F.2,18.F.2,,,index_navigation,True
+341,e1845d13-2473-4fbd-95bd-0c49db1e75fa,90,True,True,1536,56,,23.A.2,23.A.2,,,index_navigation;under_80_characters,True
+342,98b8f222-8640-42f7-9f63-f4561659f751,90,True,True,1536,92,,21.C.9,21.C.9,,,index_navigation,True
+343,1bd759cb-edeb-423a-af46-a0e4c659d7c1,90,True,True,1536,20,,"6.F.1, 6.F.2, 6.F.3,","6.F.1, 6.F.2, 6.F.3,",,,index_navigation;heading_only;under_80_characters,True
+344,775cf4fa-8783-4524-8d70-5e4b0227db2f,90,True,True,1536,26,,6.F.4,6.F.4,,,index_navigation;under_80_characters,True
+345,499e3145-0c37-46a2-8919-bc97f04b2991,90,True,True,1536,55,,"6.E.1, 20.A","6.E.1, 20.A",,,index_navigation;under_80_characters,True
+346,7433da90-bfd7-481f-8c8e-db332329cc7a,90,True,True,1536,61,,"21.B.2, 21.B.3","21.B.2, 21.B.3",,,index_navigation;under_80_characters,True
+347,70a14533-a5dc-4283-96cb-51c785c28671,90,True,True,1536,66,,"5.B.2, 5.B.3","5.B.2, 5.B.3",,,index_navigation;under_80_characters,True
+348,4d8ed7fb-46ba-4365-b4bc-f61dec6ed13a,90,True,True,1536,99,,"15.C, 15.C.1, 15.C.2","15.C, 15.C.1, 15.C.2",,,index_navigation,True
+349,fbee5bd8-c944-4162-b9ec-da8871ec7f6f,90,True,True,1536,245,,"6.D.1, 6.D.2","6.D.1, 6.D.2",,,index_navigation,True
+350,96c87fb7-cbb5-4656-ac3a-4e87133d66c8,90,True,True,1536,23,,A.2),A.2),,,index_navigation;under_80_characters,True
+351,9c525cd5-a0e8-4602-85e2-d8bb0c147597,90,True,True,1536,79,,10.A,10.A,,,index_navigation;under_80_characters,True
+352,9d4188ec-be9b-4082-b41f-fb7b45129209,90,True,True,1536,64,,5.B.4,5.B.4,,,index_navigation;under_80_characters,True
+353,835dabba-198b-4259-ac85-50185a413aa2,90,True,True,1536,55,,"2, 5.B.2","2, 5.B.2",,,index_navigation;under_80_characters,True
+354,d6bd5b2c-bb9b-46f6-94a5-c7d8bb1cc7a5,91,True,True,1536,139,86,Rule 86,,,,recurring_copyright_present;index_navigation;numeric_metadata_not_usap_playing_rule_id,True
+355,6622271f-bba9-4a3e-b156-2e48a0cabc51,91,True,True,1536,28,,17.D.5,17.D.5,,,index_navigation;under_80_characters,True
+356,e5cbd41b-b244-4d38-980b-e706232446db,91,True,True,1536,123,,"8.G, 19.D.2, 19.D.3,","8.G, 19.D.2, 19.D.3,",,,index_navigation,True
+357,6285a8df-b8db-4af0-b453-4c187a321f23,91,True,True,1536,61,,24.A,24.A,,,index_navigation;under_80_characters,True
+358,683ff4c0-3f5a-4d87-a10d-e9e53db20728,91,True,True,1536,58,,"17.C.5, 18.C, 22.I.2","17.C.5, 18.C, 22.I.2",,,index_navigation;under_80_characters,True
+359,eed24cc4-6a8e-400c-a0b2-b9e07d92003e,91,True,True,1536,65,,22.D,22.D,,,index_navigation;under_80_characters,True
+360,8b236e79-ebce-4999-892f-a7e86734ccd6,91,True,True,1536,48,,"22.E.1, 22.E.2","22.E.1, 22.E.2",,,index_navigation;under_80_characters,True
+361,690062f6-9075-4a1a-887b-f39a71f05558,91,True,True,1536,61,,21.B.6,21.B.6,,,index_navigation;under_80_characters,True
+362,889e6a1d-eb1a-4a70-b5a4-4104a85c819d,91,True,True,1536,30,,17.D.17,17.D.17,,,index_navigation;under_80_characters,True
+363,6ce68ae4-320b-442a-9da8-7328658c5a65,91,True,True,1536,29,,"22.F, 22.F.1","22.F, 22.F.1",,,index_navigation;under_80_characters,True
+364,c0bee6dd-27b0-47be-86a3-68b60d811fc2,91,True,True,1536,26,,22.E.1,22.E.1,,,index_navigation;under_80_characters,True
+365,cfbd3f07-7879-4e89-9a0b-6034eb8092aa,91,True,True,1536,77,,22.I.7,22.I.7,,,index_navigation;under_80_characters,True
+366,1087e557-2eba-4369-a6e7-295d078fee7f,91,True,True,1536,148,,22.B,22.B,,,index_navigation,True
+367,8b0f630c-4b42-43a3-bc05-8768cefdb283,91,True,True,1536,27,,17.D.17,17.D.17,,,index_navigation;under_80_characters,True
+368,79154f66-4522-4ff9-a926-1f718e765072,91,True,True,1536,158,,"22.F, 22.F.1","22.F, 22.F.1",,,index_navigation,True
+369,6a08da2e-cb72-4b5f-9143-a64d0b744d55,91,True,True,1536,29,,"21.E, 21.E.1","21.E, 21.E.1",,,index_navigation;under_80_characters,True
+370,1e6e04e4-6f1a-4cec-a089-8d68bbe51371,91,True,True,1536,24,,21.C.6,21.C.6,,,index_navigation;under_80_characters,True
+371,7ad1a38b-1eb6-4ebf-bbdb-42a85b4fdef5,91,True,True,1536,6,,21.A.5,21.A.5,,,index_navigation;heading_only;under_80_characters,True
+372,4a090675-db83-4f27-aa04-31d8b6187d03,92,True,True,1536,2,,21.A.5,21.A.5,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+373,934d7e0a-8725-44c1-9f35-5a9aa6493774,92,True,True,1536,92,2026,Rule 2026,,,,recurring_copyright_present;index_navigation;numeric_metadata_not_usap_playing_rule_id,True
+374,a400c428-e771-4c9b-8280-260607e39422,92,True,True,1536,59,,"16.M, 18.F","16.M, 18.F",,,index_navigation;under_80_characters,True
+375,38c3b5fe-e2a2-4f21-9a2e-9f69ab5c3700,92,True,True,1536,87,,21.B.4,21.B.4,,,index_navigation,True
+376,74e025c0-6ce6-4515-95a5-1d95747304d2,92,True,True,1536,39,,21.C.2,21.C.2,,,index_navigation;under_80_characters,True
+377,cc9db5d1-52e7-44b1-8813-a858331b6060,92,True,True,1536,50,,21.C.3,21.C.3,,,index_navigation;under_80_characters,True
+378,cd9046ae-59ac-4252-b551-13e0123cfb25,92,True,True,1536,45,,21.C.11,21.C.11,,,index_navigation;under_80_characters,True
+379,94d6cef4-a6d8-41db-96e5-f551eb27d20f,92,True,True,1536,60,,21.C.10,21.C.10,,,index_navigation;under_80_characters,True
+380,fd166df8-e1db-4f5a-a85d-ba11be14f634,92,True,True,1536,24,,21.D.3,21.D.3,,,index_navigation;under_80_characters,True
+381,45d104c7-0ec8-447c-91db-0edb50e06f1f,92,True,True,1536,108,,21.D.2,21.D.2,,,index_navigation,True
+382,15b990cf-4c8d-417d-8fcf-fa19b8dd9dbe,92,True,True,1536,76,,21.A.3,21.A.3,,,index_navigation;under_80_characters,True
+383,d04d83c4-040d-4c89-8cbf-7fb969f20ee3,92,True,True,1536,87,,21.A.2,21.A.2,,,index_navigation,True
+384,04f9bc2a-0d01-48b9-a412-cedc113b1bfa,92,True,True,1536,21,,16.D,16.D,,,index_navigation;under_80_characters,True
+385,8142bf0f-34e1-475e-8f2e-e490cd3572f0,92,True,True,1536,24,,15.A,15.A,,,index_navigation;under_80_characters,True
+386,4b18e91c-c0d2-4a77-a9b4-a796c13159a2,92,True,True,1536,52,,"15.A.1, 15.A.2","15.A.1, 15.A.2",,,index_navigation;under_80_characters,True
+387,ee025f80-ddc5-4d89-b387-a432217a9abe,92,True,True,1536,20,,15.B.1,15.B.1,,,index_navigation;under_80_characters,True
+388,3896a8b9-87ca-4501-ac5e-0d47f118d1a2,92,True,True,1536,78,,15.B.6,15.B.6,,,index_navigation;under_80_characters,True
+389,8570bcab-cdb5-4d2a-bb59-fae8523886d9,92,True,True,1536,45,,15.B.2,15.B.2,,,index_navigation;under_80_characters,True
+390,42651e46-b756-4b4c-b59d-3bc9f51b6250,92,True,True,1536,50,,15.B.3,15.B.3,,,index_navigation;under_80_characters,True
+391,a0a0e31e-fbba-4ecd-9ab3-41b9cf83fb7a,93,True,True,1536,93,88,Rule 88,,,,recurring_copyright_present;index_navigation;numeric_metadata_not_usap_playing_rule_id,True
+392,8d801b8a-9565-4056-b28e-05f8a21883ed,93,True,True,1536,130,,15.D,15.D,,,index_navigation,True
+393,cc1d27d0-04f3-418f-8712-1ea884086c11,93,True,True,1536,60,,"17.D.17, 22.B","17.D.17, 22.B",,,index_navigation;under_80_characters,True
+394,687d24b2-9b18-4c72-84af-e473c2cc1838,93,True,True,1536,24,,25.A.9,25.A.9,,,index_navigation;under_80_characters,True
+395,397a4850-0c08-4ded-a048-3d7972b33922,93,True,True,1536,181,,25.A.5,25.A.5,,,index_navigation,True
+396,7af22fc0-2d9a-4c94-9d62-601412f30010,93,True,True,1536,70,,25.A.3,25.A.3,,,index_navigation;under_80_characters,True
+397,1fae5015-29ec-4fc9-ab87-0e76e72f20ed,93,True,True,1536,30,,"25.A.12, 25.C","25.A.12, 25.C",,,index_navigation;under_80_characters,True
+398,40bf9e1b-7b61-458d-9f3f-107ee0d4c45e,93,True,True,1536,130,,15.A,15.A,,,index_navigation,True
+399,9570556a-13e6-421b-9743-83d3aa1cf77f,94,True,True,1536,2,,15.A,15.A,,,standalone_page_numbers;clear_noise_searchable_union;under_80_characters,True
+400,f325104c-fe5d-4d01-8bff-a0628dca514f,94,True,True,1536,800,2026,Rule 2026,,,,recurring_copyright_present;numeric_metadata_not_usap_playing_rule_id,True
+401,688d3747-8c3b-473b-8a7c-1297c5554c6e,95,True,True,1536,74,90,Rule 90,,,,copyright_only;recurring_copyright_present;clear_noise_searchable_union;under_80_characters;numeric_metadata_not_usap_playing_rule_id,True
+402,512f5372-8050-4a95-9083-f3db10905f76,95,True,True,1536,6,,NOTES:,NOTES:,,,heading_only;under_80_characters,True
+403,9af97763-d468-42ba-92f0-f09ec515fadb,96,True,True,1536,457,,NATIONAL GOVERNING BODY,NATIONAL GOVERNING BODY,,,,True

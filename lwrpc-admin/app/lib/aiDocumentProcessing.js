@@ -224,7 +224,9 @@ function observeSuspiciousText(text, diagnostics) {
 export function chunkPdfPages(pages, {
   maxCharacters = MAX_CHUNK_CHARACTERS,
   minCharacters = MIN_LOGICAL_CHUNK_CHARACTERS,
+  documentType = "",
 } = {}) {
+  if (documentType === "usap_rulebook") return chunkUsapRulebookPages(pages, { maxCharacters, minCharacters });
   const chunks = [];
   let carriedMetadata = emptyMetadata();
 
@@ -278,6 +280,154 @@ export function chunkPdfPages(pages, {
     }
   }
   return chunks.map((chunk, index) => ({ ...chunk, chunkOrdinal: index + 1 }));
+}
+
+// USA Pickleball rulebooks use alphanumeric provision IDs (for example,
+// 20.E.1.e) and intentionally continue provisions across physical pages. Keep
+// this format isolated from the accepted LWR chunker above.
+function chunkUsapRulebookPages(pages, { maxCharacters, minCharacters }) {
+  const chunks = [];
+  let current = null;
+  let preview = null;
+  let section = emptyMetadata();
+  let part = "";
+  let sequence = 0;
+  const flushCurrent = () => {
+    if (!current?.lines.length) return;
+    chunks.push({ ...current, content: current.lines.join("\n").trim() });
+    current = null;
+  };
+  const flushPreview = () => {
+    if (!preview?.lines.length) return;
+    chunks.push({ ...preview, content: preview.lines.join("\n").trim() });
+    preview = null;
+  };
+  const beginCurrent = (pageNumber, metadata, line) => {
+    current = { sort: sequence++, pageNumber, ...metadata, lines: line ? [line] : [], isSearchable: true };
+  };
+
+  for (const page of normalizeUsapRulebookPages(pages)) for (const entry of page.entries) {
+    if (!entry.isSearchable) {
+      if (!preview || preview.kind !== entry.kind) {
+        flushPreview();
+        preview = { sort: sequence++, pageNumber: page.pageNumber, sectionLabel: entry.label, ruleNumber: "", heading: entry.label, isSearchable: false, kind: entry.kind, lines: [] };
+      }
+      preview.lines.push(entry.line);
+      continue;
+    }
+    flushPreview();
+    const partMatch = entry.line.match(/^Part\s+([IVXLC]+)\s+(.+)$/i);
+    if (partMatch) {
+      flushCurrent();
+      part = `Part ${partMatch[1].toUpperCase()}: ${partMatch[2].trim()}`;
+      beginCurrent(page.pageNumber, { sectionLabel: part, ruleNumber: "", heading: part }, entry.line);
+      continue;
+    }
+    const sectionMatch = entry.line.match(/^Section\s+(\d{1,2})\s+(.+)$/i);
+    if (sectionMatch) {
+      flushCurrent();
+      section = { sectionLabel: `Section ${sectionMatch[1]}: ${sectionMatch[2].trim()}`, ruleNumber: "", heading: sectionMatch[2].trim(), parents: {} };
+      beginCurrent(page.pageNumber, section, entry.line);
+      continue;
+    }
+    const rule = usapRuleMetadata(entry.line, section, part);
+    if (rule) {
+      flushCurrent();
+      beginCurrent(page.pageNumber, rule, entry.line);
+      continue;
+    }
+    if (!current) beginCurrent(page.pageNumber, section.sectionLabel ? section : (part ? { sectionLabel: part, ruleNumber: "", heading: part } : emptyMetadata()), entry.line);
+    else current.lines.push(entry.line);
+    // General introductory material is bounded. A named USAP rule is never
+    // split only because a page or character limit was reached.
+    if (!current.ruleNumber && current.lines.join("\n").length > maxCharacters && current.lines.join("\n").length >= minCharacters) flushCurrent();
+  }
+  flushPreview();
+  flushCurrent();
+  return chunks.sort((left, right) => left.sort - right.sort)
+    .map((chunk, index) => ({
+      pageNumber: chunk.pageNumber,
+      sectionLabel: chunk.sectionLabel,
+      ruleNumber: chunk.ruleNumber,
+      heading: chunk.heading,
+      content: chunk.content,
+      isSearchable: chunk.isSearchable,
+      chunkOrdinal: index + 1,
+    }));
+}
+
+function normalizeUsapRulebookPages(pages) {
+  let inToc = false;
+  let inIndex = false;
+  let inAppendixAFaultTable = false;
+  return (pages || []).map((page) => {
+    const lines = (page.lines || []).map((line) => String(line || "").replace(/\s+/g, " ").trim()).filter(Boolean);
+    const cover = lines.length > 0 && lines.length <= 5 && lines.every((line) => /^\d{4}$|^[A-Z][A-Z ]{2,}$/.test(line));
+    const acknowledgement = lines.some((line) => /^Acknowledg(?:e)?ments?:/i.test(line));
+    if (lines.some((line) => /\btable of contents\b/i.test(line))) inToc = true;
+    if (lines.some((line) => /^Appendix A\s+Faults and Replays\b/i.test(line))) inAppendixAFaultTable = true;
+    if (lines.some((line) => /^Appendix B\b/i.test(line))) inAppendixAFaultTable = false;
+    if (lines.some((line) => /^index$/i.test(line))) inIndex = true;
+    const startsBody = inToc && lines.some((line, index) => (
+      /^Section\s+\d{1,2}\s+.+$/i.test(line)
+      && !isUsapTocLine(line)
+      && !isUsapTocLine(lines[index + 1] || "")
+    ));
+    if (startsBody) inToc = false;
+    return {
+      pageNumber: page.pageNumber,
+      entries: lines.map((line) => {
+        if (cover || acknowledgement) return usapPreviewEntry(line, "Structural content", "structural");
+        if (inToc) return usapPreviewEntry(line, "Table of Contents", "toc");
+        if (inIndex) return usapPreviewEntry(line, "Index", "index");
+        if (inAppendixAFaultTable) return usapPreviewEntry(line, "Appendix A fault/replay summary", "appendix_summary");
+        if (isUsapStructuralLine(line)) return usapPreviewEntry(line, "Structural content", "structural");
+        return { line, isSearchable: true };
+      }),
+    };
+  });
+}
+
+function usapPreviewEntry(line, label, kind) { return { line, isSearchable: false, label, kind }; }
+
+function isUsapTocLine(line) { return /\.{3,}\s*\d*\s*$/.test(String(line || "")); }
+
+function isUsapStructuralLine(line) {
+  return /^\d{1,3}$/.test(line)
+    || /^[ivxlcdm]{1,6}$/i.test(line)
+    || /\bUSA Pickleball Official Rulebook\b.*(?:copyright|all rights reserved)/i.test(line)
+    || /^202\d\s+USA PICKLEBALL$/i.test(line)
+    || /^OFFICIAL RULEBOOK$/i.test(line)
+    || /^(?:Tournament Play|Stadium Court)\s+\d+\s*ft\b/i.test(line);
+}
+
+function usapRuleMetadata(line, section, part) {
+  const match = String(line || "").trim().match(/^(\d{1,2}(?:\.(?:[A-Z]|\d+|[a-z])){1,6})\s+(.+)$/);
+  if (!match) return null;
+  const ruleNumber = match[1];
+  // A USAP rule ID includes an uppercase hierarchy part. This rejects years,
+  // printed folios, and dimensions such as 6.08 m.
+  if (!ruleNumber.split(".").some((value) => /^[A-Z]$/.test(value))) return null;
+  const title = match[2].trim();
+  if (!/^[A-Z“(]/.test(title)) return null;
+  const parent = immediateUsapParent(ruleNumber);
+  const parentHeading = parent && section?.parents?.[parent] ? `${parent} ${section.parents[parent]}` : "";
+  section.parents = { ...(section?.parents || {}), [ruleNumber]: headingFromUsapRuleTitle(title) };
+  return {
+    sectionLabel: section?.sectionLabel || part || "USA Pickleball Official Rulebook",
+    ruleNumber,
+    heading: [parentHeading, headingFromUsapRuleTitle(title)].filter(Boolean).join(" — "),
+  };
+}
+
+function immediateUsapParent(ruleNumber) {
+  const parts = ruleNumber.split(".");
+  return parts.length > 2 ? parts.slice(0, -1).join(".") : "";
+}
+
+function headingFromUsapRuleTitle(value) {
+  const normalized = String(value || "").replace(/\s+/g, " ").trim();
+  return (normalized.match(/^(.{3,160}?)(?:\.\s+(?=[A-Z“])|$)/)?.[1] || normalized).slice(0, 160);
 }
 
 export function searchableChunksForEmbedding(chunks) {
@@ -420,6 +570,12 @@ export async function processAiDocumentVersion({ supabase, versionId, actorMembe
     .eq("id", versionId)
     .single();
   if (versionError) throw versionError;
+  const { data: document, error: documentError } = await supabase
+    .from("ai_documents")
+    .select("document_type")
+    .eq("id", version.document_id)
+    .single();
+  if (documentError) throw documentError;
 
   await updateVersion(supabase, versionId, {
     processing_status: "processing",
@@ -443,7 +599,7 @@ export async function processAiDocumentVersion({ supabase, versionId, actorMembe
     if (bytes.subarray(0, 5).toString("ascii") !== "%PDF-") throw new Error("The stored document is not a valid PDF.");
 
     const extracted = await extractPdfPages(bytes);
-    const chunks = chunkPdfPages(extracted.pages);
+    const chunks = chunkPdfPages(extracted.pages, { documentType: document.document_type });
     const searchableChunks = searchableChunksForEmbedding(chunks);
     if (chunks.length === 0 || searchableChunks.length === 0) {
       throw new Error("No searchable sections could be created from this PDF.");

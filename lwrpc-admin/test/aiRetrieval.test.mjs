@@ -55,6 +55,7 @@ test("generic exact matching recognizes unseen official phrases without boosting
   assert.equal(genericExactScore("scoring freeze", "The scoring freeze is final."), .85);
   assert.equal(genericExactScore("team player game", "A team player completes the game."), 0);
   assert.equal(genericExactScore("Rule 4.5", "Rule text", "4.5"), 1);
+  assert.equal(genericExactScore("What is Rule 20.E.1.e?", "Rule text", "20.e.1.e"), 1);
   assert.equal(genericExactScore("NR", "The NR rating is provisional."), .95);
   assert.equal(genericExactScore("NR", "The corner rating is provisional."), 0);
   assert.equal(genericExactScore("What is a retired game?", "6+ Points (Retired): record the current score."), .85);
@@ -206,7 +207,7 @@ function medicalRow() { return { ...row(), section_label: "Rule 5.7", heading: "
 
 function genericExactScore(query, content, ruleNumber = "", metadata = {}) {
   const normalized = String(query).toLowerCase(); const searchable = String(content).toLowerCase();
-  const requestedRule = normalized.match(/\b(?:rule\s*)?(\d+(?:\.\d+)+)\b/)?.[1] || "";
+  const requestedRule = normalized.match(/\b(?:rule\s*)?(\d{1,2}(?:\.(?:[a-z]|\d+)){1,6})\b/i)?.[1] || "";
   if (requestedRule && ruleNumber === requestedRule) return 1;
   const words = normalized.match(/[a-z0-9]+/g) || [];
   const generic = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);

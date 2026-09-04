@@ -253,7 +253,7 @@ function exactMatchReason(question, candidate) {
   const query = String(question || "");
   const words = query.toLowerCase().match(/[a-z0-9]+/g) || [];
   const searchable = [candidate.sectionLabel, candidate.heading, candidate.ruleNumber, candidate.content].filter(Boolean).join(" ").toLowerCase();
-  const requestedRule = query.toLowerCase().match(/\b(?:rule\s*)?(\d+(?:\.\d+)+)\b/)?.[1] || "";
+  const requestedRule = query.toLowerCase().match(/\b(?:rule\s*)?(\d{1,2}(?:\.(?:[a-z]|\d+)){1,6})\b/i)?.[1] || "";
   if (requestedRule && candidate.ruleNumber.toLowerCase() === requestedRule) return `Rule number: ${requestedRule}`;
   const includes = (term) => new RegExp(`\\b${term.replaceAll(" ", "\\s+")}\\b`, "i").test(searchable);
   const acronyms = [...new Set([...(query.match(/\b[A-Z][A-Z0-9]{1,9}\b/g) || []).map((term) => term.toLowerCase()), ...(words.includes("nr") ? ["nr"] : [])])];

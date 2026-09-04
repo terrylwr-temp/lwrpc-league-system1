@@ -127,3 +127,11 @@ test("LMS-0706 insufficient, below-threshold and unrelated USAP evidence still s
     assert.equal(result.modelCallSkipped, true);
   }
 });
+
+test("LMS-0706 does not select an unfinished USAP condition as governing evidence", () => {
+  const selected = selectAnswerEvidence(retrieval(
+    "What is the fault for spin or manipulation on release?",
+    [usap("20.E.1.e Fault – Volley Serve and Drop Serve, Spin or Manipulation on Release. When the server")],
+  ));
+  assert.deepEqual(ids(selected), []);
+});

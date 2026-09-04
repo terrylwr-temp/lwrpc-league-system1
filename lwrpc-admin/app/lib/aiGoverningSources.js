@@ -25,6 +25,7 @@ function issueTerms(question) {
 // A body passage must contain the issue's specific terms and an actual rule or
 // instruction. Titles/headings alone and scattered paragraphs cannot override.
 function directPassages(candidate, question) {
+  if (isObviouslyIncompleteUsapFragment(candidate)) return [];
   const terms = issueTerms(question);
   if (!terms.length) return [];
   return String(candidate.content || "").split(/\n\s*\n|\n(?=\s*(?:[•]|\d+(?:\.\d+)*\.\s))/).filter((passage) => {
@@ -37,6 +38,14 @@ function directPassages(candidate, question) {
       return /\b(?:must|shall|may|cannot|can|only|required|allowed|permitted|prohibited|fault|loses?|wins?|recorded|awarded|use|select|click|save)\b/i.test(sentence);
     });
   });
+}
+
+function isObviouslyIncompleteUsapFragment(candidate) {
+  if (candidate?.documentType !== "usap_rulebook") return false;
+  const content = String(candidate?.content || "").trim();
+  return content.length > 0
+    && !/[.!?)]$/.test(content)
+    && /\b(?:when|if|unless|because|while|where|that|which|the|a|an|and|or|to|of|for|with|from|on|in|at|by|server|player|referee)$/i.test(content);
 }
 
 export function selectGoverningEvidence(retrieval, { detectIntents, intentSupport, selectLocal, limit }) {

@@ -223,3 +223,32 @@ test("passes normalized searchable content, not raw glyph artifacts, into logica
   assert.ok(searchable.every((chunk) => !/[\uf0b7\ufffd]/.test(chunk.content)));
   assert.ok(searchable.some((chunk) => chunk.content.includes("• Record the score")));
 });
+
+test("keeps USAP rule identities and cross-page outcomes together while excluding structural navigation", () => {
+  const chunks = chunkPdfPages([
+    { pageNumber: 1, lines: ["2026", "OFFICIAL", "RULEBOOK"] },
+    { pageNumber: 4, lines: ["i", "2026 USA Pickleball Official Rulebook © Copyright – All rights reserved", "TABLE OF CONTENTS", "Section 20 Tournament Match Situations ........ 47", "Section 25 Wheelchair Play", "........................................ 65"] },
+    { pageNumber: 5, lines: ["ii", "Section 25 Wheelchair Play ........ 65", "Index ................................ 83"] },
+    { pageNumber: 6, lines: ["1", "2026 USA Pickleball Official Rulebook © Copyright – All rights reserved", "Section 3 Court and Equipment", "3.A.4.c Non-Volley Zone. The 7-foot by 20-foot area is part of the court."] },
+    { pageNumber: 52, lines: ["47", "2026 USA Pickleball Official Rulebook © Copyright – All rights reserved", "Section 20 Tournament Match Situations", "20.E.1 Faults. The referee will call faults for service violations.", "20.E.1.e Fault – Volley Serve and Drop Serve, Spin or Manipulation on Release. When the server"] },
+    { pageNumber: 53, lines: ["48", "2026 USA Pickleball Official Rulebook © Copyright – All rights reserved", "manipulates or spins the ball immediately prior to the serve, it is a fault against the server.", "20.E.1.f Fault – Drop Serve. When the server propels the ball, it is a fault."] },
+    { pageNumber: 72, lines: ["67", "25.A.10.c Fault – Failure to Exit the Non-Volley Zone Before Volleying. After contacting the non-volley zone, when a player volleys"] },
+    { pageNumber: 73, lines: ["68", "the ball before both rear wheels are outside the non-volley zone, it is a fault against the player.", "25.A.11 Playing Surface Dimensions. The recommended area is 44 feet wide."] },
+    { pageNumber: 85, lines: ["80", "INDEX", "10-second rule 6.D", "non-volley zone 3.A.4.c"] },
+  ], { documentType: "usap_rulebook" });
+  const toc = chunks.find((chunk) => chunk.heading === "Table of Contents");
+  assert.ok(toc);
+  assert.equal(toc.isSearchable, false);
+  assert.ok(!searchableChunksForEmbedding(chunks).some((chunk) => /TABLE OF CONTENTS|10-second rule 6\.D/i.test(chunk.content)));
+  const early = chunks.find((chunk) => chunk.ruleNumber === "3.A.4.c");
+  const middle = chunks.find((chunk) => chunk.ruleNumber === "20.E.1.e");
+  const late = chunks.find((chunk) => chunk.ruleNumber === "25.A.10.c");
+  assert.equal(early.pageNumber, 6);
+  assert.equal(middle.pageNumber, 52);
+  assert.equal(late.pageNumber, 72);
+  assert.match(middle.content, /When the server\nmanipulates or spins the ball/i);
+  assert.match(middle.content, /fault against the server\.$/i);
+  assert.match(late.content, /fault against the player\.$/i);
+  assert.deepEqual(chunks.filter((chunk) => chunk.ruleNumber).map((chunk) => chunk.ruleNumber), ["3.A.4.c", "20.E.1", "20.E.1.e", "20.E.1.f", "25.A.10.c", "25.A.11"]);
+  assert.ok(!chunks.some((chunk) => chunk.ruleNumber === "2026" || chunk.ruleNumber === "6.08"));
+});

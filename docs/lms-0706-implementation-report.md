@@ -58,7 +58,7 @@ A shared constant is used by Stage 3 insufficiency diagnostics and Stage 4/5 ski
 
 ## Regression results
 
-All 80 tests pass: the existing 66 tests plus 14 new governing-source tests. Existing test assertions were retained except the required official-evidence prompt wording update; the raw production compound case additionally receives a high-scoring general USAP candidate and still selects Important Dates and Rule 5.4.
+All 82 tests pass: the existing coverage plus the USAP processing, numbered-rule, and incomplete-fragment regressions. Existing test assertions were retained except the required official-evidence prompt wording update; the raw production compound case additionally receives a high-scoring general USAP candidate and still selects Important Dates and Rule 5.4.
 
 | Coverage | Result |
 | --- | --- |
@@ -84,7 +84,7 @@ USAP evidence and conflicting outcomes in these new tests are explicitly synthet
 
 | Command | Result |
 | --- | --- |
-| `npm test` | PASS: 80 tests, 0 failed, 0 skipped |
+| `npm test` | PASS: 82 tests, 0 failed, 0 skipped |
 | `npm run lint` | PASS: 0 errors; 3 existing warnings in unchanged Captain/Player Dashboard files |
 | `npx tsc --noEmit --incremental false` | PASS |
 | `npm run build` | PASS: compiled successfully; 69/69 static pages generated |
@@ -103,25 +103,60 @@ The first sandboxed builds compiled but hit Windows EPERM writing `.next/cache/.
 | `lwrpc-admin/app/lib/aiDocumentMetadata.js` | USAP type validation and default authority helper |
 | `lwrpc-admin/app/ai-assistant/page.js` | USAP catalog label/default and applicability-first help |
 | `lwrpc-admin/app/ai-assistant/console/page.js` | Governing source and applicability diagnostics |
-| `lwrpc-admin/app/lib/version.js` | Visible version LMS-0706 |
+| `lwrpc-admin/app/lib/version.js` | Visible version LMS-0707 |
+| `lwrpc-admin/app/lib/aiDocumentProcessing.js` | LMS-0707 USAP-only structural filtering, alphanumeric rule parsing, and cross-page rule grouping |
+| `lwrpc-admin/test/aiDocumentProcessing.test.mjs` | LMS-0707 early/middle/late USAP, TOC, hierarchy, and cross-page regressions |
 | `lwrpc-admin/supabase-ai-assistant-lms-0706-usap-rulebook.sql` | Focused migration |
 | `lwrpc-admin/test/aiGoverningSources.test.mjs` | New authority/metadata/fallback regressions |
 | `lwrpc-admin/test/aiAnswerGeneration.test.mjs` | Prompt assertion and USAP interference regression |
 | `docs/project-roadmap.md` | Appended implementation status and Stage 6 pause; preserves pre-existing edit |
 | `docs/lms-0706-implementation-report.md` | This report and rollout instructions |
 
-Stage 3 RPC, scoring weights, .350 threshold, embeddings, PDF chunking, Storage architecture, secure citation viewer, live-data guard, LMS-0705 coherent-passage logic, Question/Answer colors, and role-aware guide visibility remain unchanged. No dynamic equipment lists or web-rule retrieval were added.
+Stage 3 RPC, scoring weights, .350 threshold, Storage architecture, secure citation viewer, live-data guard, LMS-0705 coherent-passage logic, Question/Answer colors, and role-aware guide visibility remain unchanged. No dynamic equipment lists or web-rule retrieval were added.
 
 ## Exact deployment order
 
 1. Apply `supabase-ai-assistant-lms-0706-usap-rulebook.sql` to the intended Supabase project. Confirm the transaction succeeds and the document-type constraint now includes `usap_rulebook`. Do not assume local implementation applied it.
 2. Deploy the LMS-0706 application to that same environment. Confirm the visible version and the new type option in AI Assistant Administration.
-3. Upload and process the actual official 2026 PDF using the steps below. Processing does not activate it.
-4. Review extraction/chunks, rule references, page numbers and processing warnings; then explicitly activate the ready version.
+3. For this already managed 2026 source, use **Reprocess Selected** to create and process a new immutable version from the same PDF. Upload only if the source PDF itself changes. Processing does not activate it.
+4. Review extraction/chunks, rule references, page numbers and processing warnings; activate only after the corrected version passes the required review.
 5. Run production LWR-override and USAP-fallback questions in the management console and player experience. Inspect selected evidence, excluded USAP reasons and citations. Confirm Important Dates + Rule 5.4 for the exact compound question.
 6. Record LMS-0706 production acceptance only after these checks pass. Stage 6 stays paused throughout.
 
-## Add Official PDF steps after deployment
+## LMS-0707 Recommendation C processing remediation
+
+LMS-0707 is a local, un-deployed processing extension to LMS-0706. It does not activate, alter, or reprocess the existing inactive ready version `8e03c077-478b-4319-9c68-db7a13751915`. Stage 6 remains paused. No new Supabase migration is required: the remediation uses the existing version, chunk, searchability, embedding, and activation schema.
+
+The processor now selects a `usap_rulebook`-only path. It preserves existing LWR chunking unchanged. That path retains cover, copyright/running-title, standalone folio, two-page table-of-contents, Appendix A fault/replay summary, and index material for the administrator preview, marks it non-searchable, and omits its embedding. It recognizes USAP identifiers only when they start a provision and include an uppercase hierarchy component, such as `3.A.4.c`, `6.D.1`, `20.E.1.e`, and `25.A.10.c`; years, folios, cross-references, and measured values such as `6.08 m` cannot become rule metadata. A rule unit remains open across a physical page boundary until the next valid provision starts. Its stored primary page remains the page where the provision begins, preserving the secure citation-viewer contract. Section and immediate parent-rule headings remain in metadata for subrule context.
+
+The exact checksum-matched 96-page source was re-chunked locally without writing a version, chunks, or embeddings to Supabase. This is a controlled processing audit, not a production reprocess:
+
+| Metric | Existing inactive version | Local corrected processing |
+| --- | ---: | ---: |
+| Total chunks | 403 | 666 |
+| Searchable / embedded | 402 / 402 | 586 / 586 |
+| Non-searchable | 1 | 80 |
+| Non-searchable with embeddings | 0 | 0 |
+| Searchable chunks under 80 characters | 186 | 76 |
+| Searchable structural-noise chunks | 84 | 0 |
+| TOC searchable chunks | 13 | 0 |
+| Valid stored USAP rule IDs | 0 | 547 distinct IDs |
+| False stored rule IDs | `2026`, folios, `6.08` examples | 0 |
+| Dangling rule-condition fragments | 48 spans / 17 cross-page spans in the old layout | 0 detected by the bounded dangling-condition check |
+
+The total rises because each governing provision is a coherent evidence unit instead of an arbitrary page-sized fragment. The relevant quality measure is that the 547 real provision IDs are individually addressable and no longer compete with structural navigation. Representative local outputs: `3.A.4.c` starts on PDF page 12 and retains its full non-volley-zone dimensions; `6.D.1` is complete on page 19; `7.B.2.a` starts on page 21 and includes its replay outcome across page 22; `20.E.1.e` starts on page 52 and includes the page-53 outcome; and `25.A.10.c` starts on page 72 and includes the page-73 fault outcome. All five are searchable and would receive embeddings in a real reprocess.
+
+The previous Chunk 143/144 failure is a regression fixture. The old incomplete `When the server` fragment is rejected by a narrowly scoped USAP defensive Stage 4 check while awaiting reprocessing. The corrected `20.E.1.e` unit contains `When the server manipulates or spins the ball immediately prior to the serve, it is a fault against the server.` and is selected as the direct governing evidence in a controlled local smoke test. LMS-0706 authority tests continue to pass: LWR retirement, scoring-freeze, Franklin X-40, Match Setup, roster/Friday-lineup, direct conflict, unrelated-LWR, and mixed-intent cases retain their expected authority outcomes; ordinary USAP governing fixtures still select USAP. Stage 3 weights and the `.350` threshold are unchanged.
+
+### Production next steps for this remediation
+
+1. Deploy LMS-0707 after the standard validation below. The existing LMS-0706 catalog-type migration need only have been applied once; do not create or apply another migration for this remediation.
+2. As a League Manager, open AI Assistant Administration, select the inactive 2026 USA Pickleball Rulebook and its existing ready version, then select **Reprocess Selected**. This creates a new immutable version from the same managed Storage PDF; uploading the file again is not necessary.
+3. Confirm the new version is **ready** and remains inactive. Review the preview, rule IDs, no-searchable TOC/index/Appendix-A chunks, the cross-page examples above, and processing warnings. The old version remains in history for audit.
+4. Run manager-console retrieval checks for Rule `20.E.1.e`, spin/manipulation on release, Rule `6.D.1`, and Rule `25.A.10.c`, confirming the complete rule and its primary citation page. Then rerun the LMS-0706 LWR-over-USAP regressions.
+5. Do not use **Activate Ready Version** until that review passes. Record LMS-0706 production acceptance only after this corrected version and its production retrieval tests are accepted.
+
+## Add Official PDF steps after deployment (for a new source, not this remediation)
 
 1. Sign in as a League Manager and open AI Assistant Administration → **Add Official PDF**.
 2. Set **Document title** to `2026 USA Pickleball Official Rulebook`.
