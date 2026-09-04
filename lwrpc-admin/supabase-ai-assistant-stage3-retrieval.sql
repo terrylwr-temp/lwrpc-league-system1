@@ -44,7 +44,7 @@ as $$
       -- requiring an unrelated intent word from the question.
       trim(regexp_replace(
         left(trim(coalesce(p_query_text, '')), 1000),
-        '\m(?:what|which|who|when|where|why|how|does|do|did|is|are|was|were|can|could|would|should|will|mean|meaning|work|works|requirement|requirements|explain|explained|tell|show|say|says|define|definition|describe|described|please|someone|somebody|anyone|anybody|we|us|our|i|me|my|you|your|they|them|their|he|she|it|this|that|got|get|gets|halfway|through|then|just|really|t|game|games|match|matches)\M',
+        '\m(?:what|which|who|when|where|why|how|does|do|did|is|are|was|were|can|could|would|should|will|mean|meaning|work|works|requirement|requirements|explain|explained|tell|show|say|says|define|definition|describe|described|please|someone|somebody|anyone|anybody|we|us|our|i|me|my|you|your|they|them|their|he|she|it|this|that|got|get|gets|halfway|through|then|just|really|t|game|games|match|matches|need|must|required|deadline|due|latest|early|long|before)\M',
         ' ',
         'gi'
       )) as keyword_query_text,
@@ -56,7 +56,17 @@ as $$
       (
         ni.query_lower ~ '\m(?:injur(?:y|ed|ies)?|hurt|medical|illness|emergency|cannot|unable|can''?t|won''?t|stop(?:ped|ping)?|quit|leave)\M'
         and ni.query_lower ~ '\m(?:players?|participants?|teams?|games?|matches?|play(?:ing)?|finish|continue|complete)\M'
-      ) as continuation_intent
+      ) as continuation_intent,
+      (
+        ni.query_lower ~ '\m(?:when|deadline|due|latest|early)\M'
+        or ni.query_lower ~ '\mhow\s+(?:early|long\s+before|many\s+(?:days?|hours?|weeks?)\s+before)\M'
+        or ni.query_lower ~ '\m(?:need|must|required)\s+(?:to\s+)?(?:be\s+)?(?:completed|submitted|done)\M'
+      ) as deadline_intent,
+      (
+        ni.query_lower ~ '\mhow\s+(?:do|can|to)\M'
+        or ni.query_lower ~ '\mwhere\s+(?:do|can)\M'
+        or ni.query_lower ~ '\mwhat\s+(?:button|screen)\M'
+      ) as procedural_intent
     from normalized_input ni
   ),
   retrieval_expansions as (
@@ -196,13 +206,70 @@ as $$
     select e.chunk_id from eligible e cross join retrieval_expansions i
     where i.continuation_intent and e.searchable_text ~ '\mcannot\s+complete\M'
   ),
+  intent_candidates as (
+    -- Intent evidence is considered only when a meaningful phrase from the
+    -- question is also present. This prevents a generic timing or procedure
+    -- word from pulling unrelated rules or guides into the candidate set.
+    select e.chunk_id
+    from eligible e cross join retrieval_expansions i
+    where exists (
+      select 1 from phrase_terms p
+      where e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M')
+    )
+      and (
+        (i.deadline_intent and (
+          e.searchable_text ~ '\mno\s+later\s+than\M.{0,60}\m(?:days?|hours?|weeks?)\M'
+          or e.searchable_text ~ '\mat\s+least\M.{0,60}\m(?:days?|hours?|weeks?)\M'
+          or e.searchable_text ~ '\mwithin\M.{0,60}\m(?:days?|hours?|weeks?)\M'
+          or e.searchable_text ~ '\m(?:deadline|due)\M'
+          or e.searchable_text ~ '\m(?:before|prior\s+to)\s+(?:the\s+)?(?:scheduled\s+)?(?:match|match\s+date|date)\M'
+        ))
+        or (i.procedural_intent and e.searchable_text ~ '\m(?:click|button|select|enter|save|screen|dashboard|step(?:s)?|dropdown)\M')
+      )
+  ),
   candidate_ids as (
-    select chunk_id from vector_candidates union select chunk_id from keyword_candidates union select chunk_id from exact_candidates
+    select chunk_id from vector_candidates
+    union select chunk_id from keyword_candidates
+    union select chunk_id from exact_candidates
+    union select chunk_id from intent_candidates
   ),
   base_scores as (
     select e.*, vc.vector_rank, kc.keyword_rank, i.*,
       greatest(0::double precision, least(1::double precision, 1 - (e.embedding <=> p_query_embedding))) as semantic_score,
-      least(1::double precision, greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real))::double precision * 2.5) as keyword_score,
+      least(1::double precision, greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real))::double precision * 2.5) as fts_keyword_score,
+      case
+        -- Strong timing language in an enumerated rule is direct requirement
+        -- evidence. The question phrase must also occur in the chunk, so this
+        -- does not globally prefer Rules documents for every timing question.
+        when i.deadline_intent
+          and exists (select 1 from phrase_terms p where e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M'))
+          and e.searchable_text ~ '\m(?:no\s+later\s+than|at\s+least|within)\M.{0,60}\m(?:days?|hours?|weeks?)\M'
+          and e.content ~ '\m[0-9]+(?:\.[0-9]+)+\.\s*'
+          then .95::double precision
+        -- A direct phrase plus a concrete date, duration, or deadline is
+        -- strong evidence even when it is presented outside a numbered rule.
+        when i.deadline_intent
+          and exists (select 1 from phrase_terms p where e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M'))
+          and (
+            e.searchable_text ~ '\m(?:no\s+later\s+than|at\s+least|within)\M.{0,60}\m(?:days?|hours?|weeks?)\M'
+            or e.searchable_text ~ '\m(?:deadline|due)\M'
+          )
+          then .75::double precision
+        -- “Before the scheduled match” is useful but less specific than a
+        -- concrete deadline, so it receives a smaller corroborating score.
+        when i.deadline_intent
+          and exists (select 1 from phrase_terms p where e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M'))
+          and e.searchable_text ~ '\m(?:before|prior\s+to)\s+(?:the\s+)?(?:scheduled\s+)?(?:match|match\s+date|date)\M'
+          then .45::double precision
+        -- Procedural questions receive a bounded boost from direct phrase
+        -- matches in operational instructions, without treating a guide's
+        -- authority as a substitute for relevance.
+        when i.procedural_intent
+          and exists (select 1 from phrase_terms p where e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M'))
+          and e.searchable_text ~ '\m(?:click|button|select|enter|save|screen|dashboard|step(?:s)?|dropdown)\M'
+          then .55::double precision
+        else 0::double precision
+      end as intent_keyword_score,
       case
         when i.requested_rule <> '' and lower(coalesce(e.rule_number, '')) = i.requested_rule then 1::double precision
         when exists (select 1 from acronym_terms a where e.searchable_text ~ ('\m' || a.term || '\M')) then .95::double precision
@@ -221,6 +288,12 @@ as $$
     cross join retrieval_expansions i
     left join vector_candidates vc on vc.chunk_id = e.chunk_id
     left join keyword_candidates kc on kc.chunk_id = e.chunk_id
+  ),
+  weighted_scores as (
+    -- Keep the published hybrid weights unchanged. Intent compatibility is a
+    -- conservative keyword-relevance signal, not an additional weight.
+    select b.*, greatest(b.fts_keyword_score, b.intent_keyword_score) as keyword_score
+    from base_scores b
   ),
   scored as (
     select b.*,
@@ -244,7 +317,7 @@ as $$
         + (case when b.current_path <> '' and b.searchable_text like '%' || b.current_path || '%' then .10 else 0 end)
         + (case when b.user_role <> '' and b.searchable_text like '%' || replace(b.user_role, '_', ' ') || '%' then .05 else 0 end)
       )::double precision as context_score
-    from base_scores b
+    from weighted_scores b
     left join team_context tc on true
   )
   select chunk_id, document_id, document_version_id, document_title, document_type,

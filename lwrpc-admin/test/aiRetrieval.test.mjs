@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
-const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, continuationExpansionPhrases, evaluateEvidence, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, toPgVector } = await import("../app/lib/aiRetrieval.js");
+const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, continuationExpansionPhrases, detectRetrievalIntent, evaluateEvidence, intentDiagnostic, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, toPgVector } = await import("../app/lib/aiRetrieval.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 const vector = Array.from({ length: 1536 }, (_, i) => i / 1000);
 
@@ -75,6 +75,34 @@ test("FTS removes generic question framing while retaining meaningful content te
   assert.deepEqual(normalizedFtsTerms("How does scoring freeze work?"), ["scoring", "freeze"]);
   assert.deepEqual(normalizedFtsTerms("Someone got hurt halfway through the game and can't finish. What do we do?"), ["hurt", "finish"]);
   assert.deepEqual(normalizedFtsTerms("What type of balls will we be using?"), ["balls"]);
+  assert.deepEqual(normalizedFtsTerms("When does Match Setup need to be completed?"), ["setup", "completed"]);
+});
+
+test("uses generic deadline and procedural compatibility without changing hybrid weights", async () => {
+  const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
+  for (const cte of ["deadline_intent", "procedural_intent", "intent_candidates", "intent_keyword_score", "weighted_scores"]) assert.match(sql, new RegExp(`\\b${cte}\\b`));
+  assert.match(sql, /strong timing language/i);
+  assert.match(sql, /click\|button\|select\|enter\|save/i);
+  assert.doesNotMatch(sql, /match setup|rule 5\.4/i);
+  assert.equal(RETRIEVAL_WEIGHTS.semantic + RETRIEVAL_WEIGHTS.keyword + RETRIEVAL_WEIGHTS.exact + RETRIEVAL_WEIGHTS.authority + RETRIEVAL_WEIGHTS.context, 1);
+  assert.equal(detectRetrievalIntent("When does this need to be completed?"), "Deadline/requirement");
+  assert.equal(detectRetrievalIntent("How early do we have to submit our team roster?"), "Deadline/requirement");
+  assert.equal(detectRetrievalIntent("What button do I use to save my team roster?"), "Procedural/how-to");
+  assert.equal(detectRetrievalIntent("What does NR mean?"), "None");
+  const timingRule = { ...row(), ruleNumber: "5", content: "5.4. Team Roster exchange: submit the team roster no later than three days before the scheduled date." };
+  const timingGuide = { ...row(), ruleNumber: "", content: "Team Roster instructions: submit the team roster before the scheduled match date." };
+  const procedureGuide = { ...row(), ruleNumber: "", content: "Team Roster instructions: click Save Roster from the dashboard to submit changes." };
+  const unrelatedRule = { ...row(), ruleNumber: "7", content: "7.2. Equipment: submit a waiver no later than three days before the event." };
+  assert.deepEqual(intentDiagnostic("When does team roster need to be completed?", timingRule), { detectedIntent: "Deadline/requirement", evidenceMatch: "Concrete timing requirement in numbered rule" });
+  assert.deepEqual(intentDiagnostic("When does team roster need to be completed?", timingGuide), { detectedIntent: "Deadline/requirement", evidenceMatch: "General timing language" });
+  assert.deepEqual(intentDiagnostic("What button do I use to save team roster?", procedureGuide), { detectedIntent: "Procedural/how-to", evidenceMatch: "Procedural instructions" });
+  assert.deepEqual(intentDiagnostic("When does team roster need to be completed?", unrelatedRule), { detectedIntent: "Deadline/requirement", evidenceMatch: "None" });
+  const output = await retrieveOfficialEvidence({
+    supabase: { rpc: async () => ({ data: [{ ...timingRule, chunk_id: row().chunk_id, document_id: row().document_id, document_version_id: row().document_version_id, document_title: "Rules", document_type: "league_rules", document_authority_rank: 1, document_scope_kind: "all", page_number: 4, section_label: "", heading: "", semantic_score: .4, keyword_score: .95, exact_score: .85, authority_score: .85, context_score: 0, combined_score: .58, vector_rank: 9, keyword_rank: null, exact_match: true }], error: null }) },
+    body: { question: "When does team roster need to be completed?" }, embedQuery: async () => ({ embedding: vector, model: "text-embedding-3-small", inputTokens: 9 }), clock: (() => { let n = 0; return () => ++n; })(),
+  });
+  assert.equal(output.candidates[0].ftsDiagnostic.matched, false);
+  assert.equal(output.candidates[0].intentDiagnostic.evidenceMatch, "Concrete timing requirement in numbered rule");
 });
 
 test("uses a generic interruption expansion without injecting an official outcome term", async () => {
@@ -98,9 +126,9 @@ test("retrieval route is League Manager protected and has no answer-model path",
   assert.match(route, /authorizeAdminRequest\(req, "league_manager"\)/); assert.doesNotMatch(route, /chat\/completions|generateText|streamText|responses\.create/i);
 });
 
-test("includes the approved multi-document, natural-language, typo, and unsupported-question evaluation prompts", () => {
-  assert.ok(AI_RETRIEVAL_EVALUATION_SET.length >= 26);
-  for (const required of ["Rule 4.5", "verbally abusive", "injured", "Picklebraker", "weather cancellations"]) assert.ok(AI_RETRIEVAL_EVALUATION_SET.some((question) => question.includes(required)));
+test("includes the approved multi-document, paired-intent, natural-language, typo, and unsupported-question evaluation prompts", () => {
+  assert.ok(AI_RETRIEVAL_EVALUATION_SET.length >= 34);
+  for (const required of ["Rule 4.5", "verbally abusive", "injured", "Picklebraker", "weather cancellations", "deadline for Match Setup", "enter match scores"]) assert.ok(AI_RETRIEVAL_EVALUATION_SET.some((question) => question.includes(required)));
 });
 
 function row() { return { chunk_id: "10000000-0000-4000-8000-000000000001", document_id: "20000000-0000-4000-8000-000000000001", document_version_id: "30000000-0000-4000-8000-000000000001", document_title: "Rules", document_type: "league_rules", document_authority_rank: 1, document_scope_kind: "all", page_number: 4, section_label: "Rule 4.5", heading: "Retired Games", rule_number: "4.5", content: "Retired games", semantic_score: .8, keyword_score: .7, exact_score: 1, authority_score: .9, context_score: 0, combined_score: .85, vector_rank: 1, keyword_rank: 1, exact_match: true }; }
