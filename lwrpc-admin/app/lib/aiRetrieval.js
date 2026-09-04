@@ -121,6 +121,7 @@ export function continuationExpansionPhrases(question) {
 
 export function detectRetrievalIntent(question) {
   const value = String(question || "").toLowerCase();
+  if (isConductIntent(value)) return "Behavior/conduct";
   const deadline = /\b(?:when|deadline|due|latest|early)\b/.test(value)
     || /\bhow\s+(?:early|long\s+before|many\s+(?:days?|hours?|weeks?)\s+before)\b/.test(value)
     || /\b(?:need|must|required)\s+(?:to\s+)?(?:be\s+)?(?:completed|submitted|done)\b/.test(value);
@@ -132,14 +133,19 @@ export function detectRetrievalIntent(question) {
 export function intentDiagnostic(question, candidate) {
   const intent = detectRetrievalIntent(question);
   const searchable = [candidate.sectionLabel, candidate.heading, candidate.ruleNumber, candidate.content].filter(Boolean).join(" ").toLowerCase();
-  if (intent === "None" || !hasDirectQueryPhrase(question, searchable)) return { detectedIntent: intent, evidenceMatch: "None" };
+  if (intent === "None" || (intent !== "Behavior/conduct" && !hasDirectQueryPhrase(question, searchable))) return { detectedIntent: intent, evidenceMatch: "None" };
   const concreteTiming = /\b(?:no\s+later\s+than|at\s+least|within)\b[\s\S]{0,60}\b(?:days?|hours?|weeks?)\b/.test(searchable) || /\b(?:deadline|due)\b/.test(searchable);
   const timing = concreteTiming || /\b(?:before|prior\s+to)\s+(?:the\s+)?(?:scheduled\s+)?(?:match|match\s+date|date)\b/.test(searchable);
   const procedure = /\b(?:click|button|select|enter|save|screen|dashboard|steps?|dropdown)\b/.test(searchable);
+  const conductStandard = /\b(?:respect|respectful|sportsmanship|conduct|decorum|behavior)\b/.test(searchable);
+  const conductExample = /\b(?:trash\s+talk|profanity|aggressive|abusive|harass(?:ment)?|paddle\s+throwing)\b/.test(searchable);
+  const conductProhibition = /\b(?:avoid|prohibit(?:ed|ion)?|not\s+(?:be\s+)?tolerated|violation|disciplin(?:ary|e)|must|shall)\b/.test(searchable);
+  const conductAudience = /\b(?:players?|opponents?|partners?|members?|captains?|spectators?)\b/.test(searchable);
   if (intent === "Deadline/requirement" && concreteTiming && /\b\d+(?:\.\d+)+\.\s/.test(candidate.content || "")) return { detectedIntent: intent, evidenceMatch: "Concrete timing requirement in numbered rule" };
   if (intent === "Deadline/requirement" && concreteTiming) return { detectedIntent: intent, evidenceMatch: "Concrete timing requirement" };
   if (intent === "Deadline/requirement" && timing) return { detectedIntent: intent, evidenceMatch: "General timing language" };
   if (intent === "Procedural/how-to" && procedure) return { detectedIntent: intent, evidenceMatch: "Procedural instructions" };
+  if (intent === "Behavior/conduct" && conductStandard && (conductExample || (conductProhibition && conductAudience))) return { detectedIntent: intent, evidenceMatch: "Behavioral standard and prohibition" };
   return { detectedIntent: intent, evidenceMatch: "None" };
 }
 
@@ -192,6 +198,13 @@ function hasDirectQueryPhrase(question, searchable) {
     if (phrase.length >= 8 && distinctive.slice(index, index + size).some(Boolean) && new RegExp(`\\b${phrase.replaceAll(" ", "\\s+")}\\b`, "i").test(searchable)) return true;
   }
   return false;
+}
+function isConductIntent(value) {
+  const interpersonalBehavior = /\b(?:yell|insult|swear|curse|verbal(?:ly)?\s+abus(?:e|ive)|harass(?:ment)?|threaten|taunt|mock|disrespect(?:ful)?|profan(?:e|ity))\b/.test(value)
+    && /\b(?:another\s+)?(?:player|opponent|partner|member|captain|spectator|someone|anyone)\b/.test(value);
+  const namedConduct = /\btrash\s+talk(?:ing)?\b/.test(value) || /\b(?:sportsmanship|conduct)\b/.test(value);
+  const angryPaddle = /\bthrow(?:ing)?\s+(?:my\s+|a\s+)?paddle\b/.test(value) && /\b(?:angry|anger)\b/.test(value);
+  return interpersonalBehavior || namedConduct || angryPaddle;
 }
 function assertEmbeddingConfiguration() { if (aiAssistantConfig.embeddingDimensions !== 1536) throw new Error("LWR_AI_EMBEDDING_DIMENSIONS must remain 1536 until the AI chunk schema is migrated and reindexed."); }
 function clean(value, max) { return String(value || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max); }

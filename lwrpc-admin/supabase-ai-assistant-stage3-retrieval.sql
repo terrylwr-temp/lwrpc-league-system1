@@ -66,7 +66,19 @@ as $$
         ni.query_lower ~ '\mhow\s+(?:do|can|to)\M'
         or ni.query_lower ~ '\mwhere\s+(?:do|can)\M'
         or ni.query_lower ~ '\mwhat\s+(?:button|screen)\M'
-      ) as procedural_intent
+      ) as procedural_intent,
+      (
+        (
+          ni.query_lower ~ '\m(?:yell|insult|swear|curse|verbal(?:ly)?\s+abus(?:e|ive)|harass(?:ment)?|threaten|taunt|mock|disrespect(?:ful)?|profan(?:e|ity))\M'
+          and ni.query_lower ~ '\m(?:another\s+)?(?:player|opponent|partner|member|captain|spectator|someone|anyone)\M'
+        )
+        or ni.query_lower ~ '\mtrash\s+talk(?:ing)?\M'
+        or ni.query_lower ~ '\m(?:sportsmanship|conduct)\M'
+        or (
+          ni.query_lower ~ '\mthrow(?:ing)?\s+(?:my\s+|a\s+)?paddle\M'
+          and ni.query_lower ~ '\m(?:angry|anger)\M'
+        )
+      ) as conduct_intent
     from normalized_input ni
   ),
   retrieval_expansions as (
@@ -225,6 +237,15 @@ as $$
           or e.searchable_text ~ '\m(?:before|prior\s+to)\s+(?:the\s+)?(?:scheduled\s+)?(?:match|match\s+date|date)\M'
         ))
         or (i.procedural_intent and e.searchable_text ~ '\m(?:click|button|select|enter|save|screen|dashboard|step(?:s)?|dropdown)\M')
+        or (i.conduct_intent
+          and e.searchable_text ~ '\m(?:respect|respectful|sportsmanship|conduct|decorum|behavior)\M'
+          and (
+            e.searchable_text ~ '\m(?:trash\s+talk|profanity|aggressive|abusive|harass(?:ment)?|paddle\s+throwing)\M'
+            or (
+              e.searchable_text ~ '\m(?:avoid|prohibit(?:ed|ion)?|not\s+(?:be\s+)?tolerated|violation|disciplin(?:ary|e)|must|shall)\M'
+              and e.searchable_text ~ '\m(?:players?|opponents?|partners?|members?|captains?|spectators?)\M'
+            )
+          ))
       )
   ),
   candidate_ids as (
@@ -268,6 +289,19 @@ as $$
           and exists (select 1 from phrase_terms p where e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M'))
           and e.searchable_text ~ '\m(?:click|button|select|enter|save|screen|dashboard|step(?:s)?|dropdown)\M'
           then .55::double precision
+        -- Interpersonal-conduct questions are corroborated only by a chunk
+        -- that states a behavioral standard and a prohibition or concrete
+        -- misconduct example. No document title or catalog rank is used here.
+        when i.conduct_intent
+          and e.searchable_text ~ '\m(?:respect|respectful|sportsmanship|conduct|decorum|behavior)\M'
+          and (
+            e.searchable_text ~ '\m(?:trash\s+talk|profanity|aggressive|abusive|harass(?:ment)?|paddle\s+throwing)\M'
+            or (
+              e.searchable_text ~ '\m(?:avoid|prohibit(?:ed|ion)?|not\s+(?:be\s+)?tolerated|violation|disciplin(?:ary|e)|must|shall)\M'
+              and e.searchable_text ~ '\m(?:players?|opponents?|partners?|members?|captains?|spectators?)\M'
+            )
+          )
+          then .65::double precision
         else 0::double precision
       end as intent_keyword_score,
       case

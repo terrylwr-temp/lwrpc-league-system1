@@ -105,6 +105,21 @@ test("uses generic deadline and procedural compatibility without changing hybrid
   assert.equal(output.candidates[0].intentDiagnostic.evidenceMatch, "Concrete timing requirement in numbered rule");
 });
 
+test("uses a generic interpersonal-conduct signal without targeting a document", async () => {
+  const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
+  for (const marker of ["conduct_intent", "Behavioral standard", "paddle"]) assert.match(sql, new RegExp(marker, "i"));
+  assert.doesNotMatch(sql, /document_type\s*=\s*'code_of_conduct'|document_authority_rank\s*=\s*2/i);
+  assert.equal(detectRetrievalIntent("Can I yell at or insult another player during a match?"), "Behavior/conduct");
+  assert.equal(detectRetrievalIntent("What happens if someone is verbally abusive?"), "Behavior/conduct");
+  assert.equal(detectRetrievalIntent("Is trash talking allowed?"), "Behavior/conduct");
+  assert.equal(detectRetrievalIntent("Can I throw my paddle when I'm angry?"), "Behavior/conduct");
+  assert.equal(detectRetrievalIntent("Can I make an aggressive serve?"), "None");
+  const conductEvidence = { ...row(), ruleNumber: "1", content: "1. Sportsmanship: Treat every player with respect. Avoid discouraging trash talk toward opponents. Profanity will not be tolerated." };
+  const unrelatedEvidence = { ...row(), content: "Respect the court schedule. Teams must reserve courts before the match." };
+  assert.deepEqual(intentDiagnostic("Can I yell at or insult another player during a match?", conductEvidence), { detectedIntent: "Behavior/conduct", evidenceMatch: "Behavioral standard and prohibition" });
+  assert.deepEqual(intentDiagnostic("Can I yell at or insult another player during a match?", unrelatedEvidence), { detectedIntent: "Behavior/conduct", evidenceMatch: "None" });
+});
+
 test("uses a generic interruption expansion without injecting an official outcome term", async () => {
   const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
   assert.match(sql, /continuation_intent/); assert.match(sql, /phraseto_tsquery\('english', 'cannot complete'\)/);
@@ -126,9 +141,9 @@ test("retrieval route is League Manager protected and has no answer-model path",
   assert.match(route, /authorizeAdminRequest\(req, "league_manager"\)/); assert.doesNotMatch(route, /chat\/completions|generateText|streamText|responses\.create/i);
 });
 
-test("includes the approved multi-document, paired-intent, natural-language, typo, and unsupported-question evaluation prompts", () => {
-  assert.ok(AI_RETRIEVAL_EVALUATION_SET.length >= 34);
-  for (const required of ["Rule 4.5", "verbally abusive", "injured", "Picklebraker", "weather cancellations", "deadline for Match Setup", "enter match scores"]) assert.ok(AI_RETRIEVAL_EVALUATION_SET.some((question) => question.includes(required)));
+test("includes the approved multi-document, paired-intent, conduct, natural-language, typo, and unsupported-question evaluation prompts", () => {
+  assert.ok(AI_RETRIEVAL_EVALUATION_SET.length >= 40);
+  for (const required of ["Rule 4.5", "verbally abusive", "injured", "Picklebraker", "weather cancellations", "deadline for Match Setup", "enter match scores", "yell at or insult", "trash talking"]) assert.ok(AI_RETRIEVAL_EVALUATION_SET.some((question) => question.includes(required)));
 });
 
 function row() { return { chunk_id: "10000000-0000-4000-8000-000000000001", document_id: "20000000-0000-4000-8000-000000000001", document_version_id: "30000000-0000-4000-8000-000000000001", document_title: "Rules", document_type: "league_rules", document_authority_rank: 1, document_scope_kind: "all", page_number: 4, section_label: "Rule 4.5", heading: "Retired Games", rule_number: "4.5", content: "Retired games", semantic_score: .8, keyword_score: .7, exact_score: 1, authority_score: .9, context_score: 0, combined_score: .85, vector_rank: 1, keyword_rank: 1, exact_match: true }; }
