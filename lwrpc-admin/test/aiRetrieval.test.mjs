@@ -61,6 +61,11 @@ test("generic exact matching recognizes unseen official phrases without boosting
   assert.equal(genericExactScore("What type of balls will we be using?", "Match Balls: an official item is provided."), .85);
   assert.equal(genericExactScore("What ball do we use?", "Match Balls: an official item is provided."), .85);
   assert.equal(genericExactScore("Which pickleball is used for league matches?", "Match Balls: an official item is provided."), .85);
+  assert.match(sql, /'another'/);
+  assert.equal(genericExactScore("to another", "A player speaks to another player."), 0);
+  assert.equal(genericExactScore("another player", "A player speaks to another player."), 0);
+  assert.equal(genericExactScore("What happens if a player is verbally abusive to another player?", "A player speaks to another player."), 0);
+  assert.equal(genericExactScore("What happens if a player is verbally abusive to another player?", "Verbally abusive behavior toward a player is prohibited."), .85);
   for (const ordinary of ["someone", "finish", "halfway", "through"]) assert.equal(genericExactScore(ordinary, `The ${ordinary} word appears in prose.`), 0);
   for (const ordinary of ["using", "type", "brand"]) assert.equal(genericExactScore(ordinary, `The ${ordinary} word appears in prose.`), 0);
 });
@@ -155,7 +160,7 @@ function genericExactScore(query, content, ruleNumber = "", metadata = {}) {
   const requestedRule = normalized.match(/\b(?:rule\s*)?(\d+(?:\.\d+)+)\b/)?.[1] || "";
   if (requestedRule && ruleNumber === requestedRule) return 1;
   const words = normalized.match(/[a-z0-9]+/g) || [];
-  const generic = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides"]);
+  const generic = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);
   const boundary = (term) => new RegExp(`\\b${term.replaceAll(" ", "\\s+")}\\b`, "i").test(searchable);
   const acronyms = [...new Set([...(query.match(/\b[A-Z][A-Z0-9]{1,9}\b/g) || []).map((term) => term.toLowerCase()), ...(words.includes("nr") ? ["nr"] : [])])];
   if (acronyms.some(boundary)) return .95;
