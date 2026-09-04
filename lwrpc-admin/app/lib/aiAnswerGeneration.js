@@ -27,13 +27,37 @@ export function selectAnswerEvidence(retrieval) {
   const primary = candidates[0];
   if (!primary) return [];
   const cutoff = Math.max(Number(retrieval.evidence.threshold) || aiAssistantConfig.evidenceThreshold, Number(primary.combinedScore) - DIRECT_RELEVANCE_DELTA);
+  const intents = detectedEvidenceIntents(retrieval.request?.question);
   const selected = [primary, ...candidates.slice(1).filter((candidate) => (
     Number(candidate.combinedScore) >= cutoff
     && hasDirectRelevance(candidate)
     && materiallyContributes(candidate, primary, retrieval.request?.question)
-  ))].slice(0, MAX_SELECTED_CHUNKS);
-  return classifyAnswerEvidence(selected, retrieval.request?.question);
+  ))];
+  // A compound question needs direct evidence for each independently detected
+  // official concept, even when one concept's candidate falls below the other
+  // concept's score cutoff.
+  for (const intent of intents) {
+    const best = candidates.find((candidate) => supportsEvidenceIntent(candidate, intent));
+    if (best && !selected.some((candidate) => candidate.chunkId === best.chunkId)) selected.push(best);
+  }
+  return classifyAnswerEvidence(selected.filter((candidate) => !intents.length || supportsAnyEvidenceIntent(candidate, intents)).slice(0, MAX_SELECTED_CHUNKS), retrieval.request?.question);
 }
+
+function detectedEvidenceIntents(question) {
+  const value = String(question || "").toLowerCase();
+  const roster = /\b(?:add|remove|delete|drop|update|change|lock|open|close)\b/.test(value) && /\b(?:player|players|person|someone|member|members|roster|team)\b/.test(value) && /\b(?:team|league|season|roster)\b/.test(value);
+  const match = /\b(?:match|game|lineup|pairings?|match\s+setup)\b/.test(value);
+  return [roster && "Team/season roster management", match && "Individual-match Match Setup"].filter(Boolean);
+}
+
+function supportsEvidenceIntent(candidate, intent) {
+  const text = searchableEvidenceText(candidate);
+  if (intent === "Team/season roster management") return /\b(?:add|remove|delete|drop|update|change|lock|open|close)\b/.test(text) && /\b(?:player|players|team|roster)\b/.test(text) && (/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|date|deadline|open|close|lock)\b/.test(text) || /\bmanage roster\b/.test(text));
+  if (intent === "Individual-match Match Setup") return /\b(?:match setup|lineup|pairings?)\b/.test(text) && /\b(?:three|3|before|submit|enter|save|match day)\b/.test(text);
+  return false;
+}
+
+function supportsAnyEvidenceIntent(candidate, intents) { return intents.some((intent) => supportsEvidenceIntent(candidate, intent)); }
 
 export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = fetch, clock = performance.now.bind(performance), resolveSources = resolveOfficialSources }) {
   const started = clock();
@@ -237,9 +261,11 @@ function classifyAnswerEvidence(evidence, question) {
     .filter(({ candidate }) => isControllingRule(candidate))
     .sort((left, right) => authorityRank(left.candidate) - authorityRank(right.candidate) || left.index - right.index)[0]?.candidate;
   return evidence.map((candidate, index) => {
-    if (candidate === controlling) return { ...candidate, evidenceRole: "Primary / controlling", evidenceSelectionReason: "Highest-authority selected rule evidence" };
-    if (index === 0 && !controlling) return { ...candidate, evidenceRole: "Primary", evidenceSelectionReason: "Highest-ranked direct evidence" };
-    return { ...candidate, evidenceRole: "Supporting", evidenceSelectionReason: supportingReason(candidate, evidence[0], question) };
+    const intentSupport = detectedEvidenceIntents(question).filter((intent) => supportsEvidenceIntent(candidate, intent));
+    const annotated = { ...candidate, intentSupport };
+    if (candidate === controlling) return { ...annotated, evidenceRole: "Primary / controlling", evidenceSelectionReason: "Highest-authority selected rule evidence" };
+    if (index === 0 && !controlling) return { ...annotated, evidenceRole: "Primary", evidenceSelectionReason: "Highest-ranked direct evidence" };
+    return { ...annotated, evidenceRole: "Supporting", evidenceSelectionReason: supportingReason(candidate, evidence[0], question) };
   });
 }
 
