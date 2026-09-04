@@ -115,16 +115,78 @@ test("preserves compact primary evidence for the five production Stage 4 evaluat
   }
 });
 
-test("preserves direct evidence for both roster management and Match Setup while pruning score entry", () => {
+test("preserves direct evidence for both roster management and Match Setup while pruning score entry", async () => {
   const question = "When can I add a player to my team and when do I submit my lineup for Friday's match?";
-  const selected = selectAnswerEvidence(retrievalFor(question, [
+  const retrieval = retrievalFor(question, [
     stage4Chunk("dates", .68, { documentId: "dates", documentType: "league_supplement", authorityRank: 2, ruleNumber: "", sectionLabel: "Weekday League Key Dates", heading: "Weekday League Key Dates", content: "Sept. 28: Can start update rosters for the Weekday League." }),
     stage4Chunk("score-entry", .66, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", sectionLabel: "ENTER/VERIFY SCORES", heading: "ENTER/VERIFY SCORES", content: "Enter and verify scores after a match." }),
     stage4Chunk("roster-guide", .57, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", sectionLabel: "CREATE/UPDATE TEAM ROSTER", heading: "CREATE/UPDATE TEAM ROSTER", content: "Use Manage Roster to add or remove players." }),
     stage4Chunk("match-setup", .55, { documentId: "rules", documentType: "league_rules", authorityRank: 1, ruleNumber: "5.4", sectionLabel: "Match Setup", intent: "Concrete timing requirement in numbered rule", content: "Match Setup lineup must be submitted no later than three days before the scheduled match." }),
-  ]));
-  assert.deepEqual(selected.map((chunk) => chunk.chunkId), ["dates", "roster-guide", "match-setup"]);
-  assert.deepEqual(selected.map((chunk) => chunk.intentSupport), [["Team/season roster management"], ["Team/season roster management"], ["Individual-match Match Setup"]]);
+  ]);
+  const selected = selectAnswerEvidence(retrieval);
+  assert.deepEqual(selected.map((chunk) => chunk.chunkId), ["dates", "match-setup"]);
+  assert.deepEqual(selected.map((chunk) => chunk.intentSupport), [["Team/season roster management"], ["Individual-match Match Setup"]]);
+
+  let request;
+  const answer = await generateOfficialAnswer({
+    retrieval,
+    supabase: null,
+    resolveSources: async (_supabase, evidence) => evidence.map(sourceFor),
+    fetchImpl: async (_url, options) => {
+      request = JSON.parse(options.body);
+      return completedResponse({ answer: "The selected evidence supports both requested deadlines.", conflict: false });
+    },
+  });
+  assert.deepEqual(answer.selectedEvidence.map((chunk) => chunk.chunkId), ["dates", "match-setup"]);
+  assert.deepEqual(answer.sources.map((source) => source.chunkId), ["dates", "match-setup"]);
+  assert.equal(retrieval.suppliedEvidence.find((chunk) => chunk.chunkId === "score-entry").evidenceRole, "Not selected for model");
+  assert.equal(retrieval.suppliedEvidence.find((chunk) => chunk.chunkId === "score-entry").evidenceSelectionReason, "Does not support a detected question intent");
+  assert.doesNotMatch(request.input[0].content, /ENTER\/VERIFY SCORES/);
+  assert.match(request.input[0].content, /Question intent supported: Team\/season roster management/);
+  assert.match(request.input[0].content, /Question intent supported: Individual-match Match Setup/);
+});
+
+test("keeps roster-only and Match Setup-only source selections independent", () => {
+  const candidates = [
+    stage4Chunk("dates", .68, { documentId: "dates", documentType: "league_supplement", authorityRank: 2, sectionLabel: "Weekday League Key Dates", heading: "Weekday League Key Dates", content: "September 28: Can start updating rosters for the Weekday League." }),
+    stage4Chunk("score-entry", .66, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, sectionLabel: "ENTER/VERIFY SCORES", heading: "ENTER/VERIFY SCORES", content: "Enter and verify scores after a match." }),
+    stage4Chunk("match-setup", .64, { documentId: "rules", documentType: "league_rules", authorityRank: 1, ruleNumber: "5.4", sectionLabel: "Match Setup", heading: "Match Setup", content: "Match Setup lineup must be submitted no later than three days before the scheduled match." }),
+  ];
+  const rosterOnly = selectAnswerEvidence(retrievalFor("When can I add players to my Weekday team?", candidates));
+  assert.deepEqual(rosterOnly.map((chunk) => chunk.chunkId), ["dates"]);
+
+  const matchOnly = selectAnswerEvidence(retrievalFor("When do I need to submit my lineup for Friday's match?", candidates));
+  assert.deepEqual(matchOnly.map((chunk) => chunk.chunkId), ["match-setup"]);
+});
+
+test("recognizes bounded roster-management and calendar wording variations in direct evidence", () => {
+  const question = "When can I update my roster for the Weekday team?";
+  for (const [index, wording] of [
+    "Sep. 28: Can start update roster for the Weekday League.",
+    "Sept. 28: Can start updating rosters for the Weekday League.",
+    "September 28: Can start updating rosters for the Weekday League.",
+  ].entries()) {
+    const selected = selectAnswerEvidence(retrievalFor(question, [
+      stage4Chunk(`dates-${index}`, .60, { documentId: "dates", documentType: "league_supplement", authorityRank: 2, sectionLabel: "Weekday League Key Dates", heading: "Weekday League Key Dates", content: wording }),
+    ]));
+    assert.deepEqual(selected.map((chunk) => chunk.chunkId), [`dates-${index}`], wording);
+    assert.deepEqual(selected[0].intentSupport, ["Team/season roster management"], wording);
+  }
+});
+
+test("reserves bounded evidence space for every detected compound intent", () => {
+  const question = "When can I add a player to my team and when do I submit my lineup for Friday's match?";
+  const candidates = [
+    stage4Chunk("dates", .70, { documentId: "dates", documentType: "league_supplement", authorityRank: 2, sectionLabel: "Weekday League Key Dates", heading: "Weekday League Key Dates", content: "Sept. 28: Can start updating rosters for the Weekday League." }),
+    stage4Chunk("roster-1", .69, { documentId: "guide-1", documentType: "captain_guide", authorityRank: 3, sectionLabel: "CREATE/UPDATE TEAM ROSTER", heading: "CREATE/UPDATE TEAM ROSTER", content: "Manage rosters to add or remove players before the roster deadline." }),
+    stage4Chunk("roster-2", .68, { documentId: "guide-2", documentType: "captain_guide", authorityRank: 3, sectionLabel: "TEAM ROSTER", heading: "TEAM ROSTER", content: "Update team rosters before the roster lock date." }),
+    stage4Chunk("roster-3", .67, { documentId: "guide-3", documentType: "captain_guide", authorityRank: 3, sectionLabel: "TEAM ROSTER", heading: "TEAM ROSTER", content: "Players may be added when the roster is open." }),
+    stage4Chunk("match-setup", .48, { documentId: "rules", documentType: "league_rules", authorityRank: 1, ruleNumber: "5.4", sectionLabel: "Match Setup", heading: "Match Setup", content: "Match Setup lineup must be submitted no later than three days before the scheduled match." }),
+  ];
+  const selected = selectAnswerEvidence(retrievalFor(question, candidates));
+  assert.equal(selected.length, 4);
+  assert.equal(selected[0].chunkId, "dates");
+  assert.ok(selected.some((chunk) => chunk.chunkId === "match-setup"));
 });
 
 test("builds concise trusted citation labels without duplicated rule metadata", () => {

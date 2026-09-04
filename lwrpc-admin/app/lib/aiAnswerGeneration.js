@@ -35,24 +35,28 @@ export function selectAnswerEvidence(retrieval) {
   ))];
   // A compound question needs direct evidence for each independently detected
   // official concept, even when one concept's candidate falls below the other
-  // concept's score cutoff.
-  for (const intent of intents) {
-    const best = candidates.find((candidate) => supportsEvidenceIntent(candidate, intent));
-    if (best && !selected.some((candidate) => candidate.chunkId === best.chunkId)) selected.push(best);
-  }
-  return classifyAnswerEvidence(selected.filter((candidate) => !intents.length || supportsAnyEvidenceIntent(candidate, intents)).slice(0, MAX_SELECTED_CHUNKS), retrieval.request?.question);
+  // concept's score cutoff. Put that required coverage first so optional
+  // supporting candidates cannot consume the bounded evidence budget.
+  const requiredIntentEvidence = intents.map((intent) => candidates.find((candidate) => supportsEvidenceIntent(candidate, intent))).filter(Boolean);
+  const selectedForModel = [...requiredIntentEvidence, ...selected]
+    .filter((candidate, index, collection) => collection.findIndex((item) => item.chunkId === candidate.chunkId) === index)
+    .filter((candidate) => !intents.length || supportsAnyEvidenceIntent(candidate, intents));
+  return classifyAnswerEvidence(selectedForModel.slice(0, MAX_SELECTED_CHUNKS), retrieval.request?.question);
 }
 
 function detectedEvidenceIntents(question) {
   const value = String(question || "").toLowerCase();
   const roster = /\b(?:add|remove|delete|drop|update|change|lock|open|close)\b/.test(value) && /\b(?:player|players|person|someone|member|members|roster|team)\b/.test(value) && /\b(?:team|league|season|roster)\b/.test(value);
-  const match = /\b(?:match|game|lineup|pairings?|match\s+setup)\b/.test(value);
+  // This selector intent is intentionally narrower than a general reference to
+  // a match or game.  It governs Match Setup evidence only; injury, conduct,
+  // scoring, and other match questions retain the normal Stage 4 selection.
+  const match = /\b(?:lineup|pairings?|match\s+setup)\b/.test(value);
   return [roster && "Team/season roster management", match && "Individual-match Match Setup"].filter(Boolean);
 }
 
 function supportsEvidenceIntent(candidate, intent) {
   const text = searchableEvidenceText(candidate);
-  if (intent === "Team/season roster management") return /\b(?:add|remove|delete|drop|update|updating|change|changing|lock|open|close)\b/.test(text) && /\b(?:player|players|team|roster)\b/.test(text) && (/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|date|deadline|open|close|lock)\b/.test(text) || /\bmanage roster\b/.test(text));
+  if (intent === "Team/season roster management") return /\b(?:add|remove|delete|drop|update|updating|change|changing|lock|open|close)\b/.test(text) && /\b(?:player|players|team|rosters?)\b/.test(text) && (/\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?|date|deadline|open|close|lock)\b/.test(text) || /\bmanage rosters?\b/.test(text));
   if (intent === "Individual-match Match Setup") return /\b(?:match setup|lineup|pairings?)\b/.test(text) && /\b(?:three|3|before|submit|enter|save|match day)\b/.test(text);
   return false;
 }
@@ -320,17 +324,21 @@ function supportingReason(candidate, primary, question) {
 
 function annotateEvidenceSelection(retrieval, selectedEvidence) {
   const selectedById = new Map(selectedEvidence.map((candidate) => [candidate.chunkId, candidate]));
+  const intents = detectedEvidenceIntents(retrieval?.request?.question);
   for (const candidate of Array.isArray(retrieval?.suppliedEvidence) ? retrieval.suppliedEvidence : []) {
     const selected = selectedById.get(candidate.chunkId);
     Object.assign(candidate, selected || {
       evidenceRole: "Not selected for model",
-      evidenceSelectionReason: "Related retrieval candidate did not materially contribute beyond the selected official evidence",
+      intentSupport: [],
+      evidenceSelectionReason: intents.length && !supportsAnyEvidenceIntent(candidate, intents)
+        ? "Does not support a detected question intent"
+        : "Related retrieval candidate did not materially contribute beyond the selected official evidence",
     });
   }
 }
 
 function answerPrompt(question, evidence) {
-  return `User question:\n${question}\n\nOfficial LWR evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
+  return `User question:\n${question}\n\nOfficial LWR evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Direct official evidence"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
 }
 
 function cleanCitationDetail(value) {
