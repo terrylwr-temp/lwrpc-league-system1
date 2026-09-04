@@ -52,7 +52,7 @@ function detectedEvidenceIntents(question) {
 
 function supportsEvidenceIntent(candidate, intent) {
   const text = searchableEvidenceText(candidate);
-  if (intent === "Team/season roster management") return /\b(?:add|remove|delete|drop|update|change|lock|open|close)\b/.test(text) && /\b(?:player|players|team|roster)\b/.test(text) && (/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|date|deadline|open|close|lock)\b/.test(text) || /\bmanage roster\b/.test(text));
+  if (intent === "Team/season roster management") return /\b(?:add|remove|delete|drop|update|updating|change|changing|lock|open|close)\b/.test(text) && /\b(?:player|players|team|roster)\b/.test(text) && (/\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|date|deadline|open|close|lock)\b/.test(text) || /\bmanage roster\b/.test(text));
   if (intent === "Individual-match Match Setup") return /\b(?:match setup|lineup|pairings?)\b/.test(text) && /\b(?:three|3|before|submit|enter|save|match day)\b/.test(text);
   return false;
 }

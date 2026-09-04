@@ -115,6 +115,18 @@ test("preserves compact primary evidence for the five production Stage 4 evaluat
   }
 });
 
+test("preserves direct evidence for both roster management and Match Setup while pruning score entry", () => {
+  const question = "When can I add a player to my team and when do I submit my lineup for Friday's match?";
+  const selected = selectAnswerEvidence(retrievalFor(question, [
+    stage4Chunk("dates", .68, { documentId: "dates", documentType: "league_supplement", authorityRank: 2, ruleNumber: "", sectionLabel: "Weekday League Key Dates", heading: "Weekday League Key Dates", content: "Sept. 28: Can start update rosters for the Weekday League." }),
+    stage4Chunk("score-entry", .66, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", sectionLabel: "ENTER/VERIFY SCORES", heading: "ENTER/VERIFY SCORES", content: "Enter and verify scores after a match." }),
+    stage4Chunk("roster-guide", .57, { documentId: "guide", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", sectionLabel: "CREATE/UPDATE TEAM ROSTER", heading: "CREATE/UPDATE TEAM ROSTER", content: "Use Manage Roster to add or remove players." }),
+    stage4Chunk("match-setup", .55, { documentId: "rules", documentType: "league_rules", authorityRank: 1, ruleNumber: "5.4", sectionLabel: "Match Setup", intent: "Concrete timing requirement in numbered rule", content: "Match Setup lineup must be submitted no later than three days before the scheduled match." }),
+  ]));
+  assert.deepEqual(selected.map((chunk) => chunk.chunkId), ["dates", "roster-guide", "match-setup"]);
+  assert.deepEqual(selected.map((chunk) => chunk.intentSupport), [["Team/season roster management"], ["Team/season roster management"], ["Individual-match Match Setup"]]);
+});
+
 test("builds concise trusted citation labels without duplicated rule metadata", () => {
   assert.equal(citationLabel({ documentTitle: "LWR Pickleball Club Code of Conduct", ruleNumber: "1", heading: "Rule 1", pageNumber: 1 }), "LWR Pickleball Club Code of Conduct — Rule 1 — Page 1");
   assert.equal(citationLabel({ documentTitle: "LWR Pickleball Club DUPR League Rules", ruleNumber: "5.7", heading: "Rule 5.7 — Incomplete Matches", pageNumber: 5 }), "LWR Pickleball Club DUPR League Rules — Rule 5.7 — Incomplete Matches — Page 5");
