@@ -1,0 +1,6 @@
+// Stage 3 production checklist. These prompts exercise live retrieval only;
+// expected evidence is reviewed in the manager console before Stage 4 exists.
+export const AI_RETRIEVAL_EVALUATION_SET = Object.freeze([
+  "How does scoring freeze work?", "What does NR mean?", "What is the Reliability Factor requirement?", "What happens if a player gets injured and can't finish?", "How does Picklebreaker work?", "When does Match Setup need to be completed?", "How do I complete Match Setup in the LMS?", "How many players play in the Weekday league?", "How does the Saturday league work?", "Who chooses serve or receive?", "How many timeouts does each team get?", "What behavior is expected if a player is verbally abusive?", "Where do I find my player information in the LMS?", "How does a captain manage a lineup in the LMS?", "How does an administrator update league information?", "What does Rule 4.5 say?", "What is the club policy on weather cancellations?",
+  "Someone got hurt halfway through the game. What do we do?", "How early do captains have to put their players in?", "Can somebody swear at another player during a match?", "Where do I put my lineup?", "Why does my rating say NR?", "How does Picklebraker work?", "What is the Reliabilty Factor?", "How do I record a forfeiture?", "Where is Match Setp?",
+]);

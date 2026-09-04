@@ -1,0 +1,215 @@
+-- Ask LWR Pickleball AI — Stage 3 hybrid retrieval
+-- Apply after the Stage 1 / Stage 2 scripts. This creates no tables and does
+-- not alter PDF storage or document/version status.
+
+create or replace function public.search_ai_official_chunks(
+  p_query_embedding extensions.vector(1536),
+  p_query_text text,
+  p_ask_about text default 'all',
+  p_current_path text default null,
+  p_feature_module text default null,
+  p_season_id uuid default null,
+  p_league_id uuid default null,
+  p_division_id uuid default null,
+  p_team_id uuid default null,
+  p_user_role text default null,
+  p_limit integer default 32
+)
+returns table (
+  chunk_id uuid, document_id uuid, document_version_id uuid,
+  document_title text, document_type text, document_authority_rank smallint,
+  document_scope_kind text, page_number integer, section_label text,
+  heading text, rule_number text, content text,
+  semantic_score double precision, keyword_score double precision,
+  exact_score double precision, authority_score double precision,
+  context_score double precision, combined_score double precision,
+  vector_rank integer, keyword_rank integer, exact_match boolean
+)
+language sql
+security invoker
+set search_path = public, extensions, pg_temp
+as $$
+  with input as (
+    select
+      left(trim(coalesce(p_query_text, '')), 1000) as query_text,
+      lower(left(trim(coalesce(p_query_text, '')), 1000)) as query_lower,
+      lower(coalesce(nullif(trim(p_ask_about), ''), 'all')) as ask_about,
+      lower(left(trim(coalesce(p_current_path, '')), 240)) as current_path,
+      lower(left(trim(coalesce(p_feature_module, '')), 120)) as feature_module,
+      lower(left(trim(coalesce(p_user_role, '')), 40)) as user_role,
+      coalesce((regexp_match(lower(coalesce(p_query_text, '')), '\m(?:rule\s*)?([0-9]+(?:\.[0-9]+)+)\M'))[1], '') as requested_rule,
+      websearch_to_tsquery('english', left(trim(coalesce(p_query_text, '')), 1000)) as ts_query,
+      greatest(16, least(coalesce(p_limit, 32), 80)) as candidate_limit
+  ),
+  eligible as (
+    select c.id as chunk_id, c.document_version_id, c.page_number, c.section_label,
+      c.heading, c.rule_number, c.content, c.search_vector, c.embedding,
+      d.id as document_id, d.title as document_title, d.document_type,
+      d.authority_rank as document_authority_rank, d.scope_kind as document_scope_kind,
+      d.league_id as document_league_id, d.division_id as document_division_id,
+      d.season_id as document_season_id,
+      lower(concat_ws(' ', c.section_label, c.heading, c.rule_number, c.content)) as searchable_text
+    from public.ai_document_chunks c
+    join public.ai_document_versions v on v.id = c.document_version_id
+    join public.ai_documents d on d.id = v.document_id
+    where d.status = 'active'
+      and d.active_version_id = v.id
+      and v.processing_status = 'ready'
+      and c.is_searchable
+      and c.embedding is not null
+  ),
+  team_context as (
+    -- Documents are scoped no more narrowly than division. Resolve a supplied
+    -- team only to its existing division/league/season for a soft score.
+    select t.division_id, d.league_id, l.season_id
+    from public.teams t
+    join public.divisions d on d.id = t.division_id
+    join public.leagues l on l.id = d.league_id
+    where t.id = p_team_id
+    limit 1
+  ),
+  vector_candidates as (
+    select e.chunk_id, row_number() over (order by e.embedding <=> p_query_embedding) as vector_rank
+    from eligible e order by e.embedding <=> p_query_embedding
+    limit (select candidate_limit from input)
+  ),
+  keyword_candidates as (
+    select e.chunk_id, row_number() over (order by ts_rank_cd(e.search_vector, i.ts_query) desc, e.chunk_id) as keyword_rank
+    from eligible e cross join input i
+    where e.search_vector @@ i.ts_query
+    order by ts_rank_cd(e.search_vector, i.ts_query) desc, e.chunk_id
+    limit (select candidate_limit from input)
+  ),
+  query_tokens as (
+    select token, ordinal_position,
+      (
+        token not in ('team', 'teams', 'player', 'players', 'game', 'games', 'league', 'leagues', 'match', 'matches', 'score', 'scores', 'rule', 'rules', 'guide', 'guides')
+        and to_tsvector('english', token) <> ''::tsvector
+      ) as is_distinctive
+    from input i
+    cross join lateral regexp_split_to_table(i.query_lower, '[^[:alnum:]]+') with ordinality as token_parts(token, ordinal_position)
+    where token <> ''
+  ),
+  token_windows as (
+    select token as token_1, lead(token, 1) over (order by ordinal_position) as token_2,
+      lead(token, 2) over (order by ordinal_position) as token_3,
+      lead(token, 3) over (order by ordinal_position) as token_4,
+      is_distinctive as distinctive_1, lead(is_distinctive, 1) over (order by ordinal_position) as distinctive_2,
+      lead(is_distinctive, 2) over (order by ordinal_position) as distinctive_3,
+      lead(is_distinctive, 3) over (order by ordinal_position) as distinctive_4
+    from query_tokens
+  ),
+  phrase_candidates as (
+    select concat_ws(' ', token_1, token_2) as phrase, (distinctive_1::integer + distinctive_2::integer) as distinctive_count, 2 as word_count
+    from token_windows where token_2 is not null
+    union all
+    select concat_ws(' ', token_1, token_2, token_3), (distinctive_1::integer + distinctive_2::integer + distinctive_3::integer), 3
+    from token_windows where token_3 is not null
+    union all
+    select concat_ws(' ', token_1, token_2, token_3, token_4), (distinctive_1::integer + distinctive_2::integer + distinctive_3::integer + distinctive_4::integer), 4
+    from token_windows where token_4 is not null
+  ),
+  phrase_terms as (
+    -- Phrase text is assembled only from alphanumeric query tokens, so this
+    -- boundary-aware regex has no user-controlled regex operators.
+    select phrase
+    from (
+      select distinct phrase, distinctive_count, word_count
+      from phrase_candidates
+      where distinctive_count >= 1 and char_length(phrase) >= 8
+    ) phrases
+    order by word_count, distinctive_count desc, char_length(phrase), phrase
+    limit 32
+  ),
+  distinctive_terms as (
+    select token, max(case when char_length(token) >= 10 then .85::double precision else .65::double precision end) as term_score
+    from query_tokens
+    where is_distinctive and char_length(token) >= 5
+    group by token
+    order by term_score desc, char_length(token) desc, token
+    limit 8
+  ),
+  acronym_terms as (
+    -- Acronyms are matched at word boundaries. Preserve NR even when typed
+    -- in lower case; other acronyms are detected from uppercase query text.
+    select distinct lower(acronym_match.parts[1]) as term
+    from input i cross join lateral regexp_matches(i.query_text, '\m([A-Z][A-Z0-9]{1,9})\M', 'g') as acronym_match(parts)
+    union
+    select 'nr' from input where query_lower ~ '\mnr\M'
+  ),
+  exact_candidates as (
+    select e.chunk_id from eligible e cross join input i
+    where i.requested_rule <> '' and lower(coalesce(e.rule_number, '')) = i.requested_rule
+    union
+    select e.chunk_id from eligible e join acronym_terms a on e.searchable_text ~ ('\m' || a.term || '\M')
+    union
+    select e.chunk_id from eligible e join phrase_terms p on e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M')
+    union
+    select e.chunk_id from eligible e join distinctive_terms t on e.searchable_text ~ ('\m' || t.token || '\M')
+  ),
+  candidate_ids as (
+    select chunk_id from vector_candidates union select chunk_id from keyword_candidates union select chunk_id from exact_candidates
+  ),
+  base_scores as (
+    select e.*, vc.vector_rank, kc.keyword_rank, i.*,
+      greatest(0::double precision, least(1::double precision, 1 - (e.embedding <=> p_query_embedding))) as semantic_score,
+      least(1::double precision, ts_rank_cd(e.search_vector, i.ts_query)::double precision * 2.5) as keyword_score,
+      case
+        when i.requested_rule <> '' and lower(coalesce(e.rule_number, '')) = i.requested_rule then 1::double precision
+        when exists (select 1 from acronym_terms a where e.searchable_text ~ ('\m' || a.term || '\M')) then .95::double precision
+        when exists (select 1 from phrase_terms p where e.searchable_text ~ ('\m' || replace(p.phrase, ' ', '\s+') || '\M')) then .85::double precision
+        when exists (select 1 from distinctive_terms t where e.searchable_text ~ ('\m' || t.token || '\M') and t.term_score = .85::double precision) then .85::double precision
+        when exists (select 1 from distinctive_terms t where e.searchable_text ~ ('\m' || t.token || '\M')) then .65::double precision
+        else 0::double precision
+      end as exact_score
+    from candidate_ids ids
+    join eligible e on e.chunk_id = ids.chunk_id
+    cross join input i
+    left join vector_candidates vc on vc.chunk_id = e.chunk_id
+    left join keyword_candidates kc on kc.chunk_id = e.chunk_id
+  ),
+  scored as (
+    select b.*,
+      -- Catalog authority matters only in proportion to direct subject relevance.
+      ((100 - b.document_authority_rank)::double precision / 99)
+        * greatest(b.keyword_score, b.exact_score, b.semantic_score * .75) as authority_score,
+      least(1::double precision,
+        (case
+          when b.ask_about = 'lms_help' and b.document_scope_kind = 'lms_help' then .70
+          when b.ask_about = 'weekday' and b.searchable_text like '%weekday%' then .70
+          when b.ask_about = 'saturday' and b.searchable_text like '%saturday%' then .70
+          when b.ask_about = 'primetime' and b.searchable_text like '%primetime%' then .70
+          else 0 end)
+        + (case when p_league_id is not null and b.document_league_id = p_league_id then .25 else 0 end)
+        + (case when p_division_id is not null and b.document_division_id = p_division_id then .25 else 0 end)
+        + (case when p_season_id is not null and b.document_season_id = p_season_id then .15 else 0 end)
+        + (case when tc.division_id is not null and b.document_division_id = tc.division_id then .20 else 0 end)
+        + (case when tc.league_id is not null and b.document_league_id = tc.league_id then .15 else 0 end)
+        + (case when tc.season_id is not null and b.document_season_id = tc.season_id then .10 else 0 end)
+        + (case when b.feature_module <> '' and b.searchable_text like '%' || b.feature_module || '%' then .15 else 0 end)
+        + (case when b.current_path <> '' and b.searchable_text like '%' || b.current_path || '%' then .10 else 0 end)
+        + (case when b.user_role <> '' and b.searchable_text like '%' || replace(b.user_role, '_', ' ') || '%' then .05 else 0 end)
+      )::double precision as context_score
+    from base_scores b
+    left join team_context tc on true
+  )
+  select chunk_id, document_id, document_version_id, document_title, document_type,
+    document_authority_rank, document_scope_kind, page_number, section_label, heading,
+    rule_number, content, semantic_score, keyword_score, exact_score, authority_score,
+    context_score,
+    (.47 * semantic_score + .24 * keyword_score + .19 * exact_score + .06 * authority_score + .04 * context_score)::double precision as combined_score,
+    vector_rank, keyword_rank, exact_score > 0 as exact_match
+  from scored
+  order by combined_score desc, exact_score desc, keyword_score desc, semantic_score desc, chunk_id
+  limit (select candidate_limit from input);
+$$;
+
+comment on function public.search_ai_official_chunks is
+  'Stage 3 server-only hybrid retrieval: only active documents, their active ready version, and searchable embedded chunks are eligible.';
+
+revoke all on function public.search_ai_official_chunks(
+  extensions.vector(1536), text, text, text, text, uuid, uuid, uuid, uuid, text, integer
+) from public, anon, authenticated;
+grant execute on function public.search_ai_official_chunks(
+  extensions.vector(1536), text, text, text, text, uuid, uuid, uuid, uuid, text, integer
+) to service_role;

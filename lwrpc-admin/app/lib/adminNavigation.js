@@ -53,6 +53,7 @@ const ADMIN_SECTIONS = [
       { title: "Score Sheets", desc: "Manage printable score sheet templates.", path: "/score-sheets", code: "SS", tone: "emerald", role: "commissioner" },
       { title: "Dashboard Guides", desc: "Select the PDF guides shown on each dashboard.", path: "#dashboard-guides", code: "DG", tone: "blue", role: "league_manager", dialog: "guides" },
       { title: "AI Assistant Management", desc: "Manage official AI rule sources and inspect PDF processing.", path: "/ai-assistant", code: "AI", tone: "emerald", role: "league_manager" },
+      { title: "Test AI Assistant", desc: "Inspect hybrid retrieval evidence without generating an AI answer.", path: "/ai-assistant/console", code: "AT", tone: "blue", role: "league_manager" },
       { title: "Club Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "CS", tone: "amber", role: "commissioner" },
       { title: "Season Reset", desc: "Prepare one season for rollover while preserving match history.", path: "#season-reset", code: "SR", tone: "amber", role: "league_manager", dialog: "reset", hideFromSidebar: true },
       { title: "Master Reset All", desc: "Open the protected full-system operations reset.", path: "#master-reset", code: "MR", tone: "slate", role: "league_manager", dialog: "reset", hideFromSidebar: true },

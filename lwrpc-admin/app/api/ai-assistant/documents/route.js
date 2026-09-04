@@ -2,11 +2,9 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 import { assertPdfUpload, processAiDocumentVersion, sanitizePdfFilename } from "../../../lib/aiDocumentProcessing";
+import { assertDocumentMetadataReferences, isDocumentMetadataValidationError, normalizeDocumentMetadata } from "../../../lib/aiDocumentMetadata";
 
 export const runtime = "nodejs";
-
-const DOCUMENT_TYPES = new Set(["league_rules", "league_supplement", "captain_guide", "player_guide", "lms_guide", "other"]);
-const SCOPE_KINDS = new Set(["all", "lms_help", "league", "division"]);
 
 export async function GET(req) {
   try {
@@ -18,7 +16,7 @@ export async function GET(req) {
     if (documentId) return NextResponse.json({ success: true, ...(await documentDetail(authorization.supabase, documentId, versionId)) });
     return NextResponse.json({ success: true, ...(await documentList(authorization.supabase)) });
   } catch (error) {
-    return failure(error.message, 500);
+    return failure(error.message, isDocumentMetadataValidationError(error) ? 400 : 500);
   }
 }
 
@@ -57,12 +55,12 @@ export async function POST(req) {
 
     const documentId = action === "replace"
       ? requiredId(form.get("documentId"), "Document")
-      : await createDocument(authorization.supabase, documentInput(form), memberId);
+      : await createDocument(authorization.supabase, await documentInput(form, authorization.supabase), memberId);
     const versionId = await createManagedVersion(authorization.supabase, documentId, file, bytes, memberId);
     const processingError = await safelyProcess(authorization.supabase, versionId, memberId);
     return NextResponse.json({ success: true, processingError, ...(await documentDetail(authorization.supabase, documentId, versionId)) });
   } catch (error) {
-    return failure(error.message, 500);
+    return failure(error.message, isDocumentMetadataValidationError(error) ? 400 : 500);
   }
 }
 
@@ -71,16 +69,32 @@ export async function PATCH(req) {
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return failure(authorization.error, authorization.status);
     const body = await req.json().catch(() => ({}));
-    if (body.action !== "set_chunk_searchable") return failure("Unknown document update.", 400);
-    const chunkId = requiredId(body.chunkId, "Chunk");
+    if (body.action === "set_chunk_searchable") {
+      const chunkId = requiredId(body.chunkId, "Chunk");
+      const { error } = await authorization.supabase
+        .from("ai_document_chunks")
+        .update({ is_searchable: Boolean(body.isSearchable) })
+        .eq("id", chunkId);
+      if (error) throw error;
+      return NextResponse.json({ success: true });
+    }
+    if (body.action !== "edit_document_details") return failure("Unknown document update.", 400);
+
+    const documentId = requiredId(body.documentId, "Document");
+    const metadata = await documentInput(body, authorization.supabase);
+    const memberId = authorization.memberRows?.[0]?.id || null;
+    // This update deliberately addresses ai_documents only. It never touches
+    // the immutable version row, Storage source, chunks, or embeddings.
     const { error } = await authorization.supabase
-      .from("ai_document_chunks")
-      .update({ is_searchable: Boolean(body.isSearchable) })
-      .eq("id", chunkId);
+      .from("ai_documents")
+      .update({ ...metadata, updated_at: new Date().toISOString(), updated_by_member_id: memberId })
+      .eq("id", documentId)
+      .select("id")
+      .single();
     if (error) throw error;
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, ...(await documentDetail(authorization.supabase, documentId)) });
   } catch (error) {
-    return failure(error.message, 500);
+    return failure(error.message, isDocumentMetadataValidationError(error) ? 400 : 500);
   }
 }
 
@@ -127,36 +141,35 @@ async function documentDetail(supabase, documentId, requestedVersionId = "") {
   return { document, versions: versions || [], selectedVersionId, previewChunks: chunks || [] };
 }
 
-function documentInput(form) {
-  const documentType = String(form.get("documentType") || "other");
-  const scopeKind = String(form.get("scopeKind") || "all");
-  if (!DOCUMENT_TYPES.has(documentType)) throw new Error("Select a valid document type.");
-  if (!SCOPE_KINDS.has(scopeKind)) throw new Error("Select a valid applicability scope.");
-  const title = String(form.get("title") || "").trim();
-  if (!title) throw new Error("Document title is required.");
-  const authorityRank = Number.parseInt(String(form.get("authorityRank") || ""), 10);
-  if (!Number.isInteger(authorityRank) || authorityRank < 1 || authorityRank > 99) throw new Error("Authority rank must be between 1 and 99.");
-  const leagueId = optionalId(form.get("leagueId"));
-  const divisionId = optionalId(form.get("divisionId"));
-  if (scopeKind === "league" && !leagueId) throw new Error("Choose the applicable league.");
-  if (scopeKind === "division" && !divisionId) throw new Error("Choose the applicable division.");
-  return {
-    title,
-    description: String(form.get("description") || "").trim() || null,
-    document_type: documentType,
-    authority_rank: authorityRank,
-    status: "inactive",
-    scope_kind: scopeKind,
-    league_id: scopeKind === "league" ? leagueId : null,
-    division_id: scopeKind === "division" ? divisionId : null,
-    season_id: optionalId(form.get("seasonId")),
-  };
+async function documentInput(source, supabase) {
+  const metadata = normalizeDocumentMetadata(source);
+  const references = await metadataReferences(supabase, metadata);
+  return assertDocumentMetadataReferences(metadata, references);
+}
+
+async function metadataReferences(supabase, metadata) {
+  const [seasonResult, leagueResult, divisionResult] = await Promise.all([
+    metadata.season_id ? supabase.from("seasons").select("id").eq("id", metadata.season_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    metadata.league_id ? supabase.from("leagues").select("id, season_id").eq("id", metadata.league_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    metadata.division_id ? supabase.from("divisions").select("id, league_id").eq("id", metadata.division_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+  ]);
+  for (const result of [seasonResult, leagueResult, divisionResult]) if (result.error) throw result.error;
+  let divisionLeague = null;
+  if (divisionResult.data?.league_id) {
+    if (leagueResult.data && String(leagueResult.data.id) === String(divisionResult.data.league_id)) divisionLeague = leagueResult.data;
+    else {
+      const { data, error } = await supabase.from("leagues").select("id, season_id").eq("id", divisionResult.data.league_id).maybeSingle();
+      if (error) throw error;
+      divisionLeague = data;
+    }
+  }
+  return { season: seasonResult.data, league: leagueResult.data, division: divisionResult.data, divisionLeague };
 }
 
 async function createDocument(supabase, values, memberId) {
   const { data, error } = await supabase
     .from("ai_documents")
-    .insert({ ...values, created_by_member_id: memberId, updated_by_member_id: memberId })
+    .insert({ ...values, status: "inactive", created_by_member_id: memberId, updated_by_member_id: memberId })
     .select("id")
     .single();
   if (error) throw error;
@@ -245,4 +258,3 @@ function optionalId(value) {
 function failure(error, status) {
   return NextResponse.json({ success: false, error: error || "Request failed." }, { status });
 }
-
