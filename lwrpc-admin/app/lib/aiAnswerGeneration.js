@@ -86,15 +86,25 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
 
 export async function resolveOfficialSources(supabase, evidence, signedUrlSeconds = 900) {
   const versionIds = [...new Set(evidence.map((chunk) => chunk.documentVersionId).filter(Boolean))];
+  const chunkIds = [...new Set(evidence.map((chunk) => chunk.chunkId).filter(Boolean))];
   const { data, error } = await supabase.from("ai_document_versions")
-    .select("id, document_id, storage_bucket, storage_path, processing_status, document:ai_documents!inner(id, title, status, active_version_id)")
+    // ai_documents also references ai_document_versions through active_version_id.
+    // Use the version ownership FK explicitly so PostgREST does not attempt an
+    // ambiguous relationship embed when it validates a citation source.
+    .select("id, document_id, storage_bucket, storage_path, processing_status, document:ai_documents!ai_document_versions_document_id_fkey!inner(id, title, status, active_version_id)")
     .in("id", versionIds);
   if (error) throw new Error(`Official source lookup failed: ${error.message}`);
+  const { data: chunkData, error: chunkError } = await supabase.from("ai_document_chunks")
+    .select("id, document_version_id, is_searchable")
+    .in("id", chunkIds);
+  if (chunkError) throw new Error(`Official source chunk lookup failed: ${chunkError.message}`);
   const versions = new Map((data || []).map((version) => [version.id, version]));
+  const chunks = new Map((chunkData || []).map((chunk) => [chunk.id, chunk]));
   return Promise.all(evidence.map(async (chunk) => {
     const version = versions.get(chunk.documentVersionId);
     const document = version?.document;
-    if (!version || !document || version.document_id !== chunk.documentId || document.id !== chunk.documentId || document.status !== "active" || document.active_version_id !== version.id || version.processing_status !== "ready") {
+    const citedChunk = chunks.get(chunk.chunkId);
+    if (!version || !document || !citedChunk || version.document_id !== chunk.documentId || document.id !== chunk.documentId || document.status !== "active" || document.active_version_id !== version.id || version.processing_status !== "ready" || citedChunk.document_version_id !== version.id || citedChunk.is_searchable !== true) {
       throw new Error("An answer source is no longer an eligible active official document version.");
     }
     const { data: signed, error: signError } = await supabase.storage.from(version.storage_bucket).createSignedUrl(version.storage_path, signedUrlSeconds);
