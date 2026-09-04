@@ -2,7 +2,7 @@ import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
 import { officialDocumentViewerHref } from "./aiOfficialDocumentViewer.js";
 
 const PERSONAL_OPERATIONAL_PATTERNS = [
-  /\b(?:what|which|who|when|where)\b[\s\S]{0,80}\b(?:my|our|i|we)\b[\s\S]{0,80}\b(?:team|roster|standing|place|match|score|season\s+dupr|court)\b/i,
+  /\b(?:what|which|who|when|where)\b[\s\S]{0,80}\b(?:my|our|i|we)\b[\s\S]{0,80}\b(?:team|roster|lineup|standing|place|match|score|season\s+dupr|court)\b/i,
   /\b(?:who\s+do\s+we\s+play|our\s+next\s+match|my\s+(?:next|last)\s+match|my\s+season\s+dupr|my\s+roster|my\s+team(?:'s)?\s+(?:place|standing|record))\b/i,
   /\bwhat\s+place\s+(?:are|is)\s+(?:we|i)\b/i,
   /\b(?:how\s+many\s+matches\s+have\s+we\s+won|what\s+was\s+our\s+last\s+score)\b/i,
@@ -10,7 +10,16 @@ const PERSONAL_OPERATIONAL_PATTERNS = [
 
 export function isUnsupportedOperationalQuestion(question) {
   const value = String(question || "").replace(/\s+/g, " ").trim();
+  // A member can naturally use “my lineup” while asking for an official
+  // deadline or how-to. That is document guidance, not a request for their
+  // live lineup data, and must reach the existing evidence-gated RAG path.
+  if (isOfficialConfigurationGuidance(value)) return false;
   return PERSONAL_OPERATIONAL_PATTERNS.some((pattern) => pattern.test(value));
+}
+
+function isOfficialConfigurationGuidance(value) {
+  return /\b(?:lineups?|rosters?|pairings?)\b/i.test(value)
+    && /\b(?:when|deadline|due|how|enter|submit|set|save|complete|change|assign)\b/i.test(value);
 }
 
 export function playerRetrievalBody(body = {}, role = "player") {

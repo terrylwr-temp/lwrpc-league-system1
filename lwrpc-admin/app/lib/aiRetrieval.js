@@ -6,6 +6,9 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-
 const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);
 const QUERY_FRAMING_TERMS = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "mean", "meaning", "work", "works", "requirement", "requirements", "explain", "explained", "tell", "show", "say", "says", "define", "definition", "describe", "described", "please", "someone", "somebody", "anyone", "anybody", "we", "us", "our", "i", "me", "my", "you", "your", "they", "them", "their", "he", "she", "it", "this", "that", "got", "get", "gets", "halfway", "through", "then", "just", "really", "t", "game", "games", "match", "matches", "type", "kind", "using", "use", "used", "brand", "playing", "need", "must", "required", "deadline", "due", "latest", "early", "long", "before"]);
 const COMMON_QUERY_STOPWORDS = new Set(["a", "an", "and", "about", "at", "be", "by", "for", "from", "have", "in", "of", "on", "or", "the", "to", "with"]);
+// These are precision-sensitive values/categories. They must be entered as
+// written rather than silently normalized by a lexical typo heuristic.
+const PROTECTED_FUZZY_TERMS = new Set(["nr", "dupr", "rating", "ratings", "score", "scores", "date", "dates", "rule", "rules"]);
 
 export function normalizeRetrievalRequest(body = {}) {
   const question = clean(body.question, 1000);
@@ -34,15 +37,28 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
   const embedding = await embedQuery(request.question);
   if (!Array.isArray(embedding.embedding) || embedding.embedding.length !== aiAssistantConfig.embeddingDimensions) throw new Error("The embedding provider returned an unexpected vector size.");
   const embeddingDone = clock();
-  const { data, error } = await supabase.rpc("search_ai_official_chunks", {
-    p_query_embedding: toPgVector(embedding.embedding), p_query_text: request.question, p_ask_about: request.askAbout,
+  const rpcArgs = (queryText) => ({
+    p_query_embedding: toPgVector(embedding.embedding), p_query_text: queryText, p_ask_about: request.askAbout,
     p_current_path: request.context.currentPath || null, p_feature_module: request.context.featureModule || null,
     p_season_id: request.context.seasonId, p_league_id: request.context.leagueId, p_division_id: request.context.divisionId,
     p_team_id: request.context.teamId, p_user_role: request.context.userRole || null,
     p_limit: Math.max(aiAssistantConfig.retrievalLimit * 4, 24),
   });
+  let { data, error } = await supabase.rpc("search_ai_official_chunks", rpcArgs(request.question));
   if (error) throw new Error(`Official-document retrieval failed: ${error.message}`);
-  const candidates = (data || []).map((row) => candidateFromRow(row, request.question));
+  const typoNormalizations = deriveTypoNormalizations(request.question, data || []);
+  const retrievalQuery = applyTypoNormalizations(request.question, typoNormalizations);
+  if (retrievalQuery !== request.question) {
+    ({ data, error } = await supabase.rpc("search_ai_official_chunks", rpcArgs(retrievalQuery)));
+    if (error) throw new Error(`Official-document retrieval failed: ${error.message}`);
+  }
+  const retrievalRequest = {
+    ...request,
+    retrievalQuery,
+    typoNormalizations,
+    terminologyExpansionEnabled: isDocumentGroundedMatchConfiguration(retrievalQuery, data || []),
+  };
+  const candidates = (data || []).map((row) => candidateFromRow(row, retrievalRequest));
   const suppliedEvidence = candidates.slice(0, aiAssistantConfig.retrievalLimit);
   const evidence = evaluateEvidence(suppliedEvidence, aiAssistantConfig.evidenceThreshold);
   return {
@@ -85,21 +101,24 @@ export function toPgVector(values) {
   return `[${values.join(",")}]`;
 }
 
-function candidateFromRow(row, question) {
+function candidateFromRow(row, request) {
   const candidate = {
     chunkId: row.chunk_id, documentId: row.document_id, documentVersionId: row.document_version_id, documentTitle: row.document_title,
     documentType: row.document_type, documentAuthorityRank: Number(row.document_authority_rank), documentScopeKind: row.document_scope_kind,
     pageNumber: row.page_number, sectionLabel: row.section_label || "", heading: row.heading || "", ruleNumber: row.rule_number || "", content: row.content || "",
     semanticScore: number(row.semantic_score), keywordScore: number(row.keyword_score), exactScore: number(row.exact_score), authorityScore: number(row.authority_score), contextScore: number(row.context_score), combinedScore: number(row.combined_score), vectorRank: row.vector_rank ?? null, keywordRank: row.keyword_rank ?? null, exactMatch: Boolean(row.exact_match),
   };
-  const ftsTerms = normalizedFtsTerms(question);
-  const intent = intentDiagnostic(question, candidate);
+  const query = request.retrievalQuery || request.question;
+  const ftsTerms = normalizedFtsTerms(query);
+  const intent = intentDiagnostic(query, candidate, request.terminologyExpansionEnabled);
   return {
     ...candidate,
-    exactMatchReason: exactMatchReason(question, candidate),
+    exactMatchReason: exactMatchReason(query, candidate),
+    terminologyDiagnostic: terminologyDiagnostic(query, candidate, request.terminologyExpansionEnabled),
     ftsDiagnostic: {
       normalizedTerms: ftsTerms,
-      retrievalExpansion: continuationExpansionPhrases(question),
+      retrievalExpansion: continuationExpansionPhrases(query),
+      typoNormalization: request.typoNormalizations || [],
       matched: candidate.keywordRank !== null,
       candidateRank: candidate.keywordRank,
     },
@@ -125,15 +144,14 @@ export function detectRetrievalIntent(question) {
   const deadline = /\b(?:when|deadline|due|latest|early)\b/.test(value)
     || /\bhow\s+(?:early|long\s+before|many\s+(?:days?|hours?|weeks?)\s+before)\b/.test(value)
     || /\b(?:need|must|required)\s+(?:to\s+)?(?:be\s+)?(?:completed|submitted|done)\b/.test(value);
-  if (deadline) return "Deadline/requirement";
-  if (/\bhow\s+(?:do|can|to)\b/.test(value) || /\bwhere\s+(?:do|can)\b/.test(value) || /\bwhat\s+(?:button|screen)\b/.test(value)) return "Procedural/how-to";
-  return "None";
+  const procedural = /\bhow\s+(?:do|can|to)\b/.test(value) || /\bwhere\s+(?:do|can)\b/.test(value) || /\bwhat\s+(?:button|screen)\b/.test(value);
+  return [deadline && "Deadline/requirement", procedural && "Procedural/how-to"].filter(Boolean).join(" + ") || "None";
 }
 
-export function intentDiagnostic(question, candidate) {
+export function intentDiagnostic(question, candidate, terminologyEnabled = true) {
   const intent = detectRetrievalIntent(question);
   const searchable = [candidate.sectionLabel, candidate.heading, candidate.ruleNumber, candidate.content].filter(Boolean).join(" ").toLowerCase();
-  if (intent === "None" || (intent !== "Behavior/conduct" && !hasDirectQueryPhrase(question, searchable))) return { detectedIntent: intent, evidenceMatch: "None" };
+  if (intent === "None" || (intent !== "Behavior/conduct" && !hasDirectQueryPhrase(question, searchable) && terminologyDiagnostic(question, candidate, terminologyEnabled) === "None")) return { detectedIntent: intent, evidenceMatch: "None" };
   const concreteTiming = /\b(?:no\s+later\s+than|at\s+least|within)\b[\s\S]{0,60}\b(?:days?|hours?|weeks?)\b/.test(searchable) || /\b(?:deadline|due)\b/.test(searchable);
   const timing = concreteTiming || /\b(?:before|prior\s+to)\s+(?:the\s+)?(?:scheduled\s+)?(?:match|match\s+date|date)\b/.test(searchable);
   const procedure = /\b(?:click|button|select|enter|save|screen|dashboard|steps?|dropdown)\b/.test(searchable);
@@ -141,12 +159,82 @@ export function intentDiagnostic(question, candidate) {
   const conductExample = /\b(?:trash\s+talk|profanity|aggressive|abusive|harass(?:ment)?|paddle\s+throwing)\b/.test(searchable);
   const conductProhibition = /\b(?:avoid|prohibit(?:ed|ion)?|not\s+(?:be\s+)?tolerated|violation|disciplin(?:ary|e)|must|shall)\b/.test(searchable);
   const conductAudience = /\b(?:players?|opponents?|partners?|members?|captains?|spectators?)\b/.test(searchable);
-  if (intent === "Deadline/requirement" && concreteTiming && /\b\d+(?:\.\d+)+\.\s/.test(candidate.content || "")) return { detectedIntent: intent, evidenceMatch: "Concrete timing requirement in numbered rule" };
-  if (intent === "Deadline/requirement" && concreteTiming) return { detectedIntent: intent, evidenceMatch: "Concrete timing requirement" };
-  if (intent === "Deadline/requirement" && timing) return { detectedIntent: intent, evidenceMatch: "General timing language" };
-  if (intent === "Procedural/how-to" && procedure) return { detectedIntent: intent, evidenceMatch: "Procedural instructions" };
+  const matches = [];
+  if (intent.includes("Deadline/requirement") && concreteTiming && /\b\d+(?:\.\d+)+\.\s/.test(candidate.content || "")) matches.push("Concrete timing requirement in numbered rule");
+  else if (intent.includes("Deadline/requirement") && concreteTiming) matches.push("Concrete timing requirement");
+  else if (intent.includes("Deadline/requirement") && timing) matches.push("General timing language");
+  if (intent.includes("Procedural/how-to") && procedure) matches.push("Procedural instructions");
+  if (matches.length) return { detectedIntent: intent, evidenceMatch: matches.join(" + ") };
   if (intent === "Behavior/conduct" && conductStandard && (conductExample || (conductProhibition && conductAudience))) return { detectedIntent: intent, evidenceMatch: "Behavioral standard and prohibition" };
   return { detectedIntent: intent, evidenceMatch: "None" };
+}
+
+export function terminologyDiagnostic(question, candidate, enabled = true) {
+  const value = String(question || "").toLowerCase();
+  const asksForConfiguration = /\b(?:starting\s+)?lineups?\b|\brosters?\b|\bplayer\s+pairings?\b/.test(value)
+    && /\b(?:when|deadline|due|latest|early|how|enter|submit|set|save|complete|change|assign)\b/.test(value);
+  const searchable = [candidate.sectionLabel, candidate.heading, candidate.content].filter(Boolean).join(" ").toLowerCase();
+  return enabled && asksForConfiguration && /\bmatch\s+setup\b/.test(searchable) && /\b(?:lineups?|rosters?|pairings?)\b/.test(searchable)
+    ? "Match configuration: lineup/roster/pairings ↔ Match Setup"
+    : "None";
+}
+
+export function isDocumentGroundedMatchConfiguration(question, rows = []) {
+  const value = String(question || "").toLowerCase();
+  const hasConfiguration = /\b(?:starting\s+)?lineups?\b|\brosters?\b|\bplayer\s+pairings?\b/.test(value);
+  const hasGuidanceIntent = /\b(?:when|deadline|due|latest|early|how|enter|submit|set|save|complete|change|assign)\b/.test(value);
+  if (!hasConfiguration || !hasGuidanceIntent) return false;
+  const corpus = rows.map((row) => [row?.content, row?.heading, row?.section_label].filter(Boolean).join(" ").toLowerCase()).join(" ");
+  if (!/\bmatch\s+setup\b/.test(corpus) || !/\b(?:lineups?|rosters?|pairings?)\b/.test(corpus)) return false;
+  const allowed = new Set(["lineup", "lineups", "roster", "rosters", "pairing", "pairings", "starting", "enter", "submit", "set", "save", "complete", "change", "assign"]);
+  return normalizedFtsTerms(value).filter((term) => !allowed.has(term)).every((term) => new RegExp(`\\b${escapeRegExp(term)}\\b`, "i").test(corpus));
+}
+
+export function deriveTypoNormalizations(question, rows = []) {
+  const vocabulary = new Map();
+  const structural = new Set();
+  for (const row of rows) {
+    const text = [row?.content, row?.heading, row?.section_label].filter(Boolean).join(" ").toLowerCase();
+    const heading = [row?.heading, row?.section_label].filter(Boolean).join(" ").toLowerCase();
+    for (const term of text.match(/[a-z]{4,}/g) || []) vocabulary.set(term, (vocabulary.get(term) || 0) + 1);
+    for (const term of heading.match(/[a-z]{4,}/g) || []) structural.add(term);
+  }
+  const words = String(question || "").match(/[A-Za-z]+/g) || [];
+  const corrections = [];
+  for (const original of words) {
+    const source = original.toLowerCase();
+    if (source.length < 4 || PROTECTED_FUZZY_TERMS.has(source) || QUERY_FRAMING_TERMS.has(source) || COMMON_QUERY_STOPWORDS.has(source) || vocabulary.has(source) || /^[A-Z0-9]{2,}$/.test(original)) continue;
+    const limit = source.length <= 6 ? 1 : 2;
+    const matches = [...vocabulary.keys()].filter((term) => !PROTECTED_FUZZY_TERMS.has(term) && Math.abs(term.length - source.length) <= limit && (vocabulary.get(term) >= 2 || structural.has(term))).map((term) => ({ term, distance: editDistance(source, term) })).filter((match) => match.distance <= limit).sort((a, b) => a.distance - b.distance || a.term.localeCompare(b.term));
+    if (matches.length && (matches.length === 1 || matches[0].distance < matches[1].distance)) corrections.push({ from: source, to: matches[0].term });
+  }
+  // A missing space is a common typo. Join adjacent query words only when the
+  // resulting compound already occurs often enough (or structurally) in the
+  // retrieved official vocabulary; this is not a fixed phrase dictionary.
+  for (let index = 0; index + 1 < words.length; index += 1) {
+    const from = `${words[index].toLowerCase()} ${words[index + 1].toLowerCase()}`;
+    const to = `${words[index]}${words[index + 1]}`.toLowerCase();
+    if (!PROTECTED_FUZZY_TERMS.has(to) && vocabulary.has(to) && (vocabulary.get(to) >= 2 || structural.has(to))) corrections.push({ from, to });
+  }
+  return [...new Map(corrections.map((item) => [item.from, item])).values()].slice(0, 4);
+}
+
+export function applyTypoNormalizations(question, normalizations = []) {
+  let value = String(question || "");
+  for (const { from, to } of normalizations) value = value.replace(new RegExp(`\\b${from}\\b`, "gi"), to);
+  return value;
+}
+
+function escapeRegExp(value) { return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+function editDistance(left, right) {
+  const previous = Array.from({ length: right.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= left.length; i += 1) {
+    const current = [i];
+    for (let j = 1; j <= right.length; j += 1) current[j] = Math.min(current[j - 1] + 1, previous[j] + 1, previous[j - 1] + (left[i - 1] === right[j - 1] ? 0 : 1));
+    previous.splice(0, previous.length, ...current);
+  }
+  return previous[right.length];
 }
 
 function exactMatchReason(question, candidate) {

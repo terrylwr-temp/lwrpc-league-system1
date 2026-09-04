@@ -48,6 +48,9 @@ test("personal or live LMS questions do not enter document RAG without a future 
   for (const question of ["What place is my team in?", "What place are we in for our division?", "Who do we play next?", "What was our last score?", "What is my Season DUPR?", "How many matches have we won?"]) assert.equal(isUnsupportedOperationalQuestion(question), true, question);
   assert.equal(isUnsupportedOperationalQuestion("How are standings determined?"), false);
   assert.equal(isUnsupportedOperationalQuestion("What does NR mean?"), false);
+  for (const question of ["When do I need to enter my match lineup?", "When is my match lineup due?", "How do I enter my match lineup?", "When do I enter my lineup and how do I do it?", "When do captains submit their roster?"]) assert.equal(isUnsupportedOperationalQuestion(question), false, question);
+  assert.equal(isUnsupportedOperationalQuestion("Who is in my lineup?"), true);
+  assert.equal(isUnsupportedOperationalQuestion("What is the lineup for tonight?"), false);
   assert.deepEqual(playerFallbackResult(), { answer: INSUFFICIENT_EVIDENCE_ANSWER, evidenceSufficient: false, conflict: false, sources: [] });
 });
 
@@ -61,7 +64,7 @@ test("normalizes generic question framing so FTS keeps the substantive Balls ter
 test("player route passes realistic unrelated-page context to the shared Stage 3/4 pipeline without scope filtering", async () => {
   const supportedQuestions = [
     "What kind of balls are we using?", "What does NR mean?", "Someone got hurt halfway through the game and can't finish. What do we do?",
-    "When does Match Setup need to be completed?", "Can I yell at or insult another player during a match?", "How does a Picklebreaker work?",
+    "When does Match Setup need to be completed?", "When do I need to enter my match lineup?", "How do I enter my match lineup?", "Can I yell at or insult another player during a match?", "How does a Picklebreaker work?",
   ];
   for (const question of supportedQuestions) {
     let requestBody; let generated = false;

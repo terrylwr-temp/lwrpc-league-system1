@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
-const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, continuationExpansionPhrases, detectRetrievalIntent, evaluateEvidence, intentDiagnostic, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, toPgVector } = await import("../app/lib/aiRetrieval.js");
+const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, applyTypoNormalizations, continuationExpansionPhrases, deriveTypoNormalizations, detectRetrievalIntent, evaluateEvidence, intentDiagnostic, isDocumentGroundedMatchConfiguration, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, terminologyDiagnostic, toPgVector } = await import("../app/lib/aiRetrieval.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 const vector = Array.from({ length: 1536 }, (_, i) => i / 1000);
 
@@ -24,7 +24,7 @@ test("uses one compatible embedding and the protected hybrid RPC without chat ge
   assert.equal(called.name, "search_ai_official_chunks"); assert.equal(called.args.p_query_embedding.split(",").length, 1536);
   assert.equal(output.suppliedEvidence.length, 1); assert.equal(output.evidence.sufficient, true);
   assert.equal(output.candidates[0].exactMatchReason, "Rule number: 4.5");
-  assert.deepEqual(output.candidates[0].ftsDiagnostic, { normalizedTerms: ["rule", "4", "5"], retrievalExpansion: [], matched: true, candidateRank: 1 });
+  assert.deepEqual(output.candidates[0].ftsDiagnostic, { normalizedTerms: ["rule", "4", "5"], retrievalExpansion: [], typoNormalization: [], matched: true, candidateRank: 1 });
   assert.equal(toPgVector(vector).split(",").length, 1536);
 });
 
@@ -43,7 +43,7 @@ test("retrieval SQL locks out inactive, historical, failed, and excluded content
 test("generic exact matching recognizes unseen official phrases without boosting generic words", async () => {
   const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
   for (const cte of ["query_tokens", "phrase_candidates", "phrase_terms", "official_term_candidates", "acronym_terms"]) assert.match(sql, new RegExp(`\\b${cte}\\b`));
-  assert.doesNotMatch(sql, /reliability factor|picklebreaker|match setup|scoring freeze|retired game|rally scoring|forfeit/i);
+  assert.doesNotMatch(sql, /reliability factor|picklebreaker|scoring freeze|retired game|rally scoring|forfeit/i);
   assert.equal(genericExactScore("What is a medical retirement?", "A medical retirement must be recorded."), .85);
   assert.equal(genericExactScore("Can the visiting captain defer?", "The visiting captain may defer the choice."), .85);
   assert.equal(genericExactScore("Does the home team serve or receive?", "The home team may serve or receive."), .85);
@@ -88,7 +88,8 @@ test("uses generic deadline and procedural compatibility without changing hybrid
   for (const cte of ["deadline_intent", "procedural_intent", "intent_candidates", "intent_keyword_score", "weighted_scores"]) assert.match(sql, new RegExp(`\\b${cte}\\b`));
   assert.match(sql, /strong timing language/i);
   assert.match(sql, /click\|button\|select\|enter\|save/i);
-  assert.doesNotMatch(sql, /match setup|rule 5\.4/i);
+  assert.match(sql, /match_configuration_concept/);
+  assert.doesNotMatch(sql, /rule 5\.4/i);
   assert.equal(RETRIEVAL_WEIGHTS.semantic + RETRIEVAL_WEIGHTS.keyword + RETRIEVAL_WEIGHTS.exact + RETRIEVAL_WEIGHTS.authority + RETRIEVAL_WEIGHTS.context, 1);
   assert.equal(detectRetrievalIntent("When does this need to be completed?"), "Deadline/requirement");
   assert.equal(detectRetrievalIntent("How early do we have to submit our team roster?"), "Deadline/requirement");
@@ -108,6 +109,54 @@ test("uses generic deadline and procedural compatibility without changing hybrid
   });
   assert.equal(output.candidates[0].ftsDiagnostic.matched, false);
   assert.equal(output.candidates[0].intentDiagnostic.evidenceMatch, "Concrete timing requirement in numbered rule");
+});
+
+test("grounds lineup terminology in official Match Setup evidence without expanding unrelated lineups", () => {
+  const rule54 = { ...row(), heading: "TEAM/GAME RULES", content: "5.4. Match Setup and Roster Exchange: Captains submit their upcoming match rosters through Match Setup no later than three days before the scheduled match. The home team submits the lineup first." };
+  const guide = { ...row(), heading: "Match Setup Process", content: "In Match Setup, captains assign player pairings and save lineups before the match date." };
+  const evidence = [rule54, guide];
+  for (const question of ["When do I need to enter my match lineup?", "When is my match lineup due?", "How do I enter my match lineup?", "When do I enter my lineup and how do I do it?", "When do captains submit their roster?"]) {
+    assert.equal(isDocumentGroundedMatchConfiguration(question, evidence), true, question);
+  }
+  assert.equal(terminologyDiagnostic("When do I need to enter my match lineup?", rule54, true), "Match configuration: lineup/roster/pairings ↔ Match Setup");
+  assert.equal(isDocumentGroundedMatchConfiguration("Can I change the batting lineup?", evidence), false);
+  assert.equal(isDocumentGroundedMatchConfiguration("What is the lineup for tonight?", evidence), false);
+  assert.equal(terminologyDiagnostic("Can I change the batting lineup?", rule54, false), "None");
+  assert.deepEqual(intentDiagnostic("Can I change the batting lineup?", rule54, false), { detectedIntent: "None", evidenceMatch: "None" });
+  assert.deepEqual(intentDiagnostic("When do I need to enter my match lineup?", rule54), { detectedIntent: "Deadline/requirement", evidenceMatch: "Concrete timing requirement in numbered rule" });
+  assert.deepEqual(intentDiagnostic("How do I enter my match lineup?", guide), { detectedIntent: "Procedural/how-to", evidenceMatch: "Procedural instructions" });
+});
+
+test("derives bounded typo normalizations from official candidate vocabulary", () => {
+  const vocabularyRows = [
+    { heading: "Match Setup", section_label: "Captain Instructions", content: "Captains complete Match Setup and save their match lineup. The Reliability Factor and scoring freeze appear in the Picklebreaker guide. A rating, score, date, rule, and DUPR value are exact." },
+    { heading: "Match Setup", section_label: "Captain Instructions", content: "Captains submit the match lineup. The Reliability Factor and scoring freeze appear in the Picklebreaker guide. A rating, score, date, rule, and DUPR value are exact." },
+  ];
+  for (const expected of [{ from: "linup", to: "lineup" }, { from: "setp", to: "setup" }, { from: "reliabilty", to: "reliability" }, { from: "picklebraker", to: "picklebreaker" }, { from: "captian", to: "captain" }]) {
+    const corrections = deriveTypoNormalizations(`When do I enter my ${expected.from}?`, vocabularyRows);
+    assert.ok(corrections.some((item) => item.from === expected.from && item.to === expected.to), JSON.stringify(corrections));
+  }
+  const splitCompound = deriveTypoNormalizations("match line up", vocabularyRows);
+  assert.ok(splitCompound.some((item) => item.from === "line up" && item.to === "lineup"));
+  assert.equal(applyTypoNormalizations("match line up", splitCompound), "match lineup");
+  assert.deepEqual(deriveTypoNormalizations("NR Rule 4.5 requires 29 points in 2026", vocabularyRows), []);
+  assert.deepEqual(deriveTypoNormalizations("ratng scroe datee rulee duprr", vocabularyRows), []);
+  assert.deepEqual(deriveTypoNormalizations("zzzzzz unrelated wording", vocabularyRows), []);
+});
+
+test("reruns the protected RPC with only a documented typo normalization and exposes it diagnostically", async () => {
+  const vocabularyRow = { ...row(), heading: "Match Setup", content: "Captains save the match lineup in Match Setup." };
+  const calls = [];
+  const output = await retrieveOfficialEvidence({
+    supabase: { rpc: async (name, args) => { calls.push({ name, args }); return { data: [vocabularyRow, { ...vocabularyRow, chunk_id: "10000000-0000-4000-8000-000000000002" }], error: null }; } },
+    body: { question: "How do I enter my match linup?" }, embedQuery: async () => ({ embedding: vector, model: "text-embedding-3-small", inputTokens: 7 }), clock: (() => { let n = 0; return () => ++n; })(),
+  });
+  assert.equal(calls.length, 2);
+  assert.equal(calls[0].name, "search_ai_official_chunks");
+  assert.equal(calls[0].args.p_query_text, "How do I enter my match linup?");
+  assert.equal(calls[1].args.p_query_text, "How do I enter my match lineup?");
+  assert.deepEqual(output.candidates[0].ftsDiagnostic.typoNormalization, [{ from: "linup", to: "lineup" }]);
+  assert.equal(output.candidates[0].terminologyDiagnostic, "Match configuration: lineup/roster/pairings ↔ Match Setup");
 });
 
 test("uses a generic interpersonal-conduct signal without targeting a document", async () => {
@@ -148,7 +197,7 @@ test("retrieval route is League Manager protected and has no answer-model path",
 
 test("includes the approved multi-document, paired-intent, conduct, natural-language, typo, and unsupported-question evaluation prompts", () => {
   assert.ok(AI_RETRIEVAL_EVALUATION_SET.length >= 40);
-  for (const required of ["Rule 4.5", "verbally abusive", "injured", "Picklebraker", "weather cancellations", "deadline for Match Setup", "enter match scores", "yell at or insult", "trash talking"]) assert.ok(AI_RETRIEVAL_EVALUATION_SET.some((question) => question.includes(required)));
+  for (const required of ["Rule 4.5", "verbally abusive", "injured", "Picklebraker", "weather cancellations", "deadline for Match Setup", "enter match scores", "yell at or insult", "trash talking", "match lineup", "match linup", "batting lineup"]) assert.ok(AI_RETRIEVAL_EVALUATION_SET.some((question) => question.includes(required)));
 });
 
 function row() { return { chunk_id: "10000000-0000-4000-8000-000000000001", document_id: "20000000-0000-4000-8000-000000000001", document_version_id: "30000000-0000-4000-8000-000000000001", document_title: "Rules", document_type: "league_rules", document_authority_rank: 1, document_scope_kind: "all", page_number: 4, section_label: "Rule 4.5", heading: "Retired Games", rule_number: "4.5", content: "Retired games", semantic_score: .8, keyword_score: .7, exact_score: 1, authority_score: .9, context_score: 0, combined_score: .85, vector_rank: 1, keyword_rank: 1, exact_match: true }; }
