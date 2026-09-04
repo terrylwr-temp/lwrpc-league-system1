@@ -115,6 +115,7 @@ function candidateFromRow(row, request) {
     ...candidate,
     exactMatchReason: exactMatchReason(query, candidate),
     terminologyDiagnostic: terminologyDiagnostic(query, candidate, request.terminologyExpansionEnabled),
+    leagueTextDiagnostic: leagueTextDiagnostic(query, candidate),
     ftsDiagnostic: {
       normalizedTerms: ftsTerms,
       retrievalExpansion: continuationExpansionPhrases(query),
@@ -171,12 +172,21 @@ export function intentDiagnostic(question, candidate, terminologyEnabled = true)
 
 export function terminologyDiagnostic(question, candidate, enabled = true) {
   const value = String(question || "").toLowerCase();
+  const teamRoster = /\b(?:team|season|league|rosters?)\b/.test(value) && /\b(?:add|remove|delete|drop|update|change|lock|open|close|when|deadline|due|date)\b/.test(value);
   const asksForConfiguration = /\b(?:starting\s+)?lineups?\b|\brosters?\b|\bplayer\s+pairings?\b/.test(value)
     && /\b(?:when|deadline|due|latest|early|how|enter|submit|set|save|complete|change|assign)\b/.test(value);
   const searchable = [candidate.sectionLabel, candidate.heading, candidate.content].filter(Boolean).join(" ").toLowerCase();
-  return enabled && asksForConfiguration && /\bmatch\s+setup\b/.test(searchable) && /\b(?:lineups?|rosters?|pairings?)\b/.test(searchable)
-    ? "Match configuration: lineup/roster/pairings ↔ Match Setup"
+  if (teamRoster && /\b(?:add|remove|delete|drop|update|change|lock|open|close)\b/.test(searchable) && /\b(?:player|players|team|rosters?)\b/.test(searchable)) return "Team/season roster management";
+  return enabled && !teamRoster && asksForConfiguration && /\bmatch\s+setup\b/.test(searchable) && /\b(?:lineups?|rosters?|pairings?)\b/.test(searchable)
+    ? "Individual-match Match Setup"
     : "None";
+}
+
+export function leagueTextDiagnostic(question, candidate) {
+  const query = String(question || "").toLowerCase();
+  const text = [candidate.sectionLabel, candidate.heading, candidate.content].filter(Boolean).join(" ").toLowerCase();
+  const league = ["weekday", "primetime", "saturday"].find((term) => new RegExp(`\\b${term}\\b`).test(query) && new RegExp(`\\b${term}\\b`).test(text));
+  return league ? `League-text/context compatibility: ${league}` : "None";
 }
 
 export function isDocumentGroundedMatchConfiguration(question, rows = []) {

@@ -67,18 +67,19 @@ as $$
         or ni.query_lower ~ '\mwhere\s+(?:do|can)\M'
         or ni.query_lower ~ '\mwhat\s+(?:button|screen)\M'
       ) as procedural_intent,
-      -- A captain's match configuration may be described in ordinary language
-      -- as a lineup, roster, or player pairings. It is only eligible for the
-      -- Match Setup concept below when the question also requests an action,
-      -- procedure, or timing requirement.
       (
-        ni.query_lower ~ '(?:\m(?:starting\s+)?lineups?\M|\mrosters?\M|\mplayer\s+pairings?\M)'
+        ni.query_lower ~ '\m(?:team|season|league|rosters?)\M'
+        and (ni.query_lower ~ '\m(?:add|remove|delete|drop|update|change|lock|open|close)\M' or ni.query_lower ~ '\m(?:when|deadline|due|date|dates|latest|early)\M')
+      ) as team_roster_management_intent,
+      -- Match Setup requires a match-specific signal; roster alone is not one.
+      (
+        ni.query_lower ~ '\m(?:match|game|match\s+setup|(?:starting\s+)?lineups?|player\s+pairings?)\M'
         and (
           ni.query_lower ~ '\m(?:when|deadline|due|latest|early)\M'
           or ni.query_lower ~ '\mhow\s+(?:do|can|to)\M'
           or ni.query_lower ~ '\m(?:enter|submit|set|save|complete|change|assign)\M'
         )
-      ) as match_configuration_intent,
+      ) as individual_match_setup_intent,
       (
         (
           ni.query_lower ~ '\m(?:yell|insult|swear|curse|verbal(?:ly)?\s+abus(?:e|ive)|harass(?:ment)?|threaten|taunt|mock|disrespect(?:ful)?|profan(?:e|ity))\M'
@@ -219,7 +220,8 @@ as $$
     -- no eligible official chunk blocks the expansion (for example, an
     -- out-of-domain sport-specific lineup question).
     select i.*,
-      i.match_configuration_intent
+      i.individual_match_setup_intent
+      and not i.team_roster_management_intent
       and exists (
         select 1 from eligible bridge
         where bridge.searchable_text ~ '\mmatch\s+setup\M'
@@ -228,10 +230,22 @@ as $$
       and not exists (
         select 1 from query_tokens qt
         where qt.is_distinctive
-          and qt.token not in ('lineup', 'lineups', 'roster', 'rosters', 'pairing', 'pairings', 'starting', 'enter', 'submit', 'set', 'save', 'complete', 'change', 'assign')
+          and qt.token not in ('match', 'game', 'lineup', 'lineups', 'pairing', 'pairings', 'starting', 'enter', 'submit', 'set', 'save', 'complete', 'change', 'assign')
           and not exists (select 1 from eligible vocabulary where vocabulary.searchable_text ~ ('\m' || qt.token || '\M'))
       ) as match_configuration_concept_enabled
     from retrieval_expansions i
+  ),
+  team_roster_management_concept as (
+    -- The official corpus must contain an explicit roster-management bridge;
+    -- this does not depend on a particular document title or date.
+    select i.*,
+      i.team_roster_management_intent
+      and exists (
+        select 1 from eligible bridge
+        where bridge.searchable_text ~ '\m(?:add|remove|delete|drop|update|change|lock|open|close)\M'
+          and bridge.searchable_text ~ '\m(?:player|players|team|rosters?)\M'
+      ) as team_roster_management_enabled
+    from match_configuration_concept i
   ),
   exact_candidates as (
     select e.chunk_id from eligible e cross join input i
@@ -288,18 +302,31 @@ as $$
       and e.searchable_text ~ '\mmatch\s+setup\M'
       and e.searchable_text ~ '\m(?:lineups?|rosters?|pairings?)\M'
   ),
+  team_roster_candidates as (
+    select e.chunk_id
+    from eligible e cross join team_roster_management_concept i
+    where i.team_roster_management_enabled
+      and e.searchable_text ~ '\m(?:add|remove|delete|drop|update|change|lock|open|close)\M'
+      and e.searchable_text ~ '\m(?:player|players|team|rosters?)\M'
+  ),
   candidate_ids as (
     select chunk_id from vector_candidates
     union select chunk_id from keyword_candidates
     union select chunk_id from exact_candidates
     union select chunk_id from intent_candidates
     union select chunk_id from terminology_candidates
+    union select chunk_id from team_roster_candidates
   ),
   base_scores as (
     select e.*, vc.vector_rank, kc.keyword_rank, i.*,
       greatest(0::double precision, least(1::double precision, 1 - (e.embedding <=> p_query_embedding))) as semantic_score,
       least(1::double precision, greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real))::double precision * 2.5) as fts_keyword_score,
       case
+        when i.team_roster_management_enabled
+          and e.searchable_text ~ '\m(?:add|remove|delete|drop|update|change|lock|open|close)\M'
+          and e.searchable_text ~ '\m(?:player|players|team|rosters?)\M'
+          and (e.searchable_text ~ '\m(?:date|dates|deadline|due|open|close|lock)\M' or e.searchable_text ~ '\m(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\M')
+          then .95::double precision
         -- This is a concept-compatibility keyword signal, not an exact match:
         -- the active official corpus itself established Match Setup as the
         -- relevant feature for lineup/roster/pairings questions.
@@ -375,7 +402,7 @@ as $$
       end as exact_score
     from candidate_ids ids
     join eligible e on e.chunk_id = ids.chunk_id
-    cross join match_configuration_concept i
+    cross join team_roster_management_concept i
     left join vector_candidates vc on vc.chunk_id = e.chunk_id
     left join keyword_candidates kc on kc.chunk_id = e.chunk_id
   ),
@@ -406,6 +433,9 @@ as $$
         + (case when b.feature_module <> '' and b.searchable_text like '%' || b.feature_module || '%' then .15 else 0 end)
         + (case when b.current_path <> '' and b.searchable_text like '%' || b.current_path || '%' then .10 else 0 end)
         + (case when b.user_role <> '' and b.searchable_text like '%' || replace(b.user_role, '_', ' ') || '%' then .05 else 0 end)
+        + (case when b.query_lower ~ '\mweekday\M' and b.searchable_text ~ '\mweekday\M' then .20 else 0 end)
+        + (case when b.query_lower ~ '\mprimetime\M' and b.searchable_text ~ '\mprimetime\M' then .20 else 0 end)
+        + (case when b.query_lower ~ '\msaturday\M' and b.searchable_text ~ '\msaturday\M' then .20 else 0 end)
       )::double precision as context_score
     from weighted_scores b
     left join team_context tc on true

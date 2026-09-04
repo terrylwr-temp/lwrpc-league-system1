@@ -118,7 +118,7 @@ test("grounds lineup terminology in official Match Setup evidence without expand
   for (const question of ["When do I need to enter my match lineup?", "When is my match lineup due?", "How do I enter my match lineup?", "When do I enter my lineup and how do I do it?", "When do captains submit their roster?"]) {
     assert.equal(isDocumentGroundedMatchConfiguration(question, evidence), true, question);
   }
-  assert.equal(terminologyDiagnostic("When do I need to enter my match lineup?", rule54, true), "Match configuration: lineup/roster/pairings ↔ Match Setup");
+  assert.equal(terminologyDiagnostic("When do I need to enter my match lineup?", rule54, true), "Individual-match Match Setup");
   assert.equal(isDocumentGroundedMatchConfiguration("Can I change the batting lineup?", evidence), false);
   assert.equal(isDocumentGroundedMatchConfiguration("What is the lineup for tonight?", evidence), false);
   assert.equal(terminologyDiagnostic("Can I change the batting lineup?", rule54, false), "None");
@@ -156,7 +156,7 @@ test("reruns the protected RPC with only a documented typo normalization and exp
   assert.equal(calls[0].args.p_query_text, "How do I enter my match linup?");
   assert.equal(calls[1].args.p_query_text, "How do I enter my match lineup?");
   assert.deepEqual(output.candidates[0].ftsDiagnostic.typoNormalization, [{ from: "linup", to: "lineup" }]);
-  assert.equal(output.candidates[0].terminologyDiagnostic, "Match configuration: lineup/roster/pairings ↔ Match Setup");
+  assert.equal(output.candidates[0].terminologyDiagnostic, "Individual-match Match Setup");
 });
 
 test("uses a generic interpersonal-conduct signal without targeting a document", async () => {
