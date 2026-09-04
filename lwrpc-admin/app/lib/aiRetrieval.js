@@ -3,6 +3,9 @@ import { aiAssistantConfig } from "./aiAssistantConfig.js";
 export const ASK_ABOUT_SCOPES = Object.freeze(["all", "weekday", "primetime", "saturday", "lms_help"]);
 export const RETRIEVAL_WEIGHTS = Object.freeze({ semantic: 0.47, keyword: 0.24, exact: 0.19, authority: 0.06, context: 0.04 });
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides"]);
+const QUERY_FRAMING_TERMS = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "mean", "meaning", "work", "works", "requirement", "requirements", "explain", "explained", "tell", "show", "say", "says", "define", "definition", "describe", "described", "please"]);
+const COMMON_QUERY_STOPWORDS = new Set(["a", "an", "and", "about", "at", "be", "by", "for", "from", "have", "i", "in", "it", "of", "on", "or", "that", "the", "this", "to", "with"]);
 
 export function normalizeRetrievalRequest(body = {}) {
   const question = clean(body.question, 1000);
@@ -39,7 +42,7 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     p_limit: Math.max(aiAssistantConfig.retrievalLimit * 4, 24),
   });
   if (error) throw new Error(`Official-document retrieval failed: ${error.message}`);
-  const candidates = (data || []).map(candidateFromRow);
+  const candidates = (data || []).map((row) => candidateFromRow(row, request.question));
   const suppliedEvidence = candidates.slice(0, aiAssistantConfig.retrievalLimit);
   const evidence = evaluateEvidence(suppliedEvidence, aiAssistantConfig.evidenceThreshold);
   return {
@@ -82,13 +85,51 @@ export function toPgVector(values) {
   return `[${values.join(",")}]`;
 }
 
-function candidateFromRow(row) {
-  return {
+function candidateFromRow(row, question) {
+  const candidate = {
     chunkId: row.chunk_id, documentId: row.document_id, documentVersionId: row.document_version_id, documentTitle: row.document_title,
     documentType: row.document_type, documentAuthorityRank: Number(row.document_authority_rank), documentScopeKind: row.document_scope_kind,
     pageNumber: row.page_number, sectionLabel: row.section_label || "", heading: row.heading || "", ruleNumber: row.rule_number || "", content: row.content || "",
     semanticScore: number(row.semantic_score), keywordScore: number(row.keyword_score), exactScore: number(row.exact_score), authorityScore: number(row.authority_score), contextScore: number(row.context_score), combinedScore: number(row.combined_score), vectorRank: row.vector_rank ?? null, keywordRank: row.keyword_rank ?? null, exactMatch: Boolean(row.exact_match),
   };
+  const ftsTerms = normalizedFtsTerms(question);
+  return {
+    ...candidate,
+    exactMatchReason: exactMatchReason(question, candidate),
+    ftsDiagnostic: {
+      normalizedTerms: ftsTerms,
+      matched: candidate.keywordScore > 0,
+      candidateRank: candidate.keywordRank,
+    },
+  };
+}
+
+export function normalizedFtsTerms(question) {
+  return (String(question || "").toLowerCase().match(/[a-z0-9]+/g) || [])
+    .filter((term) => !QUERY_FRAMING_TERMS.has(term) && !COMMON_QUERY_STOPWORDS.has(term));
+}
+
+function exactMatchReason(question, candidate) {
+  if (!candidate.exactMatch) return "None";
+  const query = String(question || "");
+  const words = query.toLowerCase().match(/[a-z0-9]+/g) || [];
+  const searchable = [candidate.sectionLabel, candidate.heading, candidate.ruleNumber, candidate.content].filter(Boolean).join(" ").toLowerCase();
+  const requestedRule = query.toLowerCase().match(/\b(?:rule\s*)?(\d+(?:\.\d+)+)\b/)?.[1] || "";
+  if (requestedRule && candidate.ruleNumber.toLowerCase() === requestedRule) return `Rule number: ${requestedRule}`;
+  const includes = (term) => new RegExp(`\\b${term.replaceAll(" ", "\\s+")}\\b`, "i").test(searchable);
+  const acronyms = [...new Set([...(query.match(/\b[A-Z][A-Z0-9]{1,9}\b/g) || []).map((term) => term.toLowerCase()), ...(words.includes("nr") ? ["nr"] : [])])];
+  const acronym = acronyms.find(includes);
+  if (acronym) return `Acronym: ${acronym.toUpperCase()}`;
+  const distinctive = words.map((word) => !GENERIC_EXACT_TERMS.has(word) && !QUERY_FRAMING_TERMS.has(word) && !COMMON_QUERY_STOPWORDS.has(word));
+  const phrases = [];
+  for (let index = 0; index < words.length; index += 1) for (let size = 2; size <= 4 && index + size <= words.length; size += 1) {
+    const phrase = words.slice(index, index + size).join(" ");
+    if (phrase.length >= 8 && distinctive.slice(index, index + size).some(Boolean)) phrases.push(phrase);
+  }
+  const phrase = phrases.find(includes);
+  if (phrase) return `Phrase: ${phrase}`;
+  const term = words.find((word, index) => distinctive[index] && word.length >= 5 && includes(word));
+  return term ? `Distinctive term: ${term}` : "Exact query-term match";
 }
 function assertEmbeddingConfiguration() { if (aiAssistantConfig.embeddingDimensions !== 1536) throw new Error("LWR_AI_EMBEDDING_DIMENSIONS must remain 1536 until the AI chunk schema is migrated and reindexed."); }
 function clean(value, max) { return String(value || "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max); }

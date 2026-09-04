@@ -29,7 +29,7 @@ language sql
 security invoker
 set search_path = public, extensions, pg_temp
 as $$
-  with input as (
+  with normalized_input as (
     select
       left(trim(coalesce(p_query_text, '')), 1000) as query_text,
       lower(left(trim(coalesce(p_query_text, '')), 1000)) as query_lower,
@@ -38,8 +38,22 @@ as $$
       lower(left(trim(coalesce(p_feature_module, '')), 120)) as feature_module,
       lower(left(trim(coalesce(p_user_role, '')), 40)) as user_role,
       coalesce((regexp_match(lower(coalesce(p_query_text, '')), '\m(?:rule\s*)?([0-9]+(?:\.[0-9]+)+)\M'))[1], '') as requested_rule,
-      websearch_to_tsquery('english', left(trim(coalesce(p_query_text, '')), 1000)) as ts_query,
+      -- websearch_to_tsquery joins ordinary input terms with AND. Remove
+      -- generic question framing before constructing the keyword query so a
+      -- natural-language prompt searches its subject terms rather than also
+      -- requiring an unrelated intent word from the question.
+      trim(regexp_replace(
+        left(trim(coalesce(p_query_text, '')), 1000),
+        '\m(?:what|which|who|when|where|why|how|does|do|did|is|are|was|were|can|could|would|should|will|mean|meaning|work|works|requirement|requirements|explain|explained|tell|show|say|says|define|definition|describe|described|please)\M',
+        ' ',
+        'gi'
+      )) as keyword_query_text,
       greatest(16, least(coalesce(p_limit, 32), 80)) as candidate_limit
+  ),
+  input as (
+    select ni.*,
+      websearch_to_tsquery('english', coalesce(nullif(ni.keyword_query_text, ''), ni.query_text)) as keyword_ts_query
+    from normalized_input ni
   ),
   eligible as (
     select c.id as chunk_id, c.document_version_id, c.page_number, c.section_label,
@@ -74,10 +88,10 @@ as $$
     limit (select candidate_limit from input)
   ),
   keyword_candidates as (
-    select e.chunk_id, row_number() over (order by ts_rank_cd(e.search_vector, i.ts_query) desc, e.chunk_id) as keyword_rank
+    select e.chunk_id, row_number() over (order by ts_rank_cd(e.search_vector, i.keyword_ts_query) desc, e.chunk_id) as keyword_rank
     from eligible e cross join input i
-    where e.search_vector @@ i.ts_query
-    order by ts_rank_cd(e.search_vector, i.ts_query) desc, e.chunk_id
+    where e.search_vector @@ i.keyword_ts_query
+    order by ts_rank_cd(e.search_vector, i.keyword_ts_query) desc, e.chunk_id
     limit (select candidate_limit from input)
   ),
   query_tokens as (
@@ -153,7 +167,7 @@ as $$
   base_scores as (
     select e.*, vc.vector_rank, kc.keyword_rank, i.*,
       greatest(0::double precision, least(1::double precision, 1 - (e.embedding <=> p_query_embedding))) as semantic_score,
-      least(1::double precision, ts_rank_cd(e.search_vector, i.ts_query)::double precision * 2.5) as keyword_score,
+      least(1::double precision, ts_rank_cd(e.search_vector, i.keyword_ts_query)::double precision * 2.5) as keyword_score,
       case
         when i.requested_rule <> '' and lower(coalesce(e.rule_number, '')) = i.requested_rule then 1::double precision
         when exists (select 1 from acronym_terms a where e.searchable_text ~ ('\m' || a.term || '\M')) then .95::double precision

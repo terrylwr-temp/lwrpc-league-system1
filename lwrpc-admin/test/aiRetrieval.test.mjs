@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
-const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, evaluateEvidence, normalizeRetrievalRequest, retrieveOfficialEvidence, toPgVector } = await import("../app/lib/aiRetrieval.js");
+const { ASK_ABOUT_SCOPES, RETRIEVAL_WEIGHTS, evaluateEvidence, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, toPgVector } = await import("../app/lib/aiRetrieval.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 const vector = Array.from({ length: 1536 }, (_, i) => i / 1000);
 
@@ -23,6 +23,8 @@ test("uses one compatible embedding and the protected hybrid RPC without chat ge
   });
   assert.equal(called.name, "search_ai_official_chunks"); assert.equal(called.args.p_query_embedding.split(",").length, 1536);
   assert.equal(output.suppliedEvidence.length, 1); assert.equal(output.evidence.sufficient, true);
+  assert.equal(output.candidates[0].exactMatchReason, "Rule number: 4.5");
+  assert.deepEqual(output.candidates[0].ftsDiagnostic, { normalizedTerms: ["rule", "4", "5"], matched: true, candidateRank: 1 });
   assert.equal(toPgVector(vector).split(",").length, 1536);
 });
 
@@ -55,6 +57,16 @@ test("generic exact matching recognizes unseen official phrases without boosting
   assert.equal(genericExactScore("Rule 4.5", "Rule text", "4.5"), 1);
   assert.equal(genericExactScore("NR", "The NR rating is provisional."), .95);
   assert.equal(genericExactScore("NR", "The corner rating is provisional."), 0);
+});
+
+test("FTS removes generic question framing while retaining meaningful content terms", async () => {
+  const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
+  assert.match(sql, /keyword_query_text/); assert.match(sql, /keyword_ts_query/);
+  assert.match(sql, /e\.search_vector @@ i\.keyword_ts_query/);
+  assert.doesNotMatch(sql, /e\.search_vector @@ i\.ts_query/);
+  assert.deepEqual(normalizedFtsTerms("What does NR mean?"), ["nr"]);
+  assert.deepEqual(normalizedFtsTerms("What is the Reliability Factor requirement?"), ["reliability", "factor"]);
+  assert.deepEqual(normalizedFtsTerms("How does scoring freeze work?"), ["scoring", "freeze"]);
 });
 
 test("retrieval route is League Manager protected and has no answer-model path", async () => {
