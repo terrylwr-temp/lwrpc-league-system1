@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 process.env.LWR_AI_ENABLED = "true";
-const { ASK_ABOUT_SCOPES, AUTHORITY_REVIEW_LIMIT, RETRIEVAL_WEIGHTS, applyTypoNormalizations, continuationExpansionPhrases, deriveTypoNormalizations, detectRetrievalIntent, evaluateEvidence, intentDiagnostic, isDocumentGroundedMatchConfiguration, normalizeRetrievalRequest, normalizedFtsTerms, retrieveOfficialEvidence, terminologyDiagnostic, toPgVector } = await import("../app/lib/aiRetrieval.js");
+const { ASK_ABOUT_SCOPES, AUTHORITY_REVIEW_LIMIT, RETRIEVAL_WEIGHTS, applyTypoNormalizations, continuationExpansionPhrases, deriveTypoNormalizations, detectRetrievalIntent, evaluateEvidence, intentDiagnostic, isDocumentGroundedMatchConfiguration, normalizeRetrievalRequest, normalizedFtsTerms, nvzTerminologyAliasPhrases, retrieveOfficialEvidence, terminologyDiagnostic, toPgVector } = await import("../app/lib/aiRetrieval.js");
 const { AI_RETRIEVAL_EVALUATION_SET } = await import("../app/lib/aiRetrievalEvaluation.js");
 const vector = Array.from({ length: 1536 }, (_, i) => i / 1000);
 
@@ -193,6 +193,26 @@ test("uses a generic interruption expansion without injecting an official outcom
   });
   assert.equal(output.candidates[0].exactMatchReason, "Retrieval expansion: cannot complete");
   assert.deepEqual(output.candidates[0].ftsDiagnostic.retrievalExpansion, ["cannot complete"]);
+});
+
+test("LMS-0709 adds kitchen/NVZ terminology only for a document-grounded pickleball-rule context", async () => {
+  const sql = await readFile(new URL("../supabase-ai-assistant-stage3-retrieval.sql", import.meta.url), "utf8");
+  const migration = await readFile(new URL("../supabase-ai-assistant-lms-0709-usap-nvz-terminology.sql", import.meta.url), "utf8");
+  const rows = [{
+    heading: "Allowable Contact",
+    section_label: "Section 11: Non-Volley Zone Infractions",
+    content: "11.A Allowable Contact. All volleys must be initiated outside of the non-volley\nzone. A player may contact the non-\nvolley zone at any time except during the act of volleying a ball.",
+  }];
+  for (const question of ["Can I volley in the kitchen?", "Can I volley in the NVZ?", "Can I volley in the non-volley zone?", "Can I step into the kitchen after hitting a volley?"]) {
+    assert.deepEqual(nvzTerminologyAliasPhrases(question, rows), ["non-volley zone", "NVZ"], question);
+  }
+  assert.deepEqual(nvzTerminologyAliasPhrases("How should I renovate my kitchen?", rows), []);
+  assert.deepEqual(nvzTerminologyAliasPhrases("What should I cook in the kitchen?", rows), []);
+  assert.match(sql, /nvz_terminology_intent/);
+  assert.match(sql, /nvz \| \(non & volley & zone\)/);
+  assert.match(sql, /nvz_terminology_candidates/);
+  assert.match(migration, /does not touch documents, versions,\s*-- chunks, embeddings, metadata, storage, or grants/i);
+  assert.match(migration, /nvz_terminology_intent/);
 });
 
 test("LMS-0708 keeps the singular and plural match detector identical in Stage 3 SQL", async () => {

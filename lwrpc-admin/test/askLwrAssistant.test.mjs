@@ -140,7 +140,7 @@ test("the shared AI trigger covers every authenticated header shell without chan
   assert.match(assistant, /SESSION_EXCHANGES_KEY/);
   assert.match(assistant, /slice\(0, MAX_SESSION_EXCHANGES\)/);
   assert.doesNotMatch(assistant, /ask-lwr-question[^>]*disabled=\{working\}/);
-  assert.match(assistant, /Get answers from official LWR Pickleball Club information/);
+  assert.match(assistant, /Get answers from official LWR PC information and USAP Rules/);
   assert.match(assistant, /Ask a question about anything regarding LWR Pickleball Club or leagues/);
   assert.match(assistant, /href=\{source\.officialDocumentUrl\}/);
   assert.doesNotMatch(assistant, /#page=/);

@@ -11,11 +11,18 @@ const FRAMING = new Set("what which who when where why how does do did is are wa
 
 function normalized(value) {
   return String(value || "").toLowerCase()
-    .replace(/non[ -]volley zone|kitchen/g, "nvz")
+    // The processor preserves source text verbatim. This matcher-only form
+    // joins the harmless PDF line wrap found in Rule 11.A without changing a
+    // stored chunk, embedding, citation, or answer excerpt.
+    .replace(/\b(?:non(?:-\s*|\s+)volley\s+zone|kitchen|nvz)\b/g, "nvz")
+    // These bounded phrasings describe contact with the NVZ after a volley;
+    // they do not turn an isolated "step" into a momentum question.
+    .replace(/\b(?:step(?:ping)?\s+(?:into|in)|enter(?:ing)?|carried\s+into)\b/g, "contact")
+    .replace(/\bafter\s+(?:hitting|hit)\s+(?:a\s+)?volley\b/g, "after volley")
     .replace(/can't finish|cannot finish|cannot complete|unable to finish|retire(?:ment|d)?|injur(?:y|ed)|hurt|medical issue/g, "retirement")
     .replace(/\btouch(?:ing|es|ed)?\b/g, "touch")
     .replace(/scoring/g, "score").replace(/serving|service|server/g, "serve")
-    .replace(/\b(balls|serves|volleys|bounces|feet|lines)\b/g, (word) => ({ balls: "ball", serves: "serve", volleys: "volley", bounces: "bounce", feet: "foot", lines: "line" })[word]);
+    .replace(/\b(balls|serves|volleys|volleying|bounces|feet|lines|exiting)\b/g, (word) => ({ balls: "ball", serves: "serve", volleys: "volley", volleying: "volley", bounces: "bounce", feet: "foot", lines: "line", exiting: "exit" })[word]);
 }
 
 function issueTerms(question) {
@@ -26,18 +33,64 @@ function issueTerms(question) {
 // instruction. Titles/headings alone and scattered paragraphs cannot override.
 function directPassages(candidate, question) {
   if (isObviouslyIncompleteUsapFragment(candidate)) return [];
+  const nvzScope = nvzQuestionScope(question);
   const terms = issueTerms(question);
   if (!terms.length) return [];
-  return String(candidate.content || "").split(/\n\s*\n|\n(?=\s*(?:[•]|\d+(?:\.\d+)*\.\s))/).filter((passage) => {
+  if (nvzScope === "definition" && !isNvzDefinition(candidate)) return [];
+  const candidateNvzScope = nvzRuleScope(candidate);
+  if (nvzScope && nvzScope !== "definition" && candidate?.documentType === "usap_rulebook" && candidateNvzScope && candidateNvzScope !== nvzScope) return [];
+  const content = String(candidate.content || "");
+  // Definitions commonly put the term in a label sentence and the dimensions
+  // in the immediately following sentence. Keep that single stored chunk
+  // intact instead of requiring both words in one sentence.
+  if (nvzScope === "definition") return [content];
+  // Rule headings and their operative condition may likewise span separate
+  // sentences. Scope has already established the USAP provision's fit.
+  if (nvzScope && candidate?.documentType === "usap_rulebook" && candidateNvzScope === nvzScope) return [content];
+  return content.split(/\n\s*\n|\n(?=\s*(?:[•]|\d+(?:\.\d+)*\.\s))/).filter((passage) => {
     return passage.split(/(?<=[.!?])\s+(?=[A-Z])/).some((sentence) => {
       const words = new Set(normalized(sentence).match(/[a-z0-9]+/g) || []);
       if (!terms.every((term) => words.has(term))) return false;
+      if (nvzScope === "definition") return /\b(?:area|court|zone|lines?|feet|dimensional)\b/i.test(sentence);
       // A direction to consult a rule or a statement about its coverage is
       // not the rule's outcome, even when all of the topic words occur locally.
       if (/\b(?:refer|consult|review|read|discuss|address|describe|cover)(?:s|ed|ing)?\b/i.test(sentence)) return false;
       return /\b(?:must|shall|may|cannot|can|only|required|allowed|permitted|prohibited|fault|loses?|wins?|recorded|awarded|use|select|click|save)\b/i.test(sentence);
     });
   });
+}
+
+// Scope selection is based on the rule's operative language rather than a
+// rule number. It keeps a general NVZ volley question with the general rule,
+// while retaining the narrower provisions when the player describes their
+// actual condition.
+function nvzQuestionScope(question) {
+  const value = normalized(question);
+  const hasNvz = /\bnvz\b/.test(value);
+  if (!hasNvz) return "";
+  if (/\bwhat\s+is\b|\bdefine\b|\bdimensions?\b|\bhow\s+(?:big|wide|deep|long)\b/.test(value)) return "definition";
+  if (/\b(?:wheelchair|assistive\s+device|large\s+rear\s+wheels?|rear\s+wheels?)\b/.test(value)) return "adaptive";
+  const hasVolley = /\bvolley\b/.test(value);
+  if (!hasVolley) return "";
+  if (/\b(?:contact|touch)\b[^.?!]{0,60}\bwhile\b[^.?!]{0,60}\bvolley\b|\bwhile\b[^.?!]{0,60}\bvolley\b[^.?!]{0,60}\b(?:contact|touch)\b/.test(value)) return "contact_while_volley";
+  if (/\b(?:contact|momentum)\b/.test(value) && /\bafter\b/.test(value)) return "post_volley_momentum";
+  if (/\b(?:before|until)\b[^.?!]{0,80}\b(?:fully|completely|both\s+feet|outside|exit)\b|\b(?:fully|completely|both\s+feet|outside|exit)\b[^.?!]{0,80}\b(?:before|until)\b/.test(value)) return "exit_before_volley";
+  return "general_volley";
+}
+
+function nvzRuleScope(candidate) {
+  const text = normalized([candidate?.heading, candidate?.content].filter(Boolean).join(" "));
+  if (/\b(?:wheelchair|assistive\s+device|large\s+rear\s+wheel|rear\s+wheel)\b/.test(text)) return "adaptive";
+  if (/\b(?:contact|touch)\b[^.?!]{0,60}\bwhile\b[^.?!]{0,60}\bvolley\b|\bwhile\b[^.?!]{0,60}\bvolley\b[^.?!]{0,60}\b(?:contact|touch)\b/.test(text)) return "contact_while_volley";
+  if (/\bmomentum\b|\beven\s+after\s+the\s+ball\s+becomes\s+dead\b/.test(text)) return "post_volley_momentum";
+  if (/\bboth\s+feet\b|\b(?:fully|completely)\s+outside\b|\bfailure\s+to\s+exit\b/.test(text)) return "exit_before_volley";
+  if (/\ball\s+volley\s+must\s+be\s+initiated\s+outside\b/.test(text)) return "general_volley";
+  return "";
+}
+
+function isNvzDefinition(candidate) {
+  const text = normalized([candidate?.heading, candidate?.content].filter(Boolean).join(" "));
+  return /\bnvz\b/.test(text) && /\b(?:area|court|zone|lines?|feet|dimensional)\b/.test(text);
 }
 
 function isObviouslyIncompleteUsapFragment(candidate) {

@@ -117,7 +117,7 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
   return <>
     <header className="flex items-start gap-3 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
       <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700"><AssistantIcon size={21}/></span>
-      <div className="min-w-0 flex-1"><h2 id="ask-lwr-title" className="text-lg font-black text-[#102e64]">Ask LWR Pickleball Club AI</h2><p id="ask-lwr-subtitle" className="mt-0.5 text-sm font-semibold leading-5 text-slate-600">Get answers from official LWR Pickleball Club information</p></div>
+      <div className="min-w-0 flex-1"><h2 id="ask-lwr-title" className="text-lg font-black text-[#102e64]">Ask LWR Pickleball Club AI</h2><p id="ask-lwr-subtitle" className="mt-0.5 text-sm font-semibold leading-5 text-slate-600">Get answers from official LWR PC information and USAP Rules</p></div>
       {onClose && <button ref={closeButtonRef} type="button" onClick={onClose} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" aria-label="Close Ask LWR Pickleball Club AI">×</button>}
     </header>
     <div className={bodyClass}>

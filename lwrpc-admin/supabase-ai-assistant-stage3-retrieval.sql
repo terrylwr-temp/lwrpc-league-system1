@@ -57,6 +57,22 @@ as $$
         ni.query_lower ~ '\m(?:injur(?:y|ed|ies)?|hurt|medical|illness|emergency|cannot|unable|can''?t|won''?t|stop(?:ped|ping)?|quit|leave)\M'
         and ni.query_lower ~ '\m(?:players?|participants?|teams?|games?|match(?:es)?|play(?:ing)?|finish|continue|complete)\M'
       ) as continuation_intent,
+      -- Kitchen/NVZ is a bounded pickleball terminology bridge. It is
+      -- additive to the original query and never supplies a rule outcome.
+      -- An ordinary use of “kitchen” must also carry a playing-rule signal.
+      (
+        (
+          ni.query_lower ~ '\m(?:kitchen|nvz)\M'
+          or ni.query_lower ~ '\mnon[ -]volley\s+zone\M'
+        )
+        and (
+          ni.query_lower ~ '\m(?:volley|serve|court|fault|step|momentum|paddle|ball|play(?:ing)?)\M'
+          or (
+            ni.query_lower ~ '\m(?:non[ -]volley\s+zone|nvz)\M'
+            and ni.query_lower ~ '\m(?:what|where|define|dimension|zone|line)\M'
+          )
+        )
+      ) as nvz_terminology_intent,
       (
         ni.query_lower ~ '\m(?:when|deadline|due|latest|early)\M'
         or ni.query_lower ~ '\mhow\s+(?:early|long\s+before|many\s+(?:days?|hours?|weeks?)\s+before)\M'
@@ -98,7 +114,9 @@ as $$
     -- This is generic interruption/continuation normalization, not a
     -- document-specific synonym: it gives lexical retrieval the canonical
     -- form used by rules that describe a participant being unable to finish.
-    select i.*, case when i.continuation_intent then phraseto_tsquery('english', 'cannot complete') else null::tsquery end as continuation_ts_query
+    select i.*,
+      case when i.continuation_intent then phraseto_tsquery('english', 'cannot complete') else null::tsquery end as continuation_ts_query,
+      case when i.nvz_terminology_intent then to_tsquery('english', 'nvz | (non & volley & zone)') else null::tsquery end as nvz_ts_query
     from input i
   ),
   eligible as (
@@ -138,8 +156,13 @@ as $$
       row_number() over (order by greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real)) desc, e.chunk_id) as keyword_rank
     from eligible e cross join retrieval_expansions i
     where e.search_vector @@ i.keyword_ts_query
-      or (i.continuation_intent and e.search_vector @@ i.continuation_ts_query)
-    order by greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real)) desc, e.chunk_id
+    or (i.continuation_intent and e.search_vector @@ i.continuation_ts_query)
+    or (i.nvz_terminology_intent and e.search_vector @@ i.nvz_ts_query)
+    order by greatest(
+      ts_rank_cd(e.search_vector, i.keyword_ts_query),
+      coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real),
+      coalesce(ts_rank_cd(e.search_vector, i.nvz_ts_query), 0::real)
+    ) desc, e.chunk_id
     limit (select candidate_limit from input)
   ),
   query_tokens as (
@@ -302,6 +325,16 @@ as $$
       and e.searchable_text ~ '\mmatch\s+setup\M'
       and e.searchable_text ~ '\m(?:lineups?|rosters?|pairings?)\M'
   ),
+  nvz_terminology_candidates as (
+    -- Preserve the original question/vector signal while ensuring the
+    -- official NVZ wording is eligible for lexical recall. This is not a
+    -- document-specific rule preference: matching chunks remain scored under
+    -- the established hybrid weights and Stage 4 determines applicability.
+    select e.chunk_id
+    from eligible e cross join retrieval_expansions i
+    where i.nvz_terminology_intent
+      and e.searchable_text ~ '\mnon(?:-\s*|\s+)volley\s+zone\M'
+  ),
   team_roster_candidates as (
     select e.chunk_id
     from eligible e cross join team_roster_management_concept i
@@ -315,12 +348,17 @@ as $$
     union select chunk_id from exact_candidates
     union select chunk_id from intent_candidates
     union select chunk_id from terminology_candidates
+    union select chunk_id from nvz_terminology_candidates
     union select chunk_id from team_roster_candidates
   ),
   base_scores as (
     select e.*, vc.vector_rank, kc.keyword_rank, i.*,
       greatest(0::double precision, least(1::double precision, 1 - (e.embedding <=> p_query_embedding))) as semantic_score,
-      least(1::double precision, greatest(ts_rank_cd(e.search_vector, i.keyword_ts_query), coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real))::double precision * 2.5) as fts_keyword_score,
+      least(1::double precision, greatest(
+        ts_rank_cd(e.search_vector, i.keyword_ts_query),
+        coalesce(ts_rank_cd(e.search_vector, i.continuation_ts_query), 0::real),
+        coalesce(ts_rank_cd(e.search_vector, i.nvz_ts_query), 0::real)
+      )::double precision * 2.5) as fts_keyword_score,
       case
         when i.team_roster_management_enabled
           and e.searchable_text ~ '\m(?:add|remove|delete|drop|update|change|lock|open|close)\M'

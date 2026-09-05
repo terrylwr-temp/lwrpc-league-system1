@@ -61,6 +61,7 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     ...request,
     retrievalQuery,
     typoNormalizations,
+    terminologyAliases: nvzTerminologyAliasPhrases(request.question, data || []),
     terminologyExpansionEnabled: isDocumentGroundedMatchConfiguration(retrievalQuery, data || []),
   };
   const candidates = (data || []).map((row, index) => ({ ...candidateFromRow(row, retrievalRequest), stage3Rank: index + 1 }));
@@ -127,7 +128,7 @@ function candidateFromRow(row, request) {
     leagueTextDiagnostic: leagueTextDiagnostic(query, candidate),
     ftsDiagnostic: {
       normalizedTerms: ftsTerms,
-      retrievalExpansion: continuationExpansionPhrases(query),
+      retrievalExpansion: [...continuationExpansionPhrases(query), ...(request.terminologyAliases || [])],
       typoNormalization: request.typoNormalizations || [],
       matched: candidate.keywordRank !== null,
       candidateRank: candidate.keywordRank,
@@ -146,6 +147,19 @@ export function continuationExpansionPhrases(question) {
   const hasInterruption = /\b(?:injur(?:y|ed|ies)?|hurt|medical|illness|emergency|cannot|unable|can['’]?t|won['’]?t|stop(?:ped|ping)?|quit|leave)\b/.test(value);
   const hasActivity = /\b(?:players?|participants?|teams?|games?|match(?:es)?|play(?:ing)?|finish|continue|complete)\b/.test(value);
   return hasInterruption && hasActivity ? ["cannot complete"] : [];
+}
+
+// This is an additive, context-bounded diagnostic for the matching SQL CTE.
+// It never replaces the player's query or asserts a rule outcome; the active
+// official corpus still supplies the candidate rules and their wording.
+export function nvzTerminologyAliasPhrases(question, rows = []) {
+  const value = String(question || "").toLowerCase();
+  const mentionsAlias = /\b(?:kitchen|nvz)\b|\bnon[ -]volley\s+zone\b/.test(value);
+  const pickleballContext = /\b(?:volley|serve|court|fault|step|momentum|paddle|ball|play(?:ing)?)\b/.test(value)
+    || (/\b(?:non[ -]volley\s+zone|nvz)\b/.test(value) && /\b(?:what|where|define|dimension|zone|line)\b/.test(value));
+  const corpus = rows.map((row) => [row?.content, row?.heading, row?.section_label].filter(Boolean).join(" ")).join(" ").toLowerCase();
+  const officialTermPresent = /\bnon(?:-\s*|\s+)volley\s+zone\b/.test(corpus);
+  return mentionsAlias && pickleballContext && officialTermPresent ? ["non-volley zone", "NVZ"] : [];
 }
 
 export function detectRetrievalIntent(question) {

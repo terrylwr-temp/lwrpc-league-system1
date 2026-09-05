@@ -150,6 +150,32 @@ test("LMS-0708 preserves the explicit medical continuation control question", ()
   assert.equal(selected[0].sourceClassification, "lwr_controlling");
 });
 
+test("LMS-0709 selects the production USAP NVZ rule by player-question scope", () => {
+  const rule11a = usap("11.A Allowable Contact. All volleys must be initiated outside of the non-volley\nzone. A player, or anything in contact with the player, may contact the non-\nvolley zone at any time except during the act of volleying a ball.", { chunkId: "usap-11-a", ruleNumber: "11.A", pageNumber: 30, combinedScore: .4766, heading: "Allowable Contact" });
+  const rule11a1 = usap("11.A.1 Fault – Non-Volley Zone Contact While Volleying. When a\nvolleying player or anything that has contact with the volleying\nplayer (including the player’s partner) contacts the non-volley\nzone, it is a fault against the player.", { chunkId: "usap-11-a-1", ruleNumber: "11.A.1", pageNumber: 30, combinedScore: .4245, heading: "11.A Allowable Contact — Fault – Non-Volley Zone Contact While Volleying" });
+  const rule11a2 = usap("11.A.2 Fault – Non-Volley Zone Momentum. When a volleying player’s\nmomentum causes the player to contact anything (including the\nplayer’s partner) that is in contact with the non-volley zone, even\nafter the ball becomes dead, it is a fault against the volleying\nplayer.", { chunkId: "usap-11-a-2", ruleNumber: "11.A.2", pageNumber: 30, combinedScore: .4292, heading: "11.A Allowable Contact — Fault – Non-Volley Zone Momentum" });
+  const rule11a3 = usap("11.A.3 Fault – Failure to Exit the Non-Volley Zone Before Volleying.\nAfter contacting the non-volley zone, when a player volleys a ball\nbefore both feet contact the playing surface completely outside\nthe non-volley zone, it is a fault against the player.", { chunkId: "usap-11-a-3", ruleNumber: "11.A.3", pageNumber: 30, combinedScore: .6956, heading: "11.A Allowable Contact — Fault – Failure to Exit the Non-Volley Zone Before Volleying." });
+  const adaptiveContact = usap("25.B.2.d Fault – Non-Volley Zone Contact While Volleying. When a player’s assistive device, or anything that has contact with the volleying player (including the player’s partner) contacts the non-volley zone, it is a fault against the player.", { chunkId: "usap-25-b-2-d", ruleNumber: "25.B.2.d", pageNumber: 74, combinedScore: .4242, heading: "25.B.2 Assistive Devices — Fault – Non-Volley Zone Contact While Volleying." });
+  const adaptiveMomentum = usap("25.B.2.e Fault – Non-Volley Zone Momentum. When a volleying player’s momentum causes the player’s assistive device to contact anything (including the player’s partner) that is in contact with the non-volley zone, even after the ball becomes dead, it is a fault against the player.", { chunkId: "usap-25-b-2-e", ruleNumber: "25.B.2.e", pageNumber: 74, combinedScore: .4160, heading: "25.B.2 Assistive Devices — Fault – Non-Volley Zone Momentum." });
+  const definition = usap("3.A.4.c Non-Volley Zone. The 7-foot by 20-foot (2.13.m by\n6.08 m) area of the court adjacent to each end of the\nnet. The non-volley zone lines run parallel to the net, 7\nfeet (2.13 m) from the net on each end between the\ntwo sidelines. All lines that bound the non-volley zone\nare part of the zone. The non-volley zone is two-\ndimensional and does not extend above the playing\nsurface.", { chunkId: "usap-3-a-4-c", ruleNumber: "3.A.4.c", pageNumber: 12, combinedScore: .7727, heading: "3.A.4 Lines and Areas — Non-Volley Zone" });
+  const unrelated = usap("20.E.2.h Replay – Volley Serve, Questionable Ball Height. When it is questionable whether the ball was no higher than the server’s waist when the paddle contacted the ball to make a volley serve, the referee may call for a replay.", { chunkId: "usap-20-e-2-h", ruleNumber: "20.E.2.h", pageNumber: 54, combinedScore: .4293 });
+
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can I volley in the kitchen?", [rule11a, unrelated, rule11a2, rule11a3]))), ["usap-11-a"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can I volley in the NVZ?", [rule11a, definition, rule11a3, rule11a1, adaptiveContact, rule11a2, adaptiveMomentum]))), ["usap-11-a"]);
+
+  // Production had 11.A at rank 11 for this wording. LMS-0708's bounded
+  // authority-review set brings it to Stage 4 without widening model input.
+  const nonVolleyInput = {
+    ...retrieval("Can I volley in the non-volley zone?", [definition, rule11a3, rule11a2, unrelated]),
+    authorityReviewCandidates: [definition, rule11a3, rule11a2, unrelated, rule11a],
+  };
+  assert.deepEqual(ids(selectAnswerEvidence(nonVolleyInput)), ["usap-11-a"]);
+
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can I step into the kitchen after hitting a volley?", [unrelated, rule11a, rule11a2, adaptiveMomentum, rule11a3]))), ["usap-11-a-2"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can I volley before fully exiting the non-volley zone?", [rule11a, rule11a2, rule11a3]))), ["usap-11-a-3"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("What is the non-volley zone?", [definition, rule11a, rule11a3]))), ["usap-3-a-4-c"]);
+});
+
 test("LMS-0706 mixed intents retain LWR lineup and USAP volley rules independently", async () => {
   const input = retrieval("When do I submit my lineup and can I volley in the kitchen?", [lwr("Match Setup lineup must be submitted no later than three days before the scheduled match.", { ruleNumber: "5.4" }), usap("Players must not volley while touching the kitchen.")]);
   const { answer, request } = await generate(input, "Submit three days before the match. Do not volley in the kitchen.");
