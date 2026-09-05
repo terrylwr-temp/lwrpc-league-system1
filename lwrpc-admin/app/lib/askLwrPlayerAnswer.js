@@ -1,3 +1,4 @@
+import { isRosterTroubleshooting } from "./aiRosterTroubleshooting.js";
 import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
 import { officialDocumentViewerHref } from "./aiOfficialDocumentViewer.js";
 import { APP_VERSION } from "./version.js";
@@ -30,12 +31,6 @@ export function isUnsupportedOperationalQuestion(question) {
 
 }
 
-function isRosterTroubleshooting(value) {
-  return /\b(?:player|person|member)\b/i.test(value)
-    && /\b(?:why|what\s+should\s+i\s+check)\b/i.test(value)
-    && /\b(?:find|show\s+up|available)\b/i.test(value)
-    && /\b(?:add|adding|change|changing|roster)\b/i.test(value);
-}
 
 function isOfficialConfigurationGuidance(value) {
   return /\b(?:lineups?|rosters?|pairings?)\b/i.test(value)

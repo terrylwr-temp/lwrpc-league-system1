@@ -1,6 +1,8 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-08-30
+Last updated: 2026-09-05
+
+Current prepared application version: **LMS-0713** (package `0.1.535`), awaiting review/deployment. Stage 7 remains paused.
 
 ## Purpose
 
@@ -523,3 +525,14 @@ As of 2026-05-21:
 ### LMS-0712 bounded personal/live-data guard correction (2026-09-05)
 
 Implemented locally for review: owned rating-value detection, completed-action precedence, personal opponent/schedule protection and general roster-troubleshooting eligibility. Existing contextual-fragment handling now clarifies absent as well as invalid/expired context. Added request-local manager conversation diagnostics without persistent logs. Valid kitchen follow-up/11.A.2 retrieval is unchanged; the original production context-loss cause remains unproven. No SQL, corpus or deployment changes. See `docs/lms-0712-implementation-report.md` for validation and exact production acceptance controls. LMS-0712 remains not production accepted; Stage 7 remains paused.
+
+
+### LMS-0713 final Stage 6 production hardening (2026-09-05)
+
+LMS-0712 is the prior Stage 6 revision. The user now confirms production PASS for personal rating/status/opponent guards, NR/Season DUPR official answers, kitchen 11.A and live contextual 11.A.2, LWR-selected Franklin Outdoor X-40 Optic, mobile full-screen layout and feedback rendering. This supersedes the earlier pending observations without rewriting their historical entries. Feedback database-event acceptance remains pending.
+
+LMS-0713 is prepared locally to correct roster troubleshooting confidence and a reproduced tangential Player Guide/upcoming-match selection. It shares the existing bounded troubleshooting detector, requires materially applicable evidence before GPT/citations, and adds a troubleshooting-only distinction between documented checks and unknown live causes. No SQL/corpus or deployment changes. Tests: 172 passing; four real answer-model replays use only selected official evidence. See `docs/lms-0713-implementation-report.md` for the exact trace, answers, validation and deployment/acceptance sequence.
+
+Stage 7 remains documentation-only and paused: Helpful/Not Helpful management reporting; automatic capture/review of insufficient-evidence/no-applicable-source questions; recurring unanswered-question identification; rule/guide clarification and update workflow; statuses New / Reviewing / Rule or Guide Update Needed / Resolved / Dismissed where appropriate.
+
+Future permission-aware live LMS intelligence/navigation is also documentation-only: personal DUPR, another player's rating where permitted, Team X roster/standing, next opponent/match, Friday lineup, Take me to Match Setup, Open my roster and Open the standings. Implement later through existing role/permission rules and deterministic authorized server-side data services, never by pretending official-document RAG inspected live state.

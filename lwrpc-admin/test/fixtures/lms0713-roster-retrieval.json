@@ -1,0 +1,446 @@
+{
+  "request": {
+    "question": "I'm changing my roster but I can't find a player in the list, why?",
+    "normalizedQuery": "i'm changing my roster but i can't find a player in the list, why?",
+    "askAbout": "all",
+    "context": {
+      "currentPath": "",
+      "featureModule": "",
+      "seasonId": null,
+      "leagueId": null,
+      "divisionId": null,
+      "teamId": null,
+      "userRole": "captain"
+    }
+  },
+  "evidence": {
+    "sufficient": true,
+    "threshold": 0.35,
+    "topScore": 0.474,
+    "stage4Fallback": "Evidence meets the configured threshold."
+  },
+  "suppliedEvidence": [
+    {
+      "chunkId": "61269c81-f09f-44af-adbd-3da3065e22a7",
+      "documentId": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+      "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "documentTitle": "LWRPC-Captains Guide to the LMS",
+      "documentType": "captain_guide",
+      "documentAuthorityRank": 3,
+      "pageNumber": 8,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Managing Team Rosters\nTo update your team roster, go to the Captain Tools section on your Captain Dashboard\nand click Manage Roster to add, change, or remove players.\n• Changing Captains or Co-Captains: On the Team Roster Management screen, click\nChange Captain/Co-Captain next to your team name. This opens an email draft to\nsubmit your request directly to League Management.\nTeam Roster Management Window",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.474,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 1
+    },
+    {
+      "chunkId": "cbb9ff22-5b51-4391-a81d-fc4c08dba6c4",
+      "documentId": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "documentVersionId": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "documentTitle": "LWRPC-Players Guide to the LMS",
+      "documentType": "player_guide",
+      "documentAuthorityRank": 4,
+      "pageNumber": 8,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Viewing My Teams Information\nIf you are on multiple teams, you can easily switch between them. Go to the sidebar, select\nMy Team, and choose the team you want to see.\nThe team page displays:\n• Next Match: Shows at the top with quick links to Match Details and Match Lineup\n(if available).\n• Team Performance: Displays your team's current record, rank and your personal\nseason DUPR rating.\n• Schedules & Results: Lists of upcoming matches and recent match results.\n• Team Roster: Shows your full roster. Tap or click any captain's card to email them\ndirectly.\n• League Documents: Access all current league files via the sidebar option.\nFor more details, see the sections below on Team Roster, Division Standings, and Team\nMatches.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.4252,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 2
+    },
+    {
+      "chunkId": "c524d6d2-34d8-41ed-8fd6-40cf4c5e0e09",
+      "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+      "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+      "documentType": "captain_guide",
+      "documentAuthorityRank": 3,
+      "pageNumber": 7,
+      "sectionLabel": "CREATE/UPDATE TEAM ROSTER",
+      "heading": "CREATE/UPDATE TEAM ROSTER",
+      "ruleNumber": "",
+      "content": "CREATE/UPDATE TEAM ROSTER\no Enter or update your player team roster prior to the commencement of each season. Use the\nManage Roster option to add or remove players.\n All players must be active Lakewood Ranch Pickleball Club members before playing. To\njoin, they can visit: https://lwrpickleballclub.com/signup.\n All DUPR League players must have a free DUPR ID which can be created at\nhttps://www.dupr.com.\n All players must join the Lakewood Ranch Pickleball Club DUPR club (free and\nseparate from the LWR PC membership) so we can accurately sync player ratings.\nCaptains should share this link with all players: https://tinyurl.com/LWRPC-DUPRCLUB.\no Roster Requirements & Substitutes: Teams must roster enough players and substitutes (who\nare not already on another team) to field a full lineup weekly. For example, if your match\nrequires 6 players, an 8–10 player roster is recommended. Additional substitutes may be drawn\nfrom other teams in the same community, provided they meet the DUPR division rating\nrequirements. For complete details, see the Player Requirements and DUPR Rating/Divisions\nsections in the DUPR League Mission and Rules.\no Captain Roster Control: Captains are responsible for building their own rosters and may add\nor delete players throughout the season as needed provided the player is a current, valid\nmember of the LWR PC, has a DUPR ID and is eligible for that division.\no Player DUPR Ratings: Season DUPR ratings are updated in the LMS before the season starts\nand remain visible to captains all season. For players added midseason, their rating is based on\nthe date the league's season ratings were originally recorded.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.4182,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 3
+    },
+    {
+      "chunkId": "7d12396b-f172-4180-af01-56a80fbf52ce",
+      "documentId": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "documentVersionId": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "documentTitle": "LWRPC-Players Guide to the LMS",
+      "documentType": "player_guide",
+      "documentAuthorityRank": 4,
+      "pageNumber": 13,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Viewing Upcoming Matches\nYour next upcoming match is featured right at the top of your Player Dashboard for quick\naccess. Below, in the Upcoming Schedule block, you can view the rest of your team’s\nscheduled games—click View All if you need to expand the list to see additional matches.\nClick on a match row to view more information about an upcoming match. This popup\nwindow includes a button that opens a map of the playing location.\nAdditionally, each team block on this screen features direct buttons for viewing the\nrespective team rosters.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.4169,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 4
+    },
+    {
+      "chunkId": "7a1fb421-89d9-4ddd-b089-b6ec12b2c3c9",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 5,
+      "sectionLabel": "Rule 5",
+      "heading": "TEAM/GAME RULES",
+      "ruleNumber": "5",
+      "content": "the required timeframe may result in forfeiture of the current or future matches, at the\ndiscretion of League Management.\n5.5. Roster Requirements & Retroactive Additions: All active players must appear on the\nteam’s roster in the LMS prior to match play. Retroactive additions are permitted without\npenalty only if the player is a valid LWR PC member with an eligible DUPR account and\nrating. Failure to meet these requirements will result in a match forfeit, and the match will\nnot be posted to DUPR.\n5.6. DUPR Submission & Eligibility: All qualifying games will be automatically entered into\nthe DUPR rating system. Games that are forfeited, incomplete, or deemed ineligible will\nnot be recorded in DUPR (unless otherwise specified by a rule). Individuals/Players are\nnot authorized to independently submit any Club League scheduled games to DUPR.\n5.7. Incomplete Matches: Forfeits vs. Retirements: If a player cannot complete a match for\nany reason, the scoring and DUPR eligibility depend on the current score:\n5.7.1. Under 6 Points (Forfeit): If neither team has reached 6 points, the match is a\nForfeit, recorded as 0-0, and excluded from DUPR.\n5.7.2. 6+ Points (Retired): If at least one team has 6 or more points, the match is recorded\nas Retired. Current scores are entered, and results will be posted to DUPR.\n5.7.3. Note: In both scenarios, the opposing team is credited with the win. A substitute\nmay fill in for any remaining games in the session; however, any games left unplayed\nwithout a substitute will be marked as forfeited.\n5.8. Coaching & Court Access: Coaching is permitted only during timeouts or between\ngames. Coaches and non-players must always remain oƯ the court; only active players\nmay be on the courts.",
+      "keywordScore": 0.25,
+      "exactScore": 0.85,
+      "combinedScore": 0.4117,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 5
+    },
+    {
+      "chunkId": "bddfae38-0a1b-47da-b1a4-d66e26bfb479",
+      "documentId": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "documentVersionId": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "documentTitle": "LWRPC-Players Guide to the LMS",
+      "documentType": "player_guide",
+      "documentAuthorityRank": 4,
+      "pageNumber": 9,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Viewing Your Play History\nMy Play History lets a player review their recorded league match results and performance\nacross the league.\nUse the Play History Scope list to choose which results to view:\n• All Seasons/All Teams\n• A specific season, league, division, or team\nThe page updates immediately to show only results within the selected scope.\nAt the top, summary cards show:\n• Games Played — the number of recorded match-line results in the selected scope.\n• Wins — recorded individual line wins.\n• Losses — recorded individual line losses.\n• Other Category - Tracks non-counting personal games, such as forfeits and\nPicklebreaker matches. Scores Pending — matches whose scores have not yet been\nentered and posted.\nBelow the summary, each match shows the match date, teams, home/away status, season,\nleague, division, lines played, and available game scores. A match that still needs scoring is\nclearly labeled Scores Not Entered rather than being shown as an unclear “Other” result.\nSelect More Player Details in the header to open a separate, scrollable details window. It\nprovides five additional groups of scope-specific information:\n• Matches: wins, losses, and match win percentage.\n• Games: individual game wins, losses, and game win percentage.\n• Points: points earned, points against, and point differential percentage.\n• Ratings: average recorded partner and opponent ratings, plus adjusted and overall\nperformance estimates.\n• Last 5 Matchups: the player’s five most recent results, marked with W or L.\nThe details window is designed for mobile as well as desktop and can be closed without\nchanging the selected History Scope.\n• Mobile Shortcut: Tap the Play History icon in the bottom navigation bar.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3801,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 6
+    },
+    {
+      "chunkId": "2a8f2b2a-c421-4516-afae-723802f8b649",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 6,
+      "sectionLabel": "Rule 5.13.3",
+      "heading": "Roster Continuity",
+      "ruleNumber": "5.13.3",
+      "content": "5.13.3. Roster Continuity: When a game is rescheduled, the players originally assigned to\nit must participate and maintain their original positions/line assignments.\n5.14. End of Season PlayoƯs/Championship Day (All Leagues)\n5.14.1. Teams starting the season with fewer scheduled games than others in their\nDivision/Pool will receive compensatory points at the end of the season. These\npoints will be calculated based on the team’s average points earned per match\ndate, rounded to the nearest whole number (0.5 and above rounds up; 0.4 and\nbelow rounds down).",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3741,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 7
+    },
+    {
+      "chunkId": "03713d3b-211d-45cb-bac2-410cf3c50e44",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 12,
+      "sectionLabel": "Rule 6.3.1",
+      "heading": "Scheduling",
+      "ruleNumber": "6.3.1",
+      "content": "6.3.1. Scheduling: Women’s and men’s games are typically scheduled for Fridays at\nnoon.\n6.3.2. Roster & Courts: 4 players / 2 lines. Requires 2 courts. Player age is determined as\nof 12/31 of the season’s starting year. Players must be 65 or older and will use the\nDUPR Age-Based Rating. Players who are not 65 at the start of the season will be\nrated NR since they will not yet have an official 65+ age-based rating.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3585,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 8
+    }
+  ],
+  "authorityReviewCandidates": [
+    {
+      "chunkId": "61269c81-f09f-44af-adbd-3da3065e22a7",
+      "documentId": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+      "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "documentTitle": "LWRPC-Captains Guide to the LMS",
+      "documentType": "captain_guide",
+      "documentAuthorityRank": 3,
+      "pageNumber": 8,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Managing Team Rosters\nTo update your team roster, go to the Captain Tools section on your Captain Dashboard\nand click Manage Roster to add, change, or remove players.\n• Changing Captains or Co-Captains: On the Team Roster Management screen, click\nChange Captain/Co-Captain next to your team name. This opens an email draft to\nsubmit your request directly to League Management.\nTeam Roster Management Window",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.474,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 1
+    },
+    {
+      "chunkId": "cbb9ff22-5b51-4391-a81d-fc4c08dba6c4",
+      "documentId": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "documentVersionId": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "documentTitle": "LWRPC-Players Guide to the LMS",
+      "documentType": "player_guide",
+      "documentAuthorityRank": 4,
+      "pageNumber": 8,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Viewing My Teams Information\nIf you are on multiple teams, you can easily switch between them. Go to the sidebar, select\nMy Team, and choose the team you want to see.\nThe team page displays:\n• Next Match: Shows at the top with quick links to Match Details and Match Lineup\n(if available).\n• Team Performance: Displays your team's current record, rank and your personal\nseason DUPR rating.\n• Schedules & Results: Lists of upcoming matches and recent match results.\n• Team Roster: Shows your full roster. Tap or click any captain's card to email them\ndirectly.\n• League Documents: Access all current league files via the sidebar option.\nFor more details, see the sections below on Team Roster, Division Standings, and Team\nMatches.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.4252,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 2
+    },
+    {
+      "chunkId": "c524d6d2-34d8-41ed-8fd6-40cf4c5e0e09",
+      "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+      "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+      "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+      "documentType": "captain_guide",
+      "documentAuthorityRank": 3,
+      "pageNumber": 7,
+      "sectionLabel": "CREATE/UPDATE TEAM ROSTER",
+      "heading": "CREATE/UPDATE TEAM ROSTER",
+      "ruleNumber": "",
+      "content": "CREATE/UPDATE TEAM ROSTER\no Enter or update your player team roster prior to the commencement of each season. Use the\nManage Roster option to add or remove players.\n All players must be active Lakewood Ranch Pickleball Club members before playing. To\njoin, they can visit: https://lwrpickleballclub.com/signup.\n All DUPR League players must have a free DUPR ID which can be created at\nhttps://www.dupr.com.\n All players must join the Lakewood Ranch Pickleball Club DUPR club (free and\nseparate from the LWR PC membership) so we can accurately sync player ratings.\nCaptains should share this link with all players: https://tinyurl.com/LWRPC-DUPRCLUB.\no Roster Requirements & Substitutes: Teams must roster enough players and substitutes (who\nare not already on another team) to field a full lineup weekly. For example, if your match\nrequires 6 players, an 8–10 player roster is recommended. Additional substitutes may be drawn\nfrom other teams in the same community, provided they meet the DUPR division rating\nrequirements. For complete details, see the Player Requirements and DUPR Rating/Divisions\nsections in the DUPR League Mission and Rules.\no Captain Roster Control: Captains are responsible for building their own rosters and may add\nor delete players throughout the season as needed provided the player is a current, valid\nmember of the LWR PC, has a DUPR ID and is eligible for that division.\no Player DUPR Ratings: Season DUPR ratings are updated in the LMS before the season starts\nand remain visible to captains all season. For players added midseason, their rating is based on\nthe date the league's season ratings were originally recorded.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.4182,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 3
+    },
+    {
+      "chunkId": "7d12396b-f172-4180-af01-56a80fbf52ce",
+      "documentId": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "documentVersionId": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "documentTitle": "LWRPC-Players Guide to the LMS",
+      "documentType": "player_guide",
+      "documentAuthorityRank": 4,
+      "pageNumber": 13,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Viewing Upcoming Matches\nYour next upcoming match is featured right at the top of your Player Dashboard for quick\naccess. Below, in the Upcoming Schedule block, you can view the rest of your team’s\nscheduled games—click View All if you need to expand the list to see additional matches.\nClick on a match row to view more information about an upcoming match. This popup\nwindow includes a button that opens a map of the playing location.\nAdditionally, each team block on this screen features direct buttons for viewing the\nrespective team rosters.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.4169,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 4
+    },
+    {
+      "chunkId": "7a1fb421-89d9-4ddd-b089-b6ec12b2c3c9",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 5,
+      "sectionLabel": "Rule 5",
+      "heading": "TEAM/GAME RULES",
+      "ruleNumber": "5",
+      "content": "the required timeframe may result in forfeiture of the current or future matches, at the\ndiscretion of League Management.\n5.5. Roster Requirements & Retroactive Additions: All active players must appear on the\nteam’s roster in the LMS prior to match play. Retroactive additions are permitted without\npenalty only if the player is a valid LWR PC member with an eligible DUPR account and\nrating. Failure to meet these requirements will result in a match forfeit, and the match will\nnot be posted to DUPR.\n5.6. DUPR Submission & Eligibility: All qualifying games will be automatically entered into\nthe DUPR rating system. Games that are forfeited, incomplete, or deemed ineligible will\nnot be recorded in DUPR (unless otherwise specified by a rule). Individuals/Players are\nnot authorized to independently submit any Club League scheduled games to DUPR.\n5.7. Incomplete Matches: Forfeits vs. Retirements: If a player cannot complete a match for\nany reason, the scoring and DUPR eligibility depend on the current score:\n5.7.1. Under 6 Points (Forfeit): If neither team has reached 6 points, the match is a\nForfeit, recorded as 0-0, and excluded from DUPR.\n5.7.2. 6+ Points (Retired): If at least one team has 6 or more points, the match is recorded\nas Retired. Current scores are entered, and results will be posted to DUPR.\n5.7.3. Note: In both scenarios, the opposing team is credited with the win. A substitute\nmay fill in for any remaining games in the session; however, any games left unplayed\nwithout a substitute will be marked as forfeited.\n5.8. Coaching & Court Access: Coaching is permitted only during timeouts or between\ngames. Coaches and non-players must always remain oƯ the court; only active players\nmay be on the courts.",
+      "keywordScore": 0.25,
+      "exactScore": 0.85,
+      "combinedScore": 0.4117,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 5
+    },
+    {
+      "chunkId": "bddfae38-0a1b-47da-b1a4-d66e26bfb479",
+      "documentId": "d12b5a86-3f83-4988-8cdf-4d96a5b31786",
+      "documentVersionId": "939baf3b-f0b9-4c17-86be-68b85fd1b0de",
+      "documentTitle": "LWRPC-Players Guide to the LMS",
+      "documentType": "player_guide",
+      "documentAuthorityRank": 4,
+      "pageNumber": 9,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Viewing Your Play History\nMy Play History lets a player review their recorded league match results and performance\nacross the league.\nUse the Play History Scope list to choose which results to view:\n• All Seasons/All Teams\n• A specific season, league, division, or team\nThe page updates immediately to show only results within the selected scope.\nAt the top, summary cards show:\n• Games Played — the number of recorded match-line results in the selected scope.\n• Wins — recorded individual line wins.\n• Losses — recorded individual line losses.\n• Other Category - Tracks non-counting personal games, such as forfeits and\nPicklebreaker matches. Scores Pending — matches whose scores have not yet been\nentered and posted.\nBelow the summary, each match shows the match date, teams, home/away status, season,\nleague, division, lines played, and available game scores. A match that still needs scoring is\nclearly labeled Scores Not Entered rather than being shown as an unclear “Other” result.\nSelect More Player Details in the header to open a separate, scrollable details window. It\nprovides five additional groups of scope-specific information:\n• Matches: wins, losses, and match win percentage.\n• Games: individual game wins, losses, and game win percentage.\n• Points: points earned, points against, and point differential percentage.\n• Ratings: average recorded partner and opponent ratings, plus adjusted and overall\nperformance estimates.\n• Last 5 Matchups: the player’s five most recent results, marked with W or L.\nThe details window is designed for mobile as well as desktop and can be closed without\nchanging the selected History Scope.\n• Mobile Shortcut: Tap the Play History icon in the bottom navigation bar.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3801,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 6
+    },
+    {
+      "chunkId": "2a8f2b2a-c421-4516-afae-723802f8b649",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 6,
+      "sectionLabel": "Rule 5.13.3",
+      "heading": "Roster Continuity",
+      "ruleNumber": "5.13.3",
+      "content": "5.13.3. Roster Continuity: When a game is rescheduled, the players originally assigned to\nit must participate and maintain their original positions/line assignments.\n5.14. End of Season PlayoƯs/Championship Day (All Leagues)\n5.14.1. Teams starting the season with fewer scheduled games than others in their\nDivision/Pool will receive compensatory points at the end of the season. These\npoints will be calculated based on the team’s average points earned per match\ndate, rounded to the nearest whole number (0.5 and above rounds up; 0.4 and\nbelow rounds down).",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3741,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 7
+    },
+    {
+      "chunkId": "03713d3b-211d-45cb-bac2-410cf3c50e44",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 12,
+      "sectionLabel": "Rule 6.3.1",
+      "heading": "Scheduling",
+      "ruleNumber": "6.3.1",
+      "content": "6.3.1. Scheduling: Women’s and men’s games are typically scheduled for Fridays at\nnoon.\n6.3.2. Roster & Courts: 4 players / 2 lines. Requires 2 courts. Player age is determined as\nof 12/31 of the season’s starting year. Players must be 65 or older and will use the\nDUPR Age-Based Rating. Players who are not 65 at the start of the season will be\nrated NR since they will not yet have an official 65+ age-based rating.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3585,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 8
+    },
+    {
+      "chunkId": "3080dcfb-af85-489b-b3a6-d98e2626f7be",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 4,
+      "sectionLabel": "Rule 5",
+      "heading": "TEAM/GAME RULES",
+      "ruleNumber": "5",
+      "content": "5. TEAM/GAME RULES\n5.1. Team Home Court Expectations: All teams registering for league play are expected to\nhost their share of scheduled home matches by providing adequate court availability,\nresulting in a balanced home-and-away schedule whenever possible. If a team cannot\nreserve enough courts for all its assigned home match dates, additional matches may be\nscheduled as away games. Teams that are unable to provide any courts due to limitations\nwithin their community or facility will play all their scheduled matches as away games.\n5.2. Governing Rules & Equipment Standards: All matches are governed by USA Pickleball\nRules (https://usapickleball.org/) and equipment standards including USA Pickleball\napproved equipment. In the event of a conflict, specific Lakewood Ranch Pickleball Club\n(LWR PC) rules shall take precedence over the corresponding USA Pickleball rules and\nregulations.\n5.3. Unauthorized Equipment Penalty: Games played with unauthorized paddles or\nequipment will be forfeited, not recorded, and not posted to DUPR if discovered by\nplayers/captains during or after play.\n5.4. Match Setup and Roster Exchange: Home and visiting Captains must submit their\nupcoming match rosters through the League Management System (LMS) using the Match\nSetup button no later than three (3) days prior to the scheduled match. It is strongly\nrecommended that the Home Team submit its lineup first. Automated reminder emails\nwill be sent to all Captains. Any lineup or roster changes made after the initial submission\nmust be entered through Match Setup, which will automatically notify the opposing\nCaptain(s) of the change. Teams that have not completed Match Setup will not be able to\nprint a completed Match Score Sheet. Repeated failure to complete Match Setup within",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3485,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 9
+    },
+    {
+      "chunkId": "e72cd462-99a2-4d0b-9ce2-481d4d28c51f",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 9,
+      "sectionLabel": "Rule 6.2.1",
+      "heading": "Scheduling",
+      "ruleNumber": "6.2.1",
+      "content": "6.2.1. Scheduling: Games are typically scheduled for every other Saturday at noon.\n6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s\ndoubles teams and 3 women’s doubles teams. Mixed teams may be formed from\nthe gender doubles players or can be from additional players who participate only in\nthe mixed round. Requires 4 courts.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3381,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 10
+    },
+    {
+      "chunkId": "e29d3cb5-3fb5-4c72-98c8-9a19e0dde72b",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "documentAuthorityRank": 1,
+      "pageNumber": 7,
+      "sectionLabel": "Rule 6.1.1",
+      "heading": "Scheduling",
+      "ruleNumber": "6.1.1",
+      "content": "6.1.1. Scheduling: Games are typically scheduled for Wednesdays at noon for women\nand Thursdays at noon for men. DUPR 9: See 6.1.9 below.\n6.1.2. Roster & Courts: 6 Players / 3 Lines. Requires 3 courts.\n6.1.3. Match Format: Round robin; one game to 15, win by 1. Each team receives two\none-minute timeouts. Teams switch ends when the first team reaches 8 points,\nand visitors choose serve, receive, side, or defer in games 1 and 3.",
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "combinedScore": 0.3319,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 11
+    },
+    {
+      "chunkId": "aaedf4ae-3936-4d8c-ae6c-23435bd27105",
+      "documentId": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+      "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "documentTitle": "LWRPC-Captains Guide to the LMS",
+      "documentType": "captain_guide",
+      "documentAuthorityRank": 3,
+      "pageNumber": 9,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Player Eligibility & DUPR Ratings\nClick the Add Player button to add a player to your roster.\n• Selection: A pop-up window will appear with your home community preselected.\nUse the drop-down menu to view available players, along with their eligibility status\nand DUPR ratings.\n• Missing DUPR Info: If a player is missing a DUPR ID or Season Rating, select the\nplayer and click Add Player to Team. League Management will automatically be\nnotified to review the issue and update you on their status.\n• Ineligible Players: If a player is marked \"Not Eligible,\" attempting to add them will\ndisplay an on-screen message explaining the specific reason why.\nAdd Player Pop-up Window",
+      "keywordScore": 0,
+      "exactScore": 0,
+      "combinedScore": 0.2802,
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 12
+    }
+  ]
+}

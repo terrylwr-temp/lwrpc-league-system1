@@ -1,3 +1,4 @@
+import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER, selectGoverningEvidence } from "./aiGoverningSources.js";
 import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapBallSpecificationEvidence, isUsapLegalBallQuestion } from "./aiEquipmentIntents.js";
@@ -66,6 +67,7 @@ function selectLwrAnswerEvidence(retrieval) {
   const requiredCandidates = requiredIntentEvidence.map(({ candidate }) => candidate);
   const selectedForModel = [...requiredCandidates, ...selected.filter((candidate) => (
     requiredCandidates.some((required) => required.chunkId === candidate.chunkId)
+    || (isRosterTroubleshooting(retrieval.request?.question) && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question))
     || (questionRequestsProcedure(retrieval.request?.question) && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question) && materiallyContributes(candidate, primary, retrieval.request?.question))
     || isMoreAuthoritativeThanRequired(candidate, requiredCandidates, intents, retrieval.request?.question)
   ))]
@@ -76,6 +78,7 @@ function selectLwrAnswerEvidence(retrieval) {
 
 function detectedEvidenceIntents(question) {
   const value = String(question || "").toLowerCase();
+  if (isRosterTroubleshooting(value)) return [ROSTER_TROUBLESHOOTING_INTENT];
   const roster = /\b(?:add|remove|delete|drop|update|change|lock|open|close)\b/.test(value) && /\b(?:player|players|person|someone|member|members|roster|team)\b/.test(value) && /\b(?:team|league|season|roster)\b/.test(value);
   // This selector intent is intentionally narrower than a general reference to
   // a match or game.  It governs Match Setup evidence only; injury, conduct,
@@ -100,6 +103,11 @@ function supportsEvidenceIntent(candidate, intent, question = "") { return Boole
 function intentSupport(candidate, intent, question) {
   if (intent === CLUB_SELECTED_MATCH_EQUIPMENT_INTENT && isClubSelectedMatchEquipmentQuestion(question) && isLwrSelectedMatchEquipmentEvidence(candidate)) return { intent, strength: 130, reason: "Direct LWR-selected match-equipment passage" };
   if (intent === USAP_LEGAL_BALL_INTENT && isUsapLegalBallQuestion(question) && isUsapBallSpecificationEvidence(candidate)) return { intent, strength: 130, reason: "Direct USAP ball specification or approval passage" };
+  if (intent === ROSTER_TROUBLESHOOTING_INTENT) {
+    if (Number(candidate.combinedScore) < aiAssistantConfig.evidenceThreshold || candidate.documentType === "usap_rulebook") return null;
+    const support = localEvidencePassages(candidate).map(rosterTroubleshootingSupport).filter(Boolean).sort((a, b) => b.strength - a.strength)[0];
+    return support ? { intent, ...support } : null;
+  }
   const asksTiming = asksForTiming(question);
   const structural = [candidate?.sectionLabel, candidate?.heading].filter(Boolean).join(" ").toLowerCase();
   for (const passage of localEvidencePassages(candidate)) {
@@ -184,6 +192,9 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
         "Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence.",
+        ...(isRosterTroubleshooting(retrieval.request.question) ? [
+          "This is roster-availability troubleshooting using general official documentation, not live LMS data. Explain only documented requirements/checks supported by the selected evidence. You have not inspected the affected player, account, team or roster and do not know the actual reason the player is absent. Do not turn a prerequisite into a cause or probability: avoid 'most likely', 'the reason is', 'this means' or equivalent unsupported diagnoses. A documented conditional cause may be explained conditionally, never asserted as this player's status. Do not infer that missing DUPR or another-team membership necessarily hides a player. Do not transfer Match Setup restrictions to Manage Roster. Where appropriate, suggest contacting League Management if documented checks do not resolve the issue."
+        ] : []),
         "Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk.",
         "When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct.",
         "Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play.",
@@ -373,7 +384,7 @@ function isControllingRule(candidate) {
 }
 
 function questionRequestsProcedure(question) {
-  return /\b(?:how\s+(?:do|can|to)|steps?|click|button|screen|where\s+(?:do|can))\b/i.test(String(question || ""));
+  return isRosterTroubleshooting(question) || /\b(?:how\s+(?:do|can|to)|steps?|click|button|screen|where\s+(?:do|can))\b/i.test(String(question || ""));
 }
 
 function addsQuestionSignal(candidate, primary, question) {
