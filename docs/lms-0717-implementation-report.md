@@ -1,6 +1,6 @@
 # LMS-0717 / 0.1.539 — AI Quality Hardening
 
-**Current status (2026-09-05): LMS-0717 / 0.1.539 was deployed by the owner and is NOT production accepted. The approved correction described in the addendum below is implemented locally and has not been deployed.** LMS-0716 / Stage 7A remains production accepted; Stage 7B / LMS-0718 and Live LMS Intelligence have not started. The numbered initial-implementation sections below retain their original validation checkpoint; use the correction addendum for current results.
+**Current status (2026-09-05): LMS-0717 / 0.1.539, including the final bounded correction, is deployed and production accepted, as confirmed by the owner.** LMS-0716 / Stage 7A remains complete and production accepted. Stage 7B implementation has not started; LMS-0718 / 0.1.540 is planned pending approval following pre-implementation verification. Live LMS Intelligence has not started. The implementation and correction sections below retain their historical validation/deployment checkpoints.
 
 This implements the owner-approved diagnosis in `lms-0717-ai-quality-hardening-diagnosis.md`. No production request, external answer-model replay, database mutation, corpus processing or deployment was performed in this implementation pass.
 

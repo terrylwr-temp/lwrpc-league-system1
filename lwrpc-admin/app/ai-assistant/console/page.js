@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import AppHeader from "../../components/AppHeader";
 import LoadingScreen from "../../components/LoadingScreen";
 import { getRequestAuthorizationHeaders, requireRole } from "../../lib/auth";
+import { consumeReviewRetest } from "../../lib/aiReviewShared.js";
 
 const scopes = [["all", "All"], ["weekday", "Weekday"], ["primetime", "PrimeTime"], ["saturday", "Saturday"], ["lms_help", "LMS Help"]];
 const contextDefaults = { currentPath: "", featureModule: "", seasonId: "", leagueId: "", divisionId: "", teamId: "", userRole: "league_manager" };
@@ -11,7 +12,7 @@ const contextDefaults = { currentPath: "", featureModule: "", seasonId: "", leag
 export default function TestAiAssistantPage() {
   const router = useRouter();
   const [ready, setReady] = useState(false); const [question, setQuestion] = useState("How does scoring freeze work?"); const [askAbout, setAskAbout] = useState("all"); const [context, setContext] = useState(contextDefaults); const [result, setResult] = useState(null); const [conversationReceipt, setConversationReceipt] = useState(null); const [error, setError] = useState(""); const [working, setWorking] = useState(false);
-  useEffect(() => { (async () => { const user = await requireRole(router, "league_manager"); if (user) { setContext((current) => ({ ...current, userRole: user.role })); setReady(true); } })(); }, [router]);
+  useEffect(() => { (async () => { const user = await requireRole(router, "league_manager"); if (user) { setContext((current) => ({ ...current, userRole: user.role })); try { const prefill = consumeReviewRetest(sessionStorage); if (prefill) setQuestion(prefill); } catch { /* Storage may be disabled; manual entry remains available. */ } setReady(true); } })(); }, [router]);
   async function submit(event) {
     event.preventDefault(); setWorking(true); setError("");
     try {
