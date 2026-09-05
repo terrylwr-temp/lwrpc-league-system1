@@ -28,7 +28,7 @@ test("player response is deliberately limited to plain answer and trusted citati
     conflict: { requiresClarification: false }, model: "gpt-5.5", metrics: { totalTokens: 99 },
     sources: [{ documentId: TEST_DOCUMENT_ID, documentVersionId: TEST_VERSION_ID, chunkId: TEST_CHUNK_ID, documentTitle: "League Rules", pageNumber: 5, ruleNumber: "5.7", citation: "League Rules — Rule 5.7 — Page 5", officialDocumentUrl: "https://signed.example/rules#page=5" }],
   }, TEST_USER_ID);
-  assert.deepEqual(Object.keys(result).sort(), ["answer", "conflict", "evidenceSufficient", "sources"]);
+  assert.deepEqual(Object.keys(result).sort(), ["answer", "conflict", "conversationReceipt", "evidenceSufficient", "feedbackReceipt", "kind", "sources"]);
   assert.equal(result.sources[0].documentId, undefined); assert.equal(result.sources[0].chunkId, undefined);
   assert.match(result.sources[0].officialDocumentUrl, /^\/official-document\//);
   assert.doesNotMatch(result.sources[0].officialDocumentUrl, /signed\.example|secret-id|chunk-id/);
@@ -54,7 +54,7 @@ test("personal or live LMS questions do not enter document RAG without a future 
   assert.equal(isUnsupportedOperationalQuestion("Who is in my lineup?"), true);
   assert.equal(isUnsupportedOperationalQuestion("Who is on my team?"), true);
   assert.equal(isUnsupportedOperationalQuestion("What is the lineup for tonight?"), false);
-  assert.deepEqual(playerFallbackResult(), { answer: INSUFFICIENT_EVIDENCE_ANSWER, evidenceSufficient: false, conflict: false, sources: [] });
+  assert.deepEqual(playerFallbackResult(), { kind: "insufficient_evidence", answer: INSUFFICIENT_EVIDENCE_ANSWER, evidenceSufficient: false, conflict: false, sources: [], conversationReceipt: null, feedbackReceipt: null });
 });
 
 test("normalizes generic question framing so FTS keeps the substantive Balls term", async () => {
@@ -72,7 +72,7 @@ test("player route passes realistic unrelated-page context to the shared Stage 3
   for (const question of supportedQuestions) {
     let requestBody; let generated = false;
     const output = await runPlayerOfficialAnswer({
-      body: { question, context: { currentPath: "/members", featureModule: "Member Administration", teamId: "not-forwarded" } }, role: "commissioner", supabase: { marker: "server" },
+      body: { question, context: { currentPath: "/members", featureModule: "Member Administration", teamId: "not-forwarded" } }, role: "commissioner", userId: TEST_USER_ID, supabase: { marker: "server" },
       retrieveOfficialEvidence: async ({ body }) => { requestBody = body; return { evidence: { sufficient: true } }; },
       generateOfficialAnswer: async ({ retrieval }) => { generated = retrieval.evidence.sufficient; return { answer: "Grounded answer", evidenceSufficient: true, conflict: {}, sources: [] }; },
     });
@@ -85,7 +85,7 @@ test("player route passes realistic unrelated-page context to the shared Stage 3
 test("unsupported and insufficient paths do not manufacture an operational or aggressive-serve answer", async () => {
   let retrieveCalls = 0;
   const live = await runPlayerOfficialAnswer({ body: { question: "What place are we in for our division?" }, role: "player", supabase: null, retrieveOfficialEvidence: async () => { retrieveCalls += 1; }, generateOfficialAnswer: async () => { throw new Error("must not generate"); } });
-  assert.equal(retrieveCalls, 0); assert.deepEqual(live.result, playerFallbackResult());
+  assert.equal(retrieveCalls, 0); assert.equal(live.result.kind, "protected"); assert.equal(live.result.answer, INSUFFICIENT_EVIDENCE_ANSWER);
   const unsupportedEvidence = await runPlayerOfficialAnswer({ body: { question: "Can I make an aggressive serve?" }, role: "player", supabase: null, retrieveOfficialEvidence: async () => ({ evidence: { sufficient: false } }), generateOfficialAnswer: async () => ({ answer: INSUFFICIENT_EVIDENCE_ANSWER, evidenceSufficient: false, conflict: {}, sources: [] }) });
   assert.deepEqual(unsupportedEvidence.result, playerFallbackResult());
 });
@@ -136,12 +136,12 @@ test("the shared AI trigger covers every authenticated header shell without chan
   assert.match(assistant, /if \(entry\.pending\).*Finding the official answer/s);
   assert.match(assistant, /if \(entry\.requestError\).*TECHNICAL_ERROR/);
   assert.match(assistant, /bg-blue-100\/70.*>Question/s);
-  assert.match(assistant, /bg-emerald-50\/70.*>Answer/s);
+  assert.match(assistant, /bg-emerald-50\/70.*(?:Clarification|Answer)/s);
   assert.match(assistant, /SESSION_EXCHANGES_KEY/);
   assert.match(assistant, /slice\(0, MAX_SESSION_EXCHANGES\)/);
   assert.doesNotMatch(assistant, /ask-lwr-question[^>]*disabled=\{working\}/);
   assert.match(assistant, /Get answers from official LWR PC information and USAP Rules/);
-  assert.match(assistant, /Ask a question about anything regarding LWR Pickleball Club or leagues/);
+  assert.match(assistant, /placeholder="Ask a question"/); assert.doesNotMatch(assistant, /Ask a question about anything regarding LWR Pickleball Club or leagues/);
   assert.match(assistant, /href=\{source\.officialDocumentUrl\}/);
   assert.doesNotMatch(assistant, /#page=/);
 });
