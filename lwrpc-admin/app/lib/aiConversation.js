@@ -1,4 +1,4 @@
-import { missingPlayerObject, playerObjectReply } from "./aiQuestionApplicability.js";
+import { missingPlayerObject, playerObjectReply, plausibleRosterTimingLeagues, questionLeague, isRosterParticipationQuestion, ballDamageKind } from "./aiQuestionApplicability.js";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
 
 const RECEIPT_VERSION = 1;
@@ -38,12 +38,19 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
   }
   const diagnostics = { priorContextPurpose: prior?.purpose || null, receiptValidation: receipt ? (prior ? "valid" : "invalid_or_expired") : "absent", clarificationConsumed: false };
 
+  if (prior?.purpose === "clarification" && prior.category === "roster_league") {
+    const reply = rawQuestion.trim().replace(/[?.!]+$/, "");
+    if (/^(?:(?:the|for the)\s+)?(?:weekday|saturday|primetime|weekend)(?:\s+league)?$/i.test(reply)) {
+      const league = /weekend/i.test(reply) ? "Saturday" : reply.match(/weekday|saturday|primetime/i)[0];
+      return { ...diagnostics, clarificationConsumed: true, kind: "resolved", classification: "clarification_response", rawQuestion, effectiveQuestion: `${prior.originalQuestion.replace(/[?.!]+$/, "")} for the ${league} League?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
+    }
+  }
   if (prior?.purpose === "clarification" && prior.category === CLARIFICATION_PLAYER_OBJECT && missingPlayerObject(prior.originalQuestion)) {
     const object = playerObjectReply(rawQuestion);
     if (object) return { ...diagnostics, clarificationConsumed: true, kind: "resolved", classification: "clarification_response", rawQuestion, effectiveQuestion: `${prior.originalQuestion.replace(/[?.!]+$/, "")} to my ${object}?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
   }
   if (missingPlayerObject(rawQuestion)) return { ...diagnostics, ...clarificationResolution(rawQuestion, CLARIFICATION_PLAYER_OBJECT, "missing_player_entry_object", Boolean(prior)), contextSuperseded: Boolean(prior) };
-  if (isCompleteStandaloneQuestion(rawQuestion)) {
+  if (isRosterParticipationQuestion(rawQuestion) || ballDamageKind(rawQuestion) || isCompleteStandaloneQuestion(rawQuestion)) {
     return {
       ...diagnostics, kind: "resolved", classification: prior ? "standalone_supersedes_context" : "standalone", rawQuestion, effectiveQuestion: rawQuestion,
       priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior), clarification: null,
@@ -84,7 +91,15 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
 // This post-retrieval check deliberately inspects only query completeness and
 // the presence of active candidates. It never turns candidates into an answer.
 export function clarificationFromRetrieval(resolution, retrieval) {
-  if (resolution?.kind !== "resolved" || !requiresColorSubjectClarification(resolution.effectiveQuestion)) return null;
+  if (resolution?.kind !== "resolved") return null;
+  const candidates = [...(retrieval?.authorityReviewCandidates || []), ...(retrieval?.candidates || []), ...(retrieval?.suppliedEvidence || [])];
+  const leagues = plausibleRosterTimingLeagues(resolution.effectiveQuestion, candidates);
+  if (!questionLeague(resolution.effectiveQuestion).length && leagues.length > 1) return {
+    ...resolution, ...clarificationResolution(resolution.rawQuestion, "roster_league", "missing_roster_timing_league", resolution.priorContextAvailable),
+    clarificationQuestion: resolution.effectiveQuestion,
+    clarification: { category: "roster_league", reason: "missing_roster_timing_league", message: `Which league do you mean: ${leagues.map(league => ({ weekday: "Weekday", saturday: "Saturday", primetime: "PrimeTime" })[league]).join(", ")}?` },
+  };
+  if (!requiresColorSubjectClarification(resolution.effectiveQuestion)) return null;
   const hasCandidates = Array.isArray(retrieval?.candidates) && retrieval.candidates.length > 0;
   return { ...resolution, ...clarificationResolution(resolution.rawQuestion, CLARIFICATION_COLOR, hasCandidates ? "missing_color_subject_with_active_candidates" : "missing_color_subject", resolution.priorContextAvailable), clarificationQuestion: resolution.effectiveQuestion };
 }

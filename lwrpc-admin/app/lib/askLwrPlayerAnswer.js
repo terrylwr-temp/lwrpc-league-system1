@@ -1,3 +1,4 @@
+import { isRosterParticipationQuestion } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting } from "./aiRosterTroubleshooting.js";
 import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
 import { officialDocumentViewerHref } from "./aiOfficialDocumentViewer.js";
@@ -23,6 +24,8 @@ export function isUnsupportedOperationalQuestion(question) {
     || /\bmy\s+next\s+(?:opponent|match)\b/i.test(value)
     || /\bwhere\s+do\s+i\s+play\s+next\b/i.test(value);
   if (ratingValue || completedAction || personalSchedule) return true;
+  if (/\bhow\s+is\s+(?:my\s+|the\s+)?season\s+dupr(?:\s+rating)?\s+(?:determined|calculated|established|set|truncated)\b/i.test(value)) return false;
+  if (isRosterParticipationQuestion(value)) return false;
   if (isOfficialConfigurationGuidance(value) || isOfficialTeamRosterGuidance(value) || isRosterTroubleshooting(value)) return false;
   return PERSONAL_OPERATIONAL_PATTERNS.some((pattern) => pattern.test(value))
     || /\b(?:did|have|can)\s+(?:i|we)\b[\s\S]{0,50}\b(?:already\s+)?(?:submit(?:ted)?|save[ds]?|enter(?:ed)?)\b/i.test(value)
@@ -121,7 +124,7 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
 function clarificationResult(resolution, userId, now) {
   return {
     kind: "clarification", answer: resolution.clarification.message, evidenceSufficient: false, conflict: false, sources: [], feedbackReceipt: null,
-    conversationReceipt: ["color_subject", "player_entry_object"].includes(resolution.clarification.category) ? createClarificationReceipt(userId, resolution.clarificationQuestion || resolution.rawQuestion, resolution.clarification.category, { now }) : null,
+    conversationReceipt: ["color_subject", "player_entry_object", "roster_league"].includes(resolution.clarification.category) ? createClarificationReceipt(userId, resolution.clarificationQuestion || resolution.rawQuestion, resolution.clarification.category, { now }) : null,
   };
 }
 

@@ -1,6 +1,6 @@
 # LMS-0717 / 0.1.539 — AI Quality Hardening
 
-Implemented and validated locally on 2026-09-05. **Ready for review; not deployed or production accepted.** Production remains LMS-0716 / 0.1.538, Stage 7A complete and production accepted. Stages 1–6 remain accepted. Stage 7B manager reporting is reserved for **LMS-0718 / 0.1.540** and has not started. Live LMS Intelligence has not started.
+**Current status (2026-09-05): LMS-0717 / 0.1.539 was deployed by the owner and is NOT production accepted. The approved correction described in the addendum below is implemented locally and has not been deployed.** LMS-0716 / Stage 7A remains production accepted; Stage 7B / LMS-0718 and Live LMS Intelligence have not started. The numbered initial-implementation sections below retain their original validation checkpoint; use the correction addendum for current results.
 
 This implements the owner-approved diagnosis in `lms-0717-ai-quality-hardening-diagnosis.md`. No production request, external answer-model replay, database mutation, corpus processing or deployment was performed in this implementation pass.
 
@@ -127,3 +127,141 @@ The unchanged Stage 3, Stage 7A capture/grouping/snapshot code, player route and
 12. If an unexpected security, capture, scope or answer regression appears, stop and record the question, selected evidence and sanitized diagnostics for review. After all applicable gates pass, obtain owner production acceptance and update the roadmap. **Do not start LMS-0718 or Live LMS Intelligence.**
 
 No claim of LMS-0717 production acceptance is made by this local implementation report.
+
+## Correction addendum — production failures, including cracked ball (2026-09-05)
+
+**Current release: LMS-0717 / 0.1.539, deployed but NOT production accepted. This correction is local, not deployed.** The initial report above is historical; this addendum supersedes its validation and deployment status. No new release number was created.
+
+### Diagnosis and correction
+
+1. **Parent/child structure.** The deployed passage splitter separated the Captains Guide's `o The League shall provide:` from its ` Match Balls:` child. Neither fragment then established the complete equipment assignment. The corrected semantic unit preserves the adjacent governing parent with one qualifying child, not all fee/waiver/administration siblings. Numbered parents ending in a colon retain their contiguous numbered descendants as one conditional unit; unrelated sibling rules remain independent. Actual production text, including extracted PDF bullet characters and line breaks, is preserved verbatim.
+2. **Selected match ball.** `what kind of ball are we using` now selects only Captains Guide page 10's parent + Match Balls bullet. Diagnosis found the normal guide at rank 62, outside the normal review, and the existing bounded probe at rank 1 / .6498. The previously implemented probe already supplied the evidence; no Stage 3 change was required. The selected official text specifies Franklin Outdoor X-40 Optic for regular-season/playoff matches. No answer/brand is hardcoded.
+3. **Medical 5.7.** Explicit medical wording and the original injury question had actual Rule 5 evidence at rank 7 / .4798 and rank 1 / .425 respectively. Splitting 5.7's condition from 5.7.1–5.7.3 lost its operative outcomes. The correction selects that complete bounded subtree and excludes 5.5, 5.6 and 5.8. Tests cover `Medical issue during match`, the explicit cannot-finish question, and `Someone got hurt halfway through the game and can't finish. What do we do?`.
+4. **Season DUPR.** A method-specific profile connects determined/calculated/established/set/truncated to the official establishment and truncation passages, not a literal repetition of the question's verb. It keeps 4.1, 4.2, 4.1.1 and applicable NR/consistent-rating qualifications from 4.5.1–4.5.2. Material qualifications do not depend on an unrelated aggregate paragraph ranking first. `How is my Season DUPR determined?` receives a narrow official-method guard exemption; `What is my Season DUPR?` remains protected. The regression covers the complete guard-to-selection path.
+5. **Tangential exclusions.** NR/Not Rated and Reliability Factor definitions stay with 4.1.1 rather than admitting age schedules, roster screens or Match Setup merely through overlapping words. Its own cross-reference to Rule 4.5 remains verbatim; that is distinct from adding unrelated 4.5 paragraphs. General Season DUPR excludes team aggregate calculations and calendar/application instructions. Coach, roster troubleshooting, kitchen, serve and reimbursement controls remain intact.
+6. **Roster participation guard.** Generic player participation questions have a narrow exemption; named-player roster lookups and personal roster listings remain protected before retrieval. Complete permission questions are recognized before pronoun-based follow-up classification, so `that's` does not cause an unnecessary clarification. All three approved permission variants and four protected lookup variants are tested end to end.
+7. **Rule 5.5.** Only the roster participation/retroactive-addition provision is selected. It retains pre-match roster requirements, retroactive admission **only if** valid club membership and eligible DUPR account/rating, and the failure consequence: forfeit and no DUPR posting. It excludes 5.4 and the scheduling page. General Manage Roster how-to remains free of unrequested enforcement.
+8. **Second clarification.** After `When can I start adding players` → `On my team roster`, active Weekday, Saturday and PrimeTime roster-opening sections are all plausible. Previously the rank/score ordering chose PrimeTime (.4933 vs Weekday .4749 and Saturday .461). The player now asks which league before generation. Signed, user-bound clarification context retains the full effective question; a bounded league reply resolves it. Explicit league/weekend context and the accepted roster + Friday lineup compound remain direct. Manager Test AI Assistant uses the same post-retrieval check and issues object/league receipts, preserving actual retrieval diagnostics and manager_test separation. No capture schema or logic changed.
+9. **Disclaimer spacing.** Desktop drawer and embedded body use an 8px top gap; the existing disclaimer has an 8px bottom gap before the composer. Mobile's existing 12px body padding, safe areas, viewport/keyboard handling, own scroll, overlay, focus and close behavior are unchanged. Responsive checks are static source/layout contracts in this pass. No new actual-phone keyboard or browser-render verification is claimed; those remain in the acceptance checklist.
+10. **Production-format fixtures.** `test/fixtures/lms0717-correction-production-evidence.json` records 27 sanitized read-only production retrievals: full official chunks, rule identities, ranks/scores, scope and bounded probe evidence. No embeddings, credentials, model answers, signed document URLs or member records. The 30 new correction tests use these actual passages, including structural children and distractor candidates. Mock model transport proves which evidence reaches generation, not that a live model has produced acceptable final prose.
+
+### Cracked-ball trace and smallest generic correction
+
+Question and effective question are identical: **`What happens if we have a cracked ball when playing a point?`** No inherited history is needed. Stage 3 is sufficient at the existing .35 threshold and already retrieves the applicable damaged-ball provisions. Normal top score is **.5366**. The unchanged Stage 3 lexical expansion diagnostics are retained in the fixture; semantic retrieval already connects this phrasing to the correct rulebook evidence. This correction does not add terminology expansion to Stage 3.
+
+The deployed Stage 4 gives the broad club-selected-equipment intent precedence because of `what`, `we` and `playing`. It therefore diverts away from damaged-ball applicability; the then-broken parent/bullet splitter rejects the guide assignment too. Final production/current-deployed result is **insufficient_evidence**, selected evidence empty, model skipped. Restoring only the bullet parent would expose the older wrong-match-ball selection; therefore the damage issue must take precedence within Stage 4. The Stage 3 probe may still appear in diagnostics, but its evidence cannot control this damage question.
+
+The existing passing test asks `What happens if the ball is damaged during play?`: it lacks the club-intent combination and matches the old damage adjective detector. Its simplified 20.F fixture only says a broken/cracked ball will be replaced; it does not exercise the real 10.G/10.G.1 agreement condition, 20.F/20.F.1 referee condition, competing rules, or verb forms. `cracks` and `breaks` were not recognized by the old damaged/broken/cracked matcher. The after-rally cracked variant already reached USAP but could over-select the referee-duty cross-reference.
+
+The new **Stage 4-only** damage profile links ball directly to cracked/cracks/cracking, broken/breaks/breaking, damaged, soft or degraded. Point/play/rally and conversational framing do not require literal duplication in each rule. Damage precedence and bounded complete-question routing prevent diversion or an unnecessary `What if...` clarification. This is not exact-sentence handling. Legal specifications, color, selection, extra/spare/returned/placed-ball questions do not gain damaged-ball applicability. There is no generic-ball fallback.
+
+Stage 4 retains verbatim rule chunks and their conditions, ordered by operative role within the existing four-chunk cap:
+
+| Selected rule | Location | Material condition retained |
+| --- | --- | --- |
+| 10.G | 2026 USA Pickleball Official Rulebook, p29 | Continue to rally end; replace when all players agree. |
+| 10.G.1 | Same, p29 | Replay only when all players agree broken/cracked ball affected outcome; absent agreement, rally result stands. |
+| 20.F | Same, p54 | Referee appeal/replacement determination; explicitly modifies 10.G. |
+| 20.F.1 | Same, p54 | Referee determines broken/cracked ball affected outcome before replay with replacement; modifies 10.G.1. |
+
+These are separately stored, complete USAP provisions: 10.G.1 supplies its own replay condition rather than borrowing arbitrary adjacent text. 20.F/20.F.1 preserve refereed scope. Redundant referee-duty pointer 17.D.14 (p45) adds no replacement/replay condition and is excluded. 10.G.2 remains available for soft/degraded/general-damage questions with **no replay**; it is not incorrectly substituted for the cracked-ball replay condition. Returned/extra/placement/legal-ball and guide-assignment evidence is excluded from the crack issue.
+
+All five required natural variants select 10.G, 10.G.1, 20.F and 20.F.1 and reach `answer` in the isolated player-path test. Model transport receives the complete agreement/no-agreement and referee qualifications. No universal replay answer is inserted. Final live-generated wording is still a production acceptance gate.
+
+### Exact Stage 3 candidate inventory for the production cracked-ball wording
+
+The normal retrieval returned 32 candidates; ranks 1–12 form the existing bounded authority-review window. Scores below are the recorded combined Stage 3 scores, unchanged by correction. Applicable 10.G/10.G.1/20.F/20.F.1 are already inside that window. Candidates outside it are not added to Stage 4 by this fix. The separate existing guide probe is listed afterward.
+
+| Rank | Rule / heading | Page | Score | Correction disposition |
+| --- | --- | --- | --- | --- |
+| 1 | 10.G | 29 | 0.5366 | Selected: directly applicable condition |
+| 2 | 17.D.14 | 45 | 0.5316 | Excluded: redundant duty/cross-reference |
+| 3 | 20.F | 54 | 0.5306 | Selected: directly applicable condition |
+| 4 | 20.F.1 | 54 | 0.5248 | Selected: directly applicable condition |
+| 5 | 10.G.1 | 29 | 0.5154 | Selected: directly applicable condition |
+| 6 | 25.C.3 | 76 | 0.4977 | Excluded: different ball issue/condition |
+| 7 | 10.C.5 | 28 | 0.4778 | Excluded: different ball issue/condition |
+| 8 | 10.C.3 | 28 | 0.4758 | Excluded: different ball issue/condition |
+| 9 | 10.C.4 | 28 | 0.4670 | Excluded: different ball issue/condition |
+| 10 | 13.I.2.b | 34 | 0.4668 | Excluded: different ball issue/condition |
+| 11 | 9.B.1 | 26 | 0.4663 | Excluded: different ball issue/condition |
+| 12 | 13.E.1 | 32 | 0.4627 | Excluded: different ball issue/condition |
+| 13 | 10.D.2 | 29 | 0.4620 | Outside unchanged authority-review window |
+| 14 | 13.I.1.a | 33 | 0.4600 | Outside unchanged authority-review window |
+| 15 | 10.G.2 | 29 | 0.4590 | Outside unchanged authority-review window |
+| 16 | 10.C.2 | 28 | 0.4587 | Outside unchanged authority-review window |
+| 17 | 10.C.1 | 28 | 0.4586 | Outside unchanged authority-review window |
+| 18 | 13.F.1 | 32 | 0.4574 | Outside unchanged authority-review window |
+| 19 | 25.A.9.a | 72 | 0.4545 | Outside unchanged authority-review window |
+| 20 | 25.B.3.c | 75 | 0.4543 | Outside unchanged authority-review window |
+| 21 | 13.I.1.b | 33 | 0.4541 | Outside unchanged authority-review window |
+| 22 | 24.B.1 | 69 | 0.4535 | Outside unchanged authority-review window |
+| 23 | 13.I.2.a | 34 | 0.4510 | Outside unchanged authority-review window |
+| 24 | 13.D.1 | 32 | 0.4502 | Outside unchanged authority-review window |
+| 25 | 10.C | 28 | 0.4487 | Outside unchanged authority-review window |
+| 26 | 9.B | 26 | 0.4469 | Outside unchanged authority-review window |
+| 27 | 13.B.1 | 32 | 0.4463 | Outside unchanged authority-review window |
+| 28 | 22.B.4 | 62 | 0.4455 | Outside unchanged authority-review window |
+| 29 | 13.B.2 | 32 | 0.4439 | Outside unchanged authority-review window |
+| 30 | 3.C.5 | 13 | 0.4424 | Outside unchanged authority-review window |
+| 31 | 13.C | 32 | 0.4420 | Outside unchanged authority-review window |
+| 32 | 13.A | 32 | 0.4372 | Outside unchanged authority-review window |
+
+Existing bounded guide probe: Captains Guide p10, probe rank 1, score .6498, normal rank outside the 32 returned candidates. Excluded from the damage issue: equipment selection before play does not govern damage during a point.
+
+### Exact correction files (relative to repository root)
+
+| File | Correction |
+| --- | --- |
+| `lwrpc-admin/app/lib/aiQuestionApplicability.js` | Structural units, rating/roster/damage issue helpers, plausible league detection. |
+| `lwrpc-admin/app/lib/aiAnswerGeneration.js` | Issue precedence and material rating/roster evidence selection. |
+| `lwrpc-admin/app/lib/aiGoverningSources.js` | Structural units, damage applicability and bounded conditional rule ordering. |
+| `lwrpc-admin/app/lib/aiConversation.js` | Complete explicit issue routing and bounded league clarification receipts/resolution. |
+| `lwrpc-admin/app/lib/askLwrPlayerAnswer.js` | Narrow roster permission/method guard exemptions and league clarification receipt. |
+| `lwrpc-admin/app/api/ai-assistant/answer/route.js` | Manager parity for object/league clarification and post-retrieval diagnostics. |
+| `lwrpc-admin/app/components/AskLwrAssistant.js` | Desktop top gap and disclaimer-to-composer gap. |
+| `lwrpc-admin/test/aiQualityHardeningCorrection.test.mjs` | 30 focused production-format, guard/conversation/model-transport/manager/UI regressions. |
+| `lwrpc-admin/test/fixtures/lms0717-correction-production-evidence.json` | 27 sanitized actual retrieval fixtures. |
+| `docs/lms-0717-implementation-report.md` | This diagnosis, correction, validation and acceptance addendum. |
+| `docs/project-roadmap.md` | Deployed/unaccepted status, correction checkpoint, retained defect-history requirement. |
+
+### Final correction validation
+
+| Check | Result |
+| --- | --- |
+| Full `npm test` from app | **PASS: 257 tests**, 0 failures; all 227 previous tests preserved plus 30 new. |
+| `npm run lint` | PASS, 0 errors and the same six existing warnings documented above. |
+| `npx tsc --noEmit --incremental false` | PASS. |
+| `npm run verify:ai-pdf-server-bundle` | PASS against normal output and fresh isolated output. |
+| `npm run build` | Compilation PASS (10.8s), followed by known EPERM writing `.next/cache/.tsbuildinfo`; normal build exit 1 is recorded, not concealed. |
+| Isolated clean production build | PASS: compilation 22.9s, TypeScript 2.4s, 71/71 pages and final optimization. |
+| `git diff --check` | PASS. |
+
+The correction clean build lives in ignored `.next/lms0717-correction-clean-build`; it copies source, uses the installed dependency junction, inherits environment without copying or printing secrets, and anchors only its temporary tracing/bundler root to the repository. Logs are in the system temporary directory to avoid locking Next's output cleanup. One test command was initially invoked at the repository root, which has no test script; the required full test run was then run successfully from `lwrpc-admin`.
+
+No code was added to Stage 3 retrieval or its shared equipment probe, SQL/RPC, migrations, corpus, documents, processing, embeddings, activation, metadata, feedback/capture routes, six-table schema, HMAC configuration or Stage 7A snapshot/grouping logic. Version files remain **LMS-0717 / 0.1.539**. No database writes, feedback test events, deployment or external answer-model replay were performed in this correction pass. The diagnosis used read-only existing-corpus retrieval for public test questions; local generation tests use a mock transport. Existing production defect outcomes/occurrences/groups are legitimate history and remain untouched. Stage 7A remains observational and production accepted.
+
+### Exact production acceptance sequence after owner deployment
+
+This is a review checklist, not authorization to deploy automatically. Use the normal existing application-only production pipeline for this source after review. No migration or corpus processing step is required. Keep version 0.1.539; identify the corrected deployment by its new source commit/deployment ID because the version is intentionally unchanged.
+
+1. Confirm the corrected source is deployed and the visible build is LMS-0717 / 0.1.539. Record deployment/source identity. Preserve LMS-0716 accepted limitations and existing defect telemetry. Stop on an unexpected security, capture or behavior regression.
+2. In **Test AI Assistant**, run `what kind of ball are we using`. Require only the page-10 parent + Match Balls bullet, no waiver/fees, and grounded official selected-ball wording. Check player Ask LWR uses the same result.
+3. Run `Medical issue during match`, `What happens if a player has a medical issue and cannot finish the game?`, and `Someone got hurt halfway through the game and can't finish. What do we do?`. Require 5.7 plus 5.7.1–5.7.3 and accurate distinctions between the documented retirement/forfeit outcomes, no unrelated 5.5/5.8. Run `Can a coach or non-player be on the court during play?` separately; require 5.8.
+4. Run `What is Season DUPR?`, `How is Season DUPR calculated?`, `How is my Season DUPR determined?`, `What does NR mean?`, and `What is the DUPR Reliability Factor?`. Inspect establishment/truncation and material NR qualifications for the method, definition-only context for NR/reliability; reject team aggregate/scheduling/Match Setup tangents. Confirm `What is my Season DUPR?` and `What is my DUPR?` remain protected.
+5. Run all three permission questions: `Can I use a player that's not on my roster?`; `Does a player have to be on the roster before playing?`; `What happens if a player wasn't on the roster?`. Require Rule 5.5's full eligibility and failure conditions, no 5.4/scheduling. Then `Who is on my roster?`, `Show me my roster.`, `Is John Smith on my roster?`, and `Did I already add John Smith to my roster?` must remain protected with no retrieval/model call. The name is a synthetic test string, never a member lookup.
+6. In a fresh conversation, `When can I start adding players` must ask team roster vs Match Setup with no retrieval. Reply `On my team roster`: require a second league question, no model/Official Sources/feedback. Reply `Saturday`: require only compatible roster-opening evidence. Repeat league resolution for Weekday and PrimeTime where needed. Explicit `When can I start adding players to my roster for the weekend league` must resolve Saturday without a second clarification. The compound `When can I add a player to my team and when do I submit my lineup for Friday's match?` must retain roster-opening + 5.4 without added clarification. Verify the same sequence in manager testing, including receipt diagnostics.
+7. Run the five cracked-ball questions exactly:
+   - `What happens if we have a cracked ball when playing a point?`
+   - `What happens if the ball cracks during a rally?`
+   - `What if the ball breaks while we're playing the point?`
+   - `What happens if we discover the ball is cracked after the rally?`
+   - `Can we replay a point if the ball breaks?`
+
+   Require applicable 10.G/10.G.1 and 20.F/20.F.1, `answer` final kind, and final prose that distinguishes all-player agreement from referee determination. Continue-to-rally-end and affected-outcome conditions must survive. Without all-player agreement in the applicable non-refereed rule, the result stands. Discovery after a rally does not itself grant replay. No universal replay claim, no selected-match-ball answer, no unrelated 17.D.14/returned/extra-ball rule.
+8. Run `What happens if the ball is damaged during play?` and `What happens if the ball is soft during play?`; soft/degraded evidence must retain 10.G.2's no-replay condition. Retest `What are the USA Pickleball requirements for a legal ball?`, `Are there any color considerations for Ball?`, selected match ball, and unrelated generic/extra/returned-ball questions. Damage rules must not spread to a different issue merely because it contains “ball”.
+9. Retest `Can I volley in the kitchen?` (11.A), `Can I step into the kitchen after hitting a volley?` (11.A.2), `Can I volley before fully exiting the non-volley zone?` (11.A.3), `Can I serve with one foot over the court but not touching it?` (7.A.2), and server-contact-at-serve (7.A.2.a). Verify affirmative/negative wording respects each condition. Confirm Color → Ball/Paddle, standalone supersession and valid kitchen follow-ups.
+10. Retest `Why can't I find a player when changing my roster?`, general Manage Roster how-to, Match Setup-only, score-entry-only and original unsupported reimbursement/generic-policy controls from the initial checklist. Require applicable procedures without tangential enforcement and no inferred policy from silence. Explicit waiver summaries must remain scoped to their actual document.
+11. On desktop and an actual narrow phone, check the disclaimer once immediately above the composer: desktop top gap about 8px, bottom gap 8px, muted centered text; phone wrapping, keyboard open/closed, visible close, reachable answers/feedback/Official Sources, no dashboard overlap. Preserve focus, Escape and viewer behavior. No manager diagnostics may leak to the player payload.
+12. Review resulting Stage 7A capture read-only: grounded results lightweight, clarification/protected metadata not unanswered cases, genuine insufficient evidence automatically captured, manager_test separated. Verify normal feedback correlation and existing legacy behavior; perform a fresh four-click Helpful→Helpful→Not Helpful→Not Helpful sequence only if needed for this release's acceptance, expecting two events on one answer. Do not delete legitimate defect history. Inspect sanitized health/logs through existing authorized paths; no HMAC/schema changes or deliberate production outage.
+13. Record generated-answer results, source/selection checks and any remaining failures. **Production acceptance is pending these deployed checks and owner review. Do not start LMS-0718 / Stage 7B or Live LMS Intelligence.**

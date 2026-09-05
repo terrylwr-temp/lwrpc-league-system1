@@ -2,7 +2,7 @@ import { conversationDiagnostics } from "../../../lib/aiConversationDiagnostics"
 import { NextResponse } from "next/server";
 import { answerGenerationDiagnostic, generateOfficialAnswer } from "../../../lib/aiAnswerGeneration";
 import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
-import { createClarificationReceipt, createFollowUpReceipt } from "../../../lib/aiConversation";
+import { clarificationFromRetrieval, createClarificationReceipt, createFollowUpReceipt } from "../../../lib/aiConversation";
 import { resolveOfficialConversation, playerFallbackResult } from "../../../lib/askLwrPlayerAnswer";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 import { observeQualityRequest } from "../../../lib/aiQualityCapture";
@@ -28,11 +28,17 @@ async function runManagerAnswer(authorization, body, trace) {
     const conversationResolution = resolveOfficialConversation({ question: body.question, userId: authorization.user.id, receipt: body.conversationReceipt });
     if (conversationResolution.kind !== "resolved") return {
       conversationResolution, result: { kind: conversationResolution.kind },
-      response: managerClarificationResult(body, conversationResolution, conversationResolution.clarification?.category === "color_subject" ? createClarificationReceipt(authorization.user.id, conversationResolution.rawQuestion, conversationResolution.clarification.category) : null),
+      response: managerClarificationResult(body, conversationResolution, managerClarificationReceipt(authorization.user.id, conversationResolution)),
     };
     trace.stage3Invoked = true;
     const retrieval = await retrieveOfficialEvidence({ supabase: authorization.supabase, body: { ...body, question: conversationResolution.effectiveQuestion } });
     retrieval.conversationResolution = conversationResolution;
+    const clarification = clarificationFromRetrieval(conversationResolution, retrieval);
+    if (clarification) {
+      const response = managerClarificationResult(body, clarification, managerClarificationReceipt(authorization.user.id, clarification));
+      response.retrieval = { ...retrieval, conversationResolution: conversationDiagnostics(clarification, { stage3Invoked: true }) };
+      return { retrieval, conversationResolution: clarification, result: { kind: "clarification" }, response };
+    }
     const [answer, documentsConsidered] = await Promise.all([
       generateOfficialAnswer({ retrieval, supabase: authorization.supabase }),
       eligibleDocuments(authorization.supabase),
@@ -46,6 +52,11 @@ async function runManagerAnswer(authorization, body, trace) {
         conversationReceipt: answer.evidenceSufficient ? createFollowUpReceipt(authorization.user.id, conversationResolution.effectiveQuestion) : null,
       },
     };
+}
+
+function managerClarificationReceipt(userId, resolution) {
+  return ["color_subject", "player_entry_object", "roster_league"].includes(resolution.clarification?.category)
+    ? createClarificationReceipt(userId, resolution.clarificationQuestion || resolution.rawQuestion, resolution.clarification.category) : null;
 }
 
 function managerClarificationResult(body, resolution, conversationReceipt) {

@@ -1,4 +1,4 @@
-import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses } from "./aiQuestionApplicability.js";
+import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER, selectGoverningEvidence } from "./aiGoverningSources.js";
@@ -60,7 +60,10 @@ function selectLwrAnswerEvidence(retrieval) {
   if (!primary) return [];
   const cutoff = Math.max(Number(retrieval.evidence.threshold) || aiAssistantConfig.evidenceThreshold, Number(primary.combinedScore) - DIRECT_RELEVANCE_DELTA);
   const intents = detectedEvidenceIntents(retrieval.request?.question);
-  const selected = [primary, ...candidates.slice(1).filter((candidate) => (
+  const ratingKind = ratingQuestionKind(retrieval.request?.question);
+  // Rating qualifications contribute to the method even when an unrelated
+  // aggregate-rating paragraph happened to rank first in retrieval.
+  const selected = ratingKind ? candidates.filter(candidate => ratingApplicablePassages(candidate, retrieval.request?.question).length) : [primary, ...candidates.slice(1).filter((candidate) => (
     Number(candidate.combinedScore) >= cutoff
     && hasDirectRelevance(candidate)
     && materiallyContributes(candidate, primary, retrieval.request?.question)
@@ -85,6 +88,7 @@ function selectLwrAnswerEvidence(retrieval) {
   const requiredCandidates = requiredIntentEvidence.map(({ candidate }) => candidate);
   const selectedForModel = [...requiredCandidates, ...selected.filter((candidate) => (
     requiredCandidates.some((required) => required.chunkId === candidate.chunkId)
+    || (ratingKind && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question))
     || (isRosterTroubleshooting(retrieval.request?.question) && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question))
     || (questionRequestsProcedure(retrieval.request?.question) && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question) && materiallyContributes(candidate, primary, retrieval.request?.question))
     || isMoreAuthoritativeThanRequired(candidate, requiredCandidates, intents, retrieval.request?.question)
@@ -101,6 +105,9 @@ function selectLwrAnswerEvidence(retrieval) {
 
 function detectedEvidenceIntents(question) {
   const value = operationWords(question);
+  if (ballDamageKind(value)) return [];
+  if (isRosterParticipationQuestion(value)) return ["Roster participation permission"];
+  if (ratingQuestionKind(value)) return [ratingQuestionKind(value)];
   if (isRosterTroubleshooting(value)) return [ROSTER_TROUBLESHOOTING_INTENT];
   const roster = /\b(?:add|enter|remove|delete|drop|update|change|lock|open|close)\b/.test(value) && /\b(?:player|players|person|someone|member|members|roster|team)\b/.test(value) && /\b(?:team|league|season|roster)\b/.test(value);
   // This selector intent is intentionally narrower than a general reference to
@@ -127,6 +134,13 @@ function supportsEvidenceIntent(candidate, intent, question = "") { return Boole
 
 function intentSupport(candidate, intent, question) {
   if (!leagueCompatible(candidate, question)) return null;
+  if (intent === "Roster participation permission") {
+    const passage = evidencePassages(candidate).find(text => /\b(?:active\s+)?players?\s+must\s+appear\s+on\b[\s\S]{0,100}\broster\b[\s\S]{0,70}\b(?:prior\s+to|before)\s+match\s+play\b/i.test(text));
+    return passage ? { intent, strength: 130, reason: "Direct roster-before-participation requirement with its conditional remedies" } : null;
+  }
+  if (intent === ratingQuestionKind(question)) {
+    return ratingApplicablePassages(candidate, question).length ? { intent, strength: 120, reason: "Direct definition, determination step or documented rating qualification" } : null;
+  }
   if (intent === "Roster eligibility enforcement") {
     const passage = evidencePassages(candidate).find(text => /\b(?:retroactive|ineligible|eligible|eligibility|requirements)[\s\S]*\b(?:forfeit|penalty|posted)\b/i.test(text));
     return passage ? { intent, strength: 120, reason: "Direct eligibility/remedy passage requested by the question" } : null;

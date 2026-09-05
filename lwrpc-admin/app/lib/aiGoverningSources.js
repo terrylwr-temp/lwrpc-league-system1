@@ -1,4 +1,4 @@
-import { leagueCompatible, evidencePassages, questionLeague } from "./aiQuestionApplicability.js";
+import { leagueCompatible, evidencePassages, questionLeague, ballDamageKind } from "./aiQuestionApplicability.js";
 // Stage 4 only: neither retrieval scores nor the Stage 3 evidence gate change.
 import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapBallSpecificationEvidence } from "./aiEquipmentIntents.js";
 export const INSUFFICIENT_EVIDENCE_ANSWER = "I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.";
@@ -45,13 +45,19 @@ function directPassages(candidate, question) {
   if (isObviouslyIncompleteUsapFragment(candidate)) return [];
   const nvzScope = nvzQuestionScope(question);
   const servingFootScope = servingFootQuestionScope(question);
-  const damagedBallScope = damagedBallQuestion(question);
+  const damagedBallScope = ballDamageKind(question);
   const terms = issueTerms(question);
   if (!terms.length) return [];
   if (nvzScope === "definition" && !isNvzDefinition(candidate)) return [];
   const candidateNvzScope = nvzRuleScope(candidate);
   const candidateServingFootScope = servingFootRuleScope(candidate);
-  if (damagedBallScope && isUsapDamagedBallEvidence(candidate)) return [String(candidate.content || "")];
+  if (damagedBallScope && candidate?.documentType === "usap_rulebook") {
+    const body = String(candidate.content || "");
+    if (!isUsapDamagedBallEvidence(candidate) || /\bsee rule\b/i.test(body) && !/\b(?:replaced|replayed|stands)\b/i.test(body)) return [];
+    if (damagedBallScope === "fracture" && /\bsoft|degraded\b/i.test(body) && !/\bbroken|cracked\b/i.test(body)) return [];
+    if (damagedBallScope === "soft" && /\bbroken|cracked\b/i.test(body) && !/\bsoft|degraded\b/i.test(body)) return [];
+    return [body];
+  }
   const nvzScopeMatches = candidateNvzScope === nvzScope || (nvzScope === "completed_exit" && candidateNvzScope === "exit_before_volley");
   if (nvzScope && nvzScope !== "definition" && candidate?.documentType === "usap_rulebook" && candidateNvzScope && !nvzScopeMatches) return [];
   if (servingFootScope && candidate?.documentType === "usap_rulebook" && candidateServingFootScope && candidateServingFootScope !== servingFootScope) return [];
@@ -64,7 +70,7 @@ function directPassages(candidate, question) {
   // sentences. Scope has already established the USAP provision's fit.
   if (nvzScope && candidate?.documentType === "usap_rulebook" && nvzScopeMatches) return [content];
   if (servingFootScope && candidate?.documentType === "usap_rulebook" && candidateServingFootScope === servingFootScope) return [content];
-  return content.split(/\n\s*\n|\n(?=\s*(?:[•]|\d+(?:\.\d+)*\.\s))/).filter((passage) => {
+  return evidencePassages(candidate).filter((passage) => {
     return passage.split(/(?<=[.!?])\s+(?=[A-Z])/).some((sentence) => {
       const words = new Set(normalized(sentence).match(/[a-z0-9]+/g) || []);
       if (!terms.every((term) => words.has(term))) return false;
@@ -133,11 +139,6 @@ function isNvzDefinition(candidate) {
   return /\bnvz\b/.test(text) && /\b(?:area|court|zone|lines?|feet|dimensional)\b/.test(text);
 }
 
-function damagedBallQuestion(question) {
-  const value = normalized(question);
-  return /\bball\b/.test(value) && /\b(?:damaged|damage|broken|cracked|degraded|soft)\b/.test(value);
-}
-
 function isUsapDamagedBallEvidence(candidate) {
   if (candidate?.documentType !== "usap_rulebook") return false;
   const text = normalized([candidate?.heading, candidate?.content].filter(Boolean).join(" "));
@@ -198,6 +199,7 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
       retained = direct.filter((item) => localSelection.some((chosen) => chosen.chunkId === item.candidate.chunkId));
     } else {
       // Retain same-authority evidence for conflict detection / continuations.
+      if (ballDamageKind(issue.question)) governing.sort((a, b) => damageEvidenceOrder(a.candidate, issue.question) - damageEvidenceOrder(b.candidate, issue.question) || Number(b.candidate.combinedScore) - Number(a.candidate.combinedScore));
       retained = governing.filter((item) => item.candidate.documentAuthorityRank === governing[0]?.candidate.documentAuthorityRank);
     }
     for (const item of direct) {
@@ -247,4 +249,13 @@ function issueSourceClassification(candidate, intent, question) {
     && isLwrSelectedMatchEquipmentEvidence(candidate)) return "lwr_selected_equipment";
   if (intent === USAP_LEGAL_BALL_INTENT && isUsapBallSpecificationEvidence(candidate)) return "usap_governing_fallback";
   return governingSourceClass(candidate.documentType);
+}
+
+function damageEvidenceOrder(candidate, question) {
+  const text = String(candidate.content || "");
+  if (/play must continue/i.test(text)) return 0;
+  if (/referee/i.test(text)) return /replayed/i.test(text) ? 3 : ballDamageKind(question) === "general" ? 4 : 2;
+  if (/all players (?:do not )?agree/i.test(text)) return 1;
+  if (/result of the prior rally stands/i.test(text)) return ballDamageKind(question) === "soft" ? 1 : 2;
+  return 5;
 }
