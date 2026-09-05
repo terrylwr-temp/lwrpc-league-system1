@@ -17,12 +17,14 @@ function normalized(value) {
     .replace(/\b(?:non(?:-\s*|\s+)volley\s+zone|kitchen|nvz)\b/g, "nvz")
     // These bounded phrasings describe contact with the NVZ after a volley;
     // they do not turn an isolated "step" into a momentum question.
-    .replace(/\b(?:step(?:ping)?\s+(?:into|in)|enter(?:ing)?|carried\s+into)\b/g, "contact")
+    .replace(/\b(?:step(?:ped|ping)?\s+(?:into|in)|enter(?:ed|ing)?|carried\s+into)\b/g, "contact")
+    .replace(/\b(?:step(?:ped|ping)?|move(?:d|ing)?)\s+back\s+out\b|\bback(?:ed|ing)?\s+out\b/g, "exit")
+    .replace(/\b(?:left|leaving)\s+(?:the\s+)?nvz\b/g, "exit nvz")
     .replace(/\bafter\s+(?:hitting|hit)\s+(?:a\s+)?volley\b/g, "after volley")
     .replace(/can't finish|cannot finish|cannot complete|unable to finish|retire(?:ment|d)?|injur(?:y|ed)|hurt|medical issue/g, "retirement")
     .replace(/\btouch(?:ing|es|ed)?\b/g, "touch")
     .replace(/scoring/g, "score").replace(/serving|service|server/g, "serve")
-    .replace(/\b(balls|serves|volleys|volleying|bounces|feet|lines|exiting)\b/g, (word) => ({ balls: "ball", serves: "serve", volleys: "volley", volleying: "volley", bounces: "bounce", feet: "foot", lines: "line", exiting: "exit" })[word]);
+    .replace(/\b(balls|serves|volleys|volleying|volleyed|bounces|feet|lines|exiting)\b/g, (word) => ({ balls: "ball", serves: "serve", volleys: "volley", volleying: "volley", volleyed: "volley", bounces: "bounce", feet: "foot", lines: "line", exiting: "exit" })[word]);
 }
 
 function issueTerms(question) {
@@ -34,11 +36,15 @@ function issueTerms(question) {
 function directPassages(candidate, question) {
   if (isObviouslyIncompleteUsapFragment(candidate)) return [];
   const nvzScope = nvzQuestionScope(question);
+  const servingFootScope = servingFootQuestionScope(question);
   const terms = issueTerms(question);
   if (!terms.length) return [];
   if (nvzScope === "definition" && !isNvzDefinition(candidate)) return [];
   const candidateNvzScope = nvzRuleScope(candidate);
-  if (nvzScope && nvzScope !== "definition" && candidate?.documentType === "usap_rulebook" && candidateNvzScope && candidateNvzScope !== nvzScope) return [];
+  const candidateServingFootScope = servingFootRuleScope(candidate);
+  const nvzScopeMatches = candidateNvzScope === nvzScope || (nvzScope === "completed_exit" && candidateNvzScope === "exit_before_volley");
+  if (nvzScope && nvzScope !== "definition" && candidate?.documentType === "usap_rulebook" && candidateNvzScope && !nvzScopeMatches) return [];
+  if (servingFootScope && candidate?.documentType === "usap_rulebook" && candidateServingFootScope && candidateServingFootScope !== servingFootScope) return [];
   const content = String(candidate.content || "");
   // Definitions commonly put the term in a label sentence and the dimensions
   // in the immediately following sentence. Keep that single stored chunk
@@ -46,7 +52,8 @@ function directPassages(candidate, question) {
   if (nvzScope === "definition") return [content];
   // Rule headings and their operative condition may likewise span separate
   // sentences. Scope has already established the USAP provision's fit.
-  if (nvzScope && candidate?.documentType === "usap_rulebook" && candidateNvzScope === nvzScope) return [content];
+  if (nvzScope && candidate?.documentType === "usap_rulebook" && nvzScopeMatches) return [content];
+  if (servingFootScope && candidate?.documentType === "usap_rulebook" && candidateServingFootScope === servingFootScope) return [content];
   return content.split(/\n\s*\n|\n(?=\s*(?:[•]|\d+(?:\.\d+)*\.\s))/).filter((passage) => {
     return passage.split(/(?<=[.!?])\s+(?=[A-Z])/).some((sentence) => {
       const words = new Set(normalized(sentence).match(/[a-z0-9]+/g) || []);
@@ -74,7 +81,12 @@ function nvzQuestionScope(question) {
   if (!hasVolley) return "";
   if (/\b(?:contact|touch)\b[^.?!]{0,60}\bwhile\b[^.?!]{0,60}\bvolley\b|\bwhile\b[^.?!]{0,60}\bvolley\b[^.?!]{0,60}\b(?:contact|touch)\b/.test(value)) return "contact_while_volley";
   if (/\b(?:contact|momentum)\b/.test(value) && /\bafter\b/.test(value)) return "post_volley_momentum";
-  if (/\b(?:before|until)\b[^.?!]{0,80}\b(?:fully|completely|both\s+feet|outside|exit)\b|\b(?:fully|completely|both\s+feet|outside|exit)\b[^.?!]{0,80}\b(?:before|until)\b/.test(value)) return "exit_before_volley";
+  const completedExit = /\b(?:both\s+foot\b[^.?!]{0,60}\b(?:fully|completely)\s+outside\b|(?:fully|completely)\s+outside\b[^.?!]{0,60}\bboth\s+foot\b)[^.?!]{0,80}\b(?:then|before)\s+volley\b/.test(value);
+  if (completedExit) return "completed_exit";
+  const incompleteExit = /\b(?:before|until|without)\b[^.?!]{0,80}\b(?:fully|completely|both\s+foot|outside|exit)\b|\bboth\s+foot\b[^.?!]{0,50}\b(?:not|aren['’]?t|isn['’]?t)\b[^.?!]{0,50}\b(?:back\s+)?outside\b/.test(value);
+  const volleyBeforeExit = /\bvolley\b[^.?!]{0,80}\b(?:before|until)\b[^.?!]{0,80}\b(?:fully|completely|both\s+foot|outside|exit)\b/.test(value);
+  const subsequentVolley = /\b(?:then|again|after)\s+volley\b|\bvolley\b[^.?!]{0,80}\b(?:before|without|while|if|after)\b/.test(value);
+  if ((volleyBeforeExit || (/\bexit\b/.test(value) && subsequentVolley)) && incompleteExit) return "exit_before_volley";
   return "general_volley";
 }
 
@@ -85,6 +97,24 @@ function nvzRuleScope(candidate) {
   if (/\bmomentum\b|\beven\s+after\s+the\s+ball\s+becomes\s+dead\b/.test(text)) return "post_volley_momentum";
   if (/\bboth\s+feet\b|\b(?:fully|completely)\s+outside\b|\bfailure\s+to\s+exit\b/.test(text)) return "exit_before_volley";
   if (/\ball\s+volley\s+must\s+be\s+initiated\s+outside\b/.test(text)) return "general_volley";
+  return "";
+}
+
+function servingFootQuestionScope(question) {
+  const value = normalized(question);
+  if (!/\bserve\b/.test(value) || !/\bfoot\b/.test(value) || !/\b(?:court|playing\s+surface|serving\s+area)\b/.test(value)) return "";
+  if (/\b(?:wheelchair|assistive\s+device|rear\s+wheels?)\b/.test(value)) return "adaptive";
+  if (/\b(?:over|above|without|not|no)\b[^.?!]{0,60}\b(?:touch|contact)\b|\b(?:touch|contact)\b[^.?!]{0,60}\b(?:not|no)\b/.test(value)) return "outside_court";
+  if (/\b(?:touch|contact)\b/.test(value)) return "court_contact";
+  return "";
+}
+
+function servingFootRuleScope(candidate) {
+  const text = normalized([candidate?.heading, candidate?.content].filter(Boolean).join(" "));
+  if (/\b(?:wheelchair|assistive\s+device|rear\s+wheels?)\b/.test(text)) return "adaptive";
+  if (!/\bserve\b/.test(text) || !/\bfoot\b/.test(text) || !/\bcourt\b/.test(text)) return "";
+  if (/\bfault\b/.test(text) && /\b(?:touch|contact)\b/.test(text)) return "court_contact";
+  if (/\boutside\s+court\b|\bneither\b[^.?!]{0,80}\bfoot\b[^.?!]{0,80}\b(?:touch|contact)\b/.test(text)) return "outside_court";
   return "";
 }
 

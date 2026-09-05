@@ -173,7 +173,25 @@ test("LMS-0709 selects the production USAP NVZ rule by player-question scope", (
 
   assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can I step into the kitchen after hitting a volley?", [unrelated, rule11a, rule11a2, adaptiveMomentum, rule11a3]))), ["usap-11-a-2"]);
   assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can I volley before fully exiting the non-volley zone?", [rule11a, rule11a2, rule11a3]))), ["usap-11-a-3"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("I stepped into the kitchen, stepped back out, and then volleyed the ball before both feet were completely outside. Is that a fault?", [rule11a, rule11a2, rule11a3]))), ["usap-11-a-3"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can I volley after leaving the kitchen if both feet aren't back outside yet?", [rule11a, rule11a2, rule11a3]))), ["usap-11-a-3"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("I stepped into the kitchen, stepped back out, got both feet completely outside, and then volleyed. Is that a fault?", [rule11a, rule11a2, rule11a3]))), ["usap-11-a-3"]);
   assert.deepEqual(ids(selectAnswerEvidence(retrieval("What is the non-volley zone?", [definition, rule11a, rule11a3]))), ["usap-3-a-4-c"]);
+});
+
+test("LMS-0710 keeps coaching access distinct from a server foot-contact rule", async () => {
+  const serverOutsideCourt = usap("7.A.2 Outside Court. Neither of the server’s feet is allowed to be in contact with the court when the serve is hit.", { chunkId: "usap-7-a-2", ruleNumber: "7.A.2", pageNumber: 21, combinedScore: .5224, heading: "7.A Server Positioning — Outside Court" });
+  const serverContactFault = usap("7.A.2.a Fault – Server Contacting Court. If a server’s foot is in contact with the court when the serve is hit, it is a fault against the server.", { chunkId: "usap-7-a-2-a", ruleNumber: "7.A.2.a", pageNumber: 21, combinedScore: .4445, heading: "7.A.2 Outside Court — Fault – Server Contacting Court" });
+  const lwr58 = lwr("5.8. Coaching & Court Access: Coaching is permitted only during timeouts or between games. Coaches and non-players must always remain off the court; only active players may be on the courts.", { chunkId: "lwr-5-8", ruleNumber: "5.8", pageNumber: 5, combinedScore: .4390, heading: "Coaching & Court Access" });
+
+  const productionQuestion = "Can I serve with one foot over the court but not touching it?";
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval(productionQuestion, [serverOutsideCourt, serverContactFault, lwr58]))), ["usap-7-a-2"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can a server keep one foot over the court without contact while serving?", [serverOutsideCourt, serverContactFault, lwr58]))), ["usap-7-a-2"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("If a server’s foot touches the court when the serve is hit, is that a fault?", [serverOutsideCourt, serverContactFault, lwr58]))), ["usap-7-a-2-a"]);
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("Can a coach or non-player be on the court during play?", [serverOutsideCourt, serverContactFault, lwr58]))), ["lwr-5-8"]);
+
+  const { request } = await generate(retrieval("Can I volley in the NVZ?", [usap("11.A Allowable Contact. All volleys must be initiated outside of the non-volley zone.", { ruleNumber: "11.A" })]), "No.");
+  assert.match(request.instructions, /When direct evidence prohibits the action.*begin with the negative result/i);
 });
 
 test("LMS-0706 mixed intents retain LWR lineup and USAP volley rules independently", async () => {
