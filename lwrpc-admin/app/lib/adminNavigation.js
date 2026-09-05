@@ -1,4 +1,4 @@
-import { hasRole } from "./permissions";
+import { hasRole } from "./permissions.js";
 
 const ADMIN_SECTIONS = [
   {
@@ -52,7 +52,7 @@ const ADMIN_SECTIONS = [
       { title: "Email Options", desc: "Edit automated email templates and send test notifications.", path: "/email-options", code: "EO", tone: "blue", role: "commissioner" },
       { title: "Score Sheets", desc: "Manage printable score sheet templates.", path: "/score-sheets", code: "SS", tone: "emerald", role: "commissioner" },
       { title: "Dashboard Guides", desc: "Select the PDF guides shown on each dashboard.", path: "#dashboard-guides", code: "DG", tone: "blue", role: "league_manager", dialog: "guides" },
-      { title: "AI Assistant Management", desc: "Manage official AI rule sources and inspect PDF processing.", path: "/ai-assistant", code: "AI", tone: "emerald", role: "league_manager" },
+      { title: "AI Assistant Management", desc: "Manage official AI rule sources and inspect PDF processing.", path: "/ai-assistant", exact: true, code: "AI", tone: "emerald", role: "league_manager" },
       { title: "Test AI Assistant", desc: "Test grounded official-document answers with retrieval diagnostics.", path: "/ai-assistant/console", code: "AT", tone: "blue", role: "league_manager" },
       { title: "Club Setup", desc: "Configure club branding and contact defaults.", path: "/system-setup", code: "CS", tone: "amber", role: "commissioner" },
       { title: "Season Reset", desc: "Prepare one season for rollover while preserving match history.", path: "#season-reset", code: "SR", tone: "amber", role: "league_manager", dialog: "reset", hideFromSidebar: true },

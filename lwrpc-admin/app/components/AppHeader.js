@@ -10,6 +10,7 @@ import { DEFAULT_SYSTEM_SETTINGS, cacheSystemSettings, mergeSystemSettings } fro
 import { findMembersByEmail, highestRoleForMembers, memberEmailResolution } from "../lib/memberLookup";
 import { saveProfilePhoto } from "../lib/profilePhotos";
 import { APP_VERSION } from "../lib/version";
+import { isNavigationPathActive } from "../lib/navigationActiveState";
 import { adminNavigationSections } from "../lib/adminNavigation";
 import adminShellStyles from "../design-preview/page.module.css";
 import { useDashboardAppearance } from "../design-preview/DashboardAppearanceControls";
@@ -99,19 +100,17 @@ export default function AppHeader({
       links: section.cards.filter((card) => !card.hideFromSidebar).map((card) => ({
         label: card.title,
         path: card.path,
+        exact: card.exact,
         dialog: card.dialog,
       })),
     }));
   }, [role]);
 
 
-  const isPathActive = useCallback((path, aliases = []) => {
-    const paths = [path, ...aliases];
-    return paths.some((candidate) => candidate === "/" ? pathname === "/" : pathname === candidate || pathname.startsWith(`${candidate}/`));
-  }, [pathname]);
+  const isPathActive = useCallback((path, aliases = [], exact = false) => isNavigationPathActive(pathname, path, aliases, exact), [pathname]);
 
-  const activeAdminGroup = useMemo(() => adminGroups.find((group) => group.links.some((link) => isPathActive(link.path))), [adminGroups, isPathActive]);
-  const dashboardActive = dashboardLinks.some((link) => isPathActive(link.path, link.aliases));
+  const activeAdminGroup = useMemo(() => adminGroups.find((group) => group.links.some((link) => isPathActive(link.path, link.aliases, link.exact))), [adminGroups, isPathActive]);
+  const dashboardActive = dashboardLinks.some((link) => isPathActive(link.path, link.aliases, link.exact));
   const contextLabel = activeAdminGroup?.label || (dashboardActive ? (hasRole(role, "league_manager") ? "Admin Dashboard" : "Dashboard") : "Administration");
   const hidePageSectionLabel = ["people", "matches", "structure", "system"].includes(activeAdminGroup?.key);
   const displayName = memberDisplayName(member);
@@ -210,7 +209,7 @@ export default function AppHeader({
   }
 
   function NavLink({ link, nested = false }) {
-    const active = isPathActive(link.path, link.aliases);
+    const active = isPathActive(link.path, link.aliases, link.exact);
     if (nested) {
       return (
         <button type="button" onClick={() => navigate(navigationTarget(link))} aria-current={active ? "page" : undefined} className={active ? adminShellStyles.submenuActive : ""}>
@@ -227,7 +226,7 @@ export default function AppHeader({
 
   function Group({ group }) {
     const expanded = openGroup === group.key;
-    const active = group.links.some((link) => isPathActive(link.path, link.aliases));
+    const active = group.links.some((link) => isPathActive(link.path, link.aliases, link.exact));
     return (
       <div className={adminShellStyles.navGroup}>
         <button type="button" onClick={() => toggleGroup(group.key)} aria-expanded={expanded} className={active ? adminShellStyles.active : ""}>

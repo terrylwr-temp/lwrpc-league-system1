@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-05
 
-Current prepared application version: **LMS-0714** (package `0.1.536`), awaiting review/deployment. Stage 7 remains paused.
+Current prepared application version: **LMS-0715** (package `0.1.537`), awaiting review/deployment. **Stage 6 / LMS-0714 is production accepted. Stage 7 has not started.**
 
 ## Purpose
 
@@ -543,3 +543,21 @@ Future permission-aware live LMS intelligence/navigation is also documentation-o
 The selected feedback button stayed disabled under LMS-0713 even after successful pending cleanup, and `disabled:cursor-wait` made selection appear permanently busy. LMS-0714 separates selected from pending state, keeps selected controls enabled, suppresses repeat votes, adds a synchronous per-answer request lock and `finally` cleanup, retains confirmed state on errors, and resets abandoned pending state on session restore. Server route and feedback database semantics are unchanged. Version LMS-0714/package 0.1.536; 182 tests and component browser verification pass. Required lint/type/PDF checks and isolated production build pass; normal build hits the known cache EPERM after compilation. No deployment or SQL/corpus change. See `docs/lms-0714-implementation-report.md`. Stage 6 awaits final same-answer four-click/two-event production acceptance; Stage 7 remains paused.
 
 Pending post-Stage-6 manager UI cleanup (documentation only): System Setup highlights AI Assistant Management and Test AI Assistant simultaneously when the latter is active; the blue Test AI Assistant header has a blank white upper-right control/box. Neither is fixed in LMS-0714. Previously documented Stage 7 reporting/review and future permission-aware live LMS intelligence remain future work.
+
+
+### LMS-0715 post-Stage-6 manager UI cleanup (2026-09-05)
+
+Stage 6 / LMS-0714 is production accepted, including read-only verification of exactly two same-answer feedback events Helpful → Not Helpful. This current acceptance supersedes historical pending statements without rewriting the LMS-0714 report.
+
+LMS-0715 (package 0.1.537) fixes the two previously documented manager UI findings: AI Assistant Management uses exact route matching so Test AI Assistant does not double-highlight; the existing AI Source Management header action has explicit dark text on its white background, retaining its label/navigation with mobile touch/focus styling. Both manager tools remain separate and named unchanged. No player Ask LWR, AI pipeline, feedback, SQL/corpus or deployment changes. Tests: 185 pass; desktop/phone fixture browser checks pass. See `docs/lms-0715-implementation-report.md` for files, validation and deployment acceptance steps.
+
+### Stage 7 agreed requirements — documentation only, not started
+
+- Manager Helpful / Not Helpful reporting, with drill-down into question, answer, Official Sources, selected evidence and useful diagnostics.
+- Automatically capture genuine `insufficient_evidence` / no-applicable-source questions without requiring a Not Helpful click. Surface recurring unanswered/problem questions so League Management can identify missing or unclear rules/guides.
+- Review workflow/statuses: `New`, `Reviewing`, `Rule/Guide Update Needed`, `Resolved`, `Dismissed`.
+- Filters for date, Helpful/Not Helpful, source type (LWR/USAP), and topic/question where practical.
+- Keep protected live/personal-data requests distinct from genuine missing-source cases. In particular, `What is my DUPR?` is not a missing-rule problem merely because live LMS intelligence is unavailable.
+- Preserve later permission-aware live LMS intelligence/navigation: ratings, rosters, standings, opponents, schedules, Match Setup and navigation, using existing role/permission rules and deterministic authorized server-side data services.
+
+These requirements are recorded only. LMS-0715 implements no Stage 7 reporting, automatic capture, review workflow or database schema.
