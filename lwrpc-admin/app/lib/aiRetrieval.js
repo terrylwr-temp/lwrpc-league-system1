@@ -1,5 +1,6 @@
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER } from "./aiGoverningSources.js";
+import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapLegalBallQuestion, isUsapBallSpecificationEvidence } from "./aiEquipmentIntents.js";
 
 export const ASK_ABOUT_SCOPES = Object.freeze(["all", "weekday", "primetime", "saturday", "lms_help"]);
 export const RETRIEVAL_WEIGHTS = Object.freeze({ semantic: 0.47, keyword: 0.24, exact: 0.19, authority: 0.06, context: 0.04 });
@@ -7,6 +8,8 @@ export const RETRIEVAL_WEIGHTS = Object.freeze({ semantic: 0.47, keyword: 0.24, 
 // deciding whether a directly applicable LWR rule controls a USAP fallback.
 // Production medical-issue evidence placed the controlling rule at rank 11.
 export const AUTHORITY_REVIEW_LIMIT = 12;
+const LWR_MATCH_EQUIPMENT_PROBE_QUERY = "match balls";
+const LWR_MATCH_EQUIPMENT_PROBE_EMBEDDING_QUERY = "What ball does the LWR league provide for regular-season matches?";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);
 const QUERY_FRAMING_TERMS = new Set(["what", "which", "who", "when", "where", "why", "how", "does", "do", "did", "is", "are", "was", "were", "can", "could", "would", "should", "will", "mean", "meaning", "work", "works", "requirement", "requirements", "explain", "explained", "tell", "show", "say", "says", "define", "definition", "describe", "described", "please", "someone", "somebody", "anyone", "anybody", "we", "us", "our", "i", "me", "my", "you", "your", "they", "them", "their", "he", "she", "it", "this", "that", "got", "get", "gets", "halfway", "through", "then", "just", "really", "t", "game", "games", "match", "matches", "type", "kind", "using", "use", "used", "brand", "playing", "need", "must", "required", "deadline", "due", "latest", "early", "long", "before"]);
@@ -42,12 +45,12 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
   const embedding = await embedQuery(request.question);
   if (!Array.isArray(embedding.embedding) || embedding.embedding.length !== aiAssistantConfig.embeddingDimensions) throw new Error("The embedding provider returned an unexpected vector size.");
   const embeddingDone = clock();
-  const rpcArgs = (queryText) => ({
+  const rpcArgs = (queryText, limit = Math.max(aiAssistantConfig.retrievalLimit * 4, 24)) => ({
     p_query_embedding: toPgVector(embedding.embedding), p_query_text: queryText, p_ask_about: request.askAbout,
     p_current_path: request.context.currentPath || null, p_feature_module: request.context.featureModule || null,
     p_season_id: request.context.seasonId, p_league_id: request.context.leagueId, p_division_id: request.context.divisionId,
     p_team_id: request.context.teamId, p_user_role: request.context.userRole || null,
-    p_limit: Math.max(aiAssistantConfig.retrievalLimit * 4, 24),
+    p_limit: limit,
   });
   let { data, error } = await supabase.rpc("search_ai_official_chunks", rpcArgs(request.question));
   if (error) throw new Error(`Official-document retrieval failed: ${error.message}`);
@@ -65,6 +68,7 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     terminologyExpansionEnabled: isDocumentGroundedMatchConfiguration(retrievalQuery, data || []),
   };
   const candidates = (data || []).map((row, index) => ({ ...candidateFromRow(row, retrievalRequest), stage3Rank: index + 1 }));
+  const lwrMatchEquipmentProbe = await retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, rpcArgs, embedQuery, clock });
   const suppliedEvidence = candidates.slice(0, aiAssistantConfig.retrievalLimit);
   const authorityReviewCandidates = candidates.slice(0, AUTHORITY_REVIEW_LIMIT);
   authorityReviewCandidates.forEach((candidate, index) => {
@@ -72,9 +76,61 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
   });
   const evidence = evaluateEvidence(suppliedEvidence, aiAssistantConfig.evidenceThreshold);
   return {
-    request, candidates, suppliedEvidence, authorityReviewCandidates, evidence, conflict: conservativeConflictDiagnostic(suppliedEvidence),
+    request, candidates, suppliedEvidence, authorityReviewCandidates, intentEvidenceCandidates: lwrMatchEquipmentProbe?.candidates || [], lwrMatchEquipmentProbe, evidence, conflict: conservativeConflictDiagnostic(suppliedEvidence),
     environment: { embeddingModel: embedding.model || aiAssistantConfig.embeddingModel, embeddingDimensions: aiAssistantConfig.embeddingDimensions, evidenceThreshold: aiAssistantConfig.evidenceThreshold, retrievalLimit: aiAssistantConfig.retrievalLimit, authorityReviewLimit: AUTHORITY_REVIEW_LIMIT },
     metrics: { embeddingInputTokens: finiteOrNull(embedding.inputTokens), embeddingMs: Math.round(embeddingDone - started), retrievalMs: Math.round(clock() - embeddingDone), totalMs: Math.round(clock() - started) },
+  };
+}
+
+async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, rpcArgs, embedQuery, clock }) {
+  if (!isClubSelectedMatchEquipmentQuestion(request.question)) return null;
+  const started = clock();
+  const probeEmbedding = await embedQuery(LWR_MATCH_EQUIPMENT_PROBE_EMBEDDING_QUERY);
+  if (!Array.isArray(probeEmbedding.embedding) || probeEmbedding.embedding.length !== aiAssistantConfig.embeddingDimensions) throw new Error("The match-equipment retrieval probe returned an unexpected vector size.");
+  const { data, error } = await supabase.rpc("search_ai_official_chunks", {
+    ...rpcArgs(LWR_MATCH_EQUIPMENT_PROBE_QUERY),
+    p_query_embedding: toPgVector(probeEmbedding.embedding),
+  });
+  if (error) throw new Error(`LWR match-equipment retrieval probe failed: ${error.message}`);
+  const probeRequest = { ...request, retrievalQuery: LWR_MATCH_EQUIPMENT_PROBE_QUERY, typoNormalizations: [], terminologyAliases: [], terminologyExpansionEnabled: false };
+  const normalCandidateIds = new Set(candidates.map((candidate) => candidate.chunkId));
+  const matches = (data || []).map((row, index) => ({ ...candidateFromRow(row, probeRequest), probeRank: index + 1 }))
+    .filter(isLwrSelectedMatchEquipmentEvidence)
+    .slice(0, 1);
+  if (!matches.length) return { intent: CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, retrieved: false, query: LWR_MATCH_EQUIPMENT_PROBE_QUERY, normalStage3CandidateLimit: candidates.length, elapsedMs: Math.round(clock() - started), candidates: [] };
+  const chunkId = matches[0].chunkId;
+  let normalStage3Rank = candidates.find((candidate) => candidate.chunkId === chunkId)?.stage3Rank || null;
+  if (!normalStage3Rank) {
+    // Diagnostics only: the player's normal query is expanded to the RPC's
+    // existing maximum so the manager can see where the probe candidate would
+    // have landed. This does not alter normal handoff or review candidates.
+    const expanded = await supabase.rpc("search_ai_official_chunks", rpcArgs(retrievalQuery, 80));
+    if (expanded.error) throw new Error(`LWR match-equipment rank diagnostic failed: ${expanded.error.message}`);
+    normalStage3Rank = (expanded.data || []).findIndex((row) => row.chunk_id === chunkId) + 1 || null;
+  }
+  const probeCandidate = {
+    ...matches[0],
+    stage3Rank: null,
+    lwrMatchEquipmentProbe: {
+      intent: CLUB_SELECTED_MATCH_EQUIPMENT_INTENT,
+      retrieved: true,
+      query: LWR_MATCH_EQUIPMENT_PROBE_QUERY,
+      probeRank: matches[0].probeRank,
+      normalStage3Rank,
+      normalStage3CandidateLimit: candidates.length,
+      deduplicatedAgainstNormal: normalCandidateIds.has(chunkId),
+      diagnostic: "Bounded LWR match-equipment probe; not a normal Stage 3 ranking.",
+    },
+  };
+  if (normalCandidateIds.has(chunkId)) {
+    // Preserve the normal result and rank, while exposing that the bounded
+    // probe independently confirmed its applicability.
+    Object.assign(candidates.find((candidate) => candidate.chunkId === chunkId), { lwrMatchEquipmentProbe: probeCandidate.lwrMatchEquipmentProbe });
+  }
+  return {
+    ...probeCandidate.lwrMatchEquipmentProbe,
+    elapsedMs: Math.round(clock() - started),
+    candidates: normalCandidateIds.has(chunkId) ? [] : [probeCandidate],
   };
 }
 
@@ -164,17 +220,21 @@ export function nvzTerminologyAliasPhrases(question, rows = []) {
 
 export function detectRetrievalIntent(question) {
   const value = String(question || "").toLowerCase();
+  const clubEquipment = isClubSelectedMatchEquipmentQuestion(value);
+  const legalBall = isUsapLegalBallQuestion(value);
   if (isConductIntent(value)) return "Behavior/conduct";
   const deadline = /\b(?:when|deadline|due|latest|early)\b/.test(value)
     || /\bhow\s+(?:early|long\s+before|many\s+(?:days?|hours?|weeks?)\s+before)\b/.test(value)
     || /\b(?:need|must|required)\s+(?:to\s+)?(?:be\s+)?(?:completed|submitted|done)\b/.test(value);
   const procedural = /\bhow\s+(?:do|can|to)\b/.test(value) || /\bwhere\s+(?:do|can)\b/.test(value) || /\bwhat\s+(?:button|screen)\b/.test(value);
-  return [deadline && "Deadline/requirement", procedural && "Procedural/how-to"].filter(Boolean).join(" + ") || "None";
+  return [clubEquipment && CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, legalBall && USAP_LEGAL_BALL_INTENT, deadline && "Deadline/requirement", procedural && "Procedural/how-to"].filter(Boolean).join(" + ") || "None";
 }
 
 export function intentDiagnostic(question, candidate, terminologyEnabled = true) {
   const intent = detectRetrievalIntent(question);
   const searchable = [candidate.sectionLabel, candidate.heading, candidate.ruleNumber, candidate.content].filter(Boolean).join(" ").toLowerCase();
+  if (isClubSelectedMatchEquipmentQuestion(question) && isLwrSelectedMatchEquipmentEvidence(candidate)) return { detectedIntent: intent, evidenceMatch: "Direct LWR-selected match equipment" };
+  if (isUsapLegalBallQuestion(question) && isUsapBallSpecificationEvidence(candidate)) return { detectedIntent: intent, evidenceMatch: "USAP ball specification or approval evidence" };
   if (intent === "None" || (intent !== "Behavior/conduct" && !hasDirectQueryPhrase(question, searchable) && terminologyDiagnostic(question, candidate, terminologyEnabled) === "None")) return { detectedIntent: intent, evidenceMatch: "None" };
   const concreteTiming = /\b(?:no\s+later\s+than|at\s+least|within)\b[\s\S]{0,60}\b(?:days?|hours?|weeks?)\b/.test(searchable) || /\b(?:deadline|due)\b/.test(searchable);
   const timing = concreteTiming || /\b(?:before|prior\s+to)\s+(?:the\s+)?(?:scheduled\s+)?(?:match|match\s+date|date)\b/.test(searchable);

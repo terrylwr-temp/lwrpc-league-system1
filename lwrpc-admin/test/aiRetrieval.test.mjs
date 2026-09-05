@@ -225,6 +225,42 @@ test("LMS-0708 keeps the singular and plural match detector identical in Stage 3
   assert.match(migration, /match\(\?:es\)\?/);
 });
 
+test("LMS-0711 adds a bounded, deduplicated LWR match-equipment probe without changing normal candidates", async () => {
+  const normal = { ...row(), chunk_id: "normal-usap", document_id: "usap-doc", document_version_id: "usap-version", document_title: "2026 USA Pickleball Official Rulebook", document_type: "usap_rulebook", document_authority_rank: 2, rule_number: "3.C.5", heading: "Ball Specifications", content: "3.C.5 Construction. The ball must be made of durable material." };
+  const matchBall = { ...row(), chunk_id: "lwr-match-ball", document_id: "captains-doc", document_version_id: "captains-version", document_title: "LWR Pickleball Club DUPR Captains Guide", document_type: "captain_guide", document_authority_rank: 3, page_number: 10, rule_number: "", heading: "LEAGUE FEES AND WAIVER", content: "The League shall provide: Match Balls: official source text for regular season and playoff matches.", combined_score: .6458 };
+  const calls = [];
+  const output = await retrieveOfficialEvidence({
+    supabase: { rpc: async (_name, args) => {
+      calls.push(args);
+      if (args.p_query_text === "match balls") return { data: [matchBall], error: null };
+      if (args.p_limit === 80) return { data: [...Array.from({ length: 62 }, () => normal), matchBall], error: null };
+      return { data: [normal], error: null };
+    } },
+    body: { question: "what kind of ball are we using" }, embedQuery: async () => ({ embedding: vector, model: "text-embedding-3-small", inputTokens: 7 }), clock: (() => { let n = 0; return () => ++n; })(),
+  });
+  assert.equal(output.candidates.length, 1, "normal Stage 3 candidates stay unchanged");
+  assert.equal(output.authorityReviewCandidates.length, 1, "normal authority-review window stays unchanged");
+  assert.equal(output.intentEvidenceCandidates.length, 1);
+  assert.equal(output.intentEvidenceCandidates[0].chunkId, "lwr-match-ball");
+  assert.equal(output.intentEvidenceCandidates[0].lwrMatchEquipmentProbe.normalStage3Rank, 63);
+  assert.equal(output.intentEvidenceCandidates[0].lwrMatchEquipmentProbe.probeRank, 1);
+  assert.equal(output.intentEvidenceCandidates[0].stage3Rank, null);
+  assert.equal(output.lwrMatchEquipmentProbe.query, "match balls");
+  assert.equal(calls.filter(({ p_query_text }) => p_query_text === "match balls").length, 1);
+  assert.equal(calls.some(({ p_limit }) => p_limit === 80), true);
+  assert.equal(detectRetrievalIntent("what kind of ball are we using"), "Club-selected match equipment");
+  assert.equal(detectRetrievalIntent("What are the USA Pickleball requirements for a legal ball?"), "USAP legal ball specifications");
+  assert.equal(detectRetrievalIntent("What happens if the ball is damaged during play?"), "None");
+
+  const deduplicated = await retrieveOfficialEvidence({
+    supabase: { rpc: async (_name, args) => ({ data: args.p_query_text === "match balls" ? [matchBall] : [matchBall], error: null }) },
+    body: { question: "What ball do we use for league matches?" }, embedQuery: async () => ({ embedding: vector, model: "text-embedding-3-small", inputTokens: 7 }), clock: (() => { let n = 0; return () => ++n; })(),
+  });
+  assert.equal(deduplicated.intentEvidenceCandidates.length, 0);
+  assert.equal(deduplicated.candidates[0].lwrMatchEquipmentProbe.deduplicatedAgainstNormal, true);
+  assert.equal(deduplicated.candidates[0].lwrMatchEquipmentProbe.normalStage3Rank, 1);
+});
+
 test("retrieval route is League Manager protected and has no answer-model path", async () => {
   const route = await readFile(new URL("../app/api/ai-assistant/retrieval/route.js", import.meta.url), "utf8");
   assert.match(route, /authorizeAdminRequest\(req, "league_manager"\)/); assert.doesNotMatch(route, /chat\/completions|generateText|streamText|responses\.create/i);

@@ -1,4 +1,5 @@
 // Stage 4 only: neither retrieval scores nor the Stage 3 evidence gate change.
+import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapBallSpecificationEvidence } from "./aiEquipmentIntents.js";
 export const INSUFFICIENT_EVIDENCE_ANSWER = "I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.";
 
 export function governingSourceClass(documentType) {
@@ -7,7 +8,7 @@ export function governingSourceClass(documentType) {
   return "lwr_supporting_guide";
 }
 
-const FRAMING = new Set("what which who when where why how does do did is are was were can could would should will a an and about at be by for from in of on or the to with i we you my our your this that it need needs must rule rules official lwr pickleball club please explain mean meaning definition work works type kind using use used brand someone got halfway through during game games match matches player players happen happens".split(" "));
+const FRAMING = new Set("what which who when where why how does do did is are was were can could would should will a an and about at be by for from in of on or the to with i we you my our your this that it need needs must rule rules official lwr pickleball club please explain mean meaning definition work works type kind using use used brand someone got halfway through during game games match matches player players happen happens if play".split(" "));
 
 function normalized(value) {
   return String(value || "").toLowerCase()
@@ -37,11 +38,13 @@ function directPassages(candidate, question) {
   if (isObviouslyIncompleteUsapFragment(candidate)) return [];
   const nvzScope = nvzQuestionScope(question);
   const servingFootScope = servingFootQuestionScope(question);
+  const damagedBallScope = damagedBallQuestion(question);
   const terms = issueTerms(question);
   if (!terms.length) return [];
   if (nvzScope === "definition" && !isNvzDefinition(candidate)) return [];
   const candidateNvzScope = nvzRuleScope(candidate);
   const candidateServingFootScope = servingFootRuleScope(candidate);
+  if (damagedBallScope && isUsapDamagedBallEvidence(candidate)) return [String(candidate.content || "")];
   const nvzScopeMatches = candidateNvzScope === nvzScope || (nvzScope === "completed_exit" && candidateNvzScope === "exit_before_volley");
   if (nvzScope && nvzScope !== "definition" && candidate?.documentType === "usap_rulebook" && candidateNvzScope && !nvzScopeMatches) return [];
   if (servingFootScope && candidate?.documentType === "usap_rulebook" && candidateServingFootScope && candidateServingFootScope !== servingFootScope) return [];
@@ -62,7 +65,7 @@ function directPassages(candidate, question) {
       // A direction to consult a rule or a statement about its coverage is
       // not the rule's outcome, even when all of the topic words occur locally.
       if (/\b(?:refer|consult|review|read|discuss|address|describe|cover)(?:s|ed|ing)?\b/i.test(sentence)) return false;
-      return /\b(?:must|shall|may|cannot|can|only|required|allowed|permitted|prohibited|fault|loses?|wins?|recorded|awarded|use|select|click|save)\b/i.test(sentence);
+      return /\b(?:must|shall|will|may|cannot|can|only|required|allowed|permitted|prohibited|fault|loses?|wins?|recorded|awarded|use|select|click|save)\b/i.test(sentence);
     });
   });
 }
@@ -123,6 +126,17 @@ function isNvzDefinition(candidate) {
   return /\bnvz\b/.test(text) && /\b(?:area|court|zone|lines?|feet|dimensional)\b/.test(text);
 }
 
+function damagedBallQuestion(question) {
+  const value = normalized(question);
+  return /\bball\b/.test(value) && /\b(?:damaged|damage|broken|cracked|degraded|soft)\b/.test(value);
+}
+
+function isUsapDamagedBallEvidence(candidate) {
+  if (candidate?.documentType !== "usap_rulebook") return false;
+  const text = normalized([candidate?.heading, candidate?.content].filter(Boolean).join(" "));
+  return /\bdamaged ball\b/.test(text) && /\b(?:replace|replaced|replay|broken|cracked|degraded|soft)\b/.test(text);
+}
+
 function isObviouslyIncompleteUsapFragment(candidate) {
   if (candidate?.documentType !== "usap_rulebook") return false;
   const content = String(candidate?.content || "").trim();
@@ -145,7 +159,9 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
   const usapApplies = candidates.some((candidate) => candidate.documentType === "usap_rulebook" && issues.some((issue) => (
     issue.local ? intentSupport(candidate, issue.intent, issue.question) : directPassages(candidate, issue.question).length
   )));
-  if (!usapApplies) {
+  const hasSelectedEquipmentControl = issues.some((issue) => issue.intent === CLUB_SELECTED_MATCH_EQUIPMENT_INTENT
+    && candidates.some((candidate) => isClubSelectedMatchEquipmentQuestion(issue.question) && isLwrSelectedMatchEquipmentEvidence(candidate)));
+  if (!usapApplies && !hasSelectedEquipmentControl) {
     for (const candidate of retrieval.suppliedEvidence.filter((item) => item.documentType === "usap_rulebook")) {
       candidate.sourceClassification = "usap_governing_fallback";
       candidate.governingDiagnostics = [{ intent: question, reason: "No direct applicable USAP passage", overridden: false }];
@@ -159,9 +175,9 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
     const direct = candidates.map((candidate) => {
       const support = issue.local ? intentSupport(candidate, issue.intent, issue.question) : null;
       const passages = issue.local ? (support ? [candidate.content] : []) : directPassages(candidate, issue.question);
-      return { candidate, support, passages, classification: governingSourceClass(candidate.documentType) };
+      return { candidate, support, passages, classification: issueSourceClassification(candidate, issue.intent, issue.question) };
     }).filter(({ passages }) => passages.length);
-    const lwr = direct.filter((item) => item.classification === "lwr_controlling");
+    const lwr = direct.filter((item) => ["lwr_controlling", "lwr_selected_equipment"].includes(item.classification));
     const usap = direct.filter((item) => item.classification === "usap_governing_fallback");
     const governing = lwr.length ? lwr : usap.length ? usap : direct;
     // Preserve LMS-0705 strength ordering for dates/deadlines before rank.
@@ -179,7 +195,8 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
     for (const item of direct) {
       const overridden = item.classification === "usap_governing_fallback" && lwr.length > 0;
       if (overridden) overriddenPassages.set(item.candidate.chunkId, [...(overriddenPassages.get(item.candidate.chunkId) || []), ...item.passages]);
-      diagnostics.get(item.candidate.chunkId).push({ intent: issue.intent, reason: overridden ? "Excluded: directly applicable LWR rule controls this same issue" : "Direct local passage addresses this issue", overridden });
+      const equipmentSelection = item.classification === "lwr_selected_equipment";
+      diagnostics.get(item.candidate.chunkId).push({ intent: issue.intent, reason: overridden ? "Excluded: directly applicable LWR selected-equipment source controls this same issue" : equipmentSelection ? "Direct LWR selected-equipment source addresses this issue" : "Direct local passage addresses this issue", overridden });
     }
     for (const item of retained) {
       const previous = selected.get(item.candidate.chunkId);
@@ -192,12 +209,14 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
         sourceClassification: item.classification,
         intentSupport: [...new Set([...(previous?.intentSupport || []), issue.intent])],
         evidenceRole: item.classification === "lwr_supporting_guide" ? "Supporting" : "Primary / controlling",
-        evidenceSelectionReason: item.classification === "lwr_controlling" ? "Directly applicable LWR rule controls this issue" : item.classification === "usap_governing_fallback" ? "Applicable USAP rule; no direct LWR override for this issue" : "Direct supporting guide; cannot override a governing playing rule",
+        evidenceSelectionReason: item.classification === "lwr_selected_equipment" ? "Direct LWR-selected match equipment controls this issue" : item.classification === "lwr_controlling" ? "Directly applicable LWR rule controls this issue" : item.classification === "usap_governing_fallback" ? "Applicable USAP rule; no direct LWR override for this issue" : "Direct supporting guide; cannot override a governing playing rule",
       });
     }
   }
   for (const candidate of retrieval.suppliedEvidence) {
-    candidate.sourceClassification = governingSourceClass(candidate.documentType);
+    candidate.sourceClassification = issues.some((issue) => issueSourceClassification(candidate, issue.intent, issue.question) === "lwr_selected_equipment")
+      ? "lwr_selected_equipment"
+      : governingSourceClass(candidate.documentType);
     candidate.governingDiagnostics = diagnostics.get(candidate.chunkId) || [];
   }
   // Reserve one slot per covered issue before additional same-issue evidence.
@@ -209,4 +228,12 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
   }).filter((candidate) => candidate.content);
   const required = issues.map((issue) => values.find((candidate) => candidate.intentSupport.includes(issue.intent))).filter(Boolean);
   return [...new Set([...required, ...values])].slice(0, limit).map((candidate) => ({ ...candidate, governingDiagnostics: diagnostics.get(candidate.chunkId) || [] }));
+}
+
+function issueSourceClassification(candidate, intent, question) {
+  if (intent === CLUB_SELECTED_MATCH_EQUIPMENT_INTENT
+    && isClubSelectedMatchEquipmentQuestion(question)
+    && isLwrSelectedMatchEquipmentEvidence(candidate)) return "lwr_selected_equipment";
+  if (intent === USAP_LEGAL_BALL_INTENT && isUsapBallSpecificationEvidence(candidate)) return "usap_governing_fallback";
+  return governingSourceClass(candidate.documentType);
 }

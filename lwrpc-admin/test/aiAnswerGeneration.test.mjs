@@ -105,7 +105,7 @@ test("preserves compact primary evidence for the five production Stage 4 evaluat
   const cases = [
     ["Someone got hurt halfway through the game and can't finish. What do we do?", { documentType: "league_rules", authorityRank: 1, ruleNumber: "5.7", content: "A player who cannot finish an incomplete match is recorded according to the score." }],
     ["What does NR mean?", { documentType: "league_rules", authorityRank: 1, ruleNumber: "4.1.1", content: "A Reliability Factor below 29 is Not Rated (NR)." }],
-    ["What type of balls will we be using?", { documentId: "captains", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", content: "Match Balls: Franklin Outdoor X-40 Optic balls." }],
+    ["What type of balls will we be using?", { documentId: "captains", documentType: "captain_guide", authorityRank: 3, ruleNumber: "", pageNumber: 10, heading: "LEAGUE FEES AND WAIVER", content: "The League shall provide: Match Balls: Franklin Outdoor X-40 Optic balls for all regular season and playoff matches." }],
     ["When does Match Setup need to be completed?", { documentType: "league_rules", authorityRank: 1, ruleNumber: "3.4.1", intent: "Concrete timing requirement in numbered rule", content: "Match Setup must be completed three days before the scheduled match." }],
     ["Can I yell at or insult another player during a match?", { documentId: "conduct", documentType: "other", authorityRank: 2, ruleNumber: "1", intent: "Behavioral standard and prohibition", content: "Respectful conduct is required; abusive language is prohibited." }],
   ];

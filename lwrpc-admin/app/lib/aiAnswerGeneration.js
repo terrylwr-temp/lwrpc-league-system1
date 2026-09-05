@@ -1,5 +1,6 @@
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER, selectGoverningEvidence } from "./aiGoverningSources.js";
+import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapBallSpecificationEvidence, isUsapLegalBallQuestion } from "./aiEquipmentIntents.js";
 
 export { INSUFFICIENT_EVIDENCE_ANSWER };
 export const CONFLICT_ANSWER = "The supplied official LWR Pickleball Club sources appear to conflict on this point. Please contact League Management for clarification.";
@@ -27,11 +28,13 @@ export function selectAnswerEvidence(retrieval) {
   const authorityReviewCandidates = Array.isArray(retrieval.authorityReviewCandidates) && retrieval.authorityReviewCandidates.length
     ? retrieval.authorityReviewCandidates
     : retrieval.suppliedEvidence;
-  if (authorityReviewCandidates?.some((candidate) => candidate.documentType === "usap_rulebook")) {
+  const intentEvidenceCandidates = Array.isArray(retrieval.intentEvidenceCandidates) ? retrieval.intentEvidenceCandidates : [];
+  const governingCandidates = [...new Map([...authorityReviewCandidates, ...intentEvidenceCandidates].map((candidate) => [candidate.chunkId, candidate])).values()];
+  if (governingCandidates?.some((candidate) => candidate.documentType === "usap_rulebook")) {
     // The review set is bounded before this point. It is used only to decide
     // applicability and authority; the selected evidence sent to GPT remains
     // capped by MAX_SELECTED_CHUNKS.
-    return selectGoverningEvidence({ ...retrieval, suppliedEvidence: authorityReviewCandidates }, { detectIntents: detectedEvidenceIntents, intentSupport, selectLocal: selectLwrAnswerEvidence, limit: MAX_SELECTED_CHUNKS });
+    return selectGoverningEvidence({ ...retrieval, suppliedEvidence: governingCandidates }, { detectIntents: detectedEvidenceIntents, intentSupport, selectLocal: selectLwrAnswerEvidence, limit: MAX_SELECTED_CHUNKS });
   }
   return selectLwrAnswerEvidence(retrieval);
 }
@@ -78,7 +81,7 @@ function detectedEvidenceIntents(question) {
   // a match or game.  It governs Match Setup evidence only; injury, conduct,
   // scoring, and other match questions retain the normal Stage 4 selection.
   const match = /\b(?:lineup|pairings?|match\s+setup)\b/.test(value);
-  return [roster && "Team/season roster management", match && "Individual-match Match Setup"].filter(Boolean);
+  return [isClubSelectedMatchEquipmentQuestion(value) && CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, isUsapLegalBallQuestion(value) && USAP_LEGAL_BALL_INTENT, roster && "Team/season roster management", match && "Individual-match Match Setup"].filter(Boolean);
 }
 
 function bestIntentEvidence(candidates, intent, question) {
@@ -95,6 +98,8 @@ function isMoreAuthoritativeThanRequired(candidate, required, intents, question)
 function supportsEvidenceIntent(candidate, intent, question = "") { return Boolean(intentSupport(candidate, intent, question)); }
 
 function intentSupport(candidate, intent, question) {
+  if (intent === CLUB_SELECTED_MATCH_EQUIPMENT_INTENT && isClubSelectedMatchEquipmentQuestion(question) && isLwrSelectedMatchEquipmentEvidence(candidate)) return { intent, strength: 130, reason: "Direct LWR-selected match-equipment passage" };
+  if (intent === USAP_LEGAL_BALL_INTENT && isUsapLegalBallQuestion(question) && isUsapBallSpecificationEvidence(candidate)) return { intent, strength: 130, reason: "Direct USAP ball specification or approval passage" };
   const asksTiming = asksForTiming(question);
   const structural = [candidate?.sectionLabel, candidate?.heading].filter(Boolean).join(" ").toLowerCase();
   for (const passage of localEvidencePassages(candidate)) {

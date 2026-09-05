@@ -45,7 +45,6 @@ test("LMS-0706 catalog type, default rank, edit roundtrip and exact fallback", a
 for (const [name, question, localText, usapText, ruleNumber] of [
   ["medical retirement", "Someone got hurt halfway through the game and can't finish. What do we do?", "A player who cannot finish an incomplete match must have the score recorded under the LWR retirement procedure.", "A player who cannot finish must receive the USAP retirement outcome instead.", "5.7"],
   ["scoring freeze", "How does scoring freeze work?", "Scoring freeze means the receiving team cannot score after the league freeze threshold.", "Scoring freeze does not apply; the receiving team may score under this fixture.", "5.6"],
-  ["match ball", "What type of balls will we be using?", "Match balls must be Franklin Outdoor X-40 Optic balls.", "Match balls may be any approved ball under this fixture.", "5.2"],
 ]) test(`LMS-0706 ${name}: direct LWR conflict excludes USAP before model and citations`, async () => {
   const input = retrieval(question, [usap(usapText, { combinedScore: .9, documentAuthorityRank: 1 }), lwr(localText, { ruleNumber, documentAuthorityRank: 9 })]);
   const { answer, request } = await generate(input, localText);
@@ -56,6 +55,44 @@ for (const [name, question, localText, usapText, ruleNumber] of [
   assert.ok(!request.input[0].content.includes(usapText));
   assert.match(request.input[0].content, /lwr_controlling/);
   assert.match(input.suppliedEvidence[0].evidenceSelectionReason, /directly applicable LWR rule/);
+});
+
+test("LMS-0711 production-shaped LWR match-equipment probe controls only club-selected equipment", async () => {
+  const guide = evidence("lwr-match-ball", "captain_guide", "LEAGUE FEES AND WAIVER\nThe League shall provide: Match Balls: Franklin Outdoor X-40 Optic balls for all regular season and playoff matches.", {
+    documentTitle: "LWR Pickleball Club DUPR Captains Guide", documentAuthorityRank: 3, pageNumber: 10, heading: "LEAGUE FEES AND WAIVER", combinedScore: .4677,
+    lwrMatchEquipmentProbe: { intent: "Club-selected match equipment", retrieved: true, query: "match balls", probeRank: 1, normalStage3Rank: 63, diagnostic: "Bounded LWR match-equipment probe; not a normal Stage 3 ranking." },
+  });
+  const usapPressure = [
+    evidence("usap-construction", "usap_rulebook", "3.C.5 Construction. The ball must be made of durable material.", { ruleNumber: "3.C.5", combinedScore: .7363 }),
+    evidence("usap-damaged", "usap_rulebook", "20.F Damaged Ball. A broken ball will be replaced.", { ruleNumber: "20.F", combinedScore: .6838 }),
+    evidence("usap-extra", "usap_rulebook", "24.B.1 Extra Ball. An extra ball is a fault.", { ruleNumber: "24.B.1", combinedScore: .6513 }),
+  ];
+  for (const question of ["what kind of ball are we using", "What ball do we use for league matches?", "Which ball are we playing with?"]) {
+    const input = { ...retrieval(question, usapPressure), authorityReviewCandidates: usapPressure, intentEvidenceCandidates: [guide] };
+    const { answer, request } = await generate(input, "The league provides Franklin Outdoor X-40 Optic balls.");
+    assert.deepEqual(ids(answer.selectedEvidence), ["lwr-match-ball"], question);
+    assert.deepEqual(ids(answer.sources), ["lwr-match-ball"], question);
+    assert.equal(answer.selectedEvidence[0].sourceClassification, "lwr_selected_equipment", question);
+    assert.match(answer.selectedEvidence[0].evidenceSelectionReason, /selected match equipment/i, question);
+    assert.match(request.input[0].content, /Franklin Outdoor X-40 Optic/, question);
+    assert.ok(!request.input[0].content.includes("3.C.5 Construction"), question);
+  }
+  assert.equal(guide.lwrMatchEquipmentProbe.normalStage3Rank, 63);
+  assert.equal(guide.pageNumber, 10);
+  assert.equal(guide.documentType, "captain_guide");
+});
+
+test("LMS-0711 keeps USAP governing for legal-ball specifications and damaged-ball questions", () => {
+  const guide = evidence("lwr-match-ball", "captain_guide", "The League shall provide: Match Balls: Franklin Outdoor X-40 Optic balls for all regular season and playoff matches.", { documentTitle: "LWR Pickleball Club DUPR Captains Guide", pageNumber: 10, heading: "LEAGUE FEES AND WAIVER" });
+  const specifications = evidence("usap-3-c", "usap_rulebook", "3.C Ball Specifications. The requirements for the ball are set forth in Rules 3.C.1 through 3.C.5. The complete list of approved balls is posted on the USA Pickleball website.", { ruleNumber: "3.C", heading: "Ball Specifications" });
+  const design = evidence("usap-3-c-2", "usap_rulebook", "3.C.2 Design. An approved ball must meet the stated ball specifications.", { ruleNumber: "3.C.2", heading: "Ball Specifications — Design" });
+  const damaged = evidence("usap-20-f", "usap_rulebook", "20.F Damaged Ball. If the ball is broken or cracked, it will be replaced.", { ruleNumber: "20.F", heading: "Damaged Ball" });
+  for (const question of ["What are the USA Pickleball requirements for a legal ball?", "What makes a pickleball legal under USA Pickleball rules?", "What are the specifications for an approved pickleball?"]) {
+    const selected = selectAnswerEvidence({ ...retrieval(question, [specifications, design, guide]), authorityReviewCandidates: [specifications, design, guide] });
+    assert.ok(selected.some(({ ruleNumber }) => ruleNumber === "3.C"), question);
+    assert.ok(selected.every(({ documentType }) => documentType === "usap_rulebook"), question);
+  }
+  assert.deepEqual(ids(selectAnswerEvidence(retrieval("What happens if the ball is damaged during play?", [guide, damaged]))), ["usap-20-f"]);
 });
 
 test("LMS-0706 Match Setup stays under Rule 5.4 despite higher USAP score", () => {
@@ -204,7 +241,8 @@ test("LMS-0706 mixed intents retain LWR lineup and USAP volley rules independent
 test("LMS-0706 mixed USAP chunk cannot leak an overridden sibling passage", async () => {
   const overridden = "Match balls may be any approved ball.";
   const applicable = "Players must not volley while touching the kitchen.";
-  const input = retrieval("What balls are we using and can I volley in the kitchen?", [lwr("Match balls must be Franklin Outdoor X-40 Optic balls."), usap(`${overridden}\n\n${applicable}`)]);
+  const matchBallGuide = evidence("lwr", "captain_guide", "The League shall provide: Match Balls: Franklin Outdoor X-40 Optic balls for all regular season and playoff matches.", { documentTitle: "LWR Pickleball Club DUPR Captains Guide", documentAuthorityRank: 3, pageNumber: 10, heading: "LEAGUE FEES AND WAIVER" });
+  const input = retrieval("What balls are we using and can I volley in the kitchen?", [matchBallGuide, usap(`${overridden}\n\n${applicable}`)]);
   const { answer, request } = await generate(input, "Use Franklin Outdoor X-40 Optic balls. Do not volley in the kitchen.");
   assert.deepEqual(ids(answer.selectedEvidence), ["lwr", "usap"]);
   assert.ok(!request.input[0].content.includes(overridden));
