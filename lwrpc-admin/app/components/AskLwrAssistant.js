@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "./AskLwrAssistant.module.css";
+import { createFeedbackController, resetFeedbackPending } from "../lib/askLwrFeedbackState";
 import { currentConversationContext } from "../lib/askLwrConversationState";
 import { usePathname } from "next/navigation";
 import { getCurrentUserRole, getRequestAuthorizationHeaders, supabase } from "../lib/auth";
@@ -18,7 +19,7 @@ function initialSessionExchanges() {
   if (typeof window === "undefined") return [];
   try {
     const saved = JSON.parse(window.sessionStorage.getItem(SESSION_EXCHANGES_KEY) || "[]");
-    return Array.isArray(saved) ? saved.filter((entry) => entry && !entry.pending && (entry.result || entry.requestError)).slice(0, MAX_SESSION_EXCHANGES) : [];
+    return Array.isArray(saved) ? saved.filter((entry) => entry && !entry.pending && (entry.result || entry.requestError)).slice(0, MAX_SESSION_EXCHANGES).map(resetFeedbackPending) : [];
   } catch { return []; }
 }
 
@@ -111,6 +112,10 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
   const pageContext = useMemo(() => assistantPageContext(pathname, role), [pathname, role]);
   const [question, setQuestion] = useState("");
   const [exchanges, setExchanges] = useState(initialSessionExchanges);
+  const [sendFeedback] = useState(() => createFeedbackController({
+    getAuthorizationHeaders: getRequestAuthorizationHeaders,
+    updateEntry: (id, patch) => setExchanges((current) => current.map((entry) => entry.id === id ? { ...entry, ...patch } : entry)),
+  }));
   const [working, setWorking] = useState(false);
   const [guidesOpen, setGuidesOpen] = useState(false);
   const [leagueGuides, setLeagueGuides] = useState([]);
@@ -149,21 +154,8 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
     } finally { setWorking(false); }
   }
 
-  async function submitFeedback(exchangeId, helpful) {
-    const entry = exchanges.find((item) => item.id === exchangeId);
-    const receipt = entry?.result?.feedbackReceipt;
-    if (!receipt || entry?.feedbackWorking || entry?.feedback?.helpful === helpful) return;
-    setExchanges((current) => current.map((item) => item.id === exchangeId ? { ...item, feedbackWorking: true } : item));
-    try {
-      const response = await fetch("/api/ask-lwr/feedback", {
-        method: "POST", headers: { "Content-Type": "application/json", ...(await getRequestAuthorizationHeaders()) }, body: JSON.stringify({ receipt, helpful }),
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || !payload?.success || typeof payload?.result?.helpful !== "boolean") throw new Error("feedback_failed");
-      setExchanges((current) => current.map((item) => item.id === exchangeId ? { ...item, feedback: { helpful: payload.result.helpful, feedbackId: payload.result.feedbackId || null }, feedbackWorking: false } : item));
-    } catch {
-      setExchanges((current) => current.map((item) => item.id === exchangeId ? { ...item, feedbackWorking: false, feedbackError: true } : item));
-    }
+  function submitFeedback(exchangeId, helpful) {
+    return sendFeedback(exchanges.find((item) => item.id === exchangeId), helpful);
   }
 
   async function toggleGuides() {
@@ -205,8 +197,8 @@ function Exchange({ entry, onFeedback }) {
 
 function FeedbackControls({ entry, onFeedback }) {
   const selected = entry.feedback?.helpful;
-  const buttonClass = (value) => `rounded-lg border px-3 py-1.5 text-xs font-black transition disabled:cursor-wait ${selected === value ? "border-blue-400 bg-blue-100 text-blue-900" : "border-slate-300 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-800"}`;
-  return <div className="mt-4 border-t border-emerald-100 pt-3"><div className="flex flex-wrap items-center gap-2"><span className="mr-1 text-xs font-bold text-slate-500">Was this helpful?</span><button type="button" onClick={() => onFeedback(entry.id, true)} disabled={entry.feedbackWorking || selected === true} className={buttonClass(true)}>👍 Helpful</button><button type="button" onClick={() => onFeedback(entry.id, false)} disabled={entry.feedbackWorking || selected === false} className={buttonClass(false)}>👎 Not Helpful</button></div>{entry.feedbackError && <p className="mt-2 text-xs font-semibold text-rose-700">Feedback could not be saved. Please try again.</p>}</div>;
+  const buttonClass = (value) => `rounded-lg border px-3 py-1.5 text-xs font-black transition cursor-pointer disabled:cursor-wait ${selected === value ? "border-blue-400 bg-blue-100 text-blue-900" : "border-slate-300 bg-white text-slate-600 hover:border-blue-300 hover:text-blue-800"}`;
+  return <div className="mt-4 border-t border-emerald-100 pt-3"><div className="flex flex-wrap items-center gap-2"><span className="mr-1 text-xs font-bold text-slate-500">Was this helpful?</span><button type="button" onClick={() => onFeedback(entry.id, true)} disabled={Boolean(entry.feedbackWorking)} aria-pressed={selected === true} aria-busy={Boolean(entry.feedbackWorking)} className={buttonClass(true)}>👍 Helpful</button><button type="button" onClick={() => onFeedback(entry.id, false)} disabled={Boolean(entry.feedbackWorking)} aria-pressed={selected === false} aria-busy={Boolean(entry.feedbackWorking)} className={buttonClass(false)}>👎 Not Helpful</button></div>{entry.feedbackError && <p className="mt-2 text-xs font-semibold text-rose-700">Feedback could not be saved. Please try again.</p>}</div>;
 }
 
 async function loadLeagueGuides(role) {

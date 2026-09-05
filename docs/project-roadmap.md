@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-05
 
-Current prepared application version: **LMS-0713** (package `0.1.535`), awaiting review/deployment. Stage 7 remains paused.
+Current prepared application version: **LMS-0714** (package `0.1.536`), awaiting review/deployment. Stage 7 remains paused.
 
 ## Purpose
 
@@ -536,3 +536,10 @@ LMS-0713 is prepared locally to correct roster troubleshooting confidence and a 
 Stage 7 remains documentation-only and paused: Helpful/Not Helpful management reporting; automatic capture/review of insufficient-evidence/no-applicable-source questions; recurring unanswered-question identification; rule/guide clarification and update workflow; statuses New / Reviewing / Rule or Guide Update Needed / Resolved / Dismissed where appropriate.
 
 Future permission-aware live LMS intelligence/navigation is also documentation-only: personal DUPR, another player's rating where permitted, Team X roster/standing, next opponent/match, Friday lineup, Take me to Match Setup, Open my roster and Open the standings. Implement later through existing role/permission rules and deterministic authorized server-side data services, never by pretending official-document RAG inspected live state.
+
+
+### LMS-0714 bounded Stage 6 feedback lifecycle correction (2026-09-05)
+
+The selected feedback button stayed disabled under LMS-0713 even after successful pending cleanup, and `disabled:cursor-wait` made selection appear permanently busy. LMS-0714 separates selected from pending state, keeps selected controls enabled, suppresses repeat votes, adds a synchronous per-answer request lock and `finally` cleanup, retains confirmed state on errors, and resets abandoned pending state on session restore. Server route and feedback database semantics are unchanged. Version LMS-0714/package 0.1.536; 182 tests and component browser verification pass. Required lint/type/PDF checks and isolated production build pass; normal build hits the known cache EPERM after compilation. No deployment or SQL/corpus change. See `docs/lms-0714-implementation-report.md`. Stage 6 awaits final same-answer four-click/two-event production acceptance; Stage 7 remains paused.
+
+Pending post-Stage-6 manager UI cleanup (documentation only): System Setup highlights AI Assistant Management and Test AI Assistant simultaneously when the latter is active; the blue Test AI Assistant header has a blank white upper-right control/box. Neither is fixed in LMS-0714. Previously documented Stage 7 reporting/review and future permission-aware live LMS intelligence remain future work.

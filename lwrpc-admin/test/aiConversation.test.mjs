@@ -77,13 +77,14 @@ test("LMS-0712 feedback receipt is user-bound and feedback transitions are idemp
 });
 
 test("LMS-0712 feedback migration and player UI retain server-only feedback writes", async () => {
-  const [sql, route, assistant] = await Promise.all([
+  const [sql, route, assistant, feedbackClient] = await Promise.all([
     readFile(new URL("../supabase-ai-assistant-lms-0712-stage6.sql", import.meta.url), "utf8"),
     readFile(new URL("../app/api/ask-lwr/feedback/route.js", import.meta.url), "utf8"),
     readFile(new URL("../app/components/AskLwrAssistant.js", import.meta.url), "utf8"),
+    readFile(new URL("../app/lib/askLwrFeedbackState.js", import.meta.url), "utf8"),
   ]);
   for (const field of ["answer_id", "auth_user_id", "member_id", "original_question", "effective_question", "generated_answer", "source_snapshot", "selection_snapshot", "assistant_version", "comment"]) assert.match(sql, new RegExp(`\\b${field}\\b`));
   assert.match(sql, /enable row level security/i); assert.match(sql, /revoke all on table.*from public, anon, authenticated/i); assert.doesNotMatch(sql, /ai_document_chunks.*update|activate_ai_document_version/i);
   assert.match(route, /readFeedbackReceipt/); assert.match(route, /authorizeAdminRequest\(req, "player"\)/); assert.match(route, /feedbackTransition/);
-  assert.match(assistant, /👍 Helpful/); assert.match(assistant, /👎 Not Helpful/); assert.match(assistant, /api\/ask-lwr\/feedback/); assert.match(assistant, /placeholder="Ask a question"/);
+  assert.match(assistant, /👍 Helpful/); assert.match(assistant, /👎 Not Helpful/); assert.match(feedbackClient, /api\/ask-lwr\/feedback/); assert.match(assistant, /createFeedbackController/); assert.match(assistant, /placeholder="Ask a question"/);
 });
