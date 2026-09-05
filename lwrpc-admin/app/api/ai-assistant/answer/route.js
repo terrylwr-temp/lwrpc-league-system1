@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { answerGenerationDiagnostic, generateOfficialAnswer } from "../../../lib/aiAnswerGeneration";
 import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
-import { createClarificationReceipt, createFollowUpReceipt, resolveConversationTurn } from "../../../lib/aiConversation";
-import { isUnsupportedOperationalQuestion } from "../../../lib/askLwrPlayerAnswer";
+import { createClarificationReceipt, createFollowUpReceipt } from "../../../lib/aiConversation";
+import { resolveOfficialConversation, playerFallbackResult } from "../../../lib/askLwrPlayerAnswer";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 
 export const runtime = "nodejs";
@@ -13,14 +13,13 @@ export async function POST(req) {
     if (authorization.error) return failure(authorization.error, authorization.status);
     const body = await req.json().catch(() => ({}));
     const started = performance.now();
-    const rawLiveDataGuard = isUnsupportedOperationalQuestion(body.question);
-    const conversationResolution = resolveConversationTurn({ question: body.question, userId: authorization.user.id, receipt: body.conversationReceipt });
-    if (conversationResolution.kind === "clarification") return NextResponse.json({
+    const conversationResolution = resolveOfficialConversation({ question: body.question, userId: authorization.user.id, receipt: body.conversationReceipt });
+    if (conversationResolution.kind !== "resolved") return NextResponse.json({
       success: true,
-      result: managerClarificationResult(body, conversationResolution, createClarificationReceipt(authorization.user.id, conversationResolution.rawQuestion, conversationResolution.clarification.category)),
+      result: managerClarificationResult(body, conversationResolution, conversationResolution.clarification?.category === "color_subject" ? createClarificationReceipt(authorization.user.id, conversationResolution.rawQuestion, conversationResolution.clarification.category) : null),
     });
     const retrieval = await retrieveOfficialEvidence({ supabase: authorization.supabase, body: { ...body, question: conversationResolution.effectiveQuestion } });
-    retrieval.conversationResolution = { ...conversationResolution, rawLiveDataGuard, effectiveLiveDataGuard: isUnsupportedOperationalQuestion(conversationResolution.effectiveQuestion) };
+    retrieval.conversationResolution = conversationResolution;
     const [answer, documentsConsidered] = await Promise.all([
       generateOfficialAnswer({ retrieval, supabase: authorization.supabase }),
       eligibleDocuments(authorization.supabase),
@@ -41,14 +40,15 @@ export async function POST(req) {
 }
 
 function managerClarificationResult(body, resolution, conversationReceipt) {
+  const message = resolution.clarification?.message || playerFallbackResult("protected").answer;
   const request = { question: resolution.rawQuestion || String(body.question || ""), askAbout: body.askAbout || "all", context: body.context || {} };
   return {
     retrieval: {
-      request, conversationResolution: { ...resolution, rawLiveDataGuard: isUnsupportedOperationalQuestion(resolution.rawQuestion), effectiveLiveDataGuard: false }, candidates: [], suppliedEvidence: [], authorityReviewCandidates: [], intentEvidenceCandidates: [], documentsConsidered: [],
-      evidence: { sufficient: false, threshold: .35, topScore: null, stage4Fallback: resolution.clarification.message },
+      request, conversationResolution: resolution, candidates: [], suppliedEvidence: [], authorityReviewCandidates: [], intentEvidenceCandidates: [], documentsConsidered: [],
+      evidence: { sufficient: false, threshold: .35, topScore: null, stage4Fallback: message },
       environment: { embeddingModel: "Not called", embeddingDimensions: 1536, evidenceThreshold: .35, retrievalLimit: 8, authorityReviewLimit: 12 }, metrics: { embeddingMs: 0, embeddingInputTokens: null, retrievalMs: 0, totalMs: 0 },
     },
-    answer: { answer: resolution.clarification.message, evidenceSufficient: false, modelCallSkipped: true, model: null, selectedEvidence: [], sources: [], conflict: { requiresClarification: false }, diagnostic: { label: "Clarification requested" }, metrics: { retrievalMs: 0, sourceResolutionMs: 0, generationMs: 0, totalMs: 0, inputTokens: null, outputTokens: null, totalTokens: null, estimatedGenerationCostUsd: null } },
+    answer: { answer: message, evidenceSufficient: false, modelCallSkipped: true, model: null, selectedEvidence: [], sources: [], conflict: { requiresClarification: false }, diagnostic: { label: resolution.kind === "protected" ? "Personal/live-data question protected" : "Clarification requested" }, metrics: { retrievalMs: 0, sourceResolutionMs: 0, generationMs: 0, totalMs: 0, inputTokens: null, outputTokens: null, totalTokens: null, estimatedGenerationCostUsd: null } },
     conversationReceipt,
   };
 }

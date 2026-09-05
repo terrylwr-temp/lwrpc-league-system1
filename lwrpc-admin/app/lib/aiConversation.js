@@ -32,41 +32,42 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
   if (receipt) {
     try { prior = readConversationReceipt(receipt, userId, { now }); } catch (error) { receiptError = error; }
   }
+  const diagnostics = { priorContextPurpose: prior?.purpose || null, receiptValidation: receipt ? (prior ? "valid" : "invalid_or_expired") : "absent", clarificationConsumed: false };
+
+  if (isCompleteStandaloneQuestion(rawQuestion)) {
+    return {
+      ...diagnostics, kind: "resolved", classification: prior ? "standalone_supersedes_context" : "standalone", rawQuestion, effectiveQuestion: rawQuestion,
+      priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior), clarification: null,
+    };
+  }
 
   if (prior?.purpose === "clarification") {
     const subject = clarificationSubject(rawQuestion);
-    if (!subject) return clarificationResolution(prior.originalQuestion, prior.category, "clarification_response_needs_subject", true);
-    return {
+    if (subject && prior.category === CLARIFICATION_COLOR && requiresColorSubjectClarification(prior.originalQuestion)) return {
+      ...diagnostics, clarificationConsumed: true,
       kind: "resolved", classification: "clarification_response", rawQuestion, effectiveQuestion: clarifiedQuestion(prior.originalQuestion, prior.category, subject),
       priorContextAvailable: true, contextSuperseded: false, clarification: null,
     };
   }
 
-  if (isCompleteStandaloneQuestion(rawQuestion)) {
-    return {
-      kind: "resolved", classification: prior ? "standalone_supersedes_context" : "standalone", rawQuestion, effectiveQuestion: rawQuestion,
-      priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior), clarification: null,
-    };
-  }
-
-  if (requiresColorSubjectClarification(rawQuestion)) return clarificationResolution(rawQuestion, CLARIFICATION_COLOR, "missing_color_subject", Boolean(prior));
+  if (requiresColorSubjectClarification(rawQuestion)) return { ...diagnostics, ...clarificationResolution(rawQuestion, CLARIFICATION_COLOR, "missing_color_subject", Boolean(prior)), contextSuperseded: Boolean(prior) };
 
   if (prior?.purpose === "follow_up" && isContextualFollowUp(rawQuestion)) {
     return {
-      kind: "resolved", classification: "follow_up", rawQuestion, effectiveQuestion: composeFollowUp(prior.effectiveQuestion, rawQuestion),
+      ...diagnostics, kind: "resolved", classification: "follow_up", rawQuestion, effectiveQuestion: composeFollowUp(prior.effectiveQuestion, rawQuestion),
       priorContextAvailable: true, contextSuperseded: false, clarification: null,
     };
   }
 
-  if (receiptError && isContextualFollowUp(rawQuestion)) {
+  if ((receiptError || prior?.purpose === "clarification") && isContextualFollowUp(rawQuestion)) {
     return {
-      kind: "clarification", classification: "expired_context", rawQuestion, effectiveQuestion: "", priorContextAvailable: false, contextSuperseded: false,
-      clarification: { category: "expired_context", message: "Please ask the full question again so I can check the official rules." },
+      ...diagnostics, kind: "clarification", classification: receiptError ? "expired_context" : "unresolved_follow_up", rawQuestion, effectiveQuestion: "", priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior),
+      clarification: { category: "full_question", message: "Please ask the full question again so I can check the official rules." },
     };
   }
 
   return {
-    kind: "resolved", classification: "standalone_fragment", rawQuestion, effectiveQuestion: rawQuestion,
+    ...diagnostics, kind: "resolved", classification: "standalone_fragment", rawQuestion, effectiveQuestion: rawQuestion,
     priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior), clarification: null,
   };
 }
@@ -74,9 +75,9 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
 // This post-retrieval check deliberately inspects only query completeness and
 // the presence of active candidates. It never turns candidates into an answer.
 export function clarificationFromRetrieval(resolution, retrieval) {
-  if (resolution?.kind !== "resolved" || !requiresColorSubjectClarification(resolution.rawQuestion)) return null;
+  if (resolution?.kind !== "resolved" || !requiresColorSubjectClarification(resolution.effectiveQuestion)) return null;
   const hasCandidates = Array.isArray(retrieval?.candidates) && retrieval.candidates.length > 0;
-  return hasCandidates ? clarificationResolution(resolution.rawQuestion, CLARIFICATION_COLOR, "missing_color_subject_with_active_candidates", resolution.priorContextAvailable) : clarificationResolution(resolution.rawQuestion, CLARIFICATION_COLOR, "missing_color_subject", resolution.priorContextAvailable);
+  return { ...resolution, ...clarificationResolution(resolution.rawQuestion, CLARIFICATION_COLOR, hasCandidates ? "missing_color_subject_with_active_candidates" : "missing_color_subject", resolution.priorContextAvailable), clarificationQuestion: resolution.effectiveQuestion };
 }
 
 export function createFeedbackReceipt({ userId, memberId = null, originalQuestion, effectiveQuestion, answer, sources = [], selectedEvidence = [], retrieval, assistantVersion, model, now = Date.now() } = {}) {
@@ -122,13 +123,14 @@ function requiresColorSubjectClarification(question) {
   const value = String(question || "").toLowerCase();
   return /\bcolou?r\b/.test(value)
     && /\b(?:considerations?|requirements?|rules?|restrictions?|matter)\b/.test(value)
-    && !/\b(?:ball|pickleball|paddle|clothing|apparel|shirt|jersey|court)\b/.test(value);
+    && !/\b(?:ball|pickleball|paddle|clothing|apparel|shirt|jersey|court|surface|uniform|shoes|hat)\b/.test(value);
 }
 
 function clarificationSubject(question) {
   const value = cleanQuestion(question).replace(/[?.!]+$/, "").trim();
-  if (!value || value.length > 80 || /\b(?:what|when|where|why|how|can|does|did)\b/i.test(value)) return "";
-  return value;
+  // A bounded noun fragment, including natural multiword answers, not a word-count
+  // shortcut that would consume a new independent question as a subject.
+  return /^(?:(?:the|a|an|my|our)\s+)?(?:(?:indoor|outdoor|pickleball|playing|court|team|uniform|paddle)\s+){0,3}(?:ball|paddle|clothing|apparel|shirt|jersey|court|surface|uniform|shoes|hat)(?:\s+colou?r)?$/i.test(value) ? value : "";
 }
 
 function clarifiedQuestion(originalQuestion, category, subject) {
@@ -146,7 +148,7 @@ function isContextualFollowUp(question) {
 function isCompleteStandaloneQuestion(question) {
   const value = cleanQuestion(question);
   if (!value) return false;
-  if (requiresColorSubjectClarification(value) || isContextualFollowUp(value)) return false;
+  if (requiresColorSubjectClarification(value) || clarificationSubject(value) || isContextualFollowUp(value)) return false;
   return value.split(/\s+/).length >= 3 || /[?]$/.test(value);
 }
 

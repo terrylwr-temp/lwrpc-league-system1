@@ -48,14 +48,12 @@ export function playerRetrievalBody(body = {}, role = "player") {
 
 export async function runPlayerOfficialAnswer({ body, role, userId, memberId = null, supabase, retrieveOfficialEvidence, generateOfficialAnswer, now = Date.now }) {
   const rawQuestion = body?.question;
-  if (isUnsupportedOperationalQuestion(rawQuestion)) return { retrieval: null, conversationResolution: protectedResolution(rawQuestion, "raw_live_data_guard"), result: playerFallbackResult("protected") };
-
-  const resolution = resolveConversationTurn({ question: rawQuestion, userId, receipt: body?.conversationReceipt, now: now() });
+  const resolution = resolveOfficialConversation({ question: rawQuestion, userId, receipt: body?.conversationReceipt, now: now() });
+  if (resolution.kind === "protected") return { retrieval: null, conversationResolution: resolution, result: playerFallbackResult("protected") };
   if (resolution.kind === "clarification") return {
     retrieval: null, conversationResolution: resolution,
     result: clarificationResult(resolution, userId, now()),
   };
-  if (isUnsupportedOperationalQuestion(resolution.effectiveQuestion)) return { retrieval: null, conversationResolution: { ...resolution, effectiveLiveDataGuard: true }, result: playerFallbackResult("protected") };
 
   const retrieval = await retrieveOfficialEvidence({ supabase, body: playerRetrievalBody({ ...body, question: resolution.effectiveQuestion }, role) });
   retrieval.conversationResolution = { ...resolution, rawLiveDataGuard: false, effectiveLiveDataGuard: false };
@@ -68,6 +66,13 @@ export async function runPlayerOfficialAnswer({ body, role, userId, memberId = n
   return { retrieval, conversationResolution: retrieval.conversationResolution, result: toPlayerAnswerResult(answer, userId, {
     originalQuestion: resolution.rawQuestion, effectiveQuestion: resolution.effectiveQuestion, memberId, retrieval, now: now(),
   }) };
+}
+
+export function resolveOfficialConversation(args) {
+  if (isUnsupportedOperationalQuestion(args.question)) return protectedResolution(args.question, "raw_live_data_guard");
+  const resolution = resolveConversationTurn(args);
+  const effectiveLiveDataGuard = resolution.kind === "resolved" ? isUnsupportedOperationalQuestion(resolution.effectiveQuestion) : null;
+  return { ...resolution, rawLiveDataGuard: false, effectiveLiveDataGuard, ...(effectiveLiveDataGuard ? { kind: "protected" } : {}) };
 }
 
 export function playerFallbackResult(kind = "insufficient_evidence") {
@@ -105,10 +110,10 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
 function clarificationResult(resolution, userId, now) {
   return {
     kind: "clarification", answer: resolution.clarification.message, evidenceSufficient: false, conflict: false, sources: [], feedbackReceipt: null,
-    conversationReceipt: createClarificationReceipt(userId, resolution.rawQuestion, resolution.clarification.category, { now }),
+    conversationReceipt: resolution.clarification.category === "color_subject" ? createClarificationReceipt(userId, resolution.clarificationQuestion || resolution.rawQuestion, resolution.clarification.category, { now }) : null,
   };
 }
 
 function protectedResolution(rawQuestion, classification) {
-  return { kind: "protected", classification, rawQuestion: String(rawQuestion || ""), effectiveQuestion: "", priorContextAvailable: false, contextSuperseded: false, rawLiveDataGuard: true, effectiveLiveDataGuard: false };
+  return { kind: "protected", classification, rawQuestion: String(rawQuestion || ""), effectiveQuestion: "", priorContextAvailable: false, priorContextPurpose: null, receiptValidation: "not_checked_raw_guard", clarificationConsumed: false, contextSuperseded: false, rawLiveDataGuard: true, effectiveLiveDataGuard: null };
 }

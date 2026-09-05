@@ -29,7 +29,13 @@ function normalized(value) {
 }
 
 function issueTerms(question) {
-  return [...new Set((normalized(question).match(/[a-z0-9]+/g) || []).filter((term) => !FRAMING.has(term)))];
+  const terms = [...new Set((normalized(question).match(/[a-z0-9]+/g) || []).filter((term) => !FRAMING.has(term)))];
+  // Only color-subject issues get this framing normalization. Keep every
+  // substantive qualifier; unrelated ball questions use the existing matcher.
+  if (terms.includes("color") && terms.some((term) => ["ball", "paddle", "clothing", "apparel", "shirt", "jersey", "court"].includes(term))) {
+    return terms.filter((term) => !["there", "any", "consideration", "considerations", "requirement", "requirements", "restriction", "restrictions"].includes(term));
+  }
+  return terms;
 }
 
 // A body passage must contain the issue's specific terms and an actual rule or

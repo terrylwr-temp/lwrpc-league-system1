@@ -19,7 +19,7 @@ test("centralizes page-aware suggestions without fabricating LMS scope IDs", () 
   assert.equal(assistantPageContext("/player-dashboard?view=standings", "player").featureModule, "Standings");
   assert.equal(assistantPageContext("/members", "commissioner").featureModule, "Member Administration");
   assert.equal(assistantPageContext("/player-dashboard", "player").featureModule, "LMS");
-  assert.match(ASK_LWR_INITIAL_COPY, /official documents/i);
+  assert.match(ASK_LWR_INITIAL_COPY, /complete USA Pickleball Rulebook/);
 });
 
 test("player response is deliberately limited to plain answer and trusted citations", () => {

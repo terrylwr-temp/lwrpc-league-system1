@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import styles from "./AskLwrAssistant.module.css";
+import { currentConversationContext } from "../lib/askLwrConversationState";
 import { usePathname } from "next/navigation";
 import { getCurrentUserRole, getRequestAuthorizationHeaders, supabase } from "../lib/auth";
 import { GUIDE_DOCUMENT_TYPES, openGuideDocument } from "../lib/dashboardGuides";
@@ -25,6 +28,7 @@ function AssistantIcon({ size = 20 }) {
 
 export function AskLwrAssistantDrawer({ open, onClose, role }) {
   const drawerRef = useRef(null);
+  const overlayRef = useRef(null);
   const closeButtonRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -32,8 +36,35 @@ export function AskLwrAssistantDrawer({ open, onClose, role }) {
     if (!open) return undefined;
     const previousFocus = document.activeElement;
     const previousOverflow = document.body.style.overflow;
+    const previousRootOverflow = document.documentElement.style.overflow;
+    const previousPosition = document.body.style.position;
+    const previousTop = document.body.style.top;
+    const previousWidth = document.body.style.width;
+    const scrollY = window.scrollY;
+    const mobile = window.matchMedia("(max-width: 639px)").matches;
     document.body.style.overflow = "hidden";
-    const focusInput = window.setTimeout(() => inputRef.current?.focus() || closeButtonRef.current?.focus(), 0);
+    document.documentElement.style.overflow = "hidden";
+    if (mobile) {
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+    }
+    // The portal escapes header transforms/stacking contexts. Hide its siblings
+    // from keyboard and assistive navigation while the modal owns focus.
+    const siblings = [...document.body.children].filter((node) => node !== overlayRef.current);
+    const inertBefore = siblings.map((node) => node.inert);
+    siblings.forEach((node) => { node.inert = true; });
+    const viewport = window.visualViewport;
+    const syncViewport = () => {
+      overlayRef.current?.style.setProperty("--ask-height", `${viewport?.height || window.innerHeight}px`);
+      overlayRef.current?.style.setProperty("--ask-top", `${viewport?.offsetTop || 0}px`);
+    };
+    syncViewport();
+    viewport?.addEventListener("resize", syncViewport);
+    viewport?.addEventListener("scroll", syncViewport);
+    const focusInput = window.setTimeout(() => {
+      (inputRef.current || closeButtonRef.current)?.focus({ preventScroll: true });
+    }, 0);
     const onKeyDown = (event) => {
       if (event.key === "Escape") { onClose(); return; }
       if (event.key !== "Tab") return;
@@ -47,18 +78,28 @@ export function AskLwrAssistantDrawer({ open, onClose, role }) {
     return () => {
       window.clearTimeout(focusInput);
       window.removeEventListener("keydown", onKeyDown);
+      viewport?.removeEventListener("resize", syncViewport);
+      viewport?.removeEventListener("scroll", syncViewport);
+      siblings.forEach((node, index) => { node.inert = inertBefore[index]; });
       document.body.style.overflow = previousOverflow;
+      document.documentElement.style.overflow = previousRootOverflow;
+      if (mobile) {
+        document.body.style.position = previousPosition;
+        document.body.style.top = previousTop;
+        document.body.style.width = previousWidth;
+        window.scrollTo(0, scrollY);
+      }
       previousFocus?.focus?.();
     };
   }, [open, onClose]);
 
-  if (!open) return null;
-  return <div className="fixed inset-0 z-[90]" role="dialog" aria-modal="true" aria-labelledby="ask-lwr-title">
-    <button type="button" className="absolute inset-0 bg-slate-950/45 backdrop-blur-[1px]" onClick={onClose} aria-label="Close Ask LWR Pickleball Club AI"/>
-    <aside ref={drawerRef} className="absolute inset-y-0 right-0 flex w-full max-w-[640px] flex-col border-l border-slate-200 bg-slate-50 shadow-2xl sm:w-[min(92vw,640px)]" aria-describedby="ask-lwr-subtitle">
+  if (!open || typeof document === "undefined") return null;
+  return createPortal(<div ref={overlayRef} className={styles.overlay} role="dialog" aria-modal="true" aria-labelledby="ask-lwr-title">
+    <button type="button" tabIndex={-1} className="absolute inset-0 bg-slate-950/45 backdrop-blur-[1px]" onClick={onClose} aria-label="Close Ask LWR Pickleball Club AI"/>
+    <aside ref={drawerRef} className={`${styles.panel} absolute inset-y-0 right-0 flex w-full max-w-[640px] flex-col border-l border-slate-200 bg-slate-50 shadow-2xl sm:w-[min(92vw,640px)]`} aria-describedby="ask-lwr-subtitle">
       <AssistantContent role={role} inputRef={inputRef} closeButtonRef={closeButtonRef} onClose={onClose} drawer/>
     </aside>
-  </div>;
+  </div>, document.body);
 }
 
 export function AskLwrAssistantPage({ role }) {
@@ -88,7 +129,9 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
     const nextQuestion = String(suggestedQuestion || question).trim();
     if (!nextQuestion || working) return;
     const exchangeId = `${Date.now()}-${Math.random()}`;
-    const conversationReceipt = exchanges.find((entry) => entry.result?.conversationReceipt)?.result?.conversationReceipt || null;
+    const context = currentConversationContext();
+    const contextRequest = context.begin();
+    const conversationReceipt = contextRequest.receipt;
     setQuestion(""); setWorking(true);
     setExchanges((current) => [{ id: exchangeId, question: nextQuestion, pending: true }, ...current].slice(0, MAX_SESSION_EXCHANGES));
     try {
@@ -99,6 +142,7 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload?.success || !payload?.result?.answer) throw new Error("player_request_failed");
+      context.complete(contextRequest, payload.result.conversationReceipt);
       setExchanges((current) => current.map((entry) => entry.id === exchangeId ? { ...entry, pending: false, result: payload.result } : entry));
     } catch {
       setExchanges((current) => current.map((entry) => entry.id === exchangeId ? { ...entry, pending: false, requestError: true } : entry));
@@ -131,16 +175,16 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
   }
 
   const guides = GUIDE_DOCUMENT_TYPES.filter((guide) => visibleDashboardGuideKeys(role).includes(guide.key));
-  const bodyClass = drawer ? "flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-5 sm:px-6" : "min-h-[620px] px-4 py-6 sm:px-7";
+  const bodyClass = drawer ? `${styles.scroll} flex min-h-0 flex-1 flex-col overflow-y-auto px-4 py-5 sm:px-6` : "min-h-[620px] px-4 py-6 sm:px-7";
   return <>
-    <header className="flex items-start gap-3 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700"><AssistantIcon size={21}/></span>
+    <header className={`${drawer ? styles.header : ""} flex shrink-0 items-start gap-3 border-b border-slate-200 bg-white px-4 py-4 sm:px-6`}>
+      <span className={`${styles.icon} grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-blue-50 text-blue-700`}><AssistantIcon size={21}/></span>
       <div className="min-w-0 flex-1"><h2 id="ask-lwr-title" className="text-lg font-black text-[#102e64]">Ask LWR Pickleball Club AI</h2><p id="ask-lwr-subtitle" className="mt-0.5 text-sm font-semibold leading-5 text-slate-600">Get answers from official LWR PC information and USAP Rules</p></div>
-      {onClose && <button ref={closeButtonRef} type="button" onClick={onClose} className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950" aria-label="Close Ask LWR Pickleball Club AI">×</button>}
+      {onClose && <button ref={closeButtonRef} type="button" onClick={onClose} className={`${styles.close} grid h-9 w-9 shrink-0 place-items-center rounded-full text-xl text-slate-600 transition hover:bg-slate-100 hover:text-slate-950`} aria-label="Close Ask LWR Pickleball Club AI">×</button>}
     </header>
     <div className={bodyClass}>
-      <form onSubmit={submit} className="flex gap-2"><label className="sr-only" htmlFor="ask-lwr-question">Ask a question</label><textarea id="ask-lwr-question" ref={inputRef} value={question} maxLength={1000} rows={3} onChange={(event) => setQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(event); } }} placeholder="Ask a question" className="min-h-[74px] flex-1 resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"/><button type="submit" disabled={working || !question.trim()} className="self-end rounded-xl bg-[#1558d5] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-[#104ab7] disabled:cursor-not-allowed disabled:bg-slate-300">Ask</button></form>
-      {exchanges.length === 0 && <section className="mt-4 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm"><h3 className="text-base font-black text-[#102e64]">How can I help?</h3><p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{ASK_LWR_INITIAL_COPY}</p><div className="mt-4 flex flex-wrap gap-2">{pageContext.suggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => submit(null, suggestion)} disabled={working} className="rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-left text-xs font-bold leading-4 text-blue-800 transition hover:border-blue-400 hover:bg-blue-100 disabled:cursor-wait disabled:opacity-60">{suggestion}</button>)}</div></section>}
+      <form onSubmit={submit} className={`${styles.composer} flex shrink-0 gap-2`}><label className="sr-only" htmlFor="ask-lwr-question">Ask a question</label><textarea id="ask-lwr-question" ref={inputRef} value={question} maxLength={1000} rows={3} onChange={(event) => setQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(event); } }} placeholder="Ask a question" className="min-h-[74px] min-w-0 flex-1 resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"/><button type="submit" disabled={working || !question.trim()} className="self-end rounded-xl bg-[#1558d5] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-[#104ab7] disabled:cursor-not-allowed disabled:bg-slate-300">Ask</button></form>
+      {exchanges.length === 0 && <section className="mt-4 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm"><h3 className="text-base font-black text-[#102e64]">How can I help?</h3><p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{ASK_LWR_INITIAL_COPY}</p><div className="mt-4 flex flex-wrap gap-2">{pageContext.suggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => submit(null, suggestion)} disabled={working} className="min-h-11 max-w-full rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-left text-xs font-bold leading-4 text-blue-800 transition hover:border-blue-400 hover:bg-blue-100 disabled:cursor-wait disabled:opacity-60">{suggestion}</button>)}</div></section>}
       <div className="mt-4 space-y-4">{exchanges.map((entry) => <Exchange key={entry.id} entry={entry} onFeedback={submitFeedback}/>)}</div>
       <div className="mt-5 rounded-xl border border-slate-200 bg-white"><button type="button" onClick={toggleGuides} aria-expanded={guidesOpen} className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left text-sm font-black text-[#102e64]"><span>Browse Guides &amp; Rules</span><span aria-hidden="true">{guidesOpen ? "−" : "+"}</span></button>{guidesOpen && <div className="border-t border-slate-200 p-3"><p className="mb-3 text-xs font-semibold leading-5 text-slate-600">Open the official user guides and league documents already available in the LMS.</p><div className="grid gap-2">{guides.map((guide) => <button key={guide.key} type="button" onClick={() => openGuideDocument(supabase, guide)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-blue-50">{guide.label}</button>)}{leagueGuides.map((guide) => <button key={guide.key} type="button" onClick={() => openLeagueGuide(guide)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-blue-50">{guide.label}</button>)}{guidesLoading && <p className="text-sm font-semibold text-slate-500" role="status">Loading league documents...</p>}{!guidesLoading && guides.length + leagueGuides.length === 0 && <p className="text-sm font-semibold text-slate-500">No user-facing guides are configured yet.</p>}</div></div>}</div>
     </div>
