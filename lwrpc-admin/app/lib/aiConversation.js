@@ -1,3 +1,4 @@
+import { missingPlayerObject, playerObjectReply } from "./aiQuestionApplicability.js";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
 
 const RECEIPT_VERSION = 1;
@@ -5,6 +6,9 @@ const CONTEXT_TTL_MS = 20 * 60 * 1000;
 const FEEDBACK_TTL_MS = 24 * 60 * 60 * 1000;
 const MAX_QUESTION_LENGTH = 1000;
 const MAX_RECEIPT_LENGTH = 30000;
+
+export const CLARIFICATION_PLAYER_OBJECT = "player_entry_object";
+export const PLAYER_OBJECT_CLARIFICATION = "Do you mean adding players to your team roster or entering players into a match lineup?";
 
 export const CLARIFICATION_COLOR = "color_subject";
 export const COLOR_CLARIFICATION = "What are you asking about—the ball, paddle, clothing, or something else?";
@@ -34,6 +38,11 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
   }
   const diagnostics = { priorContextPurpose: prior?.purpose || null, receiptValidation: receipt ? (prior ? "valid" : "invalid_or_expired") : "absent", clarificationConsumed: false };
 
+  if (prior?.purpose === "clarification" && prior.category === CLARIFICATION_PLAYER_OBJECT && missingPlayerObject(prior.originalQuestion)) {
+    const object = playerObjectReply(rawQuestion);
+    if (object) return { ...diagnostics, clarificationConsumed: true, kind: "resolved", classification: "clarification_response", rawQuestion, effectiveQuestion: `${prior.originalQuestion.replace(/[?.!]+$/, "")} to my ${object}?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
+  }
+  if (missingPlayerObject(rawQuestion)) return { ...diagnostics, ...clarificationResolution(rawQuestion, CLARIFICATION_PLAYER_OBJECT, "missing_player_entry_object", Boolean(prior)), contextSuperseded: Boolean(prior) };
   if (isCompleteStandaloneQuestion(rawQuestion)) {
     return {
       ...diagnostics, kind: "resolved", classification: prior ? "standalone_supersedes_context" : "standalone", rawQuestion, effectiveQuestion: rawQuestion,
@@ -107,7 +116,7 @@ export function feedbackTransition(previousHelpful, nextHelpful) {
 function clarificationResolution(originalQuestion, category, reason, priorContextAvailable) {
   return {
     kind: "clarification", classification: "clarification_required", rawQuestion: cleanQuestion(originalQuestion), effectiveQuestion: "", priorContextAvailable,
-    contextSuperseded: false, clarification: { category, reason, message: category === CLARIFICATION_COLOR ? COLOR_CLARIFICATION : "Please clarify what you mean." },
+    contextSuperseded: false, clarification: { category, reason, message: category === CLARIFICATION_COLOR ? COLOR_CLARIFICATION : category === CLARIFICATION_PLAYER_OBJECT ? PLAYER_OBJECT_CLARIFICATION : "Please clarify what you mean." },
   };
 }
 

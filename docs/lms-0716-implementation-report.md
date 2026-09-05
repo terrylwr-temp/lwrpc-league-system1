@@ -1,6 +1,6 @@
 # LMS-0716 implementation report — Stage 7A
 
-Version **LMS-0716 / 0.1.538**. **Corrected additive migration applied to production on 2026-09-05; application not deployed and Stage 7A not production accepted.** Controlled validation stopped at the HMAC configuration gate because authenticated Vercel environment-write access is unavailable. All identified synthetic validation rows were removed. LMS-0715 / 0.1.537 remains the accepted production application. Stages 1–6 remain production accepted. LMS-0717 has not started. The final section supersedes the earlier local-review/preflight checkpoints below.
+**LMS-0716 / 0.1.538 — PRODUCTION ACCEPTED. Stage 7A — COMPLETE.** Final read-only review on 2026-09-05 found no new defect. The owner-authorized live authorization and failure-injection limitations are accepted and remain documented for operational review; they do not block Stage 7B unless new evidence indicates a problem. Stages 1–6 remain accepted. LMS-0717 / Stage 7B and Live LMS Intelligence have not started and are not authorized by this acceptance. Historical checkpoints below are superseded by the final acceptance section.
 
 The owner approved the complete Stage 7 design and separately approved its Unicode normalized-question constraint correction. This implementation observes existing outcomes; it does not change retrieval or answer decisions.
 
@@ -228,3 +228,155 @@ After safe configuration, recheck production security/state and resume the alrea
 ## HMAC gate resumed — 2026-09-05
 
 The owner configured both Production variables manually. Read-only Vercel UI verification confirms AI_QUALITY_HMAC_KEY is Secret/Production and AI_QUALITY_HMAC_KEY_VERSION is Config/Production with value 1. The secret was not revealed, copied or changed. The previously reported configuration blocker is cleared. The production migration will not be reapplied. Release through the existing Git-connected production pipeline and live acceptance are now in progress; this note does not claim acceptance.
+
+## Production deployment complete; authenticated acceptance pending — 2026-09-05
+
+- Read-only Vercel UI confirmed the dedicated key as Secret/Production and version as Config/Production, value 1. The secret was never revealed, copied or changed. Successful HMAC-dependent capture remains the runtime verification gate.
+- Normal Git pipeline: pushed reviewed release commit `7dae6d0c49a431e31a73bba2309242a633307b5c` to the existing main branch. Vercel production deployment `dpl_CntbLvoarcpooSgYzGsxby34DWz2` became READY; production alias is https://league.lwrpickleballclub.com. Build completed in 33 seconds; compilation and TypeScript passed. Deployment completed at 2026-09-05 19:54:15 UTC.
+- Production browser reload shows LMS-0716. Anonymous GET /api/ai-assistant/capture-health returns HTTP 401 with only success:false and Manager access required. The player UI source was not changed in this deployment. Authenticated payload/UI behavior has not yet been exercised.
+- Read-only database recheck: all six new tables retain approved RLS/service/browser permissions. All six remain empty and existing feedback count remains 11. No migration replay or database write occurred in this resumed pass.
+- Runtime log query for ai_quality_capture in this deployment returned no events before authenticated testing. Vercel project UI identifies the Hobby plan; official runtime-log documentation specifies one-hour retention: https://vercel.com/docs/logs/runtime. This is an operational retention limit, not proof of live capture success/failure visibility. No logging infrastructure was modified.
+- Browser LMS authentication had expired after four hours of inactivity. The owner was asked to sign in without sharing credentials. No member was impersonated, no token was extracted and no auth account/role was changed.
+- Grounded telemetry, four-click feedback correlation, automatic/repeated insufficient-evidence capture, protected privacy, clarification/follow-up, actual manager_test separation, authenticated health role matrix, sanitized live capture logs and deployed capture latency/fail-open acceptance remain pending this authenticated test session. Prior local and synthetic database results remain evidence only for their documented scope.
+- No HMAC change, document/corpus/embedding processing, deferred retrieval investigation or LMS-0717 work occurred. LMS-0716 is deployed but cannot yet be declared production accepted.
+
+## Authenticated production acceptance stop — 2026-09-05 20:00 UTC
+
+The owner signed in and authorized continuation. Tests used the normal Ask LWR UI under the existing Commissioner session; the player pipeline correctly records origin player_interface independently of the operator role. No auth token was extracted and no roles were changed.
+
+### Passed live checks
+
+- Question: **Can I volley in the kitchen?** The answer correctly stated that volleying must begin outside the NVZ and that contact during the volley is prohibited, with the 2026 USA Pickleball Rulebook Rule 11.A source. Outcome **a3c4db5d-c48f-4f15-b827-91c6b06b5a09**, LMS-0716, player_interface, final_kind=answer, feedback_eligible=true, source_family=usap. Before voting, occurrence count was zero: lightweight telemetry only.
+- Actually clicked **Helpful → Helpful again → Not Helpful → Not Helpful again**. Exactly two feedback events were stored for that same answer: true at **19:58:02.029295 UTC**, false at **19:58:57.987090 UTC**, both LMS-0716. Repeated clicks created no additional event. One grounded_feedback occurrence references the same outcome/answer identity; one New case exists. One source and one selected-evidence snapshot entry are present. The route records key_version=1, establishing successful production HMAC-dependent grouping without exposing or changing the key.
+- Vercel runtime logs contain sanitized ai_quality_capture/capture_succeeded entries for the answer and both feedback transitions. Application log fields contain only event, stage, assistant_version and time; no question, evidence, identity, credential or signed URL appeared in these capture entries.
+- First answer completion 19:57:21.407 UTC → persistence-success log 19:57:21.451 UTC: **44 ms**. Second answer completion 20:00:04.751 UTC → persistence-success log 20:00:04.778 UTC: **27 ms**. These are application-timestamp capture intervals for two successful requests, not overall answer latency or proof of the failure deadline. Database recorded_at lay within each interval. Grounded answer generation itself took 3,649 ms; the second took 10,771 ms.
+- The existing Ask LWR header/composer, newest-first exchanges, feedback selection states and Official Sources rendered normally during these tests. No new telemetry fields appeared visibly. Exact live wire-payload parity, mobile/keyboard layout and document-viewer navigation were not independently tested in this pass.
+
+### Stop-triggering result
+
+Question: **What is the official LWR Pickleball Club policy for reimbursement of lost prescription sunglasses?**
+
+The intended no-source test instead produced this answer:
+
+> LWR Pickleball Club does not provide reimbursement for lost prescription sunglasses under the supplied policy evidence. The league waiver says members release LWR PC, match sites, communities/clubs, and officers/volunteers from claims, liability, and costs. No separate reimbursement policy for lost prescription sunglasses is supplied.
+
+Displayed sources were Code of Conduct page 1, DUPR League Rules Rule 3 / Player Requirements page 2, League Waiver page 14 and Rule 5 / Team/Game Rules page 4. A definitive reimbursement-policy assertion based on a general waiver, alongside the acknowledgment that no separate policy is supplied, is an unexpected answer-quality concern. Its correctness/applicability and whether it predates LMS-0716 have **not** been diagnosed. It is not evidence that Stage 7A changed retrieval/selection.
+
+Outcome **a2465488-cdcd-4d78-bce9-415ef2724211** was recorded as answer, LMS-0716, player_interface, eligible=true, with zero detailed occurrences before voting. That is observationally consistent with the pipeline's actual final kind. It does **not** validate automatic insufficient_evidence capture. No feedback was clicked on this second answer and no alternative no-source question was tried after the stop condition fired.
+
+Per the owner's instruction to stop on unexpected Ask LWR behavior, no further acceptance interactions or fixes were performed. Only read-only outcome/log inspection and this documentation followed. No rollback was performed: no serious regression attributable to LMS-0716 has been established. LMS-0716 remains deployed pending review.
+
+### Still pending / acceptance decision
+
+Genuine insufficient-evidence capture, repeated unanswered grouping, protected privacy, clarification/follow-up, actual Test AI Assistant manager_test separation, authenticated capture-health role matrix, safe hosted fail-open/cancellation, exact response-payload parity and mobile/viewer acceptance remain uncompleted. Anonymous capture-health denial and prior isolated/database tests remain valid within their documented scope. Live success-log visibility is now proven; live failure-log visibility is not.
+
+**LMS-0716 / Stage 7A cannot yet be production accepted.** Review this unexpected answer before authorizing continuation or diagnosis. No code, SQL, migration, HMAC, corpus/document/embedding, active version, retrieval/selection or deployment changes were made in this test pass. The previously deferred roster questions were not investigated. LMS-0717 has not started. Live acceptance events are retained; no real feedback/history was cleaned up.
+
+## Diagnosis-only follow-up
+
+The completed `lms-0716-reimbursement-diagnosis.md` contains the historical-versus-replay distinction, full fresh candidate/selection/model-input trace, exact source passages, reimbursement/waiver controls, LMS-0715 neutrality comparison and a verified alternative no-source question. Diagnosis did not write production rows or change application code/configuration. The original negative policy wording was not reproduced verbatim; the incorrect grounded classification and permissive selection reproduce under accepted LMS-0715. Stage 7A may resume unchanged after review using the verified alternative, but remains not production accepted until outstanding live tests pass.
+
+## Resumed Stage 7A acceptance — 2026-09-05, current checkpoint
+
+The owner accepted the diagnosis and authorized continuation without Stage 3/4/generation changes. All interactions below used the deployed application, existing authenticated session and normal UI. Only the authorized requests created operational capture rows. No extra feedback clicks, replayed migration, credential extraction, role change, HMAC change, corpus operation, deployment or application edit occurred in this continuation. Real acceptance history remains stored.
+
+### Automatic no-source capture and exact repeat — passed
+
+Question: **What is the chemical symbol for tungsten?**
+
+| Request | Outcome/answer ID | Occurrence ID | Completed UTC |
+|---|---|---|---|
+| First | 28c00993-e808-460f-a6fb-73b41e6ab6f0 | bfcd5dc5-e3e4-4c19-b981-6e3deb852652 | 20:14:43.962 |
+| Exact repeat, new request | 81fd76b8-cc6e-41e8-8eab-a67de8fa373c | 8f9cb00b-0693-4b32-abac-68dfc7c8b0f7 | 20:15:38.477 |
+
+Both are LMS-0716/player_interface/insufficient_evidence, reason stage3_insufficient_evidence, model_call_skipped=true. Each has exactly one outcome and one automatic occurrence. Both share deterministic group **6932b916-e45e-4299-864e-c10d812a5844** and the single **New** case **8216aace-13eb-49b8-ae9b-037e1b172dd5**. The route uses key_version=1 and normalizer_version=1. No feedback click was required or made.
+
+The existing fallback was displayed for both requests. Top candidate score was .0898; no evidence was selected and no answer-model call was made. Each source snapshot and selected-evidence array is empty. The outcome diagnostic is 271 bytes; selection snapshots are 1,583/1,584 bytes, containing bounded candidate identifiers/scores and reason diagnostics, without candidate passage text or unrelated generated model content. The stored output is the existing fallback, not an invented chemistry answer.
+
+### Other functional gates — passed
+
+| Gate | Production evidence |
+|---|---|
+| Protected privacy | `What is my DUPR?` → outcome **ad719a08-95da-403c-a7f9-0df2225859ce**, final_kind=protected, raw_live_data_guard, stage3_invoked=false, model skipped, source_family=none, diagnostic_snapshot={}. No detail occurrence/group/case or feedback eligibility. The unchanged generic fallback displayed; telemetry correctly distinguishes protection from missing rules. Outcomes have no question, answer or member identity columns. |
+| Clarification | `Are there any color considerations?` → **7fae6a8d-33b3-429f-a374-d8981e7f868d**, clarification/clarification_required, no Stage 3/model, no detail occurrence. UI asked whether ball, paddle, clothing or something else. |
+| Follow-up | `Paddle.` → **66fa3d1c-32b3-41ba-a1e7-0463ee46cce3**, effective question `Are there any color considerations for Paddle?`, resolver=clarification_response, clarificationConsumed=true. Actual pipeline result was insufficient_evidence/stage4_no_applicable_evidence, model skipped; one automatic occurrence with no source/selected evidence and bounded resolver flags, not conversation history. This verifies capture/resolution, not a new paddle-rule quality diagnosis. |
+| Actual manager interface | Submitted tungsten through **Test AI Assistant**, not the player drawer. Outcome **5f672eb1-dd51-45f4-ad91-d05608ffe0d1**, occurrence **28d2552c-be7d-4885-b196-32a84209a639**, origin=manager_test, insufficient_evidence, feedback_eligible=false. Separate group **5e18213d-0778-423c-8560-2a32df300cd4** and one New case; never joined the player tungsten group. Manager UI showed model skipped, zero supplied evidence and existing diagnostics. |
+| Feedback compatibility | Preserved the earlier passed four-click sequence and same-answer correlation without repeating votes. The 11 pre-existing events still match full-row aggregate hash **1fbd99e7e03a37ad0f30865e9ef7617a**. There remain exactly two added LMS-0716 feedback events for the accepted NVZ answer. Legacy receipt/de-duplication compatibility also passed the existing isolated regression. No historical backfill or manufactured vote was performed. |
+| Reconciliation/privacy | Eight outcomes total: player 2 answer, 3 insufficient_evidence, 1 clarification, 1 protected; manager 1 insufficient_evidence. Five occurrences, four groups, four cases; zero duplicate answer occurrences or group cases. Protected/clarification detailed occurrences=0. Snapshot key inspection found no auth/member identity, conversation, receipt, signed URL, embedding, content or API-key fields. |
+| Existing data/security preservation | Existing relation ACL/RLS, column, constraint, index, function and project-default ACL hashes equal the pre-migration baseline. Full-row hashes/counts still match for documents (7), versions (18), chunks (1,438), and the original feedback (11). Prior effective six-table/RPC privilege operation tests remain passed. |
+| Player contract/UI | Existing result-key regression passed and route still serializes only `{success:true,result}`. Observer returns the identical execution object. Player UI/CSS, retrieval, generation and viewer files are unchanged from accepted LMS-0715. Live desktop and 390×844 checks showed the compact opaque full-screen mobile panel, visible composer/close control, scrolling newest-first exchanges and ordinary clarification/fallback rendering. Desktop viewport restored. Exact live network-payload parity and a physical phone keyboard were not independently measured. |
+
+### Capture health, logs and latency
+
+Sanitized production `ai_quality_capture` success logs were verified for player insufficient-evidence, protected, clarification/follow-up, and manager requests, in addition to the already-passed answer/feedback events. Application fields remain event, stage, assistant_version and time; no question, evidence, identifiers, credentials or signed URLs. Hosting adds its ordinary request/deployment metadata separately.
+
+| Request | Completion → success-log interval |
+|---|---:|
+| Prior grounded NVZ answer | 44 ms |
+| Prior reimbursement answer | 27 ms |
+| Tungsten first | 75 ms |
+| Tungsten repeat | 47 ms |
+| Protected | 52 ms |
+| Clarification | 50 ms |
+| Clarification follow-up | 52 ms |
+| Manager test | 58 ms |
+
+These are eight successful application-clock capture intervals (27–75 ms), not a load test, overall answer latency or proof of a deployed failure deadline.
+
+Operational choice: use the existing Vercel runtime logs and manual operator verification. The project's Hobby retention is **one hour**, per the verified [Vercel runtime-log documentation](https://vercel.com/docs/logs/runtime). Check the same deployment's last 15 minutes for capture_succeeded/capture_failed; database recency alone is not health. The endpoint deliberately returns Unknown with operator_log_verification_required when its database read succeeds, or Degraded when unavailable. No automated external log feed or longer-retention drain was configured or claimed.
+
+Previously passed live anonymous health denial remains valid. An isolated harness executed the current route, authorizeAdminRequest and actual role hierarchy, substituting only Supabase/NextResponse dependencies: anonymous/invalid token=401; Player/Captain/Club Pro=403 without outcome reads; League Manager/Commissioner=200 with private,no-store and Unknown; simulated database failure=Degraded without raw errors. This was **not** the live authenticated endpoint role matrix, and no user token or role was changed to produce it.
+
+An isolated current-source test of the **default 500 ms** capture deadline completed in **503 ms**, aborted persistence, emitted only capture_failed/persistence, and returned the identical valid answer object. Prior production synthetic lock failures (297–298 ms) and local wrapper using production PostgREST rejection (61 ms) remain separately scoped evidence. No deployed outage, missing-schema condition or HMAC failure was induced. The 15 existing focused capture tests passed again, including Unicode byte boundaries, fail-open, privacy, legacy receipt and result-key compatibility. Prior full 209-test/build/lint/type/PDF results remain unchanged; no application change required rebuilding.
+
+### Acceptance decision and remaining verification limits
+
+**Functional Stage 7A production capture acceptance passed; no new Stage 7A defect was observed.** The safe tests requested in this continuation are complete. An unqualified claim that every original live operational gate passed would be inaccurate. Final owner production-acceptance review must explicitly consider:
+
+1. The authenticated capture-health role matrix was exercised in isolation, not against production. The signed-in UI has no health action that supplies the required bearer header; available browser automation does not provide an authorized API-request surface. No credential extraction, impersonation or role manipulation was used to bypass that limitation.
+2. Deployed failure-log emission and end-to-end hosted timeout/cancellation remain unobserved. Successful live latency, bounded real database failures and isolated fail-open passed, but no safe deployed fault-injection mechanism exists in this release. Do not create a production outage merely to fill this test cell.
+
+These are verification gaps for final review, **not demonstrated defects**. They are separate from the deferred answer-quality issue. This report stops at acceptance review and does not silently waive those original live gates or label them passed. No LMS-0717 work is authorized.
+
+### Approved deferred follow-ups — not implemented
+
+- **Generic upstream applicability/generation issue:** the owner accepted the reimbursement diagnosis as pre-existing, not a demonstrated LMS-0716 regression. After Stage 7A acceptance, obtain separate diagnosis/implementation authorization for a generic Stage 4 applicability rule: retrieval rank/authority alone must not make tangential evidence directly applicable to the user's issue. When selected evidence does not establish the requested fact/policy, generation must not infer a policy or incorrectly label it grounded. Do not hardcode reimbursement, sunglasses, lost property or waiver-specific answers. Preserve the existing three deferred roster investigations and LMS-0701/LMS-0705 controls; none was investigated here.
+- **Future player UI only:** `Ask LWR PC AI may make mistakes. Check Official Sources for important information.` Place small muted centered text immediately above the `Ask a question` composer on desktop/mobile, unobtrusively, without changing answer/source behavior. Recorded only; not implemented in LMS-0716.
+
+## Final read-only acceptance review — 2026-09-05
+
+**LMS-0716 / 0.1.538 — PRODUCTION ACCEPTED**
+
+**Stage 7A — COMPLETE**
+
+This decision follows the owner's explicit authorization to accept the two documented verification limitations if the evidence remains sound. It supersedes the preceding pending-review status, without retroactively labeling unexecuted checks passed. No new defect was found.
+
+### Final production findings
+
+- Vercel production alias still resolves to READY deployment `dpl_CntbLvoarcpooSgYzGsxby34DWz2`, Git commit `7dae6d0c49a431e31a73bba2309242a633307b5c`. Local reviewed capture/grouping/health code matches that source commit. The 500 ms constant, cancellation, guarded secondary persistence and unchanged answer return are the tested implementation; no evidence indicates a materially different production fail-open implementation.
+- Re-read all eight acceptance outcomes and five correlated occurrences. Grounded metadata exists; the NVZ answer/outcome identity remains `a3c4db5d-c48f-4f15-b827-91c6b06b5a09` with exactly two feedback values `[true,false]` in time order. The unvoted second grounded answer still has no detailed occurrence. Tungsten's two distinct outcomes/occurrences share group `6932b916-e45e-4299-864e-c10d812a5844` and exactly one New case. Protected and initial clarification outcomes have no detailed occurrence; the resolved follow-up's actual insufficient-evidence result is captured separately. Manager_test retains its separate group and reporting origin.
+- No duplicate cases, deterministic groups or answer occurrences were found. Outcome identities remain unique. Across all six tables, no pre-deployment synthetic UUID prefix or validation-run marker remains. No new requests or votes were created during this review.
+- All six tables retain RLS. Effective anon/authenticated table privileges are empty; both browser roles cannot execute the capture RPC. Service_role retains only SELECT/INSERT on outcomes/audit and SELECT/INSERT/UPDATE on the other four, with DELETE/TRUNCATE/REFERENCES/TRIGGER denied throughout. Service_role alone among these tested roles retains capture RPC execution. These are fresh catalog/effective-privilege checks, supported by the previously passed actual-operation tests; no DML permission probes were repeated in this read-only review.
+- Existing schema/relation ACL/RLS, constraints, indexes, functions and default-ACL hashes still match the baseline. Original 11 feedback events have the identical aggregate full-row hash. Documents (7), versions (18), chunks including embeddings (1,438) retain identical full-row hashes. No corpus data changed.
+- Protected diagnostics remain empty with no raw/effective personal question or member identity. Snapshot scans found zero forbidden identity/conversation/receipt/token/embedding/content keys and zero HTTP URL/JWT patterns. This complements the server snapshot allowlists and privacy regressions; it does not claim an unlimited semantic PII detector.
+- All four production fingerprint routes record key_version=1. Successful grouping and repeated exact-question reuse establish runtime use of the configured production HMAC, alongside the previously verified Production configuration. No secret was read, printed or changed. The deployment is unchanged.
+- Fresh Vercel runtime-log review still shows sanitized success events for all eight requests and two feedback transitions, with only event/stage/version/time in application capture logs. No capture-failure event was observed in that reviewed window. The eight measured successful request-capture intervals remain 27–75 ms, below the intended 500 ms budget. This is observed successful behavior, not proof of every possible latency or failure path.
+
+### Live authorization checks actually exercised
+
+A fresh uncredentialed GET to `/api/ai-assistant/capture-health` returned HTTP 401 with exactly `{"success":false,"error":"Manager access required."}`. No question, user, source or secret data was returned.
+
+The only available browser session displays Commissioner in Test AI Assistant. Its document exposes no health button or WebMCP tools; the available browser API has no authenticated request facility. The endpoint requires an Authorization bearer header rather than merely the browser's signed-in page state. Therefore **live Commissioner/League Manager health success was not exercised**, and no authenticated minimal-success response is claimed. No other role session was available, no token was extracted, and no account or role was changed. Existing isolated tests execute the actual authorization/route code and verify Commissioner/League Manager allow, all lower-role denial, minimal Unknown/Degraded output and private,no-store. Static review of the unchanged deployed-source route confirms the success payload is limited to success plus status, lastRecordedAt and independentSignal; live success-payload validation remains part of this accepted authorization limitation.
+
+### Accepted operational limitations
+
+1. Full live capture-health denial matrix was not exercised using separately authenticated production accounts for every role; isolated authorization tests plus available live checks provide current evidence. The tooling limitation also prevented an authenticated health success call despite an existing Commissioner UI session. This remains visible for future operational review, not silently marked passed.
+2. **Production failure injection intentionally not performed because analytics capture is non-critical and intentionally causing a production failure would create more risk than acceptance value.** Production failure/timeout injection was intentionally not performed; isolated fail-open testing (default timeout returned unchanged answer in 503 ms), previously bounded synthetic production lock/concurrency validation, and deployed successful capture/log behavior provide current evidence.
+
+Per the owner's final acceptance instructions, these limitations do **not block Stage 7B unless new evidence indicates a problem**. Existing log retention is one hour and health requires manual operator review; no automated health or guaranteed capture delivery is claimed.
+
+### Scope preserved / stop
+
+Only documentation changed in this final pass. No production database mutation, new test outcome/vote, user/role change, HMAC change, migration replay, application code/version change or deployment occurred. `git diff --check` passed after documentation updates. Historical evidence is preserved.
+
+The generic applicability/generation hardening remains a separately authorized post-Stage-7A quality item. All three roster questions remain pending. The exact future disclaimer remains recorded: **Ask LWR PC AI may make mistakes. Check Official Sources for important information.** Placement remains small muted centered text immediately above the Ask a question composer on desktop/mobile. None was implemented. LMS-0717, AI Feedback & Review manager UI and Live LMS Intelligence have not started.

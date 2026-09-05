@@ -121,7 +121,7 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
 function clarificationResult(resolution, userId, now) {
   return {
     kind: "clarification", answer: resolution.clarification.message, evidenceSufficient: false, conflict: false, sources: [], feedbackReceipt: null,
-    conversationReceipt: resolution.clarification.category === "color_subject" ? createClarificationReceipt(userId, resolution.clarificationQuestion || resolution.rawQuestion, resolution.clarification.category, { now }) : null,
+    conversationReceipt: ["color_subject", "player_entry_object"].includes(resolution.clarification.category) ? createClarificationReceipt(userId, resolution.clarificationQuestion || resolution.rawQuestion, resolution.clarification.category, { now }) : null,
   };
 }
 

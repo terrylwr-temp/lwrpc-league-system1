@@ -45,6 +45,7 @@ function Chunks({ chunks }) {
       {c.governingDiagnostics?.length ? <p className="mt-1"><b>Applicability / precedence:</b> {c.governingDiagnostics.map(({ intent, reason }) => `${intent}: ${reason}`).join(" · ")}</p> : null}
       {c.intentSupport?.length ? <p className="mt-1"><b>Selected intent support:</b> {c.intentSupport.join(" + ")}</p> : null}
       {c.intentSupportDetails?.length ? <p className="mt-1"><b>Intent-support detail:</b> {c.intentSupportDetails.map(({ intent, reason }) => `${intent}: ${reason}`).join(" · ")}</p> : null}
+      {c.applicabilityDiagnostic && <p className="mt-1"><b>Issue applicability:</b> {c.applicabilityDiagnostic.issues.join(" + ")} · {c.applicabilityDiagnostic.role} · League: {c.applicabilityDiagnostic.league} ({c.applicabilityDiagnostic.leagueCompatible ? "compatible" : "incompatible"}) · {c.applicabilityDiagnostic.reason}</p>}
       {c.intentSelectionDiagnostic ? <p className="mt-1"><b>Intent selection diagnostic:</b> {c.intentSelectionDiagnostic}</p> : null}
       <p className={c.evidenceRole ? "mt-1" : ""}><b>Exact match reason:</b> {c.exactMatchReason || "None"}</p>
       <p className="mt-1"><b>FTS:</b> {c.ftsDiagnostic?.matched ? "Matched" : "No match"}{c.ftsDiagnostic?.candidateRank ? ` · keyword candidate #${c.ftsDiagnostic.candidateRank}` : ""} · normalized terms: {c.ftsDiagnostic?.normalizedTerms?.join(" + ") || "none"}{c.ftsDiagnostic?.retrievalExpansion?.length ? ` · retrieval expansion: ${c.ftsDiagnostic.retrievalExpansion.join(" + ")}` : ""}</p>

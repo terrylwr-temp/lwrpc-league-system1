@@ -1,3 +1,4 @@
+import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER, selectGoverningEvidence } from "./aiGoverningSources.js";
@@ -37,12 +38,24 @@ export function selectAnswerEvidence(retrieval) {
     // capped by MAX_SELECTED_CHUNKS.
     return selectGoverningEvidence({ ...retrieval, suppliedEvidence: governingCandidates }, { detectIntents: detectedEvidenceIntents, intentSupport, selectLocal: selectLwrAnswerEvidence, limit: MAX_SELECTED_CHUNKS });
   }
-  return selectLwrAnswerEvidence(retrieval);
+  return selectLwrAnswerEvidence({ ...retrieval, suppliedEvidence: governingCandidates });
 }
 
 function selectLwrAnswerEvidence(retrieval) {
   if (!retrieval?.evidence?.sufficient) return [];
-  const candidates = Array.isArray(retrieval.suppliedEvidence) ? retrieval.suppliedEvidence : [];
+  const candidates = (Array.isArray(retrieval.suppliedEvidence) ? retrieval.suppliedEvidence : []).filter(candidate => Number(candidate.combinedScore) >= (Number(retrieval.evidence.threshold) || aiAssistantConfig.evidenceThreshold) && leagueCompatible(candidate, retrieval.request?.question));
+  const clauses = questionClauses(retrieval.request?.question);
+  if (clauses.length > 1) {
+    const selections = clauses.map(question => selectLwrAnswerEvidence({ ...retrieval, request: { ...retrieval.request, question } }));
+    if (selections.some(selection => !selection.length)) return [];
+    const merged = new Map();
+    for (const candidate of selections.flat()) {
+      const previous = merged.get(candidate.chunkId);
+      const selectedPassages = [...new Set([...(previous?.selectedPassages || []), ...(candidate.selectedPassages || [candidate.content])])];
+      merged.set(candidate.chunkId, { ...candidate, selectedPassages, content: selectedPassages.join("\n\n"), intentSupport: [...new Set([...(previous?.intentSupport || []), ...(candidate.intentSupport || [])])] });
+    }
+    return merged.size <= MAX_SELECTED_CHUNKS ? [...merged.values()] : [];
+  }
   const primary = candidates[0];
   if (!primary) return [];
   const cutoff = Math.max(Number(retrieval.evidence.threshold) || aiAssistantConfig.evidenceThreshold, Number(primary.combinedScore) - DIRECT_RELEVANCE_DELTA);
@@ -52,13 +65,18 @@ function selectLwrAnswerEvidence(retrieval) {
     && hasDirectRelevance(candidate)
     && materiallyContributes(candidate, primary, retrieval.request?.question)
   ))];
-  if (!intents.length) return classifyAnswerEvidence(selected.slice(0, MAX_SELECTED_CHUNKS), retrieval.request?.question);
+  if (!intents.length) {
+    const applicable = candidates.map(candidate => ({ ...candidate, selectedPassages: genericApplicablePassages(candidate, retrieval.request?.question) })).filter(candidate => candidate.selectedPassages.length);
+    const distinct = applicable.filter((candidate, index) => !applicable.slice(0, index).some(previous => previous.selectedPassages.join(" ").replace(/[^a-z0-9]/gi, "").toLowerCase() === candidate.selectedPassages.join(" ").replace(/[^a-z0-9]/gi, "").toLowerCase()));
+    return classifyAnswerEvidence(distinct.slice(0, MAX_SELECTED_CHUNKS).map(candidate => ({ ...candidate, content: candidate.selectedPassages.join("\n\n") })), retrieval.request?.question);
+  }
 
   // A compound question needs direct evidence for each independently detected
   // official concept.  Intent evidence is evaluated within a paragraph/list
   // item, then the strongest direct passage for each intent is reserved before
   // optional support can consume the bounded evidence budget.
   const requiredIntentEvidence = intents.map((intent) => ({ intent, candidate: bestIntentEvidence(candidates, intent, retrieval.request?.question) })).filter(({ candidate }) => candidate);
+  if (requiredIntentEvidence.length !== intents.length) return [];
   const bestIntentByChunkId = new Map();
   for (const { intent, candidate } of requiredIntentEvidence) {
     const existing = bestIntentByChunkId.get(candidate.chunkId) || [];
@@ -73,18 +91,25 @@ function selectLwrAnswerEvidence(retrieval) {
   ))]
     .filter((candidate, index, collection) => collection.findIndex((item) => item.chunkId === candidate.chunkId) === index)
     .filter((candidate) => supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question));
-  return classifyAnswerEvidence(selectedForModel.slice(0, MAX_SELECTED_CHUNKS), retrieval.request?.question, bestIntentByChunkId);
+  const bounded = selectedForModel.slice(0, MAX_SELECTED_CHUNKS);
+  if (!intents.every(intent => bounded.some(candidate => supportsEvidenceIntent(candidate, intent, retrieval.request?.question)))) return [];
+  return classifyAnswerEvidence(bounded.map(candidate => {
+    const passages = evidencePassages(candidate).filter(content => intents.some(intent => intentSupport({ ...candidate, content }, intent, retrieval.request?.question)));
+    return { ...candidate, selectedPassages: passages, content: passages.join("\n\n") };
+  }), retrieval.request?.question, bestIntentByChunkId);
 }
 
 function detectedEvidenceIntents(question) {
-  const value = String(question || "").toLowerCase();
+  const value = operationWords(question);
   if (isRosterTroubleshooting(value)) return [ROSTER_TROUBLESHOOTING_INTENT];
-  const roster = /\b(?:add|remove|delete|drop|update|change|lock|open|close)\b/.test(value) && /\b(?:player|players|person|someone|member|members|roster|team)\b/.test(value) && /\b(?:team|league|season|roster)\b/.test(value);
+  const roster = /\b(?:add|enter|remove|delete|drop|update|change|lock|open|close)\b/.test(value) && /\b(?:player|players|person|someone|member|members|roster|team)\b/.test(value) && /\b(?:team|league|season|roster)\b/.test(value);
   // This selector intent is intentionally narrower than a general reference to
   // a match or game.  It governs Match Setup evidence only; injury, conduct,
   // scoring, and other match questions retain the normal Stage 4 selection.
   const match = /\b(?:lineup|pairings?|match\s+setup)\b/.test(value);
-  return [isClubSelectedMatchEquipmentQuestion(value) && CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, isUsapLegalBallQuestion(value) && USAP_LEGAL_BALL_INTENT, roster && "Team/season roster management", match && "Individual-match Match Setup"].filter(Boolean);
+  const enforcement = /\b(?:retroactive|ineligible|violation|forfeit|penalty)\b/.test(value) && /\b(?:player|players|roster|add|added|membership|dupr)\b/.test(value);
+  const scores = /\b(?:enter|verify|submit|record)\b/.test(value) && /\b(?:scores?|results?)\b/.test(value);
+  return [enforcement && "Roster eligibility enforcement", scores && "Match score entry", isClubSelectedMatchEquipmentQuestion(value) && CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, isUsapLegalBallQuestion(value) && USAP_LEGAL_BALL_INTENT, roster && !enforcement && "Team/season roster management", match && "Individual-match Match Setup"].filter(Boolean);
 }
 
 function bestIntentEvidence(candidates, intent, question) {
@@ -101,6 +126,15 @@ function isMoreAuthoritativeThanRequired(candidate, required, intents, question)
 function supportsEvidenceIntent(candidate, intent, question = "") { return Boolean(intentSupport(candidate, intent, question)); }
 
 function intentSupport(candidate, intent, question) {
+  if (!leagueCompatible(candidate, question)) return null;
+  if (intent === "Roster eligibility enforcement") {
+    const passage = evidencePassages(candidate).find(text => /\b(?:retroactive|ineligible|eligible|eligibility|requirements)[\s\S]*\b(?:forfeit|penalty|posted)\b/i.test(text));
+    return passage ? { intent, strength: 120, reason: "Direct eligibility/remedy passage requested by the question" } : null;
+  }
+  if (intent === "Match score entry") {
+    const passage = evidencePassages(candidate).find(text => /\b(?:enter(?:ing)?|verify|verif(?:y|ication)|submit)\b[\s\S]{0,80}\bscores?\b/i.test(text) && /\b(?:click|button|dropdown|submit|verify|verification)\b/i.test(text));
+    return passage ? { intent, strength: 115, reason: "Direct completed-match score-entry procedure" } : null;
+  }
   if (intent === CLUB_SELECTED_MATCH_EQUIPMENT_INTENT && isClubSelectedMatchEquipmentQuestion(question) && isLwrSelectedMatchEquipmentEvidence(candidate)) return { intent, strength: 130, reason: "Direct LWR-selected match-equipment passage" };
   if (intent === USAP_LEGAL_BALL_INTENT && isUsapLegalBallQuestion(question) && isUsapBallSpecificationEvidence(candidate)) return { intent, strength: 130, reason: "Direct USAP ball specification or approval passage" };
   if (intent === ROSTER_TROUBLESHOOTING_INTENT) {
@@ -112,15 +146,18 @@ function intentSupport(candidate, intent, question) {
   const structural = [candidate?.sectionLabel, candidate?.heading].filter(Boolean).join(" ").toLowerCase();
   for (const passage of localEvidencePassages(candidate)) {
     if (intent === "Team/season roster management") {
-      if (isMatchSpecificPassage(passage)) continue;
+      if (isMatchSpecificPassage(passage) || /\b(?:retroactive|forfeit|penalty|reschedul|playoffs?|championship)\b/.test(passage)) continue;
       const rosterOperation = /\b(?:update|updating)\s+(?:your\s+|team\s+)?rosters?\b/.test(passage)
         || /\b(?:add|remove|delete|drop)\b[^.\n]{0,70}\bplayers?\b/.test(passage)
         || /\b(?:team|season)\s+roster\b[^.\n]{0,70}\b(?:add|remove|delete|drop|update|change|open|close|lock)\b/.test(passage)
         || /\b(?:add|remove|delete|drop|update|change)\b[^.\n]{0,70}\b(?:team|season)\s+roster\b/.test(passage);
-      if (!rosterOperation) continue;
+      if (!rosterOperation || !/\b(?:use|may|must|can|click|select|allowed|permitted|responsible)\b/.test(passage)) continue;
+      if (questionRequestsProcedure(question) && /\b(?:remove|delete|drop)\b/.test(operationWords(question)) && !/\b(?:remove|delete|drop)\b/.test(passage)) continue;
       const calendarDate = /\b(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|jun(?:e)?|jul(?:y)?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)\.?\s+\d{1,2}\b/.test(passage);
       const timing = calendarDate || /\b(?:date|deadline|open|close|lock|throughout\s+the\s+season|prior\s+to\s+(?:the\s+)?(?:commencement|start)\s+of\s+(?:each\s+)?season)\b/.test(passage);
-      return { intent, strength: calendarDate ? 120 : asksTiming && timing ? 100 : 75, reason: calendarDate ? "Direct roster calendar/timing passage" : timing ? "Direct roster timing passage" : "Direct team roster-management passage" };
+      if (calendarDate && !asksTiming) continue;
+      if (asksTiming && !timing && !questionRequestsProcedure(question)) continue;
+      return { intent, strength: asksTiming && calendarDate ? 120 : questionRequestsProcedure(question) && /\b(?:manage\s+roster|click|button|option)\b/.test(passage) ? 115 : asksTiming && timing ? 100 : 75, reason: calendarDate ? "Direct roster calendar/timing passage" : timing ? "Direct roster timing passage" : "Direct team roster-management passage" };
     }
     if (intent === "Individual-match Match Setup") {
       if (/\b(?:enter|verify|submit(?:ting)?)\s+(?:match\s+)?scores?|score\s+(?:entry|verification)|forfeit|weather\b/.test(structural)) continue;
@@ -129,8 +166,9 @@ function intentSupport(candidate, intent, question) {
       const deadline = /\b(?:no\s+later\s+than|within)\b[^.\n]{0,70}\b(?:three|3|days?|hours?|weeks?)\b/.test(passage)
         || /\b(?:must|shall)\s+submit\b[^.\n]{0,100}\b(?:match\s+setup|lineups?|rosters?)\b/.test(passage);
       const timing = deadline || /\b(?:before|prior\s+to)\b[^.\n]{0,70}\b(?:match\s+date|match\s+day|scheduled\s+match)\b/.test(passage);
-      const procedure = /\b(?:click|save|button|screen|complete)\b/.test(passage);
+      const procedure = /\b(?:click|button|screen)\b/.test(passage) || /\b(?:save|complete)\b[^.]{0,45}\b(?:lineup|match\s+setup)\b/.test(passage);
       if (!timing && !procedure) continue;
+      if (asksTiming && !timing && !questionRequestsProcedure(question)) continue;
       return { intent, strength: deadline ? 120 : questionRequestsProcedure(question) && procedure ? 115 : timing ? 95 : 75, reason: deadline ? "Direct Match Setup deadline passage" : timing ? "Direct Match Setup timing passage" : "Direct Match Setup procedure passage" };
     }
   }
@@ -140,9 +178,7 @@ function intentSupport(candidate, intent, question) {
 function supportsAnyEvidenceIntent(candidate, intents, question = "") { return intents.some((intent) => supportsEvidenceIntent(candidate, intent, question)); }
 
 function localEvidencePassages(candidate) {
-  const structural = [candidate?.sectionLabel, candidate?.heading].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
-  const blocks = String(candidate?.content || "").replace(/\r/g, "").split(/\n(?=\s*(?:[•]\s*|o\s+|\d+(?:\.\d+)*\.\s))/);
-  return blocks.map((block) => `${structural}\n${block}`.replace(/\s+/g, " ").trim().toLowerCase()).filter(Boolean);
+  return evidencePassages(candidate).map(block => block.replace(/\s+/g, " ").trim().toLowerCase()).filter(Boolean);
 }
 
 function isMatchSpecificPassage(passage) { return /\b(?:match\s+setup|upcoming\s+match|match\s+rosters?|match\s+lineups?|player\s+pairings?)\b/.test(passage); }
@@ -192,6 +228,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
         "Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence.",
+        "Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence.",
         ...(isRosterTroubleshooting(retrieval.request.question) ? [
           "This is roster-availability troubleshooting using general official documentation, not live LMS data. Explain only documented requirements/checks supported by the selected evidence. You have not inspected the affected player, account, team or roster and do not know the actual reason the player is absent. Do not turn a prerequisite into a cause or probability: avoid 'most likely', 'the reason is', 'this means' or equivalent unsupported diagnoses. A documented conditional cause may be explained conditionally, never asserted as this player's status. Do not infer that missing DUPR or another-team membership necessarily hides a player. Do not transfer Match Setup restrictions to Manage Roster. Where appropriate, suggest contacting League Management if documented checks do not resolve the issue."
         ] : []),
@@ -357,7 +394,7 @@ function classifyAnswerEvidence(evidence, question, bestIntentByChunkId = new Ma
     const intentSupportDetails = detectedEvidenceIntents(question).map((intent) => intentSupport(candidate, intent, question)).filter(Boolean);
     const bestFor = bestIntentByChunkId.get(candidate.chunkId) || [];
     const bestIntentReason = bestFor.length ? `Best direct evidence for ${bestFor.join(" + ")}` : "";
-    const annotated = { ...candidate, sourceClassification: governingSourceClass(candidate.documentType), intentSupport: intentSupportDetails.map(({ intent }) => intent), intentSupportDetails, intentSelectionDiagnostic: bestIntentReason || "Optional material support retained" };
+    const annotated = { ...candidate, applicabilityDiagnostic: { issues: intentSupportDetails.map(({intent}) => intent).length ? intentSupportDetails.map(({intent}) => intent) : [String(question || "").slice(0, 240)], league: questionLeague(question).join(" / ") || "unspecified/all", leagueCompatible: leagueCompatible(candidate, question), role: bestIntentReason || !intentSupportDetails.length ? "direct" : "supporting", reason: bestIntentReason || "Coherent applicable body passage; authority only ranks eligible evidence" }, sourceClassification: governingSourceClass(candidate.documentType), intentSupport: intentSupportDetails.map(({ intent }) => intent), intentSupportDetails, intentSelectionDiagnostic: bestIntentReason || "Optional material support retained" };
     if (candidate === controlling) return { ...annotated, evidenceRole: "Primary / controlling", evidenceSelectionReason: [bestIntentReason, "Highest-authority selected rule evidence"].filter(Boolean).join(" · ") };
     if (index === 0 && !controlling) return { ...annotated, evidenceRole: "Primary", evidenceSelectionReason: bestIntentReason || "Highest-ranked direct evidence" };
     return { ...annotated, evidenceRole: "Supporting", evidenceSelectionReason: bestIntentReason || supportingReason(candidate, evidence[0], question) };
@@ -424,6 +461,7 @@ function annotateEvidenceSelection(retrieval, selectedEvidence) {
     const intentSupportDetails = intents.map((intent) => intentSupport(candidate, intent, question)).filter(Boolean);
     const selectionMetadata = selected ? { ...selected, content: candidate.content } : null;
     Object.assign(candidate, selectionMetadata || {
+      applicabilityDiagnostic: { issues: (intents.length ? intents : questionClauses(question)).slice(0, 8).map(issue => issue.slice(0, 240)), league: questionLeague(question).join(" / ") || "unspecified/all", leagueCompatible: leagueCompatible(candidate, question), role: "excluded", reason: !leagueCompatible(candidate, question) ? "Different named league scope" : "No complete applicable issue coverage, or no material contribution beyond selected passages" },
       evidenceRole: "Not selected for model",
       intentSupport: intentSupportDetails.map(({ intent }) => intent),
       intentSupportDetails,
@@ -452,7 +490,7 @@ function rejectedIntentReason(candidate, intents) {
 }
 
 function answerPrompt(question, evidence) {
-  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Direct official evidence"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
+  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
 }
 
 function cleanCitationDetail(value) {

@@ -310,11 +310,11 @@ test("protects the answer route and preserves the required Stage 4 evaluation pr
 
 function sufficientRetrieval() {
   return {
-    request: { question: "What is the official rule?" },
+    request: { question: "What is scoring freeze?" },
     evidence: { sufficient: true, threshold: .35 },
     suppliedEvidence: [
-      chunk("chunk-1", .52, .85, 0, "official rule evidence"),
-      chunk("chunk-2", .45, 0, .4, "supporting official rule evidence"),
+      chunk("chunk-1", .52, .85, 0, "Scoring freeze is official rule evidence."),
+      chunk("chunk-2", .45, 0, .4, "Scoring freeze requires supporting official rule evidence."),
       chunk("chunk-3", .43, 0, 0, "tangential evidence"),
       chunk("chunk-4", .29, .85, 0, "below threshold evidence"),
     ],

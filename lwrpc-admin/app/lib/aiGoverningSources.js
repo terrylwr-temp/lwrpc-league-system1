@@ -1,3 +1,4 @@
+import { leagueCompatible, evidencePassages, questionLeague } from "./aiQuestionApplicability.js";
 // Stage 4 only: neither retrieval scores nor the Stage 3 evidence gate change.
 import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapBallSpecificationEvidence } from "./aiEquipmentIntents.js";
 export const INSUFFICIENT_EVIDENCE_ANSWER = "I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.";
@@ -178,11 +179,12 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
   const overriddenPassages = new Map();
   const diagnostics = new Map(candidates.map((candidate) => [candidate.chunkId, []]));
   for (const issue of issues) {
-    const direct = candidates.map((candidate) => {
+    const direct = candidates.filter(candidate => leagueCompatible(candidate, issue.question)).map((candidate) => {
       const support = issue.local ? intentSupport(candidate, issue.intent, issue.question) : null;
-      const passages = issue.local ? (support ? [candidate.content] : []) : directPassages(candidate, issue.question);
+      const passages = issue.local ? (support ? evidencePassages(candidate).filter(content => intentSupport({ ...candidate, content }, issue.intent, issue.question)) : []) : directPassages(candidate, issue.question);
       return { candidate, support, passages, classification: issueSourceClassification(candidate, issue.intent, issue.question) };
     }).filter(({ passages }) => passages.length);
+    if (!direct.length) return [];
     const lwr = direct.filter((item) => ["lwr_controlling", "lwr_selected_equipment"].includes(item.classification));
     const usap = direct.filter((item) => item.classification === "usap_governing_fallback");
     const governing = lwr.length ? lwr : usap.length ? usap : direct;
@@ -210,7 +212,7 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
         ...item.candidate,
         // USAP chunks can span several issues. Only eligible verbatim passages
         // reach the model, preventing an overridden sibling issue leaking back.
-        content: item.classification === "usap_governing_fallback" ? [...new Set([...(previous?.selectedPassages || []), ...item.passages])].join("\n\n") : item.candidate.content,
+        content: [...new Set([...(previous?.selectedPassages || []), ...item.passages])].join("\n\n"),
         selectedPassages: [...new Set([...(previous?.selectedPassages || []), ...item.passages])],
         sourceClassification: item.classification,
         intentSupport: [...new Set([...(previous?.intentSupport || []), issue.intent])],
@@ -233,7 +235,10 @@ export function selectGoverningEvidence(retrieval, { detectIntents, intentSuppor
     return { ...candidate, selectedPassages: passages, content: passages.join("\n\n") };
   }).filter((candidate) => candidate.content);
   const required = issues.map((issue) => values.find((candidate) => candidate.intentSupport.includes(issue.intent))).filter(Boolean);
-  return [...new Set([...required, ...values])].slice(0, limit).map((candidate) => ({ ...candidate, governingDiagnostics: diagnostics.get(candidate.chunkId) || [] }));
+  if (required.length !== issues.length) return [];
+  const bounded = [...new Set([...required, ...values])].slice(0, limit);
+  if (!issues.every(issue => bounded.some(candidate => candidate.intentSupport.includes(issue.intent)))) return [];
+  return bounded.map((candidate) => ({ ...candidate, applicabilityDiagnostic: { issues: candidate.intentSupport.slice(0, 8).map(issue => issue.slice(0, 240)), league: questionLeague(question).join(" / ") || "unspecified/all", leagueCompatible: true, role: "direct", reason: "Applicable operative passage for each supported issue; governing authority applied afterward" }, governingDiagnostics: diagnostics.get(candidate.chunkId) || [] }));
 }
 
 function issueSourceClassification(candidate, intent, question) {
