@@ -59,7 +59,7 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
     };
   }
 
-  if ((receiptError || prior?.purpose === "clarification") && isContextualFollowUp(rawQuestion)) {
+  if (isContextualFollowUp(rawQuestion)) {
     return {
       ...diagnostics, kind: "clarification", classification: receiptError ? "expired_context" : "unresolved_follow_up", rawQuestion, effectiveQuestion: "", priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior),
       clarification: { category: "full_question", message: "Please ask the full question again so I can check the official rules." },

@@ -108,3 +108,95 @@ Do not mark production accepted until deployment and these live checks pass. Sta
 - `app/lib/askLwrAssistantConfig.js`: exact welcome copy and suggestions.
 - New `test/aiStage6Correction.test.mjs`, updated `test/askLwrAssistant.test.mjs`, new `scripts/verify-ask-lwr-ui.mjs`: regression and browser verification.
 - This report and `docs/project-roadmap.md`: status, findings, verification and acceptance instructions.
+
+
+## Bounded personal/live-data guard correction — September 5, 2026
+
+Status: implemented locally for review; this correction has not been deployed. LMS-0712 remains deployed but **not production accepted**. Stage 7 remains paused.
+
+### Files and behavior
+
+- `lwrpc-admin/app/lib/askLwrPlayerAnswer.js`: normalize apostrophes; detect owned rating/DUPR value requests using ownership, rating terminology, and value-seeking verbs/question framing. Explicit calculation/rule/range questions remain eligible. Evaluate completed submission/save/entry status before procedural exemptions. Detect first-person opponent/play requests and owned next opponent/match requests. Permit bounded player-availability roster troubleshooting through normal evidence-gated retrieval. Preserve existing personal-data patterns and protected response shape. Both raw and resolved effective questions are guarded.
+- `lwrpc-admin/app/lib/aiConversation.js`: reuse the existing contextual-fragment detector when no usable follow-up exists, including absent receipts. Return the existing full-question clarification with no retrieval or generation. Valid follow-up composition and standalone precedence remain unchanged.
+- `lwrpc-admin/app/lib/aiConversationDiagnostics.js`: whitelist request-local diagnostics; cap current/effective question lengths and selected IDs. No persistent logging or database writes.
+- `lwrpc-admin/app/api/ai-assistant/answer/route.js`: expose diagnostics through the existing authenticated league-manager console Conversation resolution panel. Player response payload is unchanged.
+- `lwrpc-admin/test/aiPersonalGuard.test.mjs`: all approved personal and official controls, protected stage skipping, roster troubleshooting eligibility, both kitchen receipt boundaries, diagnostic whitelist.
+- `lwrpc-admin/test/aiStage6Correction.test.mjs`: extend the existing integrated answer/evidence selection test to both kitchen follow-up phrasings and Rule 11.A.2.
+- This report and `docs/project-roadmap.md`: scope, limitations, validation and acceptance procedure.
+
+Personal rating, submission status, schedule/opponent, and roster/team intents remain deterministic guard checks for future permission-aware routing; no live-data service is implemented. Protected results retain the existing insufficient-evidence wording but `kind: protected`, zero Stage 3/4 calls, no feedback/conversation receipt and no Official Sources.
+
+Roster troubleshooting only gains access to the existing Stage 3/4 pipeline. No answer or missing-player cause is hardcoded. Normal evidence insufficiency remains possible. No new rule transfers Match Setup restrictions to Manage Roster. Production acceptance must inspect generated answers for unsupported claims about missing DUPR or another-team membership.
+
+### Manager diagnostics and kitchen investigation
+
+The existing manager answer response now includes actual raw current question, receipt-supplied boolean, validation outcome, validated prior purpose, classification, effective question, inherited-context boolean, raw/effective guard results, Stage 3 invocation boolean, selected chunk/rule IDs and final response kind. A raw protected request deliberately reports `not_checked_raw_guard`; its supplied receipt is not decrypted. False Stage 3 invocation means skipped. Selected IDs are empty on skipped paths.
+
+These diagnostics are returned only for the current authorized manager request; they do not record production player history or recover the original failed player's receipt. Reproduce a future failure in the manager console and inspect its Conversation resolution panel immediately. Do not copy receipt tokens, signed URLs, credentials or unrelated member details into reports. No persistent production telemetry was added. The original production context-loss cause remains unproven.
+
+Both kitchen follow-ups with valid receipts retain the existing 11.A.2 path. Missing, malformed and expired receipts now request the full question instead of treating an obvious fragment as standalone. The existing generic detector is reused; no kitchen-specific resolver or retrieval patch was introduced.
+
+### Validation
+
+- Full `npm test`: 166 passed, zero failed; deterministic fixtures, no live answer-model replay in this correction.
+- `npm run lint`: zero errors, six existing warnings (captain-dashboard hook dependency, two player-dashboard unused functions, three omitted source-ID destructuring bindings).
+- `npx tsc --noEmit --incremental false`: passed.
+- `npm run verify:ai-pdf-server-bundle`: passed against the main build output; isolated build verification recorded below.
+- `npm run build`: compiled successfully, then failed only on the known `.next/cache/.tsbuildinfo` EPERM write lock. Authorized isolated clean build result recorded below.
+
+No SQL, migration, corpus, active document, embedding, metadata, processing, activation, retrieval weights/limits/threshold, governing hierarchy, feedback schema, selected-match-equipment logic or UI changes. The active 666-chunk USAP version is untouched.
+
+### Deployment and exact production acceptance
+
+After review approval, deploy the reviewed application revision through the existing deployment workflow. No SQL, reprocessing, re-embedding, corpus activation or environment changes are required. Do not deploy the ignored isolated build directory as a source revision. Run these checks against that deployed revision before accepting LMS-0712; Stage 7 stays paused until separately authorized.
+
+For every protected question below, expect the unchanged fallback, internal `protected`, Stage 3 skipped, no selected evidence, no feedback and no Official Sources:
+
+- `What is my DUPR?`
+- `What's my DUPR?`
+- `What is my current DUPR?`
+- `Do you know my DUPR?`
+- `What's my rating?`
+- `What is my player rating?`
+- `Can you tell me my DUPR?`
+- `Did I already submit my lineup?`
+- `Did I already submit my match scores?`
+- `Have I entered my scores yet?`
+- `Who am I playing Friday?`
+- `Who do we play Friday?`
+- `Who is my next opponent?`
+- `When is my next match?`
+- `Where do I play next?`
+- `Who is on my roster?`
+- `Who is on my team?`
+- `Is John Smith on my roster?`
+- `Show me my roster.`
+
+For every official question below, expect document-RAG eligibility (raw/effective guards false and Stage 3 invoked), followed by an evidence-supported answer or the normal insufficient-evidence result. Eligibility does not guarantee sufficient documentation:
+
+- `What does NR mean?`
+- `What is the DUPR Reliability Factor rule?`
+- `How is Season DUPR determined?`
+- `What DUPR is allowed in this division?`
+- `What DUPR range can play in Weekday DUPR 7?`
+- `How do I submit my lineup?`
+- `When do I submit my lineup?`
+- `How do I enter match scores?`
+- `When does Match Setup need to be completed?`
+- `What day does DUPR 9 normally play?`
+- `Can captains change the scheduled DUPR 9 match time?`
+- `What are the Saturday league dates?`
+- `I'm changing my roster but I can't find a player in the list, why?`
+- `Why can't I find a player when changing my roster?`
+- `Why won't a player show up when I try to add them?`
+- `What should I check if a player isn't available to add to my roster?`
+
+Kitchen and conversation acceptance:
+
+1. Ask `Can I volley in the kitchen?`, then `What if I step in after I hit it?`. Inspect a valid follow-up receipt outcome, inherited kitchen/volley context, Stage 3 invoked, Rule 11.A.2 selected and a supported momentum answer.
+2. Start a fresh equivalent sequence, then ask `What if I step in the kitchen after I hit it?`; require the same result.
+3. For each follow-up, use no receipt, an expired receipt and a malformed receipt in a controlled manager test. Expect full-question clarification, Stage 3 skipped, no feedback/sources and no renewed receipt. Do not retain or share token contents.
+4. Repeat `Are there any color considerations?` → `Ball.` and → `Paddle.` in separate sequences, then a standalone `When does Match Setup need to be completed?`; standalone context must supersede prior context.
+5. Repeat existing accepted LMS-0705–LMS-0712 controls, including official match-ball evidence, color evidence, feedback eligibility, newest-first exchanges, mobile full-screen panel and desktop drawer behavior. These are retained by existing automated coverage; live production acceptance remains required.
+
+Final validation: the isolated clean build at `.next/lms0712-guard-clean-build` passed compilation, TypeScript, all 70 static pages and final optimization. Its PDF server-bundle verification also passed. The isolated copy uses the original installed dependencies and inherited environment without copying `.env` files; only its temporary tracing root points at the repository. Final `git diff --check` passed.

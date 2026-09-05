@@ -11,14 +11,30 @@ const PERSONAL_OPERATIONAL_PATTERNS = [
 ];
 
 export function isUnsupportedOperationalQuestion(question) {
-  const value = String(question || "").replace(/\s+/g, " ").trim();
-  // A member can naturally use “my lineup” while asking for an official
-  // deadline or how-to. That is document guidance, not a request for their
-  // live lineup data, and must reach the existing evidence-gated RAG path.
-  if (isOfficialConfigurationGuidance(value) || isOfficialTeamRosterGuidance(value)) return false;
+  const value = String(question || "").replace(/[’‘]/g, "'").replace(/\s+/g, " ").trim();
+  // Completed personal actions and rating values take precedence over how-to exemptions.
+  const owned = /\b(?:my|our|mine|ours)\b/i.test(value);
+  const ratingValue = owned && /\b(?:dupr|rating)\b/i.test(value)
+    && /\b(?:what(?:'s| is)|tell|know|show|check)\b/i.test(value)
+    && !/\b(?:how|determined|calculated|rule|requirements?|allowed|range)\b/i.test(value);
+  const completedAction = /\b(?:did|have|has)\s+(?:i|we)\b[\s\S]{0,70}\b(?:submit(?:ted)?|save[ds]?|enter(?:ed)?)\b/i.test(value);
+  const personalSchedule = /\bwho\s+(?:am\s+i\s+playing|do\s+we\s+play)\b/i.test(value)
+    || /\bmy\s+next\s+(?:opponent|match)\b/i.test(value)
+    || /\bwhere\s+do\s+i\s+play\s+next\b/i.test(value);
+  if (ratingValue || completedAction || personalSchedule) return true;
+  if (isOfficialConfigurationGuidance(value) || isOfficialTeamRosterGuidance(value) || isRosterTroubleshooting(value)) return false;
   return PERSONAL_OPERATIONAL_PATTERNS.some((pattern) => pattern.test(value))
     || /\b(?:did|have|can)\s+(?:i|we)\b[\s\S]{0,50}\b(?:already\s+)?(?:submit(?:ted)?|save[ds]?|enter(?:ed)?)\b/i.test(value)
-    || /\b(?:did|have|can)\b[\s\S]{0,50}\b(?:mine|ours)\b[\s\S]{0,50}\b(?:submit(?:ted)?|save[ds]?|enter(?:ed)?)\b/i.test(value);
+    || /\b(?:did|have|can)\b[\s\S]{0,50}\b(?:mine|ours)\b[\s\S]{0,50}\b(?:submit(?:ted)?|save[ds]?|enter(?:ed)?)\b/i.test(value)
+    || /\b(?:show|list)\b[\s\S]{0,40}\b(?:my|our)\s+(?:roster|team)\b/i.test(value);
+
+}
+
+function isRosterTroubleshooting(value) {
+  return /\b(?:player|person|member)\b/i.test(value)
+    && /\b(?:why|what\s+should\s+i\s+check)\b/i.test(value)
+    && /\b(?:find|show\s+up|available)\b/i.test(value)
+    && /\b(?:add|adding|change|changing|roster)\b/i.test(value);
 }
 
 function isOfficialConfigurationGuidance(value) {
@@ -69,10 +85,10 @@ export async function runPlayerOfficialAnswer({ body, role, userId, memberId = n
 }
 
 export function resolveOfficialConversation(args) {
-  if (isUnsupportedOperationalQuestion(args.question)) return protectedResolution(args.question, "raw_live_data_guard");
+  if (isUnsupportedOperationalQuestion(args.question)) return { ...protectedResolution(args.question, "raw_live_data_guard"), receiptSupplied: Boolean(args.receipt) };
   const resolution = resolveConversationTurn(args);
   const effectiveLiveDataGuard = resolution.kind === "resolved" ? isUnsupportedOperationalQuestion(resolution.effectiveQuestion) : null;
-  return { ...resolution, rawLiveDataGuard: false, effectiveLiveDataGuard, ...(effectiveLiveDataGuard ? { kind: "protected" } : {}) };
+  return { ...resolution, receiptSupplied: Boolean(args.receipt), rawLiveDataGuard: false, effectiveLiveDataGuard, ...(effectiveLiveDataGuard ? { kind: "protected" } : {}) };
 }
 
 export function playerFallbackResult(kind = "insufficient_evidence") {

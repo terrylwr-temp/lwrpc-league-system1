@@ -111,8 +111,11 @@ test("LMS-0712 integrated standalone source paths and kitchen momentum", async (
   for (const [question, rule] of [[kitchen, "11.A"], [controls[2], "3.C"], [controls[3], "10.G"]]) {
     const r = await turn(question, pending()); assert.equal(r.result.kind, "answer"); assert.ok(r.result.sources.some(s => s.ruleNumber === rule));
   }
-  const first = await turn(kitchen); const next = await turn("What if I step in after I hit it?", first.result.conversationReceipt);
-  assert.equal(next.result.kind, "answer"); assert.ok(next.result.sources.some(s => s.ruleNumber === "11.A.2"));
+  const first = await turn(kitchen);
+  for (const question of ["What if I step in after I hit it?", "What if I step in the kitchen after I hit it?"]) {
+    const next = await turn(question, first.result.conversationReceipt);
+    assert.equal(next.result.kind, "answer"); assert.ok(next.result.sources.some(s => s.ruleNumber === "11.A.2"));
+  }
   const protectedTurn = await turn("Did I already submit mine?", createFollowUpReceipt(userId, setup)); assert.equal(protectedTurn.stage3, 0); assert.equal(protectedTurn.stage4, 0);
 });
 test("LMS-0712 mobile layout and feedback rendering contracts", async () => {

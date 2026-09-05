@@ -1,3 +1,4 @@
+import { conversationDiagnostics } from "../../../lib/aiConversationDiagnostics";
 import { NextResponse } from "next/server";
 import { answerGenerationDiagnostic, generateOfficialAnswer } from "../../../lib/aiAnswerGeneration";
 import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
@@ -27,7 +28,7 @@ export async function POST(req) {
     return NextResponse.json({
       success: true,
       result: {
-        retrieval: { ...retrieval, documentsConsidered },
+        retrieval: { ...retrieval, documentsConsidered, conversationResolution: conversationDiagnostics(conversationResolution, { stage3Invoked: true, answer }) },
         answer: { ...answer, metrics: { ...answer.metrics, retrievalMs: retrieval.metrics.totalMs, totalMs: Math.round(performance.now() - started) } },
         conversationReceipt: answer.evidenceSufficient ? createFollowUpReceipt(authorization.user.id, conversationResolution.effectiveQuestion) : null,
       },
@@ -44,7 +45,7 @@ function managerClarificationResult(body, resolution, conversationReceipt) {
   const request = { question: resolution.rawQuestion || String(body.question || ""), askAbout: body.askAbout || "all", context: body.context || {} };
   return {
     retrieval: {
-      request, conversationResolution: resolution, candidates: [], suppliedEvidence: [], authorityReviewCandidates: [], intentEvidenceCandidates: [], documentsConsidered: [],
+      request, conversationResolution: conversationDiagnostics(resolution), candidates: [], suppliedEvidence: [], authorityReviewCandidates: [], intentEvidenceCandidates: [], documentsConsidered: [],
       evidence: { sufficient: false, threshold: .35, topScore: null, stage4Fallback: message },
       environment: { embeddingModel: "Not called", embeddingDimensions: 1536, evidenceThreshold: .35, retrievalLimit: 8, authorityReviewLimit: 12 }, metrics: { embeddingMs: 0, embeddingInputTokens: null, retrievalMs: 0, totalMs: 0 },
     },
