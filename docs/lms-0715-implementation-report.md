@@ -1,5 +1,7 @@
 # LMS-0715 implementation report
 
+**Current status update:** The owner confirms LMS-0715 / 0.1.537 has been deployed to production, production verified and accepted. Stages 1–6 are complete and production accepted. Stage 7 implementation has not started. The preparation and pending-deployment statements below are retained as the historical implementation checkpoint; they no longer describe current production status. Stage 7 diagnosis/design is recorded separately in `docs/stage-7-ai-feedback-review-design.md`; no implementation or version bump occurred in that pass.
+
 Prepared 2026-09-05. **Focused post-Stage-6 manager UI cleanup, implemented locally for review; not deployed.** Stage 6 / LMS-0714 is production accepted, including the read-only verified same-answer Helpful → Not Helpful two-event acceptance test. Stage 7 has not started. Historical LMS-0714 implementation records are retained.
 
 ## 1. Double-highlight root cause and correction

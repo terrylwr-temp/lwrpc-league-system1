@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { feedbackTransition, readFeedbackReceipt } from "../../../lib/aiConversation";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
+import { captureQualityFeedback } from "../../../lib/aiQualityCapture";
 
 export const runtime = "nodejs";
 
@@ -20,7 +21,10 @@ export async function POST(req) {
       .limit(1);
     if (existingError) throw existingError;
     const latest = existing?.[0] || null;
-    if (!feedbackTransition(latest?.helpful, body.helpful)) return NextResponse.json({ success: true, result: { helpful: latest.helpful, changed: false, feedbackId: latest.id } });
+    if (!feedbackTransition(latest?.helpful, body.helpful)) {
+      await captureQualityFeedback(authorization.supabase, claims, latest.id);
+      return NextResponse.json({ success: true, result: { helpful: latest.helpful, changed: false, feedbackId: latest.id } });
+    }
     const event = {
       answer_id: claims.answerId, auth_user_id: authorization.user.id, member_id: claims.memberId || authorization.memberRows?.[0]?.id || null,
       helpful: body.helpful, original_question: claims.originalQuestion, effective_question: claims.effectiveQuestion, generated_answer: claims.answer,
@@ -29,6 +33,7 @@ export async function POST(req) {
     };
     const { data: inserted, error: insertError } = await authorization.supabase.from("ai_answer_feedback_events").insert(event).select("id, helpful, created_at").single();
     if (insertError) throw insertError;
+    await captureQualityFeedback(authorization.supabase, claims, inserted.id);
     return NextResponse.json({ success: true, result: { helpful: inserted.helpful, changed: true, feedbackId: inserted.id } });
   } catch (error) {
     console.error("Ask LWR feedback failed", { category: error?.name || "server_failure" });

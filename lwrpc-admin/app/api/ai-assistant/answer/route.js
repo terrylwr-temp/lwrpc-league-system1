@@ -5,6 +5,7 @@ import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
 import { createClarificationReceipt, createFollowUpReceipt } from "../../../lib/aiConversation";
 import { resolveOfficialConversation, playerFallbackResult } from "../../../lib/askLwrPlayerAnswer";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
+import { observeQualityRequest } from "../../../lib/aiQualityCapture";
 
 export const runtime = "nodejs";
 
@@ -13,31 +14,38 @@ export async function POST(req) {
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return failure(authorization.error, authorization.status);
     const body = await req.json().catch(() => ({}));
+    const execution = await observeQualityRequest({ supabase: authorization.supabase, origin: "manager_test", run: (_id, trace) => runManagerAnswer(authorization, body, trace) });
+    return NextResponse.json({ success: true, result: execution.response });
+  } catch (error) {
+    const diagnostic = answerGenerationDiagnostic(error);
+    console.error("Ask LWR Pickleball AI answer generation failed", diagnostic);
+    return failure(error.message || "Official-document answer generation failed.", diagnostic.category === "server_failure" ? 400 : 502, diagnostic);
+  }
+}
+
+async function runManagerAnswer(authorization, body, trace) {
     const started = performance.now();
     const conversationResolution = resolveOfficialConversation({ question: body.question, userId: authorization.user.id, receipt: body.conversationReceipt });
-    if (conversationResolution.kind !== "resolved") return NextResponse.json({
-      success: true,
-      result: managerClarificationResult(body, conversationResolution, conversationResolution.clarification?.category === "color_subject" ? createClarificationReceipt(authorization.user.id, conversationResolution.rawQuestion, conversationResolution.clarification.category) : null),
-    });
+    if (conversationResolution.kind !== "resolved") return {
+      conversationResolution, result: { kind: conversationResolution.kind },
+      response: managerClarificationResult(body, conversationResolution, conversationResolution.clarification?.category === "color_subject" ? createClarificationReceipt(authorization.user.id, conversationResolution.rawQuestion, conversationResolution.clarification.category) : null),
+    };
+    trace.stage3Invoked = true;
     const retrieval = await retrieveOfficialEvidence({ supabase: authorization.supabase, body: { ...body, question: conversationResolution.effectiveQuestion } });
     retrieval.conversationResolution = conversationResolution;
     const [answer, documentsConsidered] = await Promise.all([
       generateOfficialAnswer({ retrieval, supabase: authorization.supabase }),
       eligibleDocuments(authorization.supabase),
     ]);
-    return NextResponse.json({
-      success: true,
-      result: {
+    return {
+      retrieval, answer, conversationResolution,
+      result: { kind: answer.conflict?.requiresClarification ? "conflict" : answer.evidenceSufficient ? "answer" : "insufficient_evidence", answer: answer.answer },
+      response: {
         retrieval: { ...retrieval, documentsConsidered, conversationResolution: conversationDiagnostics(conversationResolution, { stage3Invoked: true, answer }) },
         answer: { ...answer, metrics: { ...answer.metrics, retrievalMs: retrieval.metrics.totalMs, totalMs: Math.round(performance.now() - started) } },
         conversationReceipt: answer.evidenceSufficient ? createFollowUpReceipt(authorization.user.id, conversationResolution.effectiveQuestion) : null,
       },
-    });
-  } catch (error) {
-    const diagnostic = answerGenerationDiagnostic(error);
-    console.error("Ask LWR Pickleball AI answer generation failed", diagnostic);
-    return failure(error.message || "Official-document answer generation failed.", diagnostic.category === "server_failure" ? 400 : 502, diagnostic);
-  }
+    };
 }
 
 function managerClarificationResult(body, resolution, conversationReceipt) {

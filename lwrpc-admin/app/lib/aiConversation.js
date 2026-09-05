@@ -80,8 +80,8 @@ export function clarificationFromRetrieval(resolution, retrieval) {
   return { ...resolution, ...clarificationResolution(resolution.rawQuestion, CLARIFICATION_COLOR, hasCandidates ? "missing_color_subject_with_active_candidates" : "missing_color_subject", resolution.priorContextAvailable), clarificationQuestion: resolution.effectiveQuestion };
 }
 
-export function createFeedbackReceipt({ userId, memberId = null, originalQuestion, effectiveQuestion, answer, sources = [], selectedEvidence = [], retrieval, assistantVersion, model, now = Date.now() } = {}) {
-  const answerId = randomUUID();
+export function createFeedbackReceipt({ userId, memberId = null, originalQuestion, effectiveQuestion, answer, sources = [], selectedEvidence = [], retrieval, assistantVersion, model, now = Date.now(), answerId = randomUUID() } = {}) {
+  if (!validUuid(answerId)) throw new Error("Invalid server answer identity.");
   return sealReceipt({
     sub: requiredUserId(userId), purpose: "feedback", exp: now + FEEDBACK_TTL_MS, answerId, memberId: cleanId(memberId),
     originalQuestion: cleanQuestion(originalQuestion), effectiveQuestion: cleanQuestion(effectiveQuestion), answer: String(answer || "").trim().slice(0, 6000),

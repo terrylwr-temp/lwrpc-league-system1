@@ -2,7 +2,11 @@
 
 Last updated: 2026-09-05
 
-Current prepared application version: **LMS-0715** (package `0.1.537`), awaiting review/deployment. **Stage 6 / LMS-0714 is production accepted. Stage 7 has not started.**
+Current production application version: **LMS-0715** (package `0.1.537`), **deployed, production verified and accepted by the owner**. **Stages 1–6 are complete and production accepted. Stage 7A implementation and controlled production validation are authorized; Stage 7B has not started.**
+
+Current implementation: **LMS-0716 / 0.1.538 — corrected Stage 7A migration applied to production; application not deployed or production accepted.** The owner approved the design, 32 KiB normalized-text correction, explicit service-role revoke/regrant correction and controlled production sequence. Local tests: 209 passed. Production schema/ACL verification and 72 effective operation checks passed; existing feedback/document data and existing schema/ACL hashes were unchanged. Synthetic concurrency/retry/collision/rollback tests completed with the limits recorded in the implementation report. Removed exactly 9 outcomes, 9 occurrences, 6 groups, 6 routes, 6 cases and 7 audit events; all six new tables are empty. **Stopped at HMAC configuration:** connected Vercel tools have no environment setter, local CLI authentication is absent, and the available browser requires Vercel login. No key was generated/configured and no deployment occurred. Live capture acceptance, hosted health/log checks and full hosted latency acceptance remain pending. See `docs/lms-0716-implementation-report.md`. Stage 7B remains reserved for LMS-0717 / 0.1.539 and has not started.
+
+Stage 7 governing design is approved in `docs/stage-7-ai-feedback-review-design.md`, including all 18 schema/workflow/UI/security/retention/test sections. Stage 7A implementation is now authorized; the phased scope and accepted Stages 1–6 behavior remain unchanged.
 
 ## Purpose
 
@@ -561,3 +565,43 @@ LMS-0715 (package 0.1.537) fixes the two previously documented manager UI findin
 - Preserve later permission-aware live LMS intelligence/navigation: ratings, rosters, standings, opponents, schedules, Match Setup and navigation, using existing role/permission rules and deterministic authorized server-side data services.
 
 These requirements are recorded only. LMS-0715 implements no Stage 7 reporting, automatic capture, review workflow or database schema.
+
+### LMS-0716 Stage 7A local implementation (2026-09-05)
+
+LMS-0716 / 0.1.538 adds the six protected quality tables and atomic capture RPC, shared feedback identity, metadata-only grounded/protected/clarification outcomes, automatic genuine no-source/conflict occurrences, conservative versioned fingerprint groups and automatic case/audit seeds. Approved normalized text correction: retain full normalized value with a 32 KiB byte constraint; effective questions remain limited to 2,400 characters. Existing append-only feedback history, player payload/UI, Stage 3/4 behavior and active corpus remain unchanged.
+
+Validation: 208 tests passed; lint passed with six pre-existing warnings; non-incremental type check and PDF verification passed. Normal compilation succeeded but hit the known tsbuildinfo cache lock; isolated production build and its PDF verification passed. The SQL was executed only in isolated PGlite tests, not production. Deployment order is additive migration → schema/security verification → server-only grouping-key configuration → application deployment → controlled acceptance. See `docs/lms-0716-implementation-report.md` for exact files and production gates. LMS-0717 manager reporting/workflow remains unimplemented.
+
+### Pending post-LMS-0716 AI quality investigations — owner production findings (2026-09-05)
+
+**Gate:** After LMS-0716 / 0.1.538 is production accepted, perform a diagnosis-only pass on the three questions below before proposing any retrieval/selection changes. These are owner-reported production observations, not independently replayed findings or confirmed root causes. They do not expand LMS-0716: Stage 7A remains observational/capture-only. No Stage 3, Stage 4, terminology expansion, clarification behavior, document, corpus or active-version change is authorized by this note. Preserve the accepted LMS-0701/LMS-0705 controls. This follow-up does not authorize LMS-0717 implementation or Live LMS Intelligence.
+
+1. **Weekend roster timing**
+
+   Exact question: `When can I start adding players to my roster for the weekend league`
+
+   Reported behavior: the answer mixes team/season roster management with individual-match Match Setup and cites tangential evidence, including `LWR Pickleball Club DUPR Captains Guide — ENTER/VERIFY SCORES — Page 9`.
+
+   Later diagnosis must determine whether `weekend league` should resolve to LWR Saturday League context; whether the applicable Important Dates/Saturday roster-opening evidence is available; and whether Stage 4 is admitting Match Setup/score-entry evidence into a season-roster-management question. Check whether team roster timing and match lineup timing should both be discussed only when the question actually asks about both. Compare with the earlier LMS-0701/LMS-0705 evidence-selection issue and preserve their accepted regression controls. Do not assume the alias, evidence availability or cause before inspecting the actual retrieval/selection trace.
+
+2. **Underspecified adding-players question**
+
+   Exact question: `When can I start adding players`
+
+   Reported behavior: insufficient evidence.
+
+   Later diagnosis must determine whether that remains appropriate or whether a bounded clarification should ask whether the player means adding players to a team roster or entering players into a match lineup/Match Setup. Do not guess the missing object. No clarification change is part of LMS-0716.
+
+3. **Roster-entry answer and forfeiture provision**
+
+   Exact question: `How do I enter players on my roster`
+
+   Reported behavior: a generally useful Manage Roster answer also states: `Retroactive additions are allowed without penalty only if the player was a valid LWR PC member with an eligible DUPR account and rating; otherwise the match is forfeited and not posted to DUPR.`
+
+   Later diagnosis must verify that the selected official evidence directly supports this statement and that the forfeiture provision is materially applicable to a general how-to question rather than tangential enforcement information. Treat the quoted answer as a reported claim to verify, not an established club rule.
+
+Expected diagnosis deliverable: for each exact question, identify original/effective question and resolved scope, applicable official evidence availability, actual selected/cited evidence and material relevance, then recommend whether a correction is warranted. Return findings for review before implementing any fix; do not alter or activate sources to manufacture a result. Until the production-acceptance gate is met, these items remain pending and LMS-0716 implementation/validation remains as already approved.
+
+### LMS-0716 production preflight hold (2026-09-05)
+
+Controlled production validation/deployment was subsequently authorized, but preflight stopped before any production mutation. Production default table ACLs give service_role broad privileges; the reviewed migration's limited GRANT statements do not remove them. The six new tables are still absent. Required bounded correction: revoke inherited service_role grants on only those six new tables before regranting the approved minimum permissions, and test with Supabase-like default ACLs. Do not change global defaults or existing feedback/LMS privileges. See the production preflight stop in `docs/lms-0716-implementation-report.md`. No migration, HMAC configuration, deployment or synthetic data creation has occurred; production acceptance remains pending.

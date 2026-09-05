@@ -57,7 +57,7 @@ export function playerRetrievalBody(body = {}, role = "player") {
   };
 }
 
-export async function runPlayerOfficialAnswer({ body, role, userId, memberId = null, supabase, retrieveOfficialEvidence, generateOfficialAnswer, now = Date.now }) {
+export async function runPlayerOfficialAnswer({ body, role, userId, memberId = null, supabase, retrieveOfficialEvidence, generateOfficialAnswer, now = Date.now, answerId }) {
   const rawQuestion = body?.question;
   const resolution = resolveOfficialConversation({ question: rawQuestion, userId, receipt: body?.conversationReceipt, now: now() });
   if (resolution.kind === "protected") return { retrieval: null, conversationResolution: resolution, result: playerFallbackResult("protected") };
@@ -74,8 +74,8 @@ export async function runPlayerOfficialAnswer({ body, role, userId, memberId = n
     result: clarificationResult(retrievalClarification, userId, now()),
   };
   const answer = await generateOfficialAnswer({ retrieval, supabase });
-  return { retrieval, conversationResolution: retrieval.conversationResolution, result: toPlayerAnswerResult(answer, userId, {
-    originalQuestion: resolution.rawQuestion, effectiveQuestion: resolution.effectiveQuestion, memberId, retrieval, now: now(),
+  return { answer, retrieval, conversationResolution: retrieval.conversationResolution, result: toPlayerAnswerResult(answer, userId, {
+    originalQuestion: resolution.rawQuestion, effectiveQuestion: resolution.effectiveQuestion, memberId, retrieval, now: now(), answerId,
   }) };
 }
 
@@ -90,7 +90,7 @@ export function playerFallbackResult(kind = "insufficient_evidence") {
   return Object.freeze({ kind, answer: INSUFFICIENT_EVIDENCE_ANSWER, evidenceSufficient: false, conflict: false, sources: [], conversationReceipt: null, feedbackReceipt: null });
 }
 
-export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", effectiveQuestion = "", memberId = null, retrieval = null, now = Date.now() } = {}) {
+export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", effectiveQuestion = "", memberId = null, retrieval = null, now = Date.now(), answerId } = {}) {
   const evidenceSufficient = answer?.evidenceSufficient === true;
   const conflict = answer?.conflict?.requiresClarification === true;
   const sources = (answer?.sources || []).map((source) => ({
@@ -106,7 +106,7 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
   const eligibleForFeedback = evidenceSufficient && !conflict && sources.length > 0;
   const feedbackReceipt = eligibleForFeedback ? createFeedbackReceipt({
     userId, memberId, originalQuestion, effectiveQuestion, answer: answer?.answer, sources: answer?.sources || [], selectedEvidence: answer?.selectedEvidence || [], retrieval,
-    assistantVersion: APP_VERSION, model: answer?.model, now,
+    assistantVersion: APP_VERSION, model: answer?.model, now, answerId,
   }) : null;
   return {
     kind: conflict ? "conflict" : evidenceSufficient ? "answer" : "insufficient_evidence",

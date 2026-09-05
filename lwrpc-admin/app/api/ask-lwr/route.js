@@ -3,6 +3,7 @@ import { generateOfficialAnswer } from "../../lib/aiAnswerGeneration";
 import { retrieveOfficialEvidence } from "../../lib/aiRetrieval";
 import { runPlayerOfficialAnswer } from "../../lib/askLwrPlayerAnswer";
 import { authorizeAdminRequest } from "../../lib/serverSupabase";
+import { observeQualityRequest } from "../../lib/aiQualityCapture";
 
 export const runtime = "nodejs";
 
@@ -12,10 +13,10 @@ export async function POST(req) {
     if (authorization.error) return failure(authorization.status);
     const body = await req.json().catch(() => ({}));
 
-    const { result } = await runPlayerOfficialAnswer({
+    const { result } = await observeQualityRequest({ supabase: authorization.supabase, run: (answerId, trace) => runPlayerOfficialAnswer({
       body, role: authorization.role, userId: authorization.user.id, memberId: authorization.memberRows?.[0]?.id || null, supabase: authorization.supabase,
-      retrieveOfficialEvidence, generateOfficialAnswer,
-    });
+      answerId, retrieveOfficialEvidence: args => { trace.stage3Invoked = true; return retrieveOfficialEvidence(args); }, generateOfficialAnswer,
+    }) });
     return NextResponse.json({ success: true, result });
   } catch (error) {
     console.error("Ask LWR player answer failed", { category: error?.name || "server_failure" });
