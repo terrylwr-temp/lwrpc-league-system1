@@ -1,4 +1,4 @@
-import { missingPlayerObject, playerObjectReply, plausibleRosterTimingLeagues, questionLeague, isRosterParticipationQuestion, ballDamageKind } from "./aiQuestionApplicability.js";
+import { missingPlayerObject, playerObjectReply, plausibleRosterTimingLeagues, questionLeague, isRosterParticipationQuestion, ballDamageKind, isSeasonRatingDateQuestion } from "./aiQuestionApplicability.js";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
 
 const RECEIPT_VERSION = 1;
@@ -37,6 +37,19 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
     try { prior = readConversationReceipt(receipt, userId, { now }); } catch (error) { receiptError = error; }
   }
   const diagnostics = { priorContextPurpose: prior?.purpose || null, receiptValidation: receipt ? (prior ? "valid" : "invalid_or_expired") : "absent", clarificationConsumed: false };
+
+  // Only this complete timing continuation has a known plural subject. The
+  // signed immediately previous question must contain that subject alone.
+  if (/^when\s+are\s+they\s+recorded(?:\s+for\s+(?:the\s+)?(?:weekday|saturday|primetime)\s+league)?[?.!]*$/i.test(rawQuestion)) {
+    const priorQuestion = prior?.effectiveQuestion || '';
+    const unambiguous = /^when\s+are\s+season\s+dupr(?:['’]s|s)?(?:\s+ratings?)?\s+recorded(?:\s+for\s+(?:the\s+)?(?:weekday|saturday|primetime)\s+league)?[?.!]*$/i.test(priorQuestion);
+    if (prior?.purpose === "follow_up" && unambiguous && isSeasonRatingDateQuestion(priorQuestion)) {
+      const league = questionLeague(rawQuestion)[0] || questionLeague(priorQuestion)[0];
+      const label = { weekday: "Weekday", saturday: "Saturday", primetime: "PrimeTime" }[league];
+      return { ...diagnostics, kind: "resolved", classification: "follow_up", rawQuestion, effectiveQuestion: `When are Season DUPR ratings recorded${label ? ` for the ${label} League` : ''}?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
+    }
+    return { ...diagnostics, kind: "clarification", classification: receiptError ? "expired_context" : "unresolved_follow_up", rawQuestion, effectiveQuestion: "", priorContextAvailable: Boolean(prior), contextSuperseded: false, clarification: { category: "full_question", message: "Please ask the full question again so I can check the official rules." } };
+  }
 
   if (prior?.purpose === "clarification" && prior.category === "roster_league") {
     const reply = rawQuestion.trim().replace(/[?.!]+$/, "");

@@ -1,4 +1,4 @@
-import { isRosterParticipationQuestion } from "./aiQuestionApplicability.js";
+import { isRosterParticipationQuestion, isCommunityParticipationQuestion } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting } from "./aiRosterTroubleshooting.js";
 import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
 import { officialDocumentViewerHref } from "./aiOfficialDocumentViewer.js";
@@ -14,6 +14,12 @@ const PERSONAL_OPERATIONAL_PATTERNS = [
 
 export function isUnsupportedOperationalQuestion(question) {
   const value = String(question || "").replace(/[’‘]/g, "'").replace(/\s+/g, " ").trim();
+  const liveAffiliation = /\b(?:what|which)\s+(?:home\s+)?community\s+(?:am\s+i|are\s+we)\s+(?:registered|assigned|affiliated)\b/i.test(value)
+    || /\b(?:what|which)\s+team\s+(?:am\s+i|are\s+we)\s+(?:currently\s+)?on\b/i.test(value)
+    || /\b(?:am\s+i|are\s+we)\s+(?:(?:currently|personally)\s+){0,2}eligible\s+for\s+(?:this\s+|that\s+|the\s+)?team\b/i.test(value)
+    || /^[Ii]s\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+){1,3}\s+(?:currently\s+)?eligible\s+for\s+(?:this\s+|that\s+|the\s+)?team\b/.test(value)
+    || /\bdoes\s+(?:my|our)\s+community\s+(?:currently\s+)?(?:have|field)\s+a\s+team\s+in\s+(?:my|our|the)\s+division\b/i.test(value);
+  if (liveAffiliation) return true;
   // Completed personal actions and rating values take precedence over how-to exemptions.
   const owned = /\b(?:my|our|mine|ours)\b/i.test(value);
   const ratingValue = owned && /\b(?:dupr|rating)\b/i.test(value)
@@ -24,6 +30,7 @@ export function isUnsupportedOperationalQuestion(question) {
     || /\bmy\s+next\s+(?:opponent|match)\b/i.test(value)
     || /\bwhere\s+do\s+i\s+play\s+next\b/i.test(value);
   if (ratingValue || completedAction || personalSchedule) return true;
+  if (isCommunityParticipationQuestion(value)) return false;
   if (/\bhow\s+is\s+(?:my\s+|the\s+)?season\s+dupr(?:\s+rating)?\s+(?:determined|calculated|established|set|truncated)\b/i.test(value)) return false;
   if (isRosterParticipationQuestion(value)) return false;
   if (isOfficialConfigurationGuidance(value) || isOfficialTeamRosterGuidance(value) || isRosterTroubleshooting(value)) return false;

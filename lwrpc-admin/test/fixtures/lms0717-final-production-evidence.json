@@ -1,0 +1,610 @@
+{
+  "provenance": "Verbatim active production chunks from the preceding read-only captures. These are bounded selection fixtures, not complete historical RPC responses. Scores for retained candidates come from the final diagnosis; adversarial tests explicitly raise distractor scores.",
+  "cases": {
+    "community": [
+      {
+        "chunkId": "9e053a2d-c36d-4f0f-8ae6-545433af12e3",
+        "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+        "documentTitle": "LWR Pickleball Club DUPR League Rules",
+        "documentType": "league_rules",
+        "sourceClassification": "lwr_controlling",
+        "documentAuthorityRank": 1,
+        "documentScopeKind": "all",
+        "pageNumber": 2,
+        "sectionLabel": "Rule 3",
+        "heading": "PLAYER REQUIREMENTS",
+        "ruleNumber": "3",
+        "content": "3. PLAYER REQUIREMENTS\n3.1. All League players must have a signed/accepted waiver with LWR PC and have a valid\nLWR PC membership. To sign up, go to https://lwrpickleballclub.com/signup/.\n3.2. All DUPR League players must have a free DUPR ID which can be found at:\nhttps://www.dupr.com/.\n3.3. All DUPR League players must join our free DUPR club, which is diƯerent/separate from\nthe LWR PC membership: https://tinyurl.com/LWRPC-DUPRCLUB\n3.4. Players are assigned to a community based on their primary address at the start of the\nseason.\n3.5. Players may form teams with members from other communities; however, they are not\npermitted to play for another community’s team if their own community already has a\nteam in their division.\n3.6. Captains are expected to prioritize players from the local community ahead of those from\noutside the community. As a community-based league, we emphasize the inclusion of\nlocal players over non-local players.\n3.7. Players are permitted to join or substitute for multiple community teams within the same\ncommunity, provided that all League and DUPR rating regulations are adhered to.\n3.8. Players must be at least 19 years old.\n3.9. Players are responsible for verifying their paddle is on the current Approved Paddle List\n(https://equipment.usapickleball.org/paddle-list/).",
+        "semanticScore": 0.4888,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.95,
+        "contextScore": 0.1,
+        "combinedScore": 0.3693,
+        "vectorRank": 26,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 26
+      },
+      {
+        "chunkId": "c524d6d2-34d8-41ed-8fd6-40cf4c5e0e09",
+        "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+        "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+        "documentType": "captain_guide",
+        "sourceClassification": "lwr_supporting_guide",
+        "documentAuthorityRank": 3,
+        "documentScopeKind": "all",
+        "pageNumber": 7,
+        "sectionLabel": "CREATE/UPDATE TEAM ROSTER",
+        "heading": "CREATE/UPDATE TEAM ROSTER",
+        "ruleNumber": "",
+        "content": "CREATE/UPDATE TEAM ROSTER\no Enter or update your player team roster prior to the commencement of each season. Use the\nManage Roster option to add or remove players.\n All players must be active Lakewood Ranch Pickleball Club members before playing. To\njoin, they can visit: https://lwrpickleballclub.com/signup.\n All DUPR League players must have a free DUPR ID which can be created at\nhttps://www.dupr.com.\n All players must join the Lakewood Ranch Pickleball Club DUPR club (free and\nseparate from the LWR PC membership) so we can accurately sync player ratings.\nCaptains should share this link with all players: https://tinyurl.com/LWRPC-DUPRCLUB.\no Roster Requirements & Substitutes: Teams must roster enough players and substitutes (who\nare not already on another team) to field a full lineup weekly. For example, if your match\nrequires 6 players, an 8–10 player roster is recommended. Additional substitutes may be drawn\nfrom other teams in the same community, provided they meet the DUPR division rating\nrequirements. For complete details, see the Player Requirements and DUPR Rating/Divisions\nsections in the DUPR League Mission and Rules.\no Captain Roster Control: Captains are responsible for building their own rosters and may add\nor delete players throughout the season as needed provided the player is a current, valid\nmember of the LWR PC, has a DUPR ID and is eligible for that division.\no Player DUPR Ratings: Season DUPR ratings are updated in the LMS before the season starts\nand remain visible to captains all season. For players added midseason, their rating is based on\nthe date the league's season ratings were originally recorded.",
+        "semanticScore": 0.5287,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.9308,
+        "contextScore": 0.25,
+        "combinedScore": 0.3665,
+        "vectorRank": 19,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 18
+      },
+      {
+        "chunkId": "1b88b1d6-cabd-4aab-ba26-cb0b34aeb1fa",
+        "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+        "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+        "documentType": "captain_guide",
+        "sourceClassification": "lwr_supporting_guide",
+        "documentAuthorityRank": 3,
+        "documentScopeKind": "all",
+        "pageNumber": 5,
+        "sectionLabel": "HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM)",
+        "heading": "HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM)",
+        "ruleNumber": "",
+        "content": "• Complete all required questions to set up your team. Most of the information you enter, such as\nyour Team Name, Captain, and other team details, can be changed later. This initial information\nwill be used to create and activate your team and associate it with the appropriate community and\nrelated league information.\n• Once you have completed the registration form, click Register My Team! You will then be prompted\nto enter your payment information or, if available, select your current payment method already on\nfile.\n• After completing your registration, you will receive a confirmation email with your team registration\ndetails, important next steps, and upcoming dates and deadlines.\n• League Management will then activate your team and assign you and/or the individuals designated\nduring registration as the Captain and Co-Captain(s). Once this is completed, your initial team\nregistration and setup will be complete.\n• League Management will notify you when team rosters for your league have been unlocked and are\navailable for you to begin adding and managing your players.",
+        "semanticScore": 0.4917,
+        "keywordScore": 0,
+        "exactScore": 0,
+        "authorityScore": 0.3613,
+        "contextScore": 0.1,
+        "combinedScore": 0.2138,
+        "vectorRank": 7,
+        "keywordRank": null,
+        "exactMatch": false,
+        "exactMatchReason": "None",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "add",
+            "player",
+            "team",
+            "submit",
+            "lineup",
+            "friday",
+            "s"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Deadline/requirement",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 32
+      },
+      {
+        "chunkId": "cf489415-4bf3-4fbd-9eb5-05aa1e4980a8",
+        "documentId": "1c9bcadf-79b9-4493-b426-3c3e3528766e",
+        "documentVersionId": "1ea2ccf1-598e-4d0c-b0a4-b20f833805f0",
+        "documentTitle": "LWR Pickleball Club Code of Conduct",
+        "documentType": "other",
+        "sourceClassification": "lwr_supporting_guide",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 1,
+        "sectionLabel": "Rule 2",
+        "heading": "",
+        "ruleNumber": "2",
+        "content": "2. Respect for Host Communities\nAs a decentralized league, LWR PC relies on the goodwill of local communities.\n• Facility Stewardship: Club Members must respect the specific rules of the\ncommunity providing the courts (e.g., parking regulations, noise ordinances, and\nguest policies).\n• Neutrality: Club Members are guests in these communities. Any behavior that\njeopardizes LWR PC’s relationship with a host community is considered a Level 2\nviolation.",
+        "semanticScore": 0.2841,
+        "keywordScore": 0,
+        "exactScore": 0,
+        "authorityScore": 0.2109,
+        "contextScore": 0,
+        "combinedScore": 0.1939,
+        "vectorRank": 12,
+        "keywordRank": null,
+        "exactMatch": false,
+        "exactMatchReason": "None",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "lwrpc",
+            "reimburse",
+            "lost",
+            "prescription",
+            "sunglasses"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "lwr pc",
+              "to": "lwrpc"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 16
+      },
+      {
+        "chunkId": "aaedf4ae-3936-4d8c-ae6c-23435bd27105",
+        "documentId": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+        "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+        "documentTitle": "LWRPC-Captains Guide to the LMS",
+        "documentType": "captain_guide",
+        "sourceClassification": "lwr_supporting_guide",
+        "documentAuthorityRank": 3,
+        "documentScopeKind": "lms_help",
+        "pageNumber": 9,
+        "sectionLabel": "",
+        "heading": "",
+        "ruleNumber": "",
+        "content": "Player Eligibility & DUPR Ratings\nClick the Add Player button to add a player to your roster.\n• Selection: A pop-up window will appear with your home community preselected.\nUse the drop-down menu to view available players, along with their eligibility status\nand DUPR ratings.\n• Missing DUPR Info: If a player is missing a DUPR ID or Season Rating, select the\nplayer and click Add Player to Team. League Management will automatically be\nnotified to review the issue and update you on their status.\n• Ineligible Players: If a player is marked \"Not Eligible,\" attempting to add them will\ndisplay an on-screen message explaining the specific reason why.\nAdd Player Pop-up Window",
+        "semanticScore": 0.4871,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.9308,
+        "contextScore": 0,
+        "combinedScore": 0.1826,
+        "vectorRank": 27,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 28
+      },
+      {
+        "chunkId": "458c9acb-ec01-4590-a9b2-3e5713cfc2ad",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 18,
+        "sectionLabel": "Section 5: Player Positions and Serving",
+        "heading": "5.C Questions About Correct Server, Receiver, and Positions — Player or Position Error Claimed During Rally",
+        "ruleNumber": "5.C.1",
+        "content": "5.C.1 Player or Position Error Claimed During Rally. Any player may\nstop a rally to claim an incorrect server, incorrect receiver, or\nincorrect player position.",
+        "semanticScore": 0.5083,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4509,
+        "vectorRank": 29,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: rally",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "happens",
+            "if",
+            "discover",
+            "ball",
+            "cracked",
+            "after",
+            "rally"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 27
+      }
+    ],
+    "timing": [
+      {
+        "chunkId": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+        "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+        "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+        "documentTitle": "2026 Fall League Important Dates",
+        "documentType": "league_supplement",
+        "sourceClassification": "lwr_controlling",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 1,
+        "sectionLabel": "Weekday DUPR League Key Dates",
+        "heading": "Weekday DUPR League Key Dates",
+        "ruleNumber": "",
+        "content": "Weekday DUPR League Key Dates\n• Sept. 7, Monday – Open Registration\n• Sept. 27, Sunday – Season DUPR ratings recorded\n• Sept. 28, Monday - Can start updating rosters\n• Oct. 4, Sunday – Last day to register (4 weeks)\n• Oct. 7, Wednesday – Schedules completed and sent\n• Oct. 14 (Women)/15(Men) – Weekday DUPR Season Starts\n• Nov. 25/26 Break Week\n• Dec. 2/3 - End of Regular Season\n• Dec. 9/10 - Championship Days (All 3 lines at the Premier Sports Center - hopefully will\nbe completed!)\nNote: No games the week of Nov. 22 (Thanksgiving Break)",
+        "semanticScore": 0.6278,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.9404,
+        "contextScore": 0.1,
+        "combinedScore": 0.8312,
+        "vectorRank": 7,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 6,
+        "authorityReview": {
+          "included": true,
+          "rank": 6,
+          "limit": 12
+        }
+      },
+      {
+        "chunkId": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+        "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+        "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+        "documentTitle": "2026 Fall League Important Dates",
+        "documentType": "league_supplement",
+        "sourceClassification": "lwr_controlling",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 1,
+        "sectionLabel": "Saturday DUPR League Key Dates",
+        "heading": "Saturday DUPR League Key Dates",
+        "ruleNumber": "",
+        "content": "Saturday DUPR League Key Dates\n• Sept. 7, Monday – Open Registration\n• Sept. 27, Sunday – Season DUPR ratings recorded\n• Sept. 28, Monday - Can start updating rosters\n• Oct. 4, Sunday – Last day to register\n• Oct. 7, Wednesday – Schedules completed and sent\n• Oct. 17 - Saturday DUPR7 Season Starts\n• Oct. 24 - Saturday DUPR6 / DUPR8 Season Starts\n• Nov. 25 / 26 Break Week\n• Dec. 5 / 12 - Last games of 1st half / break\n• Jan. 9 / 16 - Start of 2nd half\n• Feb. 20 / 27 - End of Regular Season\n• Mar. 6 / 13 - Championship Days (PlayoƯs with top 4 teams)\n• Jamboree - Mar. 20 / 27\nNote:\nNo games the week of Nov. 22 for Thanksgiving Break\nNo games after Dec. 13 – Jan. 8 for Christmas Break",
+        "semanticScore": 0.6364,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.9404,
+        "contextScore": 0.1,
+        "combinedScore": 0.8099,
+        "vectorRank": 5,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 5,
+        "authorityReview": {
+          "included": true,
+          "rank": 5,
+          "limit": 12
+        }
+      },
+      {
+        "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+        "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+        "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+        "documentTitle": "2026 Fall League Important Dates",
+        "documentType": "league_supplement",
+        "sourceClassification": "lwr_controlling",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 2,
+        "sectionLabel": "PrimeTime DUPR League Key Dates",
+        "heading": "PrimeTime DUPR League Key Dates",
+        "ruleNumber": "",
+        "content": "PrimeTime DUPR League Key Dates\n• Sept. 7, Monday – Open Registration\n• Sept. 27, Sunday – Season DUPR ratings recorded\n• Sept. 28, Monday - Can start updating rosters\n• Oct. 4, Sunday – Last day to register (4 weeks)\n• Oct. 7, Wednesday – Schedules completed and sent\n• Oct. 16 - PrimeTime League Starts\n• Nov. 25/26 Break Week\n• Dec. 4 - PrimeTime League Regular Season Ends\n• Dec. 11 - PrimeTime League Championship Day\nNote: No games the week of Nov. 22 (Thanksgiving Break)",
+        "semanticScore": 0.5836,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.9404,
+        "contextScore": 0.1,
+        "combinedScore": 0.7935,
+        "vectorRank": 9,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 9,
+        "authorityReview": {
+          "included": true,
+          "rank": 9,
+          "limit": 12
+        }
+      },
+      {
+        "chunkId": "f259c053-d57c-4b0d-9d50-3dbbd7fc1fb8",
+        "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+        "documentTitle": "LWR Pickleball Club DUPR League Rules",
+        "documentType": "league_rules",
+        "sourceClassification": "lwr_controlling",
+        "documentAuthorityRank": 1,
+        "documentScopeKind": "all",
+        "pageNumber": 4,
+        "sectionLabel": "Rule 4.6",
+        "heading": "Team DUPR Rating Requirements",
+        "ruleNumber": "4.6",
+        "content": "4.6. Team DUPR Rating Requirements: A team's DUPR Rating is calculated by adding the\nSeason DUPR Ratings of both players. Each division has established minimum and\nmaximum individual player ratings, as well as a maximum combined Team DUPR\nRating. These limits are strictly enforced.\n4.6.1. Every lineup fielded for a match must comply with both the individual player rating\nrequirements and the maximum combined Team DUPR Rating for that division.\nTeams that fail to meet these requirements will automatically forfeit the aƯected\ngames.\n4.6.2. Games forfeited due to an invalid lineup will not be submitted to DUPR. The\nLeague Management System will automatically record the forfeits and update team\nrecords and league standings accordingly.",
+        "semanticScore": 0.6701,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.95,
+        "contextScore": 0,
+        "combinedScore": 0.7933,
+        "vectorRank": 2,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 2,
+        "authorityReview": {
+          "included": true,
+          "rank": 2,
+          "limit": 12
+        }
+      },
+      {
+        "chunkId": "c524d6d2-34d8-41ed-8fd6-40cf4c5e0e09",
+        "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+        "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+        "documentType": "captain_guide",
+        "sourceClassification": "lwr_supporting_guide",
+        "documentAuthorityRank": 3,
+        "documentScopeKind": "all",
+        "pageNumber": 7,
+        "sectionLabel": "CREATE/UPDATE TEAM ROSTER",
+        "heading": "CREATE/UPDATE TEAM ROSTER",
+        "ruleNumber": "",
+        "content": "CREATE/UPDATE TEAM ROSTER\no Enter or update your player team roster prior to the commencement of each season. Use the\nManage Roster option to add or remove players.\n All players must be active Lakewood Ranch Pickleball Club members before playing. To\njoin, they can visit: https://lwrpickleballclub.com/signup.\n All DUPR League players must have a free DUPR ID which can be created at\nhttps://www.dupr.com.\n All players must join the Lakewood Ranch Pickleball Club DUPR club (free and\nseparate from the LWR PC membership) so we can accurately sync player ratings.\nCaptains should share this link with all players: https://tinyurl.com/LWRPC-DUPRCLUB.\no Roster Requirements & Substitutes: Teams must roster enough players and substitutes (who\nare not already on another team) to field a full lineup weekly. For example, if your match\nrequires 6 players, an 8–10 player roster is recommended. Additional substitutes may be drawn\nfrom other teams in the same community, provided they meet the DUPR division rating\nrequirements. For complete details, see the Player Requirements and DUPR Rating/Divisions\nsections in the DUPR League Mission and Rules.\no Captain Roster Control: Captains are responsible for building their own rosters and may add\nor delete players throughout the season as needed provided the player is a current, valid\nmember of the LWR PC, has a DUPR ID and is eligible for that division.\no Player DUPR Ratings: Season DUPR ratings are updated in the LMS before the season starts\nand remain visible to captains all season. For players added midseason, their rating is based on\nthe date the league's season ratings were originally recorded.",
+        "semanticScore": 0.5287,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.9308,
+        "contextScore": 0.25,
+        "combinedScore": 0.7453,
+        "vectorRank": 19,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 18
+      },
+      {
+        "chunkId": "05a87b39-d4ab-4d36-b539-d631e8658d87",
+        "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+        "documentVersionId": "8d64618d-6078-4be2-9484-cf11395f1c21",
+        "documentTitle": "LWR Pickleball Club DUPR League Rules",
+        "documentType": "league_rules",
+        "sourceClassification": "lwr_controlling",
+        "documentAuthorityRank": 1,
+        "documentScopeKind": "all",
+        "pageNumber": 3,
+        "sectionLabel": "Rule 4",
+        "heading": "DUPR RATINGS/DIVISIONS",
+        "ruleNumber": "4",
+        "content": "4. DUPR RATINGS/DIVISIONS\n4.1. Season DUPR Ratings: A player's Season DUPR Rating is established on the date\ncommunicated to all captains prior to the first scheduled league match and remains in\neƯect for the duration of the season.\n4.1.1. A player with a DUPR Reliability Factor below 29 will be classified as “Not Rated”\n(NR) for League purposes and will be subject to the provisions of Rule 4.5. This\nclassification recognizes that a player’s current DUPR rating may not yet provide a\nsuƯiciently reliable indication of skill level, particularly for newer or less-established\nplayers or those who have not recently recorded matches in DUPR. Players\nclassified as “NR” may be placed on a team in the division that most appropriately\nreflects their current skill level while they record additional matches and establish a\nmore reliable DUPR rating. These players are strongly encouraged to consult with a\nlocal Certified DUPR Coach, pickleball professional, or knowledgeable team\ncaptain for guidance regarding appropriate division placement.\n4.2. All DUPR ratings will be truncated to the nearest tenth to establish a player's “Season's\nDUPR Rating”. For example, a rating of 3.496 will be truncated to 3.4, as will a rating of\n3.401.\n4.3. Some of our Leagues use the “Age-based” DUPR sub-rating but will still follow all DUPR\nRating/Division Rules. If a player hasn’t established their 65+ Age-based rating as of the\nstart of a season, their 50+ Age-based rating will be used.\n4.4. Any player or team that is found to be cheating, tanking, game-fixing or any kind of data\nmanipulation, including intentionally creating multiple DUPR accounts, will be banned\nfrom the League for one calendar year.\n4.5. Players with a DUPR Rating of \"NR\" (Not Rated): Players with a DUPR rating of NR (Not",
+        "semanticScore": 0.6874,
+        "keywordScore": 0,
+        "exactScore": 0.95,
+        "authorityScore": 0.95,
+        "contextScore": 0.1,
+        "combinedScore": 0.576,
+        "vectorRank": 1,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Acronym: DUPR",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "season",
+            "dupr",
+            "determine"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [
+            {
+              "from": "determined",
+              "to": "determine"
+            }
+          ],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "None",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 1,
+        "authorityReview": {
+          "included": true,
+          "rank": 1,
+          "limit": 12
+        }
+      }
+    ]
+  }
+}

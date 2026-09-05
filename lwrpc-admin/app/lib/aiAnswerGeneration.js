@@ -1,4 +1,4 @@
-import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind } from "./aiQuestionApplicability.js";
+import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind, isSeasonRatingDateQuestion, seasonRatingDatePassages, isCommunityParticipationQuestion, communityParticipationPassages } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER, selectGoverningEvidence } from "./aiGoverningSources.js";
@@ -61,9 +61,10 @@ function selectLwrAnswerEvidence(retrieval) {
   const cutoff = Math.max(Number(retrieval.evidence.threshold) || aiAssistantConfig.evidenceThreshold, Number(primary.combinedScore) - DIRECT_RELEVANCE_DELTA);
   const intents = detectedEvidenceIntents(retrieval.request?.question);
   const ratingKind = ratingQuestionKind(retrieval.request?.question);
+  const recordingDate = isSeasonRatingDateQuestion(retrieval.request?.question);
   // Rating qualifications contribute to the method even when an unrelated
   // aggregate-rating paragraph happened to rank first in retrieval.
-  const selected = ratingKind ? candidates.filter(candidate => ratingApplicablePassages(candidate, retrieval.request?.question).length) : [primary, ...candidates.slice(1).filter((candidate) => (
+  const selected = recordingDate ? candidates.filter(candidate => seasonRatingDatePassages(candidate, retrieval.request?.question).length) : ratingKind ? candidates.filter(candidate => ratingApplicablePassages(candidate, retrieval.request?.question).length) : [primary, ...candidates.slice(1).filter((candidate) => (
     Number(candidate.combinedScore) >= cutoff
     && hasDirectRelevance(candidate)
     && materiallyContributes(candidate, primary, retrieval.request?.question)
@@ -88,7 +89,7 @@ function selectLwrAnswerEvidence(retrieval) {
   const requiredCandidates = requiredIntentEvidence.map(({ candidate }) => candidate);
   const selectedForModel = [...requiredCandidates, ...selected.filter((candidate) => (
     requiredCandidates.some((required) => required.chunkId === candidate.chunkId)
-    || (ratingKind && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question))
+    || ((ratingKind || recordingDate) && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question))
     || (isRosterTroubleshooting(retrieval.request?.question) && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question))
     || (questionRequestsProcedure(retrieval.request?.question) && supportsAnyEvidenceIntent(candidate, intents, retrieval.request?.question) && materiallyContributes(candidate, primary, retrieval.request?.question))
     || isMoreAuthoritativeThanRequired(candidate, requiredCandidates, intents, retrieval.request?.question)
@@ -105,6 +106,8 @@ function selectLwrAnswerEvidence(retrieval) {
 
 function detectedEvidenceIntents(question) {
   const value = operationWords(question);
+  if (isSeasonRatingDateQuestion(value)) return ["Season DUPR recording date"];
+  if (isCommunityParticipationQuestion(value)) return ["Team/community participation eligibility"];
   if (ballDamageKind(value)) return [];
   if (isRosterParticipationQuestion(value)) return ["Roster participation permission"];
   if (ratingQuestionKind(value)) return [ratingQuestionKind(value)];
@@ -134,6 +137,10 @@ function supportsEvidenceIntent(candidate, intent, question = "") { return Boole
 
 function intentSupport(candidate, intent, question) {
   if (!leagueCompatible(candidate, question)) return null;
+  if (intent === "Season DUPR recording date") return seasonRatingDatePassages(candidate, question).length
+    ? { intent, strength: 130, reason: "Announced rating-recording event with its verified league heading" } : null;
+  if (intent === "Team/community participation eligibility") return communityParticipationPassages(candidate).length
+    ? { intent, strength: 130, reason: "Cross-community participation permission and its complete division condition" } : null;
   if (intent === "Roster participation permission") {
     const passage = evidencePassages(candidate).find(text => /\b(?:active\s+)?players?\s+must\s+appear\s+on\b[\s\S]{0,100}\broster\b[\s\S]{0,70}\b(?:prior\s+to|before)\s+match\s+play\b/i.test(text));
     return passage ? { intent, strength: 130, reason: "Direct roster-before-participation requirement with its conditional remedies" } : null;
@@ -247,6 +254,8 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
           "This is roster-availability troubleshooting using general official documentation, not live LMS data. Explain only documented requirements/checks supported by the selected evidence. You have not inspected the affected player, account, team or roster and do not know the actual reason the player is absent. Do not turn a prerequisite into a cause or probability: avoid 'most likely', 'the reason is', 'this means' or equivalent unsupported diagnoses. A documented conditional cause may be explained conditionally, never asserted as this player's status. Do not infer that missing DUPR or another-team membership necessarily hides a player. Do not transfer Match Setup restrictions to Manage Roster. Where appropriate, suggest contacting League Management if documented checks do not resolve the issue."
         ] : []),
         "Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk.",
+        "Keep conditional permission and its limiting exception together. Explain a supplied hypothetical condition without claiming to have checked the user's actual community, team or eligibility. When that condition is unknown, explain the conditional rule rather than giving unrestricted permission or prohibition.",
+        "Describe referee-specific procedures as applying when a referee is officiating. A tournament match does not by itself establish that a referee is present.",
         "When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct.",
         "Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play.",
         "Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",

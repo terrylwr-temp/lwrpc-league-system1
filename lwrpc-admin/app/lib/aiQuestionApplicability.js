@@ -25,8 +25,13 @@ export function leagueCompatible(candidate, question) {
 export function evidencePassages(candidate) {
   const blocks = String(candidate?.content || '').replace(/\r/g, '').split(/\n\s*\n|\n(?=\s*(?:[•]\s*|o\s+|\d+(?:\.\d+)*\.\s))/).map(text => text.trim()).filter(Boolean);
   const units = [];
+  const leagueHeading = blocks[0] === candidate?.heading && /\bleague\s+key\s+dates\b/i.test(blocks[0]) && questionLeague(blocks[0]).length === 1 ? blocks[0] : '';
   for (let i = 0; i < blocks.length; i++) {
     const parent = blocks[i];
+    if (leagueHeading && /^•\s/.test(parent) && /\bseason\s+dupr\s+ratings?\s+recorded\b/i.test(parent)) {
+      units.push(`${leagueHeading}\n${parent}`);
+      continue;
+    }
     const number = parent.match(/^(\d+(?:\.\d+)*)\.\s/)?.[1];
     if (number && /:\s*$/.test(parent)) {
       const children = [];
@@ -60,6 +65,34 @@ export function ratingQuestionKind(question) {
   if (/\breliability\s+factor\b/.test(q)) return 'DUPR Reliability Factor';
   if (/\bnr\b|\bnot\s+rated\b/.test(q) && /\b(?:what|mean|definition|classified)\b/.test(q)) return 'NR definition';
   return '';
+}
+
+export function isSeasonRatingDateQuestion(question) {
+  return /^\s*(?:when\s+(?:are|were|will|do)|(?:on\s+)?what\s+date\b)/i.test(question)
+    && /\bseason\s+dupr(?:['’]s|s)?(?:\s+ratings?)?\b/i.test(question)
+    && /\brecorded\b/i.test(question)
+    && !/\b(?:and|scores?|rosters?|lineups?|match\s+setup|calculated|determined)\b/i.test(question);
+}
+
+export function seasonRatingDatePassages(candidate, question) {
+  if (!isSeasonRatingDateQuestion(question) || !leagueCompatible(candidate, question) || candidate?.documentType === 'usap_rulebook') return [];
+  return evidencePassages(candidate).filter(p => /\bleague\s+key\s+dates\s*\n•\s*[^\n]+\bseason\s+dupr\s+ratings?\s+recorded\b/i.test(p));
+}
+
+export function isCommunityParticipationQuestion(question) {
+  const q = String(question || '').toLowerCase();
+  return /\bcommunit(?:y|ies)\b/.test(q)
+    && /\b(?:join(?:ing)?|play|form|eligibility\s+rules)\b/.test(q)
+    && (/\bteams?\b/.test(q) || /\bplay\s+for\s+(?:another|a\s+different|the)\s+community\b/.test(q));
+}
+
+export function communityParticipationPassages(candidate) {
+  if (candidate?.documentType !== 'league_rules') return [];
+  // Recognize the complete conditional participation proposition in the body;
+  // a community heading or a roster/guest procedure is not permission.
+  return evidencePassages(candidate).filter(p => /\bplayers?\s+may\s+(?:form|join)\s+teams?\b/i.test(p)
+    && /\bother\s+communities\b/i.test(p) && /\bnot\s+permitted\s+to\s+play\b/i.test(p)
+    && /\bif\b[\s\S]*\bown\s+community\b[\s\S]*\bteam\b[\s\S]*\bdivision\b/i.test(p));
 }
 
 export function ratingApplicablePassages(candidate, question) {

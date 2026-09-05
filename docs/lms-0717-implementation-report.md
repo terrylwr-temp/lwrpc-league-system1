@@ -265,3 +265,83 @@ This is a review checklist, not authorization to deploy automatically. Use the n
 11. On desktop and an actual narrow phone, check the disclaimer once immediately above the composer: desktop top gap about 8px, bottom gap 8px, muted centered text; phone wrapping, keyboard open/closed, visible close, reachable answers/feedback/Official Sources, no dashboard overlap. Preserve focus, Escape and viewer behavior. No manager diagnostics may leak to the player payload.
 12. Review resulting Stage 7A capture read-only: grounded results lightweight, clarification/protected metadata not unanswered cases, genuine insufficient evidence automatically captured, manager_test separated. Verify normal feedback correlation and existing legacy behavior; perform a fresh four-click Helpful→Helpful→Not Helpful→Not Helpful sequence only if needed for this release's acceptance, expecting two events on one answer. Do not delete legitimate defect history. Inspect sanitized health/logs through existing authorized paths; no HMAC/schema changes or deliberate production outage.
 13. Record generated-answer results, source/selection checks and any remaining failures. **Production acceptance is pending these deployed checks and owner review. Do not start LMS-0718 / Stage 7B or Live LMS Intelligence.**
+
+## Final bounded correction — signed timing context and community eligibility
+
+**2026-09-05: LMS-0717 / 0.1.539 remains deployed but NOT production accepted.** The prior correction is deployed (local baseline commit `306c3ad`, `717b`). This final approved correction is implemented locally and has not been deployed. Version/build identifiers remain unchanged. This section supersedes previous local test counts and acceptance checklists for the current worktree.
+
+### Four approved corrections
+
+1. **Immediate Season DUPR subject inheritance.** A bounded `When are they recorded ...?` continuation can inherit only the unambiguous Season DUPR recording subject in the immediately previous valid signed `follow_up` receipt. The exact production sequence now resolves to `When are Season DUPR ratings recorded for the Weekday League?`. Saturday and PrimeTime are supported, as is retaining an already supplied league on the same narrowly recognized timing continuation. No new receipt format, arbitrary browser-history access or unrestricted pronoun resolver was introduced. Missing/expired/malformed/wrong-user receipts, clarification receipts, unrelated subjects and multi-subject prior questions request the full question before retrieval. Complete standalone questions continue to supersede prior context.
+2. **Recording-date applicability.** A specific timing intent separates recording dates from calculation, roster opening, Match Setup and score recording. A verified stored league Key Dates heading provides scope to its own original `Season DUPR ratings recorded` bullet. Only that heading and event bullet reach generation, without the surrounding calendar. The general question can retain all three directly applicable league event units; an explicit league retains only its matching unit. This currently yields Sept. 27 because that is the active document text, not because any date is embedded in code. A source-date mutation test demonstrates that changing fixture data changes the selected date. Rule 4.1 remains available to its existing general-policy/method paths; the announced date comes from Important Dates, not a substitute guide paragraph. No Stage 3 changes.
+3. **Team/community eligibility.** A bounded participation concept recognizes joining/forming/playing on or for a community's team, cross-community wording and eligibility-rule questions. It selects the operative body proposition from the active broad Rule 3 chunk on physical page 2: **Rule 3.5**. The complete permission and own-community/division exception remain one verbatim passage. Rules 3.4/3.6/3.7 are not added automatically. Registration, roster procedure, facility guest policies, home courts and unrelated USAP server evidence cannot substitute. No global location/community equivalence or Rule 3.5 identifier lookup was added. Generic questions explain the conditional rule; a question supplying the condition can be answered under that condition without claiming a live lookup.
+4. **Live-affiliation/current-eligibility guards.** The seven approved live-status examples now return `protected` before retrieval, generation or any member/team lookup. These checks precede general participation eligibility handling. General cross-community questions, supplied hypothetical conditions and roster-before-playing obligations remain document questions. There is no global first-person exemption. Existing rating/status/roster guards remain covered by the full suite.
+
+### Rule 3.5 and referee wording
+
+The model receives the complete original Rule 3.5 passage, including `however` and `if their own community already has a team in their division`. General instructions require conditional permission and its limiting exception to stay together and prohibit asserting unobserved community/team/eligibility facts. The negative and contrasting no-own-team hypotheticals are tested through the player path. No canned Yes/No answer was added.
+
+Cracked-ball selection remains exactly **10.G, 10.G.1, 20.F, 20.F.1** for the accepted cracked-ball question. The generation instructions now explicitly say referee-specific procedures apply **when a referee is officiating**; tournament status alone does not establish referee presence. No changes were made to damaged-ball selection, rule content, replay conditions or USAP authority. Mock-transport assertions check these instructions and selected conditions. Final live-model wording is still a deployed acceptance check; a mock response is not evidence of live generated prose.
+
+### Exact final-correction files
+
+Paths are relative to `C:\lwrpc-league-system`.
+
+| File | Change |
+| --- | --- |
+| `lwrpc-admin/app/lib/aiQuestionApplicability.js` | Recording event/heading units and bounded timing/community participation predicates. |
+| `lwrpc-admin/app/lib/aiAnswerGeneration.js` | New narrow intent support, scoped recording-date selection, conditional-rule and referee instructions. |
+| `lwrpc-admin/app/lib/aiConversation.js` | Signed immediate plural-subject timing continuation and safe unresolved fallback. |
+| `lwrpc-admin/app/lib/askLwrPlayerAnswer.js` | Narrow live-affiliation/current-eligibility guards and general participation handling. |
+| `lwrpc-admin/test/aiFinal0717Correction.test.mjs` | 26 new end-to-end/helper/transport negative and positive tests. |
+| `lwrpc-admin/test/fixtures/lms0717-final-production-evidence.json` | Actual previously captured official chunks, including broad Rule 3, separate date headings/bullets and real distractors. |
+| `docs/lms-0717-implementation-report.md` | This final implementation/validation/acceptance section. |
+| `docs/project-roadmap.md` | Final local correction status, unchanged deployed/unaccepted status and historical defect retention. |
+
+The new fixture is a **bounded selection fixture**, not a claim to preserve a complete production RPC ranking. Its provenance says so explicitly. It reuses verbatim official chunks from prior read-only captures, including Rule 3's surrounding 3.4–3.7 text, Captains Guide roster/registration, Code of Conduct host communities, LMS guide and USAP server evidence. Retained diagnosis scores are supplied where available; the adversarial test deliberately raises distractor scores. No new corpus processing, production test requests or external embedding/model calls were required for this implementation pass.
+
+### Regression results and Stage 7A compatibility
+
+**283 tests passed: all 257 previous tests plus 26 new tests.** The final test file covers:
+
+- First Season DUPR timing answer issues a valid follow-up receipt; Weekday/Saturday/PrimeTime continuations resolve to the full subject and correct date section.
+- Ambiguous plural subjects, wrong/missing/expired/invalid receipt and clarification-purpose receipt skip retrieval and generation; standalone supersession remains intact.
+- Verbatim heading + date bullet structure, no calendar contamination, wrong-header rejection and source-driven date changes.
+- All six required community-rule questions, generic eligibility wording, the supplied own-community-team condition and its contrasting absence.
+- All seven protected live questions through the actual player orchestrator, with retrieval/model functions that fail the test if called.
+- Rule 3.5's complete qualification and original chunk identity, renamed rule metadata, high-ranked real distractors, missing governing evidence and unrelated location/join questions.
+- Existing roster-before-playing permission; model transport receives the conditional rule and referee-scope instructions without changing cracked-ball selection.
+- Observational quality snapshots: corrected answers stay lightweight; protected responses have no source/diagnostic payload or unanswered occurrence; existing clarification, grouping, Unicode, security, feedback and fail-open tests remain unchanged.
+
+The legitimate historical failed Season DUPR outcome `7400c1ed-8b5f-4b09-b05a-e851ac5d5e92` and community outcome `5d281b1a-3818-44da-9075-bcd370a0b3ce` remain untouched. These are useful future LMS-0718 manager-review records, not data to delete or rewrite after a fix. No Stage 7A code/schema/configuration changed.
+
+### Final production acceptance sequence (after owner review/deployment)
+
+No automatic deployment is authorized. Deploy the approved source through the normal **application-only** pipeline, still LMS-0717 / 0.1.539. No SQL migration, processing, re-embedding, activation or environment-key step is required. Record the new source/deployment identity because the version is intentionally unchanged.
+
+1. **Confirm release identity and preserve prior passes.** Verify the corrected source commit is live. Retain all legitimate historical quality events and the accepted LMS-0716 Stage 7A limitations.
+2. **Timing conversation.** In a fresh player conversation, ask `When are Season DUPR's recorded?`; require a grounded date answer and follow-up receipt. Immediately ask `When are they recorded for the weekday league?`; inspect manager diagnostics or authorized request diagnostics for `follow_up` and effective `When are Season DUPR ratings recorded for the Weekday League?`. Require Weekday Important Dates heading + recording bullet, current source date, no roster-opening/Match Setup/score contamination. Repeat Saturday and PrimeTime on fresh equivalent sequences. Run the explicit full Weekday question too.
+3. **Context boundaries.** Verify an unrelated standalone question supersedes the timing receipt. With no usable prior subject, `When are they recorded for the weekday league?` must clarify, not guess. Recheck kitchen → `What if I step in after I hit it?`, Color → Ball, and adding-players → `On my team roster` → league clarification → `PrimeTime`.
+4. **Community permission.** Run `Can I join a team in another community?`, `Can I play on a team from a different community?`, `Can I play for another community's team?`, `Do I have to play for the community where I live?`, and `Can players from different communities form a team?`. Require Rule 3.5 as the direct source and both permission and restriction in the answer. Do not accept unconditional permission/prohibition or unrelated facility/roster material.
+5. **Supplied conditions.** Run `Can I play for another community if my community already has a team in my division?`; require the prohibition under that supplied condition. Contrast with `Can I play for another community if my community does not have a team in my division?`; require only the permission/qualification supported by Rule 3.5, with no claim that the system checked current teams or verified all personal eligibility conditions. A generic question must explain the condition rather than invent its truth.
+6. **Live-status boundaries.** Run `What community am I registered with?`, `Which community am I registered with?`, `What team am I on?`, `Am I currently eligible for Team X?`, `Am I personally eligible for Team X right now?`, `Is John Smith eligible for this team?`, and `Does my community currently have a team in my division?`. Require `protected`, no retrieval/model calls, no personal data, sources or feedback. The name/team are synthetic test strings, not instructions to look up a member. Confirm `What are the eligibility rules for joining another community's team?` and `Does a player have to be on the roster before playing?` remain grounded document questions.
+7. **Cracked ball.** Run the accepted exact cracked-ball question. Require unchanged 10.G/10.G.1/20.F/20.F.1 selection and the agreement/affected-outcome/result-stands conditions. Referee procedures must say they apply when a referee is officiating, not imply that every tournament match has a referee.
+8. **Preserved production controls.** Smoke-test selected Franklin Outdoor X-40 Optic, medical 5.7, Season DUPR determination, roster participation 5.5, weekend roster timing → Saturday, missing-object and second league clarification, reimbursement → insufficient evidence, and unchanged disclaimer spacing. Broader NVZ/serve/legal-ball/color/feedback controls remain covered by the existing acceptance checklist; repeat production cases only where needed to resolve a new concern.
+9. **Capture review.** Read-only confirm new final kinds are captured correctly: answer lightweight, protected/clarification outside unanswered cases, manager_test separate. Do not alter previous failed occurrences or generate fake records to force acceptance. No Stage 7A/HMAC/schema changes or deliberate production outage.
+10. **Final decision.** Report actual generated-answer/source/guard/conversation results. Stop on a new material defect. Production acceptance remains pending until these checks and owner review pass. **Do not start LMS-0718 / Stage 7B or Live LMS Intelligence.**
+
+### Final bounded-correction validation results
+
+| Required check | Result |
+| --- | --- |
+| `npm test` | PASS — 283 tests, 0 failures (257 preserved + 26 new). |
+| `npm run lint` | PASS — 0 errors, six existing warnings; no new warnings. |
+| `npx tsc --noEmit --incremental false` | PASS. |
+| `npm run verify:ai-pdf-server-bundle` | PASS against normal output and the freshly completed isolated build. |
+| `npm run build` | Compilation succeeded in 16.8s; normal build then exited 1 on the known `.next/cache/.tsbuildinfo` EPERM write lock. This is not a compilation failure or a successful normal build. |
+| Established isolated clean production build | PASS — compilation 29.1s, TypeScript 3.4s, 71/71 pages, final optimization. |
+| `git diff --check` | PASS. |
+
+Isolated output: `lwrpc-admin/.next/lms0717-final-clean-build`. Source/configuration copies use existing dependencies through a junction and inherited local environment without copying or printing secrets. Only the temporary copy's tracing/bundler root is anchored to the repository. Build logs reside in the system temporary directory, outside Next cleanup. This directory and the harness are ignored validation artifacts, not deployment source changes.
+
+Final scope verification confirms unchanged Stage 3 retrieval/probe, governing-source/damaged-ball selector, Stage 7A capture/snapshots/grouping, version/package files and player UI. No SQL/schema/migrations, production data, corpus/documents/chunks/embeddings/active versions, HMAC or feedback changes occurred. No production requests, model replays, commits, deployment or LMS-0718 implementation were performed during this final correction. **Ready for implementation review; deployment and final production acceptance remain pending.**
