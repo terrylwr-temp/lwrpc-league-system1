@@ -1,3 +1,4 @@
+import { matchingQuestion } from "./aiQuestionInterpretation.js";
 import { isRosterParticipationQuestion, isCommunityParticipationQuestion } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting } from "./aiRosterTroubleshooting.js";
 import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
@@ -90,9 +91,9 @@ export async function runPlayerOfficialAnswer({ body, role, userId, memberId = n
 }
 
 export function resolveOfficialConversation(args) {
-  if (isUnsupportedOperationalQuestion(args.question)) return { ...protectedResolution(args.question, "raw_live_data_guard"), receiptSupplied: Boolean(args.receipt) };
+  if (isUnsupportedOperationalQuestion(args.question) || isUnsupportedOperationalQuestion(matchingQuestion(args.question))) return { ...protectedResolution(args.question, "raw_live_data_guard"), receiptSupplied: Boolean(args.receipt) };
   const resolution = resolveConversationTurn(args);
-  const effectiveLiveDataGuard = resolution.kind === "resolved" ? isUnsupportedOperationalQuestion(resolution.effectiveQuestion) : null;
+  const effectiveLiveDataGuard = resolution.kind === "resolved" ? (isUnsupportedOperationalQuestion(resolution.effectiveQuestion) || isUnsupportedOperationalQuestion(matchingQuestion(resolution.effectiveQuestion))) : null;
   return { ...resolution, receiptSupplied: Boolean(args.receipt), rawLiveDataGuard: false, effectiveLiveDataGuard, ...(effectiveLiveDataGuard ? { kind: "protected" } : {}) };
 }
 

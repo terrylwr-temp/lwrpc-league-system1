@@ -1,3 +1,4 @@
+import { interpretQuestion } from "./aiQuestionInterpretation.js";
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER } from "./aiGoverningSources.js";
 import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapLegalBallQuestion, isUsapBallSpecificationEvidence } from "./aiEquipmentIntents.js";
@@ -54,18 +55,19 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
   });
   let { data, error } = await supabase.rpc("search_ai_official_chunks", rpcArgs(request.question));
   if (error) throw new Error(`Official-document retrieval failed: ${error.message}`);
-  const typoNormalizations = deriveTypoNormalizations(request.question, data || []);
-  const retrievalQuery = applyTypoNormalizations(request.question, typoNormalizations);
-  if (retrievalQuery !== request.question) {
-    ({ data, error } = await supabase.rpc("search_ai_official_chunks", rpcArgs(retrievalQuery)));
-    if (error) throw new Error(`Official-document retrieval failed: ${error.message}`);
-  }
+  const interpretationStarted = clock();
+  const interpretation = interpretQuestion(request.question);
+  const interpretationMs = clock() - interpretationStarted;
+  const corpusSuggestions = deriveTypoNormalizations(request.question, data || []);
+  const typoNormalizations = []; // Corpus suggestions do not rewrite the normal RPC query.
+  const retrievalQuery = request.question;
   const retrievalRequest = {
     ...request,
     retrievalQuery,
+    matchingView: interpretation.matchingView,
     typoNormalizations,
     terminologyAliases: nvzTerminologyAliasPhrases(request.question, data || []),
-    terminologyExpansionEnabled: isDocumentGroundedMatchConfiguration(retrievalQuery, data || []),
+    terminologyExpansionEnabled: isDocumentGroundedMatchConfiguration(interpretation.matchingView, data || []),
   };
   const candidates = (data || []).map((row, index) => ({ ...candidateFromRow(row, retrievalRequest), stage3Rank: index + 1 }));
   const lwrMatchEquipmentProbe = await retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, rpcArgs, embedQuery, clock });
@@ -76,14 +78,14 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
   });
   const evidence = evaluateEvidence(suppliedEvidence, aiAssistantConfig.evidenceThreshold);
   return {
-    request, candidates, suppliedEvidence, authorityReviewCandidates, intentEvidenceCandidates: lwrMatchEquipmentProbe?.candidates || [], lwrMatchEquipmentProbe, evidence, conflict: conservativeConflictDiagnostic(suppliedEvidence),
+    request, interpretation, corpusSuggestions, candidates, suppliedEvidence, authorityReviewCandidates, intentEvidenceCandidates: lwrMatchEquipmentProbe?.candidates || [], lwrMatchEquipmentProbe, evidence, conflict: conservativeConflictDiagnostic(suppliedEvidence),
     environment: { embeddingModel: embedding.model || aiAssistantConfig.embeddingModel, embeddingDimensions: aiAssistantConfig.embeddingDimensions, evidenceThreshold: aiAssistantConfig.evidenceThreshold, retrievalLimit: aiAssistantConfig.retrievalLimit, authorityReviewLimit: AUTHORITY_REVIEW_LIMIT },
-    metrics: { embeddingInputTokens: finiteOrNull(embedding.inputTokens), embeddingMs: Math.round(embeddingDone - started), retrievalMs: Math.round(clock() - embeddingDone), totalMs: Math.round(clock() - started) },
+    metrics: { interpretationMs, embeddingInputTokens: finiteOrNull(embedding.inputTokens), embeddingMs: Math.round(embeddingDone - started), retrievalMs: Math.round(clock() - embeddingDone), totalMs: Math.round(clock() - started) },
   };
 }
 
 async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, rpcArgs, embedQuery, clock }) {
-  if (!isClubSelectedMatchEquipmentQuestion(request.question)) return null;
+  if (!isClubSelectedMatchEquipmentQuestion(interpretQuestion(request.question).matchingView)) return null;
   const started = clock();
   const probeEmbedding = await embedQuery(LWR_MATCH_EQUIPMENT_PROBE_EMBEDDING_QUERY);
   if (!Array.isArray(probeEmbedding.embedding) || probeEmbedding.embedding.length !== aiAssistantConfig.embeddingDimensions) throw new Error("The match-equipment retrieval probe returned an unexpected vector size.");
@@ -174,8 +176,9 @@ function candidateFromRow(row, request) {
     pageNumber: row.page_number, sectionLabel: row.section_label || "", heading: row.heading || "", ruleNumber: row.rule_number || "", content: row.content || "",
     semanticScore: number(row.semantic_score), keywordScore: number(row.keyword_score), exactScore: number(row.exact_score), authorityScore: number(row.authority_score), contextScore: number(row.context_score), combinedScore: number(row.combined_score), vectorRank: row.vector_rank ?? null, keywordRank: row.keyword_rank ?? null, exactMatch: Boolean(row.exact_match),
   };
-  const query = request.retrievalQuery || request.question;
-  const ftsTerms = normalizedFtsTerms(query);
+  const query = request.matchingView || request.retrievalQuery || request.question;
+  const ftsQuery = request.retrievalQuery || request.question;
+  const ftsTerms = normalizedFtsTerms(ftsQuery);
   const intent = intentDiagnostic(query, candidate, request.terminologyExpansionEnabled);
   return {
     ...candidate,
@@ -184,7 +187,7 @@ function candidateFromRow(row, request) {
     leagueTextDiagnostic: leagueTextDiagnostic(query, candidate),
     ftsDiagnostic: {
       normalizedTerms: ftsTerms,
-      retrievalExpansion: [...continuationExpansionPhrases(query), ...(request.terminologyAliases || [])],
+      retrievalExpansion: [...continuationExpansionPhrases(ftsQuery), ...(request.terminologyAliases || [])],
       typoNormalization: request.typoNormalizations || [],
       matched: candidate.keywordRank !== null,
       candidateRank: candidate.keywordRank,

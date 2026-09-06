@@ -1,3 +1,4 @@
+import { interpretQuestion, matchingQuestion, medicalScoreContext } from "./aiQuestionInterpretation.js";
 import { missingPlayerObject, playerObjectReply, plausibleRosterTimingLeagues, questionLeague, isRosterParticipationQuestion, ballDamageKind, isSeasonRatingDateQuestion } from "./aiQuestionApplicability.js";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
 
@@ -36,34 +37,37 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
   if (receipt) {
     try { prior = readConversationReceipt(receipt, userId, { now }); } catch (error) { receiptError = error; }
   }
+  const rawMatch = matchingQuestion(rawQuestion, { leagueChoice: prior?.purpose === "clarification" && prior.category === "roster_league" });
   const diagnostics = { priorContextPurpose: prior?.purpose || null, receiptValidation: receipt ? (prior ? "valid" : "invalid_or_expired") : "absent", clarificationConsumed: false };
 
   // Only this complete timing continuation has a known plural subject. The
   // signed immediately previous question must contain that subject alone.
-  if (/^when\s+are\s+they\s+recorded(?:\s+for\s+(?:the\s+)?(?:weekday|saturday|primetime)\s+league)?[?.!]*$/i.test(rawQuestion)) {
-    const priorQuestion = prior?.effectiveQuestion || '';
+  if (/^when\s+are\s+they\s+recorded(?:\s+for\s+(?:the\s+)?(?:weekday|saturday|primetime)\s+league)?[?.!]*$/i.test(rawMatch)) {
+    const priorQuestion = matchingQuestion(prior?.effectiveQuestion || '');
     const unambiguous = /^when\s+are\s+season\s+dupr(?:['’]s|s)?(?:\s+ratings?)?\s+recorded(?:\s+for\s+(?:the\s+)?(?:weekday|saturday|primetime)\s+league)?[?.!]*$/i.test(priorQuestion);
     if (prior?.purpose === "follow_up" && unambiguous && isSeasonRatingDateQuestion(priorQuestion)) {
-      const league = questionLeague(rawQuestion)[0] || questionLeague(priorQuestion)[0];
-      const label = { weekday: "Weekday", saturday: "Saturday", primetime: "PrimeTime" }[league];
-      return { ...diagnostics, kind: "resolved", classification: "follow_up", rawQuestion, effectiveQuestion: `When are Season DUPR ratings recorded${label ? ` for the ${label} League` : ''}?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
+      const league = questionLeague(rawMatch)[0] || questionLeague(priorQuestion)[0];
+      const accepted = [...interpretQuestion(rawQuestion).annotations, ...interpretQuestion(prior.effectiveQuestion).annotations];
+      const label = accepted.find(a => a.canonical === league)?.originalToken || { weekday: "Weekday", saturday: "Saturday", primetime: "PrimeTime" }[league];
+      const seasonLabel = accepted.find(a => a.canonical === "season")?.originalToken || "Season";
+      return { ...diagnostics, kind: "resolved", classification: "follow_up", rawQuestion, effectiveQuestion: `When are ${seasonLabel} DUPR ratings recorded${label ? ` for the ${label} League` : ''}?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
     }
     return { ...diagnostics, kind: "clarification", classification: receiptError ? "expired_context" : "unresolved_follow_up", rawQuestion, effectiveQuestion: "", priorContextAvailable: Boolean(prior), contextSuperseded: false, clarification: { category: "full_question", message: "Please ask the full question again so I can check the official rules." } };
   }
 
   if (prior?.purpose === "clarification" && prior.category === "roster_league") {
-    const reply = rawQuestion.trim().replace(/[?.!]+$/, "");
+    const reply = rawMatch.trim().replace(/[?.!]+$/, "");
     if (/^(?:(?:the|for the)\s+)?(?:weekday|saturday|primetime|weekend)(?:\s+league)?$/i.test(reply)) {
-      const league = /weekend/i.test(reply) ? "Saturday" : reply.match(/weekday|saturday|primetime/i)[0];
+      const league = /weekend/i.test(reply) ? "Saturday" : rawQuestion.trim().replace(/^(?:(?:the|for the)\s+)/i, "").replace(/(?:\s+league)?[?.!]*$/i, "");
       return { ...diagnostics, clarificationConsumed: true, kind: "resolved", classification: "clarification_response", rawQuestion, effectiveQuestion: `${prior.originalQuestion.replace(/[?.!]+$/, "")} for the ${league} League?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
     }
   }
   if (prior?.purpose === "clarification" && prior.category === CLARIFICATION_PLAYER_OBJECT && missingPlayerObject(prior.originalQuestion)) {
-    const object = playerObjectReply(rawQuestion);
+    const object = playerObjectReply(rawMatch);
     if (object) return { ...diagnostics, clarificationConsumed: true, kind: "resolved", classification: "clarification_response", rawQuestion, effectiveQuestion: `${prior.originalQuestion.replace(/[?.!]+$/, "")} to my ${object}?`, priorContextAvailable: true, contextSuperseded: false, clarification: null };
   }
-  if (missingPlayerObject(rawQuestion)) return { ...diagnostics, ...clarificationResolution(rawQuestion, CLARIFICATION_PLAYER_OBJECT, "missing_player_entry_object", Boolean(prior)), contextSuperseded: Boolean(prior) };
-  if (isRosterParticipationQuestion(rawQuestion) || ballDamageKind(rawQuestion) || isCompleteStandaloneQuestion(rawQuestion)) {
+  if (missingPlayerObject(rawMatch)) return { ...diagnostics, ...clarificationResolution(rawQuestion, CLARIFICATION_PLAYER_OBJECT, "missing_player_entry_object", Boolean(prior)), contextSuperseded: Boolean(prior) };
+  if (isRosterParticipationQuestion(rawMatch) || ballDamageKind(rawMatch) || isCompleteStandaloneQuestion(rawMatch)) {
     return {
       ...diagnostics, kind: "resolved", classification: prior ? "standalone_supersedes_context" : "standalone", rawQuestion, effectiveQuestion: rawQuestion,
       priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior), clarification: null,
@@ -71,7 +75,7 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
   }
 
   if (prior?.purpose === "clarification") {
-    const subject = clarificationSubject(rawQuestion);
+    const subject = clarificationSubject(rawMatch);
     if (subject && prior.category === CLARIFICATION_COLOR && requiresColorSubjectClarification(prior.originalQuestion)) return {
       ...diagnostics, clarificationConsumed: true,
       kind: "resolved", classification: "clarification_response", rawQuestion, effectiveQuestion: clarifiedQuestion(prior.originalQuestion, prior.category, subject),
@@ -79,16 +83,17 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
     };
   }
 
-  if (requiresColorSubjectClarification(rawQuestion)) return { ...diagnostics, ...clarificationResolution(rawQuestion, CLARIFICATION_COLOR, "missing_color_subject", Boolean(prior)), contextSuperseded: Boolean(prior) };
+  if (requiresColorSubjectClarification(rawMatch)) return { ...diagnostics, ...clarificationResolution(rawQuestion, CLARIFICATION_COLOR, "missing_color_subject", Boolean(prior)), contextSuperseded: Boolean(prior) };
 
-  if (prior?.purpose === "follow_up" && isContextualFollowUp(rawQuestion)) {
+  if (prior?.purpose === "follow_up" && isContextualFollowUp(rawMatch)) {
     return {
       ...diagnostics, kind: "resolved", classification: "follow_up", rawQuestion, effectiveQuestion: composeFollowUp(prior.effectiveQuestion, rawQuestion),
+      medicalScoreContext: medicalScoreContext(prior.effectiveQuestion, rawQuestion),
       priorContextAvailable: true, contextSuperseded: false, clarification: null,
     };
   }
 
-  if (isContextualFollowUp(rawQuestion)) {
+  if (isContextualFollowUp(rawMatch)) {
     return {
       ...diagnostics, kind: "clarification", classification: receiptError ? "expired_context" : "unresolved_follow_up", rawQuestion, effectiveQuestion: "", priorContextAvailable: Boolean(prior), contextSuperseded: Boolean(prior),
       clarification: { category: "full_question", message: "Please ask the full question again so I can check the official rules." },
@@ -106,8 +111,8 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
 export function clarificationFromRetrieval(resolution, retrieval) {
   if (resolution?.kind !== "resolved") return null;
   const candidates = [...(retrieval?.authorityReviewCandidates || []), ...(retrieval?.candidates || []), ...(retrieval?.suppliedEvidence || [])];
-  const leagues = plausibleRosterTimingLeagues(resolution.effectiveQuestion, candidates);
-  if (!questionLeague(resolution.effectiveQuestion).length && leagues.length > 1) return {
+  const leagues = plausibleRosterTimingLeagues(matchingQuestion(resolution.effectiveQuestion), candidates);
+  if (!questionLeague(matchingQuestion(resolution.effectiveQuestion)).length && leagues.length > 1) return {
     ...resolution, ...clarificationResolution(resolution.rawQuestion, "roster_league", "missing_roster_timing_league", resolution.priorContextAvailable),
     clarificationQuestion: resolution.effectiveQuestion,
     clarification: { category: "roster_league", reason: "missing_roster_timing_league", message: `Which league do you mean: ${leagues.map(league => ({ weekday: "Weekday", saturday: "Saturday", primetime: "PrimeTime" })[league]).join(", ")}?` },

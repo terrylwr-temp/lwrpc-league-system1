@@ -1,6 +1,6 @@
 # LMS-0719 / 0.1.541 implementation report
 
-Status: implemented locally and validated for review. Not deployed; not production accepted. LMS-0718 / 0.1.540 and Stage 7B remain deployed and production accepted. No later stage or Live LMS Intelligence has started.
+Status: **LMS-0719 / 0.1.541 — DEPLOYED AND PRODUCTION ACCEPTED.** Owner deployed commit 7b6dc2d; final production acceptance completed 2026-09-06 UTC (2026-09-05 local). LMS-0718 / Stage 7B remains production accepted. No next version or Live LMS Intelligence has started. The original local implementation/deployment-plan sections below are preserved as historical evidence.
 
 ## Changes and scope
 
@@ -114,3 +114,65 @@ The browser helper accepts `PLAYWRIGHT_MODULE` for an already installed Playwrig
 11. Submit one authorized feedback event on an LMS-0719 grounded answer with a specific rule citation. Inspect its receipt/event/review snapshot through the approved read-only verification path: same answer identity, LMS-0719 version, specific source and evidence rule IDs. Confirm prior feedback/Stage 7 records and pre-0719 citation snapshots remain unchanged after New Question. Do not manufacture extra validation events.
 12. Verify Stage 7B manager reporting/workflow and an authorized retained superseded-source PDF still work. Keep exact source authorization and historical content distinct from the current evidence.
 13. Review capture health and sanitized hosting logs for unexpected errors during this bounded sequence. Stop on unexpected behavior rather than expanding scope. Report acceptance only after these production checks pass; otherwise list blockers. Do not start another LMS version or Live LMS Intelligence.
+
+
+## Final production acceptance
+
+Authenticated production Ask LWR session, beginning 2026-09-06 01:10:47 UTC. Browser-driven normal questions and exactly one authorized Helpful vote; database verification was read-only. No code, SQL, HMAC/configuration, source processing, corpus, retrieval/applicability or deployment changes in this pass.
+
+| Acceptance item | Result |
+| --- | --- |
+| New Question persistence | PASS: three exchanges and draft cleared; focus returned; close/reopen stayed empty; short question requested full wording instead of inheriting the prior subject. |
+| Normal close/reopen | PASS: visible conversation preserved. The established kitchen sequence produced a grounded momentum follow-up after reopening. Server records separately confirmed retained medical context for the additional selection observation below. |
+| Medical issue during match | PASS: Rule 5.7, page 5; both score branches, opponent win and remaining-game substitution/forfeit qualifications retained. No arbitrary child replacement. |
+| Can I use a player that's not on my roster? | PASS: Rule 5.5, page 5; before-play roster requirement and qualified retroactive addition / forfeiture behavior retained; treated as general rules, not a live membership query. |
+| How is Season DUPR determined? | PASS: Rules 4.1, 4.2 plus Rules 4.5.1, 4.5.2, both page 3. Establishment, truncation and selected NR provisions correspond to actual trusted evidence. |
+| Momentum after volley | PASS: Rule 11.A.2, page 30; momentum fault remains applicable even after the ball is dead. |
+| Server foot touching court when serve is hit | PASS: Rule 7.A.2.a, page 21; affirmative fault answer; lowercase subrule retained. |
+| Weekend roster opening | PASS: Monday Sept. 28, Saturday DUPR League Key Dates in active 2026 Fall League Important Dates, page 1. Direct read-only document check confirms the date; no fabricated rule number. |
+| New feedback snapshot | PASS: one Helpful event on the new Season DUPR answer; LMS-0719; source and selected-evidence IDs retained through feedback and Stage 7 review serializers. |
+| Historical snapshots | PASS: all 13 pre-0719 feedback rows unchanged by full-row hash; sampled LMS-0716 source remains Rule 11.A, Allowable Contact, page 30. No backfill or reinterpretation. |
+| Reset telemetry | PASS: counts and full-row hashes for all five requested entity types unchanged across the isolated reset window. |
+| Desktop/mobile | PASS: 640px desktop drawer, useful 452px textarea, 116px action column with New Question above Ask. At 390/320px, full-screen opaque panel, full-width textarea and action row, no horizontal overflow, 44px close control inside boundary, panel-owned scrolling and z-index 10000. Reduced 390x480 viewport retained composer focus and reachable composer. |
+
+### Feedback and historical evidence
+
+The new answer_id is `ba80d652-f06d-4b03-b8cd-80c893a503ff`; Helpful was recorded at `2026-09-06 01:14:45.292398+00`. Exactly one feedback event exists for this answer. It uses the already-required new Season DUPR answer to avoid an unnecessary repeat of the owner's accepted Rule 3.5 check.
+
+Both feedback and Stage 7 review snapshots retain:
+
+- `4.1, 4.2` with `LWR Pickleball Club DUPR League Rules — Rules 4.1, 4.2 — DUPR RATINGS/DIVISIONS — Page 3`;
+- `4.5.1, 4.5.2` with its corresponding page-3 citation;
+- exact document/version/chunk/page fields, verified by database joins for both source entries.
+
+Rule numbers did not replace authorization identities. The source snapshot retains labels while selected-evidence snapshots retain the existing bounded evidence fields. No new serializer fields or schema change was introduced.
+
+The 13 historical feedback rows have combined full-row hash `389f8eb5b008ed3770e890780d63d87a`, unchanged before/after this pass and matching the pre-0719 acceptance checkpoint. The sampled retained LMS-0716 row hash remains `78804a9f1ab3a2dac1086fe0cb82e2ef`; its Rule 11.A citation and exact source IDs remain intact.
+
+### Reset integrity window
+
+Between `01:13:25.777739` and `01:14:01.007379` UTC, New Question and close/reopen occurred without submitting a question. These counts and full-row hashes were identical:
+
+| Entity | Count | Hash |
+| --- | ---: | --- |
+| Outcomes | 63 | 3163c63b90dbde3617742171a8826135 |
+| Review occurrences | 14 | bfcbfd619d0a21a39bea5843a9abfea7 |
+| Question groups | 12 | faccd47ee35526d812b12661a72de9df |
+| Manager cases | 12 | 3a063583bd50a777d60e593c395110d1 |
+| Feedback events | 13 | 389f8eb5b008ed3770e890780d63d87a |
+
+The next `What if one team has 7 points?` produced the expected full-question clarification and an unresolved_follow_up outcome. Reset itself produced no captured entity. Ten intentionally submitted questions during the full pass produced exactly ten LMS-0719 outcomes: eight answers, one expected clarification and one medical follow-up selection miss. Exactly one feedback event was added.
+
+### Preserved passes and limitations
+
+Owner-confirmed desktop New Question, kitchen/momentum context, reset/no-inheritance, Rule 3.5 identity/roster-availability, Franklin ball and roster/league/PrimeTime clarification passes remain accepted. The kitchen sequence was repeated only to verify the newly requested combined close/reopen plus grounded-follow-up behavior after the medical diagnostic follow-up returned insufficient evidence.
+
+No physical phone keyboard or nonzero hardware safe-area inset was available. Mobile checks use representative browser viewports plus a reduced-height focus check. Browser tooling did not expose sessionStorage or direct HTTP interception: no receipt/token was extracted. Reset context removal is supported by the actual empty reopened UI, post-reset resolver behavior, deployed reset code and prior local storage/race tests. No-request behavior is supported by that no-fetch implementation and live unchanged telemetry, rather than a captured network waterfall. Viewport overrides were reset, and the panel was closed without clearing the final conversation.
+
+An additional medical follow-up, `What if one team has 7 points?`, retained the correct effective question `Regarding Medical issue during match, What if one team has 7 points?`, with priorContextAvailable=true and classification=follow_up, but stopped at stage4_no_applicable_evidence. This is before the LMS-0719 source/citation changes; the relevant conversation/applicability/governing modules are unchanged from accepted LMS-0718. It is not a demonstrated LMS-0719 regression. The captured occurrence is retained for separate future quality diagnosis, and no correction was made. The established kitchen follow-up subsequently passed after close/reopen.
+
+### Deferred typo robustness
+
+The owner accepted the prior diagnosis as pre-existing. Record a future bounded additive interpretation signal for high-confidence minor typos, preserving original wording and applying live-data protection to both original and accepted interpretation. Examples include usin, useing, volly, comunity, roser, linep, seson, damged, craked and misspelled league names. Do not implement broad autocorrect, alter official evidence or start a new version from this record.
+
+Final decision: **LMS-0719 / 0.1.541 PRODUCTION ACCEPTED.** No LMS-0719-specific blocker remains. LMS-0718 / Stage 7B remains production accepted. Only this report and the project roadmap were updated; no push or deployment was performed during acceptance.

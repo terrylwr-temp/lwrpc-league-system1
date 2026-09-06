@@ -147,18 +147,19 @@ test("derives bounded typo normalizations from official candidate vocabulary", (
   assert.deepEqual(deriveTypoNormalizations("zzzzzz unrelated wording", vocabularyRows), []);
 });
 
-test("reruns the protected RPC with only a documented typo normalization and exposes it diagnostically", async () => {
+test("0720 preserves the original RPC query and exposes corpus suggestion separately from interpretation", async () => {
   const vocabularyRow = { ...row(), heading: "Match Setup", content: "Captains save the match lineup in Match Setup." };
   const calls = [];
   const output = await retrieveOfficialEvidence({
     supabase: { rpc: async (name, args) => { calls.push({ name, args }); return { data: [vocabularyRow, { ...vocabularyRow, chunk_id: "10000000-0000-4000-8000-000000000002" }], error: null }; } },
     body: { question: "How do I enter my match linup?" }, embedQuery: async () => ({ embedding: vector, model: "text-embedding-3-small", inputTokens: 7 }), clock: (() => { let n = 0; return () => ++n; })(),
   });
-  assert.equal(calls.length, 2);
+  assert.equal(calls.length, 1);
   assert.equal(calls[0].name, "search_ai_official_chunks");
   assert.equal(calls[0].args.p_query_text, "How do I enter my match linup?");
-  assert.equal(calls[1].args.p_query_text, "How do I enter my match lineup?");
-  assert.deepEqual(output.candidates[0].ftsDiagnostic.typoNormalization, [{ from: "linup", to: "lineup" }]);
+  assert.equal(output.interpretation.annotations[0].canonical, "lineup");
+  assert.deepEqual(output.corpusSuggestions, [{ from: "linup", to: "lineup" }]);
+  assert.deepEqual(output.candidates[0].ftsDiagnostic.typoNormalization, []);
   assert.equal(output.candidates[0].terminologyDiagnostic, "Individual-match Match Setup");
 });
 

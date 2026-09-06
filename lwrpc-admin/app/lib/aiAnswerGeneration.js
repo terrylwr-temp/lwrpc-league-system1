@@ -1,3 +1,4 @@
+import { matchingQuestion } from "./aiQuestionInterpretation.js";
 import { trustedSelectedRuleIdentity } from "./aiSelectedRuleIdentity.js";
 import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind, isSeasonRatingDateQuestion, seasonRatingDatePassages, isCommunityParticipationQuestion, communityParticipationPassages } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
@@ -28,11 +29,23 @@ export function answerGenerationDiagnostic(error) {
 
 export function selectAnswerEvidence(retrieval) {
   if (!retrieval?.evidence?.sufficient) return [];
+  // Temporary matcher view only. The caller retains the original question for generation and storage.
+  retrieval = { ...retrieval, request: { ...retrieval.request, question: matchingQuestion(retrieval.request?.question) } };
   const authorityReviewCandidates = Array.isArray(retrieval.authorityReviewCandidates) && retrieval.authorityReviewCandidates.length
     ? retrieval.authorityReviewCandidates
     : retrieval.suppliedEvidence;
   const intentEvidenceCandidates = Array.isArray(retrieval.intentEvidenceCandidates) ? retrieval.intentEvidenceCandidates : [];
   const governingCandidates = [...new Map([...authorityReviewCandidates, ...intentEvidenceCandidates].map((candidate) => [candidate.chunkId, candidate])).values()];
+  if (retrieval.conversationResolution?.medicalScoreContext?.kind === "medical_score_condition") {
+    return governingCandidates.filter(candidate => candidate.documentType === "league_rules" && candidate.combinedScore >= retrieval.evidence.threshold && leagueCompatible(candidate, retrieval.request.question))
+      .map(candidate => ({ ...candidate, selectedPassages: evidencePassages(candidate).filter(passage => {
+        // Strip structural labels before checking score semantics; rule digits are not scores.
+        const text = passage.replace(/^\s*\d+(?:\.\d+)*\.?\s*/gm, "");
+        return /cannot complete a match/i.test(text) && /(?:scor(?:e|ing)|results?).*(?:depend|current)/is.test(text)
+          && /(?:neither|either|both|at least one) team[\s\S]{0,60}\b\d+\s*(?:or more\s+)?points/i.test(text);
+      }) })).filter(candidate => candidate.selectedPassages.length).slice(0, MAX_SELECTED_CHUNKS)
+      .map(candidate => ({ ...candidate, content: candidate.selectedPassages.join("\n\n"), sourceClassification: "lwr_controlling", evidenceRole: "governing", evidenceSelectionReason: "Direct LWR incomplete-match score conditions from validated immediate context" }));
+  }
   if (governingCandidates?.some((candidate) => candidate.documentType === "usap_rulebook")) {
     // The review set is bounded before this point. It is used only to decide
     // applicability and authority; the selected evidence sent to GPT remains
@@ -484,8 +497,8 @@ function supportingReason(candidate, primary, question) {
 
 function annotateEvidenceSelection(retrieval, selectedEvidence) {
   const selectedById = new Map(selectedEvidence.map((candidate) => [candidate.chunkId, candidate]));
-  const intents = detectedEvidenceIntents(retrieval?.request?.question);
-  const question = retrieval?.request?.question;
+  const intents = detectedEvidenceIntents(matchingQuestion(retrieval?.request?.question));
+  const question = matchingQuestion(retrieval?.request?.question);
   const candidates = [...(Array.isArray(retrieval?.suppliedEvidence) ? retrieval.suppliedEvidence : []), ...(Array.isArray(retrieval?.authorityReviewCandidates) ? retrieval.authorityReviewCandidates : [])]
     .filter((candidate, index, collection) => collection.findIndex((item) => item.chunkId === candidate.chunkId) === index);
   for (const candidate of candidates) {
