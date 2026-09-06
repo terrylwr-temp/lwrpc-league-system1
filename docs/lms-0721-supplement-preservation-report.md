@@ -85,6 +85,29 @@ After final validation, deploy through the existing Git/main Vercel pipeline, wi
 
 Production result will be appended below. LMS-0721 overall production acceptance remains pending.
 
+### Production retest — PASS; stop at recall decision
+
+Commit **46afdddcae80e950743042bf612223be68478536** deployed through main-branch Git integration. Vercel **dpl_8jGHEUkWjUcEectY5KTN2CQvozX9** is READY and serves `league.lwrpickleballclub.com`. Final normal build compiled in 15.2s before the known cache lock; final isolated build compiled in 10.7s, passed TypeScript and all 74 pages. Final diff check passed.
+
+Only one production Ask request was submitted after deployment: **Can we reschedule our match?**
+
+Exact visible answer:
+
+> Yes. If both coaches/captains agree, you may reschedule the match to a different time on the same day or to another day within the same week.
+>
+> You must notify League Management at info@lwrpickleballclub.com of the new date and time whenever the scheduled match date or time is changed. Scores must be submitted by Sunday at midnight of that same week. If that deadline cannot be met due to weather or other unforeseen circumstances, the Home Captain must notify that same email before Sunday at midnight with the rescheduled date and time; failure to do so may result in forfeiture.
+
+Official Sources:
+
+1. **LWR Pickleball Club DUPR League Rules — Rule 5.11 — Rescheduling & Score Submission Deadlines — Page 5**.
+2. **LWR Pickleball Club Approved Answer — Match Scheduling Changes — Effective 2026-09-06**.
+
+Read-only outcome verification: `de9a47b8-746a-4027-a596-db31c6dd9a44`, completed **2026-09-06 21:52:18.552 UTC**, origin `player_interface`, final kind `answer`, LMS-0721, **two** selected evidence items, feedback eligible, model invoked, **zero Authority Warnings**, total request **4,612ms**. The general supplemental obligation, public email, formal restrictions and correct selected-rule heading are all present. No additional production variants or feedback clicks were performed.
+
+Post-test preservation checks still show revision 1 Active, full row hash `5a4005dfc42b6a5e64bb76dc2f67f669`, one revision, two managed audit events and 17 feedback events. No revision 2, retirement, processing, embedding, schema, HMAC or threshold action. Historical failed outcome/snapshots remain intact. Post-deployment documentation updates are local and do not trigger another deployment.
+
+**Both bounded generation/citation corrections pass this production gate. Stop at the separately authorized recall decision. LMS-0721 overall remains NOT production accepted pending recall/lifecycle acceptance.**
+
 ## Frozen recall matrix
 
 | Positive still below .65 | Accepted diagnostic score |

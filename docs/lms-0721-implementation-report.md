@@ -1,5 +1,17 @@
 # LMS-0721 / 0.1.543 — Approved LWR Answers / Managed Knowledge
 
+## Approved ordinary sibling citation correction — 2026-09-06
+
+Implemented the shared structural identity correction for ordinary selected sibling provisions; no Stage 3/4, .65, managed data, corpus or Stage 7 changes. Full validation/production acceptance checkpoint is maintained in [ordinary sibling correction report](lms-0721-ordinary-sibling-citation-correction.md). Both revisions remain retired; no lifecycle replay or new version. 525 tests pass; remaining production gates follow the authorized deployment.
+
+## Latest final lifecycle checkpoint — 2026-09-06
+
+Owner approved retaining .65 and deferring recall/ambiguity research. Production revision 2 Draft isolation, replacement activation, active retrieval, historical revision 1 and feedback provenance passed; revision 2 was then retired as authorized. Zero Active revisions remain. Post-retirement formal-only answer exposes a citation mismatch: selected Rule 5.11 displayed as Rule 5.10. Acceptance stopped before correction; no implementation/deployment. Full 15-item disposition, timestamps, audit/integrity evidence and remaining gates: [final lifecycle report](lms-0721-final-lifecycle-acceptance.md). 28 focused existing tests pass; corpus, Saturday occurrence and older feedback hashes unchanged. **LMS-0721 / 0.1.543 remains NOT production accepted.**
+
+## Conditional managed recall diagnosis — 2026-09-06
+
+Diagnosis/design only completed; [full report and matrices](lms-0721-conditional-recall-diagnosis.md), [full formal replay](lms-0721-conditional-recall-replay.json), [local ambiguity probes](lms-0721-conditional-recall-ambiguity.json). Exact independent 5.11 selection succeeds for one of three below-.65 positives. The other two lack 5.11 in the normal 32-row pool. No safe numeric conditional floor is established; implementation is not recommended as the complete solution under the present constraints. Normal .65, Active revision 1, current code, Stage 7 and accepted reschedule production result remain unchanged. Seven read-only formal searches, three guard skips, no answer model or production writes. Revision hash and counts match the prior checkpoint. Only diagnostic documents changed. Overall acceptance and revision lifecycle remain paused for review.
+
 ## Public-contact correction pre-edit stop — 2026-09-06
 
 The owner approved a narrow exact, case-insensitive organizational-email exception and resumption of deployment/lifecycle. Inspection found an additional scope conflict before code changes: `aiQualitySnapshots.js:redactQualityText` independently treats every email as sensitive. A local read-only invocation with `Notify League Management at info@lwrpickleballclub.com of the new date and time.` returns `{text:"[detail omitted for privacy]",redacted:true}`. This is a Stage 7 field-redaction decision, not the player's protected/live-data intent guard. It applies to exception detail text and relevant question/label fields; grounded feedback uses its existing separate generated-answer snapshot, so this reproduction does not establish that every grounded feedback answer is lost.
@@ -657,6 +669,8 @@ Owner-authorized copy-only follow-up: post-Yes confirmation now says Existing Of
 See `docs/lms-0721-natural-variant-diagnosis.md`, with 14-question score/selection replay and two deterministic representation comparisons. Canonical .8176 versus failing variant .6147; .65 gate is exact first divergence, independent eligibility passes. Formal Rule 5.11 literal applicability and selected-source binding cause additional failures. No threshold/code/SQL change. Thirty diagnostic embedding calls (14 shared document/managed queries plus 14 queries and two alternative representation vectors), no answer-model calls, raw vectors neither printed nor retained, no production capture interactions or mutations. Revision 1 Active and approved UX copy preserved undeployed. Stop for review.
 
 ## Scheduling formal-applicability / binding diagnosis (2026-09-06)
+
+**Latest production result:** `46afddd` / Vercel `dpl_8jGHEUkWjUcEectY5KTN2CQvozX9` READY. Single authorized reschedule retest passes: both sources, general every-change Management notice/public email, formal time/deadline restrictions, correct 5.11 scheduling heading, zero Authority Warnings. Outcome `de9a47b8-746a-4027-a596-db31c6dd9a44`, 4,612ms. Revision 1 unchanged. Stop at recall decision; no further live variants or lifecycle actions. Complete evidence in the supplement preservation report. Overall LMS-0721 acceptance remains pending.
 
 Subsequent owner-approved generation/presentation correction: [supplement preservation report](lms-0721-supplement-preservation-report.md). Existing formal/managed selection is preserved; trusted material-supplement contract and selected-provision heading added. Six configured-model local replays pass, including general Management notice, correct heading, conflict and redundancy; 514 regressions pass. No threshold/Active-revision/Stage 7 changes. Production retest and recall stop tracked in that report.
 

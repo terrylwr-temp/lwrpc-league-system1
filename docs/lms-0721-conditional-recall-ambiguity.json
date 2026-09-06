@@ -1,0 +1,77 @@
+{
+  "method": "Local synthetic rows only; unchanged production selector; above-gate probes expose branch behavior, not an implemented conditional gate; no database writes",
+  "exactProductionBindingMatchesIndependentSelection": true,
+  "cases": [
+    {
+      "label": "Current .65 gate: two below-threshold same-passage candidates",
+      "scores": [
+        0.6147,
+        0.6122
+      ],
+      "selectedManaged": [],
+      "formalCount": 1,
+      "conflict": false,
+      "warnings": 0
+    },
+    {
+      "label": "Current .65 gate: reversed below-threshold candidates",
+      "scores": [
+        0.6122,
+        0.6147
+      ],
+      "selectedManaged": [],
+      "formalCount": 1,
+      "conflict": false,
+      "warnings": 0
+    },
+    {
+      "label": "Diagnostic counterfactual only: above-gate same-passage candidates",
+      "scores": [
+        0.66,
+        0.659
+      ],
+      "selectedManaged": [
+        "synthetic-a"
+      ],
+      "formalCount": 1,
+      "conflict": false,
+      "warnings": 0
+    },
+    {
+      "label": "Diagnostic counterfactual only: reversed above-gate candidates",
+      "scores": [
+        0.659,
+        0.66
+      ],
+      "selectedManaged": [
+        "synthetic-b"
+      ],
+      "formalCount": 1,
+      "conflict": false,
+      "warnings": 0
+    },
+    {
+      "label": "Partial overlapping binding fails whole selected-passage equality",
+      "scores": [
+        0.659
+      ],
+      "selectedManaged": [],
+      "formalCount": 1,
+      "conflict": false,
+      "warnings": 0
+    },
+    {
+      "label": "Same rule identity but partial passage cannot corroborate second candidate",
+      "scores": [
+        0.659,
+        0.66
+      ],
+      "selectedManaged": [
+        "synthetic-a"
+      ],
+      "formalCount": 1,
+      "conflict": false,
+      "warnings": 0
+    }
+  ]
+}

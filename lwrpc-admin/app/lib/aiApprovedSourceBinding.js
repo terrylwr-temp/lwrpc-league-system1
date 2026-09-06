@@ -18,7 +18,7 @@ export function managedFormalPassages(stored) {
     return text.slice(b.offset,next?.offset??text.length).trim();
   }):[text.trim()];
   return [...new Set(values)].filter(p=>p&&new TextEncoder().encode(p).length<=RELATED_PASSAGE_BYTES).map(passage=>({
-    passage,ruleNumber:trustedSelectedRuleIdentity({content:passage,selectedPassages:[passage]},stored,{managedSibling:true}),
+    passage,ruleNumber:trustedSelectedRuleIdentity({content:passage,selectedPassages:[passage]},stored),
     heading:passage.match(start)?passage.split('\n')[0].replace(start,'').split(':')[0].trim():stored.heading||'',
   }));
 }

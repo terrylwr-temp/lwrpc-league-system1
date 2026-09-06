@@ -9,10 +9,10 @@ import {validateApprovedDraft} from '../app/lib/aiApprovedAnswersShared.js';
 const scheduling=JSON.parse(await readFile(new URL('./fixtures/lms0721-scheduling-passage.json',import.meta.url)));
 const fixtures=JSON.parse(await readFile(new URL('./fixtures/lms0719-diagnosis-provisions.json',import.meta.url)));
 
-test('managed scheduling picker distinguishes exact production sibling provisions without relaxing ordinary citations',()=>{
+test('managed and ordinary citations share trusted production sibling identities',()=>{
  const options=managedFormalPassages(scheduling);assert.deepEqual(options.map(p=>p.ruleNumber),['5.10','5.11']);
  for(const p of options)assert.equal(validateManagedPassage(scheduling,p.passage,p.ruleNumber).ruleNumber,p.ruleNumber);
- assert.equal(trustedSelectedRuleIdentity({content:options[1].passage},scheduling),'5.10');
+ assert.equal(trustedSelectedRuleIdentity({content:options[1].passage},scheduling),'5.11');
  const findings=sourceReviewFindings('As a captain, can I change our scheduled match date or time?',[{...scheduling,chunk_id:scheduling.id}]);
  assert.equal(new Set(findings.map(p=>p.selectionKey)).size,2);assert.equal(findings[1].ruleNumber,'5.11');assert.equal(findings[1].containerRuleNumber,'5.10');
  assert.throws(()=>validateManagedPassage(scheduling,options[1].passage,'5.10'));

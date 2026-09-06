@@ -4,7 +4,7 @@ const compact = value => String(value || "").replace(/\s+/g, " ").trim();
 const valid = value => /^(?:\d{1,2}(?:\.\d{1,2})*|\d{1,2}(?:\.(?:[A-Z]|\d{1,2}|[a-z])){1,6})$/.test(value);
 const within = (child, parent) => child === parent || child.startsWith(`${parent}.`);
 
-export function trustedSelectedRuleIdentity(selected, stored, { managedSibling = false } = {}) {
+export function trustedSelectedRuleIdentity(selected, stored) {
   const parent = String(stored.rule_number || "").trim();
   const fallback = valid(parent) ? parent : "";
   const passages = Array.isArray(selected.selectedPassages) && selected.selectedPassages.length ? selected.selectedPassages : [selected.content];
@@ -20,7 +20,9 @@ export function trustedSelectedRuleIdentity(selected, stored, { managedSibling =
   for (const passage of passages) {
     const lines = String(passage).trim().split(/\r?\n/);
     const id = lines[0].match(start)?.[1];
-    if (!id || !valid(id) || (!managedSibling && !within(id, parent))) return fallback;
+    // A trusted chunk can contain sibling provisions. Its primary rule is only
+    // a fallback; the selected structural boundary establishes specificity.
+    if (!id || !valid(id)) return fallback;
     // The start must also be a structural boundary in the trusted full chunk.
     const trustedLines = String(stored.content).split(/\r?\n/).map(line => line.trim());
     if (!trustedLines.some(line => line.match(start)?.[1] === id && compact(passage).startsWith(compact(line)))) return fallback;
