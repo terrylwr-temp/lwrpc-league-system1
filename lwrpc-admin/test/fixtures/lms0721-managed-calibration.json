@@ -1,0 +1,90 @@
+[
+  {
+    "policy": {
+      "title": "Synthetic administrative review request",
+      "canonical_question": "How can I request an administrative review?",
+      "approved_answer": "Send an administrative review request to League Management."
+    },
+    "question": "How do I ask for an administrative review?",
+    "expected": true,
+    "semantic_score": 0.7352302071769087,
+    "model": "text-embedding-3-small"
+  },
+  {
+    "policy": {
+      "title": "Synthetic administrative review request",
+      "canonical_question": "How can I request an administrative review?",
+      "approved_answer": "Send an administrative review request to League Management."
+    },
+    "question": "Who should receive my request to review an administrative decision?",
+    "expected": true,
+    "semantic_score": 0.6638582231010348,
+    "model": "text-embedding-3-small"
+  },
+  {
+    "policy": {
+      "title": "Synthetic administrative review request",
+      "canonical_question": "How can I request an administrative review?",
+      "approved_answer": "Send an administrative review request to League Management."
+    },
+    "question": "How can I submit match scores?",
+    "expected": false,
+    "semantic_score": 0.38492396318272554,
+    "model": "text-embedding-3-small"
+  },
+  {
+    "policy": {
+      "title": "Synthetic administrative review request",
+      "canonical_question": "How can I request an administrative review?",
+      "approved_answer": "Send an administrative review request to League Management."
+    },
+    "question": "How long does an administrative review take?",
+    "expected": false,
+    "semantic_score": 0.6494444396965787,
+    "model": "text-embedding-3-small"
+  },
+  {
+    "policy": {
+      "title": "Synthetic Sunday makeup scheduling",
+      "canonical_question": "Can teams arrange a makeup on Sunday?",
+      "approved_answer": "Teams may arrange a makeup on Sunday with organizer confirmation."
+    },
+    "question": "Are Sunday makeup matches allowed?",
+    "expected": true,
+    "semantic_score": 0.7043900408375356,
+    "model": "text-embedding-3-small"
+  },
+  {
+    "policy": {
+      "title": "Synthetic Sunday makeup scheduling",
+      "canonical_question": "Can teams arrange a makeup on Sunday?",
+      "approved_answer": "Teams may arrange a makeup on Sunday with organizer confirmation."
+    },
+    "question": "May we organize our makeup match for Sunday?",
+    "expected": true,
+    "semantic_score": 0.7095530579695797,
+    "model": "text-embedding-3-small"
+  },
+  {
+    "policy": {
+      "title": "Synthetic Sunday makeup scheduling",
+      "canonical_question": "Can teams arrange a makeup on Sunday?",
+      "approved_answer": "Teams may arrange a makeup on Sunday with organizer confirmation."
+    },
+    "question": "Can teams arrange a makeup on Saturday?",
+    "expected": false,
+    "semantic_score": 0.7991645675647591,
+    "model": "text-embedding-3-small"
+  },
+  {
+    "policy": {
+      "title": "Synthetic Sunday makeup scheduling",
+      "canonical_question": "Can teams arrange a makeup on Sunday?",
+      "approved_answer": "Teams may arrange a makeup on Sunday with organizer confirmation."
+    },
+    "question": "Can teams arrange a makeup on the weekend?",
+    "expected": false,
+    "semantic_score": 0.7989752001131116,
+    "model": "text-embedding-3-small"
+  }
+]

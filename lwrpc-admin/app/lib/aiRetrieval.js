@@ -12,6 +12,7 @@ export const AUTHORITY_REVIEW_LIMIT = 12;
 const LWR_MATCH_EQUIPMENT_PROBE_QUERY = "match balls";
 // Request-local capability: vectors and database clients never serialize into diagnostics.
 const interpretationSearches = new WeakMap();
+const approvedSearches = new WeakMap();
 const LWR_MATCH_EQUIPMENT_PROBE_EMBEDDING_QUERY = "What ball does the LWR league provide for regular-season matches?";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);
@@ -91,7 +92,25 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     const assistedRequest = { ...retrievalRequest, retrievalQuery: query, terminologyAliases: nvzTerminologyAliasPhrases(query, assistedRows || []) };
     return (assistedRows || []).map((row, index) => ({ ...candidateFromRow(row, assistedRequest), stage3Rank: index + 1 }));
   });
+  approvedSearches.set(result, async (signal) => {
+    const query=supabase.rpc('search_ai_approved_answers', {p_embedding:toPgVector(embedding.embedding),p_question:request.question});
+    const {data: managed, error: managedError} = await (typeof query.abortSignal==='function'?query.abortSignal(signal):query);
+    if(managedError)throw managedError;
+    return managed || [];
+  });
   return result;
+}
+
+export async function retrieveApprovedForAnswer(retrieval) {
+  const search=approvedSearches.get(retrieval);if(!search)return null;
+  approvedSearches.delete(retrieval);
+  const started=performance.now();const controller=new AbortController();let timer;
+  try{
+    const rows=await Promise.race([search(controller.signal),new Promise((_,reject)=>{timer=setTimeout(()=>{controller.abort();reject(new Error('approved_timeout'));},500);})]);
+    retrieval.approvedRetrieval={status:'completed',candidateCount:rows.length,additionalEmbeddingCalls:0,searchCount:1,durationMs:Math.round(performance.now()-started)};
+    return rows;
+  }catch{retrieval.approvedRetrieval={status:'unavailable',additionalEmbeddingCalls:0,searchCount:1,durationMs:Math.round(performance.now()-started)};return [];}
+  finally{clearTimeout(timer);}
 }
 
 const SCORE_FIELDS = ["semanticScore", "keywordScore", "exactScore", "authorityScore", "contextScore", "combinedScore", "vectorRank", "keywordRank", "exactMatch"];

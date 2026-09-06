@@ -6,8 +6,9 @@ const {retrieveOfficialEvidence}=await import('../app/lib/aiRetrieval.js');
 const {selectAnswerEvidence,selectAnswerEvidenceWithAssistance}=await import('../app/lib/aiAnswerGeneration.js');
 const fixtures=JSON.parse(await readFile(new URL('./fixtures/lms0720-assisted-retrieval-production.json',import.meta.url),'utf8'));
 async function replay(fixture,override) {
- const calls=[],embeddings=[];
+ const calls=[],embeddings=[],managedCalls=[];
  const retrieval=await retrieveOfficialEvidence({body:{question:fixture.question},embedQuery:async q=>{embeddings.push(q);return {embedding:Array(1536).fill(.017)};},supabase:{rpc:async(name,args)=>{
+  if(name==='search_ai_approved_answers'){managedCalls.push(args);assert.equal(managedCalls.length,1);assert.equal(args.p_embedding,calls[0].p_query_embedding);return {data:[],error:null};}
   calls.push(args);assert.equal(name,'search_ai_official_chunks');assert.equal(args.p_limit,32);
   assert.equal(args.p_query_embedding,calls[0].p_query_embedding);
   const search=fixture.searches[calls.length-1];
@@ -15,7 +16,7 @@ async function replay(fixture,override) {
   assert.ok(search,'no extra search');assert.equal(args.p_query_text,search.query);
   return {data:structuredClone(search.rows),error:null};
  }}});
- return {retrieval,calls,embeddings};
+ return {retrieval,calls,embeddings,managedCalls};
 }
 for(const fixture of fixtures)test('0720 actual original/assisted sequence: '+fixture.question,async()=>{
  const {retrieval:r,calls,embeddings}=await replay(fixture);
@@ -54,10 +55,10 @@ for(const question of ['What if I am plaing the ball?','Can I join the team name
 for(const index of [0,1,2])test('0720 generation follows completed retry '+index,async()=>{
  process.env.OPENAI_API_KEY='synthetic-test-only';
  const {generateOfficialAnswer}=await import('../app/lib/aiAnswerGeneration.js');
- const {retrieval:r,calls}=await replay(fixtures[index]);let modelCalls=0;
+ const {retrieval:r,calls,managedCalls}=await replay(fixtures[index]);let modelCalls=0;
  const result=await generateOfficialAnswer({retrieval:r,supabase:null,
  resolveSources:async(_db,evidence)=>{assert.equal(calls.length,2);assert.ok(evidence.length);return evidence.map(c=>({...c,citation:c.documentTitle,officialDocumentUrl:'https://example.test/official.pdf'}));},
  fetchImpl:async(_url,options)=>{modelCalls++;assert.equal(calls.length,2);assert.ok(JSON.parse(options.body).input[0].content.includes(fixtures[index].question));return {ok:true,status:200,json:async()=>({status:'completed',output:[{type:'message',content:[{type:'output_text',text:JSON.stringify({answer:'Synthetic grounded test response.',conflict:false})}]}]})};}
  });
- assert.equal(modelCalls,1);assert.equal(result.evidenceSufficient,true);
+ assert.equal(modelCalls,1);assert.equal(result.evidenceSufficient,true);assert.equal(managedCalls.length,1);
 });

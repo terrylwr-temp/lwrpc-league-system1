@@ -1,5 +1,6 @@
 import { conversationDiagnostics } from "../../../lib/aiConversationDiagnostics";
 import { NextResponse } from "next/server";
+import {approvedViewerHref} from "../../../lib/aiApprovedAnswerViewer.js";
 import { answerGenerationDiagnostic, generateOfficialAnswer } from "../../../lib/aiAnswerGeneration";
 import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
 import { clarificationFromRetrieval, createClarificationReceipt, createFollowUpReceipt } from "../../../lib/aiConversation";
@@ -48,7 +49,7 @@ async function runManagerAnswer(authorization, body, trace) {
       result: { kind: answer.conflict?.requiresClarification ? "conflict" : answer.evidenceSufficient ? "answer" : "insufficient_evidence", answer: answer.answer },
       response: {
         retrieval: { ...retrieval, documentsConsidered, conversationResolution: conversationDiagnostics(conversationResolution, { stage3Invoked: true, answer }) },
-        answer: { ...answer, metrics: { ...answer.metrics, retrievalMs: retrieval.metrics.totalMs, totalMs: Math.round(performance.now() - started) } },
+        answer: { ...answer, sources:answer.sources.map(s=>s.sourceKind==="approved_answer"?{...s,officialDocumentUrl:approvedViewerHref(s,authorization.user.id)}:s), metrics: { ...answer.metrics, retrievalMs: retrieval.metrics.totalMs, totalMs: Math.round(performance.now() - started) } },
         conversationReceipt: answer.evidenceSufficient ? createFollowUpReceipt(authorization.user.id, conversationResolution.effectiveQuestion) : null,
       },
     };

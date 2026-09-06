@@ -1,16 +1,26 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-09-05
+Last updated: 2026-09-06
 
-Current production application version: **LMS-0720 / 0.1.542 — DEPLOYED, NOT PRODUCTION ACCEPTED.** Corrected commit 8b2e0cd passes all three equipment typos and the correctly spelled control. Resumed acceptance stopped on `Can I volly in the kitchen?`: Stage 3 top score .1826 below .350, model skipped. Last accepted baseline remains LMS-0719 / 0.1.541. Stages 1–6 and Stage 7A/B remain accepted. See `docs/lms-0720-implementation-report.md`.
+Current production application version: **LMS-0720 / 0.1.542 — DEPLOYED AND PRODUCTION ACCEPTED.** Commit 9263f83257d11bae2b60656a075fc46c2c039644 passed the controlled typo, medical context/reset, protected privacy, manager diagnostics, feedback correlation and corpus-integrity gates. Stages 1–6 and Stage 7A/B remain accepted. See docs/lms-0720-implementation-report.md.
 
-Current implementation: **LMS-0720 / 0.1.542 — Ask LWR Robustness Hardening**. Equipment handoff correction validated (411 tests) and deployed. Further acceptance/correction stopped pending review of the separate volley typo Stage 3 failure. No new version or Live LMS Intelligence.
+Current implementation: **LMS-0721 / 0.1.543 — Approved LWR Answers / Managed Knowledge, implemented locally for review.** Includes the approved metadata-only Authority Warning clarification. Migration/application have not been deployed or production accepted. See `docs/lms-0721-implementation-report.md` for validation and the controlled deployment sequence. Live LMS Intelligence remains deferred.
 
 Current Stage 7A status: final production data, privacy, effective permissions, deployment/source and capture-log review passed. The historical acceptance checkpoint contained eight outcomes, five occurrences and four groups/cases; exact two-event feedback correlation; deterministic tungsten grouping; protected and clarification metadata excluded from the unanswered queue; manager_test separate. Legacy feedback and corpus hashes remained unchanged; no validation synthetic rows remained. Live anonymous capture-health denial was reverified. Authenticated endpoint success was unavailable through the then-current browser tooling, despite the Commissioner UI session; the isolated full role matrix remains evidence. Production failure injection was intentionally not performed. These are owner-authorized accepted limitations, not acceptance blockers. See the implementation report final acceptance section.
 
 Stage 7 governing design is approved in `docs/stage-7-ai-feedback-review-design.md`, including all 18 schema/workflow/UI/security/retention/test sections. Stage 7A is complete. Stage 7B read-only pre-implementation verification is recorded in `docs/lms-0718-stage7b-readiness-report.md`: 42 outcomes, 11 occurrences, nine groups/cases and 13 feedback events at the stated snapshot. Existing tables support the workflow, but atomic manager case/audit operations require a restricted transaction helper with the current Supabase REST architecture. The owner subsequently approved implementation and the function-only migration. Stage 7B function-only migration and application are deployed. One authorized historical community case completed Reviewing/category/note/Resolve/Reopen/Resolve with six appended manager events. Historical snapshots, feedback and corpus hashes remained unchanged. That initial historical-source blocker is corrected and production acceptance completed; see the final implementation-report section. Manual merge/split, assignment tooling, charts, topic classification, retention execution and Live LMS Intelligence remain deferred.
 
-## Purpose
+## LMS-0721 — Approved LWR Answers / Managed Knowledge
+
+The owner approved the discovered contract clarification: formal Rules continue to govern grounded answers; bounded Authority Warning metadata lives in existing outcome diagnostics and is visible in the new Approved Answers tab. No fabricated conflict/unanswered occurrence, case, feedback vote or metric is created. Replacement/retirement clears current warning visibility without rewriting historical revisions or observations. The initial design-defect stop is resolved by that explicit authorization.
+
+Local implementation adds three restricted tables, audited Draft/Active/Retired revisions, independent official-source duplicate prevention, atomic activation with manifest/overlap checks, one same-vector managed retrieval, exact-revision citations/viewer/feedback provenance and manager Authority Warnings. PGlite tests exercise production-like default grants and migration replay. Desktop/mobile synthetic UI checks and measured synthetic embedding calibration are documented in the implementation report. The existing PDF corpus, Stage 3 RPC, Stage 7 capture/HMAC/metrics and deferred website/kitchen selection remain unchanged. No production migration, activation or deployment occurred. Stage 7A/B and LMS-0720 remain accepted.
+
+Website questions are **not managed-knowledge gaps or Approved Answer acceptance candidates**. Active DUPR League Rules page 2, Rule 1.1, directly supplies the main website. The owner's production trace for “What is the website for the club” places Rule 1 at rank 3 (~.464), excluded by Stage 4 applicability/material contribution, while rank-4 Players Guide is selected with only DUPR website/contact email. Record as **AI/Retrieval Review** (`ai_retrieval_selection`) for a future bounded Stage 4 diagnosis, not an LMS-0721 selection correction. Creation/activation duplicate checks must block a confirmed existing official answer and must not mistake the normal selector's exclusion for evidence of missing knowledge. A different retained “Lakewood ranch pb” insufficient-evidence trace is documented separately in the report.
+
+Future AI Source Management requirement, separately approved implementation only: show actual activation time in the manager's local timezone, optionally Activated By, and retain superseded history. Read-only production schema/function/trigger inspection found no authoritative activation timestamp/actor or document activation audit. Upload/processing/update times cannot substitute. Recommend future transactional activation records; legacy versions must say “Activation time not recorded” unless independent authoritative records are verified. No activation schema/UI changes are part of this diagnosis.
+
+## Purpose and durable memory
 
 This file is the durable project memory for the LWRPC League Management System. Future development should treat this as the first place to understand what exists, what still needs work, and what decisions have already been made.
 
@@ -706,3 +716,22 @@ The next production question, `Can I volly in the kitchen?`, failed Stage 3 at .
 ### LMS-0720 same-embedding retrieval correction (2026-09-06)
 
 Owner approved one additive lexical retry for accepted interpretations when original Stage 3 fails or deterministic Stage 4 selects zero evidence. Implemented at 0.1.542 with original wording/vector preservation, bounded provenance and unchanged 32/8/12/4 limits, .350 gate, equipment handoff, medical context and Stage 7. Actual retrieval sequence fixtures recover volly, roser, linep, comunity and medcal; already-successful typos incur no retry. 430 tests and explicit type/PDF/lint checks pass; isolated clean build passed; deployment/production acceptance remain in progress. LMS-0720 is not yet production accepted. No next version or Live LMS Intelligence started.
+
+
+### LMS-0720 final controlled acceptance (2026-09-06)
+
+Production accepted at commit 9263f83 / deployment dpl_3EzLNxGmr12RDGuJJqVZnwfquxUB. Exact volly, comunity, medcal, roster/lineup, cracked-ball, Saturday, protected typo, signed medical 7-point follow-up, New Question reset, Franklin/correct kitchen, actual manager diagnostics, Stage 7B page, feedback original-wording correlation and integrity checks passed. 430 tests plus full validation passed (known normal cache lock; clean build passed). No SQL/corpus/HMAC/player layout change. Final documentation remains local to avoid a redundant deploy.
+
+Separately retained unanswered production observations, not part of the controlled test sequence: 'Is the kitchen the same as the NVZ' and 'What is the website for Lakewood ranch pb'. Diagnosis/baseline comparison is pending separate authorization; do not label as a demonstrated regression or change aliases/corpus automatically.
+
+### LMS-0721 controlled deployment preflight stopped — 2026-09-06
+
+Owner deployment authorization was received, but its gate-1 stop condition triggered before mutation: production has 20 document versions / 1,581 chunks versus the accepted LMS-0720 record's 19 / 1,507 (seven documents in both). The live application remains accepted LMS-0720 commit 9263f83; HMAC key version remains [1]; no proposed Approved Answer object collisions were found. This is an unexplained intervening corpus change, not a demonstrated defect or LMS-0721 regression. Confirm its provenance/authorization before adopting the new corpus baseline and resuming. See the implementation report for the read-only checkpoint and pending gates. No migration, deployment, acceptance data, corpus processing or environment change occurred. LMS-0721 is not deployed or production accepted.
+
+### LMS-0721 preflight baseline reconciled — 2026-09-06
+
+Owner confirmed the intentional DUPR League Rules upload. Read-only checks account for exactly one added Rules version and 74 added chunks; excluding it leaves 19/1507. The active Rules page 2 contains Rule 3.5's roster-availability condition and the predecessor remains superseded. The predecessor's extracted clause also contains that phrase; do not attribute its first introduction to this latest upload. Current authorized baseline: 7 documents, 20 versions, 1,581 chunks. No reprocessing/reactivation. The corpus preflight stop is cleared and controlled LMS-0721 deployment resumes; production acceptance remains pending.
+
+### LMS-0721 production migration verified — 2026-09-06
+
+The authorized migration is applied; do not reapply it. Three restricted managed-knowledge tables remain empty. Effective grants/RLS/functions/indexes/constraints and permitted reads passed. Existing corpus, history, feedback, HMAC and object ACLs are unchanged; only the approved case-category compatibility function changed. Application deployment and genuine owner-policy acceptance remain pending. See the implementation report.

@@ -1,6 +1,6 @@
 # LMS-0720 / 0.1.542 — Ask LWR Robustness Hardening
 
-Status: DEPLOYED, NOT PRODUCTION ACCEPTED. The equipment handoff correction is deployed and passes; resumed acceptance stopped at the USAP volley typo Stage 3 failure. Last accepted baseline is LMS-0719 / 0.1.541. Stage 7A/B and Stages 1–6 remain accepted. Live LMS Intelligence has not started.
+Status: LMS-0720 / 0.1.542 — DEPLOYED AND PRODUCTION ACCEPTED (2026-09-06). Corrected commit 9263f83257d11bae2b60656a075fc46c2c039644 passed the authorized controlled acceptance gates. Stages 1–6 and Stage 7A/B remain accepted. No next version or Live LMS Intelligence started.
 
 ## Changes and rationale
 
@@ -261,3 +261,43 @@ Read-only live retrieval captured actual original and assisted RPC rows, without
 Automated validation: 430 tests passed, including original-RPC-first, exact same vector, both retry triggers, single-use exhaustion/failure, model-after-selection, complete score provenance, limits, no-retry negatives, protected pre-retrieval controls, signed medical context and 25 equipment topology controls. Lint: zero errors and six existing warnings. Explicit nonincremental TypeScript and PDF bundle verification passed. Normal production build compiled in 12.8s, then encountered the known .next/cache/.tsbuildinfo EPERM write lock; isolated clean production build passed compilation, TypeScript, all 72 static pages and final optimization before deployment. No SQL, RPC implementation, corpus, document, chunk, embedding-generation, HMAC, Stage 7, feedback, version or player-layout change.
 
 Acceptance sequence after successful build/deployment: first exact volly (stop immediately if incorrect), then comunity, medcal, roster/lineup, damaged/cracked, league, protected comunity, medical direct/7-point follow-up/New Question reset, manager provenance, negatives, Stage 7 privacy/wording, performance, one Franklin sanity, correct kitchen sanity, Stage 7B sanity and read-only integrity comparison. Prior failed usin/volly occurrences are retained.
+
+
+## Final corrected deployment and controlled production acceptance — 2026-09-06
+
+**LMS-0720 / 0.1.542 — PRODUCTION ACCEPTED.** Commit 9263f83257d11bae2b60656a075fc46c2c039644 deployed through main/GitHub. Vercel deployment dpl_3EzLNxGmr12RDGuJJqVZnwfquxUB reached READY and owns league.lwrpickleballclub.com. No migration/environment/processing action occurred.
+
+| Production gate | Result |
+| --- | --- |
+| Exact volly, tested first | Grounded USAP 11.A, page 30; typed wording retained |
+| comunity general rule | Grounded LWR 3.5, page 2; own-community division/team AND roster-availability qualification retained |
+| medcal | Grounded LWR 5.7, page 5; correct incomplete-match distinctions |
+| roser | Grounded Manage Roster, Captains Guide page 7 |
+| linep | Grounded LWR 5.4, page 4; three-day submission timing |
+| craked during rally | Grounded 10.G/10.G.1 and refereed 20.F/20.F.1; no universal replay claim |
+| Satrday league | Important Dates Saturday roster opening, Monday Sept. 28 |
+| what comunity am i registered with | Protected; database confirms no Stage 3, model skipped, empty diagnostic snapshot and zero review occurrences |
+| Medical issue during match | Grounded 5.7 |
+| Immediate What if one team has 7 points? | Signed context retained; retired/current score/DUPR/opponent win under 5.7 |
+| Same fragment after New Question | Clarification requesting full question; no inherited medical answer |
+| Ambiguous plaing | Clarification; local tests also prove no accepted annotation or assisted search |
+| One usin Franklin sanity | One Captains Guide source, Franklin Outdoor X-40 Optic |
+| Correct volley/kitchen sanity | Grounded 11.A |
+| Actual manager Test AI Assistant | Grounded volly; original/assisted provenance and unchanged 8/12 limits visible |
+| Stage 7B page | Summary, protected-demand separation, filters and review queue load; historical failed usin and volly remain |
+
+Other approved variants Seson/damged and negative entity/precision controls passed the full actual retrieval-sequence/local suite; representative production variants above avoid redundant production requests.
+
+Manager deployed volly diagnostics: original Rule 11.A rank 2, score .177; assisted rank 4, score .503; assisted RPC 183ms; original embedding 175ms; total retrieval 548ms; source validation 119ms; generation 1586ms; total 2257ms. UI reports one assisted search and zero additional embeddings. Exact same-vector/call counts are asserted locally; provider-level embedding call tracing was not added. No production fault injection was performed. Local failed/empty-assisted tests prove one attempt then unchanged fallback.
+
+Stage 7 wording/correlation: one Helpful click on the roser answer was accepted by the UI. Answer 70274618-1d52-4fa7-becd-b6be4d78f0de has exactly one feedback event and a grounded_feedback occurrence correlated to that same outcome. Original/effective/canonical question all retain 'How do I add someone to my roser?'; one LWR source, LMS-0720. Selected snapshot contains no new assistance internals, vector, URL, token or credential fields. Protected outcome 29b6ed14-75e2-4677-8d46-b7e87d9cf145 has stage3_invoked=false, model_call_skipped=true, diagnostic_snapshot={} and no occurrence. Manager test outcome aa52ee4a-bdd6-4031-8add-e54609647aac remains manager_test, separate from player metrics. Historical failed usin/volly occurrences were read-only confirmed with original wording intact.
+
+Hosting logs for this deployment show sanitized ai_quality_capture capture_succeeded records for player answers, protected/clarification outcomes, manager testing and the single feedback action, all HTTP 200. Logged fields are event, persistence stage, assistant version and time. The review page's existing 'Unknown / independent operator log verification required' health wording is preserved; the independent log check was completed.
+
+Read-only before/after integrity using the same query: documents 7 / hash 0e61a58a5350e2db1053efb209f755eb; versions 19 / b19e398aeba3b6d0d64072002307581e; chunks including stored vectors 1507 / ae22a78ab67a6ca5d2aa87d14566cd4b; public function definitions b6ce2e95b293cc979c296da0de4e0300; relation ACL/RLS fingerprint 5f9df915cb1a4e8f143bf4a8049e7ba8; HMAC key versions [1]. All unchanged. These hashes use this pass's row_to_json/catalog query and are not directly comparable to older differently constructed hashes.
+
+Final validation: 430/430 tests; lint zero errors/six existing warnings; nonincremental tsc pass; PDF server bundle pass; normal build compiled then known cache-lock failure; isolated clean production build fully passed; git diff --check passed. Validation logs are local under lwrpc-admin/.next/lms0720-assisted-validation. Player layout, feedback behavior, source authority, corpus, embeddings, Stage 7, HMAC and version remain unchanged. This final acceptance documentation is local and not pushed to avoid an unnecessary additional deployment.
+
+### Separate contemporaneous quality observations
+
+The read-only acceptance-window check also found two questions outside the controlled agent test sequence: 'Is the kitchen the same as the NVZ' (Stage 3 insufficient) and 'What is the website for Lakewood ranch pb' (Stage 4 no applicable evidence). Both are retained as New unanswered review items. Their policy/corpus applicability and baseline behavior were not diagnosed in this correction; neither is claimed to be a demonstrated regression. Record for separately authorized quality review. Do not automatically change aliases, retrieval or corpus for these observations.

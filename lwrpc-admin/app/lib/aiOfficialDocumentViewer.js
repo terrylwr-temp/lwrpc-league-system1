@@ -1,3 +1,4 @@
+import {approvedViewerHref} from "./aiApprovedAnswerViewer.js";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "node:crypto";
 import { resolveOfficialSources } from "./aiAnswerGeneration.js";
 
@@ -15,6 +16,7 @@ export function createOfficialDocumentViewerToken(source, userId, { now = Date.n
 }
 
 export function officialDocumentViewerHref(source, userId) {
+  if(source.sourceKind==="approved_answer")return approvedViewerHref(source,userId);
   return `/official-document/${encodeURIComponent(createOfficialDocumentViewerToken(source, userId))}`;
 }
 

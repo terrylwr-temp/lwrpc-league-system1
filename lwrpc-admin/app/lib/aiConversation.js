@@ -1,3 +1,4 @@
+import {approvedSourceIdentity} from "./aiApprovedAnswersShared.js";
 import { interpretQuestion, matchingQuestion, medicalScoreContext } from "./aiQuestionInterpretation.js";
 import { missingPlayerObject, playerObjectReply, plausibleRosterTimingLeagues, questionLeague, isRosterParticipationQuestion, ballDamageKind, isSeasonRatingDateQuestion } from "./aiQuestionApplicability.js";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
@@ -196,6 +197,7 @@ function isCompleteStandaloneQuestion(question) {
 
 function safeSources(sources) {
   return (sources || []).slice(0, 4).map((source) => ({
+    ...approvedSourceIdentity(source),
     documentId: cleanId(source?.documentId), documentVersionId: cleanId(source?.documentVersionId), chunkId: cleanId(source?.chunkId),
     documentTitle: String(source?.documentTitle || "").slice(0, 300), pageNumber: positiveNumber(source?.pageNumber), ruleNumber: String(source?.ruleNumber || "").slice(0, 120),
     sectionLabel: String(source?.sectionLabel || "").slice(0, 300), heading: String(source?.heading || "").slice(0, 300), citation: String(source?.citation || "").slice(0, 600),
@@ -204,6 +206,7 @@ function safeSources(sources) {
 
 function safeEvidence(evidence) {
   return (evidence || []).slice(0, 4).map((item) => ({
+    ...approvedSourceIdentity(item),
     documentId: cleanId(item?.documentId), documentVersionId: cleanId(item?.documentVersionId), chunkId: cleanId(item?.chunkId), ruleNumber: String(item?.ruleNumber || "").slice(0, 120),
     pageNumber: positiveNumber(item?.pageNumber), sourceClassification: String(item?.sourceClassification || "").slice(0, 80), evidenceRole: String(item?.evidenceRole || "").slice(0, 160),
     evidenceSelectionReason: String(item?.evidenceSelectionReason || "").slice(0, 500),

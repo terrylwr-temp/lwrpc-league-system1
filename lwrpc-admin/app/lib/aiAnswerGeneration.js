@@ -1,5 +1,7 @@
 import { matchingQuestion } from "./aiQuestionInterpretation.js";
-import { assistInterpretationRetrieval } from "./aiRetrieval.js";
+import { assistInterpretationRetrieval, retrieveApprovedForAnswer } from "./aiRetrieval.js";
+import {chooseApprovedEvidence} from './aiApprovedAnswersSelection.js';
+import {approvedSourceIdentity,approvedEligible} from './aiApprovedAnswersShared.js';
 import { trustedSelectedRuleIdentity } from "./aiSelectedRuleIdentity.js";
 import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind, isSeasonRatingDateQuestion, seasonRatingDatePassages, isCommunityParticipationQuestion, communityParticipationPassages } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
@@ -230,17 +232,27 @@ export async function selectAnswerEvidenceWithAssistance(retrieval) {
 
 export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = fetch, clock = performance.now.bind(performance), resolveSources = resolveOfficialSources }) {
   const started = clock();
-  const selectedEvidence = await selectAnswerEvidenceWithAssistance(retrieval);
-  if (!retrieval?.evidence?.sufficient) return skippedAnswer(retrieval, clock, started);
+  let selectedEvidence = await selectAnswerEvidenceWithAssistance(retrieval);
+  const approvedRows=await retrieveApprovedForAnswer(retrieval);
+  if(approvedRows){
+    const explicit=['weekday','saturday','primetime'].filter(s=>new RegExp(`\\b${s}\\b`,'i').test(retrieval.request.question));
+    const managed=chooseApprovedEvidence(retrieval.request.question,selectedEvidence,approvedRows,{scope:explicit.length===1?explicit[0]:retrieval.request.askAbout,seasonId:retrieval.request.context?.seasonId});
+    retrieval.authorityWarnings=managed.warnings;
+    if(managed.conflict)return {...skippedAnswer(retrieval,clock,started),answer:CONFLICT_ANSWER,conflict:{potentialConflict:true,requiresClarification:true,competingSources:[]}};
+    selectedEvidence=managed.selected;
+  }
+  if (!retrieval?.evidence?.sufficient && !selectedEvidence.some(s=>s.sourceKind==='approved_answer')) return skippedAnswer(retrieval, clock, started);
   annotateEvidenceSelection(retrieval, selectedEvidence);
   if (selectedEvidence.length === 0) return skippedAnswer(retrieval, clock, started);
   const sourcesStarted = clock();
-  const sources = await resolveSources(supabase, selectedEvidence);
+  const managedSelection=selectedEvidence.some(e=>e.sourceKind==='approved_answer');
+  let sources;
+  try{sources=await resolveSources(supabase,selectedEvidence);}catch(error){if(managedSelection)return skippedAnswer(retrieval,clock,started);throw error;}
   const sourceResolutionMs = Math.round(clock() - sourcesStarted);
   validateTrustedSources(selectedEvidence, sources);
   // Selection and its parent relationships are complete before presentation metadata changes.
   for (const chunk of selectedEvidence) {
-    const source = sources.find(source => source.chunkId === chunk.chunkId);
+    const source = sources.find(source => chunk.sourceKind==='approved_answer'?source.approvedRevisionId===chunk.approvedRevisionId:source.chunkId === chunk.chunkId);
     chunk.chunkRuleNumber = chunk.ruleNumber;
     chunk.ruleNumber = source.ruleNumber || "";
   }
@@ -266,13 +278,14 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
           schema: {
             type: "object",
             additionalProperties: false,
-            required: ["answer", "conflict"],
-            properties: { answer: { type: "string" }, conflict: { type: "boolean" } },
+            required: managedSelection ? ["answer", "conflict", "supported"] : ["answer", "conflict"],
+            properties: { answer: { type: "string" }, conflict: { type: "boolean" }, ...(managedSelection ? {supported:{type:"boolean"}} : {}) },
           },
         },
       },
       instructions: [
         "You are the official Lakewood Ranch Pickleball Club AI Assistant.",
+        ...(managedSelection?["The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts."]:[]),
         "Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request.",
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
@@ -304,7 +317,12 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
   }
   const generationMs = Math.round(clock() - generationStarted);
   if (!response.ok) throw new OfficialAnswerModelError("api_request_failure", "The answer model could not generate an official-document answer.", { httpStatus: Number(response.status) || null, providerCode: cleanProviderCode(result?.error?.code) });
-  const modelOutput = extractStructuredModelOutput(result);
+  const modelOutput = extractStructuredModelOutput(result, {managed:managedSelection});
+  if(managedSelection){
+    let current=modelOutput.supported;
+    if(current)try{await resolveSources(supabase,selectedEvidence);}catch{current=false;}
+    if(!current)return {...skippedAnswer(retrieval,clock,started),modelCallSkipped:false,model:result.model||aiAssistantConfig.chatModel,diagnostic:{category:"approved_evidence_unavailable_or_unsupported"},metrics:{generationMs,sourceResolutionMs,totalMs:Math.round(clock()-started),...usageFromResponse(result)}};
+  }
   const conflict = Boolean(modelOutput.conflict);
   const answer = conflict ? CONFLICT_ANSWER : sanitizeAnswer(modelOutput.answer);
   if (!answer) throw new Error("The answer model returned an empty official-document answer.");
@@ -323,6 +341,18 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
 }
 
 export async function resolveOfficialSources(supabase, evidence, signedUrlSeconds = 900) {
+  if(evidence.some(e=>e.sourceKind==='approved_answer')){
+    const pdf=evidence.filter(e=>e.sourceKind!=='approved_answer');
+    const pdfSources=pdf.length?await resolveOfficialSources(supabase,pdf,signedUrlSeconds):[];
+    const manifestResult=await supabase.rpc('ai_approved_authority_manifest');if(manifestResult.error)throw new Error('Approved source validation unavailable.');
+    const managed=[];
+    for(const item of evidence.filter(e=>e.sourceKind==='approved_answer')){
+      const {data:r,error}=await supabase.from('ai_approved_answer_revisions').select('id,answer_id,status,activated_at,title,content_hash,league_scope,temporal_scope,season_id,effective_on,expires_on,authority_manifest_hash').eq('id',item.approvedRevisionId).maybeSingle();
+      if(error||!r||r.answer_id!==item.approvedAnswerId||r.content_hash!==item.contentHash||!approvedEligible(r,{scope:r.league_scope,seasonId:r.season_id,manifest:manifestResult.data}))throw new Error('Approved source is no longer current.');
+      managed.push({...approvedSourceIdentity(item),documentTitle:item.documentTitle,heading:r.title,ruleNumber:'',pageNumber:null,citation:`${item.documentTitle} — Effective ${r.effective_on}`,officialDocumentUrl:null});
+    }
+    return evidence.map(e=>e.sourceKind==='approved_answer'?managed.find(s=>s.approvedRevisionId===e.approvedRevisionId):pdfSources.find(s=>s.chunkId===e.chunkId));
+  }
   const versionIds = [...new Set(evidence.map((chunk) => chunk.documentVersionId).filter(Boolean))];
   const chunkIds = [...new Set(evidence.map((chunk) => chunk.chunkId).filter(Boolean))];
   const { data, error } = await supabase.from("ai_document_versions")
@@ -381,6 +411,11 @@ export function validateTrustedSources(evidence, sources) {
   const supplied = new Set(evidence.map((chunk) => `${chunk.documentId}:${chunk.documentVersionId}:${chunk.chunkId}`));
   if (!Array.isArray(sources) || sources.length !== evidence.length) throw new Error("Every supplied evidence chunk must have one validated official source.");
   for (const source of sources) {
+    if(source.sourceKind==='approved_answer'){
+      approvedSourceIdentity(source);
+      if(!evidence.some(e=>e.sourceKind==='approved_answer'&&e.approvedRevisionId===source.approvedRevisionId&&e.approvedAnswerId===source.approvedAnswerId&&e.contentHash===source.contentHash))throw new Error('Approved citation did not correspond to selected evidence.');
+      continue;
+    }
     if (!supplied.has(`${source.documentId}:${source.documentVersionId}:${source.chunkId}`)) throw new Error("A citation did not correspond to supplied official evidence.");
     if (!source.officialDocumentUrl) throw new Error("A validated official source requires its real document link.");
   }
@@ -561,7 +596,7 @@ function sameCitationDetail(left, right) {
   return normalize(left) === normalize(right);
 }
 
-export function extractStructuredModelOutput(result) {
+export function extractStructuredModelOutput(result, {managed=false}={}) {
   assertCompletedResponse(result);
   const output = Array.isArray(result?.output) ? result.output : [];
   const content = output.flatMap((item) => Array.isArray(item?.content) ? item.content : item?.type === "output_text" ? [item] : []);
@@ -572,7 +607,7 @@ export function extractStructuredModelOutput(result) {
   if (!outputText.trim()) throw new OfficialAnswerModelError("missing_structured_output", "The answer model returned no structured official-document output.");
   try {
     const parsed = JSON.parse(outputText);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || Object.keys(parsed).length !== 2 || typeof parsed.answer !== "string" || !parsed.answer.trim() || typeof parsed.conflict !== "boolean") throw new OfficialAnswerModelError("schema_validation_failure", "The answer model output did not match the required official-answer schema.");
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || Object.keys(parsed).length !== (managed?3:2) || (managed&&typeof parsed.supported!=="boolean") || typeof parsed.answer !== "string" || !parsed.answer.trim() || typeof parsed.conflict !== "boolean") throw new OfficialAnswerModelError("schema_validation_failure", "The answer model output did not match the required official-answer schema.");
     return parsed;
   } catch (error) {
     if (error instanceof OfficialAnswerModelError) throw error;

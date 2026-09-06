@@ -1,3 +1,4 @@
+import {approvedViewerHref} from "./aiApprovedAnswerViewer.js";
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { REVIEW_CATEGORIES, REVIEW_STATUSES, reviewRoleAllowed } from './aiReviewShared.js';
 
@@ -120,6 +121,7 @@ export async function reviewSource(db, answerId, sourceIndex, user) {
   identity(answerId); if(!Number.isInteger(sourceIndex) || sourceIndex<0 || sourceIndex>3) throw new ReviewError('Invalid source.');
   const detail=await reviewDetail(db,new URLSearchParams({answer:answerId}),user); const source=detail.sources[sourceIndex];
   if(!source) throw new ReviewError('Historical source unavailable.',404);
+  if(source.sourceKind==="approved_answer")return {url:approvedViewerHref(source,user),historical:true,lifecycle:"approved_revision",title:source.documentTitle};
   const docId=identity(source.documentId), versionId=identity(source.documentVersionId), chunkId=identity(source.chunkId);
   const [vr,cr]=await Promise.all([
     db.from('ai_document_versions').select('id,document_id,storage_bucket,storage_path,processing_status,document:ai_documents!ai_document_versions_document_id_fkey!inner(id,title,status,active_version_id)').eq('id',versionId).maybeSingle(),

@@ -1,4 +1,5 @@
 export const REVIEW_CATEGORIES = {
+  approved_lwr_answer: 'LWR Approved Answer / Managed Knowledge',
   unclassified: 'Unclassified', lwr_rule_update: 'LWR Rule update', lwr_guide_update: 'LWR Guide update',
   dates_source_update: 'Important Dates/source update', ai_retrieval_selection: 'AI/Retrieval Review',
   clarification_wording: 'Clarification/wording', usap_no_lwr_change: 'USAP/no LWR change',

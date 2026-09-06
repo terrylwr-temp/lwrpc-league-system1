@@ -6,6 +6,7 @@ import LoadingScreen from '../../components/LoadingScreen';
 import { getRequestAuthorizationHeaders, requireRole } from '../../lib/auth';
 import { REVIEW_CATEGORIES, REVIEW_STATUSES, RETEST_KEY, feedbackPercent, reviewRoleAllowed } from '../../lib/aiReviewShared.js';
 import styles from './review.module.css';
+import ApprovedAnswersPanel from './ApprovedAnswersPanel';
 
 async function api(params, body) {
   const response=await fetch(`/api/ai-assistant/review?${new URLSearchParams(params)}`,{method:body?'POST':'GET',cache:'no-store',headers:{...(await getRequestAuthorizationHeaders()),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
@@ -21,9 +22,10 @@ export default function AiFeedbackReviewPage() {
   const [draft,setDraft]=useState(()=>({...dates(),search:'',status:'',type:'',source:'',version:''}));
   const [filters,setFilters]=useState(draft),[page,setPage]=useState({rows:[],next:null}),[summary,setSummary]=useState(null);
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[detail,setDetail]=useState(null),[health,setHealth]=useState(null);
-  const serial=useRef(0),lastFocus=useRef(null);
+  const serial=useRef(0),lastFocus=useRef(null);const [approvedCaseId,setApprovedCaseId]=useState(null);
   useEffect(()=>{let active=true;(async()=>{const user=await requireRole(router,'league_manager');if(active && user && reviewRoleAllowed(user.role))setReady(true);})();return()=>{active=false;};},[router]);
   const load=useCallback(async(cursor=null)=>{
+    if(tab==='approved')return;
     const n=++serial.current; setBusy(true);setError('');
     try{
       const f=range(filters);const data=await api({...f,tab,...(cursor?{cursor}:{})});
@@ -33,9 +35,11 @@ export default function AiFeedbackReviewPage() {
   },[filters,tab]);
   useEffect(()=>{if(ready)load();},[ready,load]);
   useEffect(()=>{if(!ready)return;let active=true;(async()=>{try{const r=await fetch('/api/ai-assistant/capture-health',{cache:'no-store',headers:await getRequestAuthorizationHeaders()});const h=await r.json();if(active)setHealth(r.ok?h.result:{status:'unknown'});}catch{if(active)setHealth({status:'unknown'});}})();return()=>{active=false;};},[ready]);
+  useEffect(()=>{if(!ready)return;const group=new URL(window.location.href).searchParams.get('group');if(!group)return;let active=true;(async()=>{try{const result=await api({op:'detail',group});if(active)setDetail(result);}catch(e){if(active)setError(e.message);}})();return()=>{active=false;};},[ready]);
   async function open(row){lastFocus.current=document.activeElement;setError('');try{setDetail(await api({op:'detail',...(tab==='feedback'?{answer:row.answer_id}:{group:row.id})}));}catch(e){setError(e.message);}}
   function close(){setDetail(null);requestAnimationFrame(()=>lastFocus.current?.focus());}
   if(!ready)return <LoadingScreen subtitle="Loading AI Feedback & Review…"/>;
+  if(tab==='approved')return <main className={styles.page}><AppHeader title="AI Feedback & Review" subtitle="Approved static club knowledge and authority review."/><div className={styles.workspace}><nav className={styles.tabs} aria-label="Review views">{[['needs','Needs Review'],['unanswered','Unanswered'],['feedback','Feedback'],['resolved','Resolved'],['approved','Approved Answers']].map(([key,title])=><button key={key} aria-current={tab===key?'page':undefined} onClick={()=>setTab(key)}>{title}</button>)}</nav><ApprovedAnswersPanel initialCaseId={approvedCaseId} router={router}/></div></main>;
   const f=(name,title,type='text')=><label>{title}<input type={type} maxLength={name==='search'?200:80} value={draft[name]} onChange={e=>setDraft({...draft,[name]:e.target.value})}/></label>;
   const select=(name,title,values)=><label>{title}<select aria-label={title} value={draft[name]} onChange={e=>setDraft({...draft,[name]:e.target.value})}><option value="">All</option>{values.map(v=><option key={v} value={v}>{label(v)}</option>)}</select></label>;
   return <main className={styles.page}><AppHeader title="AI Feedback & Review" subtitle="Official-answer feedback, unanswered questions and manager review."/>
@@ -47,15 +51,15 @@ export default function AiFeedbackReviewPage() {
     <p className={styles.hint}>Player metrics only; manager tests and legacy feedback are excluded. Participation counts answers, not clicks. Cards use completion dates; queues use latest activity. Search/status/type apply to lists only. Date filters are UTC; displayed times use your device timezone. Small, test-heavy activity is not a long-term performance trend.</p>
     <p className={styles.hint}>Future Live LMS Intelligence demand: {summary?.protected??'—'} protected outcomes (category unspecified). These are not unanswered failures. Clarifications: {summary?.clarification??'—'}.</p>
     <form className={styles.filters} onSubmit={e=>{e.preventDefault();setFilters({...draft});}}>{f('search','Question search')}{f('from','From (UTC)','date')}{f('to','Through (UTC)','date')}{select('status','Status',REVIEW_STATUSES)}{select('type','Type',tab==='feedback'?['helpful','not_helpful']:['not_helpful','unanswered','conflict'])}{select('source','Source family',['lwr','usap','mixed','none','unknown'])}{f('version','LMS version')}<button disabled={busy}>Apply filters</button></form>
-    <nav className={styles.tabs} aria-label="Review views">{[['needs','Needs Review'],['unanswered','Unanswered'],['feedback','Feedback'],['resolved','Resolved']].map(([key,title])=><button key={key} aria-current={tab===key?'page':undefined} onClick={()=>{setTab(key);setDraft(d=>({...d,type:''}));setFilters(d=>({...d,type:''}));}}>{title}</button>)}</nav>
+    <nav className={styles.tabs} aria-label="Review views">{[['needs','Needs Review'],['unanswered','Unanswered'],['feedback','Feedback'],['resolved','Resolved'],['approved','Approved Answers']].map(([key,title])=><button key={key} aria-current={tab===key?'page':undefined} onClick={()=>{setTab(key);setDraft(d=>({...d,type:''}));setFilters(d=>({...d,type:''}));}}>{title}</button>)}</nav>
     {error && <p role="alert" className={styles.error}>{error}</p>}
     <section aria-busy={busy} className={styles.tableWrap}><table><caption className={styles.hint}>{busy?'Loading…':`${page.rows.length} items on this page`}</caption><thead><tr>{(tab==='feedback'?['Current feedback','Question','Feedback time','Answer time','LMS Version','Source','Case','View']:['Status','Priority','Question / Group','Type','Occurrences','Latest Activity','LMS Version','Category','View']).map(s=><th key={s}>{s}</th>)}</tr></thead><tbody>{page.rows.map(row=><tr key={row.id||row.answer_id}>{tab==='feedback'?<><td>{row.helpful===null?'Ambiguous':row.helpful?'Helpful':'Not Helpful'}</td><td>{row.question}{!row.completed_at&&<small>Legacy — parent telemetry unavailable</small>}</td><td>{date(row.latest_at)}</td><td>{date(row.completed_at)}</td><td>{row.assistant_version}</td><td>{label(row.source_family)}</td><td>{row.case_id?label(row.status):'No review case'}</td></>:<><td>{label(row.status)}{row.new_activity&&['resolved','dismissed'].includes(row.status)&&<small>New activity</small>}</td><td>{row.family==='conflict'?'Confirmed conflict · ':''}{label(row.priority)}</td><td>{row.title}</td><td>{row.family==='grounded_feedback'?(row.negative?'Not Helpful':'Feedback'):label(row.family)}</td><td><b>{row.occurrences}</b></td><td>{date(row.latest_activity)}</td><td>{row.assistant_version}</td><td>{REVIEW_CATEGORIES[row.action_category]||'Unclassified'}</td></>}<td><button onClick={()=>open(row)}>View</button></td></tr>)}</tbody></table>{!busy&&!page.rows.length&&<p className={styles.empty}>No items match these filters.</p>}</section>
     <div className={styles.actions}><button disabled={busy} onClick={()=>load()}>Refresh / first page</button><button disabled={busy||!page.next} onClick={()=>load(page.next)}>Next page</button></div>
-    {detail&&<Detail key={`${detail.answerId}:${detail.case?.revision}`} detail={detail} close={close} reload={async()=>{setDetail(await api({op:'detail',answer:detail.answerId}));load();}} select={async answer=>setDetail(await api({op:'detail',answer}))} router={router}/>}</div>
+    {detail&&<Detail key={`${detail.answerId}:${detail.case?.revision}`} detail={detail} close={close} createApproved={id=>{close();setApprovedCaseId(id);setTab('approved');}} reload={async()=>{setDetail(await api({op:'detail',answer:detail.answerId}));load();}} select={async answer=>setDetail(await api({op:'detail',answer}))} router={router}/>}</div>
   </main>;
 }
 
-function Detail({detail:d,close,reload,select,router}) {
+function Detail({detail:d,close,reload,select,router,createApproved}) {
   const dialog=useRef(null);const [error,setError]=useState(''),[working,setWorking]=useState(false),[note,setNote]=useState('');
   const [category,setCategory]=useState(d.case?.action_category||'unclassified'),[priority,setPriority]=useState(d.case?.priority||'normal');
   const retry=useRef(null);const [sourceLink,setSourceLink]=useState(null);
@@ -70,6 +74,7 @@ function Detail({detail:d,close,reload,select,router}) {
   return <dialog ref={dialog} className={styles.dialog} onCancel={e=>{e.preventDefault();if(!working)close();}} aria-labelledby="review-detail-title"><header><h2 id="review-detail-title">Review detail</h2><button onClick={close} disabled={working} aria-label="Close review detail">Close</button></header>
     {error&&<p role="alert" className={styles.error}>{error}</p>}
     <section><h3>Question</h3><p>{d.original}</p><b>Effective question</b><p>{d.effective}</p><p className={styles.hint}>{d.version} · {label(d.result)} · Answer: {date(d.completedAt)} · Observed: {date(d.observedAt)}{d.legacy?' · Legacy — parent telemetry unavailable':''}</p><button onClick={retest}>Retest Question</button><p className={styles.hint}>Opens a prefilled question. Run the test explicitly; no test is submitted here.</p></section>
+    {d.case&&['new','reviewing'].includes(d.case.status)&&d.result==='insufficient_evidence'&&<section><h3>Knowledge decision</h3><p>Check existing official evidence before creating knowledge. A retrieval defect or protected/live-data question is not a missing policy.</p><button onClick={()=>createApproved(d.case.id)}>Create Approved Answer</button></section>}
     <section><h3>AI result</h3><p className={styles.answer}>{d.output||'Answer text not retained.'}</p></section>
     <section><h3>Official Sources / Evidence</h3>{d.sources.length?d.sources.map((s,i)=><article key={i}><p>{s.citation||s.documentTitle} · {s.ruleNumber?`Rule ${s.ruleNumber} · `:''}Page {s.pageNumber||'not retained'}</p><button onClick={()=>source(i)}>Prepare cited document link</button></article>):<p>No evidence selected.</p>}
       {sourceLink&&<p><b>{sourceLink.historical?(sourceLink.lifecycle==='superseded'?'Historical Source — Superseded':'Historical Source — Inactive'):'Current active version'}</b> — <a href={sourceLink.url} target="_blank" rel="noreferrer">Open {sourceLink.title}</a> (link expires in 5 minutes). {sourceLink.historical&&'This is the source retained with the historical AI response, not necessarily the current governing version.'}</p>}

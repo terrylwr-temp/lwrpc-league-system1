@@ -3,6 +3,7 @@ import { isRosterParticipationQuestion, isCommunityParticipationQuestion } from 
 import { isRosterTroubleshooting } from "./aiRosterTroubleshooting.js";
 import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
 import { officialDocumentViewerHref } from "./aiOfficialDocumentViewer.js";
+import {approvedSourceIdentity} from './aiApprovedAnswersShared.js';
 import { APP_VERSION } from "./version.js";
 import { clarificationFromRetrieval, createClarificationReceipt, createFeedbackReceipt, createFollowUpReceipt, resolveConversationTurn } from "./aiConversation.js";
 
@@ -105,6 +106,7 @@ export function toPlayerAnswerResult(answer, userId, { originalQuestion = "", ef
   const evidenceSufficient = answer?.evidenceSufficient === true;
   const conflict = answer?.conflict?.requiresClarification === true;
   const sources = (answer?.sources || []).map((source) => ({
+    ...approvedSourceIdentity(source),
     documentId: source.documentId, documentVersionId: source.documentVersionId, chunkId: source.chunkId,
     documentTitle: String(source.documentTitle || "Official LWR Pickleball Club document"),
     pageNumber: source.pageNumber || null,
