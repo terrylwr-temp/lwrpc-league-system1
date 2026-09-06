@@ -1,3 +1,4 @@
+import {managedFormalPassages,validateManagedPassage} from './aiApprovedSourceBinding.js';
 import {meaningfulDiscrepancy,APPROVED_SEMANTIC_MIN} from './aiApprovedAnswersSelection.js';
 import {createHash,createHmac,timingSafeEqual} from 'node:crypto';
 import {ApprovedAnswerError,approvedId,validateApprovedDraft,approvedPublicRevision,safeAuthorityWarnings,APPROVED_EMBEDDING_MODEL,APPROVED_EMBEDDING_DIMENSIONS,clubPolicyDate} from './aiApprovedAnswersShared.js';
@@ -5,7 +6,7 @@ import {isUnsupportedOperationalQuestion} from './askLwrPlayerAnswer.js';
 import {redactQualityText} from './aiQualitySnapshots.js';
 import {createQueryEmbedding} from './aiRetrieval.js';
 
-export const APPROVED_FIELDS='id,answer_id,revision_number,status,title,topic_key,canonical_question,approved_answer,league_scope,temporal_scope,season_id,effective_on,expires_on,related_chunk_id,related_rule_identity,public_links,content_hash,authority_manifest_hash,created_at,updated_at,activated_at,retired_at,retirement_reason,row_version';
+export const APPROVED_FIELDS='id,answer_id,revision_number,status,title,topic_key,canonical_question,approved_answer,league_scope,temporal_scope,season_id,effective_on,expires_on,related_chunk_id,related_rule_identity,related_passage,public_links,content_hash,authority_manifest_hash,created_at,updated_at,activated_at,retired_at,retirement_reason,row_version';
 const STOP=new Set('what which when where how why can could do does is are the a an for to of in on at by we i my our it this that club lwr pickleball league please tell me about have has be with and or'.split(' '));
 export function approvedIssueTerms(question){return [...new Set(String(question).toLowerCase().match(/[a-z0-9]+/g)||[])].filter(x=>x.length>2&&!STOP.has(x)).slice(0,12);}
 export function approvedContentHash(value){return createHash('sha256').update(JSON.stringify(value)).digest('hex');}
@@ -24,13 +25,12 @@ async function row(db,id){const r=checked(await db.from('ai_approved_answer_revi
 function staticQuestion(question){if(isUnsupportedOperationalQuestion(question)||redactQualityText(question,2400).redacted)throw new ApprovedAnswerError('This case contains protected/live or private information. Use AI/Retrieval Review; do not create static knowledge.');}
 export function sourceReviewFindings(question,rows){
  const terms=approvedIssueTerms(question);
- return rows.map(r=>{
-  const passages=String(r.content||'').split(/\n(?=\s*(?:\d+(?:\.\d+)*\.?\s|[A-Z0-9]+\.))/).map(p=>p.trim());
-  const direct=terms.length>0?passages.filter(p=>terms.every(term=>new RegExp(`\\b${term}(?:s|es)?\\b`,'i').test(p))):[];
-  const fact=direct.find(p=>/\b(?:must|shall|may|can|require|allowed|permitted|prohibited|deadline|website|contact)\b|https:\/\//i.test(p));
+ return rows.flatMap(r=>managedFormalPassages({content:r.content,rule_number:r.rule_number,heading:r.heading}).map((p,index)=>{
+  const proposition=p.passage.split(/\n(?=\s*(?:\d+(?:\.\d+)*\.?\s|[A-Z0-9]+\.))/)[0];
+  const direct=terms.length>0&&terms.every(term=>new RegExp('\\b'+term+'(?:s|es)?\\b','i').test(proposition))&&/\b(?:must|shall|may|can|require|allowed|permitted|prohibited|deadline|website|contact)\b|https:\/\//i.test(proposition);
   return {chunkId:r.chunk_id,documentId:r.document_id,documentVersionId:r.document_version_id,title:r.document_title,type:r.document_type,pageNumber:r.page_number,
-   ruleNumber:fact?.match(/^\s*(\d+(?:\.\d+)+)\.?\s/)?.[1]||r.rule_number||'',heading:r.heading||'',passage:(fact||r.content||'').slice(0,6000),direct:Boolean(fact)};
- });
+   selectionKey:r.chunk_id+':'+index,containerRuleNumber:r.rule_number||'',ruleNumber:p.ruleNumber,heading:p.heading,passage:p.passage,direct};
+ }).sort((a,b)=>Number(b.direct)-Number(a.direct)));
 }
 export async function approvedSourceReview(db,question){
  staticQuestion(question);const terms=approvedIssueTerms(question);
@@ -59,7 +59,7 @@ export async function approvedList(db){
  const listed=revisions.map(r=>({...r,eligibility:r.status!=='active'?null:r.authority_manifest_hash!==manifest?'Needs authority revalidation':r.effective_on>today?'Scheduled':r.expires_on&&r.expires_on<=today?'Expired':'Current scope/date checks apply'}));
  return {revisions:listed,seasons:checked(ss),warnings,warningWindow:'Most recent 100 warning-bearing outcomes; historical observations remain retained.'};
 }
-function auditPublicState(value){return Object.fromEntries(Object.entries(value||{}).filter(([k])=>['title','topic_key','canonical_question','approved_answer','league_scope','temporal_scope','effective_on','expires_on','status','revision_number','activated_at','retired_at','retirement_reason','public_links'].includes(k)));}
+function auditPublicState(value){return Object.fromEntries(Object.entries(value||{}).filter(([k])=>['title','topic_key','canonical_question','approved_answer','league_scope','temporal_scope','effective_on','expires_on','status','revision_number','activated_at','retired_at','retirement_reason','public_links','related_chunk_id','related_rule_identity','related_passage'].includes(k)));}
 export async function approvedDetail(db,id){
  const revision=await row(db,id);
  const actorRow=checked(await db.from('ai_approved_answer_revisions').select('activated_by_user_id').eq('id',id).single());
@@ -74,10 +74,11 @@ export async function approvedDetail(db,id){
   db.from('ai_approved_answer_events').select('id,action,created_at,reason,revision_id,before_state,after_state').eq('answer_id',revision.answer_id).order('created_at',{ascending:false}).limit(100),
  ]);
  const item=checked(a);const linkedCase=item.source_review_case_id?checked(await db.from('ai_manager_review_cases').select('group_id,status').eq('id',item.source_review_case_id).maybeSingle()):null;
- return {revision,activatedBy,item,linkedCase,history:checked(rs),events:checked(es).map(e=>({...e,before_state:auditPublicState(e.before_state),after_state:auditPublicState(e.after_state)}))};
+ return {revision,related:revision.related_chunk_id?await approvedBoundSource(db,revision):null,activatedBy,item,linkedCase,history:checked(rs),events:checked(es).map(e=>({...e,before_state:auditPublicState(e.before_state),after_state:auditPublicState(e.after_state)}))};
 }
 export async function approvedPreflight(db,id,user){
  const revision=await row(db,id);if(revision.status!=='draft')throw new ApprovedAnswerError('Only a Draft can be activated.');
+ if(revision.related_chunk_id)await approvedBoundSource(db,revision,{current:true});
  const sources=await approvedSourceReview(db,revision.canonical_question);
  const manifest=checked(await db.rpc('ai_approved_authority_manifest'));
  const siblings=checked(await db.from('ai_approved_answer_revisions').select('id,answer_id,title,status,topic_key,league_scope,temporal_scope,season_id,effective_on,expires_on').in('status',['active','draft']).neq('answer_id',revision.answer_id));
@@ -115,6 +116,7 @@ export async function approvedMutation(db,body,user,{embed=createQueryEmbedding}
   // Static policy only. A manager must explicitly attest; notes are never copied.
   if(body.staticPolicyConfirmed!==true)throw new ApprovedAnswerError('Confirm this is official static policy, not live player/team information.');
   if(action==='create'&&id!==null){const c=await approvedCase(db,id);if(c.blocked)throw new ApprovedAnswerError('Existing official evidence or a linked item requires review before duplicate creation.',409);}
+  if(payload.related_chunk_id)await approvedBoundSource(db,payload,{current:true});
   payload.content_hash=approvedContentHash(payload);
   const candidates=await approvedSourceReview(db,payload.canonical_question);
   if(candidates.some(s=>s.direct))throw new ApprovedAnswerError('Existing official evidence directly answers this question. Use AI/Retrieval Review.',409);
@@ -138,20 +140,33 @@ export async function approvedMutation(db,body,user,{embed=createQueryEmbedding}
    if(!String(body.overlapDistinction||'').trim()||String(body.overlapDistinction).length>1800)throw new ApprovedAnswerError('Similar Active Approved Answer: '+overlap.revision.title+'. Review it and record the distinct policy gap before retrying.',409);
   }
   expected=current.row_version;
-  payload={reason:overlap?'Semantic overlap reviewed: '+String(body.overlapDistinction).trim():null,managed_manifest_hash:claims.managedManifest,content_hash:claims.hash,authority_manifest_hash:claims.manifest,preflight_expires_at:new Date(claims.expires).toISOString(),embedding:JSON.stringify(embedding.embedding),embedding_model:APPROVED_EMBEDDING_MODEL,related_rule_identity:current.related_chunk_id?(await approvedFormalSource(db,current.related_chunk_id)).ruleNumber:null};
+  payload={reason:overlap?'Semantic overlap reviewed: '+String(body.overlapDistinction).trim():null,managed_manifest_hash:claims.managedManifest,content_hash:claims.hash,authority_manifest_hash:claims.manifest,preflight_expires_at:new Date(claims.expires).toISOString(),embedding:JSON.stringify(embedding.embedding),embedding_model:APPROVED_EMBEDDING_MODEL,related_rule_identity:current.related_rule_identity??null,related_passage:current.related_passage??null};
  }else if(action==='retire'){payload={reason:String(body.reason||'').trim()};if(!payload.reason||payload.reason.length>2000)throw new ApprovedAnswerError('Enter a retirement reason (maximum 2,000 characters).');}
  const result=await db.rpc('ai_approved_answer_action',{p_actor:user,p_operation:operation,p_action:action,p_id:id,p_expected:expected,p_body:payload});
  if(result.error){if(/approved_/.test(result.error.message||''))throw new ApprovedAnswerError('The action could not be completed: '+result.error.message.replace(/^.*?(approved_[a-z_]+).*$/,'$1')+'. Refresh and review.',409);throw new ApprovedAnswerError('Knowledge action failed; refresh before retrying.',503);}
  return result.data;
 }
-export async function approvedFormalSource(db,chunkId){
+export async function approvedFormalSource(db,chunkId,{current=false}={}){
  const c=checked(await db.from('ai_document_chunks').select('id,document_version_id,content,page_number,rule_number,heading').eq('id',approvedId(chunkId)).maybeSingle());
  if(!c)throw new ApprovedAnswerError('Source unavailable.',404);
  const v=checked(await db.from('ai_document_versions').select('id,document_id,processing_status,document:ai_documents!ai_document_versions_document_id_fkey!inner(id,title)').eq('id',c.document_version_id).maybeSingle());
- if(!v||!['ready','superseded'].includes(v.processing_status))throw new ApprovedAnswerError('Source unavailable.',404);
+ if(!v||!['ready','superseded'].includes(v.processing_status)||(current&&v.processing_status!=='ready'))throw new ApprovedAnswerError('Source unavailable.',404);
  return {title:v.document.title,documentId:v.document_id,documentVersionId:v.id,chunkId:c.id,pageNumber:c.page_number,ruleNumber:c.rule_number,heading:c.heading,passage:c.content};
 }
 export async function publicApprovedRevision(db,id,hash){
  const r=await row(db,id);if(!r.activated_at||!['active','retired'].includes(r.status)||r.content_hash!==hash)throw new ApprovedAnswerError('This approved citation is unavailable.',404);
  return approvedPublicRevision(r);
+}
+
+// Revision-bound lookup: never substitute the currently active version for the retained chunk.
+export async function approvedBoundSource(db,revision,{current=false}={}) {
+ const source=await approvedFormalSource(db,revision.related_chunk_id,{current});
+ const meta=checked(await db.from('ai_documents').select('id,active_version_id,status,document_type').eq('id',source.documentId).maybeSingle());
+ if(!meta||meta.document_type==='usap_rulebook')throw new ApprovedAnswerError('Related LWR source unavailable.',409);
+ if(current){
+  const chunk=checked(await db.from('ai_document_chunks').select('is_searchable').eq('id',source.chunkId).maybeSingle());
+  if(meta.status!=='active'||meta.active_version_id!==source.documentVersionId||!chunk?.is_searchable)throw new ApprovedAnswerError('Related source is no longer current. Select and review it again.',409);
+ }
+ let selected;try{selected=validateManagedPassage({content:source.passage,rule_number:source.ruleNumber,heading:source.heading},revision.related_passage,revision.related_rule_identity);}catch{throw new ApprovedAnswerError('Related passage binding changed or is invalid. Select and review the official provision again.',409);}
+ return {...source,containerRuleNumber:source.ruleNumber,ruleNumber:selected.ruleNumber,heading:selected.heading,passage:selected.passage};
 }

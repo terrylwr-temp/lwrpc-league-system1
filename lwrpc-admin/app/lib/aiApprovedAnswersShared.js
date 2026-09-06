@@ -46,8 +46,12 @@ export function validateApprovedDraft(input = {}) {
     season_id: input.season_id ? approvedId(input.season_id) : null,
     effective_on: dateOnly(input.effective_on, 'Effective date'), expires_on: dateOnly(input.expires_on, 'Expiration date', true),
     related_chunk_id: input.related_chunk_id ? approvedId(input.related_chunk_id) : null,
+    related_passage: input.related_chunk_id ? text(input.related_passage, 'Related passage', 16384) : null,
+    related_rule_identity: input.related_chunk_id ? text(input.related_rule_identity, 'Related rule identity', 120, true) : null,
     public_links: validateApprovedLinks(input.public_links),
   };
+  if (!draft.related_chunk_id && (input.related_passage || input.related_rule_identity)) throw new ApprovedAnswerError('Related passage requires its official chunk.');
+  if (draft.related_passage && new TextEncoder().encode(draft.related_passage).length > 16384) throw new ApprovedAnswerError('Related passage exceeds 16 KiB.');
   if (!/^[a-z][a-z0-9_-]{0,79}$/.test(draft.topic_key)) throw new ApprovedAnswerError('Use a short policy key containing letters, digits, hyphens or underscores.');
   if (!APPROVED_SCOPES.includes(draft.league_scope) || !['standing', 'season'].includes(draft.temporal_scope)) throw new ApprovedAnswerError('Choose a valid league and time scope.');
   if (draft.temporal_scope === 'season' ? !draft.season_id || !draft.expires_on : draft.season_id !== null) throw new ApprovedAnswerError('Season policies require a season and expiration; standing policies cannot select a season.');
@@ -63,7 +67,7 @@ export function approvedPublicRevision(row) {
     title: row.title, canonical_question: row.canonical_question, approved_answer: row.approved_answer,
     league_scope: row.league_scope, temporal_scope: row.temporal_scope, season_id: row.season_id,
     effective_on: row.effective_on, expires_on: row.expires_on, public_links: validateApprovedLinks(row.public_links || []),
-    related_chunk_id: row.related_chunk_id || null, related_rule_identity: row.related_rule_identity || '',
+    related_chunk_id: row.related_chunk_id || null, related_rule_identity: row.related_rule_identity || '', related_passage: row.related_passage || null,
     content_hash: row.content_hash, activated_at: row.activated_at };
 }
 export function approvedSourceIdentity(value) {

@@ -6,6 +6,8 @@ import {PGlite} from '@electric-sql/pglite';
 import {vector} from '@electric-sql/pglite-pgvector';
 const migration=await readFile(new URL('../supabase/migrations/20260906152030_lms0721_approved_answers.sql',import.meta.url),'utf8');
 const correction=await readFile(new URL('../supabase/migrations/20260906172546_lms0721_manager_originated_approved_answers.sql',import.meta.url),'utf8');
+const binding=await readFile(new URL('../supabase/migrations/20260906180112_lms0721_related_source_passage_binding.sql',import.meta.url),'utf8');
+
 test('0721 isolated PostgreSQL lifecycle, effective ACLs and immutable revision history',async t=>{
  const db=new PGlite({extensions:{vector}});
  try {
@@ -35,6 +37,9 @@ test('0721 isolated PostgreSQL lifecycle, effective ACLs and immutable revision 
   const oldDefinitions=await unaffectedFunctions();await db.exec(correction);assert.equal(await acl(),before);assert.deepEqual(await unaffectedFunctions(),oldDefinitions);
   const correctedFunction=(await db.query("select pg_get_functiondef(oid),proacl::text,proconfig from pg_proc where proname='ai_approved_answer_action'")).rows;
   await db.exec(correction);assert.equal(await acl(),before);assert.deepEqual((await db.query("select pg_get_functiondef(oid),proacl::text,proconfig from pg_proc where proname='ai_approved_answer_action'")).rows,correctedFunction);
+  await db.exec(binding);assert.equal(await acl(),before);assert.deepEqual(await unaffectedFunctions(),oldDefinitions);
+  const boundFunction=(await db.query("select pg_get_functiondef(oid),proacl::text,proconfig from pg_proc where proname='ai_approved_answer_action'")).rows;
+  await db.exec(binding);assert.equal(await acl(),before);assert.deepEqual((await db.query("select pg_get_functiondef(oid),proacl::text,proconfig from pg_proc where proname='ai_approved_answer_action'")).rows,boundFunction);
   assert.ok(correctedFunction[0].proconfig.includes('search_path=pg_catalog'));
   assert.equal((await db.query("select is_nullable from information_schema.columns where table_name='ai_approved_answers' and column_name='source_review_case_id'")).rows[0].is_nullable,'YES');
   const rpcAcl=(await db.query("select proname,has_function_privilege('anon',oid,'EXECUTE') as anon,has_function_privilege('authenticated',oid,'EXECUTE') as authenticated,has_function_privilege('service_role',oid,'EXECUTE') as service from pg_proc where proname in ('ai_approved_authority_manifest','ai_approved_knowledge_manifest','ai_approved_answer_action','search_ai_approved_answers','ai_approved_source_review')")).rows;
@@ -86,6 +91,51 @@ test('0721 isolated PostgreSQL lifecycle, effective ACLs and immutable revision 
   await db.exec('reset role');
   for(const role of ['anon','authenticated']){await db.exec(`set role ${role}`);await assert.rejects(call('retire',rev,1,{reason:'bad'}),/permission denied/);await db.exec('reset role');}
   await t.test('audit exists for every lifecycle transition',async()=>{const actions=(await db.query('select action from ai_approved_answer_events order by created_at,event_ordinal')).rows.map(r=>r.action);for(const a of ['created','linked_to_case','activated','draft_edited','replaced','retired'])assert.ok(actions.includes(a),a);});
+
+  await t.test('existing evidence category decision atomically audits, retries once and preserves occurrence/group/open state',async()=>{
+   const g=randomUUID(),caseKey=randomUUID(),answerKey=randomUUID(),op=randomUUID();
+   await db.query("insert into ai_question_groups(id,origin,family,title,canonical_question,first_seen_at,last_seen_at) values($1,'player_interface','unanswered','Synthetic Saturday review','Synthetic mixed-only players?',now(),now())",[g]);
+   await db.query('insert into ai_manager_review_cases(id,group_id) values($1,$2)',[caseKey,g]);
+   await db.query("insert into ai_review_occurrences(answer_id,group_id,provenance,origin,occurrence_kind,first_observed_at,original_question,effective_question,output_text,assistant_version) values($1,$2,'live_capture','player_interface','insufficient_evidence',now(),'Synthetic mixed-only players?','Synthetic mixed-only players?','No applicable evidence.','LMS-0721')",[answerKey,g]);
+   // Preserve a populated unanswered occurrence, not merely an empty table.
+   const snapshot=async()=>(await db.query("select coalesce(jsonb_agg(to_jsonb(o)),'[]') as data from ai_review_occurrences o")).rows[0].data;
+   const beforeOccurrence=await snapshot();
+   const beforeManaged=(await db.query('select count(*) as n from ai_approved_answers')).rows[0].n;
+   const note='Manager confirmed: existing official evidence answers the question. Rule 6.2.2; synthetic reference '+answerKey;
+   const decide=()=>db.query("select ai_review_case_action($1,$2,$3,1,'category','ai_retrieval_selection',$4,null) as result",[caseKey,actor,op,note]);
+   await db.exec('set role service_role');await decide();assert.equal((await decide()).rows[0].result.replayed,true);await db.exec('reset role');
+   const changed=(await db.query('select status,action_category,group_id from ai_manager_review_cases where id=$1',[caseKey])).rows[0];assert.equal(changed.status,'new');assert.equal(changed.action_category,'ai_retrieval_selection');assert.equal(changed.group_id,g);
+   const audit=(await db.query('select actor_user_id,created_at,note,action from ai_manager_review_events where operation_id=$1',[op])).rows;assert.equal(audit.length,1);assert.equal(audit[0].actor_user_id,actor);assert.ok(audit[0].created_at);assert.equal(audit[0].note,note);assert.equal(audit[0].action,'category_changed');
+   assert.deepEqual(await snapshot(),beforeOccurrence);assert.equal((await db.query('select count(*) as n from ai_approved_answers')).rows[0].n,beforeManaged);
+  });
+
+  await t.test('passage binding survives save, activation, replacement and history; invalid binding fails',async()=>{
+   const doc=randomUUID(),version=randomUUID(),chunk=randomUUID();
+   const passage='5.11. Rescheduling & Score Submission Deadlines: If both coaches agree, games may be rescheduled.';
+   await db.query("insert into ai_documents(id,title,document_type,authority_rank,active_version_id,status) values($1,'Synthetic rules','league_rules',1,$2,'active')",[doc,version]);
+   await db.query("insert into ai_document_versions(id,processing_status) values($1,'ready')",[version]);
+   await db.query("insert into ai_document_chunks(id,content,page_number,rule_number,heading,document_version_id,is_searchable) values($1,$2,5,'5.10','Video Recording',$3,true)",[chunk,'5.10. Video Recording: Approval is required.\n'+passage,version]);
+   const bound={...body,topic_key:'synthetic-binding',related_chunk_id:chunk,related_passage:passage,related_rule_identity:'5.11'};
+   await db.exec('set role service_role');
+   await assert.rejects(call('create',null,null,{...bound,related_rule_identity:'5.10'}),/approved_related_binding_invalid/);
+   await assert.rejects(call('create',null,null,{...bound,related_passage:'invented'}),/approved_related_binding_invalid/);
+   const item=(await call('create',null,null,bound)).rows[0].result;
+   await call('save',item.revisionId,1,bound);
+   let saved=(await db.query('select * from ai_approved_answer_revisions where id=$1',[item.revisionId])).rows[0];
+   assert.equal(saved.related_passage,passage);assert.equal(saved.related_rule_identity,'5.11');
+   const activate=async(id,expected,extra={})=>call('activate',id,expected,{...activation,related_passage:passage,related_rule_identity:'5.11',authority_manifest_hash:(await db.query('select ai_approved_authority_manifest() as hash')).rows[0].hash,managed_manifest_hash:(await db.query('select ai_approved_knowledge_manifest() as hash')).rows[0].hash,...extra});
+   await assert.rejects(activate(item.revisionId,2,{related_rule_identity:'5.10'}),/approved_related_binding_changed/);
+   await activate(item.revisionId,2);
+   const next=(await call('edit',item.revisionId,3)).rows[0].result;
+   assert.equal((await db.query('select related_passage from ai_approved_answer_revisions where id=$1',[next.revisionId])).rows[0].related_passage,passage);
+   await activate(next.revisionId,1);
+   await call('retire',next.revisionId,2,{reason:'Synthetic binding complete'});
+   await db.exec('reset role');
+   await db.query('update ai_documents set active_version_id=$1 where id=$2',[randomUUID(),doc]);
+   const history=(await db.query('select related_chunk_id,related_rule_identity,related_passage,status from ai_approved_answer_revisions where answer_id=$1',[item.answerId])).rows;
+   assert.equal(history.length,2);assert.ok(history.every(r=>r.related_passage===passage&&r.related_rule_identity==='5.11'&&r.related_chunk_id===chunk&&r.status==='retired'));
+   await db.exec(binding);assert.equal(await acl(),before);
+  });
 
   await t.test('manager origin: nullable uniqueness, roles, retry safety and lifecycle without Stage 7 writes',async()=>{
    const qualityTables=['ai_question_groups','ai_manager_review_cases','ai_review_occurrences','ai_answer_feedback_events','ai_request_outcomes'];
