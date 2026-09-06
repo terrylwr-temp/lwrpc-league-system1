@@ -1,4 +1,5 @@
 import { matchingQuestion } from "./aiQuestionInterpretation.js";
+import { assistInterpretationRetrieval } from "./aiRetrieval.js";
 import { trustedSelectedRuleIdentity } from "./aiSelectedRuleIdentity.js";
 import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind, isSeasonRatingDateQuestion, seasonRatingDatePassages, isCommunityParticipationQuestion, communityParticipationPassages } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
@@ -219,11 +220,18 @@ function localEvidencePassages(candidate) {
 function isMatchSpecificPassage(passage) { return /\b(?:match\s+setup|upcoming\s+match|match\s+rosters?|match\s+lineups?|player\s+pairings?)\b/.test(passage); }
 function asksForTiming(question) { return /\b(?:when|deadline|due|date|open|close|lock|start)\b/i.test(String(question || "")); }
 
+export async function selectAnswerEvidenceWithAssistance(retrieval) {
+  const selected = selectAnswerEvidence(retrieval);
+  if (selected.length || !retrieval?.interpretation?.annotations?.length) return selected;
+  const reason = retrieval.evidence.sufficient ? "stage4_no_applicable_evidence" : "stage3_insufficient_evidence";
+  if (await assistInterpretationRetrieval(retrieval, reason)) return selectAnswerEvidence(retrieval);
+  return selected;
+}
+
 export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = fetch, clock = performance.now.bind(performance), resolveSources = resolveOfficialSources }) {
   const started = clock();
+  const selectedEvidence = await selectAnswerEvidenceWithAssistance(retrieval);
   if (!retrieval?.evidence?.sufficient) return skippedAnswer(retrieval, clock, started);
-
-  const selectedEvidence = selectAnswerEvidence(retrieval);
   annotateEvidenceSelection(retrieval, selectedEvidence);
   if (selectedEvidence.length === 0) return skippedAnswer(retrieval, clock, started);
   const sourcesStarted = clock();

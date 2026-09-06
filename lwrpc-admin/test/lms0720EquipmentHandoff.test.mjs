@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 process.env.LWR_AI_ENABLED='true';
 const {retrieveOfficialEvidence}=await import('../app/lib/aiRetrieval.js');
-const {selectAnswerEvidence}=await import('../app/lib/aiAnswerGeneration.js');
+const {selectAnswerEvidence,selectAnswerEvidenceWithAssistance}=await import('../app/lib/aiAnswerGeneration.js');
 const fixture=JSON.parse(await readFile(new URL('./fixtures/lms0720-equipment-handoff-production.json',import.meta.url),'utf8'));
 const base=fixture.retrieval;
 const equipment=base.candidates[31];
@@ -24,7 +24,8 @@ for(const question of questions) for(const rank of [1,8,12,13,32,42]) test(`0720
  assert.equal(r.lwrMatchEquipmentProbe.deduplicatedAgainstNormal,rank<=12);
  assert.equal(r.request.question,question);assert.equal(embeddings[0],question);assert.equal(calls[0].p_query_text,question);
  assert.equal(embeddings.length,2);assert.equal(calls.length,rank<=32?2:3);
- const selected=selectAnswerEvidence(r);
+ const selected=await selectAnswerEvidenceWithAssistance(r);
+ assert.equal(calls.length,rank<=32?2:3);assert.equal(r.interpretationAssistance,undefined);
  assert.equal(selected.length,1);assert.equal(selected[0].chunkId,equipment.chunkId);assert.match(selected[0].content,/Franklin Outdoor X-40 Optic/);
  assert.doesNotMatch(selected[0].content,/Waiver|League Fees/i);
  // One full chunk contains multiple semantic provisions. Normal/probe paths

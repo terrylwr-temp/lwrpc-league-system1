@@ -10,6 +10,8 @@ export const RETRIEVAL_WEIGHTS = Object.freeze({ semantic: 0.47, keyword: 0.24, 
 // Production medical-issue evidence placed the controlling rule at rank 11.
 export const AUTHORITY_REVIEW_LIMIT = 12;
 const LWR_MATCH_EQUIPMENT_PROBE_QUERY = "match balls";
+// Request-local capability: vectors and database clients never serialize into diagnostics.
+const interpretationSearches = new WeakMap();
 const LWR_MATCH_EQUIPMENT_PROBE_EMBEDDING_QUERY = "What ball does the LWR league provide for regular-season matches?";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);
@@ -77,11 +79,66 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     candidate.authorityReview = { included: true, rank: index + 1, limit: AUTHORITY_REVIEW_LIMIT };
   });
   const evidence = evaluateEvidence(suppliedEvidence, aiAssistantConfig.evidenceThreshold);
-  return {
+  const result = {
     request, interpretation, corpusSuggestions, candidates, suppliedEvidence, authorityReviewCandidates, intentEvidenceCandidates: lwrMatchEquipmentProbe?.candidates || [], lwrMatchEquipmentProbe, evidence, conflict: conservativeConflictDiagnostic(suppliedEvidence),
     environment: { embeddingModel: embedding.model || aiAssistantConfig.embeddingModel, embeddingDimensions: aiAssistantConfig.embeddingDimensions, evidenceThreshold: aiAssistantConfig.evidenceThreshold, retrievalLimit: aiAssistantConfig.retrievalLimit, authorityReviewLimit: AUTHORITY_REVIEW_LIMIT },
     metrics: { interpretationMs, embeddingInputTokens: finiteOrNull(embedding.inputTokens), embeddingMs: Math.round(embeddingDone - started), retrievalMs: Math.round(clock() - embeddingDone), totalMs: Math.round(clock() - started) },
   };
+  if (interpretation.annotations.length) interpretationSearches.set(result, async () => {
+    const query = interpretation.matchingView;
+    const { data: assistedRows, error: assistedError } = await supabase.rpc("search_ai_official_chunks", rpcArgs(query));
+    if (assistedError) throw assistedError;
+    const assistedRequest = { ...retrievalRequest, retrievalQuery: query, terminologyAliases: nvzTerminologyAliasPhrases(query, assistedRows || []) };
+    return (assistedRows || []).map((row, index) => ({ ...candidateFromRow(row, assistedRequest), stage3Rank: index + 1 }));
+  });
+  return result;
+}
+
+const SCORE_FIELDS = ["semanticScore", "keywordScore", "exactScore", "authorityScore", "contextScore", "combinedScore", "vectorRank", "keywordRank", "exactMatch"];
+function scoreRecord(candidate) {
+  return { rank: candidate.stage3Rank, ...Object.fromEntries(SCORE_FIELDS.map(key => [key, candidate[key]])) };
+}
+
+export async function assistInterpretationRetrieval(retrieval, reason) {
+  const search = interpretationSearches.get(retrieval);
+  if (!search) return false;
+  interpretationSearches.delete(retrieval); // Consume before awaiting: at most one attempt, including failures.
+  const started = performance.now();
+  const original = retrieval.candidates;
+  const diagnostic = retrieval.interpretationAssistance = {
+    attempted: true, reason, searchCount: 1, additionalEmbeddingCalls: 0,
+    originalEvidence: { ...retrieval.evidence },
+    original: original.map(c => ({ chunkId: c.chunkId, ...scoreRecord(c) })), assisted: [],
+  };
+  try {
+    const assisted = await search();
+    diagnostic.assisted = assisted.map(c => ({ chunkId: c.chunkId, ...scoreRecord(c) }));
+    const merged = new Map(original.map(c => [c.chunkId, { ...c, retrievalProvenance: { original: scoreRecord(c), assisted: null, winningOrigin: "original" } }]));
+    for (const candidate of assisted) {
+      const previous = merged.get(candidate.chunkId);
+      const wins = !previous || candidate.combinedScore > previous.combinedScore;
+      merged.set(candidate.chunkId, {
+        ...(wins ? candidate : previous),
+        ...(previous?.lwrMatchEquipmentProbe ? { lwrMatchEquipmentProbe: previous.lwrMatchEquipmentProbe } : {}),
+        retrievalProvenance: { original: previous?.retrievalProvenance.original || null, assisted: scoreRecord(candidate), winningOrigin: wins ? "interpretation_assisted" : "original" },
+      });
+    }
+    retrieval.candidates = [...merged.values()].sort((a, b) => b.combinedScore - a.combinedScore || a.chunkId.localeCompare(b.chunkId)).slice(0, Math.max(aiAssistantConfig.retrievalLimit * 4, 24)).map((c, index) => ({ ...c, stage3Rank: index + 1 }));
+    retrieval.suppliedEvidence = retrieval.candidates.slice(0, aiAssistantConfig.retrievalLimit);
+    retrieval.authorityReviewCandidates = retrieval.candidates.slice(0, AUTHORITY_REVIEW_LIMIT);
+    retrieval.authorityReviewCandidates.forEach((c, index) => { c.authorityReview = { included: true, rank: index + 1, limit: AUTHORITY_REVIEW_LIMIT }; });
+    retrieval.evidence = evaluateEvidence(retrieval.suppliedEvidence, aiAssistantConfig.evidenceThreshold);
+    retrieval.conflict = conservativeConflictDiagnostic(retrieval.suppliedEvidence);
+    diagnostic.status = "completed";
+    return true;
+  } catch {
+    diagnostic.status = "search_failed"; // Preserve original fallback; never expose provider/client error details.
+    return false;
+  } finally {
+    diagnostic.durationMs = Math.round(performance.now() - started);
+    retrieval.metrics.retrievalMs += diagnostic.durationMs;
+    retrieval.metrics.totalMs += diagnostic.durationMs;
+  }
 }
 
 async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, downstreamCandidates, rpcArgs, embedQuery, clock }) {

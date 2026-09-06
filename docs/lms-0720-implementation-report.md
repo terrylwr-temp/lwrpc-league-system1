@@ -1,6 +1,6 @@
 # LMS-0720 / 0.1.542 — Ask LWR Robustness Hardening
 
-Status: DEPLOYED, NOT PRODUCTION ACCEPTED. Acceptance stopped at the first equipment typo failure. Last accepted baseline is LMS-0719 / 0.1.541. Stage 7A/B and Stages 1–6 remain accepted. Live LMS Intelligence has not started.
+Status: DEPLOYED, NOT PRODUCTION ACCEPTED. The equipment handoff correction is deployed and passes; resumed acceptance stopped at the USAP volley typo Stage 3 failure. Last accepted baseline is LMS-0719 / 0.1.541. Stage 7A/B and Stages 1–6 remain accepted. Live LMS Intelligence has not started.
 
 ## Changes and rationale
 
@@ -190,3 +190,74 @@ No normal candidate limit, top-eight handoff, 12-candidate authority review, fou
 Correction validation: full suite 411 passed (386 retained + 25 new); lint passed with the six existing warnings; explicit type and PDF-bundle checks passed. The normal production build compiled in 10.8 seconds before the known .next/cache/.tsbuildinfo EPERM cache-write failure. An earlier attempt encountered an open temporary log under .next during cleanup; logs were moved outside the build directory and the command rerun. Isolated clean production build and final diff checks are completed before the authorized redeployment. No failures were hidden or treated as successful normal builds.
 
 Call-count regressions: typo and correct wording each use the existing two embeddings. When the source is at rank 32, two RPCs suffice (normal query plus probe); when absent from the normal 32, the established diagnostic rank RPC remains, for three RPCs. No new call is introduced by the handoff correction. All tested rank placements select exactly one Captains Guide equipment source.
+
+
+## Corrected deployment and resumed acceptance — stopped on new volley failure
+
+Commit `8b2e0cd3b7663b55ac230cde102510e6a382722a` was pushed through the normal main/GitHub production integration. Deployment `dpl_DHjvBt8AwxNaGeiu3PkaUuFZDEsW` reached READY and owns league.lwrpickleballclub.com. Version remains LMS-0720 / 0.1.542. All 411 tests, lint (six existing warnings), explicit type/PDF checks, isolated clean production build and diff check passed before this redeployment. Only the authorized handoff correction, its fixture/tests and status documentation were committed; no environment/migration/corpus action occurred.
+
+### Equipment acceptance: all four PASS
+
+| Exact production question | Exact answer text, excluding feedback prompt | Sources |
+|---|---|---|
+| What kind of balls will we be usin | The league will use Franklin Outdoor X-40 Optic balls for all regular season and playoff matches. | One Captains Guide source, page 10 |
+| What kind of ball are we useing | The club uses Franklin Outdoor X-40 Optic balls for all regular season and playoff matches. | One Captains Guide source, page 10 |
+| What ball are we playng with? | League matches use Franklin Outdoor X-40 Optic balls for all regular season and playoff matches. | One Captains Guide source, page 10 |
+| What kind of balls will we be using | The league will use Franklin Outdoor X-40 Optic balls for all regular season and playoff matches. | One Captains Guide source, page 10 |
+
+Each displayed the original question, with no autocorrect UI and one logical Official Source: `LWR Pickleball Club DUPR Captains Guide — LEAGUE FEES AND WAIVER — Page 10`. No duplicated source was displayed. New Question separated the independent controls.
+
+The first successful answer/outcome ID is `24f3a145-b095-4a45-a31e-42092f38b522`. Stored final kind answer, selected evidence count one, Stage 3 sufficient, equipment probe invoked/retrieved true. Total execution 3286 ms. One Helpful click was made solely to verify the retained typo snapshot/correlation; no repeated feedback sequence was run. Feedback recorded at 02:16:16.924905 UTC has original/effective `What kind of balls will we be usin`, LMS-0720, and exactly one source. Its grounded_feedback occurrence references the same answer/outcome and uses grouping text `what kind of balls will we be usin`, key_version=1 and normalizer_version=1.
+
+### Next test: FAILED; further acceptance stopped
+
+Exact question: `Can I volly in the kitchen?`.
+
+Exact answer:
+
+> I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.
+
+Outcome `e34d7d14-0c38-4c3d-ba82-0f467b558988`, started 2026-09-06 02:17:20.040 UTC:
+
+- final kind insufficient_evidence;
+- reason stage3_insufficient_evidence;
+- top captured score .1826, below unchanged .350 threshold;
+- 32 candidates, handoff eight, review twelve;
+- equipment probe not invoked (appropriate for this question);
+- model skipped, zero selected evidence, 568 ms execution;
+- original/effective text both retain `Can I volly in the kitchen?`.
+
+This is a distinct production recall/gating failure, not the repaired equipment deduplication path. No further retrieval/model replay, code correction, threshold/query/SQL change, rollback or deployment was made. The correctly spelled candidate-window tests do not establish that a misspelled original production query passes Stage 3. Further diagnosis/correction requires authorization while preserving the approved scope constraints.
+
+### Integrity, logging and limitations
+
+Pre-correction snapshot 02:12:58.585071 UTC and post-test snapshot 02:17:56.581500 UTC have identical document/version/chunk full-row hashes (7/19/1507), public relation/RLS/ACL, columns, constraints, indexes, functions/ACL and policies fingerprints listed in the prior stop section. HMAC route versions remain [1]. No key/environment value was exposed or changed.
+
+All prior 14 feedback rows retain hash `ca177b10d875affcfb20b465be22f8d1`; the only added feedback is the intended Helpful event (total now 15). Historical failed usin occurrence `eb755c37-d52d-46af-ad90-70b4e85e036d` retains full-row hash `cd838f8508712587036389a6963f0188`. It was not deleted, rewritten or marked Resolved.
+
+Sanitized Vercel capture_succeeded logs and HTTP 200 were observed for the four equipment requests, one Helpful submission and failed volley request. Production records confirm existing probe activation; exact embedding-provider call counts are not separately instrumented. Local regressions prove two existing embeddings and two RPCs for the rank-32 topology, with the third existing rank-diagnostic RPC only when the source is outside the normal pool. No new call site was introduced.
+
+Two initial diagnostic queries using broad version/time filters were rejected by automatic approval review because they could include unrelated users' data. Safer exact-question/time-bound and specific-outcome queries with minimal fields succeeded. No approval bypass or alternate credential path was used; no verification remains blocked by that review.
+
+Five player questions and one Helpful event were intentionally submitted in this resumed acceptance pass. Remaining gates were not run after the genuine volley defect: cracked-ball typo, LWR/league/protected typos, medical direct/seven-point/reset sequence, actual manager interpretation diagnostics, remaining baseline sanity and Stage 7B UI. Previously passed deterministic negative controls and the automated suite remain evidence, not substitutes for these production gates. Physical-phone keyboard behavior remains untested.
+
+Final status: **LMS-0720 / 0.1.542 DEPLOYED, NOT PRODUCTION ACCEPTED**. Equipment handoff correction is verified in production. Last accepted baseline remains LMS-0719. No next version or Live LMS Intelligence started. These final documentation updates remain local and are not pushed to avoid an additional deployment during the stop.
+
+
+## Approved interpretation-assisted retrieval correction — 2026-09-06
+
+Version remains LMS-0720 / 0.1.542; production acceptance pending the controlled redeployment and gates below.
+
+The original question is embedded and searched first. Before generation, deterministic selection runs. If no evidence is selected and high-confidence interpretation annotations exist, one request-local capability performs a same-vector lexical search. The reason records Stage 3 insufficiency or Stage 4 zero applicability. The capability is consumed before awaiting the RPC, including on failure; there is no second attempt, token-by-token loop, spelling service, extra embedding, or premature answer-model call. Failed assistance retains the original fallback and exposes no upstream error details.
+
+Original and assisted score pools remain separately bounded to the existing RPC window. Full chunks merge by immutable ID; the higher complete score record wins (original wins an equal-score duplicate), with chunk-ID tie-breaking across equal-ranked candidates. No independently maximized score components. The normal pool remains 32, supplied 8, authority review 12 and selected 4, with threshold .350 and unchanged applicability/hierarchy. Equipment probe execution/deduplication remains unchanged and precedes the general retry decision; successful equipment selection costs no general retry.
+
+The original vector/client live only in a WeakMap capability, never in returned manager diagnostics, player payload, conversation, feedback or Stage 7. Original request wording remains untouched. Manager console displays bounded original/assisted ranks and score records, winning origin, reason, status and elapsed time; the existing equipment panel remains.
+
+Files: app/lib/aiRetrieval.js; app/lib/aiAnswerGeneration.js; app/ai-assistant/console/page.js; test/lms0720AssistedRetrieval.test.mjs; test/fixtures/lms0720-assisted-retrieval-production.json; test/lms0720EquipmentHandoff.test.mjs; this report; project-roadmap.md.
+
+Read-only live retrieval captured actual original and assisted RPC rows, without vectors, answer-model calls or database writes, for sequence fixtures. Implemented results: volly -> 11.A; roser -> Manage Roster; linep -> 5.4; comunity -> 3.5 including roster availability; medcal -> 5.7. Each made two search calls and one original embedding. Seson, damged, craked, Satrday and correctly spelled volley each made one search and one embedding. Existing equipment tests retain two embeddings and two RPCs (three only for the existing outside-pool rank diagnostic), with zero general retry.
+
+Automated validation: 430 tests passed, including original-RPC-first, exact same vector, both retry triggers, single-use exhaustion/failure, model-after-selection, complete score provenance, limits, no-retry negatives, protected pre-retrieval controls, signed medical context and 25 equipment topology controls. Lint: zero errors and six existing warnings. Explicit nonincremental TypeScript and PDF bundle verification passed. Normal production build compiled in 12.8s, then encountered the known .next/cache/.tsbuildinfo EPERM write lock; isolated clean production build passed compilation, TypeScript, all 72 static pages and final optimization before deployment. No SQL, RPC implementation, corpus, document, chunk, embedding-generation, HMAC, Stage 7, feedback, version or player-layout change.
+
+Acceptance sequence after successful build/deployment: first exact volly (stop immediately if incorrect), then comunity, medcal, roster/lineup, damaged/cracked, league, protected comunity, medical direct/7-point follow-up/New Question reset, manager provenance, negatives, Stage 7 privacy/wording, performance, one Franklin sanity, correct kitchen sanity, Stage 7B sanity and read-only integrity comparison. Prior failed usin/volly occurrences are retained.

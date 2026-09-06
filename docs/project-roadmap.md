@@ -2,9 +2,9 @@
 
 Last updated: 2026-09-05
 
-Current production application version: **LMS-0720 / 0.1.542 — DEPLOYED, NOT PRODUCTION ACCEPTED.** Commit e0479bd deployed via the normal pipeline; first equipment typo failed at stage4_no_applicable_evidence and acceptance stopped. Last production-accepted baseline is LMS-0719 / 0.1.541 (7b6dc2d). Stages 1–6 and Stage 7A/B remain accepted. See `docs/lms-0720-implementation-report.md` for the failure and unchanged integrity fingerprints.
+Current production application version: **LMS-0720 / 0.1.542 — DEPLOYED, NOT PRODUCTION ACCEPTED.** Corrected commit 8b2e0cd passes all three equipment typos and the correctly spelled control. Resumed acceptance stopped on `Can I volly in the kitchen?`: Stage 3 top score .1826 below .350, model skipped. Last accepted baseline remains LMS-0719 / 0.1.541. Stages 1–6 and Stage 7A/B remain accepted. See `docs/lms-0720-implementation-report.md`.
 
-Current implementation: **LMS-0720 / 0.1.542 — Ask LWR Robustness Hardening**, authorized bounded equipment handoff correction. Deduplication now checks actual eligible Stage 4 handoff rather than the broader normal pool. Production acceptance remains pending until corrected redeployment and the approved gates pass. No new version or Live LMS Intelligence.
+Current implementation: **LMS-0720 / 0.1.542 — Ask LWR Robustness Hardening**. Equipment handoff correction validated (411 tests) and deployed. Further acceptance/correction stopped pending review of the separate volley typo Stage 3 failure. No new version or Live LMS Intelligence.
 
 Current Stage 7A status: final production data, privacy, effective permissions, deployment/source and capture-log review passed. The historical acceptance checkpoint contained eight outcomes, five occurrences and four groups/cases; exact two-event feedback correlation; deterministic tungsten grouping; protected and clarification metadata excluded from the unanswered queue; manager_test separate. Legacy feedback and corpus hashes remained unchanged; no validation synthetic rows remained. Live anonymous capture-health denial was reverified. Authenticated endpoint success was unavailable through the then-current browser tooling, despite the Commissioner UI session; the isolated full role matrix remains evidence. Production failure injection was intentionally not performed. These are owner-authorized accepted limitations, not acceptance blockers. See the implementation report final acceptance section.
 
@@ -694,3 +694,15 @@ Original raw/effective wording remains authoritative for receipts, feedback and 
 Deployment e0479bd reached READY and the live footer showed LMS-0720. The first request, `What kind of balls will we be usin`, returned insufficient evidence despite Stage 3 sufficiency and a successful equipment probe. Outcome 676bb995-b582-42dc-a6c5-b92473bdaab9 records zero selected evidence and skipped model generation. Testing stopped immediately; remaining production gates are pending, not passed.
 
 Read-only code/local replay identifies a probe handoff gap when evidence is deduplicated against normal ranks 13–32 but omitted from the Stage 4 top-12 window. No correction made. Original/effective/grouping typo wording remained intact; public schema/function/security and corpus/embedding fingerprints plus all existing feedback rows remained unchanged. HMAC key versions remain [1]; no environment action occurred. Production currently runs LMS-0720 but LMS-0719 remains the last accepted baseline. See the implementation report acceptance-stop section.
+
+
+### LMS-0720 equipment correction deployed; acceptance stopped on volley typo
+
+Commit 8b2e0cd corrects probe deduplication against the actual eligible top-12 downstream handoff. A fresh pre-edit production replay confirmed Captains Guide chunk 68591ceb-77db-464b-b590-412a886dd372 at normal rank 32, score .3564, probe rank 1. All 411 automated tests and the required checks/isolated build passed. Production usin/useing/playng and correct using each returned the grounded Franklin answer with one source. One Helpful snapshot preserves the typo and answer/outcome correlation.
+
+The next production question, `Can I volly in the kitchen?`, failed Stage 3 at .1826 below .350 (outcome e34d7d14-0c38-4c3d-ba82-0f467b558988). Testing stopped before the remaining gates. No additional code/query/threshold/corpus change or rollback. Original failure history, prior feedback, schema/functions/security, corpus/embeddings and HMAC version remain unchanged. LMS-0720 is still not accepted; retain LMS-0719 as the last accepted baseline and await authorization for the distinct volley diagnosis.
+
+
+### LMS-0720 same-embedding retrieval correction (2026-09-06)
+
+Owner approved one additive lexical retry for accepted interpretations when original Stage 3 fails or deterministic Stage 4 selects zero evidence. Implemented at 0.1.542 with original wording/vector preservation, bounded provenance and unchanged 32/8/12/4 limits, .350 gate, equipment handoff, medical context and Stage 7. Actual retrieval sequence fixtures recover volly, roser, linep, comunity and medcal; already-successful typos incur no retry. 430 tests and explicit type/PDF/lint checks pass; isolated clean build passed; deployment/production acceptance remain in progress. LMS-0720 is not yet production accepted. No next version or Live LMS Intelligence started.
