@@ -41,3 +41,58 @@ test('0721 measured embedding calibration preserves paraphrases and excludes nea
   assert.equal(chooseApprovedEvidence(item.question,[],[{revision,manifest:'m',semantic_score:item.semantic_score}]).selected.length>0,item.expected,item.question);
  }
 });
+
+const {approvedDetail,approvedPreflight}=await import('../app/lib/aiApprovedAnswersService.js');
+const {validateApprovedDraft}=await import('../app/lib/aiApprovedAnswersShared.js');
+const managerDraft=()=>({title:'Synthetic administration',topic_key:'synthetic-admin',canonical_question:'How is synthetic check-in handled?',approved_answer:'Confirm synthetic check-in with the organizer.',league_scope:'all',temporal_scope:'standing',effective_on:'2026-01-01',public_links:[]});
+
+test('0721 manager creation retains content, source review, dynamic guard and exact retry identity',async()=>{
+ const user=randomUUID(),operation=randomUUID(),id=null,draft=managerDraft();let event=null;const mutations=[];
+ let sources=[];const db={from:name=>{
+  if(name==='ai_approved_answer_events')return query(event);
+  if(name==='ai_approved_answers')return query({source_review_case_id:null});
+  throw Error('Unexpected case or Stage 7 access: '+name);
+ },rpc:async(name,args)=>{
+  if(name==='ai_approved_source_review')return {data:sources};
+  assert.equal(name,'ai_approved_answer_action');mutations.push(args);
+  event={answer_id:randomUUID(),revision_id:randomUUID(),actor_user_id:user,action:'created',after_state:{content_hash:args.p_body.content_hash}};
+  return {data:{answerId:event.answer_id,revisionId:event.revision_id}};
+ }};
+ const body={action:'create',id,operation,draft,staticPolicyConfirmed:true};
+ await assert.rejects(approvedMutation(db,{...body,id:undefined},user),/reference/);
+ await assert.rejects(approvedMutation(db,{...body,staticPolicyConfirmed:false},user),/Confirm/);
+ await assert.rejects(approvedMutation(db,{...body,draft:{...draft,approved_answer:''}},user));
+ await assert.rejects(approvedMutation(db,{...body,draft:{...draft,canonical_question:'What is my DUPR?'}},user),/protected|live/i);
+ sources=[{chunk_id:randomUUID(),content:'Synthetic check-in must be handled by the organizer.'}];
+ await assert.rejects(approvedMutation(db,body,user),/directly answers/);
+ sources=[{chunk_id:randomUUID(),content:'Related administrative material.'}];
+ await assert.rejects(approvedMutation(db,body,user),/missing-policy distinction/);
+ sources=[];
+ const created=await approvedMutation(db,body,user);assert.equal(mutations.length,1);assert.equal(mutations[0].p_id,null);
+ assert.equal(mutations[0].p_body.approved_answer,validateApprovedDraft(draft).approved_answer);
+ assert.equal((await approvedMutation(db,body,user)).revisionId,created.revisionId);assert.equal(mutations.length,1);
+ await assert.rejects(approvedMutation(db,{...body,id:randomUUID()},user),/different action/);
+ await assert.rejects(approvedMutation(db,{...body,draft:{...draft,title:'Different'}},user),/different action/);
+});
+
+test('0721 detail skips NULL case lookup; genuine case navigation is retained',async()=>{
+ const id=randomUUID(),answer_id=randomUUID(),group_id=randomUUID(),caseId=randomUUID();let caseLink=null,lookups=0;
+ const db={from:name=>{
+  if(name==='ai_approved_answer_revisions')return query({id,answer_id,activated_by_user_id:null});
+  if(name==='ai_approved_answers')return query({id:answer_id,source_review_case_id:caseLink});
+  if(name==='ai_approved_answer_events')return query([]);
+  if(name==='ai_manager_review_cases'){lookups++;return query({group_id,status:'new'});}
+  throw Error(name);
+ }};
+ assert.equal((await approvedDetail(db,id)).linkedCase,null);assert.equal(lookups,0);
+ caseLink=caseId;assert.equal((await approvedDetail(db,id)).linkedCase.group_id,group_id);assert.equal(lookups,1);
+});
+
+test('0721 activation checks overlapping Drafts as well as Active managed policy',async()=>{
+ const id=randomUUID(),answer_id=randomUUID();const revision={...managerDraft(),id,answer_id,status:'draft',row_version:1,content_hash:'a'.repeat(64)};
+ for(const status of ['draft','active']){
+  const sibling={...revision,id:randomUUID(),answer_id:randomUUID(),status};
+  const db={from:()=>{const q=query(revision);q.in=(_k,values)=>{assert.deepEqual(values,['active','draft']);return query([sibling]);};return q;},rpc:async name=>({data:name==='ai_approved_source_review'?[]:'manifest'})};
+  const result=await approvedPreflight(db,id,randomUUID());assert.equal(result.blocked,true);assert.equal(result.token,null);assert.equal(result.overlaps[0].status,status);
+ }
+});

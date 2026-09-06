@@ -73,14 +73,14 @@ export async function approvedDetail(db,id){
   db.from('ai_approved_answer_revisions').select(APPROVED_FIELDS).eq('answer_id',revision.answer_id).order('revision_number',{ascending:false}),
   db.from('ai_approved_answer_events').select('id,action,created_at,reason,revision_id,before_state,after_state').eq('answer_id',revision.answer_id).order('created_at',{ascending:false}).limit(100),
  ]);
- const item=checked(a);const linkedCase=checked(await db.from('ai_manager_review_cases').select('group_id,status').eq('id',item.source_review_case_id).maybeSingle());
+ const item=checked(a);const linkedCase=item.source_review_case_id?checked(await db.from('ai_manager_review_cases').select('group_id,status').eq('id',item.source_review_case_id).maybeSingle()):null;
  return {revision,activatedBy,item,linkedCase,history:checked(rs),events:checked(es).map(e=>({...e,before_state:auditPublicState(e.before_state),after_state:auditPublicState(e.after_state)}))};
 }
 export async function approvedPreflight(db,id,user){
  const revision=await row(db,id);if(revision.status!=='draft')throw new ApprovedAnswerError('Only a Draft can be activated.');
  const sources=await approvedSourceReview(db,revision.canonical_question);
  const manifest=checked(await db.rpc('ai_approved_authority_manifest'));
- const siblings=checked(await db.from('ai_approved_answer_revisions').select('id,answer_id,title,topic_key,league_scope,temporal_scope,season_id,effective_on,expires_on').eq('status','active').neq('answer_id',revision.answer_id));
+ const siblings=checked(await db.from('ai_approved_answer_revisions').select('id,answer_id,title,status,topic_key,league_scope,temporal_scope,season_id,effective_on,expires_on').in('status',['active','draft']).neq('answer_id',revision.answer_id));
  const overlaps=(siblings||[]).filter(s=>s.topic_key===revision.topic_key&&(s.league_scope==='all'||revision.league_scope==='all'||s.league_scope===revision.league_scope)
   &&(s.temporal_scope==='standing'||revision.temporal_scope==='standing'||s.season_id===revision.season_id)
   &&s.effective_on<(revision.expires_on||'9999-12-31')&&revision.effective_on<(s.expires_on||'9999-12-31'));
@@ -89,7 +89,9 @@ export async function approvedPreflight(db,id,user){
  return {sources,overlaps,blocked,token:blocked?null:ticket({user,id,version:revision.row_version,hash:revision.content_hash,manifest,managedManifest,expires:Date.now()+600000})};
 }
 export async function approvedMutation(db,body,user,{embed=createQueryEmbedding}={}){
- const {action,id,operation}=body;approvedId(operation);approvedId(user);approvedId(id);
+ const {action,id,operation}=body;approvedId(operation);approvedId(user);
+ // Only explicit NULL on create denotes manager origin; missing/invalid IDs never bypass case checks.
+ if(action!=='create'||id!==null)approvedId(id);
  if(!['create','save','edit','activate','retire'].includes(action))throw new ApprovedAnswerError('Invalid knowledge action.');
  const previous=checked(await db.from('ai_approved_answer_events').select('answer_id,revision_id,actor_user_id,action,before_state,after_state,reason').eq('operation_id',operation).eq('event_ordinal',0).maybeSingle());
  if(previous){
@@ -112,7 +114,7 @@ export async function approvedMutation(db,body,user,{embed=createQueryEmbedding}
     ||redactQualityText(payload.approved_answer,6000).redacted)throw new ApprovedAnswerError('Do not publish personal/live data or private information as static knowledge.');
   // Static policy only. A manager must explicitly attest; notes are never copied.
   if(body.staticPolicyConfirmed!==true)throw new ApprovedAnswerError('Confirm this is official static policy, not live player/team information.');
-  if(action==='create'){const c=await approvedCase(db,id);if(c.blocked)throw new ApprovedAnswerError('Existing official evidence or a linked item requires review before duplicate creation.',409);}
+  if(action==='create'&&id!==null){const c=await approvedCase(db,id);if(c.blocked)throw new ApprovedAnswerError('Existing official evidence or a linked item requires review before duplicate creation.',409);}
   payload.content_hash=approvedContentHash(payload);
   const candidates=await approvedSourceReview(db,payload.canonical_question);
   if(candidates.some(s=>s.direct))throw new ApprovedAnswerError('Existing official evidence directly answers this question. Use AI/Retrieval Review.',409);

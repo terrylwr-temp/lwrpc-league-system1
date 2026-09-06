@@ -5,6 +5,7 @@ import {randomUUID} from 'node:crypto';
 import {PGlite} from '@electric-sql/pglite';
 import {vector} from '@electric-sql/pglite-pgvector';
 const migration=await readFile(new URL('../supabase/migrations/20260906152030_lms0721_approved_answers.sql',import.meta.url),'utf8');
+const correction=await readFile(new URL('../supabase/migrations/20260906172546_lms0721_manager_originated_approved_answers.sql',import.meta.url),'utf8');
 test('0721 isolated PostgreSQL lifecycle, effective ACLs and immutable revision history',async t=>{
  const db=new PGlite({extensions:{vector}});
  try {
@@ -30,6 +31,12 @@ test('0721 isolated PostgreSQL lifecycle, effective ACLs and immutable revision 
   const tables=['ai_approved_answers','ai_approved_answer_revisions','ai_approved_answer_events'];
   const acl=async()=>JSON.stringify((await db.query("select relname,relacl::text,relrowsecurity from pg_class where relname=any($1) order by relname",[tables])).rows);
   const before=await acl();await db.exec(migration);assert.equal(await acl(),before);
+  const unaffectedFunctions=async()=>(await db.query("select proname,pg_get_functiondef(oid),proacl::text from pg_proc where pronamespace='public'::regnamespace and proname<>'ai_approved_answer_action' order by oid")).rows;
+  const oldDefinitions=await unaffectedFunctions();await db.exec(correction);assert.equal(await acl(),before);assert.deepEqual(await unaffectedFunctions(),oldDefinitions);
+  const correctedFunction=(await db.query("select pg_get_functiondef(oid),proacl::text,proconfig from pg_proc where proname='ai_approved_answer_action'")).rows;
+  await db.exec(correction);assert.equal(await acl(),before);assert.deepEqual((await db.query("select pg_get_functiondef(oid),proacl::text,proconfig from pg_proc where proname='ai_approved_answer_action'")).rows,correctedFunction);
+  assert.ok(correctedFunction[0].proconfig.includes('search_path=pg_catalog'));
+  assert.equal((await db.query("select is_nullable from information_schema.columns where table_name='ai_approved_answers' and column_name='source_review_case_id'")).rows[0].is_nullable,'YES');
   const rpcAcl=(await db.query("select proname,has_function_privilege('anon',oid,'EXECUTE') as anon,has_function_privilege('authenticated',oid,'EXECUTE') as authenticated,has_function_privilege('service_role',oid,'EXECUTE') as service from pg_proc where proname in ('ai_approved_authority_manifest','ai_approved_knowledge_manifest','ai_approved_answer_action','search_ai_approved_answers','ai_approved_source_review')")).rows;
   assert.equal(rpcAcl.length,5);for(const f of rpcAcl){assert.equal(f.anon,false);assert.equal(f.authenticated,false);assert.equal(f.service,true);}
   assert.ok((await db.query("select relrowsecurity from pg_class where relname=any($1)",[tables])).rows.every(r=>r.relrowsecurity));
@@ -79,5 +86,53 @@ test('0721 isolated PostgreSQL lifecycle, effective ACLs and immutable revision 
   await db.exec('reset role');
   for(const role of ['anon','authenticated']){await db.exec(`set role ${role}`);await assert.rejects(call('retire',rev,1,{reason:'bad'}),/permission denied/);await db.exec('reset role');}
   await t.test('audit exists for every lifecycle transition',async()=>{const actions=(await db.query('select action from ai_approved_answer_events order by created_at,event_ordinal')).rows.map(r=>r.action);for(const a of ['created','linked_to_case','activated','draft_edited','replaced','retired'])assert.ok(actions.includes(a),a);});
+
+  await t.test('manager origin: nullable uniqueness, roles, retry safety and lifecycle without Stage 7 writes',async()=>{
+   const qualityTables=['ai_question_groups','ai_manager_review_cases','ai_review_occurrences','ai_answer_feedback_events','ai_request_outcomes'];
+   const snapshot=async()=>Promise.all(qualityTables.map(async table=>(await db.query(`select coalesce(jsonb_agg(to_jsonb(t) order by id),'[]') as value from ${table} t`)).rows[0].value));
+   const oldQuality=await snapshot();
+   for(const role of ['player','captain','club_pro']){
+    await db.query('update user_roles set role=$1 where member_id=$2',[role,member]);
+    await db.exec('set role service_role');await assert.rejects(call('create',null,null,body),/approved_forbidden/);await db.exec('reset role');
+   }
+   await db.query("update user_roles set role='commissioner' where member_id=$1",[member]);
+   await db.exec('set role service_role');
+   const op=randomUUID();const pair=await Promise.all([call('create',null,null,body,op),call('create',null,null,body,op)]);
+   const direct=pair[0].rows[0].result;assert.equal(pair[1].rows[0].result.revisionId,direct.revisionId);assert.equal(pair[1].rows[0].result.replayed,true);
+   await assert.rejects(call('create',null,null,{...body,title:'Changed'},op),/approved_operation_mismatch/);
+   await assert.rejects(call('create',caseId,null,body,op),/approved_operation_mismatch/);
+   const second=(await call('create',null,null,{...body,topic_key:'synthetic-second'})).rows[0].result;
+   assert.notEqual(second.answerId,direct.answerId);
+   const directItems=(await db.query('select source_review_case_id from ai_approved_answers where id=any($1)',[[direct.answerId,second.answerId]])).rows;
+   assert.equal(directItems.length,2);assert.ok(directItems.every(r=>r.source_review_case_id===null));
+   await assert.rejects(call('create',caseId,null,body),/approved_case_already_linked/);
+   await assert.rejects(call('create',randomUUID(),null,body),/approved_case_not_missing_knowledge/);
+   assert.equal((await search()).rows.length,0);
+   const freshActivation=async()=>({...activation,managed_manifest_hash:(await db.query('select ai_approved_knowledge_manifest() as hash')).rows[0].hash});
+   await call('activate',direct.revisionId,1,await freshActivation());
+   const edited=(await call('edit',direct.revisionId,2)).rows[0].result;
+   assert.equal((await search()).rows[0].revision.id,direct.revisionId);
+   await call('activate',edited.revisionId,1,await freshActivation());
+   const previous=(await db.query('select status,activated_at,activated_by_user_id,approved_answer from ai_approved_answer_revisions where id=$1',[direct.revisionId])).rows[0];
+   assert.equal(previous.status,'retired');assert.ok(previous.activated_at);assert.equal(previous.activated_by_user_id,actor);assert.equal(previous.approved_answer,body.approved_answer);
+   await call('retire',edited.revisionId,2,{reason:'Synthetic local lifecycle complete'});
+   assert.equal((await search()).rows.length,0);
+   const events=(await db.query('select action,actor_user_id,created_at from ai_approved_answer_events where answer_id=$1',[direct.answerId])).rows;
+   assert.deepEqual(events.map(e=>e.action).sort(),['created','activated','draft_edited','replaced','activated','retired'].sort());
+   assert.ok(events.every(e=>e.actor_user_id===actor&&e.created_at));
+   await db.exec('reset role');
+   await assert.rejects(db.query('insert into ai_approved_answers(source_review_case_id) values($1)',[caseId]),/unique constraint/);
+   await assert.rejects(db.query('insert into ai_approved_answers(source_review_case_id) values($1)',[randomUUID()]),/foreign key constraint/);
+   const saved=(await db.query('select jsonb_agg(to_jsonb(a) order by id) as value from ai_approved_answers a')).rows;
+   await db.exec(correction);assert.deepEqual((await db.query('select jsonb_agg(to_jsonb(a) order by id) as value from ai_approved_answers a')).rows,saved);
+   assert.equal(await acl(),before);assert.deepEqual(await snapshot(),oldQuality);
+   // Explicit case disposition still uses the existing audited path, never activation.
+   await db.exec('set role service_role');
+   const caseRow=(await db.query('select revision from ai_manager_review_cases where id=$1',[caseId])).rows[0];
+   await db.query("select ai_review_case_action($3,$1,$2,$4,'status','resolved','Synthetic retest completed',now())",[actor,randomUUID(),caseId,caseRow.revision]);
+   assert.equal((await db.query('select status from ai_manager_review_cases where id=$1',[caseId])).rows[0].status,'resolved');
+   await assert.rejects(call('create',caseId,null,body),/approved_case_not_missing_knowledge/);
+   await db.exec('reset role');
+  });
  } finally {await db.close();}
 });

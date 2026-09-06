@@ -1,12 +1,12 @@
 # LMS-0721 — Approved LWR Answers / Managed Knowledge: diagnosis and proposed design
 
-Date: 2026-09-06. **Governing design approved; implementation authorized, including the subsequent Authority Warning workflow clarification.** Current production remains **LMS-0720 / 0.1.542**, production accepted, including Stage 7A/B. Local implementation is LMS-0721 / 0.1.543; deployment and production acceptance remain separate. See the implementation report for validation.
+Date: 2026-09-06. **Governing design approved; implementation authorized, including the subsequent Authority Warning workflow clarification.** Current production is **LMS-0721 / 0.1.543, deployed but not production accepted**. LMS-0720 / 0.1.542 is the last accepted release; Stage 7A/B remain accepted. The manager-origin correction below is local only, pending review and production authorization. See the implementation report for validation.
 
 This report covers the owner's diagnosis request and the additional future document-activation-history requirement. The supplied request ends at section 38, after “Design tests covering:”; the acceptance matrix below is derived from its preceding requirements.
 
 ## 1. Findings and recommendation
 
-Add controlled knowledge alongside the existing PDF corpus, using three dedicated tables and an **Approved Answers** tab inside AI Feedback & Review. Creation starts from a genuine unanswered case, saves a Draft, and requires explicit Commissioner or League Manager activation. Notes, feedback and case resolution never become knowledge automatically. Preserve published revisions from the first release.
+Add controlled knowledge alongside the existing PDF corpus, using three dedicated tables and an **Approved Answers** tab inside AI Feedback & Review. Creation starts from a genuine unanswered case or an authorized manager, saves a Draft, and requires explicit Commissioner or League Manager activation. Notes, feedback and case resolution never become knowledge automatically. Preserve published revisions from the first release.
 
 The unanswered club-website example is **not missing knowledge**: active League Rules 1.1 already provides the main website, and 1.2 provides the LMS website. Creating a duplicate Approved Answer would hide an existing retrieval/applicability defect. The kitchen/NVZ case remains excluded pending separate diagnosis. No inspected case is an unconditionally validated acceptance-policy candidate; the reimbursement question is only a conditional candidate if management actually establishes an official policy after authority review.
 
@@ -218,3 +218,20 @@ Measured synthetic embedding fixtures established a .65 managed semantic gate pl
 Source-review results are bounded and deliberately independent of Stage 4. A direct existing answer blocks knowledge creation/activation; similar evidence requires an audited missing-policy distinction. The website Rule 1.1 fixture exercises this separate prevention path; its player selection defect remains deferred.
 
 Actual Approved Answer activation actor/time is retained and displayed in local time, including historical revisions. The separately requested document/PDF activation history remains deferred as specified in section 11; no upload/processing timestamp is relabeled.
+
+
+## Approved bounded correction — manager-originated knowledge (2026-09-06)
+
+The owner's manager-origin approval supersedes the earlier first-release case-only creation restriction. This remains LMS-0721 / 0.1.543. Production correction/deployment is not authorized automatically after local validation.
+
+- Origin is represented by the existing case FK: NULL means Manager-created; non-NULL means case-originated. Keep FK ON DELETE RESTRICT and standard UNIQUE semantics (multiple NULLs, one item per non-NULL case). No origin sentinel or synthetic Stage 7 record.
+- `New Approved Answer` in the Approved Answers tab opens the same Draft editor. An explicit `id: null` on create uses the manager path. Missing/invalid IDs are rejected; supplied case IDs still require the unresolved, unmerged unanswered case and one-per-case validation.
+- Existing protected route and SQL actor-role revalidation restrict both paths to Commissioner/League Manager. Retain table RLS/ACLs, safe function search path, all content/dynamic-data/URL checks, independent formal-source review and activation conflict/manifest checks. Activation preflight now includes same-topic, overlapping-scope/date Drafts as well as Active items from other knowledge objects; this is not a claim of comprehensive semantic Draft deduplication.
+- The related-source model and governing hierarchy are unchanged. Consistent linked supplemental knowledge may contribute; it never overrides formal Rules. Direct creation does not bypass confirmed existing-source blocks or the required missing-policy distinction.
+- Create keeps the existing operation UUID, advisory transaction lock and request hash. Replays return the same item/revision; changing payload, actor or origin cannot reuse an operation ID. Content edits remain immutable after publication.
+- All lifecycle audit remains; `linked_to_case` is emitted only for a non-NULL genuine case. Null detail lookup is skipped, and the manager sees `Source: Manager-created` with no broken linked-case navigation. No new listing/filter subsystem is needed.
+- Manager-origin lifecycle never changes Stage 7 data. For the scheduling acceptance item, skip linked-case Resolve. Preserve and test the genuine case path and explicit Resolve separately in the isolated database.
+
+Corrective migration: `lwrpc-admin/supabase/migrations/20260906172546_lms0721_manager_originated_approved_answers.sql`. It changes only column nullability and the existing managed mutation function, explicitly reinstating that function's service-only EXECUTE ACL. The original applied migration stays historical and is not edited/reapplied.
+
+The owner-approved scheduling text in the implementation report is the production continuation item, not a source-code fixture or hardcoded answer. Its first production Draft/activation remains pending authorization and live authority checks.
