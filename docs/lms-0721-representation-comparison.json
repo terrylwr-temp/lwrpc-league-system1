@@ -1,0 +1,92 @@
+{
+  "representations": {
+    "title_question": "Match Scheduling Changes\nAs a captain, can I change our scheduled match date or time?",
+    "question_answer": "As a captain, can I change our scheduled match date or time?\nYes. Under Rule 5.11, captains may mutually agree to reschedule a match to another time that day or to another day within the same week, subject to the Rule's scheduling and score-reporting requirements. Whenever captains agree to change a scheduled match date or time, they must also notify League Management at info@lwrpickleballclub.com of the new date and time."
+  },
+  "results": [
+    {
+      "question": "As a captain, can I change our scheduled match date or time?",
+      "current": 0.817563143427545,
+      "title_question": 0.9374990410866417,
+      "question_answer": 0.8412680800782185
+    },
+    {
+      "question": "Can we move our match to another day?",
+      "current": 0.614711299914807,
+      "title_question": 0.6555244610989767,
+      "question_answer": 0.6251379461818509
+    },
+    {
+      "question": "Can both captains agree to play earlier?",
+      "current": 0.61224956692717,
+      "title_question": 0.6339945903255069,
+      "question_answer": 0.6366049242037767
+    },
+    {
+      "question": "Can we play our match earlier in the week?",
+      "current": 0.561220738033462,
+      "title_question": 0.6009882343333833,
+      "question_answer": 0.5690402982077333
+    },
+    {
+      "question": "Can we change our scheduled match time?",
+      "current": 0.740996362486045,
+      "title_question": 0.8343340620372418,
+      "question_answer": 0.7341418098576332
+    },
+    {
+      "question": "Can we reschedule our match?",
+      "current": 0.684921860975445,
+      "title_question": 0.7276665941164193,
+      "question_answer": 0.6955020287496716
+    },
+    {
+      "question": "Can we change the date of our match?",
+      "current": 0.702567658408756,
+      "title_question": 0.7862103510991436,
+      "question_answer": 0.7009882052605662
+    },
+    {
+      "question": "When is my next match?",
+      "current": 0.456233368174886,
+      "title_question": 0.47411902631575537,
+      "question_answer": 0.43215306742160525
+    },
+    {
+      "question": "Who do we play next?",
+      "current": 0.294558139261246,
+      "title_question": 0.3137008041115764,
+      "question_answer": 0.2990820300833658
+    },
+    {
+      "question": "What time is my match?",
+      "current": 0.488957475420308,
+      "title_question": 0.5382660981568838,
+      "question_answer": 0.468233807542416
+    },
+    {
+      "question": "Can I change my lineup?",
+      "current": 0.517908782991251,
+      "title_question": 0.5778961127208534,
+      "question_answer": 0.5181891381634272
+    },
+    {
+      "question": "Can I change teams?",
+      "current": 0.458030891249926,
+      "title_question": 0.5204397575335854,
+      "question_answer": 0.46597210767468866
+    },
+    {
+      "question": "When do scores have to be entered?",
+      "current": 0.30799677240994,
+      "title_question": 0.2978740941902432,
+      "question_answer": 0.30619182308872017
+    },
+    {
+      "question": "Can playoffs be rescheduled?",
+      "current": 0.531656048075645,
+      "title_question": 0.5292595580990966,
+      "question_answer": 0.5414552369590429
+    }
+  ]
+}

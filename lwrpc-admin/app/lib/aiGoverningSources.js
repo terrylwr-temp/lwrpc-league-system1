@@ -1,4 +1,5 @@
-import { leagueCompatible, evidencePassages, questionLeague, ballDamageKind } from "./aiQuestionApplicability.js";
+import { leagueCompatible, evidencePassages, questionLeague, ballDamageKind, genericApplicablePassages } from "./aiQuestionApplicability.js";
+import { schedulingQuestionKind } from './aiSchedulingApplicability.js';
 // Stage 4 only: neither retrieval scores nor the Stage 3 evidence gate change.
 import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapBallSpecificationEvidence } from "./aiEquipmentIntents.js";
 export const INSUFFICIENT_EVIDENCE_ANSWER = "I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.";
@@ -42,6 +43,7 @@ function issueTerms(question) {
 // A body passage must contain the issue's specific terms and an actual rule or
 // instruction. Titles/headings alone and scattered paragraphs cannot override.
 function directPassages(candidate, question) {
+  if (schedulingQuestionKind(question)) return genericApplicablePassages(candidate, question);
   if (isObviouslyIncompleteUsapFragment(candidate)) return [];
   const nvzScope = nvzQuestionScope(question);
   const servingFootScope = servingFootQuestionScope(question);

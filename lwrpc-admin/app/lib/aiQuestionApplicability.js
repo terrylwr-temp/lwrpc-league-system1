@@ -1,3 +1,4 @@
+import { schedulingQuestionKind, schedulingPassageApplies } from './aiSchedulingApplicability.js';
 // Stage 4 matcher-only analysis. Never rewrites a stored document or retrieval score.
 export function operationWords(value) {
   return String(value || '').toLowerCase().replace(/\b(adding|added|updating|updated|removing|removed|entering|entered|deleting|deleted|changing|changed)\b/g,
@@ -146,6 +147,8 @@ function conceptWords(value) {
 
 export function genericApplicablePassages(candidate, question) {
   if (!leagueCompatible(candidate, question)) return [];
+  const scheduling = schedulingQuestionKind(question);
+  if (scheduling) return candidate.documentType === 'usap_rulebook' ? [] : evidencePassages(candidate).filter(p => schedulingPassageApplies(p, scheduling));
   if (ratingQuestionKind(question)) return ratingApplicablePassages(candidate, question);
   const q = conceptWords(question);
   // A request for the contents of a named document is a summary, not a new policy.

@@ -1,4 +1,5 @@
 import {approvedEligible,APPROVED_SOURCE_NAME,safeAuthorityWarnings} from './aiApprovedAnswersShared.js';
+import {schedulingQuestionKind,schedulingPolicyApplies} from './aiSchedulingApplicability.js';
 // Candidate scoring proposes relevance; fixed scope/authority gates decide eligibility.
 // These conservative thresholds are independently tested against adjacent-topic fixtures.
 export const APPROVED_SEMANTIC_MIN=.65;
@@ -21,6 +22,7 @@ export function meaningfulDiscrepancy(managed,formal){
  return null;
 }
 export function managedQuestionCompatible(question,revision){
+ if(schedulingQuestionKind(revision.canonical_question)==='match_schedule_change'&&!schedulingPolicyApplies(question,revision))return false;
  const days=text=>(String(text).toLowerCase().match(/\b(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/g)||[]);
  const requested=days(question),defined=days(revision.canonical_question);
  if(/\b(?:how long|how soon|how many (?:days|hours|weeks))\b/i.test(question)&&!/\b(?:minutes?|hours?|days?|weeks?|months?|immediately|within)\b/i.test(revision.approved_answer))return false;
@@ -42,9 +44,10 @@ export function chooseApprovedEvidence(question,formal,rows,{date,scope='all',se
  }
  // Existing selected formal/guide/USAP evidence keeps its governing behavior.
  // Managed knowledge fills a genuine unsupported issue, never displaces an accepted selected source.
- const eligible=relevant.filter(x=>approvedEligible(x.revision,{date,scope,seasonId:seasonId||x.resolved_season_id,manifest:x.manifest}));
+ const eligible=relevant.filter(x=>approvedEligible(x.revision,{date,scope,seasonId:seasonId||x.resolved_season_id,manifest:x.manifest})
+   && !(schedulingQuestionKind(x.revision.canonical_question)==='match_schedule_change'&&x.revision.related_chunk_id&&!x.validatedRelatedEvidence));
  if(formal.length){
-   const complementary=eligible.find(x=>!managedPlayingRule(question)&&!managedPlayingRule(x.revision.approved_answer)&&x.revision.related_chunk_id&&formal.some(f=>f.documentType!=='usap_rulebook'&&f.chunkId===x.revision.related_chunk_id)&&!formal.some(f=>meaningfulDiscrepancy(x.revision,f)));
+   const complementary=eligible.find(x=>!managedPlayingRule(question)&&!managedPlayingRule(x.revision.approved_answer)&&x.revision.related_chunk_id&&formal.some(f=>f.documentType!=='usap_rulebook'&&f.chunkId===x.revision.related_chunk_id&&(!x.validatedRelatedEvidence||f.content===x.revision.related_passage))&&!formal.some(f=>meaningfulDiscrepancy(x.revision,f)));
    return {selected:complementary&&formal.length<4?[...formal,managedCandidate(complementary)]:formal,warnings:safeAuthorityWarnings(warnings),conflict:false};
  }
  if(managedPlayingRule(question)||eligible.some(x=>managedPlayingRule(x.revision.approved_answer)))return {selected:[],warnings:[],conflict:false};

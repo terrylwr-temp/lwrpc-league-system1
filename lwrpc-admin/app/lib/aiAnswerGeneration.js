@@ -1,6 +1,8 @@
 import { matchingQuestion } from "./aiQuestionInterpretation.js";
 import { assistInterpretationRetrieval, retrieveApprovedForAnswer } from "./aiRetrieval.js";
 import {chooseApprovedEvidence} from './aiApprovedAnswersSelection.js';
+import {prepareApprovedRelatedEvidence} from './aiApprovedRelatedEvidence.js';
+import {validateManagedPassage} from './aiApprovedSourceBinding.js';
 import {approvedSourceIdentity,approvedEligible} from './aiApprovedAnswersShared.js';
 import { trustedSelectedRuleIdentity } from "./aiSelectedRuleIdentity.js";
 import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind, isSeasonRatingDateQuestion, seasonRatingDatePassages, isCommunityParticipationQuestion, communityParticipationPassages } from "./aiQuestionApplicability.js";
@@ -236,7 +238,10 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
   const approvedRows=await retrieveApprovedForAnswer(retrieval);
   if(approvedRows){
     const explicit=['weekday','saturday','primetime'].filter(s=>new RegExp(`\\b${s}\\b`,'i').test(retrieval.request.question));
-    const managed=chooseApprovedEvidence(retrieval.request.question,selectedEvidence,approvedRows,{scope:explicit.length===1?explicit[0]:retrieval.request.askAbout,seasonId:retrieval.request.context?.seasonId});
+    const options={scope:explicit.length===1?explicit[0]:retrieval.request.askAbout,seasonId:retrieval.request.context?.seasonId};
+    const related=await prepareApprovedRelatedEvidence({supabase,question:retrieval.request.question,formal:selectedEvidence,rows:approvedRows,...options});
+    const managed=chooseApprovedEvidence(retrieval.request.question,related.formal,related.rows,options);
+    retrieval.approvedRelatedEvidence={...related.diagnostic,combination:managed.selected.some(s=>s.sourceKind==='approved_answer')?(managed.selected.some(s=>s.sourceKind!=='approved_answer')?'formal_plus_supplemental':'managed_only'):'formal_only_or_none'};
     retrieval.authorityWarnings=managed.warnings;
     if(managed.conflict)return {...skippedAnswer(retrieval,clock,started),answer:CONFLICT_ANSWER,conflict:{potentialConflict:true,requiresClarification:true,competingSources:[]}};
     selectedEvidence=managed.selected;
@@ -383,7 +388,7 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
       ...chunk,
       documentTitle: document.title,
       pageNumber: citationPageNumber(citedChunk.page_number),
-      ruleNumber: chunk.content !== undefined || chunk.selectedPassages ? trustedSelectedRuleIdentity(chunk, citedChunk) : citedChunk.rule_number || "",
+      ruleNumber: chunk.boundRelatedPassage ? validateManagedPassage(citedChunk,chunk.content,chunk.ruleNumber).ruleNumber : chunk.content !== undefined || chunk.selectedPassages ? trustedSelectedRuleIdentity(chunk, citedChunk) : citedChunk.rule_number || "",
       chunkRuleNumber: citedChunk.rule_number || "",
       sectionLabel: citedChunk.section_label || "",
       heading: citedChunk.heading || "",

@@ -1,0 +1,1592 @@
+{
+  "revision": {
+    "id": "a9880b0e-da01-4692-aedf-020f07b22bf7",
+    "title": "Match Scheduling Changes",
+    "canonical_question": "As a captain, can I change our scheduled match date or time?",
+    "approved_answer": "Yes. Under Rule 5.11, captains may mutually agree to reschedule a match to another time that day or to another day within the same week, subject to the Rule's scheduling and score-reporting requirements. Whenever captains agree to change a scheduled match date or time, they must also notify League Management at info@lwrpickleballclub.com of the new date and time.",
+    "league_scope": "all",
+    "temporal_scope": "standing",
+    "effective_on": "2026-09-06",
+    "expires_on": null,
+    "related_rule_identity": "5.11",
+    "related_passage": "5.11. Rescheduling & Score Submission Deadlines: If both coaches agree, games may be\nrescheduled to a diƯerent time on the same day or to another day within the same week.\nHowever, all game scores must be submitted by the end of Sunday of the same week by\nmidnight. If this deadline cannot be met due to weather conditions or other unforeseen\ncircumstances, the Home Captain must notify info@lwrpickleballclub.com before\nSunday at midnight with the rescheduled date and time. Failure to do so may result in\nforfeiture of the games.",
+    "content_hash": "91809791df17409722e4baf3034c32cc698e9dc3a9dffbf60ce4ba5204269f83",
+    "embedding_model": "text-embedding-3-small",
+    "activated_at": "2026-09-06T19:21:34.82887+00:00"
+  },
+  "representation": "Match Scheduling Changes\nAs a captain, can I change our scheduled match date or time?\nYes. Under Rule 5.11, captains may mutually agree to reschedule a match to another time that day or to another day within the same week, subject to the Rule's scheduling and score-reporting requirements. Whenever captains agree to change a scheduled match date or time, they must also notify League Management at info@lwrpickleballclub.com of the new date and time.",
+  "threshold": 0.65,
+  "rows": [
+    {
+      "question": "As a captain, can I change our scheduled match date or time?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "27b4e999ecc22d6e29783eae5237715550537bb52f7f59520656bae97da9cac4",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 148
+      },
+      "score": 0.817563143427545,
+      "lexical": 0.0609884,
+      "rank": 1,
+      "thresholdPass": true,
+      "compatible": true,
+      "eligible": true,
+      "formal": [],
+      "selected": [
+        {
+          "kind": "approved_answer",
+          "id": "a9880b0e-da01-4692-aedf-020f07b22bf7",
+          "rule": "",
+          "content": "Yes. Under Rule 5.11, captains may mutually agree to reschedule a match to another time that day or to another day within the same week, subject to the Rule's scheduling and score-reporting requirements. Whenever captains agree to change a scheduled match date or time, they must also notify League Management at info@lwrpickleballclub.com of the new date and time."
+        }
+      ],
+      "counterfactualScoreOnlySelected": true,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "8f8fdf7c-3bcc-4501-953a-6cceb1f5d60c",
+          "rule": "21.A.3",
+          "score": 0.6333
+        },
+        {
+          "rank": 2,
+          "id": "c8642e31-30ef-4167-ba0d-3ffb1023c08a",
+          "rule": "21.C.4",
+          "score": 0.621
+        },
+        {
+          "rank": 3,
+          "id": "7e6a6175-7876-461b-b998-b76811a0e8fe",
+          "rule": "21.C.10",
+          "score": 0.6151
+        },
+        {
+          "rank": 4,
+          "id": "465bc5ba-f3e9-43e2-8bb2-3dd714c21131",
+          "rule": "17.D.15",
+          "score": 0.5993
+        },
+        {
+          "rank": 5,
+          "id": "0937bb3e-664e-4b31-9ad4-f6608578ff46",
+          "rule": "22.B.9",
+          "score": 0.5865
+        },
+        {
+          "rank": 6,
+          "id": "5f703df6-84af-4ff8-8f2c-eaf7670a0db5",
+          "rule": "22.D.6",
+          "score": 0.5854
+        },
+        {
+          "rank": 7,
+          "id": "18d12ed1-1433-433d-a153-15cd84117924",
+          "rule": "21.C.9",
+          "score": 0.5741
+        },
+        {
+          "rank": 8,
+          "id": "282fa8f4-d1bf-4351-902a-29507ea31937",
+          "rule": "16.M",
+          "score": 0.5595
+        },
+        {
+          "rank": 9,
+          "id": "ee133944-bdb5-41ab-994f-d19440b45ddb",
+          "rule": "21.G",
+          "score": 0.5435
+        },
+        {
+          "rank": 10,
+          "id": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+          "rule": "21.B",
+          "score": 0.5412
+        },
+        {
+          "rank": 11,
+          "id": "2acff5ec-8f67-4a41-9320-1eb3cf91cdd8",
+          "rule": "21.A",
+          "score": 0.5407
+        },
+        {
+          "rank": 12,
+          "id": "aff27a49-365b-4ca3-877d-9a0316b7d2e8",
+          "rule": "21.C.6",
+          "score": 0.5401
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "As a captain, can I change our scheduled match date or time?"
+      }
+    },
+    {
+      "question": "Can we move our match to another day?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "6ba93857528f47faf0c6a1db33ceaedec6ef797f10fac402f2f120271fff4510",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 69
+      },
+      "score": 0.614711299914807,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [],
+      "selected": [],
+      "counterfactualScoreOnlySelected": true,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "01444d6d-44da-4fd9-8069-e7fe1e117e28",
+          "rule": "5.10",
+          "score": 0.4155
+        },
+        {
+          "rank": 2,
+          "id": "282fa8f4-d1bf-4351-902a-29507ea31937",
+          "rule": "16.M",
+          "score": 0.2407
+        },
+        {
+          "rank": 3,
+          "id": "4379d866-7cd3-457a-9fe0-8e98209988e7",
+          "rule": "6.1.8",
+          "score": 0.2325
+        },
+        {
+          "rank": 4,
+          "id": "3814d8a0-290e-460c-9140-1509738e7292",
+          "rule": "22.J",
+          "score": 0.227
+        },
+        {
+          "rank": 5,
+          "id": "be478610-7cd2-4252-abd0-87c86906cef7",
+          "rule": "16.N",
+          "score": 0.2247
+        },
+        {
+          "rank": 6,
+          "id": "5cd591a9-9b3b-4029-b96b-42c6c34464b1",
+          "rule": "15.D",
+          "score": 0.2244
+        },
+        {
+          "rank": 7,
+          "id": "b7110c48-fa57-49ab-9e68-3119dc21bdf1",
+          "rule": "22.I.4",
+          "score": 0.2238
+        },
+        {
+          "rank": 8,
+          "id": "1d556519-2d9f-4e5e-8f2f-4eb2a87f0c87",
+          "rule": "5.13",
+          "score": 0.2234
+        },
+        {
+          "rank": 9,
+          "id": "e05db4f0-e98a-4336-8ca0-895bf80fb21f",
+          "rule": "18.F.2",
+          "score": 0.222
+        },
+        {
+          "rank": 10,
+          "id": "cbafc499-9412-44c7-aa0a-858c6059d5e2",
+          "rule": "18.E",
+          "score": 0.2186
+        },
+        {
+          "rank": 11,
+          "id": "09c03bcd-9c30-4f00-91ae-a03cb65af6be",
+          "rule": "5.4",
+          "score": 0.2093
+        },
+        {
+          "rank": 12,
+          "id": "c5792642-352c-49fa-a5c0-11399754fefe",
+          "rule": "16.L",
+          "score": 0.2084
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can we move our match to another day?"
+      }
+    },
+    {
+      "question": "Can both captains agree to play earlier?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "9707a4a3e93c94aeb5f9f30a037760b3f6a764eedb9a13e1fd962ea3e233920b",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 61
+      },
+      "score": 0.61224956692717,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [],
+      "selected": [],
+      "counterfactualScoreOnlySelected": true,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "1d556519-2d9f-4e5e-8f2f-4eb2a87f0c87",
+          "rule": "5.13",
+          "score": 0.4495
+        },
+        {
+          "rank": 2,
+          "id": "50f36ffe-cce0-48a3-b4b1-7e32892d28a8",
+          "rule": "",
+          "score": 0.4495
+        },
+        {
+          "rank": 3,
+          "id": "6e572a43-4aed-47a8-89fc-518ecb52e7e9",
+          "rule": "",
+          "score": 0.4421
+        },
+        {
+          "rank": 4,
+          "id": "b49c3579-012f-4b78-8c4d-b5940baef598",
+          "rule": "",
+          "score": 0.4337
+        },
+        {
+          "rank": 5,
+          "id": "6199f5a5-c9a3-4706-bc06-d17faaf4a72e",
+          "rule": "",
+          "score": 0.4249
+        },
+        {
+          "rank": 6,
+          "id": "bc191c12-071e-41a8-b571-3083327a288f",
+          "rule": "1.2",
+          "score": 0.4227
+        },
+        {
+          "rank": 7,
+          "id": "19a6da2c-4f5a-4d15-bef3-c75da9009d5a",
+          "rule": "",
+          "score": 0.4172
+        },
+        {
+          "rank": 8,
+          "id": "e973c74e-c59f-40d4-a301-1e09eba7a4ea",
+          "rule": "2",
+          "score": 0.4141
+        },
+        {
+          "rank": 9,
+          "id": "fb919a5a-ae9f-4fcf-afa4-409e656a8ee1",
+          "rule": "",
+          "score": 0.4086
+        },
+        {
+          "rank": 10,
+          "id": "0cc5f1a9-439b-4673-8ca2-ebcb9b75f5d0",
+          "rule": "17.D.1",
+          "score": 0.4041
+        },
+        {
+          "rank": 11,
+          "id": "61269c81-f09f-44af-adbd-3da3065e22a7",
+          "rule": "",
+          "score": 0.4027
+        },
+        {
+          "rank": 12,
+          "id": "af45fef4-2236-4d4b-81a1-c3d6d155c5b2",
+          "rule": "21.F.4",
+          "score": 0.4013
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can both captains agree to play earlier?"
+      }
+    },
+    {
+      "question": "Can we play our match earlier in the week?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "0f56cb4e811eb0004744689f3751a02c67d1524c2562f31f95a32ef3fc7fe5e4",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 61
+      },
+      "score": 0.561220738033462,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [],
+      "selected": [],
+      "counterfactualScoreOnlySelected": true,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "e1d5b881-351d-42a5-bd11-504e6e438c11",
+          "rule": "6.3.10",
+          "score": 0.3996
+        },
+        {
+          "rank": 2,
+          "id": "c4ab8544-decb-4ea1-b856-2df4a2d196f1",
+          "rule": "",
+          "score": 0.3978
+        },
+        {
+          "rank": 3,
+          "id": "0f7eba94-bcbc-4ab5-ad16-1780920cfc68",
+          "rule": "6",
+          "score": 0.3941
+        },
+        {
+          "rank": 4,
+          "id": "6d72e024-95d8-455f-bfb4-2baca003faa6",
+          "rule": "5.14",
+          "score": 0.391
+        },
+        {
+          "rank": 5,
+          "id": "f9f05921-2ee9-46fc-9b44-e5a861d7dd6f",
+          "rule": "",
+          "score": 0.3848
+        },
+        {
+          "rank": 6,
+          "id": "af45fef4-2236-4d4b-81a1-c3d6d155c5b2",
+          "rule": "21.F.4",
+          "score": 0.3847
+        },
+        {
+          "rank": 7,
+          "id": "a1a21f16-2ac5-4535-a2ff-921bcd7e9b1f",
+          "rule": "21.D.4",
+          "score": 0.3837
+        },
+        {
+          "rank": 8,
+          "id": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+          "rule": "",
+          "score": 0.3836
+        },
+        {
+          "rank": 9,
+          "id": "862b4b5e-4aec-45b1-aab0-10bf38742e74",
+          "rule": "21.E.2",
+          "score": 0.3815
+        },
+        {
+          "rank": 10,
+          "id": "4e562ffc-5ed0-481b-95e3-fbce26afbb35",
+          "rule": "21.B.8",
+          "score": 0.3793
+        },
+        {
+          "rank": 11,
+          "id": "b04b80e9-c26f-4f8a-8b6e-63965613a12e",
+          "rule": "21.C.11",
+          "score": 0.3781
+        },
+        {
+          "rank": 12,
+          "id": "7984245c-3a8b-47cc-8f56-97cfa2a7106c",
+          "rule": "21.A.6",
+          "score": 0.3778
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can we play our match earlier in the week?"
+      }
+    },
+    {
+      "question": "Can we change our scheduled match time?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "d9f31d2450120bb1e01b8b5d601f5e1de327e488a0ecde16d5bcefdaf44c653b",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 60
+      },
+      "score": 0.740996362486045,
+      "lexical": 0.0575499,
+      "rank": 1,
+      "thresholdPass": true,
+      "compatible": true,
+      "eligible": true,
+      "formal": [],
+      "selected": [
+        {
+          "kind": "approved_answer",
+          "id": "a9880b0e-da01-4692-aedf-020f07b22bf7",
+          "rule": "",
+          "content": "Yes. Under Rule 5.11, captains may mutually agree to reschedule a match to another time that day or to another day within the same week, subject to the Rule's scheduling and score-reporting requirements. Whenever captains agree to change a scheduled match date or time, they must also notify League Management at info@lwrpickleballclub.com of the new date and time."
+        }
+      ],
+      "counterfactualScoreOnlySelected": true,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "c5792642-352c-49fa-a5c0-11399754fefe",
+          "rule": "16.L",
+          "score": 0.4516
+        },
+        {
+          "rank": 2,
+          "id": "282fa8f4-d1bf-4351-902a-29507ea31937",
+          "rule": "16.M",
+          "score": 0.448
+        },
+        {
+          "rank": 3,
+          "id": "ee133944-bdb5-41ab-994f-d19440b45ddb",
+          "rule": "21.G",
+          "score": 0.4449
+        },
+        {
+          "rank": 4,
+          "id": "09c03bcd-9c30-4f00-91ae-a03cb65af6be",
+          "rule": "5.4",
+          "score": 0.4439
+        },
+        {
+          "rank": 5,
+          "id": "536619ca-b02e-454a-8fa3-d1f4cc8d8f94",
+          "rule": "21.F.3",
+          "score": 0.4335
+        },
+        {
+          "rank": 6,
+          "id": "275eb933-c2aa-4c49-9632-5bba54976bbc",
+          "rule": "24.A",
+          "score": 0.4316
+        },
+        {
+          "rank": 7,
+          "id": "be478610-7cd2-4252-abd0-87c86906cef7",
+          "rule": "16.N",
+          "score": 0.4272
+        },
+        {
+          "rank": 8,
+          "id": "de9ab654-63eb-49ef-8450-4f6c84e64510",
+          "rule": "21.A.1",
+          "score": 0.4269
+        },
+        {
+          "rank": 9,
+          "id": "2c9ed553-c425-43f0-b2e1-deadcda18cc3",
+          "rule": "18.G",
+          "score": 0.424
+        },
+        {
+          "rank": 10,
+          "id": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+          "rule": "21.B",
+          "score": 0.418
+        },
+        {
+          "rank": 11,
+          "id": "98ca9f86-2eee-4ac2-9c0d-9b91f7df8b18",
+          "rule": "21.C.1",
+          "score": 0.4161
+        },
+        {
+          "rank": 12,
+          "id": "fb919a5a-ae9f-4fcf-afa4-409e656a8ee1",
+          "rule": "",
+          "score": 0.4059
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can we change our scheduled match time?"
+      }
+    },
+    {
+      "question": "Can we reschedule our match?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "3ea048d65dada534dccc7cf627d64e679cdbc0fff691cf50ce5063544b21ffae",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 67
+      },
+      "score": 0.684921860975445,
+      "lexical": 0.0576923,
+      "rank": 1,
+      "thresholdPass": true,
+      "compatible": true,
+      "eligible": true,
+      "formal": [
+        {
+          "id": "564f30d1-eab3-4c31-9035-d54b1fa60811",
+          "rule": "6.1.9.5",
+          "content": "6.1.9.5. Forfeits: In the event of a forfeit (unable to reschedule and not weather\nrelated), the match score is officially recorded as 3-0 in favor of the non-\nforfeiting team.\n\n6.1.9.6. Weather Issues: If games are aƯected by weather-related issues and both\nteams are unable to reschedule them within the permitted league timeframe,\nthe matches will officially be scored as a “weather related” resulting in a 2-2\ntie."
+        }
+      ],
+      "selected": [
+        {
+          "kind": "pdf",
+          "id": "564f30d1-eab3-4c31-9035-d54b1fa60811",
+          "rule": "6.1.9.5",
+          "content": "6.1.9.5. Forfeits: In the event of a forfeit (unable to reschedule and not weather\nrelated), the match score is officially recorded as 3-0 in favor of the non-\nforfeiting team.\n\n6.1.9.6. Weather Issues: If games are aƯected by weather-related issues and both\nteams are unable to reschedule them within the permitted league timeframe,\nthe matches will officially be scored as a “weather related” resulting in a 2-2\ntie."
+        }
+      ],
+      "counterfactualScoreOnlySelected": false,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "1d556519-2d9f-4e5e-8f2f-4eb2a87f0c87",
+          "rule": "5.13",
+          "score": 0.5507
+        },
+        {
+          "rank": 2,
+          "id": "01444d6d-44da-4fd9-8069-e7fe1e117e28",
+          "rule": "5.10",
+          "score": 0.4723
+        },
+        {
+          "rank": 3,
+          "id": "564f30d1-eab3-4c31-9035-d54b1fa60811",
+          "rule": "6.1.9.5",
+          "score": 0.3698
+        },
+        {
+          "rank": 4,
+          "id": "4379d866-7cd3-457a-9fe0-8e98209988e7",
+          "rule": "6.1.8",
+          "score": 0.3244
+        },
+        {
+          "rank": 5,
+          "id": "cf0a99cc-b193-4be0-bfa7-aef8f56438a3",
+          "rule": "6.2.6",
+          "score": 0.3005
+        },
+        {
+          "rank": 6,
+          "id": "f9e44db6-6601-45c1-85d3-94883c746c58",
+          "rule": "6.1.7",
+          "score": 0.2911
+        },
+        {
+          "rank": 7,
+          "id": "cb5ef7b6-b312-4417-91a2-d55723e8af9b",
+          "rule": "6.3.8",
+          "score": 0.2864
+        },
+        {
+          "rank": 8,
+          "id": "c43a2965-5150-423d-b010-50c2395c4b53",
+          "rule": "6.2.7",
+          "score": 0.2806
+        },
+        {
+          "rank": 9,
+          "id": "282fa8f4-d1bf-4351-902a-29507ea31937",
+          "rule": "16.M",
+          "score": 0.2606
+        },
+        {
+          "rank": 10,
+          "id": "e05db4f0-e98a-4336-8ca0-895bf80fb21f",
+          "rule": "18.F.2",
+          "score": 0.2588
+        },
+        {
+          "rank": 11,
+          "id": "09c03bcd-9c30-4f00-91ae-a03cb65af6be",
+          "rule": "5.4",
+          "score": 0.2547
+        },
+        {
+          "rank": 12,
+          "id": "5cd591a9-9b3b-4029-b96b-42c6c34464b1",
+          "rule": "15.D",
+          "score": 0.247
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can we reschedule our match?"
+      }
+    },
+    {
+      "question": "Can we change the date of our match?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "8909d7c9a53cc5fd0e28264b55740cd86e3a407f9894c1e46ab8f0f58366df0c",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 62
+      },
+      "score": 0.702567658408756,
+      "lexical": 0.0690476,
+      "rank": 1,
+      "thresholdPass": true,
+      "compatible": true,
+      "eligible": true,
+      "formal": [],
+      "selected": [
+        {
+          "kind": "approved_answer",
+          "id": "a9880b0e-da01-4692-aedf-020f07b22bf7",
+          "rule": "",
+          "content": "Yes. Under Rule 5.11, captains may mutually agree to reschedule a match to another time that day or to another day within the same week, subject to the Rule's scheduling and score-reporting requirements. Whenever captains agree to change a scheduled match date or time, they must also notify League Management at info@lwrpickleballclub.com of the new date and time."
+        }
+      ],
+      "counterfactualScoreOnlySelected": true,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "2c9ed553-c425-43f0-b2e1-deadcda18cc3",
+          "rule": "18.G",
+          "score": 0.441
+        },
+        {
+          "rank": 2,
+          "id": "275eb933-c2aa-4c49-9632-5bba54976bbc",
+          "rule": "24.A",
+          "score": 0.4395
+        },
+        {
+          "rank": 3,
+          "id": "be478610-7cd2-4252-abd0-87c86906cef7",
+          "rule": "16.N",
+          "score": 0.4389
+        },
+        {
+          "rank": 4,
+          "id": "536619ca-b02e-454a-8fa3-d1f4cc8d8f94",
+          "rule": "21.F.3",
+          "score": 0.4389
+        },
+        {
+          "rank": 5,
+          "id": "c5792642-352c-49fa-a5c0-11399754fefe",
+          "rule": "16.L",
+          "score": 0.4362
+        },
+        {
+          "rank": 6,
+          "id": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+          "rule": "21.B",
+          "score": 0.4284
+        },
+        {
+          "rank": 7,
+          "id": "1bc2673d-8f28-4c74-a785-2f0496568a50",
+          "rule": "21.F.2",
+          "score": 0.4206
+        },
+        {
+          "rank": 8,
+          "id": "eea377bb-a0e6-4704-b65a-782934e0ab96",
+          "rule": "16.Q",
+          "score": 0.4188
+        },
+        {
+          "rank": 9,
+          "id": "3931d24b-23fd-44a3-9844-f99c675a73b8",
+          "rule": "16.K",
+          "score": 0.4026
+        },
+        {
+          "rank": 10,
+          "id": "577601f5-47a1-4ae1-a264-08fbd18ec5f4",
+          "rule": "18.B.4",
+          "score": 0.4005
+        },
+        {
+          "rank": 11,
+          "id": "76911003-5ff6-44a3-93b5-61d245cb5b86",
+          "rule": "18.B.3",
+          "score": 0.3984
+        },
+        {
+          "rank": 12,
+          "id": "b926746e-4004-4001-a20b-9c2664982b7e",
+          "rule": "21.B.5",
+          "score": 0.3955
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can we change the date of our match?"
+      }
+    },
+    {
+      "question": "When is my next match?",
+      "guard": true,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "6edaeb4b2ffbdea37bb751c91861f1849922d345416e91d3b3c3aa1ef13635ef",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 64
+      },
+      "score": 0.456233368174886,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [
+        {
+          "id": "00eb78eb-8c40-416b-ae19-cc456b2624da",
+          "rule": "23.B.2",
+          "content": "23.B.2 Withdrawal from Upcoming Matches. A singles player or\ndoubles team may withdraw from all remaining matches in a\nbracket prior to the initial score being called to start their next\nmatch."
+        },
+        {
+          "id": "e5f804df-10e9-4af5-9c3a-22f9ad620518",
+          "rule": "22.A.2",
+          "content": "22.A.2 Player Misconduct After Match. Behavior rising to the level of a\nwarning or foul after the match is over while a player is still in\nthe vicinity of the court must be brought to the attention of the\nTournament Director. Based on this information, the\nTournament Director may impose a verbal warning, technical\nwarning, or technical foul that will be applied to the offending\nplayer’s next match at the tournament."
+        }
+      ],
+      "selected": [
+        {
+          "kind": "pdf",
+          "id": "00eb78eb-8c40-416b-ae19-cc456b2624da",
+          "rule": "23.B.2",
+          "content": "23.B.2 Withdrawal from Upcoming Matches. A singles player or\ndoubles team may withdraw from all remaining matches in a\nbracket prior to the initial score being called to start their next\nmatch."
+        },
+        {
+          "kind": "pdf",
+          "id": "e5f804df-10e9-4af5-9c3a-22f9ad620518",
+          "rule": "22.A.2",
+          "content": "22.A.2 Player Misconduct After Match. Behavior rising to the level of a\nwarning or foul after the match is over while a player is still in\nthe vicinity of the court must be brought to the attention of the\nTournament Director. Based on this information, the\nTournament Director may impose a verbal warning, technical\nwarning, or technical foul that will be applied to the offending\nplayer’s next match at the tournament."
+        }
+      ],
+      "counterfactualScoreOnlySelected": false,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "1b89a6d2-c608-4ada-8a89-bf37dc2dc240",
+          "rule": "",
+          "score": 0.5503
+        },
+        {
+          "rank": 2,
+          "id": "19a6da2c-4f5a-4d15-bef3-c75da9009d5a",
+          "rule": "",
+          "score": 0.5308
+        },
+        {
+          "rank": 3,
+          "id": "5137e85a-ab55-4734-ad94-309e922f9e85",
+          "rule": "",
+          "score": 0.5112
+        },
+        {
+          "rank": 4,
+          "id": "07463ae2-a809-4a86-b77e-4fa022176b07",
+          "rule": "",
+          "score": 0.499
+        },
+        {
+          "rank": 5,
+          "id": "cbb9ff22-5b51-4391-a81d-fc4c08dba6c4",
+          "rule": "",
+          "score": 0.4957
+        },
+        {
+          "rank": 6,
+          "id": "09c03bcd-9c30-4f00-91ae-a03cb65af6be",
+          "rule": "5.4",
+          "score": 0.4944
+        },
+        {
+          "rank": 7,
+          "id": "00eb78eb-8c40-416b-ae19-cc456b2624da",
+          "rule": "23.B.2",
+          "score": 0.4909
+        },
+        {
+          "rank": 8,
+          "id": "6e572a43-4aed-47a8-89fc-518ecb52e7e9",
+          "rule": "",
+          "score": 0.478
+        },
+        {
+          "rank": 9,
+          "id": "e5f804df-10e9-4af5-9c3a-22f9ad620518",
+          "rule": "22.A.2",
+          "score": 0.4399
+        },
+        {
+          "rank": 10,
+          "id": "7d12396b-f172-4180-af01-56a80fbf52ce",
+          "rule": "",
+          "score": 0.3546
+        },
+        {
+          "rank": 11,
+          "id": "17d347dd-9039-403d-b782-dae358725c0c",
+          "rule": "",
+          "score": 0.3496
+        },
+        {
+          "rank": 12,
+          "id": "4b0d96f9-750c-4bc3-b450-5688480b9bd5",
+          "rule": "",
+          "score": 0.3365
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "When is my next match?"
+      }
+    },
+    {
+      "question": "Who do we play next?",
+      "guard": true,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "9eed21c064793dcfffba47a9a326413a91a5b1ca5c121c1a4b457f6b7770eba1",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 69
+      },
+      "score": 0.294558139261246,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [],
+      "selected": [],
+      "counterfactualScoreOnlySelected": true,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "19558baf-028a-4388-9a12-f562d5c44d70",
+          "rule": "",
+          "score": 0.3834
+        },
+        {
+          "rank": 2,
+          "id": "a2c1c86e-802f-4d3b-9dd8-67b8548456fd",
+          "rule": "15.B.6",
+          "score": 0.3817
+        },
+        {
+          "rank": 3,
+          "id": "cbb9ff22-5b51-4391-a81d-fc4c08dba6c4",
+          "rule": "",
+          "score": 0.3758
+        },
+        {
+          "rank": 4,
+          "id": "af45fef4-2236-4d4b-81a1-c3d6d155c5b2",
+          "rule": "21.F.4",
+          "score": 0.3753
+        },
+        {
+          "rank": 5,
+          "id": "a1a21f16-2ac5-4535-a2ff-921bcd7e9b1f",
+          "rule": "21.D.4",
+          "score": 0.3702
+        },
+        {
+          "rank": 6,
+          "id": "862b4b5e-4aec-45b1-aab0-10bf38742e74",
+          "rule": "21.E.2",
+          "score": 0.3696
+        },
+        {
+          "rank": 7,
+          "id": "4e562ffc-5ed0-481b-95e3-fbce26afbb35",
+          "rule": "21.B.8",
+          "score": 0.3695
+        },
+        {
+          "rank": 8,
+          "id": "b04b80e9-c26f-4f8a-8b6e-63965613a12e",
+          "rule": "21.C.11",
+          "score": 0.3693
+        },
+        {
+          "rank": 9,
+          "id": "7fd765f3-3f03-4fe1-9e4e-2774e6ba4910",
+          "rule": "23.A.3",
+          "score": 0.3658
+        },
+        {
+          "rank": 10,
+          "id": "7984245c-3a8b-47cc-8f56-97cfa2a7106c",
+          "rule": "21.A.6",
+          "score": 0.3653
+        },
+        {
+          "rank": 11,
+          "id": "76da7fcb-5ee1-4407-be00-cd67614b9958",
+          "rule": "23.B.3",
+          "score": 0.3599
+        },
+        {
+          "rank": 12,
+          "id": "f4485503-ceb5-4ecf-9d40-15abd1befa9b",
+          "rule": "15.B.5",
+          "score": 0.359
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Who do we play next?"
+      }
+    },
+    {
+      "question": "What time is my match?",
+      "guard": true,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "e091bb267011e5b18a329836a9e617d639c25fcfcc2c9004f8346ff4ac0ecc5f",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 68
+      },
+      "score": 0.488957475420308,
+      "lexical": 0.111782,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [
+        {
+          "id": "8f8fdf7c-3bcc-4501-953a-6cceb1f5d60c",
+          "rule": "21.A.3",
+          "content": "21.A.3 Between Games. Between games, players may request to use\none or both standard time-outs before the start of the next\ngame. The players must inform the referee. The standard time-\nout will start immediately after the expiration of the time-out\nbetween games. A time-out must be charged when any portion\nof the time is used. When the requesting singles player or\ndoubles team is ready to resume play before a requested time-\nout begins, that time-out is not charged."
+        },
+        {
+          "id": "7e6a6175-7876-461b-b998-b76811a0e8fe",
+          "rule": "21.C.10",
+          "content": "21.C.10 Technical Warning or Technical Foul – Invalid Medical\nCondition. When medical personnel, or the Tournament\nDirector when medical personnel are not available, determine\nthat no valid medical condition exists for granting a medical\ntimeout, the referee will assess a technical warning and charge\na standard time-out against the singles player or doubles team\nthat requested the medical time-out. When a standard time-\nout is not available, the referee will assess a technical foul\nagainst the player or team. The medical time-out is no longer\navailable to that player and the player must resume play\nimmediately."
+        },
+        {
+          "id": "465bc5ba-f3e9-43e2-8bb2-3dd714c21131",
+          "rule": "17.D.15",
+          "content": "17.D.15 Time-Outs. Enforce time-out procedures. (See Section 21.)\n17.D.16 15-Second Warnings. Announce when there are 15 seconds\nremaining in a time-out. At the end of the 15 seconds, the referee\nmust call “time in” and then the score when all players are ready\nto play or should be ready to play."
+        },
+        {
+          "id": "ee133944-bdb5-41ab-994f-d19440b45ddb",
+          "rule": "21.G",
+          "content": "21.G Time Between Matches. The allowed time between matches, including a\ntie-breaker match to determine a championship, is 10 minutes. When all\nplayers agree, a match may start early."
+        }
+      ],
+      "selected": [
+        {
+          "kind": "pdf",
+          "id": "8f8fdf7c-3bcc-4501-953a-6cceb1f5d60c",
+          "rule": "21.A.3",
+          "content": "21.A.3 Between Games. Between games, players may request to use\none or both standard time-outs before the start of the next\ngame. The players must inform the referee. The standard time-\nout will start immediately after the expiration of the time-out\nbetween games. A time-out must be charged when any portion\nof the time is used. When the requesting singles player or\ndoubles team is ready to resume play before a requested time-\nout begins, that time-out is not charged."
+        },
+        {
+          "kind": "pdf",
+          "id": "7e6a6175-7876-461b-b998-b76811a0e8fe",
+          "rule": "21.C.10",
+          "content": "21.C.10 Technical Warning or Technical Foul – Invalid Medical\nCondition. When medical personnel, or the Tournament\nDirector when medical personnel are not available, determine\nthat no valid medical condition exists for granting a medical\ntimeout, the referee will assess a technical warning and charge\na standard time-out against the singles player or doubles team\nthat requested the medical time-out. When a standard time-\nout is not available, the referee will assess a technical foul\nagainst the player or team. The medical time-out is no longer\navailable to that player and the player must resume play\nimmediately."
+        },
+        {
+          "kind": "pdf",
+          "id": "465bc5ba-f3e9-43e2-8bb2-3dd714c21131",
+          "rule": "17.D.15",
+          "content": "17.D.15 Time-Outs. Enforce time-out procedures. (See Section 21.)\n17.D.16 15-Second Warnings. Announce when there are 15 seconds\nremaining in a time-out. At the end of the 15 seconds, the referee\nmust call “time in” and then the score when all players are ready\nto play or should be ready to play."
+        },
+        {
+          "kind": "pdf",
+          "id": "ee133944-bdb5-41ab-994f-d19440b45ddb",
+          "rule": "21.G",
+          "content": "21.G Time Between Matches. The allowed time between matches, including a\ntie-breaker match to determine a championship, is 10 minutes. When all\nplayers agree, a match may start early."
+        }
+      ],
+      "counterfactualScoreOnlySelected": false,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "8f8fdf7c-3bcc-4501-953a-6cceb1f5d60c",
+          "rule": "21.A.3",
+          "score": 0.6358
+        },
+        {
+          "rank": 2,
+          "id": "7e6a6175-7876-461b-b998-b76811a0e8fe",
+          "rule": "21.C.10",
+          "score": 0.6295
+        },
+        {
+          "rank": 3,
+          "id": "465bc5ba-f3e9-43e2-8bb2-3dd714c21131",
+          "rule": "17.D.15",
+          "score": 0.6159
+        },
+        {
+          "rank": 4,
+          "id": "ee133944-bdb5-41ab-994f-d19440b45ddb",
+          "rule": "21.G",
+          "score": 0.6072
+        },
+        {
+          "rank": 5,
+          "id": "18d12ed1-1433-433d-a153-15cd84117924",
+          "rule": "21.C.9",
+          "score": 0.6041
+        },
+        {
+          "rank": 6,
+          "id": "c8642e31-30ef-4167-ba0d-3ffb1023c08a",
+          "rule": "21.C.4",
+          "score": 0.6011
+        },
+        {
+          "rank": 7,
+          "id": "5f703df6-84af-4ff8-8f2c-eaf7670a0db5",
+          "rule": "22.D.6",
+          "score": 0.5713
+        },
+        {
+          "rank": 8,
+          "id": "0937bb3e-664e-4b31-9ad4-f6608578ff46",
+          "rule": "22.B.9",
+          "score": 0.5699
+        },
+        {
+          "rank": 9,
+          "id": "2acff5ec-8f67-4a41-9320-1eb3cf91cdd8",
+          "rule": "21.A",
+          "score": 0.5578
+        },
+        {
+          "rank": 10,
+          "id": "282fa8f4-d1bf-4351-902a-29507ea31937",
+          "rule": "16.M",
+          "score": 0.5542
+        },
+        {
+          "rank": 11,
+          "id": "aff27a49-365b-4ca3-877d-9a0316b7d2e8",
+          "rule": "21.C.6",
+          "score": 0.5518
+        },
+        {
+          "rank": 12,
+          "id": "bf4c228e-2481-4b77-8687-d5d7d0b864db",
+          "rule": "21.A.2",
+          "score": 0.5354
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "What time is my match?"
+      }
+    },
+    {
+      "question": "Can I change my lineup?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "1ee303b3b1713a46481b6c5feeff29c2f26d1ea499ed55f824f9f585d3856772",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 63
+      },
+      "score": 0.517908782991251,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [
+        {
+          "id": "6e572a43-4aed-47a8-89fc-518ecb52e7e9",
+          "rule": "",
+          "content": "o Lineup Submission: Both captains must enter starting lineups in Match Setup at least 3 days\nbefore match day. It is recommended that the Home Team enter their lineups first."
+        }
+      ],
+      "selected": [
+        {
+          "kind": "pdf",
+          "id": "6e572a43-4aed-47a8-89fc-518ecb52e7e9",
+          "rule": "",
+          "content": "o Lineup Submission: Both captains must enter starting lineups in Match Setup at least 3 days\nbefore match day. It is recommended that the Home Team enter their lineups first."
+        }
+      ],
+      "counterfactualScoreOnlySelected": false,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "536619ca-b02e-454a-8fa3-d1f4cc8d8f94",
+          "rule": "21.F.3",
+          "score": 0.4245
+        },
+        {
+          "rank": 2,
+          "id": "275eb933-c2aa-4c49-9632-5bba54976bbc",
+          "rule": "24.A",
+          "score": 0.4198
+        },
+        {
+          "rank": 3,
+          "id": "2c9ed553-c425-43f0-b2e1-deadcda18cc3",
+          "rule": "18.G",
+          "score": 0.4196
+        },
+        {
+          "rank": 4,
+          "id": "6e572a43-4aed-47a8-89fc-518ecb52e7e9",
+          "rule": "",
+          "score": 0.4191
+        },
+        {
+          "rank": 5,
+          "id": "1b89a6d2-c608-4ada-8a89-bf37dc2dc240",
+          "rule": "",
+          "score": 0.4152
+        },
+        {
+          "rank": 6,
+          "id": "c6e219c2-71aa-4d02-b1a6-52e82e3aa45a",
+          "rule": "",
+          "score": 0.3954
+        },
+        {
+          "rank": 7,
+          "id": "19a6da2c-4f5a-4d15-bef3-c75da9009d5a",
+          "rule": "",
+          "score": 0.3915
+        },
+        {
+          "rank": 8,
+          "id": "eea377bb-a0e6-4704-b65a-782934e0ab96",
+          "rule": "16.Q",
+          "score": 0.3905
+        },
+        {
+          "rank": 9,
+          "id": "be478610-7cd2-4252-abd0-87c86906cef7",
+          "rule": "16.N",
+          "score": 0.3898
+        },
+        {
+          "rank": 10,
+          "id": "3931d24b-23fd-44a3-9844-f99c675a73b8",
+          "rule": "16.K",
+          "score": 0.3856
+        },
+        {
+          "rank": 11,
+          "id": "c5792642-352c-49fa-a5c0-11399754fefe",
+          "rule": "16.L",
+          "score": 0.3837
+        },
+        {
+          "rank": 12,
+          "id": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+          "rule": "21.B",
+          "score": 0.3809
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can I change my lineup?"
+      }
+    },
+    {
+      "question": "Can I change teams?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "d0040a5a5c6b180944e6e64eb7b83cc21fff4f0f5d51ada55bb68170689d5b59",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 61
+      },
+      "score": 0.458030891249926,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [
+        {
+          "id": "bc191c12-071e-41a8-b571-3083327a288f",
+          "rule": "1.2",
+          "content": "1.4. Optional End Change: Prior to the start of the Picklebreaker, both teams may mutually\nagree to switch ends when the first team reaches six (8) points (15-point game) or thirteen\n(13) points (25-point game). If both teams do not agree before play begins, no end change\nshall occur during the entire game."
+        }
+      ],
+      "selected": [
+        {
+          "kind": "pdf",
+          "id": "bc191c12-071e-41a8-b571-3083327a288f",
+          "rule": "1.2",
+          "content": "1.4. Optional End Change: Prior to the start of the Picklebreaker, both teams may mutually\nagree to switch ends when the first team reaches six (8) points (15-point game) or thirteen\n(13) points (25-point game). If both teams do not agree before play begins, no end change\nshall occur during the entire game."
+        }
+      ],
+      "counterfactualScoreOnlySelected": false,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "536619ca-b02e-454a-8fa3-d1f4cc8d8f94",
+          "rule": "21.F.3",
+          "score": 0.5102
+        },
+        {
+          "rank": 2,
+          "id": "275eb933-c2aa-4c49-9632-5bba54976bbc",
+          "rule": "24.A",
+          "score": 0.4824
+        },
+        {
+          "rank": 3,
+          "id": "0bfeaa08-b9bb-4f71-bf1e-1c8085bffd08",
+          "rule": "17.D.2.a",
+          "score": 0.4599
+        },
+        {
+          "rank": 4,
+          "id": "2c9ed553-c425-43f0-b2e1-deadcda18cc3",
+          "rule": "18.G",
+          "score": 0.4427
+        },
+        {
+          "rank": 5,
+          "id": "1bc2673d-8f28-4c74-a785-2f0496568a50",
+          "rule": "21.F.2",
+          "score": 0.4389
+        },
+        {
+          "rank": 6,
+          "id": "3931d24b-23fd-44a3-9844-f99c675a73b8",
+          "rule": "16.K",
+          "score": 0.4023
+        },
+        {
+          "rank": 7,
+          "id": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+          "rule": "21.B",
+          "score": 0.4013
+        },
+        {
+          "rank": 8,
+          "id": "76911003-5ff6-44a3-93b5-61d245cb5b86",
+          "rule": "18.B.3",
+          "score": 0.3923
+        },
+        {
+          "rank": 9,
+          "id": "eea377bb-a0e6-4704-b65a-782934e0ab96",
+          "rule": "16.Q",
+          "score": 0.3915
+        },
+        {
+          "rank": 10,
+          "id": "bc191c12-071e-41a8-b571-3083327a288f",
+          "rule": "1.2",
+          "score": 0.3891
+        },
+        {
+          "rank": 11,
+          "id": "5345b056-5071-482e-9cc7-2a83617b6d35",
+          "rule": "21.B.7",
+          "score": 0.3847
+        },
+        {
+          "rank": 12,
+          "id": "be478610-7cd2-4252-abd0-87c86906cef7",
+          "rule": "16.N",
+          "score": 0.3789
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can I change teams?"
+      }
+    },
+    {
+      "question": "When do scores have to be entered?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "079d42142d3094889998a4a9e9c29f2f745b4e1465b293423918a11b8d2b33e6",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 65
+      },
+      "score": 0.30799677240994,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [
+        {
+          "id": "fb919a5a-ae9f-4fcf-afa4-409e656a8ee1",
+          "rule": "",
+          "content": " Entering Match Scores: To enter scores, click the Enter Match Scores button in the\nmatch. This option becomes available only on or after the scheduled match date and\nwill be red.\n\n Score Entry Process: When entering scores, use the dropdown menus to select the\nplayers for each game (built from your Match Setup), then enter the scores in each\ngame block. Click Submit when finished; the system will check for errors before saving.\n\n Score Verification: Once scores are submitted, the opposing captain will receive an\nemail request to verify them, and a red notification count will appear in their Pending\nMatch Verifications block. The opposing captain must open the match, review the\nscores, and click the verification button (or dispute button if they don’t accept the\nscores as written). Both captains will then be notified, and the standings will update\nautomatically.\n\no The visiting team captain must verify match scores promptly. This ensures there is enough time\nto review the results and enter them into DUPR before the end of the weekend."
+        }
+      ],
+      "selected": [
+        {
+          "kind": "pdf",
+          "id": "fb919a5a-ae9f-4fcf-afa4-409e656a8ee1",
+          "rule": "",
+          "content": " Entering Match Scores: To enter scores, click the Enter Match Scores button in the\nmatch. This option becomes available only on or after the scheduled match date and\nwill be red.\n\n Score Entry Process: When entering scores, use the dropdown menus to select the\nplayers for each game (built from your Match Setup), then enter the scores in each\ngame block. Click Submit when finished; the system will check for errors before saving.\n\n Score Verification: Once scores are submitted, the opposing captain will receive an\nemail request to verify them, and a red notification count will appear in their Pending\nMatch Verifications block. The opposing captain must open the match, review the\nscores, and click the verification button (or dispute button if they don’t accept the\nscores as written). Both captains will then be notified, and the standings will update\nautomatically.\n\no The visiting team captain must verify match scores promptly. This ensures there is enough time\nto review the results and enter them into DUPR before the end of the weekend."
+        }
+      ],
+      "counterfactualScoreOnlySelected": false,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "09c03bcd-9c30-4f00-91ae-a03cb65af6be",
+          "rule": "5.4",
+          "score": 0.6391
+        },
+        {
+          "rank": 2,
+          "id": "fb919a5a-ae9f-4fcf-afa4-409e656a8ee1",
+          "rule": "",
+          "score": 0.585
+        },
+        {
+          "rank": 3,
+          "id": "1859086d-5874-43b5-b162-4cd3152c0eab",
+          "rule": "",
+          "score": 0.5667
+        },
+        {
+          "rank": 4,
+          "id": "b49c3579-012f-4b78-8c4d-b5940baef598",
+          "rule": "",
+          "score": 0.4196
+        },
+        {
+          "rank": 5,
+          "id": "f411c1a3-01f6-4c90-830e-6f74d95cd81b",
+          "rule": "",
+          "score": 0.4072
+        },
+        {
+          "rank": 6,
+          "id": "50f36ffe-cce0-48a3-b4b1-7e32892d28a8",
+          "rule": "",
+          "score": 0.4036
+        },
+        {
+          "rank": 7,
+          "id": "6e572a43-4aed-47a8-89fc-518ecb52e7e9",
+          "rule": "",
+          "score": 0.32
+        },
+        {
+          "rank": 8,
+          "id": "b7ef08d2-387f-4100-8b1c-60af2a258273",
+          "rule": "17.D.6",
+          "score": 0.2944
+        },
+        {
+          "rank": 9,
+          "id": "a2ee8dbc-f52b-4ef1-a88a-ac99a5e90e43",
+          "rule": "2",
+          "score": 0.2711
+        },
+        {
+          "rank": 10,
+          "id": "2c4206cb-e198-45ab-9387-efe231d61f60",
+          "rule": "6.B",
+          "score": 0.2608
+        },
+        {
+          "rank": 11,
+          "id": "3aa22b42-d85b-4357-b676-b78f5a8d5ce0",
+          "rule": "14.A.3",
+          "score": 0.259
+        },
+        {
+          "rank": 12,
+          "id": "edf26617-2342-4ffa-9c84-b688e68312fa",
+          "rule": "22.I.3",
+          "score": 0.257
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "When do scores have to be entered?"
+      }
+    },
+    {
+      "question": "Can playoffs be rescheduled?",
+      "guard": false,
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingInputHash": "8c7679d9d36172dfc8ef03964936190c142f7a21f8ae419e34fc55613fd24855",
+      "embeddingCalls": 1,
+      "managed": {
+        "status": "completed",
+        "candidateCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "searchCount": 1,
+        "durationMs": 62
+      },
+      "score": 0.531656048075645,
+      "lexical": 0,
+      "rank": 1,
+      "thresholdPass": false,
+      "compatible": true,
+      "eligible": true,
+      "formal": [],
+      "selected": [],
+      "counterfactualScoreOnlySelected": true,
+      "stage3": [
+        {
+          "rank": 1,
+          "id": "01444d6d-44da-4fd9-8069-e7fe1e117e28",
+          "rule": "5.10",
+          "score": 0.4421
+        },
+        {
+          "rank": 2,
+          "id": "1d556519-2d9f-4e5e-8f2f-4eb2a87f0c87",
+          "rule": "5.13",
+          "score": 0.4412
+        },
+        {
+          "rank": 3,
+          "id": "4379d866-7cd3-457a-9fe0-8e98209988e7",
+          "rule": "6.1.8",
+          "score": 0.246
+        },
+        {
+          "rank": 4,
+          "id": "c43a2965-5150-423d-b010-50c2395c4b53",
+          "rule": "6.2.7",
+          "score": 0.2345
+        },
+        {
+          "rank": 5,
+          "id": "cb5ef7b6-b312-4417-91a2-d55723e8af9b",
+          "rule": "6.3.8",
+          "score": 0.2247
+        },
+        {
+          "rank": 6,
+          "id": "44005716-ca85-4f7d-9993-3f1242d8cced",
+          "rule": "",
+          "score": 0.22
+        },
+        {
+          "rank": 7,
+          "id": "97d610c5-d262-4982-9b06-305e50e1c4c7",
+          "rule": "3",
+          "score": 0.216
+        },
+        {
+          "rank": 8,
+          "id": "6d72e024-95d8-455f-bfb4-2baca003faa6",
+          "rule": "5.14",
+          "score": 0.2117
+        },
+        {
+          "rank": 9,
+          "id": "e1d5b881-351d-42a5-bd11-504e6e438c11",
+          "rule": "6.3.10",
+          "score": 0.2082
+        },
+        {
+          "rank": 10,
+          "id": "6a2e92c8-c4ce-47b6-9779-112d48d5ca3b",
+          "rule": "21.C.2",
+          "score": 0.2064
+        },
+        {
+          "rank": 11,
+          "id": "564f30d1-eab3-4c31-9035-d54b1fa60811",
+          "rule": "6.1.9.5",
+          "score": 0.2051
+        },
+        {
+          "rank": 12,
+          "id": "282fa8f4-d1bf-4351-902a-29507ea31937",
+          "rule": "16.M",
+          "score": 0.2043
+        }
+      ],
+      "interpretation": {
+        "policyVersion": "lms0720-v1",
+        "annotations": [],
+        "matchingView": "Can playoffs be rescheduled?"
+      }
+    }
+  ]
+}

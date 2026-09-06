@@ -1,0 +1,141 @@
+{
+  "method": "Saved managed scores; current read-only exact source revalidation; no embedding, model or capture calls",
+  "rows": [
+    {
+      "question": "As a captain, can I change our scheduled match date or time?",
+      "recordedManagedScore": 0.817563143427545,
+      "thresholdPass": true,
+      "diagnostic": {
+        "concept": "match_schedule_change",
+        "considered": [
+          {
+            "revisionId": "a9880b0e-da01-4692-aedf-020f07b22bf7",
+            "chunkId": "01444d6d-44da-4fd9-8069-e7fe1e117e28",
+            "status": "validated",
+            "ruleIdentity": "5.11"
+          }
+        ],
+        "lookupCount": 2,
+        "durationMs": 169
+      },
+      "formal": [
+        "5.11"
+      ],
+      "managed": true,
+      "warnings": 0
+    },
+    {
+      "question": "Can we move our match to another day?",
+      "recordedManagedScore": 0.614711299914807,
+      "thresholdPass": false,
+      "diagnostic": {
+        "concept": "match_schedule_change",
+        "considered": [],
+        "lookupCount": 0,
+        "durationMs": 0
+      },
+      "formal": [
+        "5.10"
+      ],
+      "managed": false,
+      "warnings": 0
+    },
+    {
+      "question": "Can both captains agree to play earlier?",
+      "recordedManagedScore": 0.61224956692717,
+      "thresholdPass": false,
+      "diagnostic": {
+        "concept": "match_schedule_change",
+        "considered": [],
+        "lookupCount": 0,
+        "durationMs": 0
+      },
+      "formal": [],
+      "managed": false,
+      "warnings": 0
+    },
+    {
+      "question": "Can we play our match earlier in the week?",
+      "recordedManagedScore": 0.561220738033462,
+      "thresholdPass": false,
+      "diagnostic": {
+        "concept": "match_schedule_change",
+        "considered": [],
+        "lookupCount": 0,
+        "durationMs": 0
+      },
+      "formal": [],
+      "managed": false,
+      "warnings": 0
+    },
+    {
+      "question": "Can we change our scheduled match time?",
+      "recordedManagedScore": 0.740996362486045,
+      "thresholdPass": true,
+      "diagnostic": {
+        "concept": "match_schedule_change",
+        "considered": [
+          {
+            "revisionId": "a9880b0e-da01-4692-aedf-020f07b22bf7",
+            "chunkId": "01444d6d-44da-4fd9-8069-e7fe1e117e28",
+            "status": "validated",
+            "ruleIdentity": "5.11"
+          }
+        ],
+        "lookupCount": 2,
+        "durationMs": 109
+      },
+      "formal": [
+        "5.11"
+      ],
+      "managed": true,
+      "warnings": 0
+    },
+    {
+      "question": "Can we reschedule our match?",
+      "recordedManagedScore": 0.684921860975445,
+      "thresholdPass": true,
+      "diagnostic": {
+        "concept": "match_schedule_change",
+        "considered": [
+          {
+            "revisionId": "a9880b0e-da01-4692-aedf-020f07b22bf7",
+            "chunkId": "01444d6d-44da-4fd9-8069-e7fe1e117e28",
+            "status": "validated",
+            "ruleIdentity": "5.11"
+          }
+        ],
+        "lookupCount": 2,
+        "durationMs": 109
+      },
+      "formal": [
+        "5.11"
+      ],
+      "managed": true,
+      "warnings": 0
+    },
+    {
+      "question": "Can we change the date of our match?",
+      "recordedManagedScore": 0.702567658408756,
+      "thresholdPass": true,
+      "diagnostic": {
+        "concept": "match_schedule_change",
+        "considered": [
+          {
+            "revisionId": "a9880b0e-da01-4692-aedf-020f07b22bf7",
+            "chunkId": "01444d6d-44da-4fd9-8069-e7fe1e117e28",
+            "status": "validated",
+            "ruleIdentity": "5.11"
+          }
+        ],
+        "lookupCount": 2,
+        "durationMs": 115
+      },
+      "formal": [
+        "5.11"
+      ],
+      "managed": true,
+      "warnings": 0
+    }
+  ]
+}
