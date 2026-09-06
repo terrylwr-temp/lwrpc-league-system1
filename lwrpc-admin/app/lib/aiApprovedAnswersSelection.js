@@ -48,7 +48,7 @@ export function chooseApprovedEvidence(question,formal,rows,{date,scope='all',se
    && !(schedulingQuestionKind(x.revision.canonical_question)==='match_schedule_change'&&x.revision.related_chunk_id&&!x.validatedRelatedEvidence));
  if(formal.length){
    const complementary=eligible.find(x=>!managedPlayingRule(question)&&!managedPlayingRule(x.revision.approved_answer)&&x.revision.related_chunk_id&&formal.some(f=>f.documentType!=='usap_rulebook'&&f.chunkId===x.revision.related_chunk_id&&(!x.validatedRelatedEvidence||f.content===x.revision.related_passage))&&!formal.some(f=>meaningfulDiscrepancy(x.revision,f)));
-   return {selected:complementary&&formal.length<4?[...formal,managedCandidate(complementary)]:formal,warnings:safeAuthorityWarnings(warnings),conflict:false};
+   return {selected:complementary&&formal.length<4?[...formal,managedCandidate(complementary,true)]:formal,warnings:safeAuthorityWarnings(warnings),conflict:false};
  }
  if(managedPlayingRule(question)||eligible.some(x=>managedPlayingRule(x.revision.approved_answer)))return {selected:[],warnings:[],conflict:false};
  if(!eligible.length)return {selected:[],warnings:[],conflict:false};
@@ -59,11 +59,13 @@ export function chooseApprovedEvidence(question,formal,rows,{date,scope='all',se
  if(eligible.length>1&&eligible[0].revision.topic_key!==eligible[1].revision.topic_key&&eligible[0].semantic_score-eligible[1].semantic_score<.06)return {selected:[],warnings:[],conflict:false};
  return {selected:[managedCandidate(eligible[0])],warnings:[],conflict:false};
 }
-function managedCandidate(item){
+function managedCandidate(item,materialSupplement=false){
  const r=item.revision;
  return {sourceKind:'approved_answer',approvedAnswerId:r.answer_id,approvedRevisionId:r.id,approvedRevisionNumber:r.revision_number,contentHash:r.content_hash,
   leagueScope:r.league_scope,effectiveOn:r.effective_on,expiresOn:r.expires_on,
   documentTitle:`${APPROVED_SOURCE_NAME} — ${r.title}`,documentType:'approved_answer',sourceClassification:'lwr_approved_answer',
-  content:r.approved_answer,ruleNumber:'',heading:r.title,combinedScore:item.semantic_score,evidenceRole:'Approved static LWR knowledge',evidenceSelectionReason:'Eligible immutable approved revision; formal evidence retains governing priority',
+  content:r.approved_answer,ruleNumber:'',heading:r.title,combinedScore:item.semantic_score,
+  ...(materialSupplement?{materialSupplement:true}:{}),
+  evidenceRole:materialSupplement?'Supplemental official LWR knowledge — materially selected':'Approved static LWR knowledge',evidenceSelectionReason:materialSupplement?'Applicable non-conflicting approved supplement; preserve its material policy contributions alongside governing evidence':'Eligible immutable approved revision; formal evidence retains governing priority',
  };
 }

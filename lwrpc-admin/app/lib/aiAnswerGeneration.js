@@ -2,7 +2,8 @@ import { matchingQuestion } from "./aiQuestionInterpretation.js";
 import { assistInterpretationRetrieval, retrieveApprovedForAnswer } from "./aiRetrieval.js";
 import {chooseApprovedEvidence} from './aiApprovedAnswersSelection.js';
 import {prepareApprovedRelatedEvidence} from './aiApprovedRelatedEvidence.js';
-import {validateManagedPassage} from './aiApprovedSourceBinding.js';
+import {validateManagedPassage,trustedPassageHeading} from './aiApprovedSourceBinding.js';
+import {MATERIAL_SUPPLEMENT_INSTRUCTION,hasMaterialSupplements,supplementalPromptMetadata} from './aiSupplementContract.js';
 import {approvedSourceIdentity,approvedEligible} from './aiApprovedAnswersShared.js';
 import { trustedSelectedRuleIdentity } from "./aiSelectedRuleIdentity.js";
 import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind, isSeasonRatingDateQuestion, seasonRatingDatePassages, isCommunityParticipationQuestion, communityParticipationPassages } from "./aiQuestionApplicability.js";
@@ -260,6 +261,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
     const source = sources.find(source => chunk.sourceKind==='approved_answer'?source.approvedRevisionId===chunk.approvedRevisionId:source.chunkId === chunk.chunkId);
     chunk.chunkRuleNumber = chunk.ruleNumber;
     chunk.ruleNumber = source.ruleNumber || "";
+    chunk.heading = source.heading || "";
   }
 
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured on the server.");
@@ -291,6 +293,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
       instructions: [
         "You are the official Lakewood Ranch Pickleball Club AI Assistant.",
         ...(managedSelection?["The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts."]:[]),
+        ...(hasMaterialSupplements(selectedEvidence)?[MATERIAL_SUPPLEMENT_INSTRUCTION]:[]),
         "Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request.",
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
@@ -391,7 +394,7 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
       ruleNumber: chunk.boundRelatedPassage ? validateManagedPassage(citedChunk,chunk.content,chunk.ruleNumber).ruleNumber : chunk.content !== undefined || chunk.selectedPassages ? trustedSelectedRuleIdentity(chunk, citedChunk) : citedChunk.rule_number || "",
       chunkRuleNumber: citedChunk.rule_number || "",
       sectionLabel: citedChunk.section_label || "",
-      heading: citedChunk.heading || "",
+      heading: trustedPassageHeading(chunk,citedChunk),
     };
     const pageNumber = sourceChunk.pageNumber;
     const officialDocumentUrl = pageAwareOfficialDocumentUrl(signed.signedUrl, pageNumber);
@@ -583,7 +586,7 @@ function rejectedIntentReason(candidate, intents) {
 }
 
 function answerPrompt(question, evidence) {
-  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
+  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}${supplementalPromptMetadata(chunk)}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
 }
 
 function cleanCitationDetail(value) {

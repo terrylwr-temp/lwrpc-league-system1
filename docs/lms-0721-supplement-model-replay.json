@@ -1,0 +1,295 @@
+{
+  "method": "Local configured-model generation only; exact active scheduling evidence and synthetic review controls; no capture or persistence; no embedding API calls",
+  "cases": [
+    {
+      "mode": "scheduling",
+      "question": "Can we reschedule our match?",
+      "structured": "{\"answer\":\"Yes. Captains may mutually agree to reschedule a match to another time that day or to another day within the same week.\\n\\nThey must notify League Management at info@lwrpickleballclub.com of the new date and time. Scores must be submitted by Sunday at midnight of that same week. If that deadline cannot be met because of weather or other unforeseen circumstances, the Home Captain must notify the same address before Sunday at midnight with the rescheduled date and time; failure to do so may result in forfeiture.\",\"conflict\":false,\"supported\":true}",
+      "answer": "Yes. Captains may mutually agree to reschedule a match to another time that day or to another day within the same week.\n\nThey must notify League Management at info@lwrpickleballclub.com of the new date and time. Scores must be submitted by Sunday at midnight of that same week. If that deadline cannot be met because of weather or other unforeseen circumstances, the Home Captain must notify the same address before Sunday at midnight with the rescheduled date and time; failure to do so may result in forfeiture.",
+      "evidenceSufficient": true,
+      "warnings": [],
+      "sources": [
+        {
+          "title": "LWR Pickleball Club DUPR League Rules",
+          "rule": "5.11",
+          "heading": "Rescheduling & Score Submission Deadlines",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 5.11 — Rescheduling & Score Submission Deadlines — Page 5"
+        },
+        {
+          "title": "LWR Pickleball Club Approved Answer — Match Scheduling Changes",
+          "rule": "",
+          "heading": "Match Scheduling Changes",
+          "citation": "LWR Pickleball Club Approved Answer — Match Scheduling Changes — Effective 2026-09-06"
+        }
+      ],
+      "selected": [
+        {
+          "type": "league_rules",
+          "role": "Primary / controlling",
+          "materialSupplement": false,
+          "content": "5.11. Rescheduling & Score Submission Deadlines: If both coaches agree, games may be\nrescheduled to a diƯerent time on the same day or to another day within the same week.\nHowever, all game scores must be submitted by the end of Sunday of the same week by\nmidnight. If this deadline cannot be met due to weather conditions or other unforeseen\ncircumstances, the Home Captain must notify info@lwrpickleballclub.com before\nSunday at midnight with the rescheduled date and time. Failure to do so may result in\nforfeiture of the games."
+        },
+        {
+          "type": "approved_answer",
+          "role": "Supplemental official LWR knowledge — materially selected",
+          "materialSupplement": true,
+          "content": "Yes. Under Rule 5.11, captains may mutually agree to reschedule a match to another time that day or to another day within the same week, subject to the Rule's scheduling and score-reporting requirements. Whenever captains agree to change a scheduled match date or time, they must also notify League Management at info@lwrpickleballclub.com of the new date and time."
+        }
+      ],
+      "metrics": {
+        "generationMs": 3036,
+        "sourceResolutionMs": 352,
+        "totalMs": 3862,
+        "inputTokens": 1226,
+        "outputTokens": 128,
+        "totalTokens": 1354,
+        "estimatedGenerationCostUsd": 0.00997
+      },
+      "modelInput": {
+        "instructions": "You are the official Lakewood Ranch Pickleball Club AI Assistant. The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts. Evidence marked \"Supplemental official LWR knowledge — materially selected\" has already passed applicability, current-policy and non-conflict selection. Its distinct material policy contributions are required, not optional. Preserve the governing rule AND every additional material obligation, permission, qualification or procedure supplied by that selected supplement. Higher formal authority prevents contradiction or override; it does not discard consistent supplemental requirements. Preserve each requirement's triggering condition and scope: do not narrow a generally applicable supplemental obligation to an exception described by the formal rule. Merge genuinely redundant statements once; do not repeat all source sentences or add commentary about this contract. Do not decide to ignore a materially selected supplement for brevity. Before finalizing, check that your answer communicates all distinct material contributions from each marked source. If that cannot be done consistently from the supplied evidence, report the existing supported/conflict status truthfully rather than returning a partial answer as supported. Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request. Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions. You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule. Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence. You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional. Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence. Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk. Keep conditional permission and its limiting exception together. Explain a supplied hypothetical condition without claiming to have checked the user's actual community, team or eligibility. When that condition is unknown, explain the conditional rule rather than giving unrestricted permission or prohibition. Describe referee-specific procedures as applying when a referee is officiating. A tournament match does not by itself establish that a referee is present. When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct. Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play. Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
+        "input": [
+          {
+            "role": "user",
+            "content": "User question:\nCan we reschedule our match?\n\nOfficial uploaded evidence only:\n[Evidence 1 — Primary / controlling]\nSource classification: lwr_controlling\nQuestion intent supported: match_schedule_change\nDocument: LWR Pickleball Club DUPR League Rules\nDocument type: league_rules\nAuthority rank: 1\nRule: 5.11\nSection: Rule 5.10\nHeading: Rescheduling & Score Submission Deadlines\nPage: 5\nText:\n5.11. Rescheduling & Score Submission Deadlines: If both coaches agree, games may be\nrescheduled to a diƯerent time on the same day or to another day within the same week.\nHowever, all game scores must be submitted by the end of Sunday of the same week by\nmidnight. If this deadline cannot be met due to weather conditions or other unforeseen\ncircumstances, the Home Captain must notify info@lwrpickleballclub.com before\nSunday at midnight with the rescheduled date and time. Failure to do so may result in\nforfeiture of the games.\n\n[Evidence 2 — Supplemental official LWR knowledge — materially selected]\nSource classification: lwr_approved_answer\nMaterial contribution contract: REQUIRED. Preserve the distinct policy contributions and their conditions in the exact approved content below; combine redundant formal facts once. The formal rule remains governing.\nQuestion intent supported: Applicable document passage\nDocument: LWR Pickleball Club Approved Answer — Match Scheduling Changes\nDocument type: approved_answer\nAuthority rank: not supplied\nRule: not supplied\nSection: not supplied\nHeading: Match Scheduling Changes\nPage: not supplied\nText:\nYes. Under Rule 5.11, captains may mutually agree to reschedule a match to another time that day or to another day within the same week, subject to the Rule's scheduling and score-reporting requirements. Whenever captains agree to change a scheduled match date or time, they must also notify League Management at info@lwrpickleballclub.com of the new date and time."
+          }
+        ]
+      }
+    },
+    {
+      "mode": "combined",
+      "question": "Can an organizer request a review?",
+      "structured": "{\"answer\":\"Yes. An organizer may request a review, and every request must include a written summary.\",\"conflict\":false,\"supported\":true}",
+      "answer": "Yes. An organizer may request a review, and every request must include a written summary.",
+      "evidenceSufficient": true,
+      "warnings": [],
+      "sources": [
+        {
+          "title": "Synthetic Review Policy — local model test only",
+          "citation": "Synthetic Review Policy — local model test only"
+        },
+        {
+          "title": "LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only",
+          "rule": "",
+          "heading": "Synthetic Review Procedure — local model test only",
+          "citation": "LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only"
+        }
+      ],
+      "selected": [
+        {
+          "type": "league_rules",
+          "role": "Primary / controlling",
+          "materialSupplement": false,
+          "content": "An organizer may request a review."
+        },
+        {
+          "type": "approved_answer",
+          "role": "Supplemental official LWR knowledge — materially selected",
+          "materialSupplement": true,
+          "content": "An organizer may request a review. Every request must include a written summary."
+        }
+      ],
+      "metrics": {
+        "generationMs": 1555,
+        "sourceResolutionMs": 0,
+        "totalMs": 1560,
+        "inputTokens": 1042,
+        "outputTokens": 40,
+        "totalTokens": 1082,
+        "estimatedGenerationCostUsd": 0.00641
+      },
+      "modelInput": {
+        "instructions": "You are the official Lakewood Ranch Pickleball Club AI Assistant. The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts. Evidence marked \"Supplemental official LWR knowledge — materially selected\" has already passed applicability, current-policy and non-conflict selection. Its distinct material policy contributions are required, not optional. Preserve the governing rule AND every additional material obligation, permission, qualification or procedure supplied by that selected supplement. Higher formal authority prevents contradiction or override; it does not discard consistent supplemental requirements. Preserve each requirement's triggering condition and scope: do not narrow a generally applicable supplemental obligation to an exception described by the formal rule. Merge genuinely redundant statements once; do not repeat all source sentences or add commentary about this contract. Do not decide to ignore a materially selected supplement for brevity. Before finalizing, check that your answer communicates all distinct material contributions from each marked source. If that cannot be done consistently from the supplied evidence, report the existing supported/conflict status truthfully rather than returning a partial answer as supported. Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request. Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions. You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule. Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence. You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional. Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence. Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk. Keep conditional permission and its limiting exception together. Explain a supplied hypothetical condition without claiming to have checked the user's actual community, team or eligibility. When that condition is unknown, explain the conditional rule rather than giving unrestricted permission or prohibition. Describe referee-specific procedures as applying when a referee is officiating. A tournament match does not by itself establish that a referee is present. When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct. Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play. Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
+        "input": [
+          {
+            "role": "user",
+            "content": "User question:\nCan an organizer request a review?\n\nOfficial uploaded evidence only:\n[Evidence 1 — Primary / controlling]\nSource classification: lwr_controlling\nQuestion intent supported: Applicable document passage\nDocument: Synthetic Review Policy — local model test only\nDocument type: league_rules\nAuthority rank: 1\nRule: not supplied\nSection: not supplied\nHeading: not supplied\nPage: not supplied\nText:\nAn organizer may request a review.\n\n[Evidence 2 — Supplemental official LWR knowledge — materially selected]\nSource classification: lwr_approved_answer\nMaterial contribution contract: REQUIRED. Preserve the distinct policy contributions and their conditions in the exact approved content below; combine redundant formal facts once. The formal rule remains governing.\nQuestion intent supported: Applicable document passage\nDocument: LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only\nDocument type: approved_answer\nAuthority rank: not supplied\nRule: not supplied\nSection: not supplied\nHeading: Synthetic Review Procedure — local model test only\nPage: not supplied\nText:\nAn organizer may request a review. Every request must include a written summary."
+          }
+        ]
+      }
+    },
+    {
+      "mode": "formal-only",
+      "question": "Can an organizer request a review?",
+      "structured": "{\"answer\":\"Yes. An organizer may request a review.\",\"conflict\":false}",
+      "answer": "Yes. An organizer may request a review.",
+      "evidenceSufficient": true,
+      "warnings": [],
+      "sources": [
+        {
+          "title": "Synthetic Review Policy — local model test only",
+          "citation": "Synthetic Review Policy — local model test only"
+        }
+      ],
+      "selected": [
+        {
+          "type": "league_rules",
+          "role": "Primary / controlling",
+          "materialSupplement": false,
+          "content": "An organizer may request a review."
+        }
+      ],
+      "metrics": {
+        "generationMs": 1167,
+        "sourceResolutionMs": 0,
+        "totalMs": 1170,
+        "inputTokens": 660,
+        "outputTokens": 27,
+        "totalTokens": 687,
+        "estimatedGenerationCostUsd": 0.00411
+      },
+      "modelInput": {
+        "instructions": "You are the official Lakewood Ranch Pickleball Club AI Assistant. Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request. Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions. You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule. Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence. You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional. Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence. Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk. Keep conditional permission and its limiting exception together. Explain a supplied hypothetical condition without claiming to have checked the user's actual community, team or eligibility. When that condition is unknown, explain the conditional rule rather than giving unrestricted permission or prohibition. Describe referee-specific procedures as applying when a referee is officiating. A tournament match does not by itself establish that a referee is present. When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct. Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play. Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
+        "input": [
+          {
+            "role": "user",
+            "content": "User question:\nCan an organizer request a review?\n\nOfficial uploaded evidence only:\n[Evidence 1 — Primary / controlling]\nSource classification: lwr_controlling\nQuestion intent supported: Applicable document passage\nDocument: Synthetic Review Policy — local model test only\nDocument type: league_rules\nAuthority rank: 1\nRule: not supplied\nSection: not supplied\nHeading: not supplied\nPage: not supplied\nText:\nAn organizer may request a review."
+          }
+        ]
+      }
+    },
+    {
+      "mode": "approved-only",
+      "question": "Can an organizer request a review?",
+      "structured": "{\"answer\":\"Yes. An organizer may request a review, and every request must include a written summary.\",\"conflict\":false,\"supported\":true}",
+      "answer": "Yes. An organizer may request a review, and every request must include a written summary.",
+      "evidenceSufficient": true,
+      "warnings": [],
+      "sources": [
+        {
+          "title": "LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only",
+          "rule": "",
+          "heading": "Synthetic Review Procedure — local model test only",
+          "citation": "LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only"
+        }
+      ],
+      "selected": [
+        {
+          "type": "approved_answer",
+          "role": "Approved static LWR knowledge",
+          "materialSupplement": false,
+          "content": "An organizer may request a review. Every request must include a written summary."
+        }
+      ],
+      "metrics": {
+        "generationMs": 3353,
+        "sourceResolutionMs": 0,
+        "totalMs": 3354,
+        "inputTokens": 750,
+        "outputTokens": 40,
+        "totalTokens": 790,
+        "estimatedGenerationCostUsd": 0.00495
+      },
+      "modelInput": {
+        "instructions": "You are the official Lakewood Ranch Pickleball Club AI Assistant. The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts. Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request. Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions. You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule. Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence. You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional. Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence. Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk. Keep conditional permission and its limiting exception together. Explain a supplied hypothetical condition without claiming to have checked the user's actual community, team or eligibility. When that condition is unknown, explain the conditional rule rather than giving unrestricted permission or prohibition. Describe referee-specific procedures as applying when a referee is officiating. A tournament match does not by itself establish that a referee is present. When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct. Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play. Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
+        "input": [
+          {
+            "role": "user",
+            "content": "User question:\nCan an organizer request a review?\n\nOfficial uploaded evidence only:\n[Evidence 1 — Approved static LWR knowledge]\nSource classification: lwr_approved_answer\nQuestion intent supported: Applicable document passage\nDocument: LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only\nDocument type: approved_answer\nAuthority rank: not supplied\nRule: not supplied\nSection: not supplied\nHeading: Synthetic Review Procedure — local model test only\nPage: not supplied\nText:\nAn organizer may request a review. Every request must include a written summary."
+          }
+        ]
+      }
+    },
+    {
+      "mode": "redundant",
+      "question": "Can an organizer request a review?",
+      "structured": "{\"answer\":\"Yes. An organizer may request a review.\",\"conflict\":false,\"supported\":true}",
+      "answer": "Yes. An organizer may request a review.",
+      "evidenceSufficient": true,
+      "warnings": [],
+      "sources": [
+        {
+          "title": "Synthetic Review Policy — local model test only",
+          "citation": "Synthetic Review Policy — local model test only"
+        },
+        {
+          "title": "LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only",
+          "rule": "",
+          "heading": "Synthetic Review Procedure — local model test only",
+          "citation": "LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only"
+        }
+      ],
+      "selected": [
+        {
+          "type": "league_rules",
+          "role": "Primary / controlling",
+          "materialSupplement": false,
+          "content": "An organizer may request a review."
+        },
+        {
+          "type": "approved_answer",
+          "role": "Supplemental official LWR knowledge — materially selected",
+          "materialSupplement": true,
+          "content": "An organizer may request a review."
+        }
+      ],
+      "metrics": {
+        "generationMs": 1268,
+        "sourceResolutionMs": 0,
+        "totalMs": 1274,
+        "inputTokens": 1034,
+        "outputTokens": 31,
+        "totalTokens": 1065,
+        "estimatedGenerationCostUsd": 0.0061
+      },
+      "modelInput": {
+        "instructions": "You are the official Lakewood Ranch Pickleball Club AI Assistant. The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts. Evidence marked \"Supplemental official LWR knowledge — materially selected\" has already passed applicability, current-policy and non-conflict selection. Its distinct material policy contributions are required, not optional. Preserve the governing rule AND every additional material obligation, permission, qualification or procedure supplied by that selected supplement. Higher formal authority prevents contradiction or override; it does not discard consistent supplemental requirements. Preserve each requirement's triggering condition and scope: do not narrow a generally applicable supplemental obligation to an exception described by the formal rule. Merge genuinely redundant statements once; do not repeat all source sentences or add commentary about this contract. Do not decide to ignore a materially selected supplement for brevity. Before finalizing, check that your answer communicates all distinct material contributions from each marked source. If that cannot be done consistently from the supplied evidence, report the existing supported/conflict status truthfully rather than returning a partial answer as supported. Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request. Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions. You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule. Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence. You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional. Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence. Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk. Keep conditional permission and its limiting exception together. Explain a supplied hypothetical condition without claiming to have checked the user's actual community, team or eligibility. When that condition is unknown, explain the conditional rule rather than giving unrestricted permission or prohibition. Describe referee-specific procedures as applying when a referee is officiating. A tournament match does not by itself establish that a referee is present. When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct. Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play. Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
+        "input": [
+          {
+            "role": "user",
+            "content": "User question:\nCan an organizer request a review?\n\nOfficial uploaded evidence only:\n[Evidence 1 — Primary / controlling]\nSource classification: lwr_controlling\nQuestion intent supported: Applicable document passage\nDocument: Synthetic Review Policy — local model test only\nDocument type: league_rules\nAuthority rank: 1\nRule: not supplied\nSection: not supplied\nHeading: not supplied\nPage: not supplied\nText:\nAn organizer may request a review.\n\n[Evidence 2 — Supplemental official LWR knowledge — materially selected]\nSource classification: lwr_approved_answer\nMaterial contribution contract: REQUIRED. Preserve the distinct policy contributions and their conditions in the exact approved content below; combine redundant formal facts once. The formal rule remains governing.\nQuestion intent supported: Applicable document passage\nDocument: LWR Pickleball Club Approved Answer — Synthetic Review Procedure — local model test only\nDocument type: approved_answer\nAuthority rank: not supplied\nRule: not supplied\nSection: not supplied\nHeading: Synthetic Review Procedure — local model test only\nPage: not supplied\nText:\nAn organizer may request a review."
+          }
+        ]
+      }
+    },
+    {
+      "mode": "conflict",
+      "question": "Can an organizer request a review?",
+      "structured": "{\"answer\":\"Yes. An organizer may request a review.\",\"conflict\":false}",
+      "answer": "Yes. An organizer may request a review.",
+      "evidenceSufficient": true,
+      "warnings": [
+        {
+          "approvedAnswerId": "ef3a570f-e449-47d0-9bf7-d3084e8d1491",
+          "approvedRevisionId": "4e4e67d5-3898-448c-b091-f63d1934489c",
+          "documentId": "97217032-90a4-421c-a875-aff3bfa6aec3",
+          "documentVersionId": "8f537967-a073-42ea-b1d1-36e1b58b7063",
+          "chunkId": "001212e4-3e5f-4060-9a5b-9cde3ca245b4",
+          "reason": "opposed_permission",
+          "leagueScope": "all"
+        }
+      ],
+      "sources": [
+        {
+          "title": "Synthetic Review Policy — local model test only",
+          "citation": "Synthetic Review Policy — local model test only"
+        }
+      ],
+      "selected": [
+        {
+          "type": "league_rules",
+          "role": "Primary / controlling",
+          "materialSupplement": false,
+          "content": "An organizer may request a review."
+        }
+      ],
+      "metrics": {
+        "generationMs": 1136,
+        "sourceResolutionMs": 0,
+        "totalMs": 1138,
+        "inputTokens": 660,
+        "outputTokens": 27,
+        "totalTokens": 687,
+        "estimatedGenerationCostUsd": 0.00411
+      },
+      "modelInput": {
+        "instructions": "You are the official Lakewood Ranch Pickleball Club AI Assistant. Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request. Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions. You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule. Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence. You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional. Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence. Answer the question directly first, in plain language. Keep it concise; use bullets only when they make multiple required steps or outcomes clearer. Do not summarize every supplied chunk. Keep conditional permission and its limiting exception together. Explain a supplied hypothetical condition without claiming to have checked the user's actual community, team or eligibility. When that condition is unknown, explain the conditional rule rather than giving unrestricted permission or prohibition. Describe referee-specific procedures as applying when a referee is officiating. A tournament match does not by itself establish that a referee is present. When direct evidence prohibits the action as the user describes it, begin with the negative result; when it permits the action, begin with the affirmative result. Do not begin affirmatively when the supplied rule prohibits the described conduct. Determine authority separately for each supported question intent. Direct applicability comes before authority rank. lwr_controlling rules modify the corresponding USAP rule only for the same specifically addressed issue. usap_governing_fallback governs its supported issue when no directly applicable LWR rule modifies it. Never apply a rank globally across unrelated issues. lwr_supporting_guide may explain procedure but cannot independently override a governing playing rule. Supporting guidance may explain procedure but must never override, weaken, or reinterpret controlling rule evidence. Do not blend an overridden USAP outcome into an LWR rule for league play. Do not add citations, sources, links, or source labels; the server attaches verified citations. If evidence does not support all of the question, say so without guessing. If supplied sources materially conflict on the requested point, set conflict to true and do not give a definitive answer. Do not treat complementary detail as a conflict.",
+        "input": [
+          {
+            "role": "user",
+            "content": "User question:\nCan an organizer request a review?\n\nOfficial uploaded evidence only:\n[Evidence 1 — Primary / controlling]\nSource classification: lwr_controlling\nQuestion intent supported: Applicable document passage\nDocument: Synthetic Review Policy — local model test only\nDocument type: league_rules\nAuthority rank: 1\nRule: not supplied\nSection: not supplied\nHeading: not supplied\nPage: not supplied\nText:\nAn organizer may request a review."
+          }
+        ]
+      }
+    }
+  ]
+}

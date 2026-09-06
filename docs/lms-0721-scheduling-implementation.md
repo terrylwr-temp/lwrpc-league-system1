@@ -67,3 +67,25 @@ Validation: **499 tests passed**; lint passed with six existing warnings; noninc
 Authorized pipeline: commit/push validated application to the existing main-branch Vercel production pipeline; no migration or environment action. First live question must be `Can we reschedule our match?`; stop if it fails. Only after it passes, test remaining >=.65 variants. Do not test revision replacement/retirement or implement recall yet. Below-.65 positives remain a separate decision: retain .65 until independently grounded conditional-recall precision is demonstrated; no global lowering recommendation from this seven-positive sample.
 
 Production results will be appended after the authorized deployment and tests. Saturday 6.2.2, general source-management activation display and other deferred AI-quality work remain outside scope.
+
+## Production deployment and mandatory stop
+
+Deployed commit **a3e49231747684c8bbb1a2467025decc8560d2e3** through main-branch Git integration. Vercel **dpl_5ochKYHXsWWC9pQ4QM99utqmbCV1** is READY and serves `league.lwrpickleballclub.com`. No migration, environment or managed-revision action occurred.
+
+The first and only new production Ask test was **Can we reschedule our match?** in the player Ask LWR panel after reloading the deployment. It produced two Official Sources: formal Rule **5.11**, page 5, and **Match Scheduling Changes**. New outcome `d9016ce3-4d36-4c91-8ec8-0d02fc9c18f7`, completed **2026-09-06 21:24:38.155 UTC**, records `answer`, LMS-0721, two selected evidence items, feedback eligibility, and a model call. No Authority Warning was recorded (the serializer omits the warning field when empty).
+
+Actual player answer:
+
+> Yes. If both coaches agree, games may be rescheduled to a different time on the same day or to another day within the same week. Scores must still be submitted by Sunday at midnight of that same week.
+>
+> If that deadline cannot be met because of weather or other unforeseen circumstances, the Home Captain must notify info@lwrpickleballclub.com before Sunday at midnight with the rescheduled date and time. Failure to do so may result in forfeiture.
+
+**Acceptance stopped:** the formal-plus-managed selection succeeds, but generation omits the approved supplement's requirement to notify League Management for **every agreed date/time change**. It mentions only formal deadline-exception notice. This does not satisfy the required supplemental-policy behavior, despite the `answer` classification and two citations. Local handoff tests prove both texts reach generation; their stubbed model response did not prove actual generation preserves every material contribution. No further correction, retry, manager test or remaining positive production test was performed after discovering this.
+
+Additional source-label defect: the formal source displays **Rule 5.11 — Video Recording — Page 5**. The specific rule identity is correct, but the heading is inherited from the stored 5.10 container at citation resolution. The helper sets the exact passage heading, while source resolution still uses `citedChunk.heading`. Record this for the next bounded correction; do not alter the source/corpus or Active revision to compensate.
+
+Remaining above-.65 variants are locally validated but **not retested live** because the first-test stop condition fired. Production manager diagnostic display and isolated related-lookup hosting interval are also not claimed verified; the measured related-lookup timings above are read-only local-to-production measurements. No new feedback was submitted. Read-only preservation check: one revision, revision 1 Active, full row hash `5a4005dfc42b6a5e64bb76dc2f67f669`; two managed audit events; 17 feedback events, unchanged.
+
+Recommendation: separately authorize correction of material supplemental-obligation preservation in generation and exact bound-passage heading presentation, then rerun this first gate. Keep .65 unchanged during that work. The .6147113, .6122496 and .5612207 questions remain distinct recall cases. Do not start revision 2, retire revision 1 or resume the lifecycle until the owner makes the recall decision. **LMS-0721 / 0.1.543 remains deployed, NOT production accepted.** Post-test documentation is local; no second deployment was triggered.
+
+Production outcome total request time: **3,561 ms**. This includes normal retrieval/generation; the deployed related-source interval was not separately captured by unchanged lightweight Stage 7 telemetry.
