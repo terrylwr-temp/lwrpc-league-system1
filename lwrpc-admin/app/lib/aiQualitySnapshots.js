@@ -1,6 +1,8 @@
 import {approvedSourceIdentity,safeAuthorityWarnings} from "./aiApprovedAnswersShared.js";
 import { APP_VERSION } from "./version.js";
 import { qualityFingerprint } from "./aiQualityGrouping.js";
+import { hasUnapprovedEmail } from "./publicOrganizationalContacts.js";
+import { hasQualityPersonalName } from "./aiQualityNameClassification.js";
 
 const short = (v,n) => [...String(v ?? "")].slice(0,n).join("");
 const code = (v,n=120) => /^[a-zA-Z0-9_. /:-]+$/.test(String(v || "")) ? short(v,n) : null;
@@ -9,8 +11,8 @@ const integer = v => Number.isInteger(v) && v>=0 && v<=2147483647 ? v : null;
 const array = v => Array.isArray(v) ? v : [];
 export function redactQualityText(value, limit) {
   const text = String(value ?? "").replace(/[\u0000-\u001f\u007f]/g," ").trim();
-  const sensitive = /https?:\/\/|www\.|[\w.+-]+@[\w.-]+\.[a-z]{2,}|\b(?:bearer|password|token|secret|api[_ -]?key)\b|\b(?:\+?\d[ ()-]*){9,}\b/i.test(text)
-    || /\b(?:player|member|named)\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?\b|\b[A-Z][a-z]+['’]s\b|\bis\s+[A-Z][a-z]+\s+(?:missing|absent|eligible)\b/.test(text);
+  const sensitive = hasUnapprovedEmail(text) || /https?:\/\/|www\.|\b(?:bearer|password|token|secret|api[_ -]?key)\b|\b(?:\+?\d[ ()-]*){9,}\b/i.test(text)
+    || hasQualityPersonalName(text);
   // Conservative whole-field omission avoids retaining a partial credential or identity.
   return { text: sensitive ? "[detail omitted for privacy]" : short(text,limit), redacted: sensitive || [...text].length>limit };
 }

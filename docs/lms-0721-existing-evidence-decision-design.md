@@ -1,5 +1,9 @@
 # LMS-0721 / 0.1.543 — Existing-evidence decision workflow diagnosis
 
+## Production checkpoint — 2026-09-06
+
+The approved workflow is now deployed at commit `7b4aca4` with the related-source passage-binding correction. The real Saturday case passed the explicit Yes decision once: specific Rule 6.2.2/page 9 reference and passage hash retained in one manager category_changed audit event; New status and original occurrence preserved; no Approved Answer created. Live mobile controls fit 390px with 44px touch targets. Retest prefilled the exact question without executing. Idempotency remains verified in isolation; no duplicate production audit was manufactured. Website 1.1 and NR 4.5 remain existing knowledge. Overall LMS-0721 acceptance is blocked separately by the known public-email validation of the owner-approved scheduling Draft; no workflow/retrieval/schema correction was made during acceptance. The implementation checkpoint below is historical; see the implementation report current acceptance matrix.
+
 ## Implementation checkpoint — 2026-09-06
 
 Owner approved this design and the bounded workflow is now implemented locally. **467 tests pass**, lint has six existing warnings and no errors, TypeScript/PDF/diff verification pass, and isolated production build passes after the known normal-build cache lock. No deployment or production case decision has been performed. Version remains LMS-0721 / 0.1.543, not production accepted.

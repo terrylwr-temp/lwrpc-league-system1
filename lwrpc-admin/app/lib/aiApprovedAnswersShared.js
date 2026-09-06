@@ -1,4 +1,5 @@
 // Public constants and validation only. No credentials, database client or model calls.
+import {hasUnapprovedEmail} from './publicOrganizationalContacts.js';
 export const APPROVED_SOURCE_NAME = 'LWR Pickleball Club Approved Answer';
 export const APPROVED_SCOPES = Object.freeze(['all', 'weekday', 'saturday', 'primetime']);
 export const APPROVED_STATUSES = Object.freeze(['draft', 'active', 'retired']);
@@ -59,7 +60,7 @@ export function validateApprovedDraft(input = {}) {
   if (new TextEncoder().encode(JSON.stringify(draft)).length > APPROVED_PUBLIC_BYTES) throw new ApprovedAnswerError('Approved public content exceeds the 32 KiB byte limit. Shorten it before saving.');
   const prose = `${draft.title}\n${draft.canonical_question}\n${draft.approved_answer}`;
   if (/<\/?[a-z][^>]*>|https?:\/\/|www\.|\[[^\]]*\]\(/i.test(prose)) throw new ApprovedAnswerError('Use plain text. Add public URLs through the structured links fields.');
-  if (/\b(?:bearer|password|api[_ -]?key|access[_ -]?token|refresh[_ -]?token)\b|[\w.+-]+@[\w.-]+\.[a-z]{2,}/i.test(prose)) throw new ApprovedAnswerError('Do not include credentials or personal contact information.');
+  if (/\b(?:bearer|password|secret|token|api[_ -]?key|access[_ -]?token|refresh[_ -]?token|supabase[_ -]?key|hmac[_ -]?key)\b|\b(?:\+?\d[ ()-]*){9,}\b/i.test(prose) || hasUnapprovedEmail(prose)) throw new ApprovedAnswerError('Do not include credentials or personal contact information.');
   return draft;
 }
 export function approvedPublicRevision(row) {
