@@ -1,3 +1,4 @@
+import { trustedSelectedRuleIdentity } from "./aiSelectedRuleIdentity.js";
 import { operationWords, leagueCompatible, questionLeague, evidencePassages, genericApplicablePassages, questionClauses, isRosterParticipationQuestion, ratingQuestionKind, ratingApplicablePassages, ballDamageKind, isSeasonRatingDateQuestion, seasonRatingDatePassages, isCommunityParticipationQuestion, communityParticipationPassages } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting, ROSTER_TROUBLESHOOTING_INTENT, rosterTroubleshootingSupport } from "./aiRosterTroubleshooting.js";
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
@@ -216,6 +217,12 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
   const sources = await resolveSources(supabase, selectedEvidence);
   const sourceResolutionMs = Math.round(clock() - sourcesStarted);
   validateTrustedSources(selectedEvidence, sources);
+  // Selection and its parent relationships are complete before presentation metadata changes.
+  for (const chunk of selectedEvidence) {
+    const source = sources.find(source => source.chunkId === chunk.chunkId);
+    chunk.chunkRuleNumber = chunk.ruleNumber;
+    chunk.ruleNumber = source.ruleNumber || "";
+  }
 
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is not configured on the server.");
   const generationStarted = clock();
@@ -249,6 +256,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
         "Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence.",
+        "You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional.",
         "Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence.",
         ...(isRosterTroubleshooting(retrieval.request.question) ? [
           "This is roster-availability troubleshooting using general official documentation, not live LMS data. Explain only documented requirements/checks supported by the selected evidence. You have not inspected the affected player, account, team or roster and do not know the actual reason the player is absent. Do not turn a prerequisite into a cause or probability: avoid 'most likely', 'the reason is', 'this means' or equivalent unsupported diagnoses. A documented conditional cause may be explained conditionally, never asserted as this player's status. Do not infer that missing DUPR or another-team membership necessarily hides a player. Do not transfer Match Setup restrictions to Manage Roster. Where appropriate, suggest contacting League Management if documented checks do not resolve the issue."
@@ -304,7 +312,7 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
     .in("id", versionIds);
   if (error) throw new Error(`Official source lookup failed: ${error.message}`);
   const { data: chunkData, error: chunkError } = await supabase.from("ai_document_chunks")
-    .select("id, document_version_id, is_searchable, page_number, rule_number, section_label, heading")
+    .select("id, document_version_id, is_searchable, page_number, rule_number, section_label, heading, content")
     .in("id", chunkIds);
   if (chunkError) throw new Error(`Official source chunk lookup failed: ${chunkError.message}`);
   const versions = new Map((data || []).map((version) => [version.id, version]));
@@ -324,7 +332,8 @@ export async function resolveOfficialSources(supabase, evidence, signedUrlSecond
       ...chunk,
       documentTitle: document.title,
       pageNumber: citationPageNumber(citedChunk.page_number),
-      ruleNumber: citedChunk.rule_number || "",
+      ruleNumber: chunk.content !== undefined || chunk.selectedPassages ? trustedSelectedRuleIdentity(chunk, citedChunk) : citedChunk.rule_number || "",
+      chunkRuleNumber: citedChunk.rule_number || "",
       sectionLabel: citedChunk.section_label || "",
       heading: citedChunk.heading || "",
     };
@@ -358,10 +367,10 @@ export function validateTrustedSources(evidence, sources) {
 
 export function citationLabel(chunk) {
   const details = [];
-  const rule = cleanCitationDetail(chunk.ruleNumber ? `Rule ${chunk.ruleNumber}` : "");
+  const rule = cleanCitationDetail(chunk.ruleNumber ? `${String(chunk.ruleNumber).includes(",") ? "Rules" : "Rule"} ${chunk.ruleNumber}` : "");
   if (rule) details.push(rule);
   const label = cleanCitationDetail(chunk.heading || chunk.sectionLabel || "");
-  const labelWithoutRepeatedRule = stripLeadingRuleReference(label, chunk.ruleNumber);
+  const labelWithoutRepeatedRule = stripLeadingRuleReference(stripLeadingRuleReference(label, chunk.chunkRuleNumber), chunk.ruleNumber);
   if (labelWithoutRepeatedRule && !details.some((detail) => sameCitationDetail(detail, labelWithoutRepeatedRule))) details.push(labelWithoutRepeatedRule);
   const pageNumber = citationPageNumber(chunk.pageNumber);
   const page = cleanCitationDetail(pageNumber ? `Page ${pageNumber}` : "");
@@ -523,7 +532,7 @@ function cleanCitationDetail(value) {
 function stripLeadingRuleReference(label, ruleNumber) {
   if (!label || !ruleNumber) return label;
   const escapedRule = String(ruleNumber).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return cleanCitationDetail(label.replace(new RegExp(`^rule\\s*${escapedRule}(?:\\s*[-—:]\\s*|\\s+)?`, "i"), ""));
+  return cleanCitationDetail(label.replace(new RegExp(`^(?:rule\\s*)?${escapedRule}(?:\\.(?=\\s|$))?(?=\\s|[-—:]|$)(?:\\s*[-—:]\\s*|\\s+)?`, "i"), ""));
 }
 
 function sameCitationDetail(left, right) {

@@ -137,7 +137,7 @@ test("the shared AI trigger covers every authenticated header shell without chan
   assert.match(assistant, /if \(entry\.requestError\).*TECHNICAL_ERROR/);
   assert.match(assistant, /bg-blue-100\/70.*>Question/s);
   assert.match(assistant, /bg-emerald-50\/70.*(?:Clarification|Answer)/s);
-  assert.match(assistant, /SESSION_EXCHANGES_KEY/);
+  assert.match(await readFile(new URL("../app/lib/askLwrConversationState.js", import.meta.url), "utf8"), /SESSION_EXCHANGES_KEY/);
   assert.match(assistant, /slice\(0, MAX_SESSION_EXCHANGES\)/);
   assert.doesNotMatch(assistant, /ask-lwr-question[^>]*disabled=\{working\}/);
   assert.match(assistant, /Get answers from official LWR PC information and USAP Rules/);

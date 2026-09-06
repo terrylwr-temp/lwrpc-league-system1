@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import styles from "./AskLwrAssistant.module.css";
-import { createFeedbackController, resetFeedbackPending } from "../lib/askLwrFeedbackState";
+import { createFeedbackController } from "../lib/askLwrFeedbackState";
 import { currentConversationContext } from "../lib/askLwrConversationState";
 import { usePathname } from "next/navigation";
 import { getCurrentUserRole, getRequestAuthorizationHeaders, supabase } from "../lib/auth";
@@ -12,16 +12,7 @@ import { LEAGUE_DOCUMENT_TYPES, leagueDocumentPath, normalizeLeagueDocumentBucke
 import { ASK_LWR_INITIAL_COPY, assistantPageContext, canBrowseLeagueDocument, visibleDashboardGuideKeys } from "../lib/askLwrAssistantConfig";
 
 const TECHNICAL_ERROR = "Sorry, I couldn't complete that request right now. Please try again.";
-const SESSION_EXCHANGES_KEY = "lwr-ask-ai-exchanges";
 const MAX_SESSION_EXCHANGES = 8;
-
-function initialSessionExchanges() {
-  if (typeof window === "undefined") return [];
-  try {
-    const saved = JSON.parse(window.sessionStorage.getItem(SESSION_EXCHANGES_KEY) || "[]");
-    return Array.isArray(saved) ? saved.filter((entry) => entry && !entry.pending && (entry.result || entry.requestError)).slice(0, MAX_SESSION_EXCHANGES).map(resetFeedbackPending) : [];
-  } catch { return []; }
-}
 
 function AssistantIcon({ size = 20 }) {
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 2 .9 4.1L17 7l-4.1.9L12 12l-.9-4.1L7 7l4.1-.9L12 2Z"/><path d="m19 14 .5 2.5L22 17l-2.5.5L19 20l-.5-2.5L16 17l2.5-.5L19 14Z"/><path d="m5 14 .6 2.4L8 17l-2.4.6L5 20l-.6-2.4L2 17l2.4-.6L5 14Z"/></svg>;
@@ -108,10 +99,17 @@ export function AskLwrAssistantPage({ role }) {
 }
 
 function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, drawer = false }) {
+  const fallbackInputRef = useRef(null);
+  const composerRef = inputRef || fallbackInputRef;
+  const [context] = useState(currentConversationContext);
+  const observedGeneration = useRef(context.generation());
+  const [busy, setBusy] = useState(() => context.busy());
+  const [announcement, setAnnouncement] = useState("");
   const pathname = usePathname();
   const pageContext = useMemo(() => assistantPageContext(pathname, role), [pathname, role]);
   const [question, setQuestion] = useState("");
-  const [exchanges, setExchanges] = useState(initialSessionExchanges);
+  const [exchanges, setVisibleExchanges] = useState(() => context.history());
+  function setExchanges(update) { context.saveHistory(update(context.history()), context.generation()); }
   const [sendFeedback] = useState(() => createFeedbackController({
     getAuthorizationHeaders: getRequestAuthorizationHeaders,
     updateEntry: (id, patch) => setExchanges((current) => current.map((entry) => entry.id === id ? { ...entry, ...patch } : entry)),
@@ -122,19 +120,31 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
   const [guidesLoading, setGuidesLoading] = useState(false);
 
   useEffect(() => {
-    try {
-      const completedExchanges = exchanges.filter((entry) => !entry.pending && (entry.result || entry.requestError)).slice(0, MAX_SESSION_EXCHANGES);
-      if (completedExchanges.length) window.sessionStorage.setItem(SESSION_EXCHANGES_KEY, JSON.stringify(completedExchanges));
-      else window.sessionStorage.removeItem(SESSION_EXCHANGES_KEY);
-    } catch { /* Session history is a convenience, never a blocker. */ }
-  }, [exchanges]);
+    const sync = () => {
+      setBusy(context.busy());
+      setVisibleExchanges(context.history());
+      if (observedGeneration.current !== context.generation()) {
+        observedGeneration.current = context.generation();
+        setQuestion(""); setAnnouncement("New question started");
+      }
+    };
+    const unsubscribe = context.subscribe(sync);
+    sync();
+    return unsubscribe;
+  }, [context]);
+
+  function newQuestion() {
+    if (!context.reset()) return;
+    composerRef.current?.focus();
+  }
 
   async function submit(event, suggestedQuestion = "") {
     event?.preventDefault();
     const nextQuestion = String(suggestedQuestion || question).trim();
-    if (!nextQuestion || working) return;
+    if (!nextQuestion || working || context.busy()) return;
     const exchangeId = `${Date.now()}-${Math.random()}`;
-    const context = currentConversationContext();
+    const finishOperation = context.startOperation();
+    const requestGeneration = context.generation();
     const contextRequest = context.begin();
     const conversationReceipt = contextRequest.receipt;
     setQuestion(""); setWorking(true);
@@ -147,15 +157,19 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok || !payload?.success || !payload?.result?.answer) throw new Error("player_request_failed");
+      if (requestGeneration !== context.generation()) return;
       context.complete(contextRequest, payload.result.conversationReceipt);
       setExchanges((current) => current.map((entry) => entry.id === exchangeId ? { ...entry, pending: false, result: payload.result } : entry));
     } catch {
+      if (requestGeneration !== context.generation()) return;
       setExchanges((current) => current.map((entry) => entry.id === exchangeId ? { ...entry, pending: false, requestError: true } : entry));
-    } finally { setWorking(false); }
+    } finally { setWorking(false); finishOperation(); }
   }
 
-  function submitFeedback(exchangeId, helpful) {
-    return sendFeedback(exchanges.find((item) => item.id === exchangeId), helpful);
+  async function submitFeedback(exchangeId, helpful) {
+    const finishOperation = context.startOperation();
+    try { await sendFeedback(exchanges.find((item) => item.id === exchangeId), helpful); }
+    finally { finishOperation(); }
   }
 
   async function toggleGuides() {
@@ -176,7 +190,7 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
     </header>
     <div className={bodyClass}>
       <p className="mb-2 shrink-0 px-1 text-center text-xs leading-4 text-slate-500">Ask LWR PC AI may make mistakes. Check Official Sources for important information.</p>
-      <form onSubmit={submit} className={`${styles.composer} flex shrink-0 gap-2`}><label className="sr-only" htmlFor="ask-lwr-question">Ask a question</label><textarea id="ask-lwr-question" ref={inputRef} value={question} maxLength={1000} rows={3} onChange={(event) => setQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(event); } }} placeholder="Ask a question" className="min-h-[74px] min-w-0 flex-1 resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"/><button type="submit" disabled={working || !question.trim()} className="self-end rounded-xl bg-[#1558d5] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-[#104ab7] disabled:cursor-not-allowed disabled:bg-slate-300">Ask</button></form>
+      <form onSubmit={submit} className={`${styles.composer} flex shrink-0 gap-2`}><label className="sr-only" htmlFor="ask-lwr-question">Ask a question</label><textarea id="ask-lwr-question" ref={composerRef} value={question} maxLength={1000} rows={3} onChange={(event) => setQuestion(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); submit(event); } }} placeholder="Ask a question" className="min-h-[74px] min-w-0 flex-1 resize-y rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm font-semibold leading-5 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"/><div className={styles.actions}><button type="button" onClick={newQuestion} disabled={busy} title={busy ? "Wait for the current request or feedback to finish" : "Start a new question"} className="min-h-11 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 focus-visible:outline-2 focus-visible:outline-blue-600 disabled:cursor-wait disabled:opacity-50">New Question</button><button type="submit" disabled={busy || working || !question.trim()} className="min-h-11 rounded-xl bg-[#1558d5] px-4 py-2.5 text-sm font-black text-white shadow-sm transition hover:bg-[#104ab7] disabled:cursor-not-allowed disabled:bg-slate-300">Ask</button></div></form><p role="status" aria-live="polite" className="sr-only">{announcement}</p>
       {exchanges.length === 0 && <section className="mt-4 rounded-2xl border border-blue-100 bg-white p-4 shadow-sm"><h3 className="text-base font-black text-[#102e64]">How can I help?</h3><p className="mt-2 text-sm font-semibold leading-6 text-slate-600">{ASK_LWR_INITIAL_COPY}</p><div className="mt-4 flex flex-wrap gap-2">{pageContext.suggestions.map((suggestion) => <button key={suggestion} type="button" onClick={() => submit(null, suggestion)} disabled={working} className="min-h-11 max-w-full rounded-full border border-blue-200 bg-blue-50 px-3 py-2 text-left text-xs font-bold leading-4 text-blue-800 transition hover:border-blue-400 hover:bg-blue-100 disabled:cursor-wait disabled:opacity-60">{suggestion}</button>)}</div></section>}
       <div className="mt-4 space-y-4">{exchanges.map((entry) => <Exchange key={entry.id} entry={entry} onFeedback={submitFeedback}/>)}</div>
       <div className="mt-5 rounded-xl border border-slate-200 bg-white"><button type="button" onClick={toggleGuides} aria-expanded={guidesOpen} className="flex w-full items-center justify-between gap-3 px-3 py-3 text-left text-sm font-black text-[#102e64]"><span>Browse Guides &amp; Rules</span><span aria-hidden="true">{guidesOpen ? "−" : "+"}</span></button>{guidesOpen && <div className="border-t border-slate-200 p-3"><p className="mb-3 text-xs font-semibold leading-5 text-slate-600">Open the official user guides and league documents already available in the LMS.</p><div className="grid gap-2">{guides.map((guide) => <button key={guide.key} type="button" onClick={() => openGuideDocument(supabase, guide)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-blue-50">{guide.label}</button>)}{leagueGuides.map((guide) => <button key={guide.key} type="button" onClick={() => openLeagueGuide(guide)} className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-left text-sm font-bold text-blue-800 hover:border-blue-300 hover:bg-blue-50">{guide.label}</button>)}{guidesLoading && <p className="text-sm font-semibold text-slate-500" role="status">Loading league documents...</p>}{!guidesLoading && guides.length + leagueGuides.length === 0 && <p className="text-sm font-semibold text-slate-500">No user-facing guides are configured yet.</p>}</div></div>}</div>

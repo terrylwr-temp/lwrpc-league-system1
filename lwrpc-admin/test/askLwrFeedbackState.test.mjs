@@ -60,5 +60,5 @@ test("LMS-0714 selected controls remain enabled with accessible pressed state", 
   assert.equal((controls.match(/disabled=\{Boolean\(entry.feedbackWorking\)\}/g) || []).length, 2);
   assert.match(controls, /aria-pressed=\{selected === true\}/); assert.match(controls, /aria-pressed=\{selected === false\}/);
   assert.match(controls, /cursor-pointer disabled:cursor-wait/); assert.doesNotMatch(controls, /disabled=\{[^}]*selected/);
-  assert.match(ui, /map\(resetFeedbackPending\)/);
+  assert.match(await readFile(new URL("../app/lib/askLwrConversationState.js", import.meta.url), "utf8"), /map\(resetFeedbackPending\)/);
 });
