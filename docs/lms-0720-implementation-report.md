@@ -1,6 +1,6 @@
 # LMS-0720 / 0.1.542 — Ask LWR Robustness Hardening
 
-Status: implemented and locally validated; NOT deployed or production accepted. Production remains accepted LMS-0719 / 0.1.541. Stage 7A/B and Stages 1–6 remain accepted. Live LMS Intelligence has not started.
+Status: DEPLOYED, NOT PRODUCTION ACCEPTED. Acceptance stopped at the first equipment typo failure. Last accepted baseline is LMS-0719 / 0.1.541. Stage 7A/B and Stages 1–6 remain accepted. Live LMS Intelligence has not started.
 
 ## Changes and rationale
 
@@ -105,3 +105,88 @@ Not executed. Deploy only after owner review/authorization through the normal re
 11. On a grounded typo answer, perform the approved Helpful → Helpful → Not Helpful → Not Helpful sequence. Read-only inspect its feedback/outcome correlation: two events, same answer, actual raw/effective wording, current version, exact sources. Inspect one naturally insufficient typo outcome if available: grouping must use the established effective wording, not the matching view. Do not manufacture no-source policy outcomes to satisfy this check. Protected telemetry must remain minimal.
 12. Check sanitized hosting logs/capture health through existing authorized tools and compare request/model/embedding counts. A recovered equipment typo may use the existing second probe embedding; no third/typo-specific embedding is expected. Ordinary typo interpretation adds no call. Measure production latency rather than treating local CPU timing as a hosted latency result.
 13. Smoke-test New Question, Rule 5.5, Rule 3.5, Season DUPR, reimbursement insufficient evidence, manager feedback review/historical viewer, feedback and mobile layout. Stop on unexpected behavior; do not make unapproved production corrections. Record acceptance separately after these checks pass.
+
+
+## Controlled deployment and acceptance stop — 2026-09-06 UTC
+
+The owner authorized deployment and bounded acceptance. Commit `e0479bd4491ebf7b89b463f554d02ace509cae8f` was pushed to main through the existing GitHub integration. Vercel production deployment `dpl_2cjJd3mAM2oVmWp2pnTKJECGXLAL` reached READY and was assigned to league.lwrpickleballclub.com. The live footer showed LMS-0720; committed package/lock version is 0.1.542. Previous production was accepted commit 7b6dc2d. No migration or environment action was taken.
+
+### First acceptance request: FAILED
+
+At 02:02:33.211 UTC the signed-in user-interface request was:
+
+`What kind of balls will we be usin`
+
+Exact production answer:
+
+> I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.
+
+Outcome/answer ID: `676bb995-b582-42dc-a6c5-b92473bdaab9`.
+
+- Version LMS-0720, origin player_interface, standalone with no prior context.
+- Final kind insufficient_evidence; reason stage4_no_applicable_evidence.
+- Stage 3 invoked and sufficient; top captured score .4693; 32 candidates, handoff 8, authority review 12, threshold .35.
+- Equipment probe invoked=true and retrieved=true.
+- Selected evidence count zero; model_call_skipped=true; feedback_eligible=false; source snapshot empty.
+- Request execution total_ms=2185; completed 02:02:35.396 UTC. Sanitized hosting log reports capture_succeeded at 02:02:35.437 UTC, approximately 41 ms after completion. This is an observation, not an injected fail-open/latency test or measurement of embedding call counts.
+
+No second equipment test or further player/manager answer was submitted. No feedback click was made. Legitimate failure telemetry was retained.
+
+### Read-only localization; no correction made
+
+The deployed probe deduplicates against all normal candidates, while Stage 4 receives only the first 12 normal candidates plus probe handoff candidates. If the validated equipment source is already in normal ranks 13–32, it is removed from the probe handoff despite being absent from Stage 4's normal review window.
+
+An in-memory local replay with production-format Captains Guide evidence demonstrated both branches for the exact typo:
+
+| Source placement | Accepted interpretation | Probe retrieved | Probe handoff | Selected |
+|---|---|---|---|---|
+| Outside normal 32 | usin → using | true | 1 | Captains Guide, page 10 |
+| Normal rank 32 | usin → using | true | 0 | none |
+
+This reproduces the mechanism consistent with the previously diagnosed rank-32 typo case. Current persisted telemetry retains only eight normal candidates, so it does not independently establish the exact probe-source rank for this new request. No further production retrieval/model replay was performed after the stop. The earlier local regression covered the outside-normal-window case using the correctly spelled capture and missed the within-32/outside-12 handoff gap.
+
+### Passed read-only checks
+
+Before/after snapshots at 02:00:11.299944 and 02:03:11.859138 UTC were identical for all listed integrity checks:
+
+| Object | Count / fingerprint |
+|---|---|
+| Documents | 7 / e09b264f001475ddcb7647cb0e8d0124 |
+| Versions | 19 / d324fae4f3c24b6910853664872b2fde |
+| Chunks, including embeddings | 1507 / 36547317916a81a41abc7f0b4ab2ab09 |
+| Existing feedback full rows | 14 / ca177b10d875affcfb20b465be22f8d1 |
+| Public relation/RLS/ACL metadata | 4c33be7a67a5fca12691974940f94ffb |
+| Columns | 0e3693168ecf0dfd4b818ab9a7934943 |
+| Constraints | f3a61578b93312ee724b1dd1509d800e |
+| Indexes | 3aa2aca9026a7da22a18eacd7559fa03 |
+| Functions/ACLs | 184a19b0c93aa33eed8ad045dc10cbc3 |
+| Policies | e646b6159c90bd2e013a6c9ee9708016 |
+
+HMAC route key versions remain [1]. No key value or environment variable was read, printed or changed. Successful capture created an unanswered occurrence and New review case using key_version=1, normalizer_version=1. Original and effective question both retain `What kind of balls will we be usin`; normalized grouping text is `what kind of balls will we be usin`, not `using`. Existing feedback full-row hashes are unchanged; new feedback correlation was not exercised.
+
+Deterministic checks on the deployed commit passed for step, plaing ambiguity, play, team named Roster, community named Satrday, NR 3.50, 09/28 and Rule 5.7.2: unchanged text, zero accepted annotations, no production telemetry/model calls.
+
+### Outstanding gates and decision
+
+LMS-0720 / 0.1.542 is DEPLOYED BUT NOT PRODUCTION ACCEPTED. No rollback, code correction, configuration change or subsequent deployment was performed. Local report/status updates after the stop are not pushed, avoiding an additional deployment.
+
+Outstanding because testing stopped at the first genuine defect: additional equipment typo; USAP volley/cracked-ball answers; LWR community/roster/Season typo answers; league typo; protected typo privacy/guard acceptance; direct medical answer; exact seven-point follow-up and its evidence; New Question reset; actual manager interpretation diagnostics; correctly spelled baseline sanity; Stage 7B page/workflow UI; new feedback correlation; full production call-budget comparison. These are not reported as passes based on local tests.
+
+Physical-phone keyboard behavior remains untested. Live LMS Intelligence and the next version have not started. A bounded correction requires owner authorization before implementation; preserve this failed acceptance record and telemetry.
+
+
+## Authorized equipment handoff correction — same LMS-0720 / 0.1.542
+
+Before editing, a fresh read-only production retrieval of the exact failed question confirmed source chunk 68591ceb-77db-464b-b590-412a886dd372, version 5d1dd639-d77f-4ecc-8d56-14d7f70f491d, at normal rank 32 with score .3564 and probe rank 1. The interpretation was usin → using; the source was absent from the top-12 review; deduplication returned zero probe candidates and selection returned zero. The replay generated no answer or telemetry.
+
+The captured production-format fixture is `lwrpc-admin/test/fixtures/lms0720-equipment-handoff-production.json`. It preserves the failing rank/window topology and full official source content. `lwrpc-admin/test/lms0720EquipmentHandoff.test.mjs` adds 25 tests: all three requested typo wordings plus the correctly spelled control at normal ranks 1, 8, 12, 13, 32 and outside the normal pool (42), plus an ineligible-normal-candidate control.
+
+The correction in `aiRetrieval.js` constructs the existing authority-review handoff before the probe and passes that exact candidate set to deduplication. A probe is suppressed only if its chunk is already represented by an eligible normal downstream candidate. A normal occurrence below the unchanged evidence threshold does not suppress the qualified probe; the request's original Stage 3 sufficiency gate still cannot be bypassed. Normal pool presence remains a separate diagnostic (`presentInNormalPool`); `deduplicatedAgainstNormal` now describes actual downstream deduplication.
+
+Identity remains the established immutable chunk ID. Both SQL paths return full stored chunks with the same source/version identity; no passage projection/truncation occurs at this boundary. Different semantic passages from that chunk therefore remain available to the existing later passage selector. The tests use the real multi-provision Captains Guide chunk and confirm exactly one selected equipment provision/source, without fees or waiver text. A same-ID/different-selected-passage input is not structurally produced by these retrieval paths, so no new passage-merging architecture was introduced.
+
+No normal candidate limit, top-eight handoff, 12-candidate authority review, four-evidence cap, threshold, weight, query, embedding strategy, interpretation/guard, citation, Stage 7, feedback or player-layout change was made. No SQL/RPC, corpus, HMAC or environment change. Version remains LMS-0720 / 0.1.542. The historical failed production outcome and New case remain untouched.
+
+Correction validation: full suite 411 passed (386 retained + 25 new); lint passed with the six existing warnings; explicit type and PDF-bundle checks passed. The normal production build compiled in 10.8 seconds before the known .next/cache/.tsbuildinfo EPERM cache-write failure. An earlier attempt encountered an open temporary log under .next during cleanup; logs were moved outside the build directory and the command rerun. Isolated clean production build and final diff checks are completed before the authorized redeployment. No failures were hidden or treated as successful normal builds.
+
+Call-count regressions: typo and correct wording each use the existing two embeddings. When the source is at rank 32, two RPCs suffice (normal query plus probe); when absent from the normal 32, the established diagnostic rank RPC remains, for three RPCs. No new call is introduced by the handoff correction. All tested rank placements select exactly one Captains Guide equipment source.

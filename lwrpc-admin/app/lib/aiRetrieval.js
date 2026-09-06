@@ -70,9 +70,9 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     terminologyExpansionEnabled: isDocumentGroundedMatchConfiguration(interpretation.matchingView, data || []),
   };
   const candidates = (data || []).map((row, index) => ({ ...candidateFromRow(row, retrievalRequest), stage3Rank: index + 1 }));
-  const lwrMatchEquipmentProbe = await retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, rpcArgs, embedQuery, clock });
   const suppliedEvidence = candidates.slice(0, aiAssistantConfig.retrievalLimit);
   const authorityReviewCandidates = candidates.slice(0, AUTHORITY_REVIEW_LIMIT);
+  const lwrMatchEquipmentProbe = await retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, downstreamCandidates: authorityReviewCandidates, rpcArgs, embedQuery, clock });
   authorityReviewCandidates.forEach((candidate, index) => {
     candidate.authorityReview = { included: true, rank: index + 1, limit: AUTHORITY_REVIEW_LIMIT };
   });
@@ -84,7 +84,7 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
   };
 }
 
-async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, rpcArgs, embedQuery, clock }) {
+async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuery, candidates, downstreamCandidates, rpcArgs, embedQuery, clock }) {
   if (!isClubSelectedMatchEquipmentQuestion(interpretQuestion(request.question).matchingView)) return null;
   const started = clock();
   const probeEmbedding = await embedQuery(LWR_MATCH_EQUIPMENT_PROBE_EMBEDDING_QUERY);
@@ -96,6 +96,9 @@ async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuer
   if (error) throw new Error(`LWR match-equipment retrieval probe failed: ${error.message}`);
   const probeRequest = { ...request, retrievalQuery: LWR_MATCH_EQUIPMENT_PROBE_QUERY, typoNormalizations: [], terminologyAliases: [], terminologyExpansionEnabled: false };
   const normalCandidateIds = new Set(candidates.map((candidate) => candidate.chunkId));
+  // Both RPC paths return full immutable chunks; passage selection happens later.
+  // A chunk outside Stage 4's eligible handoff cannot satisfy downstream deduplication.
+  const downstreamIds = new Set(downstreamCandidates.filter(candidate => candidate.combinedScore >= aiAssistantConfig.evidenceThreshold).map(candidate => candidate.chunkId));
   const matches = (data || []).map((row, index) => ({ ...candidateFromRow(row, probeRequest), probeRank: index + 1 }))
     .filter(isLwrSelectedMatchEquipmentEvidence)
     .slice(0, 1);
@@ -120,7 +123,8 @@ async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuer
       probeRank: matches[0].probeRank,
       normalStage3Rank,
       normalStage3CandidateLimit: candidates.length,
-      deduplicatedAgainstNormal: normalCandidateIds.has(chunkId),
+      deduplicatedAgainstNormal: downstreamIds.has(chunkId),
+      presentInNormalPool: normalCandidateIds.has(chunkId),
       diagnostic: "Bounded LWR match-equipment probe; not a normal Stage 3 ranking.",
     },
   };
@@ -132,7 +136,7 @@ async function retrieveLwrMatchEquipmentProbe({ supabase, request, retrievalQuer
   return {
     ...probeCandidate.lwrMatchEquipmentProbe,
     elapsedMs: Math.round(clock() - started),
-    candidates: normalCandidateIds.has(chunkId) ? [] : [probeCandidate],
+    candidates: downstreamIds.has(chunkId) ? [] : [probeCandidate],
   };
 }
 

@@ -1,0 +1,2821 @@
+{
+  "question": "What kind of balls will we be usin",
+  "retrieval": {
+    "request": {
+      "question": "What kind of balls will we be usin",
+      "normalizedQuery": "what kind of balls will we be usin",
+      "askAbout": "all",
+      "context": {
+        "currentPath": "/",
+        "featureModule": "LMS",
+        "seasonId": null,
+        "leagueId": null,
+        "divisionId": null,
+        "teamId": null,
+        "userRole": "commissioner"
+      }
+    },
+    "interpretation": {
+      "policyVersion": "lms0720-v1",
+      "annotations": [
+        {
+          "originalToken": "usin",
+          "start": 30,
+          "end": 34,
+          "canonical": "using",
+          "editDistance": 1,
+          "context": "equipment_question",
+          "confidence": "unique_edit_1_with_context",
+          "policyVersion": "lms0720-v1"
+        }
+      ],
+      "matchingView": "What kind of balls will we be using"
+    },
+    "corpusSuggestions": [],
+    "candidates": [
+      {
+        "chunkId": "d8ceb05b-3e08-453a-88aa-26cb0b10a725",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 42,
+        "sectionLabel": "Section 16: Tournament Director",
+        "heading": "Ball Selection",
+        "ruleNumber": "16.G",
+        "content": "16.G Ball Selection. The Tournament Director will choose the tournament ball\nfrom the official list of approved balls posted on the USA Pickleball website.",
+        "semanticScore": 0.5474,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4693,
+        "vectorRank": 1,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 1,
+        "authorityReview": {
+          "included": true,
+          "rank": 1,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "4da256ff-d390-47d4-8183-dfa45286f107",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Construction",
+        "ruleNumber": "3.C.5",
+        "content": "3.C.5 Construction. The ball must be made of durable material molded\nwith a smooth surface and free of texturing. The ball may have a\nslight ridge at the seam, as long as it does not significantly impact\nthe ball’s flight characteristics. (See Figure 3-2.)\nThe ball with larger holes is customarily used\nfor indoor play (pictured on the left). The ball\nwith smaller holes is customarily used for\noutdoor play (pictured on the right).\nFigure 3-2: Approved Balls – Examples",
+        "semanticScore": 0.5392,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4654,
+        "vectorRank": 2,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 2,
+        "authorityReview": {
+          "included": true,
+          "rank": 2,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "af22a56a-e841-46b8-a89e-7c34b163fd52",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "Ball Specifications",
+        "ruleNumber": "3.C",
+        "content": "3.C Ball Specifications. The requirements for the ball are set forth in Rules 3.C.1\nthrough 3.C.5. The complete list of approved balls is posted on the USA\nPickleball website.",
+        "semanticScore": 0.5282,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4602,
+        "vectorRank": 3,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 3,
+        "authorityReview": {
+          "included": true,
+          "rank": 3,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "3135724a-c059-4e76-a0ee-b40240a596eb",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Usage",
+        "ruleNumber": "3.C.1",
+        "content": "3.C.1 Usage. All approved balls are acceptable for indoor or outdoor\nplay. (See Figure 3-2.)",
+        "semanticScore": 0.5105,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4519,
+        "vectorRank": 4,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 4,
+        "authorityReview": {
+          "included": true,
+          "rank": 4,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "f581de61-f30c-4350-91af-90fd116de4ea",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Design",
+        "ruleNumber": "3.C.2",
+        "content": "3.C.2 Design. The design of the ball must be approved by USA Pickleball\nas detailed in the Equipment Standards Manual. USA Pickleball\nEquipment Standards Manual",
+        "semanticScore": 0.46,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4282,
+        "vectorRank": 5,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 5,
+        "authorityReview": {
+          "included": true,
+          "rank": 5,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "65b11e66-561c-458f-a55f-83507210db8a",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Color",
+        "ruleNumber": "3.C.3",
+        "content": "3.C.3 Color. The ball must be one uniform color, except for identification\nmarkings. Colors may vary.",
+        "semanticScore": 0.4285,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4134,
+        "vectorRank": 7,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 6,
+        "authorityReview": {
+          "included": true,
+          "rank": 6,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "69847181-ecb4-48db-b617-47edac8da5c6",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 45,
+        "sectionLabel": "Section 17: Referee Responsibilities",
+        "heading": "17.D Officiating Play — Damaged Balls",
+        "ruleNumber": "17.D.14",
+        "content": "17.D.14 Damaged Balls. Determine whether a ball is broken or cracked\nand must be replaced, and whether the broken or cracked ball\naffected the outcome of a rally. (See Rule 20.F.)",
+        "semanticScore": 0.4253,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4119,
+        "vectorRank": 8,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 7,
+        "authorityReview": {
+          "included": true,
+          "rank": 7,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "b8f58b72-95f2-4458-8d7d-56a01c3863ef",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 62,
+        "sectionLabel": "Section 22: Unsportsmanlike Conduct and",
+        "heading": "22.B Verbal and Technical Warnings — Ball Abuse",
+        "ruleNumber": "22.B.4",
+        "content": "22.B.4 Ball Abuse. Intentionally damaging or aggressively hitting a\ndead ball without endangering people.",
+        "semanticScore": 0.4039,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4018,
+        "vectorRank": 9,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 8,
+        "authorityReview": {
+          "included": true,
+          "rank": 8,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "5fd78215-565f-43cf-855f-89c7e1a2b385",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 69,
+        "sectionLabel": "Section 24: Non-Officiated Tournament",
+        "heading": "Extra Ball",
+        "ruleNumber": "24.B",
+        "content": "24.B Extra Ball. An extra ball carried by a player during a rally must not be\nvisible to the opponent and must remain in possession of the player.",
+        "semanticScore": 0.4004,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4002,
+        "vectorRank": 10,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 9,
+        "authorityReview": {
+          "included": true,
+          "rank": 9,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "cce58f04-0041-4a04-88dd-aab052122700",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 54,
+        "sectionLabel": "Section 20: Tournament Match Situations",
+        "heading": "Damaged Ball",
+        "ruleNumber": "20.F",
+        "content": "20.F Damaged Ball. A player may appeal to the referee to determine whether a\nball is degraded, soft, broken, or cracked. A potentially soft or degraded\nball will not be replaced unless all players agree. If the referee determines\nthat the ball is broken or cracked, it will be replaced. (Modifies Rule 10.G)",
+        "semanticScore": 0.3907,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3956,
+        "vectorRank": 11,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 10,
+        "authorityReview": {
+          "included": true,
+          "rank": 10,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "c5201d82-ecac-4191-af4b-cf6fbe85932c",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 21,
+        "sectionLabel": "Section 7: Serving",
+        "heading": "Ball Release",
+        "ruleNumber": "7.B",
+        "content": "7.B Ball Release. The server must comply with Rules 7.B.1 through 7.B.3 when\nreleasing the ball to make the serve.",
+        "semanticScore": 0.3903,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3954,
+        "vectorRank": 12,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 11,
+        "authorityReview": {
+          "included": true,
+          "rank": 11,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "b59f7c08-67ed-4aeb-89ea-dfcd39aada69",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Brand Identification",
+        "ruleNumber": "3.C.4",
+        "content": "3.C.4 Brand Identification. The ball must have a manufacturer or\nsupplier name or logo printed or embossed on the surface.",
+        "semanticScore": 0.3883,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3945,
+        "vectorRank": 13,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 12,
+        "authorityReview": {
+          "included": true,
+          "rank": 12,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "fd2759b3-470e-4d63-b60e-621fab8d79aa",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 29,
+        "sectionLabel": "Section 10: Rally Situations",
+        "heading": "Damaged Ball",
+        "ruleNumber": "10.G",
+        "content": "10.G Damaged Ball. When a ball is or becomes broken, cracked, soft or degraded,\nplay must continue until the end of the rally. The ball will be replaced if all\nplayers agree.",
+        "semanticScore": 0.3818,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3914,
+        "vectorRank": 15,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 13
+      },
+      {
+        "chunkId": "1e09db6a-5bc3-4d3a-93da-dee412126994",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 32,
+        "sectionLabel": "Section 13: The Net and Net Support",
+        "heading": "Ball Around Net Post",
+        "ruleNumber": "13.C",
+        "content": "13.C Ball Around Net Post. A ball may be returned around the outside of the net\npost.",
+        "semanticScore": 0.3768,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3891,
+        "vectorRank": 16,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 14
+      },
+      {
+        "chunkId": "70227caf-df96-48de-be82-423359276556",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 63,
+        "sectionLabel": "Section 22: Unsportsmanlike Conduct and",
+        "heading": "22.D Technical Fouls — Ball Abuse",
+        "ruleNumber": "22.D.2",
+        "content": "22.D.2 Ball Abuse. Aggressively or recklessly throwing or hitting a dead\nball in frustration or anger with negligent disregard for the\nconsequences as long as the ball does not strike a person but\nputs a person at risk or in danger.",
+        "semanticScore": 0.3678,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3848,
+        "vectorRank": 18,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 15
+      },
+      {
+        "chunkId": "a52acb37-df57-4095-ba36-c88f766208d8",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 32,
+        "sectionLabel": "Section 13: The Net and Net Support",
+        "heading": "Ball Contacting Net",
+        "ruleNumber": "13.A",
+        "content": "13.A Ball Contacting Net. When the ball contacts the net, or the rope or cable at\nthe top of the net between the net posts, the ball remains in play.",
+        "semanticScore": 0.3655,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3838,
+        "vectorRank": 19,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 16
+      },
+      {
+        "chunkId": "5c908a00-ddeb-4dd4-854f-acc798b2f5b5",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 32,
+        "sectionLabel": "Section 13: The Net and Net Support",
+        "heading": "Ball Contacting Net Support System",
+        "ruleNumber": "13.B",
+        "content": "13.B Ball Contacting Net Support System. A served ball must not contact any\npart of the net support system. A returned ball must not contact any part of\nthe net support system on the hitting player’s end of the net.",
+        "semanticScore": 0.3619,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3821,
+        "vectorRank": 20,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 17
+      },
+      {
+        "chunkId": "ed8c18f7-388c-4371-b103-0b8199043084",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 22,
+        "sectionLabel": "Section 7: Serving",
+        "heading": "7.B Ball Release — Visible Release",
+        "ruleNumber": "7.B.3",
+        "content": "7.B.3 Visible Release. The server’s release of the ball must be visible to\nthe receiver.",
+        "semanticScore": 0.3546,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3786,
+        "vectorRank": 22,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 18
+      },
+      {
+        "chunkId": "912eaf5c-704c-47c5-b41f-a49e4096920e",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 22,
+        "sectionLabel": "Section 7: Serving",
+        "heading": "7.C Volley Serve — Ball Height",
+        "ruleNumber": "7.C.3",
+        "content": "7.C.3 Ball Height. The ball must clearly be no higher than the server’s\nwaist when the paddle contacts the ball.",
+        "semanticScore": 0.3541,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3784,
+        "vectorRank": 23,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 19
+      },
+      {
+        "chunkId": "c4d4d62d-5d10-41b7-ac61-aece86f7e184",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 32,
+        "sectionLabel": "Section 13: The Net and Net Support",
+        "heading": "Ball Under Net",
+        "ruleNumber": "13.E",
+        "content": "13.E Ball Under Net. A ball must not be hit under the net.",
+        "semanticScore": 0.3532,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.378,
+        "vectorRank": 24,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 20
+      },
+      {
+        "chunkId": "c93a4343-347d-47e5-be63-0670c93b32e8",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 32,
+        "sectionLabel": "Section 13: The Net and Net Support",
+        "heading": "Ball Crossing Plane of Net",
+        "ruleNumber": "13.F",
+        "content": "13.F Ball Crossing Plane of Net. A ball must entirely cross to a player’s end of\nthe net before the player hits the ball.",
+        "semanticScore": 0.3524,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3776,
+        "vectorRank": 25,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 21
+      },
+      {
+        "chunkId": "dcbf7ae4-2bfc-4204-93d5-e7acc382e6c8",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 24,
+        "sectionLabel": "Section 8: Line Calls",
+        "heading": "“In” Ball",
+        "ruleNumber": "8.B",
+        "content": "8.B “In” Ball. A served ball that clears the opponent’s non-volley zone line and\nlands in the correct service court is “in.” A ball returned by a player that\nlands on the opponent’s end of the court is “in.”",
+        "semanticScore": 0.3477,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3754,
+        "vectorRank": 27,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 22
+      },
+      {
+        "chunkId": "4169a8b2-f10e-481b-b3c9-8b3d21cc2fa6",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 21,
+        "sectionLabel": "Section 7: Serving",
+        "heading": "7.B Ball Release — Release from Hand or Paddle",
+        "ruleNumber": "7.B.1",
+        "content": "7.B.1 Release from Hand or Paddle. The server must release the ball\nusing only one hand or only the paddle.",
+        "semanticScore": 0.3427,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3731,
+        "vectorRank": 30,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 23
+      },
+      {
+        "chunkId": "8723a303-e41c-470a-ae08-95866948f5c0",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 29,
+        "sectionLabel": "Section 10: Rally Situations",
+        "heading": "10.G Damaged Ball — No Replay – Soft or Degraded Ball",
+        "ruleNumber": "10.G.2",
+        "content": "10.G.2 No Replay – Soft or Degraded Ball. When a ball is or becomes\ndegraded or soft, the result of the prior rally stands.",
+        "semanticScore": 0.3297,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.367,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 24
+      },
+      {
+        "chunkId": "b38ff29a-208c-4ae4-a7c8-3b49f7ef6000",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 54,
+        "sectionLabel": "Section 20: Tournament Match Situations",
+        "heading": "20.F Damaged Ball — Replay – Broken or Cracked Ball",
+        "ruleNumber": "20.F.1",
+        "content": "20.F.1 Replay – Broken or Cracked Ball. When the referee determines\nthat the broken or cracked ball affected the outcome of the rally,\nthe rally must be replayed with a replacement ball. (Modifies\nRule 10.G.1)",
+        "semanticScore": 0.3268,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3656,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 25
+      },
+      {
+        "chunkId": "4e45501b-d487-403e-92eb-e249a68c35b3",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 69,
+        "sectionLabel": "Section 24: Non-Officiated Tournament",
+        "heading": "24.B Extra Ball — Fault – Extra Ball Visible or Ball Falls",
+        "ruleNumber": "24.B.1",
+        "content": "24.B.1 Fault – Extra Ball Visible or Ball Falls. When an extra ball\ncarried by a player is visible to an opponent or falls to the\nplaying surface while the ball is live, it is a fault against the\nplayer.",
+        "semanticScore": 0.3254,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3649,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 26
+      },
+      {
+        "chunkId": "0da77239-2181-4785-ac98-173c0b7d8a30",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 28,
+        "sectionLabel": "Section 10: Rally Situations",
+        "heading": "Returned Ball Placement",
+        "ruleNumber": "10.C",
+        "content": "10.C Returned Ball Placement. A player must return the ball so that the ball\nlands on the opponent’s end of the court or contacts the opponent or\nanything that is worn or carried by the opponent before the ball lands.",
+        "semanticScore": 0.3215,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3631,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 27
+      },
+      {
+        "chunkId": "8a66c25a-2576-46be-92c6-d6f85ac22445",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 32,
+        "sectionLabel": "Section 13: The Net and Net Support",
+        "heading": "Ball Between Net and Net Post",
+        "ruleNumber": "13.D",
+        "content": "13.D Ball Between Net and Net Post. A ball must not be hit between the net and\nthe net post.",
+        "semanticScore": 0.3211,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3629,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 28
+      },
+      {
+        "chunkId": "76cecd1c-f034-4e13-94d3-d9e660645631",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 26,
+        "sectionLabel": "Section 9: Dead Balls, Faults, and Hinders",
+        "heading": "Dead Balls, Faults, and Hinders",
+        "ruleNumber": "",
+        "content": "Section 9 Dead Balls, Faults, and Hinders",
+        "semanticScore": 0.3155,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3603,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 29
+      },
+      {
+        "chunkId": "71db4adc-1433-4b33-aa1e-3ce522904cb7",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 21,
+        "sectionLabel": "Section 7: Serving",
+        "heading": "7.B Ball Release — No Manipulation or Spin Upon Release",
+        "ruleNumber": "7.B.2",
+        "content": "7.B.2 No Manipulation or Spin Upon Release. Some natural rotation of\nthe ball is expected during any release of the ball. The server must\nnot manipulate the ball to add spin with any part of the server's\nbody or the paddle prior to hitting the ball to make the serve,\nexcept that the server may allow the ball to roll off the face of the\npaddle by gravity. Spin may be applied to the ball upon contact by\nthe paddle.",
+        "semanticScore": 0.3098,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3576,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 30
+      },
+      {
+        "chunkId": "edf08dcc-eea1-4468-92cc-987bf1b49387",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 33,
+        "sectionLabel": "Section 13: The Net and Net Support",
+        "heading": "13.I Player Crossing Plane of Net — Ball Crosses Back to Opponent’s Side",
+        "ruleNumber": "13.I.2",
+        "content": "13.I.2 Ball Crosses Back to Opponent’s Side. When a ball bounces in the\ncourt on the receiving player’s end of the net and then returns to\nthe opponent’s side of the net without being hit, the receiving\nplayer may cross over, under, or around the net to hit the ball, but\nonly after the ball has first crossed back to the opponent’s end of\nthe net.",
+        "semanticScore": 0.3082,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3568,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 31
+      },
+      {
+        "chunkId": "68591ceb-77db-464b-b590-412a886dd372",
+        "documentId": "353b1adc-756e-4e1b-8fe6-ed3fd5e18029",
+        "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+        "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+        "documentType": "captain_guide",
+        "sourceClassification": "lwr_supporting_guide",
+        "documentAuthorityRank": 3,
+        "documentScopeKind": "all",
+        "pageNumber": 10,
+        "sectionLabel": "LEAGUE FEES AND WAIVER",
+        "heading": "LEAGUE FEES AND WAIVER",
+        "ruleNumber": "",
+        "content": "LEAGUE FEES AND WAIVER\no The registration fee is per team, per division, per season, as announced before the season\nbegins. No refunds will be issued starting one week before the season starts, unless a division\nis canceled due to having fewer than the four-team minimum or other league-initiated\ncancelations.\no The League shall provide:\n Match Balls: Franklin Outdoor X-40 Optic balls for all regular season and playoƯ\nmatches.\n DUPR Uploads: All match results logged to DUPR for rating updates (excluding mixed\nand individual Picklebreaker™ games and some tournament games).\n Administration: All scheduling, website management, and administrative support.\n Championship Prize: Free entry into the following season for the Gold Medal/1st place\nteam in each division based on Championship Day/PlayoƯ results.\no Waiver: As an LWR PC member, you acknowledge the risks of participation and release\nLWR PC, match sites, communities/clubs, and all officers/volunteers from any claims,\nliability, and costs. See the full detailed Waiver here: https://tinyurl.com/LWRPC-ClubWaiver",
+        "semanticScore": 0.2997,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8328,
+        "contextScore": 0.1,
+        "combinedScore": 0.3564,
+        "vectorRank": null,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "Direct LWR-selected match equipment"
+        },
+        "stage3Rank": 32,
+        "lwrMatchEquipmentProbe": {
+          "intent": "Club-selected match equipment",
+          "retrieved": true,
+          "query": "match balls",
+          "probeRank": 1,
+          "normalStage3Rank": 32,
+          "normalStage3CandidateLimit": 32,
+          "deduplicatedAgainstNormal": true,
+          "diagnostic": "Bounded LWR match-equipment probe; not a normal Stage 3 ranking."
+        }
+      }
+    ],
+    "suppliedEvidence": [
+      {
+        "chunkId": "d8ceb05b-3e08-453a-88aa-26cb0b10a725",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 42,
+        "sectionLabel": "Section 16: Tournament Director",
+        "heading": "Ball Selection",
+        "ruleNumber": "16.G",
+        "content": "16.G Ball Selection. The Tournament Director will choose the tournament ball\nfrom the official list of approved balls posted on the USA Pickleball website.",
+        "semanticScore": 0.5474,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4693,
+        "vectorRank": 1,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 1,
+        "authorityReview": {
+          "included": true,
+          "rank": 1,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "4da256ff-d390-47d4-8183-dfa45286f107",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Construction",
+        "ruleNumber": "3.C.5",
+        "content": "3.C.5 Construction. The ball must be made of durable material molded\nwith a smooth surface and free of texturing. The ball may have a\nslight ridge at the seam, as long as it does not significantly impact\nthe ball’s flight characteristics. (See Figure 3-2.)\nThe ball with larger holes is customarily used\nfor indoor play (pictured on the left). The ball\nwith smaller holes is customarily used for\noutdoor play (pictured on the right).\nFigure 3-2: Approved Balls – Examples",
+        "semanticScore": 0.5392,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4654,
+        "vectorRank": 2,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 2,
+        "authorityReview": {
+          "included": true,
+          "rank": 2,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "af22a56a-e841-46b8-a89e-7c34b163fd52",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "Ball Specifications",
+        "ruleNumber": "3.C",
+        "content": "3.C Ball Specifications. The requirements for the ball are set forth in Rules 3.C.1\nthrough 3.C.5. The complete list of approved balls is posted on the USA\nPickleball website.",
+        "semanticScore": 0.5282,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4602,
+        "vectorRank": 3,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 3,
+        "authorityReview": {
+          "included": true,
+          "rank": 3,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "3135724a-c059-4e76-a0ee-b40240a596eb",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Usage",
+        "ruleNumber": "3.C.1",
+        "content": "3.C.1 Usage. All approved balls are acceptable for indoor or outdoor\nplay. (See Figure 3-2.)",
+        "semanticScore": 0.5105,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4519,
+        "vectorRank": 4,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 4,
+        "authorityReview": {
+          "included": true,
+          "rank": 4,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "f581de61-f30c-4350-91af-90fd116de4ea",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Design",
+        "ruleNumber": "3.C.2",
+        "content": "3.C.2 Design. The design of the ball must be approved by USA Pickleball\nas detailed in the Equipment Standards Manual. USA Pickleball\nEquipment Standards Manual",
+        "semanticScore": 0.46,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4282,
+        "vectorRank": 5,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 5,
+        "authorityReview": {
+          "included": true,
+          "rank": 5,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "65b11e66-561c-458f-a55f-83507210db8a",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Color",
+        "ruleNumber": "3.C.3",
+        "content": "3.C.3 Color. The ball must be one uniform color, except for identification\nmarkings. Colors may vary.",
+        "semanticScore": 0.4285,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4134,
+        "vectorRank": 7,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 6,
+        "authorityReview": {
+          "included": true,
+          "rank": 6,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "69847181-ecb4-48db-b617-47edac8da5c6",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 45,
+        "sectionLabel": "Section 17: Referee Responsibilities",
+        "heading": "17.D Officiating Play — Damaged Balls",
+        "ruleNumber": "17.D.14",
+        "content": "17.D.14 Damaged Balls. Determine whether a ball is broken or cracked\nand must be replaced, and whether the broken or cracked ball\naffected the outcome of a rally. (See Rule 20.F.)",
+        "semanticScore": 0.4253,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4119,
+        "vectorRank": 8,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 7,
+        "authorityReview": {
+          "included": true,
+          "rank": 7,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "b8f58b72-95f2-4458-8d7d-56a01c3863ef",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 62,
+        "sectionLabel": "Section 22: Unsportsmanlike Conduct and",
+        "heading": "22.B Verbal and Technical Warnings — Ball Abuse",
+        "ruleNumber": "22.B.4",
+        "content": "22.B.4 Ball Abuse. Intentionally damaging or aggressively hitting a\ndead ball without endangering people.",
+        "semanticScore": 0.4039,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4018,
+        "vectorRank": 9,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 8,
+        "authorityReview": {
+          "included": true,
+          "rank": 8,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      }
+    ],
+    "authorityReviewCandidates": [
+      {
+        "chunkId": "d8ceb05b-3e08-453a-88aa-26cb0b10a725",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 42,
+        "sectionLabel": "Section 16: Tournament Director",
+        "heading": "Ball Selection",
+        "ruleNumber": "16.G",
+        "content": "16.G Ball Selection. The Tournament Director will choose the tournament ball\nfrom the official list of approved balls posted on the USA Pickleball website.",
+        "semanticScore": 0.5474,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4693,
+        "vectorRank": 1,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 1,
+        "authorityReview": {
+          "included": true,
+          "rank": 1,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "4da256ff-d390-47d4-8183-dfa45286f107",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Construction",
+        "ruleNumber": "3.C.5",
+        "content": "3.C.5 Construction. The ball must be made of durable material molded\nwith a smooth surface and free of texturing. The ball may have a\nslight ridge at the seam, as long as it does not significantly impact\nthe ball’s flight characteristics. (See Figure 3-2.)\nThe ball with larger holes is customarily used\nfor indoor play (pictured on the left). The ball\nwith smaller holes is customarily used for\noutdoor play (pictured on the right).\nFigure 3-2: Approved Balls – Examples",
+        "semanticScore": 0.5392,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4654,
+        "vectorRank": 2,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 2,
+        "authorityReview": {
+          "included": true,
+          "rank": 2,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "af22a56a-e841-46b8-a89e-7c34b163fd52",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "Ball Specifications",
+        "ruleNumber": "3.C",
+        "content": "3.C Ball Specifications. The requirements for the ball are set forth in Rules 3.C.1\nthrough 3.C.5. The complete list of approved balls is posted on the USA\nPickleball website.",
+        "semanticScore": 0.5282,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4602,
+        "vectorRank": 3,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 3,
+        "authorityReview": {
+          "included": true,
+          "rank": 3,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "3135724a-c059-4e76-a0ee-b40240a596eb",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Usage",
+        "ruleNumber": "3.C.1",
+        "content": "3.C.1 Usage. All approved balls are acceptable for indoor or outdoor\nplay. (See Figure 3-2.)",
+        "semanticScore": 0.5105,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4519,
+        "vectorRank": 4,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 4,
+        "authorityReview": {
+          "included": true,
+          "rank": 4,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "f581de61-f30c-4350-91af-90fd116de4ea",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Design",
+        "ruleNumber": "3.C.2",
+        "content": "3.C.2 Design. The design of the ball must be approved by USA Pickleball\nas detailed in the Equipment Standards Manual. USA Pickleball\nEquipment Standards Manual",
+        "semanticScore": 0.46,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4282,
+        "vectorRank": 5,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 5,
+        "authorityReview": {
+          "included": true,
+          "rank": 5,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "65b11e66-561c-458f-a55f-83507210db8a",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Color",
+        "ruleNumber": "3.C.3",
+        "content": "3.C.3 Color. The ball must be one uniform color, except for identification\nmarkings. Colors may vary.",
+        "semanticScore": 0.4285,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4134,
+        "vectorRank": 7,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 6,
+        "authorityReview": {
+          "included": true,
+          "rank": 6,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "69847181-ecb4-48db-b617-47edac8da5c6",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 45,
+        "sectionLabel": "Section 17: Referee Responsibilities",
+        "heading": "17.D Officiating Play — Damaged Balls",
+        "ruleNumber": "17.D.14",
+        "content": "17.D.14 Damaged Balls. Determine whether a ball is broken or cracked\nand must be replaced, and whether the broken or cracked ball\naffected the outcome of a rally. (See Rule 20.F.)",
+        "semanticScore": 0.4253,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4119,
+        "vectorRank": 8,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 7,
+        "authorityReview": {
+          "included": true,
+          "rank": 7,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "b8f58b72-95f2-4458-8d7d-56a01c3863ef",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 62,
+        "sectionLabel": "Section 22: Unsportsmanlike Conduct and",
+        "heading": "22.B Verbal and Technical Warnings — Ball Abuse",
+        "ruleNumber": "22.B.4",
+        "content": "22.B.4 Ball Abuse. Intentionally damaging or aggressively hitting a\ndead ball without endangering people.",
+        "semanticScore": 0.4039,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4018,
+        "vectorRank": 9,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 8,
+        "authorityReview": {
+          "included": true,
+          "rank": 8,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "5fd78215-565f-43cf-855f-89c7e1a2b385",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 69,
+        "sectionLabel": "Section 24: Non-Officiated Tournament",
+        "heading": "Extra Ball",
+        "ruleNumber": "24.B",
+        "content": "24.B Extra Ball. An extra ball carried by a player during a rally must not be\nvisible to the opponent and must remain in possession of the player.",
+        "semanticScore": 0.4004,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.4002,
+        "vectorRank": 10,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 9,
+        "authorityReview": {
+          "included": true,
+          "rank": 9,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "cce58f04-0041-4a04-88dd-aab052122700",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 54,
+        "sectionLabel": "Section 20: Tournament Match Situations",
+        "heading": "Damaged Ball",
+        "ruleNumber": "20.F",
+        "content": "20.F Damaged Ball. A player may appeal to the referee to determine whether a\nball is degraded, soft, broken, or cracked. A potentially soft or degraded\nball will not be replaced unless all players agree. If the referee determines\nthat the ball is broken or cracked, it will be replaced. (Modifies Rule 10.G)",
+        "semanticScore": 0.3907,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3956,
+        "vectorRank": 11,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 10,
+        "authorityReview": {
+          "included": true,
+          "rank": 10,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "c5201d82-ecac-4191-af4b-cf6fbe85932c",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 21,
+        "sectionLabel": "Section 7: Serving",
+        "heading": "Ball Release",
+        "ruleNumber": "7.B",
+        "content": "7.B Ball Release. The server must comply with Rules 7.B.1 through 7.B.3 when\nreleasing the ball to make the serve.",
+        "semanticScore": 0.3903,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3954,
+        "vectorRank": 12,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 11,
+        "authorityReview": {
+          "included": true,
+          "rank": 11,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      },
+      {
+        "chunkId": "b59f7c08-67ed-4aeb-89ea-dfcd39aada69",
+        "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+        "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+        "documentTitle": "2026 USA Pickleball Official Rulebook",
+        "documentType": "usap_rulebook",
+        "sourceClassification": "usap_governing_fallback",
+        "documentAuthorityRank": 2,
+        "documentScopeKind": "all",
+        "pageNumber": 13,
+        "sectionLabel": "Section 3: Court and Equipment",
+        "heading": "3.C Ball Specifications — Brand Identification",
+        "ruleNumber": "3.C.4",
+        "content": "3.C.4 Brand Identification. The ball must have a manufacturer or\nsupplier name or logo printed or embossed on the surface.",
+        "semanticScore": 0.3883,
+        "keywordScore": 0,
+        "exactScore": 0.85,
+        "authorityScore": 0.8414,
+        "contextScore": 0,
+        "combinedScore": 0.3945,
+        "vectorRank": 13,
+        "keywordRank": null,
+        "exactMatch": true,
+        "exactMatchReason": "Official term: balls",
+        "terminologyDiagnostic": "None",
+        "leagueTextDiagnostic": "None",
+        "ftsDiagnostic": {
+          "normalizedTerms": [
+            "balls",
+            "usin"
+          ],
+          "retrievalExpansion": [],
+          "typoNormalization": [],
+          "matched": false,
+          "candidateRank": null
+        },
+        "intentDiagnostic": {
+          "detectedIntent": "Club-selected match equipment",
+          "evidenceMatch": "None"
+        },
+        "stage3Rank": 12,
+        "authorityReview": {
+          "included": true,
+          "rank": 12,
+          "limit": 12
+        },
+        "governingDiagnostics": [
+          {
+            "intent": "What kind of balls will we be using",
+            "reason": "No direct applicable USAP passage",
+            "overridden": false
+          }
+        ]
+      }
+    ],
+    "intentEvidenceCandidates": [],
+    "lwrMatchEquipmentProbe": {
+      "intent": "Club-selected match equipment",
+      "retrieved": true,
+      "query": "match balls",
+      "probeRank": 1,
+      "normalStage3Rank": 32,
+      "normalStage3CandidateLimit": 32,
+      "deduplicatedAgainstNormal": true,
+      "diagnostic": "Bounded LWR match-equipment probe; not a normal Stage 3 ranking.",
+      "elapsedMs": 629,
+      "candidates": []
+    },
+    "evidence": {
+      "sufficient": true,
+      "threshold": 0.35,
+      "topScore": 0.4693,
+      "stage4Fallback": "Evidence meets the configured threshold."
+    },
+    "conflict": {
+      "potentialConflict": false,
+      "competingEvidence": [
+        {
+          "chunkId": "d8ceb05b-3e08-453a-88aa-26cb0b10a725",
+          "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+          "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+          "documentTitle": "2026 USA Pickleball Official Rulebook",
+          "documentType": "usap_rulebook",
+          "sourceClassification": "usap_governing_fallback",
+          "documentAuthorityRank": 2,
+          "documentScopeKind": "all",
+          "pageNumber": 42,
+          "sectionLabel": "Section 16: Tournament Director",
+          "heading": "Ball Selection",
+          "ruleNumber": "16.G",
+          "content": "16.G Ball Selection. The Tournament Director will choose the tournament ball\nfrom the official list of approved balls posted on the USA Pickleball website.",
+          "semanticScore": 0.5474,
+          "keywordScore": 0,
+          "exactScore": 0.85,
+          "authorityScore": 0.8414,
+          "contextScore": 0,
+          "combinedScore": 0.4693,
+          "vectorRank": 1,
+          "keywordRank": null,
+          "exactMatch": true,
+          "exactMatchReason": "Official term: balls",
+          "terminologyDiagnostic": "None",
+          "leagueTextDiagnostic": "None",
+          "ftsDiagnostic": {
+            "normalizedTerms": [
+              "balls",
+              "usin"
+            ],
+            "retrievalExpansion": [],
+            "typoNormalization": [],
+            "matched": false,
+            "candidateRank": null
+          },
+          "intentDiagnostic": {
+            "detectedIntent": "Club-selected match equipment",
+            "evidenceMatch": "None"
+          },
+          "stage3Rank": 1,
+          "authorityReview": {
+            "included": true,
+            "rank": 1,
+            "limit": 12
+          },
+          "governingDiagnostics": [
+            {
+              "intent": "What kind of balls will we be using",
+              "reason": "No direct applicable USAP passage",
+              "overridden": false
+            }
+          ]
+        },
+        {
+          "chunkId": "4da256ff-d390-47d4-8183-dfa45286f107",
+          "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+          "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+          "documentTitle": "2026 USA Pickleball Official Rulebook",
+          "documentType": "usap_rulebook",
+          "sourceClassification": "usap_governing_fallback",
+          "documentAuthorityRank": 2,
+          "documentScopeKind": "all",
+          "pageNumber": 13,
+          "sectionLabel": "Section 3: Court and Equipment",
+          "heading": "3.C Ball Specifications — Construction",
+          "ruleNumber": "3.C.5",
+          "content": "3.C.5 Construction. The ball must be made of durable material molded\nwith a smooth surface and free of texturing. The ball may have a\nslight ridge at the seam, as long as it does not significantly impact\nthe ball’s flight characteristics. (See Figure 3-2.)\nThe ball with larger holes is customarily used\nfor indoor play (pictured on the left). The ball\nwith smaller holes is customarily used for\noutdoor play (pictured on the right).\nFigure 3-2: Approved Balls – Examples",
+          "semanticScore": 0.5392,
+          "keywordScore": 0,
+          "exactScore": 0.85,
+          "authorityScore": 0.8414,
+          "contextScore": 0,
+          "combinedScore": 0.4654,
+          "vectorRank": 2,
+          "keywordRank": null,
+          "exactMatch": true,
+          "exactMatchReason": "Official term: balls",
+          "terminologyDiagnostic": "None",
+          "leagueTextDiagnostic": "None",
+          "ftsDiagnostic": {
+            "normalizedTerms": [
+              "balls",
+              "usin"
+            ],
+            "retrievalExpansion": [],
+            "typoNormalization": [],
+            "matched": false,
+            "candidateRank": null
+          },
+          "intentDiagnostic": {
+            "detectedIntent": "Club-selected match equipment",
+            "evidenceMatch": "None"
+          },
+          "stage3Rank": 2,
+          "authorityReview": {
+            "included": true,
+            "rank": 2,
+            "limit": 12
+          },
+          "governingDiagnostics": [
+            {
+              "intent": "What kind of balls will we be using",
+              "reason": "No direct applicable USAP passage",
+              "overridden": false
+            }
+          ]
+        },
+        {
+          "chunkId": "af22a56a-e841-46b8-a89e-7c34b163fd52",
+          "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+          "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+          "documentTitle": "2026 USA Pickleball Official Rulebook",
+          "documentType": "usap_rulebook",
+          "sourceClassification": "usap_governing_fallback",
+          "documentAuthorityRank": 2,
+          "documentScopeKind": "all",
+          "pageNumber": 13,
+          "sectionLabel": "Section 3: Court and Equipment",
+          "heading": "Ball Specifications",
+          "ruleNumber": "3.C",
+          "content": "3.C Ball Specifications. The requirements for the ball are set forth in Rules 3.C.1\nthrough 3.C.5. The complete list of approved balls is posted on the USA\nPickleball website.",
+          "semanticScore": 0.5282,
+          "keywordScore": 0,
+          "exactScore": 0.85,
+          "authorityScore": 0.8414,
+          "contextScore": 0,
+          "combinedScore": 0.4602,
+          "vectorRank": 3,
+          "keywordRank": null,
+          "exactMatch": true,
+          "exactMatchReason": "Official term: balls",
+          "terminologyDiagnostic": "None",
+          "leagueTextDiagnostic": "None",
+          "ftsDiagnostic": {
+            "normalizedTerms": [
+              "balls",
+              "usin"
+            ],
+            "retrievalExpansion": [],
+            "typoNormalization": [],
+            "matched": false,
+            "candidateRank": null
+          },
+          "intentDiagnostic": {
+            "detectedIntent": "Club-selected match equipment",
+            "evidenceMatch": "None"
+          },
+          "stage3Rank": 3,
+          "authorityReview": {
+            "included": true,
+            "rank": 3,
+            "limit": 12
+          },
+          "governingDiagnostics": [
+            {
+              "intent": "What kind of balls will we be using",
+              "reason": "No direct applicable USAP passage",
+              "overridden": false
+            }
+          ]
+        }
+      ],
+      "limitation": "Stage 3 does not infer contradictions from text similarity alone; competing high-scoring sources are shown for manual review."
+    },
+    "environment": {
+      "embeddingModel": "text-embedding-3-small",
+      "embeddingDimensions": 1536,
+      "evidenceThreshold": 0.35,
+      "retrievalLimit": 8,
+      "authorityReviewLimit": 12
+    },
+    "metrics": {
+      "interpretationMs": 4.680599999999913,
+      "embeddingInputTokens": 9,
+      "embeddingMs": 1097,
+      "retrievalMs": 1115,
+      "totalMs": 2212
+    }
+  }
+}
