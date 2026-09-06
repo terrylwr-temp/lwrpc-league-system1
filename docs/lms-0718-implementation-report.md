@@ -1,6 +1,6 @@
 # LMS-0718 / 0.1.540 — Stage 7B AI Feedback & Review
 
-2026-09-05. **Implemented locally; not deployed or production accepted.** LMS-0717 / 0.1.539 remains the production-accepted application; LMS-0716 / Stage 7A remains accepted. This implements the owner-approved `lms-0718-stage7b-readiness-report.md`. No production SQL, data changes, model requests or deployment were performed.
+2026-09-05. **DEPLOYED; PRODUCTION ACCEPTANCE BLOCKED.** LMS-0718 / 0.1.540 is live. Historical-source handling failed acceptance as detailed below; Stage 7B is not complete. LMS-0717 / 0.1.539 remains the accepted rollback baseline; LMS-0716 / Stage 7A remains accepted. The local implementation/validation sections below are preserved as historical checkpoints.
 
 ## Migration and server security
 
@@ -123,3 +123,53 @@ If rollback is needed, roll the application back to accepted LMS-0717 while leav
 Owner authorized migration, deployment and bounded acceptance. Production project `glikrmmgirilnmamxxyl` confirmed healthy. Rollback application baseline is LMS-0717 / 0.1.539, commit `5975ee683c2f85a0b6d0f3424c89de43abc3780a`, Vercel deployment `dpl_FddvP5anKEmdW15xzgHq3ASH8QtQ`. Fresh browser navigation confirmed LMS-0717. Retained HMAC grouping versions remain `[1]`; no environment configuration was changed or secret read.
 
 The four-function migration was applied successfully. Immediate comparison at 23:41 UTC verified identical hashes/counts for all six Stage 7A tables, existing feedback, documents, versions and chunks. Public table schema/ACL hash and all pre-existing function definition/ACL hashes remained identical. Each new function body hash matches the local reviewed migration. All four are SECURITY INVOKER with fixed `pg_catalog, public` search path; workflow timeouts are 3s/250ms, reporting statement timeout 5s. Effective EXECUTE: service_role allowed; anon/authenticated/PUBLIC denied, with only owner and service_role in ACLs. Production application deployment and acceptance remain pending at this checkpoint.
+
+## Controlled production acceptance result — stopped for review
+
+Release commit `d0e81494da4bf1459bbabd2ced810a5ec3607ca5` was pushed through the normal main-branch Git pipeline. Vercel deployment `dpl_5dQwwAXu9yQjZYsS9Q8bgCxbkur5` became READY at 23:44:30 UTC and is aliased to `league.lwrpickleballclub.com`. Hosted compilation/deployment/cache upload succeeded. The live footer displays LMS-0718. No environment variables changed.
+
+**Blocker:** the LMS-0713 legacy question `what does an NR DUPR rating mean` retains a DUPR League Rules citation. Preparing its link returns `Historical source unavailable.` Read-only database inspection confirms the exact version exists, its chunk exists and matches that version, and the version is inactive with `processing_status = superseded`. `aiReviewService.js:129` requires `processing_status === ready`, so it rejects this retained historical version before signing. This prevents the required inactive-version historical link/label acceptance. No current document was substituted and no data was exposed. A separate bounded correction must review safe support for retained superseded versions with the same exact document/version/chunk checks; **no correction or further deployment was made**.
+
+| Requested gate | Production result |
+| --- | --- |
+| 1. Preflight/migration | Pass; correct project, no collisions, function-only migration applied once; LMS-0716 not reapplied. |
+| 2. Function permissions | Pass; all four exact source hashes/configurations and effective EXECUTE checked; existing schema/functions/ACLs unchanged. |
+| 3. Deployment | Pass; Git commit/deployment above, live LMS-0718. |
+| 4. Authorization | Commissioner page/report/detail/history/workflow/source path worked. Anonymous report/detail/history/mutation and capture-health requests returned 401. Other roles have isolated role-matrix evidence; no production role/account changes or additional safe sessions used. |
+| 5. Navigation | Three separate AI entries present. Review alone had `aria-current=page` and selected styling at desktop 1280x900 and mobile 390x844. Full other-route live navigation sweep remains pending; existing regression tests passed. |
+| 6. Metrics | Initial live cards matched independent SQL: grounded 24; participation 1/24 = 4.17%; Helpful 0/1 = 0.00%; Not Helpful 1; unanswered 9; open cases 8. Manager retest did not increase player cards. Resolving the one case reduced open cases to 7. |
+| 7. Needs Review | All eight player cases visible including reimbursement, tungsten, match ball, Season DUPR, community and current Not Helpful. Required columns present. |
+| 8. Detail | Original/effective question, historical fallback/answer, version/timestamps, evidence, bounded-diagnostics control, occurrences, feedback and review section present. Mobile modal measured x/y=0, 390x844, overflow auto and body scroll locked. Close/Escape worked. Expanded diagnostics and full keyboard sweep remain pending. |
+| 9. Workflow/audit | Only community group `739fa168-68a3-4d71-baed-97d8334c4268` changed. New → Reviewing, AI/Retrieval Review category, append note, Resolved; direct database verification passed. |
+| 10. Reopen | Same case Resolved → Reviewing → Resolved; final revision 7, category retained. Six manager events appended, seven total including original creation, seven distinct operation IDs; no history overwritten. Actual production retry injection not performed; isolated retry tests retained. |
+| 11. Legacy | Ten latest-state feedback rows (nine legacy). LMS-0713 match-ball and NR detail retained question/answer/evidence and actual feedback times. Missing answer timestamp shown Not retained; no invented parent/case. |
+| 12. Grouping | Tungsten one group/case, count two, two individually selectable occurrences; original question preserved. No new tungsten requests or merges. |
+| 13. Historical sources | **Blocked** for retained superseded Rules version as above. Current active Captains Guide link prepared with current label and five-minute expiry. External PDF opening was not confirmed by the in-app browser; no claim of completed viewer verification. |
+| 14. Retest | Community question prefilled console without submission. Explicit click returned grounded Rule 3.5 answer with own-community team, same-division and available-roster qualification. UI total 3097ms (retrieval 1329ms, validation 149ms, generation 1604ms). One separate manager_test outcome; historical occurrence unchanged. |
+| 15. Protected demand | Informational category-unspecified count 4, separate from failures; clarification count 6. No protected question text on review dashboard. |
+| 16. Capture health | Commissioner endpoint-backed UI shows Unknown and independent-log caveat, recent recorded time; never Recording. Anonymous denied. |
+| 17. Player sanity | One LWR question `What kind of ball are we using?` completed as grounded Franklin Outdoor X-40 Optic answer with Helpful/Not Helpful and Official Source. Mobile composer/disclaimer and preserved session history visible. USAP/protected checks not run after blocker; full desktop player sanity pending. No feedback clicked. |
+| 18. Database integrity | Pass for all actions completed; details below. |
+| 19. Limitations | Unavailable production role sessions covered only by isolated evidence as authorized. Pending checks listed above were not claimed passed. No load/outage/retry injection or synthetic data. |
+| 20. Acceptance | **LMS-0718 deployed, NOT production accepted; Stage 7B incomplete.** Stop for owner review before bounded correction/resumption. |
+
+### Final integrity snapshot, 23:53 UTC
+
+- Outcomes 44 → 46: exactly one LMS-0718 manager_test grounded answer and one player_interface grounded answer. Original 44-row hash remained `5b88e91744b09cd9069f1927756b6e6c`.
+- Occurrences 11 unchanged, full-row hash `05520072e4fe882a16313669890d81d6`; groups 9 and fingerprint routes 9 unchanged with identical hashes; key versions remain `[1]`.
+- Cases 9, exactly one updated. Manager audit 9 → 15, six authorized sequential revisions 1→7. Original nine audit rows hash unchanged (`023a941e6412f509cb8605fdbd8ec0b1`).
+- Feedback 13 unchanged, hash `389f8eb5b008ed3770e890780d63d87a`. No feedback/synthetic events created.
+- Documents 7, versions 19, chunks 1507: counts and complete row hashes unchanged.
+- Public table schema/RLS/ACL hash `7e8ac1332095929f0be79cc5b7b58cdd` and pre-existing function definition/ACL hash `1e10fe81c4877e98f144b9b929362c9b` unchanged.
+
+The approved future **New Question** UI requirement is recorded in the roadmap only. No next LMS version, Live LMS Intelligence, corpus processing, code correction or further production action was started after the blocker. This acceptance record is a local documentation update; it was not pushed to trigger another deployment.
+
+## Approved bounded historical-source correction
+
+The owner subsequently authorized correction and deployment within LMS-0718 / 0.1.540. The actual version CHECK enum is queued/processing/ready/failed/superseded; document states are active/inactive/archived. Manager review now permits only ready and superseded versions. Current document inactivity/non-current identity does not invalidate retained historical evidence. Queued, processing, failed, missing and mismatched versions/chunks remain denied. No player viewer changes, migration, workflow function or snapshot mutation is involved.
+
+Exact application files: `app/lib/aiReviewService.js` (bounded lifecycle gate and lifecycle label metadata), `app/ai-assistant/review/page.js` (Historical Source — Superseded/Inactive label and explicit retained-response/current-governing distinction), `test/aiReviewService.test.mjs` (seven additional regression cases including the full source endpoint role matrix). Documentation changes are this report, roadmap and Stage 7 design checkpoint.
+
+The POST endpoint still receives answer ID and source index; document/version/chunk identities come only from the server-loaded review/feedback snapshot. A browser-supplied unrelated version is ignored and cannot replace that identity. Exact document/version/chunk relationship and retained storage path are verified before the unchanged five-minute signing operation. Commissioner/League Manager only; other roles remain denied before reads/signing. Existing normal player viewer active-source rules are untouched.
+
+Automated correction validation: 317 tests passed, including unchanged player-viewer tests, current and superseded versions, legitimate inactive document, queued/processing/failed denial, missing/mismatched identity denial, no-snapshot denial, ignored arbitrary browser version, signing duration/path, and immutable in-memory snapshots. Lint passed with the same six existing warnings; standalone nonincremental TypeScript passed; compiled PDF worker verification passed. An initial label encoding issue was fixed before final testing. Normal build compiled successfully then hit the established cache .tsbuildinfo EPERM; isolated build result and production acceptance are recorded below when complete.

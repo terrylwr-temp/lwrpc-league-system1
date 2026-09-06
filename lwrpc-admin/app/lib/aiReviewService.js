@@ -126,8 +126,8 @@ export async function reviewSource(db, answerId, sourceIndex, user) {
     db.from('ai_document_chunks').select('id,document_version_id,page_number').eq('id',chunkId).maybeSingle(),
   ]);
   const v=check(vr), c=check(cr);
-  if(!v || !c || v.document_id!==docId || v.document?.id!==docId || c.document_version_id!==versionId || v.processing_status!=='ready' || !v.storage_path) throw new ReviewError('Historical source unavailable.',404);
+  if(!v || !c || v.document_id!==docId || v.document?.id!==docId || c.document_version_id!==versionId || !['ready','superseded'].includes(v.processing_status) || !v.storage_path) throw new ReviewError('Historical source unavailable.',404);
   const signed=check(await db.storage.from(v.storage_bucket).createSignedUrl(v.storage_path,300));
   if(!signed?.signedUrl) throw new ReviewError('Historical source unavailable.',404);
-  return {url:`${signed.signedUrl.split('#')[0]}${c.page_number?`#page=${c.page_number}`:''}`,historical:v.document.active_version_id!==v.id || v.document.status!=='active',title:v.document.title};
+  return {url:`${signed.signedUrl.split('#')[0]}${c.page_number?`#page=${c.page_number}`:''}`,historical:v.processing_status==='superseded' || v.document.active_version_id!==v.id || v.document.status!=='active',lifecycle:v.processing_status,title:v.document.title};
 }

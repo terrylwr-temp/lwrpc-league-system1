@@ -58,7 +58,7 @@ test('0718 prefill consumes once, expires, retains effective text and never exec
 });
 function database(records) {
  const calls=[];
- return {calls,from(table){const predicates=[];const q={select(fields){calls.push({table,fields});return q;},eq(k,v){predicates.push([k,v]);return q;},order(){return q;},limit(){return q;},async maybeSingle(){const rows=records[table]||[];return {data:rows.find(r=>predicates.every(([k,v])=>r[k]===v))||null};}};return q;},rpc(){return {eq(){return this;},async maybeSingle(){return {data:{helpful:false,event_count:2}};}};},storage:{from(){return {async createSignedUrl(){return {data:{signedUrl:'https://official.example/fixture.pdf?token=synthetic'}};}};}}};
+ return {calls,from(table){const predicates=[];const q={select(fields){calls.push({table,fields});return q;},eq(k,v){predicates.push([k,v]);return q;},order(){return q;},limit(){return q;},async maybeSingle(){const rows=records[table]||[];return {data:rows.find(r=>predicates.every(([k,v])=>r[k]===v))||null};}};return q;},rpc(){return {eq(){return this;},async maybeSingle(){return {data:{helpful:false,event_count:2}};}};},storage:{from(){return {async createSignedUrl(path,expires){calls.push({signedPath:path,expires});return {data:{signedUrl:'https://official.example/fixture.pdf?token=synthetic'}};}};}}};
 }
 test('0718 detail joins retained answer snapshot, hides actor IDs, does not acknowledge unseen wall time',async()=>{
  const records={ai_review_occurrences:[{id:randomUUID(),answer_id:answer,group_id:group,original_question:'Original',effective_question:'Effective',recorded_at:'2026-09-05T12:00:00Z',source_snapshot:[],selection_snapshot:{candidates:[]},assistant_version:'LMS-0717'}],
@@ -84,6 +84,36 @@ test('0718 UI has bounded modal, honest health, history and manual retest withou
  const page=await readFile(new URL('../app/ai-assistant/review/page.js',import.meta.url),'utf8');
  const css=await readFile(new URL('../app/ai-assistant/review/review.module.css',import.meta.url),'utf8');
  assert.match(page,/showModal/);assert.match(page,/Status decision|status decision/);assert.match(page,/health\?\.status==='degraded'\?'Degraded':'Unknown'/);
- assert.match(page,/Next page/);assert.match(page,/Historical\/inactive version/);assert.match(page,/Retest Question/);
+ assert.match(page,/Next page/);assert.match(page,/Historical Source — Superseded/);assert.match(page,/source retained with the historical AI response/);assert.match(page,/Retest Question/);
  assert.match(css,/100dvh/);assert.match(css,/safe-area-inset/);assert.match(css,/focus-visible/);
+});
+
+for(const role of ['commissioner','league_manager','club_pro','captain','player',null])test(`0718 superseded source endpoint authorization ${role||'anonymous'}`,async()=>{
+ const records=historicalRecords('superseded'),db=database(records);
+ const authorize=async()=>role?{role,user:{id:user},supabase:db}:{error:'denied',status:401};
+ const r=await handleReviewRequest(new Request('http://local/api/ai-assistant/review?op=source',{method:'POST',body:JSON.stringify({answer,index:0,documentVersionId:randomUUID()})}),authorize);
+ assert.equal(r.status,reviewRoleAllowed(role)?200:role?403:401);
+ const signed=db.calls.filter(c=>c.signedPath);
+ assert.equal(signed.length,reviewRoleAllowed(role)?1:0);
+ if(reviewRoleAllowed(role)){const body=await r.json();assert.equal(body.historical,true);assert.equal(body.lifecycle,'superseded');assert.equal(signed[0].signedPath,'retained.pdf');assert.equal(signed[0].expires,300);}
+});
+function historicalRecords(status='ready'){
+ const doc=randomUUID(),version=randomUUID(),chunk=randomUUID();
+ return {ai_answer_feedback_events:[{id:randomUUID(),answer_id:answer,source_snapshot:[{documentId:doc,documentVersionId:version,chunkId:chunk}]}],
+ ai_document_versions:[{id:version,document_id:doc,processing_status:status,storage_bucket:'official',storage_path:'retained.pdf',document:{id:doc,active_version_id:version,status:'active',title:'Fixture'}}],
+ ai_document_chunks:[{id:chunk,document_version_id:version,page_number:3}]};
+}
+test('0718 historical lifecycle is bounded and exact identities are required before signing',async()=>{
+ for(const status of ['ready','superseded','queued','processing','failed']){
+  const records=historicalRecords(status),db=database(records);
+  if(['ready','superseded'].includes(status)){const r=await reviewSource(db,answer,0,user);assert.equal(r.historical,status==='superseded');assert.match(r.url,/#page=3$/);}
+  else {await assert.rejects(reviewSource(db,answer,0,user),/unavailable/);assert.equal(db.calls.filter(c=>c.signedPath).length,0);}
+ }
+ const inactive=historicalRecords();inactive.ai_document_versions[0].document.status='inactive';assert.equal((await reviewSource(database(inactive),answer,0,user)).historical,true);
+ for(const mutate of [r=>r.ai_document_versions=[],r=>r.ai_document_chunks=[],r=>r.ai_document_versions[0].document_id=randomUUID(),r=>r.ai_document_chunks[0].document_version_id=randomUUID(),r=>r.ai_document_versions[0].storage_path=null]){
+  const records=historicalRecords('superseded');mutate(records);const db=database(records);await assert.rejects(reviewSource(db,answer,0,user),/unavailable/);assert.equal(db.calls.filter(c=>c.signedPath).length,0);
+ }
+ const records=historicalRecords('superseded'),before=JSON.stringify(records),db=database(records);
+ await assert.rejects(reviewSource(db,randomUUID(),0,user));await assert.rejects(reviewSource(db,answer,1,user));assert.equal(db.calls.filter(c=>c.signedPath).length,0);
+ await reviewSource(db,answer,0,user);assert.equal(JSON.stringify(records),before);
 });
