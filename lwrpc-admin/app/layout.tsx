@@ -4,6 +4,7 @@ import { AppDialogProvider } from "./components/AppDialogProvider";
 import InactivitySessionTimeout from "./components/InactivitySessionTimeout";
 import LmsPwaRegister from "./components/LmsPwaRegister";
 import SystemFooter from "./components/SystemFooter";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata = {
   title: "LWR PC League Management",
@@ -27,6 +28,7 @@ export default function RootLayout({
         <AppDialogProvider>{children}</AppDialogProvider>
         <InactivitySessionTimeout />
         <SystemFooter />
+        <Analytics />
       </body>
     </html>
   );
