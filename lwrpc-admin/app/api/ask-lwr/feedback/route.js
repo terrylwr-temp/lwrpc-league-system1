@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { feedbackTransition, readFeedbackReceipt } from "../../../lib/aiConversation";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 import { captureQualityFeedback } from "../../../lib/aiQualityCapture";
-import {authenticateLive,liveFeedback} from '../../../lib/liveLmsService.js';
+import {liveAuthFailure,authenticateLive,liveFeedback} from '../../../lib/liveLmsService.js';
 import {isLiveReceipt} from '../../../lib/liveLmsReceipts.js';
 
 export const runtime = "nodejs";
@@ -39,6 +39,8 @@ export async function POST(req) {
     await captureQualityFeedback(authorization.supabase, claims, inserted.id);
     return NextResponse.json({ success: true, result: { helpful: inserted.helpful, changed: true, feedbackId: inserted.id } });
   } catch (error) {
+    const authFailure=liveAuthFailure(error);
+    if(authFailure)return NextResponse.json(authFailure.body,{status:authFailure.status,headers:authFailure.headers});
     console.error("Ask LWR feedback failed", { category: error?.name || "server_failure" });
     return failure(400);
   }

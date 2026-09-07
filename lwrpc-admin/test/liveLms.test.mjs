@@ -5,7 +5,7 @@ import {runLive} from '../app/lib/liveLmsService.js';
 import {openLive,sealLive} from '../app/lib/liveLmsReceipts.js';
 import {createConversationContext,SESSION_EXCHANGES_KEY,CURRENT_CONTEXT_KEY} from '../app/lib/askLwrConversationState.js';
 process.env.SUPABASE_SERVICE_ROLE_KEY='synthetic-local-test-key-not-a-credential';
-const principal={user:{id:'synthetic-user'},session:'synthetic-session',supabase:{}};
+const principal={user:{id:'synthetic-user'},receiptBinding:'synthetic-session',supabase:{}};
 const cases=[['What is my Season DUPR?','SELF_RATING'],["What is John Smith's Season DUPR?",'PLAYER_RATING'],["What is John Smith's email address?",'PLAYER_CONTACT'],['What team am I on?','SELF_TEAM'],['Show my roster','TEAM_ROSTER'],['When is my next match?','NEXT_MATCH']];
 test('0723 exact six capabilities and document routing controls',()=>{
  assert.deepEqual(cases.map(([q])=>liveIntent(q).intent),LIVE_CAPABILITIES);
@@ -33,7 +33,7 @@ test('0723 six live executions cannot invoke a model and retain metadata only',a
 });
 test('0723 receipt subject reauthorization, expiry, cross-user/session and New Question',async()=>{
  const token=sealLive('context',principal,{intent:'PLAYER_RATING',subject:'opaque-subject',query:{intent:'PLAYER_RATING',rating:'season'}},1000);
- assert.throws(()=>openLive(token,'context',{...principal,session:'other'},2000));assert.throws(()=>openLive(token,'context',{...principal,user:{id:'other'}},2000));assert.throws(()=>openLive(token,'context',principal,301001));
+ assert.throws(()=>openLive(token,'context',{...principal,receiptBinding:'other'},2000));assert.throws(()=>openLive(token,'context',{...principal,user:{id:'other'}},2000));assert.throws(()=>openLive(token,'context',principal,301001));
  const current=sealLive('context',principal,{intent:'PLAYER_RATING',subject:'opaque-subject',query:{intent:'PLAYER_RATING',rating:'season'}});
  let args;
  const result=await runLive({body:{question:'What team is he on?',conversationReceipt:current},principal,lookup:async q=>{args=q;return {data:{status:'denied'}};},persist:async()=>{}});

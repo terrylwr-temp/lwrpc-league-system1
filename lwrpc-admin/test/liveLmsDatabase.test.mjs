@@ -5,6 +5,7 @@ import {runLive} from '../app/lib/liveLmsService.js';
 process.env.SUPABASE_SERVICE_ROLE_KEY='synthetic-test-secret';
 import {PGlite} from '@electric-sql/pglite';
 const migration=await readFile(new URL('../supabase/migrations/20260907110701_lms0723_live_intelligence.sql',import.meta.url),'utf8');
+const correction=await readFile(new URL('../supabase/migrations/20260907131012_lms0723_server_session_validation.sql',import.meta.url),'utf8');
 const id=n=>`10000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
 async function fixture(){
  const db=new PGlite();
@@ -47,13 +48,15 @@ async function fixture(){
  await db.exec(await readFile(new URL('../supabase-ai-assistant-lms-0712-stage6.sql',import.meta.url),'utf8'));
  await db.exec(await readFile(new URL('../supabase-ai-assistant-lms-0716-stage7a.sql',import.meta.url),'utf8'));
  await db.exec(migration);
+ await db.exec('create role supabase_auth_admin; alter table auth.sessions owner to supabase_auth_admin; alter table auth.sessions enable row level security; revoke usage on schema auth from ai_live_session_reader;');
+ await db.exec(correction);
  return db;
 }
 async function call(db,n,query){
  await db.exec('set role service_role');
- try{return (await db.query('select ai_live_lookup($1,$2,$3,$4) result',[id(100+n),id(200+n),id(500+n),query])).rows[0].result;}finally{await db.exec('reset role');}
+ try{return (await db.query('select ai_live_lookup($1,$2,$3) result',[id(100+n),id(500+n),query])).rows[0].result;}finally{await db.exec('reset role');}
 }
-test('0723 effective permissions, session checks and six capability projections',async t=>{
+test('0723 effective permissions, server auth boundary and six capability projections',async t=>{
  const db=await fixture();try{
   await t.test('six deterministic capabilities',async()=>{
    const rating=await call(db,1,{intent:'SELF_RATING',rating:'season'});assert.equal(rating.value,'3.72');assert.ok(!JSON.stringify(rating).includes('example.invalid'));
@@ -81,16 +84,16 @@ test('0723 role matrix, stale relationships, browser denial, replay and feedback
   assert.equal((await call(db,1,{intent:'TEAM_ROSTER',team:id(31)})).status,'denied');
   await db.exec(`update user_roles set role='player' where member_id='${id(2)}'`);
   assert.equal((await call(db,2,{intent:'PLAYER_CONTACT',subject:id(1)})).status,'denied');
-  await db.exec(`delete from auth.sessions where user_id='${id(103)}'`);
-  assert.equal((await call(db,3,{intent:'PLAYER_CONTACT',subject:id(1)})).status,'denied');
+  await db.exec(`update teams set co_captain_member_id=null where id='${id(30)}'`);
+  assert.equal((await call(db,3,{intent:'PLAYER_CONTACT',subject:id(1)})).status,'not_found');
   for(const role of ['anon','authenticated']){
-   await db.exec(`set role ${role}`);await assert.rejects(db.query('select ai_live_lookup($1,$2,$3,$4)',[id(107),id(207),id(501),{intent:'SELF_RATING',rating:'season'}]),/permission/);
+   await db.exec(`set role ${role}`);await assert.rejects(db.query('select ai_live_lookup($1,$2,$3)',[id(107),id(501),{intent:'SELF_RATING',rating:'season'}]),/permission/);
    await assert.rejects(db.query('select * from ai_live_private.feedback'),/permission/);await db.exec('reset role');
   }
   const before=(await db.query("select relname,relacl::text from pg_class where relname in('members','ai_answer_feedback_events') order by relname")).rows;
-  await db.exec(migration);assert.deepEqual((await db.query("select relname,relacl::text from pg_class where relname in('members','ai_answer_feedback_events') order by relname")).rows,before);
+  await db.exec(correction);assert.deepEqual((await db.query("select relname,relacl::text from pg_class where relname in('members','ai_answer_feedback_events') order by relname")).rows,before);
   await db.exec('set role service_role');
-  for(const value of [true,true,false,false])await db.query('select ai_live_feedback($1,$2,$3,$4,$5)',[id(101),id(201),id(900),value,{intent:'SELF_RATING',status:'success',relationship:'self',origin:'player_interface'}]);
+  for(const value of [true,true,false,false])await db.query('select ai_live_feedback($1,$2,$3,$4)',[id(101),id(900),value,{intent:'SELF_RATING',status:'success',relationship:'self',origin:'player_interface'}]);
   assert.deepEqual((await db.query('select helpful from ai_live_private.feedback order by at')).rows.map(x=>x.helpful),[true,false]);
   await assert.rejects(db.exec('delete from ai_live_private.feedback'),/permission/);await assert.rejects(db.exec('update ai_live_private.access_audit set decision=\'denied\''),/permission/);
   await db.exec('reset role');
@@ -99,7 +102,7 @@ test('0723 role matrix, stale relationships, browser denial, replay and feedback
 
 test('0723 real Stage 7 live outcomes retain no facts or unanswered occurrences',async()=>{
  const db=await fixture();try{
-  const principal={user:{id:id(101)},session:id(201),supabase:{}};
+  const principal={user:{id:id(101)},receiptBinding:id(201),supabase:{}};
   const result=await runLive({body:{question:'What is my Season DUPR?'},principal,
    lookup:async q=>({data:await call(db,1,q)}),
    persist:async(_s,build)=>{const p=build();await db.exec('set role service_role');try{await db.query('select capture_ai_quality($1,$2,$3,$4)',[p.p_outcome,p.p_occurrence,p.p_route,p.p_feedback_id]);}finally{await db.exec('reset role');}}
@@ -128,8 +131,8 @@ test('0723 audit fail-closed, budgets, duplicate resolution, freshness, retentio
   for(let i=0;i<5;i++)assert.equal((await call(db,2,{intent:'PLAYER_CONTACT',subject:id(1)})).status,'success');
   assert.equal((await call(db,2,{intent:'PLAYER_CONTACT',subject:id(1)})).status,'rate_limited');
   await db.exec('set role service_role');
-  await assert.rejects(db.query('select ai_live_review($1,$2)',[id(101),id(201)]),/authorization/);
-  assert.ok((await db.query('select ai_live_review($1,$2) r',[id(107),id(207)])).rows[0].r.groups);
+  await assert.rejects(db.query('select ai_live_review($1)',[id(101)]),/authorization/);
+  assert.ok((await db.query('select ai_live_review($1) r',[id(107)])).rows[0].r.groups);
   await assert.rejects(db.query('select id from auth.sessions'),/permission/);
   const count=Number((await db.query('select count(*) n from ai_live_private.access_audit')).rows[0].n);
   await db.query('select ai_live_private.expire_records()');assert.equal(Number((await db.query('select count(*) n from ai_live_private.access_audit')).rows[0].n),count,'fresh audit retained');
@@ -141,7 +144,7 @@ test('0723 audit fail-closed, budgets, duplicate resolution, freshness, retentio
 
 test('0723 current-season ambiguity, self continuation, roster pagination, schedule and team isolation',async()=>{
  const db=await fixture();try{
-  const principal={user:{id:id(101)},session:id(201),supabase:{}};
+  const principal={user:{id:id(101)},receiptBinding:id(201),supabase:{}};
   const live=body=>runLive({body,principal,lookup:async q=>({data:await call(db,1,q)}),persist:async()=>{}});
   const clarification=await live({question:'What is my DUPR?'});assert.equal(clarification.kind,'clarification');
   const rating=await live({question:'Season DUPR',conversationReceipt:clarification.conversationReceipt});assert.match(rating.answer,/3.72/);
@@ -167,7 +170,7 @@ test('0723 current-season ambiguity, self continuation, roster pagination, sched
 test('0723 synthetic six-capability timing benchmark (no external auth/model)',async t=>{
  const db=await fixture();try{
   for(const [question,n] of [['What is my Season DUPR?',1],["What is Synthetic Person1's Season DUPR?",2],["What is Synthetic Person1's email address?",2],['What team am I on?',1],['Show my roster',1],['When is my next match?',1]]){
-   const result=await runLive({body:{question},principal:{user:{id:id(100+n)},session:id(200+n),supabase:{}},lookup:async q=>({data:await call(db,n,q)}),persist:async()=>{}});
+   const result=await runLive({body:{question},principal:{user:{id:id(100+n)},receiptBinding:id(200+n),supabase:{}},lookup:async q=>({data:await call(db,n,q)}),persist:async()=>{}});
    assert.equal(result.kind,'answer');assert.ok(result.live.timing.databaseQueryMs>=0);
    t.diagnostic(JSON.stringify({capability:result.live.operation,...result.live.timing,authMs:null,auth:'injected synthetic principal; production verification pending'}));
   }
@@ -187,7 +190,7 @@ test('0723 permanent named rating blocker: protected resolution never reads requ
    create view member_season_ratings with(security_invoker=true) as select member_id,season_id,
     public.synthetic_rating_guard(member_id,season_dupr_rating) season_dupr_rating,season_primetime_rating,dupr_doubles_rating from synthetic_rating_storage;
    grant select on member_season_ratings to service_role;`);
-  const principal={user:{id:id(102)},session:id(202),supabase:{}};
+  const principal={user:{id:id(102)},receiptBinding:id(202),supabase:{}};
   let seen,snapshot;
   const live=question=>runLive({body:{question},principal,lookup:async q=>{seen=q;return {data:await call(db,2,q)};},persist:async(_db,build)=>{snapshot=build();}});
   const good=await live("Tell me Synthetic Person1's Season DUPR.");
@@ -241,7 +244,7 @@ test('0723 six-capability subject invariant, authorized population, ambiguity an
 
 test('0723 named team follow-up reauthorizes; reset and new self query discard prior subject',async()=>{
  const db=await fixture();try{
-  const principal={user:{id:id(102)},session:id(202),supabase:{}};let queries=[];
+  const principal={user:{id:id(102)},receiptBinding:id(202),supabase:{}};let queries=[];
   const live=body=>runLive({body,principal,lookup:async q=>{queries.push(q);return {data:await call(db,2,q)};},persist:async()=>{}});
   const rating=await live({question:"What is Synthetic Person1's Season DUPR?"});assert.equal(rating.kind,'answer');
   const team=await live({question:'What team is he on?',conversationReceipt:rating.conversationReceipt});assert.equal(team.kind,'answer');assert.equal(queries.at(-1).subjectKind,'FOLLOWUP_REFERENT');assert.equal(queries.at(-1).subject,id(1));
@@ -262,12 +265,17 @@ test('0723 final migration security state survives production-default grants and
   const before=(await snapshot()).rows;
   const functions=()=>db.query(`select n.nspname,p.proname,p.prosecdef,p.proconfig,array(select x::text from unnest(p.proacl) x order by x::text) proacl from pg_proc p join pg_namespace n on n.oid=p.pronamespace where p.proname in ('lookup','ai_live_lookup') order by n.nspname,p.proname`);
   const functionBefore=(await functions()).rows;
+  assert.equal((await db.query("select count(*)::int n from pg_roles where rolname='ai_live_session_reader'")).rows[0].n,0);
+  assert.equal((await db.query("select to_regprocedure('ai_live_private.session_valid(uuid,uuid)') helper")).rows[0].helper,null);
+  assert.equal((await db.query("select relrowsecurity from pg_class where oid='auth.sessions'::regclass")).rows[0].relrowsecurity,true);
+  assert.equal((await db.query("select count(*)::int n from pg_policy where polrelid='auth.sessions'::regclass")).rows[0].n,0);
+
   for(const row of functionBefore){assert.equal(row.prosecdef,false);assert.deepEqual(row.proconfig,['search_path=""']);}
-  for(const fn of ['ai_live_private.lookup(uuid,uuid,uuid,jsonb)','public.ai_live_lookup(uuid,uuid,uuid,jsonb)']){
+  for(const fn of ['ai_live_private.lookup(uuid,uuid,jsonb)','public.ai_live_lookup(uuid,uuid,jsonb)','public.ai_live_feedback(uuid,uuid,boolean,jsonb)','public.ai_live_review(uuid)']){
    for(const role of ['anon','authenticated','service_role'])assert.equal((await db.query('select has_function_privilege($1,$2,\'EXECUTE\') ok',[role,fn])).rows[0].ok,role==='service_role');
   }
   for(const row of before.filter(x=>x.nspname==='ai_live_private'))assert.equal(row.relrowsecurity,true);
-  await db.exec(migration);
+  await db.exec(correction);
   assert.deepEqual((await snapshot()).rows,before,'no new columns/tables or changed final ACL/RLS after replay');
   assert.deepEqual((await functions()).rows,functionBefore,'function security/ACL replay stable');
   assert.equal((await call(db,2,{intent:'SELF_TEAM',name:'Synthetic Person9'})).status,'not_found');

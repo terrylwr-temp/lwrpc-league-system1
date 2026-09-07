@@ -4,7 +4,7 @@ import { retrieveOfficialEvidence } from "../../lib/aiRetrieval";
 import { runPlayerOfficialAnswer } from "../../lib/askLwrPlayerAnswer";
 import { authorizeAdminRequest } from "../../lib/serverSupabase";
 import { observeQualityRequest } from "../../lib/aiQualityCapture";
-import {authenticateLive,needsLive,runLive} from '../../lib/liveLmsService.js';
+import {liveAuthFailure,authenticateLive,needsLive,runLive} from '../../lib/liveLmsService.js';
 
 export const runtime = "nodejs";
 
@@ -25,6 +25,8 @@ export async function POST(req) {
     }) });
     return NextResponse.json({ success: true, result });
   } catch (error) {
+    const authFailure=liveAuthFailure(error);
+    if(authFailure)return NextResponse.json(authFailure.body,{status:authFailure.status,headers:authFailure.headers});
     console.error("Ask LWR player answer failed", { category: error?.name || "server_failure" });
     return failure(500);
   }

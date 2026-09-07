@@ -1,21 +1,17 @@
 import {randomUUID} from 'node:crypto';
-import {createClient} from '@supabase/supabase-js';
-import {createAdminSupabase} from './serverSupabase.js';
+import {createAdminSupabase,authenticateRequestIdentity,LiveAuthenticationError} from './serverSupabase.js';
 import {liveIntent,liveMessage,LIVE_CAPABILITIES} from './liveLmsIntent.js';
 import {isLiveReceipt,openLive,sealLive} from './liveLmsReceipts.js';
 import {persistQuality} from './aiQualityCapture.js';
 import {APP_VERSION} from './version.js';
 
 export async function authenticateLive(request) {
- const authStarted=performance.now();
- const token=(request.headers.get('authorization')||'').replace(/^Bearer\s+/i,'').trim();
- if(!token)throw new Error('live_auth');
- const auth=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
- const {data,error}=await auth.auth.getUser(token);if(error||!data?.user?.id)throw new Error('live_auth');
- // Decode only AFTER provider verification. session_id is never a client body field.
- let session;try{session=JSON.parse(Buffer.from(token.split('.')[1],'base64url').toString()).session_id;}catch{}
- if(!/^[0-9a-f-]{36}$/i.test(session||''))throw new Error('live_auth');
- return {user:{id:data.user.id},session,authMs:performance.now()-authStarted,supabase:createAdminSupabase()};
+ const identity=await authenticateRequestIdentity(request);
+ return {...identity,supabase:createAdminSupabase()};
+}
+export function liveAuthFailure(error) {
+ if(!(error instanceof LiveAuthenticationError))return null;
+ return {status:error.status,body:{success:false,error:error.status===401?'Please sign in to use Ask LWR Pickleball Club AI.':'Authentication is temporarily unavailable. Please try again.'},headers:{'Cache-Control':'private, no-store'}};
 }
 export function needsLive(body) {return Boolean(liveIntent(body?.question)) || isLiveReceipt(body?.conversationReceipt);}
 
@@ -39,7 +35,7 @@ export async function runLive({body,principal,origin='player_interface',lookup,p
  let data;
  try{
   if(query.rating==='unsupported'||!LIVE_CAPABILITIES.includes(query.intent))data={status:'unsupported'};
-  else {const response=await (lookup || ((q)=>principal.supabase.rpc('ai_live_lookup',{p_actor:principal.user.id,p_session:principal.session,p_request:answerId,p_query:q}).abortSignal(AbortSignal.timeout(5000))))(args);if(response.error)throw new Error('live_lookup');data=response.data;}
+  else {const response=await (lookup || ((q)=>principal.supabase.rpc('ai_live_lookup',{p_actor:principal.user.id,p_request:answerId,p_query:q}).abortSignal(AbortSignal.timeout(5000))))(args);if(response.error)throw new Error('live_lookup');data=response.data;}
  }catch{data={status:'technical_error'};}
  const completed=clock(),status=data?.status||'technical_error';data={...data,status,intent:query.intent};
  const relation=['self','team','manager'].includes(data.relationship)?data.relationship:'unresolved';
@@ -64,6 +60,6 @@ export async function runLive({body,principal,origin='player_interface',lookup,p
 export async function liveFeedback(body,principal) {
  if(typeof body.helpful!=='boolean')throw new Error('live_feedback');
  const {answerId,...metadata}=openLive(body.receipt,'feedback',principal);
- const {data,error}=await principal.supabase.rpc('ai_live_feedback',{p_actor:principal.user.id,p_session:principal.session,p_answer:answerId,p_helpful:body.helpful,p_metadata:metadata});
+ const {data,error}=await principal.supabase.rpc('ai_live_feedback',{p_actor:principal.user.id,p_answer:answerId,p_helpful:body.helpful,p_metadata:metadata});
  if(error)throw new Error('live_feedback');return data;
 }
