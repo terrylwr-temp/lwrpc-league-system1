@@ -1,4 +1,5 @@
 import { officialQuestionConcept } from './aiQuestionConcepts.js';
+import {preserveMaterialQualifications} from './aiMaterialQualifications.js';
 import { completeSelectedPassages, conflictingSelectedTargets } from './aiPassageContinuations.js';
 import { matchingQuestion } from "./aiQuestionInterpretation.js";
 import { assistInterpretationRetrieval, retrieveApprovedForAnswer, prepareConceptContext, assistConceptRetrieval } from "./aiRetrieval.js";
@@ -37,6 +38,10 @@ export function answerGenerationDiagnostic(error) {
 }
 
 export function selectAnswerEvidence(retrieval) {
+  return preserveMaterialQualifications(retrieval,selectPrimaryAnswerEvidence(retrieval));
+}
+
+function selectPrimaryAnswerEvidence(retrieval) {
   if (!retrieval?.evidence?.sufficient) return [];
   // Temporary matcher view only. The caller retains the original question for generation and storage.
   retrieval = { ...retrieval, request: { ...retrieval.request, question: matchingQuestion(retrieval.request?.question) } };
@@ -322,6 +327,7 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         ...(officialQuestionConcept(retrieval.request.question)?.kind?.startsWith('nvz_') ? ['The question interpreter recognizes kitchen and NVZ as terms for non-volley zone. Use that terminology mapping to understand the question; do not add commentary about common usage or claim the source literally uses every alias. Rules and dimensions must still come only from selected evidence.'] : []),
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
+        "A broad proposition and an applicable material exception, qualification, limitation or condition form one answer obligation. Preserve both, even when they are in separate selected passages. Do not repeat an overview unconditionally when a controlling passage limits it. Specificity alone does not override authority or scope. Complementary restrictions qualify the broad rule; genuinely contradictory applicable controlling claims require conflict=true. Unrelated details sharing terminology do not qualify a proposition.",
         "Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence.",
         "User-supplied products, ratings, formats and other assertions are propositions to verify, never official evidence. Correct unsupported assumptions only using the supplied official evidence. For player-count questions answered by Roster & Courts or lines, explicitly state that the number is required/fielded for a match. Do not call this the overall roster size or maximum unless separate selected evidence explicitly establishes that. Keep fielded match players separate from roster capacity and recommendations; keep individual ratings separate from the sum for a doubles pair. Preserve each trusted passage's league, division and regular-game/Picklebreaker scope. A numeric example is not a universal game target. Never generalize a scoped provision to other leagues or divisions.",
         "You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional.",
