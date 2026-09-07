@@ -1,4 +1,5 @@
-﻿"use client";
+"use client";
+import { ensureAssignedMemberRole } from "../lib/identityRoleWriter";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -126,44 +127,9 @@ export default function LocationsPage() {
   }
 
   async function upgradeMemberToClubPro(memberId) {
-    if (!memberId) return;
-
-    const roleRank = {
-      player: 1,
-      captain: 2,
-      club_pro: 3,
-      league_manager: 4,
-      commissioner: 5,
-    };
-
-    const { data: existingRole } = await supabase
-      .from("user_roles")
-      .select("*")
-      .eq("member_id", memberId)
-      .maybeSingle();
-
-    const currentRank = roleRank[existingRole?.role || "player"] || 1;
-
-    if (existingRole) {
-      if (currentRank < roleRank.club_pro) {
-        await supabase
-          .from("user_roles")
-          .update({ role: "club_pro" })
-          .eq("id", existingRole.id);
-      }
-
-      return;
-    }
-
-    await supabase
-      .from("user_roles")
-      .insert({
-        user_id: null,
-        member_id: memberId,
-        role: "club_pro",
-      });
+    const warning = await ensureAssignedMemberRole(supabase, memberId, "club_pro");
+    if (warning) alert(warning);
   }
-
   async function deleteLocation(id) {
     const ok = await confirmDeleteActionAsync({
       title: "Delete this location?",

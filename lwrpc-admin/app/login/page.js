@@ -100,6 +100,19 @@ const [pendingPasswordResetEmail, setPendingPasswordResetEmail] = useState("");
       return;
     }
 
+    // Linking is independently authenticated on the server. A pending/busy link
+    // never becomes an email authorization fallback and does not block sign-in.
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        await fetch('/api/account-identity', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${session.access_token}` },
+          signal: AbortSignal.timeout(6000),
+        });
+      }
+    } catch { /* A later account-entry attempt can retry the bounded operation. */ }
+
     const role = highestRoleForMembers(activeMembers.length > 0 ? activeMembers : [selectedMember]);
 
     router.push(requestedPostSignInPath() || defaultDashboardForRole(role));

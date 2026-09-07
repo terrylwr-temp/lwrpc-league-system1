@@ -1,4 +1,5 @@
 "use client";
+import { ensureAssignedMemberRole } from "../lib/identityRoleWriter";
 
 import LoadingScreen from "../components/LoadingScreen";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -322,89 +323,14 @@ export default function TeamsPage() {
   }, []);
 
   async function upgradeMemberToCaptain(memberId) {
-    if (!memberId) return;
-
-    const { data: existingRole } = await supabase
-      .from("user_roles")
-      .select("*")
-      .eq("member_id", memberId)
-      .maybeSingle();
-
-    const roleRank = {
-      player: 1,
-      captain: 2,
-      club_pro: 3,
-      league_manager: 4,
-      commissioner: 5
-    };
-
-    if (existingRole) {
-      const currentRank = roleRank[existingRole.role] || 1;
-
-      if (currentRank < roleRank.captain) {
-        await supabase
-          .from("user_roles")
-          .update({
-            role: "captain",
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", existingRole.id);
-      }
-
-      return;
-    }
-
-    await supabase
-      .from("user_roles")
-      .insert({
-        user_id: null,
-        member_id: memberId,
-        role: "captain"
-      });
+    const warning = await ensureAssignedMemberRole(supabase, memberId, "captain");
+    if (warning) alert(warning);
   }
 
   async function upgradeMemberToClubPro(memberId) {
-    if (!memberId) return;
-
-    const { data: existingRole } = await supabase
-      .from("user_roles")
-      .select("*")
-      .eq("member_id", memberId)
-      .maybeSingle();
-
-    const roleRank = {
-      player: 1,
-      captain: 2,
-      club_pro: 3,
-      league_manager: 4,
-      commissioner: 5
-    };
-
-    if (existingRole) {
-      const currentRank = roleRank[existingRole.role] || 1;
-
-      if (currentRank < roleRank.club_pro) {
-        await supabase
-          .from("user_roles")
-          .update({
-            role: "club_pro",
-            updated_at: new Date().toISOString()
-          })
-          .eq("id", existingRole.id);
-      }
-
-      return;
-    }
-
-    await supabase
-      .from("user_roles")
-      .insert({
-        user_id: null,
-        member_id: memberId,
-        role: "club_pro"
-      });
+    const warning = await ensureAssignedMemberRole(supabase, memberId, "club_pro");
+    if (warning) alert(warning);
   }
-
   async function saveTeam(e) {
     e.preventDefault();
 

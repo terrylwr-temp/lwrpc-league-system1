@@ -124,7 +124,7 @@ export async function POST(req) {
     const authUser = await findAuthUserByEmail(supabase, normalizedEmail);
 
     if (authUser?.id) {
-      await linkUserRoles(supabase, activeMembers, authUser.id);
+      await linkUserRoles(supabase, authUser.id);
 
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
         redirectTo,
@@ -166,7 +166,7 @@ export async function POST(req) {
     }
 
     if (invited?.user?.id) {
-      await linkUserRoles(supabase, activeMembers, invited.user.id);
+      await linkUserRoles(supabase, invited.user.id);
     }
 
     return resetResponse(isManager, {
@@ -326,15 +326,10 @@ async function findAuthUserByEmail(adminSupabase, email) {
   return null;
 }
 
-async function linkUserRoles(adminSupabase, members, userId) {
-  const memberIds = (members || []).map((member) => member.id).filter(Boolean);
-  if (memberIds.length === 0) return;
-
-  await adminSupabase
-    .from("user_roles")
-    .update({ user_id: userId, updated_at: new Date().toISOString() })
-    .in("member_id", memberIds)
-    .is("user_id", null);
+async function linkUserRoles(adminSupabase, userId) {
+  const { error } = await adminSupabase.rpc("link_future_existing_member_identity", { p_user: userId }).abortSignal(AbortSignal.timeout(3000));
+  // Recovery delivery remains independent. No unchecked/direct link fallback.
+  if (error) console.warn("Account identity reconciliation pending", { code: "identity_unavailable" });
 }
 
 function isAuthEmailRateLimit(message) {
