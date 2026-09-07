@@ -1,6 +1,84 @@
 # LWRPC League Management System Roadmap
 
-Last updated: 2026-09-06
+**Post-LMS-0723 manager request (2026-09-07):** Teams By Division count/name toggle implemented locally, not deployed. Read-only captain-picker diagnosis confirmed 14 Esplanade at the Heights display names but only two matching location links; 11 NULL links and one Indigo-linked conflict. No member data changed. [Findings, safe repair recommendation and validation](teams-division-sort-and-location-diagnosis.md).
+
+**CURRENT — LMS-0723 / 0.1.545 PRODUCTION ACCEPTED (2026-09-07).** Exact approved 16-candidate repair completed and replayed safely; coordination migration applied once; commit adb4389d9c2a88501a907fe46e6fcbdb46c31002 deployed. All currently testable acceptance gates passed. Owner confirmed concurrent member edits and registration activity as intentional. Real roster/match and logout-revocation limitations remain explicitly recorded. [Final production evidence and limitations](lms-0723-manifest-production-acceptance.md). No new version or View As User work started. Earlier status entries below are historical and superseded by this result.
+
+**CURRENT — Fresh read-only identity review complete; proposed protected manifest awaiting approval.** [Review, checksum, counts and repair procedure](lms-0723-fresh-identity-manifest-review.md). 176 Auth accounts; 15 proposed existing-role links plus one identical split (16 total); 107 no-role deferred. Original historical cohort is not reconstructed. Existing migration cap is 14 links + 1 split and remains unchanged; scope-limit decision required before execution. Manifest saved encrypted outside repository. No production migration/repair/deployment; LMS-0723 / 0.1.545 remains NOT production accepted.
+
+**CURRENT — Controlled production identity continuation stopped before mutation:** the original 15-candidate protected manifest/reviewed state was not retained in the earlier aggregate dry run. [Preflight findings and required recovery/re-review](lms-0723-identity-production-preflight-stop.md). Session migration remains applied; coordination migration remains unapplied. No repair or deployment. LMS-0723 / 0.1.545 remains NOT production accepted.
+
+**CURRENT — Shared identity coordination implemented locally and validated; STOP BEFORE PRODUCTION.** The owner approved the bounded app-owned Auth coordination hook. [Implementation, 19-part review and controlled continuation plan](lms-0723-identity-coordination-implementation.md). Original 14 links + 1 identical split only; 107 no-role accounts deferred. LMS-0723 / 0.1.545 remains deployed, NOT production accepted. No production repair, migration or deployment. Earlier stop/design entries below are historical.
+
+**LATEST — identity repair implementation STOP on demonstrated concurrency defect.** [Real PostgreSQL multi-session evidence](lms-0723-identity-concurrency-stop.md): same-identity/consolidation/no-op tests passed, but a duplicate candidate and repair both committed after replacing now-prohibited broad table locks with row/advisory locks, including SERIALIZABLE repair against a legacy READ COMMITTED writer. An exact reviewed-role-state guard is also needed. Shared-writer coordination requires bounded design review before implementation can resume. Only the 15 approved identities remain in scope; 107 no-role accounts are deferred. No production mutation, migration or deployment. LMS-0723 / 0.1.545 remains NOT production accepted.
+
+**Identity-link repair design/read-only dry run complete — STOP FOR REVIEW.** [Design, exclusive 172-account classification, SQL proposal and 30 synthetic checks](lms-0723-identity-link-repair-design.md). 15 link-only candidates (14 existing member-role links + 1 identical Commissioner split), 39 verified complete no-ops, 118 held including 107 requiring a role-provisioning policy. The split needs audited consolidation to preserve existing single-row role readers; update-only would create a duplicate. No production identity/schema/ACL mutation, backup export or deployment. LMS-0723 / 0.1.545 remains deployed, NOT production accepted.
+
+**Read-only SELF_RATING diagnosis complete:** acceptance identity is split across an Auth-only Commissioner role row (member_id NULL) and a member-only Commissioner row (user_id NULL). The immutable member INNER JOIN returns no row. [Exact cause, population counts and proposed bounded link correction](lms-0723-self-rating-authorization-diagnosis.md). No linking/code/SQL/deployment change performed. LMS-0723 / 0.1.545 remains NOT production accepted.
+
+**LATEST: session redesign migrated and deployed; first SELF_RATING gate DENIED — STOP.** Corrective recorder 20260907132549; READY commit a2d4af0. No further tests/correction after the first self question returned an access denial. [Production evidence and full gate disposition](lms-0723-session-redesign-production-acceptance.md). LMS-0723 / 0.1.545 remains NOT production accepted. Concurrent intentional registration is permitted; earlier registration-baseline stop is superseded.
+
+**Controlled session-redesign preflight STOP before mutation:** two team creations and five updated team rows since the prior acceptance stop require confirmation of the intentional current registration baseline. [Read-only evidence](lms-0723-session-redesign-production-preflight-stop.md). Corrective migration remains unapplied; no redeployment. LMS-0723 / 0.1.545 remains NOT production accepted.
+
+**Session redesign implemented locally; STOP for review before corrective migration/deployment.** [Implementation, security evidence and revocation limitations](lms-0723-session-validation-implementation.md). LMS-0723 / 0.1.545 remains deployed and NOT production accepted; LMS-0722 remains the accepted baseline. Earlier design-only/local status entries are historical.
+
+**2026-09-07 session redesign: diagnosis/design complete; awaiting review.** [Trusted server-auth boundary and exact corrective SQL proposal](lms-0723-session-validation-redesign.md). No implementation, SQL application, permission/RLS change or deployment in this pass. LMS-0723 / 0.1.545 remains deployed, NOT production accepted; LMS-0722 / 0.1.544 remains the accepted baseline. Online revocation and session-lifetime semantics are explicit validation gates. Earlier stop/local-deployment statements below are historical.
+
+Last updated: 2026-09-07
+
+## LMS-0723 / 0.1.545 — deployed; production acceptance blocked
+
+**Auth correction review STOP:** production auth.sessions has RLS enabled, no policies, and the constrained reader lacks ownership/bypass. The approved USAGE-only correction is insufficient; no mutation occurred. [Evidence and required design review](lms-0723-auth-rls-boundary-stop.md).
+
+**Current status:** exact migration applied once, d7da5f6 deployed READY. First live self-rating returned technical_error because the constrained session reader lacks auth schema USAGE; read-only helper probe confirms permission denied. STOP before correction. [Acceptance matrix and diagnosis](lms-0723-production-session-permission-stop.md). No rollback; last accepted release remains LMS-0722. Seasonal empty rosters/matches are owner-accepted limitations, with first legitimate roster/match verification obligations. Earlier local/preflight notes below are historical.
+
+**Controlled-production preflight STOP:** privileged read-only verification found zero roster memberships, zero authorized Captain-to-roster-player pairs, and zero matches. Required positive production fixtures are unavailable; no migration/deployment performed. [Prerequisite evidence and pending gates](lms-0723-production-prerequisite-stop.md).
+
+**Subject-resolution correction implemented locally; STOP FOR OWNER REVIEW.** Both named-person rating and team fallback defects now have permanent synthetic regressions. The router carries explicit subject state; the protected RPC resolves/authorizes named subjects before field retrieval and never defaults a failed explicit request to self. [Correction, exact migration and validation](lms-0723-subject-resolution-report.md). No production migration/deployment performed.
+
+The owner-approved six deterministic capabilities are implemented locally: SELF_RATING, PLAYER_RATING, PLAYER_CONTACT (email only), SELF_TEAM/TEAM_IDENTITY, TEAM_ROSTER and NEXT_MATCH. The protected server uses verified Auth user ID, current session and database-derived relationships; no live facts enter an answer/embedding model, corpus or document-feedback snapshot. Player self/own-team access, explicit managed-roster Captain/co-captain/team-Pro access, bounded manager lookup, sanitized live feedback/review, durable audit/limits and private retention are implemented. Location-only Pro and unsupported/bulk/historical/eligibility lookups remain deferred.
+
+[Implementation and migration review](lms-0723-implementation-report.md). Subject-correction local validation: 633 tests, lint with six existing warnings, standalone type check, PDF bundle verification and isolated production build; normal build compiled then hit the known type-cache lock. **No production migration or deployment has been performed; production remains accepted LMS-0722 / 0.1.544.** Existing legacy broad reads and email-role inconsistencies outside the live boundary remain separate review items. No legitimate document activation occurred; the accepted activation-history limitation remains. No subsequent Live LMS phase has started.
+
+## LMS-0722 / 0.1.544 — production accepted
+
+LMS-0722 is production accepted after the owner-authorized material-qualification correction and per-document collapsed version-history UI. Corrected commit 42778fd, deployment dpl_F1A5PEKbyNdPjqfz7RHD9QkdPHdy READY. 614 automated tests, type/lint/PDF checks and isolated clean build passed; first live Picklebreaker Rally Scoring retest includes the serving/game-winning-point qualification. Required player-count/format controls and 28-question configured-model acceptance run passed, Cross-League Leakage = 0. [Complete acceptance evidence and limitations](lms-0722-production-acceptance.md). Activation-history migration was applied once; no real activation occurred, so the next legitimate live activation is the expressly accepted limitation. Historical values remain Unknown. No next version or Live LMS Intelligence started.
+
+**PrimeTime Picklebreaker source conflict RESOLVED BY OWNER SOURCE CORRECTION.** Current Rules v20260907001227-e4d9bf77 consistently specify 15 by 2 Rally. Prior versions are superseded and retained. [Final source verification](lms-0722-final-source-verification.md). No application score hardcoding; isolated equal-authority conflict coverage remains required.
+
+The four basic PrimeTime/Saturday/Weekday/Weekday-9.1 player-count questions and paired PrimeTime/Saturday game-format/Picklebreaker controls are MUST-PASS production acceptance gates. Scope belongs to numbered passages; the flattened multi-league summary is not governing evidence for a single league.
+
+Activation history is REQUIRED: nullable per-version timestamp and member actor; protected atomic activation/supersession/provenance, local-time display, truthful Unknown for historical activations including the current Rules. Production acceptance requires migration/security/UI checks and a legitimate next activation, or an explicitly retained live-check limitation if none occurs. No fake production document may be activated for testing.
+
+The [diagnosis](lms-0722-quality-hardening-diagnosis.md) and [historical traces](lms-0722-trace-appendix.md) remain provenance, not current-corpus results. General partial-answer semantics, competing-supplement redesign and Live LMS Intelligence remain deferred. Stage 7 semantics and managed threshold .65 remain unchanged.
+
+## Deferred AI quality finding — explicit apparel object resolution
+
+Recorded 2026-09-06 from owner-reported production behavior; diagnosis has not yet been performed. Classification: **conversation/intent/object resolution**, not an LMS-0721 Approved Answers defect. LMS-0721 / 0.1.543 remains production accepted. This item is for future bounded diagnosis, not current implementation.
+
+Reported sequence:
+
+1. `clothing` → insufficient evidence.
+2. `We are currently trying to order a blouse for our team. Are there any color restrictions?`
+
+Reported response to the second question: `What are you asking about—the ball, paddle, clothing, or something else?`
+
+The current question itself explicitly identifies apparel. Future diagnosis must inspect the general apparel/object vocabulary, including whether `blouse` is absent; compare this sequence with a fresh standalone request to determine whether the preceding `clothing` turn affects classification. Trace raw/effective question, receipt/context classification, detected object, terminology expansion and retrieval candidates. Inspect active official LWR evidence for clothing/team-color rules and determine whether the correct final result is a grounded answer or insufficient evidence. Do not infer that a policy exists or is missing from this clarification failure alone.
+
+Required principle: an independently unambiguous current object such as blouse, shirt, jersey or equivalent apparel terminology must not trigger the generic ball/paddle/clothing object question. Diagnose vocabulary coverage generally before proposing any bounded correction; do not hardcode blouse alone or globally assume that every reference to team/color means apparel.
+
+Future regression controls:
+
+- `Are there color restrictions for our team shirts?`
+- `Can our team wear any color jersey?`
+- `We're ordering blouses for the team. Are there color restrictions?`
+- `What color can our team wear?` — may legitimately need clarification when clothing is not otherwise established.
+- `Are there color restrictions?` — clarify when context does not establish the object.
+- The exact reported blouse question, both standalone after New Question and following `clothing`, to distinguish vocabulary from receipt/context effects.
+
+Do not implement in LMS-0721, change its accepted status, or create an Approved Answer. Any later managed-knowledge proposal requires authority review establishing a genuine missing policy rather than an existing-evidence or object-resolution defect. No production replay, code change, corpus change or deployment was performed when recording this item.
+
+**CURRENT STATUS — LMS-0721 / 0.1.543 PRODUCTION ACCEPTED (2026-09-06).** Deployed `38eb7bb` / READY `dpl_4ACBAUDbciy2uqkbx54rArrhPRSZ`. First post-retirement answer now cites exact Rule 5.11 with truthful scheduling heading and no managed source. Final Existing Evidence explanation, historical retired revision-2 viewer, remaining typo/medical/reset/protected sanity, approved isolated security/authority/privacy coverage and production effective permissions/integrity passed. Both scheduling revisions remain retired and unchanged; no Active scheduling Approved Answer. 525 tests and required validation passed (isolated build resolves known cache lock). See [final acceptance](lms-0721-ordinary-sibling-citation-correction.md). Below-.65 recall, ambiguity, document activation display, Saturday/website/rally-scope/kitchen-equivalence quality items remain explicitly deferred, nonblocking. No next version started. Historical checkpoints below are preserved.
 
 **Ordinary sibling citation correction implemented:** shared trusted identity utility now accepts a selected structural sibling inside the revalidated chunk, with all text/boundary/combined-family protections retained. No managed-only override, retrieval change or historical rewrite. 525 tests, lint (six existing warnings), nonincremental type check and PDF check pass; isolated build/deployment/first live retest follow. See [correction report](lms-0721-ordinary-sibling-citation-correction.md). Both managed revisions remain retired. LMS-0721 / 0.1.543 remains NOT production accepted until remaining gates pass.
 
@@ -801,3 +879,9 @@ Future AI quality diagnosis: Saturday mixed-doubles additional-player question, 
 CURRENT production status: 941fd96 READY; exact scheduling Draft and activation/canonical/viewer/Helpful/public-email preservation pass. Active natural variant “Can we move our match to another day?” fails insufficient evidence (Rule 5.11 chunk rank 1 .4154; no selected evidence). Stopped before retrieval correction/revision/retirement. Revision 1 remains Active. LMS-0721 not production accepted. New explicit post-Yes explanation is implemented locally, not deployed after this stop; future Saturday 6.2.2 diagnosis recorded. See report current checkpoint.
 
 Natural-variant diagnosis complete (read-only/local): managed search returns Active revision 1 rank 1; failing move-day cosine .6147 is rejected by .65 while canonical .8176 passes. Other positive scores .5612–.7410 expose recall gap; reschedule wording passes score but unrelated formal chunk prevents supplement. Representation already includes title/question/answer. Two local alternatives do not solve all positives. Recommend separately approved independent scheduling applicability + exact bound formal-source qualification, then conditional recall calibration; do not broadly lower threshold. Full traces/matrices/recommendation: docs/lms-0721-natural-variant-diagnosis.md. No implementation/deployment/Active revision change. Pending UX copy preserved.
+
+### LMS-0722 source-verification stop — 2026-09-06/07 UTC
+Owner-activated Rules v20260906234736-a8d90205 is ready/current; prior v20260906111607-c0604ad8 is superseded with PDF/chunks retained. Current Rules 6.3.3/6.3.6 say Picklebreaker 11 by 2 Rally, but original PDF page 13 PrimeTime summary still says 15 by 2 Rally. Verification fails the owner's explicit gate; local implementation is paused and incomplete, nothing deployed. Preserve generic equal-authority conflict tests. See [verification](lms-0722-owner-source-correction-verification.md).
+
+### LMS-0722 source gate passed — 2026-09-07 UTC
+**PrimeTime Picklebreaker source conflict RESOLVED BY OWNER SOURCE CORRECTION.** Active Rules v20260907001227-e4d9bf77 consistently specify 15 by 2 Rally in 6.3.3, 6.3.6 and summary. Both prior versions remain superseded/retained and excluded from current retrieval. Resume approved implementation; keep generic conflict regression, no score hardcoding. [Final verification](lms-0722-final-source-verification.md).

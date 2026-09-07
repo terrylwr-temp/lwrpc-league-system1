@@ -1,0 +1,5 @@
+
+> lwrpc-admin@0.1.544 verify:ai-pdf-server-bundle
+> node scripts/verify-ai-pdf-server-bundle.mjs
+
+Verified PDF.js WorkerMessageHandler is bundled in 066d_next_dist_esm_build_templates_app-route_0__8b_k.js.

@@ -1,5 +1,9 @@
 # LMS-0721 / 0.1.543 — Approved LWR Answers / Managed Knowledge
 
+## FINAL — PRODUCTION ACCEPTED — 2026-09-06
+
+LMS-0721 / 0.1.543 deployed at `38eb7bb` is production accepted. The prospective ordinary sibling citation correction passes the first formal-only post-retirement test; remaining Existing Evidence UX, retired revision-2 history, security/authority/privacy, LMS-0720 sanity and integrity gates are complete under approved production/isolated coverage. Both scheduling revisions remain retired, immutable and available historically. No Active scheduling revision or recall change. Full evidence, exact files, 525-test validation, build/deployment details and deferred limitations: [final correction and acceptance report](lms-0721-ordinary-sibling-citation-correction.md). Earlier pending/stop checkpoints below are historical and superseded.
+
 ## Approved ordinary sibling citation correction — 2026-09-06
 
 Implemented the shared structural identity correction for ordinary selected sibling provisions; no Stage 3/4, .65, managed data, corpus or Stage 7 changes. Full validation/production acceptance checkpoint is maintained in [ordinary sibling correction report](lms-0721-ordinary-sibling-citation-correction.md). Both revisions remain retired; no lifecycle replay or new version. 525 tests pass; remaining production gates follow the authorized deployment.

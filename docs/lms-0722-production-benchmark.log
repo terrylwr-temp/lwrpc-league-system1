@@ -1,0 +1,32 @@
+(node:63248) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiRetrieval.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{"question":"I could use some clarification on the Saturday league mixed doubles. Is it permissible to use players other than the 12 that played in the single gender matches?","kind":"answer","modelCalls":1,"ms":2523}
+{"question":"What is the website for the club","kind":"answer","modelCalls":1,"ms":1592}
+{"question":"what are your rally scoring rules","kind":"answer","modelCalls":1,"ms":2794}
+{"question":"Is the kitchen the same as the NVZ","kind":"answer","modelCalls":1,"ms":2352}
+{"question":"clothing","kind":"insufficient_evidence","modelCalls":0,"ms":8}
+{"question":"I can't seem to locate the rules/guidelines for the Saturday Pickleball League. Can you please direct me where I can locate them","kind":"answer","modelCalls":0,"ms":321}
+{"question":"I am unable to log into my account. How do I reset my password","kind":"answer","modelCalls":1,"ms":2577}
+{"question":"Where do I find the info on what Pickleball’s we will be using with weekday league? I thought I read that we were using Joola HC-40.","kind":"answer","modelCalls":1,"ms":2419}
+{"question":"So one more clarification... do we need a min of 2 men and 2 women, all under 9.1 combined, to play best of 3 men's games, 3 women's games, and 3 mixed games? And since that's a lot in the heat, you suggest a roster of 6 people total?","kind":"clarification","modelCalls":0,"ms":29}
+{"question":"Interested in putting together a team from LWRCC but need to understand better how many players we need for each team and assume that any two need a combined dupr of 9.1 or less?","kind":"clarification","modelCalls":0,"ms":18}
+{"question":"How many players do i need for the primetime league","kind":"answer","modelCalls":1,"ms":1516}
+{"question":"Can I stand in the kitchen when I am not volleying?","kind":"answer","modelCalls":1,"ms":1576}
+{"question":"What is the PrimeTime Picklebreaker format?","kind":"answer","modelCalls":1,"ms":1570}
+{"question":"How many players play in a Weekday 9.1 match?","kind":"answer","modelCalls":1,"ms":1467}
+{"question":"Does the weekday 9.1 league have a different format?","kind":"answer","modelCalls":1,"ms":2482}
+{"question":"We are currently trying to order a blouse for our team. Are there any color restrictions?","kind":"insufficient_evidence","modelCalls":0,"ms":16}
+{"question":"How many players do I need for the PrimeTime League?","kind":"answer","modelCalls":1,"ms":1790}
+{"question":"How many players do I need for the Saturday League?","kind":"answer","modelCalls":1,"ms":2627}
+{"question":"How many players do I need for Weekday?","kind":"answer","modelCalls":1,"ms":1429}
+{"question":"How many players do I need for Weekday 9.1?","kind":"answer","modelCalls":1,"ms":1572}
+{"question":"What kind of games will be played in the Saturday League?","kind":"answer","modelCalls":1,"ms":5038}
+{"question":"What is the PrimeTime match format?","kind":"answer","modelCalls":1,"ms":2229}
+{"question":"What is the Saturday match format?","kind":"answer","modelCalls":1,"ms":6150}
+{"question":"How many players do I need for PrimeTime?","kind":"answer","modelCalls":1,"ms":1447}
+{"question":"How many players do I need for Saturday?","kind":"answer","modelCalls":1,"ms":1831}
+{"question":"How does the PrimeTime Picklebreaker work?","kind":"answer","modelCalls":1,"ms":1713}
+{"question":"How does the Saturday Picklebreaker work?","kind":"answer","modelCalls":1,"ms":2319}
+{"question":"What kind of games will be played in the primetime league","kind":"answer","modelCalls":1,"ms":1807}

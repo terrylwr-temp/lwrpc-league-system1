@@ -1,0 +1,50 @@
+(node:31132) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/liveLmsIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0723 exact six capabilities and document routing controls (5.6028ms)
+✔ 0723 six live executions cannot invoke a model and retain metadata only (6.2158ms)
+✔ 0723 receipt subject reauthorization, expiry, cross-user/session and New Question (1.8122ms)
+✔ 0723 unsupported queries never touch data and audit/query errors do not fall through (0.7113ms)
+✔ 0723 independent document question supersedes a live reference and capture failure is fail-open (1.0352ms)
+✔ 0723 semantic subject matrix: recipient is not subject; competing subjects fail closed (0.7125ms)
+✔ 0723 stale, forged and cleared references cannot become self or override a new subject (1.0358ms)
+(node:62420) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/serverSupabase.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0723 online identity, forged requester, six routes use only trusted actor; zero model calls (29.4636ms)
+✔ 0723 invalid and provider-rejected identities fail before protected lookup (2.8485ms)
+✔ 0723 auth timeout, thrown/malformed/unavailable responses fail closed and sanitized (29.2583ms)
+✔ 0723 opaque receipts preserve refreshed-session and cross-user/session rejection (2.9546ms)
+(node:12460) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/liveLmsService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ 0723 effective permissions, server auth boundary and six capability projections
+  ✔ six deterministic capabilities (47.8577ms)
+  ✔ field ACL proves minimal projections instead of response filtering (20.9401ms)
+✔ 0723 effective permissions, server auth boundary and six capability projections (2315.6874ms)
+✔ 0723 role matrix, stale relationships, browser denial, replay and feedback transitions (1561.4595ms)
+✔ 0723 real Stage 7 live outcomes retain no facts or unanswered occurrences (1536.3389ms)
+✔ 0723 audit fail-closed, budgets, duplicate resolution, freshness, retention and review authorization (1500.7801ms)
+✔ 0723 current-season ambiguity, self continuation, roster pagination, schedule and team isolation (1622.1408ms)
+✔ 0723 synthetic six-capability timing benchmark (no external auth/model) (1425.114ms)
+ℹ {"capability":"SELF RATING","authMs":null,"lookupMs":11,"personResolutionMs":4,"databaseQueryMs":1,"formattingMs":1,"totalMs":12,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"PLAYER RATING","authMs":null,"lookupMs":7,"personResolutionMs":3,"databaseQueryMs":1,"formattingMs":1,"totalMs":8,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"PLAYER CONTACT","authMs":null,"lookupMs":4,"personResolutionMs":2,"databaseQueryMs":1,"formattingMs":0,"totalMs":4,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"SELF TEAM","authMs":null,"lookupMs":4,"personResolutionMs":1,"databaseQueryMs":2,"formattingMs":1,"totalMs":5,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"TEAM ROSTER","authMs":null,"lookupMs":4,"personResolutionMs":1,"databaseQueryMs":2,"formattingMs":0,"totalMs":4,"auth":"injected synthetic principal; production verification pending"}
+ℹ {"capability":"NEXT MATCH","authMs":null,"lookupMs":6,"personResolutionMs":2,"databaseQueryMs":3,"formattingMs":1,"totalMs":7,"auth":"injected synthetic principal; production verification pending"}
+✔ 0723 permanent named rating blocker: protected resolution never reads requester rating (1383.1208ms)
+✔ 0723 six-capability subject invariant, authorized population, ambiguity and effective projections (1580.4441ms)
+✔ 0723 named team follow-up reauthorizes; reset and new self query discard prior subject (1373.7917ms)
+✔ 0723 final migration security state survives production-default grants and replay (1417.2318ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 16196.6351

@@ -1,0 +1,3 @@
+{"check":"public_auth_health","status":200,"version":"v2.196.0"}
+{"check":"malformed","authenticated":false,"status":403,"code":"bad_jwt"}
+{"check":"invalid_signature","authenticated":false,"status":403,"code":"bad_jwt"}

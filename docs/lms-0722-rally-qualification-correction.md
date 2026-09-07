@@ -37,3 +37,7 @@ AI Assistant Management retains the current Active version above a collapsed-by-
 ## Deployment / acceptance
 
 Redeploy through normal main-branch production pipeline only after final checks. First production question must be the exact failed Picklebreaker question. Stop if it fails; otherwise resume after the prior stop, preserving previously passed gates. No migration replay or fake document activation. Full benchmark and remaining manager/history/Stage 7/integrity gates remain required before production acceptance.
+
+## Completion
+
+614 tests passed; isolated clean build passed after normal compilation hit the known cache lock. Commit 42778fd deployed READY. First exact production retest passed, followed by the remaining acceptance gates. Per-document version history is production verified. [Final acceptance report](lms-0722-production-acceptance.md) records methods and the permitted next-legitimate-activation limitation. LMS-0722 / 0.1.544 is production accepted.

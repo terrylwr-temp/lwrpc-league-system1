@@ -1,0 +1,1543 @@
+{
+  "method": "HEAD LMS-0721 selector on current active-version initial RPC candidates; no model call; owner-reported generated answer is separate.",
+  "question": "What kind of games will be played in the primetime league",
+  "interpretation": {
+    "policyVersion": "lms0720-v1",
+    "annotations": [],
+    "matchingView": "What kind of games will be played in the primetime league"
+  },
+  "candidates": [
+    {
+      "chunkId": "950a54ab-aa3b-4f43-9c51-88ce0ca803ae",
+      "documentId": "c6bdcc3b-c009-47c6-9dec-642b8a988a4f",
+      "documentVersionId": "f811e60f-9af8-444f-b009-9594a530acd6",
+      "documentTitle": "2026 Fall League Important Dates",
+      "documentType": "league_supplement",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 2,
+      "sectionLabel": "PrimeTime DUPR League Key Dates",
+      "heading": "PrimeTime DUPR League Key Dates",
+      "ruleNumber": "",
+      "content": "PrimeTime DUPR League Key Dates\n• Sept. 7, Monday – Open Registration\n• Sept. 27, Sunday – Season DUPR ratings recorded\n• Sept. 28, Monday - Can start updating rosters\n• Oct. 4, Sunday – Last day to register (4 weeks)\n• Oct. 7, Wednesday – Schedules completed and sent\n• Oct. 16 - PrimeTime League Starts\n• Nov. 25/26 Break Week\n• Dec. 4 - PrimeTime League Regular Season Ends\n• Dec. 11 - PrimeTime League Championship Day\nNote: No games the week of Nov. 22 (Thanksgiving Break)",
+      "semanticScore": 0.5628,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0.2,
+      "combinedScore": 0.4845,
+      "vectorRank": 1,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: primetime league",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "League-text/context compatibility: primetime",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 1,
+      "authorityReview": {
+        "included": true,
+        "rank": 1,
+        "limit": 12
+      }
+    },
+    {
+      "chunkId": "4b995b95-fdbb-420c-8c1b-5e4ed96d2ea1",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 12,
+      "sectionLabel": "Rule 6.3",
+      "heading": "",
+      "ruleNumber": "6.3",
+      "content": "6.3. PrimeTime DUPR League\nThe PrimeTime DUPR League is exclusively for players age 65 and older who want\ncompetitive play against others in the same age group. Using DUPR's 65+ age-based rating\nsystem, the league provides a more level playing field by matching players of similar age and\nability. Separate men's and women's divisions compete weekly with two doubles teams\nrepresenting each squad, and any tied team match is decided by the exciting Picklebreaker\nformat. PrimeTime emphasizes spirited competition, sportsmanship, and the opportunity\nfor experienced players to continue enjoying high-quality league play in a community-\nfocused environment.",
+      "semanticScore": 0.5302,
+      "keywordScore": 0.0445,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0.2,
+      "combinedScore": 0.4804,
+      "vectorRank": 2,
+      "keywordRank": 2,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: the primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "League-text/context compatibility: primetime",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": true,
+        "candidateRank": 2
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 2,
+      "authorityReview": {
+        "included": true,
+        "rank": 2,
+        "limit": 12
+      }
+    },
+    {
+      "chunkId": "87733046-7616-43c1-909e-d9538fd6c5b3",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 12,
+      "sectionLabel": "PrimeTime DUPR League Divisions",
+      "heading": "PrimeTime DUPR League Divisions",
+      "ruleNumber": "",
+      "content": "PrimeTime DUPR League Divisions\nDivision Name\n(Men and Women)\nIndividual Rating\nRange\nMax Team\nAggregate\nPrimeTime 7 (PT 7) 2.7 to 3.899 7.1\nPrimeTime 9 (PT 9) 3.4 to 4.899 9.1\nPrimeTime 8 (Future) 3.3 to 4.399 8.1\nPrimeTime 9 (Future) 3.8 to 4.899 9.1",
+      "semanticScore": 0.5182,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0.2,
+      "combinedScore": 0.4641,
+      "vectorRank": 3,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "League-text/context compatibility: primetime",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 3,
+      "authorityReview": {
+        "included": true,
+        "rank": 3,
+        "limit": 12
+      }
+    },
+    {
+      "chunkId": "471a928f-3197-4586-9520-6d2bc5ff7d3f",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 13,
+      "sectionLabel": "Saturday League PrimeTime League",
+      "heading": "Saturday League PrimeTime League",
+      "ruleNumber": "",
+      "content": "Saturday League PrimeTime League\nPlayers/Team 6 4 12 (6 Men / 6 Women) 4\nCourts Required 3 2 4 2\nGames/Player 3 4 + 2(E) + 1(PB) 3(G) + 1(MD) + 1(PB) 4 + 2(E) + 1(PB)\nGames 15 by 1 2 out of 3 to 11 by 2 15 by 1 (Rally) 2 out of 3 to 11 by 2\nPicklebreaker\n(tiebreaker) N/A 15 by 2 (Rally) 25 by 2 (Rally) 15 by 2 (Rally)\nTotal Points 9 5 27 5\nForfeits 7-0 3-0 21-0 3-0\nWeather Forfeits 4-4 2-2 13-13 2-2\nG=Gender Doubles, MD=Mixed Doubles, E=Extra possible games if 3rd played in a best of 3,\nPB=Picklebreaker",
+      "semanticScore": 0.5013,
+      "keywordScore": 0.0023,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0.2,
+      "combinedScore": 0.4567,
+      "vectorRank": 4,
+      "keywordRank": 3,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: played in",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "League-text/context compatibility: primetime",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": true,
+        "candidateRank": 3
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 4,
+      "authorityReview": {
+        "included": true,
+        "rank": 4,
+        "limit": 12
+      }
+    },
+    {
+      "chunkId": "e84c086d-03aa-4c0c-9683-79a6779e8d54",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 2,
+      "sectionLabel": "Rule 1",
+      "heading": "CLUB LEAGUE FORMAT",
+      "ruleNumber": "1",
+      "content": "1. CLUB LEAGUE FORMAT\n1.1. Club main website: https://lwrpickleballclub.com\n1.2. League Management System (LMS) website: https://league.lwrpickleballclub.com\n1.3. There are three seasons: Fall, Winter, and Spring.\n1.4. Each season consists of a multi-week regular play followed by championships/playoƯs.\n1.5. League teams are divided by Divisions based on DUPR ratings.\n1.6. The Leagues consist of:\n1.6.1. Weekday DUPR League – Gender doubles scheduled play during the week\n1.6.2. Saturday League - Gender Doubles/Mixed play using the Picklebreaker™ format\n(every other Saturday)\n1.6.3. PrimeTime League – Gender doubles, aged 65+ scheduled play on Fridays",
+      "semanticScore": 0.4331,
+      "keywordScore": 0.0922,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0.2,
+      "combinedScore": 0.4462,
+      "vectorRank": 13,
+      "keywordRank": 1,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: primetime league",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "League-text/context compatibility: primetime",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": true,
+        "candidateRank": 1
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 5,
+      "authorityReview": {
+        "included": true,
+        "rank": 5,
+        "limit": 12
+      }
+    },
+    {
+      "chunkId": "b7e27441-a259-417e-8ffa-c7e75bf1c654",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 14,
+      "sectionLabel": "Saturday League PrimeTime League",
+      "heading": "Saturday League PrimeTime League",
+      "ruleNumber": "",
+      "content": "End of Season PlayoƯs/Championship Day (All Leagues)",
+      "semanticScore": 0.4399,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0.2,
+      "combinedScore": 0.4272,
+      "vectorRank": 10,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: primetime league",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "League-text/context compatibility: primetime",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 6,
+      "authorityReview": {
+        "included": true,
+        "rank": 6,
+        "limit": 12
+      }
+    },
+    {
+      "chunkId": "5241048b-3490-4ef8-99af-59347ac40040",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 9,
+      "sectionLabel": "Rule 6.2.3",
+      "heading": "Match Day Format",
+      "ruleNumber": "6.2.3",
+      "content": "6.2.3. Match Day Format: (See table below)\n6.2.3.1. All Games: Games to 15 using Rally Scoring* (win by 1). 1 point per win. Two\none-minute timeouts per team/game but no timeouts in Picklebreaker. Teams\nswitch ends when the first team reaches 8 points. Visitors choose serve,\nreceive, side, or defer in games 1 and 3 and all mixed games.\n6.2.3.2. Men's Round Robin: 3 Men’s teams play Round Robin (from low to high,\nTeams 1 to 3). Each player will play 3 games. 9 points possible.\n6.2.3.3. Women's Round Robin: 3 Women’s teams play Round Robin (from low to\nhigh, Teams 4 to 6). Each player will play 3 games. 9 points possible.\n6.2.3.4. Mixed Round: Create 6 Mixed teams (from low to high, Teams 7 to 12). Each\nplayer will play 1 mixed game. 6 points possible.\n6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds -\n12-12): Features all the mixed teams that played in the Mixed rounds. This will",
+      "semanticScore": 0.3748,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0,
+      "combinedScore": 0.3886,
+      "vectorRank": 32,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: played in",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 7,
+      "authorityReview": {
+        "included": true,
+        "rank": 7,
+        "limit": 12
+      }
+    },
+    {
+      "chunkId": "1bffb661-5e6b-4a67-9c0b-03860016c4fc",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 12,
+      "sectionLabel": "Rule 6.3.4",
+      "heading": "Scoring",
+      "ruleNumber": "6.3.4",
+      "content": "6.3.4. Scoring: Each standard round win earns 1 point, with a maximum of 5 total\npossible match points per date. If the regular round-robin ends in a tie (2-2), a\nPicklebreaker will be played, awarding 1 extra bonus point to the winner. If there is\nno tie, the outright winning team receives the 1-point bonus.\n6.3.5. Player Cap: Each player plays 4 games with a possible 6+ games.",
+      "semanticScore": 0.3409,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0,
+      "combinedScore": 0.3727,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: will be played",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 8,
+      "authorityReview": {
+        "included": true,
+        "rank": 8,
+        "limit": 12
+      }
+    },
+    {
+      "chunkId": "8f8fdf7c-3bcc-4501-953a-6cceb1f5d60c",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 57,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.A Standard Time-Out — Between Games",
+      "ruleNumber": "21.A.3",
+      "content": "21.A.3 Between Games. Between games, players may request to use\none or both standard time-outs before the start of the next\ngame. The players must inform the referee. The standard time-\nout will start immediately after the expiration of the time-out\nbetween games. A time-out must be charged when any portion\nof the time is used. When the requesting singles player or\ndoubles team is ready to resume play before a requested time-\nout begins, that time-out is not charged.",
+      "semanticScore": 0.3389,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3713,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 9,
+      "authorityReview": {
+        "included": true,
+        "rank": 9,
+        "limit": 12
+      },
+      "governingDiagnostics": [
+        {
+          "intent": "What kind of games will be played in the primetime league",
+          "reason": "No direct applicable USAP passage",
+          "overridden": false
+        }
+      ]
+    },
+    {
+      "chunkId": "9d5ab0dd-453d-408d-8e92-d94d276470b4",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 61,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.F Time-Out Between Games — Duration",
+      "ruleNumber": "21.F.1",
+      "content": "21.F.1 Duration. A maximum of two minutes is allowed to change ends\nbetween games.",
+      "semanticScore": 0.3372,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3705,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 10,
+      "authorityReview": {
+        "included": true,
+        "rank": 10,
+        "limit": 12
+      },
+      "governingDiagnostics": [
+        {
+          "intent": "What kind of games will be played in the primetime league",
+          "reason": "No direct applicable USAP passage",
+          "overridden": false
+        }
+      ]
+    },
+    {
+      "chunkId": "536619ca-b02e-454a-8fa3-d1f4cc8d8f94",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 61,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.F Time-Out Between Games — Change of Starting Server",
+      "ruleNumber": "21.F.3",
+      "content": "21.F.3 Change of Starting Server. Teams may change the starting\nserver between games and should notify the referee before the\nstart of the next game.",
+      "semanticScore": 0.3355,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3697,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 11,
+      "authorityReview": {
+        "included": true,
+        "rank": 11,
+        "limit": 12
+      },
+      "governingDiagnostics": [
+        {
+          "intent": "What kind of games will be played in the primetime league",
+          "reason": "No direct applicable USAP passage",
+          "overridden": false
+        }
+      ]
+    },
+    {
+      "chunkId": "b926746e-4004-4001-a20b-9c2664982b7e",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 58,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.B End Change Time-Out — Duration",
+      "ruleNumber": "21.B.5",
+      "content": "21.B.5 Duration. A maximum of one minute is allowed to change ends\nduring a game.",
+      "semanticScore": 0.3223,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3635,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 12,
+      "authorityReview": {
+        "included": true,
+        "rank": 12,
+        "limit": 12
+      },
+      "governingDiagnostics": [
+        {
+          "intent": "What kind of games will be played in the primetime league",
+          "reason": "No direct applicable USAP passage",
+          "overridden": false
+        }
+      ]
+    },
+    {
+      "chunkId": "ccc5e7dc-235d-4415-b0e4-60c070fc9c53",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 5,
+      "sectionLabel": "Rule 5.12",
+      "heading": "Makeup Game Deadline",
+      "ruleNumber": "5.12",
+      "content": "5.12. Makeup Game Deadline: All makeup games must be played at least one week before the\nplayoƯs/championship date.",
+      "semanticScore": 0.3211,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0,
+      "combinedScore": 0.3634,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: be played",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 13
+    },
+    {
+      "chunkId": "6a2e92c8-c4ce-47b6-9779-112d48d5ca3b",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 58,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.C Medical Time-Out — Between Games",
+      "ruleNumber": "21.C.2",
+      "content": "21.C.2 Between Games. Between games, a player may request a\nmedical time-out, when available, before the start of the next\ngame.",
+      "semanticScore": 0.3222,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3634,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 14
+    },
+    {
+      "chunkId": "ee133944-bdb5-41ab-994f-d19440b45ddb",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 61,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "Time Between Matches",
+      "ruleNumber": "21.G",
+      "content": "21.G Time Between Matches. The allowed time between matches, including a\ntie-breaker match to determine a championship, is 10 minutes. When all\nplayers agree, a match may start early.",
+      "semanticScore": 0.3205,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3626,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 15
+    },
+    {
+      "chunkId": "2acff5ec-8f67-4a41-9320-1eb3cf91cdd8",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 57,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "Standard Time-Out",
+      "ruleNumber": "21.A",
+      "content": "21.A Standard Time-Out. Two standard time-outs are allowed per singles\nplayer or doubles team for each 11-point and 15-point game and three\ntime-outs for a 21-point game.",
+      "semanticScore": 0.3091,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3573,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 16
+    },
+    {
+      "chunkId": "7cdebb34-c8b6-4cc1-b12c-3bfa898df676",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 69,
+      "sectionLabel": "Section 24: Non-Officiated Tournament",
+      "heading": "Use of Time-Outs Between Games",
+      "ruleNumber": "24.E",
+      "content": "24.E Use of Time-Outs Between Games. Players must notify the opponent of\ntheir intent to use one or both standard time-outs before the start of the\nnext game. (Modifies Rule 21.A.3)",
+      "semanticScore": 0.3085,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.357,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 17
+    },
+    {
+      "chunkId": "d3a82f34-48fe-41f7-8b51-69ca40f35d70",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 6,
+      "sectionLabel": "Section 1: The Game",
+      "heading": "The Game",
+      "ruleNumber": "",
+      "content": "Section 1 The Game\nPickleball is a paddle sport that combines elements of badminton, table\ntennis, and tennis. It is played using a special perforated ball on a 20-foot\nby 44-foot court with a tennis type net. The court is divided into right and\nleft service courts and a non-volley zone on each end of the net (Figure 3-1).\nPickleball can be played as singles or doubles.\nIn standard pickleball, the ball is served diagonally across the net to the\nopposite service court on the opponent’s end, using an approved motion.\nThe ball is then hit back and forth across the net until a player fails to return\nthe ball in accordance with the rules.\nStandard pickleball uses a scoring method where points are scored only\nwhen the serving team wins the rally. The server alternates service courts\nand continues to serve until they lose a rally (commit a fault). Typically, the\nfirst player or team scoring 11 points and leading by at least a 2-point\nmargin wins the game.\nRally scoring has been provisionally approved as an option (Rule 14.A),\nwherein a point is scored by the team that wins each rally. Mini-singles\n(Rule 14.B) is a half-court variation of standard singles.\nUnique Features\nTwo-Bounce Rule. After the serve, the receiver must allow the ball to\nbounce before making their first return, and then the serving team must\nallow the ball to bounce before making their first return.\nNon-Volley Zone. The non-volley zone is the area of the court that\nextends 7 feet from the net on each end of the court, within which a player\nis not allowed to hit the ball out of the air before it bounces.\nWheelchair and Adaptive Play. Players using wheelchairs and players\nhaving certain disabilities may allow the ball to bounce twice before\nreturning the ball. The first bounce must be in the court, but the second",
+      "semanticScore": 0.308,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3567,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: be played",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 18
+    },
+    {
+      "chunkId": "304529b8-1c7f-4206-b6b6-a36f1cc3d909",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 57,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "End Change Time-Out",
+      "ruleNumber": "21.B",
+      "content": "21.B End Change Time-Out. The referee will call a time-out to allow players to\nchange ends at specified points during single-game matches and tie-\nbreaker games. Players will not change ends during the tie-breaker game\nwhen the first game of the match was forfeited due to late arrival.\n21.B.1 11-Point Game. In a single game or tie-breaker game to 11\npoints, the players will change ends when the first singles player\nor doubles team reaches a score of 6.\n21.B.2 15-Point Game. In a single game or tie-breaker game to 15\npoints, the players will change ends when the first singles player\nor doubles team reaches a score of 8.\n21.B.3 21-Point Game. In a single game or tie-breaker game to 21\npoints, the players will change ends when the first singles player\nor doubles team reaches a score of 11.",
+      "semanticScore": 0.3059,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3557,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 19
+    },
+    {
+      "chunkId": "2f7efd34-a352-4070-baa5-bc7c853d48a5",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 8,
+      "sectionLabel": "Rule 6.1.9.7",
+      "heading": "",
+      "ruleNumber": "6.1.9.7",
+      "content": "6.1.9.7. The Picklebreaker™ shall be played only when the match is tied 2–2\nfollowing completion of all preceding rounds. The Picklebreaker™ features the\ndesignated doubles teams that participated in the preceding rounds, rotating\nin accordance with the Picklebreaker™ Rotation Rules. The Picklebreaker™\nshall consist of one game to 15 points, win by two (2), using Rally Scoring.\nNote: Picklebreaker matches will not be recorded in DUPR and do not reflect\non individual’s W/L record.",
+      "semanticScore": 0.2942,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0,
+      "combinedScore": 0.3508,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: be played",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 20
+    },
+    {
+      "chunkId": "a1a21f16-2ac5-4535-a2ff-921bcd7e9b1f",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 60,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.D Referee Time-Out — Resuming Play",
+      "ruleNumber": "21.D.4",
+      "content": "21.D.4 Resuming Play. The referee will resume play by announcing a\n15-second warning (Rule 17.D.16).",
+      "semanticScore": 0.2915,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.349,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 21
+    },
+    {
+      "chunkId": "8e938dc7-9e1d-43d5-bf1a-dc04aff10c6c",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 38,
+      "sectionLabel": "Section 15: Tournament Event and Scoring",
+      "heading": "15.B Event Formats — Double Elimination",
+      "ruleNumber": "15.B.1",
+      "content": "15.B.1 Double Elimination. In a double elimination format, after losing\none match, a singles player or doubles team plays in a consolation\nbracket. The player or team is eliminated from competition after\none loss in the consolation bracket. The winner of the consolation\nbracket plays the winner of the winners’ bracket to determine first\nplace and second place. If the winner of the consolation bracket\ndefeats the winner of the winners’ bracket, then a tie-breaker\nmatch to 15 points must be played to determine first place and\nsecond place. The loser of the final match in the consolation\nbracket wins third place.",
+      "semanticScore": 0.2895,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3481,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: be played",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 22
+    },
+    {
+      "chunkId": "282fa8f4-d1bf-4351-902a-29507ea31937",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 43,
+      "sectionLabel": "Section 16: Tournament Director",
+      "heading": "Extending Time to Report to Match",
+      "ruleNumber": "16.M",
+      "content": "16.M Extending Time to Report to Match. The Tournament Director may allow\nan extension of time for players to report to a match when circumstances\nwarrant.",
+      "semanticScore": 0.2875,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3471,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 23
+    },
+    {
+      "chunkId": "af45fef4-2236-4d4b-81a1-c3d6d155c5b2",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 61,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.F Time-Out Between Games — Resuming Play",
+      "ruleNumber": "21.F.4",
+      "content": "21.F.4 Resuming Play. The referee will resume play by announcing a\n15-second warning (Rule 17.D.16).",
+      "semanticScore": 0.2872,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.347,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 24
+    },
+    {
+      "chunkId": "1859086d-5874-43b5-b162-4cd3152c0eab",
+      "documentId": "32c5d52b-1fa7-45d2-ae58-1c8de515fe4d",
+      "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+      "documentTitle": "LWRPC-Captains Guide to the LMS",
+      "documentType": "captain_guide",
+      "sourceClassification": "lwr_supporting_guide",
+      "documentAuthorityRank": 3,
+      "documentScopeKind": "lms_help",
+      "pageNumber": 13,
+      "sectionLabel": "",
+      "heading": "",
+      "ruleNumber": "",
+      "content": "Entering Match Scores\nCaptains enter scores, record forfeits, and confirm official match results. When entering\nscores, normally select the “Use this saved team” pulldown to display the previously\nentered Match Setup team. If there were changes to that, simply select the correct player in\nthe individual player pulldown option.\n• Game Forfeits & Retirements: Refer to the official League Rules when entering\nresults for individual games impacted by player or play-related issues.\n• Full Match Cancellations: If an entire match date is forfeited or cannot be played\ndue to weather or scheduling conflicts, do not enter it into the system. Instead,\ncontact League Management at info@lwrpickleballclub.com.\n• Eligible/Ineligible Player: In actual score entry, the same eligibility rules apply to\nthe players entered for each game line. An ineligible player cannot be selected, and\nscore fields are blocked if that line has an eligibility issue.\nEnter Match Scores Screen",
+      "semanticScore": 0.288,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8328,
+      "contextScore": 0,
+      "combinedScore": 0.3468,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: be played",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 25
+    },
+    {
+      "chunkId": "1d5e1d8a-2c22-42ba-aac2-125a0a4758ca",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 61,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "Suspended Game",
+      "ruleNumber": "21.H",
+      "content": "21.H Suspended Game. A game suspended due to extenuating circumstances\nmust resume with the same server, score, and remaining time-outs as when\nthe game was suspended.",
+      "semanticScore": 0.2867,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3467,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 26
+    },
+    {
+      "chunkId": "862b4b5e-4aec-45b1-aab0-10bf38742e74",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 60,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.E Equipment Time-Out — Resuming Play",
+      "ruleNumber": "21.E.2",
+      "content": "21.E.2 Resuming Play. The referee will resume play by announcing a\n15-second warning (Rule 17.D.16).",
+      "semanticScore": 0.2851,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.346,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 27
+    },
+    {
+      "chunkId": "de9ab654-63eb-49ef-8450-4f6c84e64510",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 57,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.A Standard Time-Out — Before Start of Match",
+      "ruleNumber": "21.A.1",
+      "content": "21.A.1 Before Start of Match. A standard time-out cannot be called\nbefore a match starts.",
+      "semanticScore": 0.2812,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3441,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 28
+    },
+    {
+      "chunkId": "23083b78-255d-4fc6-9a57-2263dd4a5d40",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 61,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "Time-Out Between Games",
+      "ruleNumber": "21.F",
+      "content": "21.F Time-Out Between Games. The referee will call a time-out between\ngames of a match.",
+      "semanticScore": 0.2805,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3438,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 29
+    },
+    {
+      "chunkId": "4e562ffc-5ed0-481b-95e3-fbce26afbb35",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 58,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.B End Change Time-Out — Resuming Play",
+      "ruleNumber": "21.B.8",
+      "content": "21.B.8 Resuming Play. The referee will resume play by announcing a\n15-second warning (Rule 17.D.16).",
+      "semanticScore": 0.2801,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3436,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 30
+    },
+    {
+      "chunkId": "b04b80e9-c26f-4f8a-8b6e-63965613a12e",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 60,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.C Medical Time-Out — Resuming Play",
+      "ruleNumber": "21.C.11",
+      "content": "21.C.11 Resuming Play. The referee will resume play by announcing a\n15-second warning (Rule 17.D.16).",
+      "semanticScore": 0.2794,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.3433,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 31
+    },
+    {
+      "chunkId": "7984245c-3a8b-47cc-8f56-97cfa2a7106c",
+      "documentId": "247d222a-84c8-4994-bbe8-1ac3956899cf",
+      "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+      "documentTitle": "2026 USA Pickleball Official Rulebook",
+      "documentType": "usap_rulebook",
+      "sourceClassification": "usap_governing_fallback",
+      "documentAuthorityRank": 2,
+      "documentScopeKind": "all",
+      "pageNumber": 57,
+      "sectionLabel": "Section 21: Time-Outs and Breaks",
+      "heading": "21.A Standard Time-Out — Resuming Play",
+      "ruleNumber": "21.A.6",
+      "content": "21.A.6 Resuming Play. The referee will resume play by announcing a\n15-second warning (Rule 17.D.16).",
+      "semanticScore": 0.2788,
+      "keywordScore": 0,
+      "exactScore": 0.85,
+      "authorityScore": 0.8414,
+      "contextScore": 0,
+      "combinedScore": 0.343,
+      "vectorRank": null,
+      "keywordRank": null,
+      "exactMatch": true,
+      "exactMatchReason": "Official term: primetime",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "None",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": false,
+        "candidateRank": null
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 32
+    }
+  ],
+  "selected": [
+    {
+      "chunkId": "471a928f-3197-4586-9520-6d2bc5ff7d3f",
+      "documentId": "9c200d0f-be41-4c73-9f47-41c18dcd0132",
+      "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+      "documentTitle": "LWR Pickleball Club DUPR League Rules",
+      "documentType": "league_rules",
+      "sourceClassification": "lwr_controlling",
+      "documentAuthorityRank": 1,
+      "documentScopeKind": "all",
+      "pageNumber": 13,
+      "sectionLabel": "Saturday League PrimeTime League",
+      "heading": "Saturday League PrimeTime League",
+      "ruleNumber": "",
+      "content": "Saturday League PrimeTime League\nPlayers/Team 6 4 12 (6 Men / 6 Women) 4\nCourts Required 3 2 4 2\nGames/Player 3 4 + 2(E) + 1(PB) 3(G) + 1(MD) + 1(PB) 4 + 2(E) + 1(PB)\nGames 15 by 1 2 out of 3 to 11 by 2 15 by 1 (Rally) 2 out of 3 to 11 by 2\nPicklebreaker\n(tiebreaker) N/A 15 by 2 (Rally) 25 by 2 (Rally) 15 by 2 (Rally)\nTotal Points 9 5 27 5\nForfeits 7-0 3-0 21-0 3-0\nWeather Forfeits 4-4 2-2 13-13 2-2\nG=Gender Doubles, MD=Mixed Doubles, E=Extra possible games if 3rd played in a best of 3,\nPB=Picklebreaker",
+      "semanticScore": 0.5013,
+      "keywordScore": 0.0023,
+      "exactScore": 0.85,
+      "authorityScore": 0.85,
+      "contextScore": 0.2,
+      "combinedScore": 0.4567,
+      "vectorRank": 4,
+      "keywordRank": 3,
+      "exactMatch": true,
+      "exactMatchReason": "Phrase: played in",
+      "terminologyDiagnostic": "None",
+      "leagueTextDiagnostic": "League-text/context compatibility: primetime",
+      "ftsDiagnostic": {
+        "normalizedTerms": [
+          "played",
+          "primetime",
+          "league"
+        ],
+        "retrievalExpansion": [],
+        "typoNormalization": [],
+        "matched": true,
+        "candidateRank": 3
+      },
+      "intentDiagnostic": {
+        "detectedIntent": "None",
+        "evidenceMatch": "None"
+      },
+      "stage3Rank": 4,
+      "authorityReview": {
+        "included": true,
+        "rank": 4,
+        "limit": 12
+      },
+      "selectedPassages": [
+        "Saturday League PrimeTime League\nPlayers/Team 6 4 12 (6 Men / 6 Women) 4\nCourts Required 3 2 4 2\nGames/Player 3 4 + 2(E) + 1(PB) 3(G) + 1(MD) + 1(PB) 4 + 2(E) + 1(PB)\nGames 15 by 1 2 out of 3 to 11 by 2 15 by 1 (Rally) 2 out of 3 to 11 by 2\nPicklebreaker\n(tiebreaker) N/A 15 by 2 (Rally) 25 by 2 (Rally) 15 by 2 (Rally)\nTotal Points 9 5 27 5\nForfeits 7-0 3-0 21-0 3-0\nWeather Forfeits 4-4 2-2 13-13 2-2\nG=Gender Doubles, MD=Mixed Doubles, E=Extra possible games if 3rd played in a best of 3,\nPB=Picklebreaker"
+      ],
+      "applicabilityDiagnostic": {
+        "issues": [
+          "What kind of games will be played in the primetime league"
+        ],
+        "league": "primetime",
+        "leagueCompatible": true,
+        "role": "direct",
+        "reason": "Coherent applicable body passage; authority only ranks eligible evidence"
+      },
+      "intentSupport": [],
+      "intentSupportDetails": [],
+      "intentSelectionDiagnostic": "Optional material support retained",
+      "evidenceRole": "Primary / controlling",
+      "evidenceSelectionReason": "Highest-authority selected rule evidence",
+      "citation": "LWR Pickleball Club DUPR League Rules — Saturday League PrimeTime League — Page 13"
+    }
+  ]
+}

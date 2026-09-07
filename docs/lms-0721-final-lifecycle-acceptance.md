@@ -1,5 +1,7 @@
 # LMS-0721 / 0.1.543 — Final lifecycle acceptance checkpoint
 
+**Superseded by final PRODUCTION ACCEPTED status:** the authorized ordinary sibling correction and all remaining gates subsequently passed. See [final acceptance report](lms-0721-ordinary-sibling-citation-correction.md). The original stop evidence below remains unchanged for history; both revisions remain retired.
+
 2026-09-06. Deployed application remains `46afdddcae80e950743042bf612223be68478536`. **NOT PRODUCTION ACCEPTED — stopped at post-retirement citation correctness.** No code change or deployment in this pass.
 
 ## Owner decision retained

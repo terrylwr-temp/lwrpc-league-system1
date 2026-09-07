@@ -1,5 +1,7 @@
 # LMS-0723 / 0.1.545 — Live LMS Intelligence: architecture and authorization design
 
+**Session redesign implemented locally; STOP for review before corrective migration/deployment.** [Implementation, security evidence and revocation limitations](lms-0723-session-validation-implementation.md). LMS-0723 / 0.1.545 remains deployed and NOT production accepted; LMS-0722 remains the accepted baseline. Earlier design-only/local status entries are historical.
+
 Diagnosis date: 2026-09-07. **Design only; implementation is not authorized by this report.** Current application remains **LMS-0722 / 0.1.544**, deployed and production accepted. Inspected checkout: `42778fd3066f89e7f6f8dabb00b09c952ebfbbbf`. Proposed implementation identifier: LMS-0723 / 0.1.545; no version files changed.
 
 ## Recommendation and decision gates

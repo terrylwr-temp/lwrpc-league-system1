@@ -1,0 +1,20 @@
+(node:54676) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/accountIdentity.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0723 identity manifest pins existing roles, repair/audit/replay/committed rollback (2860.9379ms)
+✔ 0723 expected-state refuses role change, preserves non-material phone and auth activity (6594.9466ms)
+✔ 0723 identical split preserves Commissioner, rejects new references and distinct roles (4706.2094ms)
+✔ 0723 default grants, private support, browser denial and native Auth hook boundary (1564.1055ms)
+✔ 0723 prospective linking never provisions roles or repairs old backlog; both orderings (1470.5307ms)
+✔ 0723 account endpoint binds only server-verified subject, errors expose no identity (56.9652ms)
+✔ 0723 ordinary role writers report busy/stale rows and never downgrade or overwrite identity (0.6935ms)
+✔ 0723 exact manifest checksum admits 16 approved entries, rejects substitution, and isolates stale peers (1439.0256ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 19158.4541

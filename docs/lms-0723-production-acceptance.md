@@ -1,5 +1,23 @@
 # LMS-0723 / 0.1.545 — pending production review
 
+**CURRENT — LMS-0723 / 0.1.545 PRODUCTION ACCEPTED (2026-09-07).** Exact approved 16-candidate repair completed and replayed safely; coordination migration applied once; commit adb4389d9c2a88501a907fe46e6fcbdb46c31002 deployed. All currently testable acceptance gates passed. Owner confirmed concurrent member edits and registration activity as intentional. Real roster/match and logout-revocation limitations remain explicitly recorded. [Final production evidence and limitations](lms-0723-manifest-production-acceptance.md). No new version or View As User work started. Earlier status entries below are historical and superseded by this result.
+
+**Read-only SELF_RATING diagnosis complete:** acceptance identity is split across an Auth-only Commissioner role row (member_id NULL) and a member-only Commissioner row (user_id NULL). The immutable member INNER JOIN returns no row. [Exact cause, population counts and proposed bounded link correction](lms-0723-self-rating-authorization-diagnosis.md). No linking/code/SQL/deployment change performed. LMS-0723 / 0.1.545 remains NOT production accepted.
+
+**LATEST: session redesign migrated and deployed; first SELF_RATING gate DENIED — STOP.** Corrective recorder 20260907132549; READY commit a2d4af0. No further tests/correction after the first self question returned an access denial. [Production evidence and full gate disposition](lms-0723-session-redesign-production-acceptance.md). LMS-0723 / 0.1.545 remains NOT production accepted. Concurrent intentional registration is permitted; earlier registration-baseline stop is superseded.
+
+**Controlled session-redesign preflight STOP before mutation:** two team creations and five updated team rows since the prior acceptance stop require confirmation of the intentional current registration baseline. [Read-only evidence](lms-0723-session-redesign-production-preflight-stop.md). Corrective migration remains unapplied; no redeployment. LMS-0723 / 0.1.545 remains NOT production accepted.
+
+**Session redesign implemented locally; STOP for review before corrective migration/deployment.** [Implementation, security evidence and revocation limitations](lms-0723-session-validation-implementation.md). LMS-0723 / 0.1.545 remains deployed and NOT production accepted; LMS-0722 remains the accepted baseline. Earlier design-only/local status entries are historical.
+
+**2026-09-07 session redesign: diagnosis/design complete; awaiting review.** [Trusted server-auth boundary and exact corrective SQL proposal](lms-0723-session-validation-redesign.md). No implementation, SQL application, permission/RLS change or deployment in this pass. LMS-0723 / 0.1.545 remains deployed, NOT production accepted; LMS-0722 / 0.1.544 remains the accepted baseline. Online revocation and session-lifetime semantics are explicit validation gates. Earlier stop/local-deployment statements below are historical.
+
+**LATEST CORRECTION STOP:** read-only pre-mutation review found auth.sessions RLS enabled with no policies and a non-owner/non-bypass reader. Schema USAGE alone cannot fix session validation; the executor also lacks grant option. No corrective mutation/retest/redeployment. [Masked RLS boundary and footprint](lms-0723-auth-rls-boundary-stop.md). LMS-0723 remains deployed, NOT production accepted.
+
+
+**CURRENT STATUS: LMS-0723 / 0.1.545 DEPLOYED, NOT PRODUCTION ACCEPTED.** Migration applied once (server version 20260907123652), commit d7da5f6 deployed READY. First live SELF_RATING failed: ai_live_session_reader lacks USAGE on auth schema despite its column grants. Acceptance stopped; no corrective change or rollback. [Full evidence, matrix, seasonal limitations and next review](lms-0723-production-session-permission-stop.md). Earlier local/preflight states below are historical.
+
+
 ## Current authorized production sequence — 2026-09-07
 
 Owner accepted the seasonal empty-roster/match limitation and authorized continuation using isolated evidence for unavailable relationship gates. Production migration applied once successfully: server migration version 20260907123652, name lms0723_live_intelligence, exact reviewed local file 20260907110701_lms0723_live_intelligence.sql, SHA-256 A069AB845DEEBBEB5477B824D4825B0338872AAA3CFB2591305A567F168AE44D. The MCP migration recorder assigns its execution timestamp; do not reapply the local filename as a missing migration.

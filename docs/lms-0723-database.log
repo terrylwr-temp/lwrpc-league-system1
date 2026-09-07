@@ -1,0 +1,20 @@
+(node:24592) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/liveLmsService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+▶ 0723 effective permissions, session checks and six capability projections
+  ✔ six deterministic capabilities (50.7392ms)
+  ✔ field ACL proves minimal projections instead of response filtering (22.6368ms)
+✔ 0723 effective permissions, session checks and six capability projections (2825.942ms)
+✔ 0723 role matrix, stale relationships, browser denial, replay and feedback transitions (1645.8305ms)
+✔ 0723 real Stage 7 live outcomes retain no facts or unanswered occurrences (1431.193ms)
+✔ 0723 audit fail-closed, budgets, duplicate resolution, freshness, retention and review authorization (1397.876ms)
+✔ 0723 current-season ambiguity, self continuation, roster pagination, schedule and team isolation (1445.0769ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 9103.3543

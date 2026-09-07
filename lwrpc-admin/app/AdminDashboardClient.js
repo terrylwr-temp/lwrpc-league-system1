@@ -1820,6 +1820,12 @@ export default function DashboardPage() {
 
 function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onToggle }) {
   const [expandedStandingGroupId, setExpandedStandingGroupId] = useState("");
+  const [teamsDivisionSort, setTeamsDivisionSort] = useState("teams");
+  const sortedTeamsByDivision = [...analytics.teamsByDivision].sort((a, b) =>
+    teamsDivisionSort === "division"
+      ? String(a.division).localeCompare(String(b.division), undefined, { numeric: true, sensitivity: "base" })
+      : b.teams - a.teams || String(a.division).localeCompare(String(b.division))
+  );
 
   useEffect(() => {
     if (!expandedStandingGroupId) return;
@@ -1910,11 +1916,24 @@ function ExecutiveDashboard({ analytics, scopeLabel, chartsReady, expanded, onTo
 
       <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <ChartPanel title="Teams By Division" helper="Active teams in each selected division">
+          <div role="group" aria-label="Sort Teams By Division" className="mb-3 flex flex-wrap gap-2">
+            {[["teams", "Number of Teams"], ["division", "Division Name"]].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                aria-pressed={teamsDivisionSort === value}
+                onClick={() => setTeamsDivisionSort(value)}
+                className={`min-h-11 rounded-lg border px-3 py-2 text-sm font-bold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 ${teamsDivisionSort === value ? "border-teal-700 bg-teal-700 text-white" : "border-slate-300 bg-white text-slate-700 hover:bg-slate-100"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           {!chartsReady ? (
             <EmptyChartState label="Charts loading..." />
           ) : analytics.teamsByDivision.length ? (
             <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={analytics.teamsByDivision} margin={{ top: 10, right: 18, left: -18, bottom: 0 }}>
+              <BarChart data={sortedTeamsByDivision} margin={{ top: 10, right: 18, left: -18, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                 <XAxis dataKey="division" tick={{ fontSize: 11, fontWeight: 700 }} interval={0} angle={-15} textAnchor="end" height={55} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11, fontWeight: 700 }} />

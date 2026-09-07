@@ -1,0 +1,99 @@
+A "I could use some clarification on the Saturday league mixed doubles. Is it permissible to use players other than the 12 that played in the single gender matches?" mixed_participation 6.2.1:6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s 
+A "Can we use additional players just for mixed doubles?" mixed_participation 6.2.1:6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s 
+A "Do the mixed doubles players have to be the same players from the gender doubles?" mixed_participation 6.2.1:6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s 
+A "Can someone play only in the mixed round?" mixed_participation NONE
+A "Can we use players other than the 12 in the gender matches for mixed?" mixed_participation 6.2.1:6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s 
+A "How many players are on a Saturday roster?" composition 6.2.1:6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s 
+A "How many courts do we need for Saturday?" composition 6.2.1:6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s 
+B "What is the website for the club" website 1:1.1. Club main website: https://lwrpickleballclub.com
+B "What is the club website?" website 1:1.1. Club main website: https://lwrpickleballclub.com
+B "What's LWR PC's website?" website 1:1.1. Club main website: https://lwrpickleballclub.com
+B "Where can I find the club online?" website 1:1.1. Club main website: https://lwrpickleballclub.com
+B "What is the LMS website?" website 1:1.2. League Management System (LMS) website: https://league.lwrpickleballclub.com
+B "What is the DUPR website?" website NONE
+B "Where do I manage my membership?" membership_help :• Club Website Link: Jump directly to the main club membership portal to manage accou
+C "what are your rally scoring rules" scoring :• Service Positioning: After a side out, the first serve is determined by the team's 
+C "How does rally scoring work?" scoring :• Service Positioning: After a side out, the first serve is determined by the team's 
+C "What are the Saturday rally scoring rules?" scoring :• Service Positioning: After a side out, the first serve is determined by the team's 
+C "What are the Weekday rally scoring rules?" scoring :• Service Positioning: After a side out, the first serve is determined by the team's 
+C "What are the PrimeTime rally scoring rules?" scoring :• Service Positioning: After a side out, the first serve is determined by the team's 
+C "How does the scoring freeze work?" scoring :• Service Positioning: After a side out, the first serve is determined by the team's 
+C "How does rally scoring work in a Picklebreaker?" scoring :PICKLEBREAKER™ GAME OVERVIEW The Picklebreaker™ is our league’s tiebreaker format, si
+D "Is the kitchen the same as the NVZ" nvz_definition 3.A.4.c:3.A.4.c Non-Volley Zone. The 7-foot by 20-foot (2.13.m by 6.08 m) area of the court a
+D "Is the kitchen the non-volley zone?" nvz_definition 3.A.4.c:3.A.4.c Non-Volley Zone. The 7-foot by 20-foot (2.13.m by 6.08 m) area of the court a
+D "Is the kitchen line part of the NVZ?" nvz_boundary 3.A.4.c:3.A.4.c Non-Volley Zone. The 7-foot by 20-foot (2.13.m by 6.08 m) area of the court a
+D "Can I volley in the kitchen?" - 11.A:11.A Allowable Contact. All volleys must be initiated outside of the non-volley zone.
+D "Can my momentum carry me into the kitchen after a volley?" - 11.A.2:11.A.2 Fault – Non-Volley Zone Momentum. When a volleying player’s momentum causes th
+D "Can I stand in the kitchen when I am not volleying?" nvz_presence NONE
+E "clothing" - NONE
+E "We are currently trying to order a blouse for our team. Are there any color restrictions?" apparel NONE
+E "Are there color restrictions for our team shirts?" apparel NONE
+E "Can our team wear any color jersey?" apparel NONE
+E "We're ordering blouses for the team. Are there color restrictions?" apparel NONE
+E "What color can our team wear?" - NONE
+E "Are there color restrictions?" - NONE
+F "I can't seem to locate the rules/guidelines for the Saturday Pickleball League. Can you please direct me where I can locate them" document_navigation NONE
+F "Where can I find the Saturday league rules?" document_navigation NONE
+F "Show me the Saturday rules." document_navigation NONE
+F "Where are the league guidelines?" document_navigation NONE
+F "Can you direct me to the Saturday league rules?" document_navigation NONE
+F "I need the rules for the Saturday league." document_navigation :Saturday League PrimeTime League Players/Team 6 4 12 (6 Men / 6 Women) 4 Courts Requi|6.2:6.2. Saturday DUPR League The Saturday DUPR League is designed for players who prefer|:Saturday DUPR League Match Day Format The schedule uses two courts for men’s teams an|:Saturday DUPR League Key Dates • Sept. 27, Sunday – Season DUPR ratings recorded
+F "Where can I find the Captains Guide?" document_navigation NONE
+F "Where is the Players Guide?" document_navigation NONE
+F "Where can I find the USA Pickleball rules?" document_navigation NONE
+F "Where can I find the rules?" document_navigation NONE
+F "Where are the Saturday rules?" document_navigation 6.2:6.2. Saturday DUPR League The Saturday DUPR League is designed for players who prefer|:Saturday DUPR League Match Day Format The schedule uses two courts for men’s teams an|:Saturday DUPR League Key Dates • Sept. 27, Sunday – Season DUPR ratings recorded|:Saturday League PrimeTime League Players/Team 6 4 12 (6 Men / 6 Women) 4 Courts Requi
+F "Show me the Captains Guide" document_navigation NONE
+F "Where are the Important Dates?" document_navigation NONE
+F "Where is the USAP rulebook?" document_navigation NONE
+F "What are the Saturday roster rules?" - NONE
+F "Show me the Saturday roster rules" - NONE
+G "I am unable to log into my account. How do I reset my password" account_help :• First-Time Users: Enter the email address associated with your Club Membership and |: First-Time Users: Enter the email address associated with your Club Membership and 
+G "How do I reset my password?" account_help :• First-Time Users: Enter the email address associated with your Club Membership and |: First-Time Users: Enter the email address associated with your Club Membership and 
+G "I forgot my password" account_help :• First-Time Users: Enter the email address associated with your Club Membership and |: First-Time Users: Enter the email address associated with your Club Membership and 
+G "I can't log in" account_help :Logging Into the System The League Management System is located at https://league.lwr
+G "Where do I change my password?" account_help :• First-Time Users: Enter the email address associated with your Club Membership and |: First-Time Users: Enter the email address associated with your Club Membership and 
+G "How do I sign into the LMS?" account_help :LEAGUE MANAGEMENT SYSTEM (LMS) – Login Instructions The League Management System is l|:• The DUPR League Mission and League Rules contain the official policies and requirem
+G "How do I update my roster?" - :o Enter or update your player team roster prior to the commencement of each season. U
+G "Where do I enter match scores?" - NONE
+G "What email address is my account under?" - NONE
+H "Where do I find the info on what Pickleball’s we will be using with weekday league? I thought I read that we were using Joola HC-40." - NONE
+H "What kind of balls will we be using?" - NONE
+H "What ball are we using in the Weekday League?" - :o The League shall provide:  Match Balls: Franklin Outdoor X-40 Optic balls for all 
+H "Where can I find what ball we're using for Weekday?" - NONE
+H "I thought we're using Joola HC-40. Is that right?" - NONE
+H "Are we using Joola HC-40?" - NONE
+H "Where does it say what ball we're using?" - NONE
+H "What ball are we using for Saturday?" - NONE
+H "Are we using the made-up Nebula ZX-999 ball?" - NONE
+H "What ball are we using? I thought it was the made-up Nebula ZX-999." - NONE
+I "So one more clarification... do we need a min of 2 men and 2 women, all under 9.1 combined, to play best of 3 men's games, 3 women's games, and 3 mixed games? And since that's a lot in the heat, you suggest a roster of 6 people total?" composition NONE
+I "How many men and women do we need for 9.1?" composition NONE
+I "How many players do we need for a 9.1 match?" composition NONE
+I "What is the team DUPR limit for 9.1?" composition 4.5.2:4.6. Team DUPR Rating Requirements: A team's DUPR Rating is calculated by adding the |4.6.1:4.6.1. Every lineup fielded for a match must comply with both the individual player r
+I "How many men's, women's and mixed games do we play?" composition NONE
+I "Do we need six players?" composition NONE
+I "Do you recommend extra players because of the heat?" - NONE
+J "Interested in putting together a team from LWRCC but need to understand better how many players we need for each team and assume that any two need a combined dupr of 9.1 or less?" composition NONE
+J "How many players do I need for a 9.1 team?" composition NONE
+J "How many players play in each 9.1 match?" composition NONE
+J "How many players can I have on my roster?" composition :o Roster Requirements & Substitutes: Teams must roster enough players and substitutes
+J "What does 9.1 mean?" composition NONE
+J "Do two players have to total 9.1 or less?" composition NONE
+J "Is 9.1 the total DUPR for the whole team?" composition 4.5.2:4.6. Team DUPR Rating Requirements: A team's DUPR Rating is calculated by adding the |4.6.1:4.6.1. Every lineup fielded for a match must comply with both the individual player r
+J "What are the individual DUPR limits for 9.1?" composition NONE
+K "Does the weekday 9.1 league have a different format?" format 6.1.9.1:6.1.9.2. Match Format: Teams play Round Robin. 2 out of 3 to 11 (win by 2). Plus, pot
+K "How is Weekday 9.1 different?" format NONE
+K "How many players play in a Weekday 9.1 match?" composition NONE
+K "Is Weekday 9.1 a flex league?" - NONE
+K "When does Weekday 9.1 normally play?" - NONE
+K "Can Weekday 9.1 captains change the match time?" - NONE
+K "What is the Weekday format?" format 6:6.1. Weekday DUPR League The Weekday DUPR League is designed for players who have the|6.1.1:6.1.2. Roster & Courts: 6 Players / 3 Lines. Requires 3 courts.  6.1.3. Match Format:
+K "What is the Saturday 9.1 format?" format NONE
+L "How many players do i need for the primetime league" composition 6.3.1:6.3.2. Roster & Courts: 4 players / 2 lines. Requires 2 courts. Player age is determi
+L "How many players play in a PrimeTime match?" composition NONE
+L "How many players are fielded for PrimeTime?" composition NONE
+L "How many players can I have on my PrimeTime roster?" composition :o Roster Requirements & Substitutes: Teams must roster enough players and substitutes
+L "How many players do I need for Weekday?" composition NONE
+L "How many players do I need for Weekday 9.1?" composition NONE
+L "How many players do I need for Saturday?" composition NONE

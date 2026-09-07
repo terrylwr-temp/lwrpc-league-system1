@@ -1,0 +1,30 @@
+(node:27044) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/askLwrAssistantConfig.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ centralizes page-aware suggestions without fabricating LMS scope IDs (1.2412ms)
+✔ player response is deliberately limited to plain answer and trusted citations (3.5533ms)
+✔ player-safe sources preserve the validated page-aware URL without rebuilding it (1.3737ms)
+✔ personal or live LMS questions do not enter document RAG without a future data tool (6.5471ms)
+✔ normalizes generic question framing so FTS keeps the substantive Balls term (9.0292ms)
+✔ player route passes realistic unrelated-page context to the shared Stage 3/4 pipeline without scope filtering (18.7312ms)
+✔ unsupported and insufficient paths do not manufacture an operational or aggressive-serve answer (1.0666ms)
+✔ guide browsing mirrors existing role entry points without changing RAG scope (0.2518ms)
+✔ the shared AI trigger covers every authenticated header shell without changing guide access (6.9881ms)
+✔ the standard authenticated route shell retains the shared AI trigger (2.9214ms)
+(node:41156) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/liveLmsIntent.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0723 exact six capabilities and document routing controls (5.126ms)
+✔ 0723 six live executions cannot invoke a model and retain metadata only (5.7471ms)
+✔ 0723 receipt subject reauthorization, expiry, cross-user/session and New Question (1.3768ms)
+✔ 0723 unsupported queries never touch data and audit/query errors do not fall through (0.3956ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 344.6167

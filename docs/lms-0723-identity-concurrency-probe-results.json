@@ -1,0 +1,49 @@
+{
+  "diagnosticOnly": true,
+  "productionMutations": 0,
+  "serverVersion": "17.11",
+  "results": [
+    {
+      "gate": "A same-identity repair",
+      "result": "pass",
+      "second": "already_linked",
+      "auditEvents": 1,
+      "unrelatedTeamWrite": "completed"
+    },
+    {
+      "gate": "C concurrent consolidation",
+      "result": "pass",
+      "second": "already_linked",
+      "auditEvents": 1,
+      "unrelatedTeamWrite": "completed"
+    },
+    {
+      "gate": "D immediate rerun",
+      "result": "pass",
+      "auditEvents": 1
+    },
+    {
+      "gate": "B concurrent role change",
+      "result": "reviewed-state guard absent",
+      "roleOverwrite": false,
+      "repairAcceptedChangedRole": true
+    },
+    {
+      "gate": "E conflict committed before revalidation",
+      "result": "pass/refused"
+    },
+    {
+      "gate": "E concurrent duplicate candidate (read committed repair / read committed writer)",
+      "result": "FAIL: both committed",
+      "candidateMembers": 2,
+      "repairCommitted": true
+    },
+    {
+      "gate": "E concurrent duplicate candidate (serializable repair / read committed writer)",
+      "result": "FAIL: both committed",
+      "candidateMembers": 2,
+      "repairCommitted": true
+    }
+  ],
+  "conclusion": "STOP: row/advisory locks alone do not satisfy required identity uniqueness with legacy writers"
+}

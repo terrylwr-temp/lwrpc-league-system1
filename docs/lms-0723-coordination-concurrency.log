@@ -1,0 +1,90 @@
+(node:27280) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/liveLmsService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+{
+  "syntheticOnly": true,
+  "productionMutations": 0,
+  "serverVersion": "17.11",
+  "answerModelCalls": 0,
+  "embeddingCalls": 0,
+  "results": [
+    {
+      "gate": "unrelated team update",
+      "milliseconds": 4.81
+    },
+    {
+      "gate": "same-identity repair",
+      "result": "BUSY then idempotent no-op; one audit"
+    },
+    {
+      "gate": "unrelated team update",
+      "milliseconds": 0.69
+    },
+    {
+      "gate": "concurrent consolidation",
+      "result": "BUSY then idempotent no-op; one audit"
+    },
+    {
+      "gate": "exact forward race: member_insert",
+      "result": "competing writer refused BUSY before repair mutation; competing binding rejected on retry"
+    },
+    {
+      "gate": "exact forward race: member_email_update",
+      "result": "competing writer refused BUSY before repair mutation; competing binding rejected on retry"
+    },
+    {
+      "gate": "exact forward race: auth_insert",
+      "result": "competing writer refused BUSY before repair mutation; competing binding rejected on retry"
+    },
+    {
+      "gate": "exact forward race: auth_state_update",
+      "result": "BUSY before mutation; legitimate Auth state update succeeds on retry"
+    },
+    {
+      "gate": "exact forward race: role_insert",
+      "result": "competing writer refused BUSY before repair mutation; competing binding rejected on retry"
+    },
+    {
+      "gate": "reverse race: duplicate committed first",
+      "result": "STALE; no repair"
+    },
+    {
+      "gate": "role change first",
+      "result": "BUSY then STALE; legitimate role preserved"
+    },
+    {
+      "gate": "non-material phone/sign-in change",
+      "result": "repair succeeds"
+    },
+    {
+      "gate": "opposing key order",
+      "result": "bounded BUSY; no deadlock or fallback"
+    },
+    {
+      "gate": "audit constraint failure",
+      "result": "entire consolidation rolled back; zero events"
+    },
+    {
+      "gate": "private support/effective grants",
+      "result": "browser and service cannot repair/read manifest; existing ACLs unchanged"
+    },
+    {
+      "gate": "native Auth hook",
+      "result": "works without granting Auth role private schema/function access"
+    },
+    {
+      "gate": "post-repair Live security/projection",
+      "result": "two-season clarification then missing; own subject correct; unrelated named player denied; Captain relationship and email field boundary preserved"
+    },
+    {
+      "gate": "actual Live service follow-up and capture boundary",
+      "result": "encrypted choice receipt resolves missing; telemetry contains no personal facts, IDs or question; zero model/embedding calls"
+    },
+    {
+      "gate": "committed guarded rollback",
+      "result": "both Commissioner fragments restored; repeated rollback no-op"
+    }
+  ],
+  "status": "PASS"
+}

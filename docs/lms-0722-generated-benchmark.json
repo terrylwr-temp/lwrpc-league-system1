@@ -1,0 +1,1475 @@
+{
+  "method": "Captured current production-format retrieval replay; live configured answer model and live active-source validation; no route or Stage 7 writes; navigation uses live active catalog.",
+  "results": [
+    {
+      "question": "I could use some clarification on the Saturday league mixed doubles. Is it permissible to use players other than the 12 that played in the single gender matches?",
+      "kind": "answer",
+      "answer": "Yes. For Saturday league regular play, the mixed doubles teams may be formed either from the players who played the men’s/women’s doubles matches or from additional players who participate only in the mixed round.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1827,
+        "sourceResolutionMs": 542,
+        "totalMs": 2399,
+        "inputTokens": 891,
+        "outputTokens": 59,
+        "totalTokens": 950,
+        "estimatedGenerationCostUsd": 0.006225
+      },
+      "wallMs": 2433,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "03d20ab5-20a7-4a3b-9764-fb8e59eb9097",
+          "pageNumber": 9,
+          "ruleNumber": "6.2.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.2 — Roster & Courts — Page 9"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "03d20ab5-20a7-4a3b-9764-fb8e59eb9097",
+          "content": "6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s\ndoubles teams and 3 women’s doubles teams. Mixed teams may be formed from\nthe gender doubles players or can be from additional players who participate only in\nthe mixed round. Requires 4 courts.",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "rule": "6.2.2",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What is the website for the club",
+      "kind": "answer",
+      "answer": "The club website is https://lwrpickleballclub.com",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1143,
+        "sourceResolutionMs": 230,
+        "totalMs": 1376,
+        "inputTokens": 799,
+        "outputTokens": 31,
+        "totalTokens": 830,
+        "estimatedGenerationCostUsd": 0.004925
+      },
+      "wallMs": 1381,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "e84c086d-03aa-4c0c-9683-79a6779e8d54",
+          "pageNumber": 2,
+          "ruleNumber": "1.1",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 1.1 — Club main website — Page 2"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "e84c086d-03aa-4c0c-9683-79a6779e8d54",
+          "content": "1.1. Club main website: https://lwrpickleballclub.com",
+          "scope": [
+            {
+              "league": null,
+              "division": null,
+              "rule": "1.1",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "clothing",
+      "kind": "insufficient_evidence",
+      "answer": "I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.",
+      "modelCalls": 0,
+      "model": null,
+      "metrics": {
+        "generationMs": 0,
+        "sourceResolutionMs": 0,
+        "totalMs": 1,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "estimatedGenerationCostUsd": null
+      },
+      "wallMs": 5,
+      "sources": [],
+      "selected": []
+    },
+    {
+      "question": "I can't seem to locate the rules/guidelines for the Saturday Pickleball League. Can you please direct me where I can locate them",
+      "kind": "answer",
+      "answer": "You can find the requested official information in LWR Pickleball Club DUPR League Rules. Open the Official Source below.",
+      "modelCalls": 0,
+      "model": null,
+      "metrics": {
+        "generationMs": 0,
+        "sourceResolutionMs": 183,
+        "totalMs": 186,
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "estimatedGenerationCostUsd": 0
+      },
+      "wallMs": 291,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "53e274a4-484d-436b-a030-94af86ccf7f8",
+          "pageNumber": 9,
+          "ruleNumber": "6.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2 — Page 9"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "53e274a4-484d-436b-a030-94af86ccf7f8",
+          "content": "6.2. Saturday DUPR League\nThe Saturday DUPR League is designed for players who prefer weekend competition or are\nunable to participate during the week. This coed league features community-based teams\nmade up of both men and women, competing every other Saturday in a unique format that\nincludes men's doubles, women's doubles, mixed doubles and the exciting mixed doubles\nPicklebreaker to determine tied matches. Teams are grouped into divisions based on\ncombined DUPR ratings, creating competitive and enjoyable matches while fostering\ncamaraderie and community spirit throughout the Lakewood Ranch area."
+        }
+      ]
+    },
+    {
+      "question": "I am unable to log into my account. How do I reset my password",
+      "kind": "answer",
+      "answer": "Select **Forgot Password** on the LMS login screen. Enter the email address associated with your Club Membership; a setup or password reset email will be sent from **no-reply@auth.lwrpickleballclub.com**.\n\nIf you are not sure which email address you used, contact **info@lwrpickleballclub.com**.\n\nIf you are already logged in, you can use **Change Password** in the top header of the initial dashboard screen. This changes only the League Management System password, not the Club Membership system password.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2081,
+        "sourceResolutionMs": 221,
+        "totalMs": 2308,
+        "inputTokens": 1301,
+        "outputTokens": 130,
+        "totalTokens": 1431,
+        "estimatedGenerationCostUsd": 0.010405
+      },
+      "wallMs": 2319,
+      "sources": [
+        {
+          "documentTitle": "LWRPC-Captains Guide to the LMS",
+          "documentVersionId": "7ec16cf5-7b9d-4b3b-a847-8dd5767396c7",
+          "chunkId": "af393e89-06b0-406c-99ab-eaffeb369c7c",
+          "pageNumber": 4,
+          "ruleNumber": "",
+          "citation": "LWRPC-Captains Guide to the LMS — Page 4"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+          "chunkId": "e95febdd-2f3b-4fe9-b453-25d7dd742324",
+          "pageNumber": 6,
+          "ruleNumber": "",
+          "citation": "LWR Pickleball Club DUPR Captains Guide — HOW TO REGISTER YOUR TEAM (SIGNING UP YOUR TEAM) — Page 6"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "af393e89-06b0-406c-99ab-eaffeb369c7c",
+          "content": "• First-Time Users: Enter the email address associated with your Club Membership\nand click Forgot Password. A setup or a password reset email will be sent from no-\nreply@auth.lwrpickleballclub.com to create your password. If you aren't sure which\nemail address you used, contact info@lwrpickleballclub.com.\n\n• Passkeys & Biometrics: To log in using a passkey or fingerprint, click the Passkey\n/ Fingerprint button to sign in or set up the feature.\nResetting Your Password\nSelect Forgot Password to reset or create your password. You can also change your\npassword at any time when you are logged in the system. Click the Change Password\nbutton located in the top header of the initial dashboard screen. Note: this will only change\nthe password in this League Management System and not the Club Membership system.",
+          "scope": [
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "e95febdd-2f3b-4fe9-b453-25d7dd742324",
+          "content": " First-Time Users: Enter the email address associated with your Club Membership and\nclick Forgot Password. A setup or a password reset email will be sent from no-\nreply@auth.lwrpickleballclub.com to create your password. If you aren't sure which\nemail address you used, contact info@lwrpickleballclub.com.\n\n Passkeys & Biometrics: To log in using a passkey or fingerprint, click the Passkey /\nFingerprint button to sign in or set up the feature.\nLMS Login Screen\nResetting Your Password\nSelect Forgot Password to reset or create your password. You can also change your password at\nany time when you are logged in the system. Click the Change Password button located in the top\nheader of the initial dashboard screen. Note: this will only change the password in this League\nManagement System and not the Club Membership system.",
+          "scope": [
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Where do I find the info on what Pickleball’s we will be using with weekday league? I thought I read that we were using Joola HC-40.",
+      "kind": "answer",
+      "answer": "The weekday league ball information is in the LWR Pickleball Club DUPR Captains Guide, under “LEAGUE FEES AND WAIVER” on page 10.\n\nIt says the league provides: “Match Balls: Franklin Outdoor X-40 Optic balls for all regular season and playoff matches.”\n\nThe uploaded evidence does not support Joola HC-40 for weekday league matches.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1521,
+        "sourceResolutionMs": 155,
+        "totalMs": 1680,
+        "inputTokens": 822,
+        "outputTokens": 101,
+        "totalTokens": 923,
+        "estimatedGenerationCostUsd": 0.00714
+      },
+      "wallMs": 1701,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR Captains Guide",
+          "documentVersionId": "5d1dd639-d77f-4ecc-8d56-14d7f70f491d",
+          "chunkId": "68591ceb-77db-464b-b590-412a886dd372",
+          "pageNumber": 10,
+          "ruleNumber": "",
+          "citation": "LWR Pickleball Club DUPR Captains Guide — LEAGUE FEES AND WAIVER — Page 10"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "68591ceb-77db-464b-b590-412a886dd372",
+          "content": "o The League shall provide:\n Match Balls: Franklin Outdoor X-40 Optic balls for all regular season and playoƯ\nmatches."
+        }
+      ]
+    },
+    {
+      "question": "So one more clarification... do we need a min of 2 men and 2 women, all under 9.1 combined, to play best of 3 men's games, 3 women's games, and 3 mixed games? And since that's a lot in the heat, you suggest a roster of 6 people total?",
+      "kind": "clarification",
+      "answer": "Which league do you mean: Weekday, Saturday, or PrimeTime? Player counts and division formats can differ.",
+      "modelCalls": 0,
+      "wallMs": 30,
+      "sources": [],
+      "selected": []
+    },
+    {
+      "question": "Interested in putting together a team from LWRCC but need to understand better how many players we need for each team and assume that any two need a combined dupr of 9.1 or less?",
+      "kind": "clarification",
+      "answer": "Which league do you mean: Weekday, Saturday, or PrimeTime? Player counts and division formats can differ.",
+      "modelCalls": 0,
+      "wallMs": 17,
+      "sources": [],
+      "selected": []
+    },
+    {
+      "question": "How many players do i need for the primetime league",
+      "kind": "answer",
+      "answer": "For Primetime regular league play, you need 4 players for 2 lines, and it requires 2 courts.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1421,
+        "sourceResolutionMs": 195,
+        "totalMs": 1622,
+        "inputTokens": 890,
+        "outputTokens": 42,
+        "totalTokens": 932,
+        "estimatedGenerationCostUsd": 0.00571
+      },
+      "wallMs": 1627,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "7d64b74d-6294-43da-bb5d-70d6350ddfe5",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.2 — Roster & Courts — Page 12"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "7d64b74d-6294-43da-bb5d-70d6350ddfe5",
+          "content": "6.3.2. Roster & Courts: 4 players / 2 lines. Requires 2 courts. Player age is determined as\nof 12/31 of the season’s starting year. Players must be 65 or older and will use the\nDUPR Age-Based Rating. Players who are not 65 at the start of the season will be\nrated NR since they will not yet have an official 65+ age-based rating.",
+          "scope": [
+            {
+              "league": "primetime",
+              "division": null,
+              "rule": "6.3.2",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Can I stand in the kitchen when I am not volleying?",
+      "kind": "answer",
+      "answer": "Yes. You may stand in the non-volley zone (“kitchen”) when you are not volleying. The rule says a player may contact the non-volley zone at any time except during the act of volleying a ball, and all volleys must be initiated outside the non-volley zone.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1508,
+        "sourceResolutionMs": 164,
+        "totalMs": 1679,
+        "inputTokens": 851,
+        "outputTokens": 79,
+        "totalTokens": 930,
+        "estimatedGenerationCostUsd": 0.006625
+      },
+      "wallMs": 1686,
+      "sources": [
+        {
+          "documentTitle": "2026 USA Pickleball Official Rulebook",
+          "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+          "chunkId": "c0908ed3-19cf-4630-a9d6-0247765bc5ba",
+          "pageNumber": 30,
+          "ruleNumber": "11.A",
+          "citation": "2026 USA Pickleball Official Rulebook — Rule 11.A — Allowable Contact — Page 30"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "c0908ed3-19cf-4630-a9d6-0247765bc5ba",
+          "content": "11.A Allowable Contact. All volleys must be initiated outside of the non-volley\nzone. A player, or anything in contact with the player, may contact the non-\nvolley zone at any time except during the act of volleying a ball.",
+          "scope": [
+            {
+              "league": null,
+              "division": null,
+              "rule": "11.A",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What is the PrimeTime Picklebreaker format?",
+      "kind": "answer",
+      "answer": "For PrimeTime, teams play a Round Robin match format: 2 out of 3 games to 11, win by 2. If needed, there is a potential Picklebreaker to 15, win by 2, using Rally Scoring.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1825,
+        "sourceResolutionMs": 186,
+        "totalMs": 2014,
+        "inputTokens": 843,
+        "outputTokens": 70,
+        "totalTokens": 913,
+        "estimatedGenerationCostUsd": 0.006315
+      },
+      "wallMs": 2020,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "b630cf6e-d96d-4e78-9610-7f3c89546839",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.3 — Match Format — Page 12"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "b630cf6e-d96d-4e78-9610-7f3c89546839",
+          "content": "6.3.3. Match Format: Teams play Round Robin. 2 out of 3 to 11 (win by 2). Plus, potential\nPicklebreaker to 15 (win by 2 using Rally Scoring).",
+          "scope": [
+            {
+              "league": "primetime",
+              "division": null,
+              "rule": "6.3.3",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How many players play in a Weekday 9.1 match?",
+      "kind": "answer",
+      "answer": "A Weekday 9.1 regular match has 2 lines, meaning 4 players play, using 2 courts.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1394,
+        "sourceResolutionMs": 232,
+        "totalMs": 1631,
+        "inputTokens": 837,
+        "outputTokens": 43,
+        "totalTokens": 880,
+        "estimatedGenerationCostUsd": 0.005475
+      },
+      "wallMs": 1636,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "5133ded2-939e-4cf8-9aa8-084ff481f8b9",
+          "pageNumber": 8,
+          "ruleNumber": "6.1.9.1",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.1.9.1 — Page 8"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "5133ded2-939e-4cf8-9aa8-084ff481f8b9",
+          "content": "6.1.9.1. This division will only have 2 lines (4 players) and require 2 courts.",
+          "scope": [
+            {
+              "league": "weekday",
+              "division": "9.1",
+              "rule": "6.1.9.1",
+              "phase": "regular",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "what are your rally scoring rules",
+      "kind": "answer",
+      "answer": "Our DUPR League rally scoring rules are:\n\n- A team can score a point whether serving or receiving, except for the game-winning point.\n- If the serving team loses a rally, it is a side out; the receiving team gets a point and takes over the serve.\n- After a side out, the server is based on the team’s score: right side serves on an even score, left side serves on an odd score.\n- Players switch sides only after winning a point on their own serve, and the same player continues serving.\n- Scoring freezes when a team reaches one point below the game-winning score. That team may score the winning point only while serving.\n- In win-by-two games, if the score becomes tied at or beyond the initial freeze point, both teams unfreeze and normal rally scoring resumes. Scores freeze again whenever a team reaches a score where its next point would win by two. The game-winning point must always be scored while serving.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3776,
+        "sourceResolutionMs": 475,
+        "totalMs": 4265,
+        "inputTokens": 1599,
+        "outputTokens": 219,
+        "totalTokens": 1818,
+        "estimatedGenerationCostUsd": 0.014565
+      },
+      "wallMs": 4289,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "09ceb070-fee5-4617-9cb9-9ed8739aef74",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "0e6f1e25-84bd-42bd-be93-1339d766778c",
+          "pageNumber": 15,
+          "ruleNumber": "",
+          "citation": "LWR Pickleball Club DUPR League Rules — DUPR LEAGUE MANAGERS — Page 15"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "09ceb070-fee5-4617-9cb9-9ed8739aef74",
+          "content": "• Service Positioning: After a side out, the first serve is determined by the team's\nscore: the player on the right (baseline facing the net) serves if the score is even, and\nthe player on the left serves if the score is odd.\n\n• Switching Sides: Players only switch sides after winning a point on their own serve.\nThe same player continues serving from the new side.\n\n• Side Outs & Scoring: If the serving team loses a rally, a side out occurs; the\nopposing team earns a point and takes over the serve.\n\n• Game Points: A team can win a point regardless of whether they are serving or\nreceiving except for the winning point (see next item).\n\n• Scoring Freeze and Match Point: To keep the game competitive through the final\npoint, a scoring freeze shall take eƯect whenever a team reaches one point below\nthe game-winning score. Once a team reaches the freeze point, it may score the\ngame-winning point only while serving. For example, in a game played to 25 points,\na team’s score shall initially freeze at 24. The scoring freeze applies only to the team\nthat has reached the freeze point; the opposing team may continue to score using\nnormal Rally Scoring until it also reaches the applicable freeze point. A team must\nbe serving to score the game-winning point.\n\n• Win-by-Two (2) Games: When the game is played using a win-by-two (2) format\nand the score becomes tied at or beyond the initial freeze point, neither team can\nwin by scoring the next point. Therefore, both teams’ scores shall become\nunfrozen, and normal Rally Scoring shall resume. Thereafter, a team’s score shall\nfreeze again whenever it reaches a score at which its next point would win the",
+          "scope": [
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "0e6f1e25-84bd-42bd-be93-1339d766778c",
+          "content": "game by two (2) points. If the score becomes tied again, both teams shall again\nbecome unfrozen. This freeze-and-unfreeze process shall continue as necessary\nuntil one team wins the game by two (2) points. The game-winning point must\nalways be scored while serving.",
+          "scope": [
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": null,
+              "division": null,
+              "rule": "",
+              "phase": "general_rally_mechanics",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Is the kitchen the same as the NVZ",
+      "kind": "answer",
+      "answer": "Yes. “Kitchen” means the non-volley zone (NVZ). Officially, the NVZ is the 7-foot by 20-foot area adjacent to each end of the net, and all lines bounding it are part of the zone.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 4737,
+        "sourceResolutionMs": 262,
+        "totalMs": 5024,
+        "inputTokens": 974,
+        "outputTokens": 68,
+        "totalTokens": 1042,
+        "estimatedGenerationCostUsd": 0.00691
+      },
+      "wallMs": 5031,
+      "sources": [
+        {
+          "documentTitle": "2026 USA Pickleball Official Rulebook",
+          "documentVersionId": "00c2e2bb-6465-4677-b8d5-6debdde8fe70",
+          "chunkId": "6804ee96-3b70-486d-8554-927542297daa",
+          "pageNumber": 12,
+          "ruleNumber": "3.A.4.c",
+          "citation": "2026 USA Pickleball Official Rulebook — Rule 3.A.4.c — 3.A.4 Lines and Areas — Non-Volley Zone — Page 12"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "6804ee96-3b70-486d-8554-927542297daa",
+          "content": "3.A.4.c Non-Volley Zone. The 7-foot by 20-foot (2.13.m by\n6.08 m) area of the court adjacent to each end of the\nnet. The non-volley zone lines run parallel to the net, 7\nfeet (2.13 m) from the net on each end between the\ntwo sidelines. All lines that bound the non-volley zone\nare part of the zone. The non-volley zone is two-\ndimensional and does not extend above the playing\nsurface.",
+          "scope": [
+            {
+              "league": null,
+              "division": null,
+              "rule": "3.A.4.c",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "Does the weekday 9.1 league have a different format?",
+      "kind": "answer",
+      "answer": "Yes. For the weekday Men’s/Women’s 9.1 Division, the rules specify a flex-league format: matches are initially scheduled for Fridays at noon, but captains can modify the match day/time within 7 days.\n\nIt also has only 2 lines / 4 players, requiring 2 courts, with teams playing Round Robin: 2 out of 3 to 11, win by 2, plus a potential Picklebreaker™ to 15.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2052,
+        "sourceResolutionMs": 299,
+        "totalMs": 2396,
+        "inputTokens": 1160,
+        "outputTokens": 117,
+        "totalTokens": 1277,
+        "estimatedGenerationCostUsd": 0.00931
+      },
+      "wallMs": 2406,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "2f93ef02-d2b8-4178-9f36-c85e597377b6",
+          "pageNumber": 8,
+          "ruleNumber": "6.1.9",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.1.9 — Men’s/Women’s 9.1 Division — Page 8"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "5133ded2-939e-4cf8-9aa8-084ff481f8b9",
+          "pageNumber": 8,
+          "ruleNumber": "6.1.9.1, 6.1.9.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rules 6.1.9.1, 6.1.9.2 — Page 8"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "2f93ef02-d2b8-4178-9f36-c85e597377b6",
+          "content": "6.1.9. Men’s/Women’s 9.1 Division: These divisions will initially be scheduled as a “flex\nleague” with matches initially scheduled for Fridays at noon but the Captains can\nmodify the match day/time (within 7 days).",
+          "scope": [
+            {
+              "league": "weekday",
+              "division": "9.1",
+              "rule": "6.1.9",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "5133ded2-939e-4cf8-9aa8-084ff481f8b9",
+          "content": "6.1.9.1. This division will only have 2 lines (4 players) and require 2 courts.\n\n6.1.9.2. Match Format: Teams play Round Robin. 2 out of 3 to 11 (win by 2). Plus,\npotential Picklebreaker™ to 15. Teams will switch ends before Game 2. If a\nthird game is required, teams will switch ends during Game 3 when the first\nteam reaches six (6) points. Visitors choose serve, receive, side, or defer in\ngame 1 and 3. Each team receives one one-minute timeout/game.",
+          "scope": [
+            {
+              "league": "weekday",
+              "division": "9.1",
+              "rule": "6.1.9.1",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "weekday",
+              "division": "9.1",
+              "rule": "6.1.9.2",
+              "phase": "regular_and_picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "We are currently trying to order a blouse for our team. Are there any color restrictions?",
+      "kind": "insufficient_evidence",
+      "answer": "I couldn't find an applicable rule or guide in the official LWR Pickleball Club or USA Pickleball materials. Please contact League Management for clarification.",
+      "modelCalls": 0,
+      "model": null,
+      "metrics": {
+        "generationMs": 0,
+        "sourceResolutionMs": 0,
+        "totalMs": 9,
+        "inputTokens": null,
+        "outputTokens": null,
+        "totalTokens": null,
+        "estimatedGenerationCostUsd": null
+      },
+      "wallMs": 24,
+      "sources": [],
+      "selected": []
+    },
+    {
+      "question": "What kind of games will be played in the Saturday League?",
+      "kind": "answer",
+      "answer": "Saturday League plays men’s doubles, women’s doubles, and mixed doubles.\n\n- Men’s Round Robin: 3 men’s teams play round robin; each player plays 3 games.\n- Women’s Round Robin: 3 women’s teams play round robin; each player plays 3 games.\n- Mixed Round: 6 mixed teams are created; each player plays 1 mixed game.\n- All regular games are to 15 using rally scoring, win by 1.\n- If the match is tied 12-12 after all gender and mixed doubles, a Picklebreaker is played using the same mixed teams in the captains’ designated order. The Picklebreaker is one game to 25, win by 2, using rally scoring.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2843,
+        "sourceResolutionMs": 269,
+        "totalMs": 3118,
+        "inputTokens": 2178,
+        "outputTokens": 187,
+        "totalTokens": 2365,
+        "estimatedGenerationCostUsd": 0.0165
+      },
+      "wallMs": 3129,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "a979a1b5-cd13-4c2c-b98b-ce51c39ab35c",
+          "pageNumber": 10,
+          "ruleNumber": "",
+          "citation": "LWR Pickleball Club DUPR League Rules — Saturday DUPR League Match Day Format — Page 10"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "5241048b-3490-4ef8-99af-59347ac40040",
+          "pageNumber": 9,
+          "ruleNumber": "6.2.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.3 — Match Day Format — Page 9"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "4203459b-7a90-45fb-a0f5-7baaba7d4078",
+          "pageNumber": 10,
+          "ruleNumber": "6.2.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.3 — Page 10"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "26d07c61-179b-4a5c-9584-251b9c2ec73f",
+          "pageNumber": 10,
+          "ruleNumber": "6.2.4",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.4 — Scoring — Page 10"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "a979a1b5-cd13-4c2c-b98b-ce51c39ab35c",
+          "content": "Saturday DUPR League Match Day Format\nThe schedule uses two courts for men’s teams and two courts for women’s teams. After the first four\ngender-doubles rounds, Men’s Team 3 and Women’s Team 6 play while Mixed Teams 7 and 8 begin.\nRound 6 includes the remaining mixed teams. If the match is tied 12-12 after all gender and mixed\ndoubles, the Picklebreaker is played on two courts using the same mixed teams in the captains’\ndesignated order.",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "",
+              "phase": "regular_and_picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "5241048b-3490-4ef8-99af-59347ac40040",
+          "content": "6.2.3.1. All Games: Games to 15 using Rally Scoring* (win by 1). 1 point per win. Two\none-minute timeouts per team/game but no timeouts in Picklebreaker. Teams\nswitch ends when the first team reaches 8 points. Visitors choose serve,\nreceive, side, or defer in games 1 and 3 and all mixed games.\n\n6.2.3.2. Men's Round Robin: 3 Men’s teams play Round Robin (from low to high,\nTeams 1 to 3). Each player will play 3 games. 9 points possible.\n\n6.2.3.3. Women's Round Robin: 3 Women’s teams play Round Robin (from low to\nhigh, Teams 4 to 6). Each player will play 3 games. 9 points possible.\n\n6.2.3.4. Mixed Round: Create 6 Mixed teams (from low to high, Teams 7 to 12). Each\nplayer will play 1 mixed game. 6 points possible.\n\n6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds -\n12-12): Features all the mixed teams that played in the Mixed rounds. This will",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.1",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.2",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.3",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.4",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.5",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "4203459b-7a90-45fb-a0f5-7baaba7d4078",
+          "content": "be one game to 25 win by 2 using Rally Scoring. The winning team collects 3\nadditional points. (If there isn’t a tie, the leading team collects a 3-point\nbonus.) Note: Picklebreaker matches will not be recorded in DUPR and do not\nreflect on individual’s W/L record.\nTeams are numbered 1–3 for Men’s Doubles, 4–6 for Women’s Doubles, and 7–12 for Mixed\nDoubles. These team numbers correspond directly to the Match Score Sheet printed from the system.\nWe highly recommend assigning higher team numbers to teams with higher combined skill levels and\nratings (for instance, Team 6 should have a higher combined DUPR rating than Team 4 in Women’s or\nTeam 12 should be a higher team rating than Team 7 in Mixed Doubles).",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.1",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.2",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.3",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.4",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.5",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "26d07c61-179b-4a5c-9584-251b9c2ec73f",
+          "content": "6.2.4. Scoring: A maximum of 27 total possible match points per date. This includes 24\npossible points awarded during standard play, plus a 3-point bonus. If the match\nends in a tie after the mixed doubles division (12-12), a Picklebreaker will be played\nto determine the winner of the 3 bonus points. If there is no tie, the leading team\nautomatically receives the 3-point bonus.",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "6.2.4",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What is the PrimeTime match format?",
+      "kind": "answer",
+      "answer": "PrimeTime uses a Round Robin format. Matches are 2 out of 3 games to 11, win by 2, with a potential Picklebreaker to 15, win by 2, using rally scoring.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1683,
+        "sourceResolutionMs": 210,
+        "totalMs": 1895,
+        "inputTokens": 854,
+        "outputTokens": 63,
+        "totalTokens": 917,
+        "estimatedGenerationCostUsd": 0.00616
+      },
+      "wallMs": 1903,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "b630cf6e-d96d-4e78-9610-7f3c89546839",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.3 — Match Format — Page 12"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "b630cf6e-d96d-4e78-9610-7f3c89546839",
+          "content": "6.3.3. Match Format: Teams play Round Robin. 2 out of 3 to 11 (win by 2). Plus, potential\nPicklebreaker to 15 (win by 2 using Rally Scoring).",
+          "scope": [
+            {
+              "league": "primetime",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.3.3",
+              "phase": "regular_and_picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What is the Saturday match format?",
+      "kind": "answer",
+      "answer": "The Saturday DUPR League match format is:\n\n- All games are to 15 using rally scoring, win by 1. Each win is 1 point.\n- Each team gets two one-minute timeouts per game, but no timeouts in the Picklebreaker.\n- Teams switch ends when the first team reaches 8 points.\n- Visitors choose serve, receive, side, or defer in games 1 and 3 and all mixed games.\n- Men’s round robin: 3 men’s teams, Teams 1–3, each player plays 3 games; 9 points possible.\n- Women’s round robin: 3 women’s teams, Teams 4–6, each player plays 3 games; 9 points possible.\n- Mixed round: 6 mixed teams, Teams 7–12, each player plays 1 mixed game; 6 points possible.\n- The schedule uses two courts for men’s teams and two courts for women’s teams; after the first four gender-doubles rounds, Men’s Team 3 and Women’s Team 6 play while Mixed Teams 7 and 8 begin, and Round 6 includes the remaining mixed teams.\n- If tied 12-12 after all gender and mixed doubles, a Picklebreaker is played on two courts using the same mixed teams in the captains’ designated order. It is one game to 25, win by 2, using rally scoring, and the winner gets 3 additional points.\n- If there is no 12-12 tie, the leading team gets a 3-point bonus.\n- Picklebreaker matches are not recorded in DUPR and do not count toward an individual’s W/L record.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3843,
+        "sourceResolutionMs": 589,
+        "totalMs": 4436,
+        "inputTokens": 1777,
+        "outputTokens": 373,
+        "totalTokens": 2150,
+        "estimatedGenerationCostUsd": 0.020075
+      },
+      "wallMs": 4444,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "5241048b-3490-4ef8-99af-59347ac40040",
+          "pageNumber": 9,
+          "ruleNumber": "6.2.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.3 — Match Day Format — Page 9"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "a979a1b5-cd13-4c2c-b98b-ce51c39ab35c",
+          "pageNumber": 10,
+          "ruleNumber": "",
+          "citation": "LWR Pickleball Club DUPR League Rules — Saturday DUPR League Match Day Format — Page 10"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "4203459b-7a90-45fb-a0f5-7baaba7d4078",
+          "pageNumber": 10,
+          "ruleNumber": "6.2.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.3 — Page 10"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "5241048b-3490-4ef8-99af-59347ac40040",
+          "content": "6.2.3.1. All Games: Games to 15 using Rally Scoring* (win by 1). 1 point per win. Two\none-minute timeouts per team/game but no timeouts in Picklebreaker. Teams\nswitch ends when the first team reaches 8 points. Visitors choose serve,\nreceive, side, or defer in games 1 and 3 and all mixed games.\n\n6.2.3.2. Men's Round Robin: 3 Men’s teams play Round Robin (from low to high,\nTeams 1 to 3). Each player will play 3 games. 9 points possible.\n\n6.2.3.3. Women's Round Robin: 3 Women’s teams play Round Robin (from low to\nhigh, Teams 4 to 6). Each player will play 3 games. 9 points possible.\n\n6.2.3.4. Mixed Round: Create 6 Mixed teams (from low to high, Teams 7 to 12). Each\nplayer will play 1 mixed game. 6 points possible.\n\n6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds -\n12-12): Features all the mixed teams that played in the Mixed rounds. This will",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.1",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.2",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.3",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.4",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            },
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.5",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "a979a1b5-cd13-4c2c-b98b-ce51c39ab35c",
+          "content": "Saturday DUPR League Match Day Format\nThe schedule uses two courts for men’s teams and two courts for women’s teams. After the first four\ngender-doubles rounds, Men’s Team 3 and Women’s Team 6 play while Mixed Teams 7 and 8 begin.\nRound 6 includes the remaining mixed teams. If the match is tied 12-12 after all gender and mixed\ndoubles, the Picklebreaker is played on two courts using the same mixed teams in the captains’\ndesignated order.",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "",
+              "phase": "regular_and_picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "4203459b-7a90-45fb-a0f5-7baaba7d4078",
+          "content": "be one game to 25 win by 2 using Rally Scoring. The winning team collects 3\nadditional points. (If there isn’t a tie, the leading team collects a 3-point\nbonus.) Note: Picklebreaker matches will not be recorded in DUPR and do not\nreflect on individual’s W/L record.\nTeams are numbered 1–3 for Men’s Doubles, 4–6 for Women’s Doubles, and 7–12 for Mixed\nDoubles. These team numbers correspond directly to the Match Score Sheet printed from the system.\nWe highly recommend assigning higher team numbers to teams with higher combined skill levels and\nratings (for instance, Team 6 should have a higher combined DUPR rating than Team 4 in Women’s or\nTeam 12 should be a higher team rating than Team 7 in Mixed Doubles).",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How does the PrimeTime Picklebreaker work?",
+      "kind": "answer",
+      "answer": "In PrimeTime DUPR League play, teams play a round robin match format: best 2 out of 3 games to 11, win by 2. If needed, there is a potential Picklebreaker to 15, win by 2, using rally scoring.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1533,
+        "sourceResolutionMs": 194,
+        "totalMs": 1733,
+        "inputTokens": 856,
+        "outputTokens": 74,
+        "totalTokens": 930,
+        "estimatedGenerationCostUsd": 0.0065
+      },
+      "wallMs": 1739,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "b630cf6e-d96d-4e78-9610-7f3c89546839",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.3 — Match Format — Page 12"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "b630cf6e-d96d-4e78-9610-7f3c89546839",
+          "content": "6.3.3. Match Format: Teams play Round Robin. 2 out of 3 to 11 (win by 2). Plus, potential\nPicklebreaker to 15 (win by 2 using Rally Scoring).",
+          "scope": [
+            {
+              "league": "primetime",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.3.3",
+              "phase": "regular_and_picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How does the Saturday Picklebreaker work?",
+      "kind": "answer",
+      "answer": "In the Saturday league, the Picklebreaker is only played if the match is tied 12-12 after all previous rounds.\n\nWhen played:\n- It uses all the mixed teams that played in the Mixed rounds.\n- It is one game to 25, win by 2, using rally scoring.\n- The winning team earns 3 additional points.\n- Picklebreaker matches are not recorded in DUPR and do not count toward an individual’s win/loss record.\n\nIf there is no 12-12 tie, no Picklebreaker is played; instead, the leading team receives a 3-point bonus.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2282,
+        "sourceResolutionMs": 255,
+        "totalMs": 2549,
+        "inputTokens": 1157,
+        "outputTokens": 150,
+        "totalTokens": 1307,
+        "estimatedGenerationCostUsd": 0.010285
+      },
+      "wallMs": 2557,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "5241048b-3490-4ef8-99af-59347ac40040",
+          "pageNumber": 9,
+          "ruleNumber": "6.2.3.5",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.3.5 — Match Day Format — Page 9"
+        },
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "4203459b-7a90-45fb-a0f5-7baaba7d4078",
+          "pageNumber": 10,
+          "ruleNumber": "6.2.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.3 — Page 10"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "5241048b-3490-4ef8-99af-59347ac40040",
+          "content": "6.2.3.5. Picklebreaker™ Game (Only played if tie at the end of all previous rounds -\n12-12): Features all the mixed teams that played in the Mixed rounds. This will",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3.5",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        },
+        {
+          "chunkId": "4203459b-7a90-45fb-a0f5-7baaba7d4078",
+          "content": "be one game to 25 win by 2 using Rally Scoring. The winning team collects 3\nadditional points. (If there isn’t a tie, the leading team collects a 3-point\nbonus.) Note: Picklebreaker matches will not be recorded in DUPR and do not\nreflect on individual’s W/L record.\nTeams are numbered 1–3 for Men’s Doubles, 4–6 for Women’s Doubles, and 7–12 for Mixed\nDoubles. These team numbers correspond directly to the Match Score Sheet printed from the system.\nWe highly recommend assigning higher team numbers to teams with higher combined skill levels and\nratings (for instance, Team 6 should have a higher combined DUPR rating than Team 4 in Women’s or\nTeam 12 should be a higher team rating than Team 7 in Mixed Doubles).",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.2.3",
+              "phase": "picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "What kind of games will be played in the primetime league",
+      "kind": "answer",
+      "answer": "In the primetime league, teams play Round Robin matches: 2 out of 3 games to 11, win by 2. There may also be a Picklebreaker to 15, win by 2, using Rally Scoring.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1562,
+        "sourceResolutionMs": 194,
+        "totalMs": 1763,
+        "inputTokens": 859,
+        "outputTokens": 68,
+        "totalTokens": 927,
+        "estimatedGenerationCostUsd": 0.006335
+      },
+      "wallMs": 1768,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "b630cf6e-d96d-4e78-9610-7f3c89546839",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.3",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.3 — Match Format — Page 12"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "b630cf6e-d96d-4e78-9610-7f3c89546839",
+          "content": "6.3.3. Match Format: Teams play Round Robin. 2 out of 3 to 11 (win by 2). Plus, potential\nPicklebreaker to 15 (win by 2 using Rally Scoring).",
+          "scope": [
+            {
+              "league": "primetime",
+              "division": null,
+              "formatContext": true,
+              "ambiguousLeague": false,
+              "rule": "6.3.3",
+              "phase": "regular_and_picklebreaker",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How many players do I need for the PrimeTime League?",
+      "kind": "answer",
+      "answer": "For PrimeTime League, you need 4 players fielded for a match, playing 2 lines on 2 courts. Players must be 65 or older, with age determined as of 12/31 of the season’s starting year.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 2322,
+        "sourceResolutionMs": 404,
+        "totalMs": 2743,
+        "inputTokens": 947,
+        "outputTokens": 67,
+        "totalTokens": 1014,
+        "estimatedGenerationCostUsd": 0.006745
+      },
+      "wallMs": 2762,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "7d64b74d-6294-43da-bb5d-70d6350ddfe5",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.2 — Roster & Courts — Page 12"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "7d64b74d-6294-43da-bb5d-70d6350ddfe5",
+          "content": "6.3.2. Roster & Courts: 4 players / 2 lines. Requires 2 courts. Player age is determined as\nof 12/31 of the season’s starting year. Players must be 65 or older and will use the\nDUPR Age-Based Rating. Players who are not 65 at the start of the season will be\nrated NR since they will not yet have an official 65+ age-based rating.",
+          "scope": [
+            {
+              "league": "primetime",
+              "division": null,
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "6.3.2",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How many players do I need for the Saturday League?",
+      "kind": "answer",
+      "answer": "For the Saturday League, you need to field 12 players for a match: 6 men and 6 women. They are divided into 3 men’s doubles teams and 3 women’s doubles teams. Mixed teams may use those gender doubles players or additional players who participate only in the mixed round. This format requires 4 courts.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1665,
+        "sourceResolutionMs": 277,
+        "totalMs": 1962,
+        "inputTokens": 928,
+        "outputTokens": 86,
+        "totalTokens": 1014,
+        "estimatedGenerationCostUsd": 0.00722
+      },
+      "wallMs": 1967,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "03d20ab5-20a7-4a3b-9764-fb8e59eb9097",
+          "pageNumber": 9,
+          "ruleNumber": "6.2.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.2 — Roster & Courts — Page 9"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "03d20ab5-20a7-4a3b-9764-fb8e59eb9097",
+          "content": "6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s\ndoubles teams and 3 women’s doubles teams. Mixed teams may be formed from\nthe gender doubles players or can be from additional players who participate only in\nthe mixed round. Requires 4 courts.",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "6.2.2",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How many players do I need for Weekday?",
+      "kind": "answer",
+      "answer": "For Weekday, you need 6 players fielded for a match, playing 3 lines on 3 courts.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1582,
+        "sourceResolutionMs": 179,
+        "totalMs": 1770,
+        "inputTokens": 875,
+        "outputTokens": 42,
+        "totalTokens": 917,
+        "estimatedGenerationCostUsd": 0.005635
+      },
+      "wallMs": 1775,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "caf23f1d-5fd9-4c6d-ba1f-8e770e234e59",
+          "pageNumber": 7,
+          "ruleNumber": "6.1.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.1.2 — Roster & Courts — Page 7"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "caf23f1d-5fd9-4c6d-ba1f-8e770e234e59",
+          "content": "6.1.2. Roster & Courts: 6 Players / 3 Lines. Requires 3 courts.",
+          "scope": [
+            {
+              "league": "weekday",
+              "division": null,
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "6.1.2",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How many players do I need for Weekday 9.1?",
+      "kind": "answer",
+      "answer": "For Weekday 9.1, you need to field 2 lines: 4 players total for a match, using 2 courts.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1785,
+        "sourceResolutionMs": 192,
+        "totalMs": 2006,
+        "inputTokens": 894,
+        "outputTokens": 47,
+        "totalTokens": 941,
+        "estimatedGenerationCostUsd": 0.00588
+      },
+      "wallMs": 2009,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "5133ded2-939e-4cf8-9aa8-084ff481f8b9",
+          "pageNumber": 8,
+          "ruleNumber": "6.1.9.1",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.1.9.1 — Page 8"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "5133ded2-939e-4cf8-9aa8-084ff481f8b9",
+          "content": "6.1.9.1. This division will only have 2 lines (4 players) and require 2 courts.",
+          "scope": [
+            {
+              "league": "weekday",
+              "division": "9.1",
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "6.1.9.1",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How many players do I need for PrimeTime?",
+      "kind": "answer",
+      "answer": "PrimeTime requires 4 players fielded for a match, across 2 lines, and requires 2 courts.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 3735,
+        "sourceResolutionMs": 168,
+        "totalMs": 3908,
+        "inputTokens": 945,
+        "outputTokens": 41,
+        "totalTokens": 986,
+        "estimatedGenerationCostUsd": 0.005955
+      },
+      "wallMs": 3912,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "7d64b74d-6294-43da-bb5d-70d6350ddfe5",
+          "pageNumber": 12,
+          "ruleNumber": "6.3.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.3.2 — Roster & Courts — Page 12"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "7d64b74d-6294-43da-bb5d-70d6350ddfe5",
+          "content": "6.3.2. Roster & Courts: 4 players / 2 lines. Requires 2 courts. Player age is determined as\nof 12/31 of the season’s starting year. Players must be 65 or older and will use the\nDUPR Age-Based Rating. Players who are not 65 at the start of the season will be\nrated NR since they will not yet have an official 65+ age-based rating.",
+          "scope": [
+            {
+              "league": "primetime",
+              "division": null,
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "6.3.2",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "question": "How many players do I need for Saturday?",
+      "kind": "answer",
+      "answer": "For Saturday, you need 12 players fielded for a match: 6 men and 6 women. They are divided into 6 teams: 3 men’s doubles teams and 3 women’s doubles teams. Mixed teams may come from those gender doubles players or from additional players who participate only in the mixed round. The format requires 4 courts.",
+      "modelCalls": 1,
+      "model": "gpt-5.5-2026-04-23",
+      "metrics": {
+        "generationMs": 1772,
+        "sourceResolutionMs": 179,
+        "totalMs": 1962,
+        "inputTokens": 926,
+        "outputTokens": 90,
+        "totalTokens": 1016,
+        "estimatedGenerationCostUsd": 0.00733
+      },
+      "wallMs": 1974,
+      "sources": [
+        {
+          "documentTitle": "LWR Pickleball Club DUPR League Rules",
+          "documentVersionId": "e4d9bf77-e15e-4d80-84ba-2f7259970ba6",
+          "chunkId": "03d20ab5-20a7-4a3b-9764-fb8e59eb9097",
+          "pageNumber": 9,
+          "ruleNumber": "6.2.2",
+          "citation": "LWR Pickleball Club DUPR League Rules — Rule 6.2.2 — Roster & Courts — Page 9"
+        }
+      ],
+      "selected": [
+        {
+          "chunkId": "03d20ab5-20a7-4a3b-9764-fb8e59eb9097",
+          "content": "6.2.2. Roster & Courts: 12 players—6 men and 6 women—divided into six teams: 3 men’s\ndoubles teams and 3 women’s doubles teams. Mixed teams may be formed from\nthe gender doubles players or can be from additional players who participate only in\nthe mixed round. Requires 4 courts.",
+          "scope": [
+            {
+              "league": "saturday",
+              "division": null,
+              "formatContext": false,
+              "ambiguousLeague": false,
+              "rule": "6.2.2",
+              "phase": "unspecified",
+              "provenance": "same_version_structure"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,209 @@
+{
+  "version": "LMS-0722 / 0.1.544",
+  "questions": 28,
+  "grounded": 24,
+  "clarifications": 2,
+  "insufficient": 2,
+  "modelCalls": 23,
+  "requiredScopedControls": 12,
+  "crossLeagueLeakage": 0,
+  "modelPlusSourceWallMs": {
+    "min": 1429,
+    "median": 1831,
+    "max": 6150
+  },
+  "deterministicConceptMeanMs": 0.0034384583333333333,
+  "requiredRetrievalSamples": [
+    {
+      "question": "How many players do I need for the PrimeTime League?",
+      "metrics": {
+        "interpretationMs": 0.47260000000005675,
+        "embeddingInputTokens": 12,
+        "embeddingMs": 429,
+        "retrievalMs": 1086,
+        "totalMs": 1515
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 373
+      }
+    },
+    {
+      "question": "How many players do I need for the Saturday League?",
+      "metrics": {
+        "interpretationMs": 0.4557999999999538,
+        "embeddingInputTokens": 11,
+        "embeddingMs": 303,
+        "retrievalMs": 867,
+        "totalMs": 1170
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 344
+      }
+    },
+    {
+      "question": "How many players do I need for Weekday?",
+      "metrics": {
+        "interpretationMs": 0.6398000000000366,
+        "embeddingInputTokens": 10,
+        "embeddingMs": 281,
+        "retrievalMs": 565,
+        "totalMs": 846
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 260
+      }
+    },
+    {
+      "question": "How many players do I need for Weekday 9.1?",
+      "metrics": {
+        "interpretationMs": 0.40000000000009095,
+        "embeddingInputTokens": 14,
+        "embeddingMs": 258,
+        "retrievalMs": 693,
+        "totalMs": 951
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 308
+      }
+    },
+    {
+      "question": "What kind of games will be played in the Saturday League?",
+      "metrics": {
+        "interpretationMs": 0.46689999999989595,
+        "embeddingInputTokens": 12,
+        "embeddingMs": 289,
+        "retrievalMs": 725,
+        "totalMs": 1013
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 347
+      }
+    },
+    {
+      "question": "What is the PrimeTime match format?",
+      "metrics": {
+        "interpretationMs": 0.4757999999999356,
+        "embeddingInputTokens": 8,
+        "embeddingMs": 284,
+        "retrievalMs": 301,
+        "totalMs": 586
+      }
+    },
+    {
+      "question": "What is the Saturday match format?",
+      "metrics": {
+        "interpretationMs": 0.45299999999997453,
+        "embeddingInputTokens": 7,
+        "embeddingMs": 343,
+        "retrievalMs": 587,
+        "totalMs": 930
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 288
+      }
+    },
+    {
+      "question": "How many players do I need for PrimeTime?",
+      "metrics": {
+        "interpretationMs": 0.723700000000008,
+        "embeddingInputTokens": 10,
+        "embeddingMs": 280,
+        "retrievalMs": 576,
+        "totalMs": 856
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 308
+      }
+    },
+    {
+      "question": "How many players do I need for Saturday?",
+      "metrics": {
+        "interpretationMs": 0.7062000000000808,
+        "embeddingInputTokens": 9,
+        "embeddingMs": 302,
+        "retrievalMs": 577,
+        "totalMs": 879
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 275
+      }
+    },
+    {
+      "question": "How does the PrimeTime Picklebreaker work?",
+      "metrics": {
+        "interpretationMs": 0.4535000000000764,
+        "embeddingInputTokens": 10,
+        "embeddingMs": 278,
+        "retrievalMs": 1079,
+        "totalMs": 1357
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 332
+      }
+    },
+    {
+      "question": "How does the Saturday Picklebreaker work?",
+      "metrics": {
+        "interpretationMs": 1.125099999999975,
+        "embeddingInputTokens": 9,
+        "embeddingMs": 249,
+        "retrievalMs": 1105,
+        "totalMs": 1354
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 295
+      }
+    },
+    {
+      "question": "What kind of games will be played in the primetime league",
+      "metrics": {
+        "interpretationMs": 1.9809999999999945,
+        "embeddingInputTokens": 12,
+        "embeddingMs": 274,
+        "retrievalMs": 657,
+        "totalMs": 931
+      },
+      "assistance": {
+        "status": "completed",
+        "searchCount": 1,
+        "additionalEmbeddingCalls": 0,
+        "durationMs": 266
+      }
+    }
+  ],
+  "limitations": [
+    "Captured active production RPC results, local corrected selection, live configured model/source validation. Not deployed UI acceptance or a load test.",
+    "Retrieval timing samples span implementation; old selections are historical. Generated benchmark records the final selected evidence for each run.",
+    "Original production baseline uses owner reports and diagnosis, not newly manufactured historical answers."
+  ]
+}

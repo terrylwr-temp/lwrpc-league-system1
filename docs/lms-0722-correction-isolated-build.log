@@ -1,0 +1,110 @@
+▲ Next.js 16.2.4 (Turbopack)
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 24.8s
+  Running TypeScript ...
+  Finished TypeScript in 2.7s ...
+  Collecting page data using 11 workers ...
+  Generating static pages using 11 workers (0/74) ...
+  Generating static pages using 11 workers (18/74) 
+  Generating static pages using 11 workers (36/74) 
+  Generating static pages using 11 workers (55/74) 
+✓ Generating static pages using 11 workers (74/74) in 1161ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ○ /ai-assistant
+├ ○ /ai-assistant/console
+├ ○ /ai-assistant/review
+├ ○ /ai-insights
+├ ƒ /api/admin/delete-member
+├ ƒ /api/admin/member-directory
+├ ƒ /api/admin/member-last-login
+├ ƒ /api/ai-assistant/answer
+├ ƒ /api/ai-assistant/approved-answers
+├ ƒ /api/ai-assistant/capture-health
+├ ƒ /api/ai-assistant/documents
+├ ƒ /api/ai-assistant/retrieval
+├ ƒ /api/ai-assistant/review
+├ ƒ /api/ai-insights
+├ ƒ /api/app-notifications/public-key
+├ ƒ /api/app-notifications/subscribe
+├ ƒ /api/approved-answer-viewer
+├ ƒ /api/ask-lwr
+├ ƒ /api/ask-lwr/feedback
+├ ƒ /api/brevo-diagnostics
+├ ƒ /api/league-communications
+├ ƒ /api/master-reset
+├ ƒ /api/match-lineups
+├ ƒ /api/match-setup-reminders
+├ ƒ /api/member-password-reset-check
+├ ƒ /api/notification-template-history
+├ ƒ /api/notification-templates
+├ ƒ /api/notifications
+├ ƒ /api/official-document-viewer
+├ ƒ /api/official-document-viewer/pdf
+├ ƒ /api/pbcc/reminders
+├ ƒ /api/round-robin/action
+├ ƒ /api/round-robin/admin
+├ ƒ /api/round-robin/player
+├ ƒ /api/score-notification
+├ ƒ /api/season-reset
+├ ƒ /api/season-rollover
+├ ƒ /api/system-settings
+├ ƒ /api/teams/delete
+├ ƒ /api/tournaments/action
+├ ƒ /api/tournaments/admin
+├ ƒ /api/tournaments/sms
+├ ƒ /api/user-last-logins
+├ ƒ /approved-answer/[citation]
+├ ○ /ask-lwr
+├ ○ /captain-dashboard
+├ ○ /design-preview
+├ ○ /design-preview/admin
+├ ○ /design-preview/captain
+├ ○ /divisions
+├ ƒ /divisions/[id]
+├ ○ /email-options
+├ ƒ /help/[role]
+├ ○ /league-communications
+├ ○ /leagues
+├ ƒ /live-match/[id]
+├ ○ /locations
+├ ○ /login
+├ ○ /matches
+├ ƒ /matches/[id]
+├ ○ /member-import
+├ ○ /members
+├ ƒ /members/[id]
+├ ƒ /official-document/[citation]
+├ ○ /player-dashboard
+├ ○ /print
+├ ○ /ratings
+├ ○ /reset-password
+├ ○ /round-robin
+├ ƒ /round-robin/[id]
+├ ƒ /round-robin/[id]/admin
+├ ƒ /round-robin/[id]/player
+├ ○ /schedule-editor
+├ ○ /scheduling
+├ ƒ /score-entry/[id]
+├ ○ /score-sheets
+├ ○ /scoring
+├ ○ /seasons
+├ ○ /standings
+├ ○ /system-setup
+├ ○ /teams
+├ ƒ /teams/[id]
+├ ○ /tournaments
+├ ƒ /tournaments/[id]
+├ ƒ /tournaments/[id]/admin
+├ ƒ /tournaments/[id]/display
+├ ƒ /tournaments/[id]/player
+└ ƒ /tournaments/[id]/standings
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

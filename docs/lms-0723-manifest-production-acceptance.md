@@ -1,6 +1,6 @@
 # LMS-0723 / 0.1.545 — manifest-bound production coordination and repair
 
-2026-09-07. Controlled production acceptance IN PROGRESS; not yet accepted. Owner approved exactly manifest 57fb2ed9-d821-4264-a48a-1cf8105dee36, plaintext SHA-256 f28b31208beca918bff2095b549a4c70bf18bc221b48d5fa8773bcd24fc2b076: 15 existing-role links and one identical Commissioner split. The historical 14+1 limit is superseded only for this exact manifest.
+2026-09-07. **LMS-0723 / 0.1.545 — PRODUCTION ACCEPTED with the previously approved unavailable-live-gate limitations below.** Owner approved exactly manifest 57fb2ed9-d821-4264-a48a-1cf8105dee36, plaintext SHA-256 f28b31208beca918bff2095b549a4c70bf18bc221b48d5fa8773bcd24fc2b076: 15 existing-role links and one identical Commissioner split. The historical 14+1 limit is superseded only for this exact manifest.
 
 ## Manifest-bound correction
 
@@ -40,8 +40,32 @@ Manifest sealed successfully. Acceptance account repaired first: REPAIRED, one c
 
 First required production UI question at 19:01:19 UTC: What is my Season DUPR? Returned LIVE LMS DATA / SELF RATING season clarification with the two active seasons. Reply 1 at 19:01:31 UTC returned: That requested value is not recorded in the authorized LMS data. This is AUTHORIZED MISSING, not DENIED, NR or fabricated numeric rating. The remaining links were released only after this gate passed.
 
-## Remaining gates
+## Completed production continuation
 
-Remaining per-identity results, no-op replay, final reconciliation, controlled Helpful correlation, security/privacy, application deployment, minimal LMS-0722 and manager-tool regression, hosting/performance and final integrity are recorded below as completed. No final production acceptance claim yet.
+All remaining 15 reviewed links returned REPAIRED. All 16 then returned ALREADY_REPAIRED on replay without additional repair audit events. Batch membership, before/after role state and preserved roles were verified against the protected manifest/backup. No replacement candidates were selected.
+
+Normal main-to-Vercel deployment completed: commit adb4389d9c2a88501a907fe46e6fcbdb46c31002; READY production deployment dpl_FYJNWrgD2Q6L3WZR4p45ZQPJyn18. Production alias remains league.lwrpickleballclub.com. No version increment beyond 0.1.545.
+
+Live acceptance: SELF_RATING clarification followed by AUTHORIZED MISSING passed. One controlled Helpful event correlated with that exact missing-value answer; the manager Live feedback panel showed intent/result/relationship, channel, vote and LMS version without personal values. Private actor retention remains as designed; no claim is made that the private feedback table contains no actor identifiers. Existing document feedback remained unchanged.
+
+Postdeployment password request returned unsupported without retrieving credentials. Explicit synthetic nonexistent-person rating request returned PLAYER_RATING/not_found without falling back to SELF. Authenticated direct RPC invocation failed with permission denied; an unauthenticated account-identity request containing synthetic substituted IDs returned 401/not_authorized. Live outcomes recorded no answer-model or embedding calls, no Stage 3 retrieval and no live values in bounded diagnostics. Official-document RAG regression requests separately used their normal model pipeline.
+
+Nine minimal LMS-0722 production regressions passed: PrimeTime and Saturday player counts; both match formats; Picklebreaker rally scoring including game-winning serving qualification; Saturday additional mixed-only players; club website; general password-help instructions; Saturday document navigation. Fielded counts were not stated as roster maximums. Cross-League Leakage = 0 across the explicitly scoped controls. The previously accepted broad stored page-15 heading remains documented in the LMS-0722 report; no new heading correction was made.
+
+Manager AI Feedback & Review and Approved Answers history passed. Historical feedback opened the exact retired scheduling revision 2 with its retained Rule 5.11 passage; revision 1 detail/history also remained available. A browser automation attempt initially treated a relative source URL as an absolute hostname; resolving it against the production origin opened the viewer successfully. This was not an application defect. No source token is included in this report.
+
+AI Assistant Management showed the active Rules version prominently, truthful Activated/Activated by Unknown values, and Prior Versions (10) collapsed initially. Expansion changed aria-expanded from false to true and exposed retained versions in newest-first order with statuses/activation information. No document was processed, activated, retired or changed for this check.
+
+Sanitized capture-success hosting logs were observed. A final error/fatal query covering the deployed build from 19:07 through 19:29:43 UTC returned no matching logs. Live service total_ms was 85 for clarification and 68 for authorized missing; these are service timings after authentication, not end-to-end latency or a measured getUser/mapping/query/render breakdown. No production fault injection was performed.
+
+## Integrity and legitimate concurrent activity
+
+At the 19:19:41 UTC reconciliation: 1,951 members, 176 Auth users, 139 role rows, 83 teams, zero roster memberships and zero matches. Twelve non-manifest role rows created/updated since the baseline were Captain roles correlated with continuing registration. Initial prospective-link events were independently verified as newly assigned roles outside the repair manifest. The original 107 no-role accounts were not bulk provisioned; counts may change through legitimate owner assignment. Newly safe unreviewed candidates were not substituted into this repair batch.
+
+Existing table ACL/RLS, policies, prior public/Live functions, Auth material identity state, ratings, documents, versions, chunks, Approved Answers/revisions/events and legacy feedback hashes remained stable. Member content changed without an updated_at/import marker; the owner explicitly confirmed member edits during this run. That change is recorded as legitimate concurrent owner activity, not LMS-0723 mutation or an unresolved integrity blocker. Team/role changes were likewise attributable to registration. No operational member/team/roster/match rows were changed by the repair migration outside its approved identity-link behavior.
+
+## Accepted limitations and conclusion
 
 Unavailable real roster and match gates retain the owner's accepted seasonal limitations; no relationships/matches are manufactured. Actual logout/revocation remains a limitation if not safely replayed. No-role and held identities remain outside controlled backlog repair. View As User has not started.
+
+No real roster-dependent or next-match gate was run because prerequisites remain absent. Isolated authorization/concurrency tests remain the accepted evidence until legitimate relationships and matches exist. Actual logout/revocation was not replayed in this run. Per-component authentication/render latency was not measured. These limitations are not represented as production passes. All currently testable required gates passed; no unresolved blocker remains. LMS-0723 / 0.1.545 is production accepted under the owner's approved limitations. No further migration, repair, deployment or next-version work is authorized by this conclusion.

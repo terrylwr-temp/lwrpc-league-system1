@@ -1,0 +1,92 @@
+(node:23240) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ skips the answer model and returns the exact fallback when Stage 3 evidence is insufficient (3.3971ms)
+✔ selects direct high-quality evidence, grounds the Responses request, and attaches only trusted sources (14.6164ms)
+✔ returns a conservative clarification instead of a definitive model answer when supplied evidence conflicts (2.604ms)
+✔ prunes merely related deadline material while retaining same-rule and explicitly requested procedural support (5.6821ms)
+✔ marks a selected rule as controlling when a more relevant guide also supplies procedural support (1.1836ms)
+✔ preserves compact primary evidence for the five production Stage 4 evaluation cases (4.187ms)
+✔ preserves direct evidence for both roster management and Match Setup while pruning score entry (9.0501ms)
+✔ uses the raw LMS-0703 production compound candidates to select only the direct roster-date and Match Setup deadline passages (7.7833ms)
+✔ keeps roster-only and Match Setup-only source selections independent (1.1816ms)
+✔ recognizes bounded roster-management and calendar wording variations in direct evidence (0.9471ms)
+✔ reserves bounded evidence space for every detected compound intent (0.891ms)
+✔ builds concise trusted citation labels without duplicated rule metadata (0.9618ms)
+✔ adds a browser-only PDF page fragment only for a valid cited chunk page (0.1777ms)
+✔ classifies a native Responses API refusal without exposing its text (1.9647ms)
+✔ classifies an incomplete max-output-token Responses result (1.3614ms)
+✔ classifies missing, malformed, and schema-invalid native structured output (3.0374ms)
+✔ classifies an API failure separately from structured-output failures (1.2477ms)
+✔ classifies an unparsable successful API payload as response extraction failure (1.307ms)
+✔ rejects citations that are not from supplied exact active-version evidence (0.7862ms)
+✔ uses the explicit ownership FK in the production dual-relationship schema and revalidates the cited searchable chunk (2.0968ms)
+✔ protects the answer route and preserves the required Stage 4 evaluation prompts (15.3477ms)
+(node:6532) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiDocumentMetadata.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ LMS-0706 catalog type, default rank, edit roundtrip and exact fallback (8.9685ms)
+✔ LMS-0706 medical retirement: direct LWR conflict excludes USAP before model and citations (18.1303ms)
+✔ LMS-0706 scoring freeze: direct LWR conflict excludes USAP before model and citations (3.3845ms)
+✔ LMS-0711 production-shaped LWR match-equipment probe controls only club-selected equipment (9.1097ms)
+✔ LMS-0711 keeps USAP governing for legal-ball specifications and damaged-ball questions (3.7418ms)
+✔ LMS-0706 Match Setup stays under Rule 5.4 despite higher USAP score (1.9786ms)
+✔ LMS-0706 ordinary uploaded USAP fallback: Can I volley in the kitchen? (4.259ms)
+✔ LMS-0706 ordinary uploaded USAP fallback: Can a serve touch the baseline? (2.0257ms)
+✔ LMS-0706 ordinary uploaded USAP fallback: Must the ball bounce twice? (2.3094ms)
+✔ LMS-0706 general LWR material, title-only matches and scattered terms do not suppress USAP (2.2948ms)
+✔ LMS-0706 a general serving rule does not override a specific baseline issue (0.4511ms)
+✔ LMS-0706 a guide cannot independently override a USAP playing rule, even at rank 1 (0.3402ms)
+✔ LMS-0708 authority review keeps an unrelated LWR rule from suppressing USAP fallback (0.3801ms)
+✔ LMS-0708 production-shaped medical density fixture selects the rank-11 LWR rule before model generation (1.7967ms)
+✔ LMS-0708 preserves the explicit medical continuation control question (1.5899ms)
+✔ LMS-0709 selects the production USAP NVZ rule by player-question scope (8.3975ms)
+✔ LMS-0710 keeps coaching access distinct from a server foot-contact rule (4.4281ms)
+✔ LMS-0706 mixed intents retain LWR lineup and USAP volley rules independently (1.2579ms)
+✔ LMS-0706 mixed USAP chunk cannot leak an overridden sibling passage (1.1553ms)
+✔ LMS-0706 insufficient, below-threshold and unrelated USAP evidence still skip generation (1.1954ms)
+✔ LMS-0706 does not select an unfinished USAP condition as governing evidence (0.4709ms)
+(node:8392) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/lwrpc-league-system/lwrpc-admin/app/lib/aiAnswerGeneration.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\lwrpc-league-system\lwrpc-admin\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ 0717 correction actual list parent survives without unrelated sibling bullets (13.1316ms)
+✔ 0717 correction medical: What happens if a player has a medical issue and cannot finish the game? (17.2043ms)
+✔ 0717 correction medical: Medical issue during match (4.6229ms)
+✔ 0717 correction medical: Someone got hurt halfway through the game and can't finish. What do we do? (8.9572ms)
+✔ 0717 correction rating method: How is Season DUPR calculated? (5.1645ms)
+✔ 0717 correction rating method: What is Season DUPR? (1.8514ms)
+✔ 0717 correction rating method: How is my Season DUPR determined? (1.9491ms)
+✔ 0717 correction NR and Reliability Factor retain only material definition (2.7567ms)
+✔ 0717 correction guard through selector: Can I use a player that's not on my roster? (3.3441ms)
+✔ 0717 correction guard through selector: Does a player have to be on the roster before playing? (2.5464ms)
+✔ 0717 correction guard through selector: What happens if a player wasn't on the roster? (2.3696ms)
+✔ 0717 correction protected: Who is on my roster? (2.1444ms)
+✔ 0717 correction protected: Show me my roster. (0.2007ms)
+✔ 0717 correction protected: Is John Smith on my roster? (0.1023ms)
+✔ 0717 correction protected: Did I already add John Smith to my roster? (0.1042ms)
+✔ 0717 correction protected: What is my DUPR? (0.1807ms)
+✔ 0717 correction protected: What is my Season DUPR? (0.1516ms)
+✔ 0717 correction two-stage object and league clarification preserves signed context (24.7955ms)
+✔ 0717 correction named league and accepted roster/Friday-lineup compound do not ask another question (11.1207ms)
+✔ 0717 correction production damaged ball: What happens if we have a cracked ball when playing a point? (4.6582ms)
+✔ 0717 correction production damaged ball: What happens if the ball cracks during a rally? (3.3244ms)
+✔ 0717 correction production damaged ball: What if the ball breaks while we're playing the point? (2.3212ms)
+✔ 0717 correction production damaged ball: What happens if we discover the ball is cracked after the rally? (2.5118ms)
+✔ 0717 correction production damaged ball: Can we replay a point if the ball breaks? (2.5512ms)
+✔ 0717 correction damage morphology is bounded to the ball, separate from specifications/other objects (2.9285ms)
+✔ 0717 correction preserved real production equipment and USAP controls (25.4749ms)
+✔ 0717 correction actual model transport receives qualified replay evidence, not universal replay text (5.0313ms)
+✔ 0717 correction manager route uses shared clarification before generation and retains manager origin (11.1549ms)
+✔ 0717 correction desktop disclaimer has eight-pixel top/bottom gaps; existing mobile owner remains (5.2477ms)
+✔ 0717 correction manager clarification executes without model and retains actual retrieval diagnostics (6.994ms)
+ℹ tests 72
+ℹ suites 0
+ℹ pass 72
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 549.7206

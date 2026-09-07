@@ -1,0 +1,73 @@
+# LMS-0722 review file manifest
+
+Exact working-tree paths for this release and its diagnostic/validation artifacts. No commit or deployment was created.
+
+- `docs/lms-0722-activation-1280.png`
+- `docs/lms-0722-activation-320.png`
+- `docs/lms-0722-activation-390.png`
+- `docs/lms-0722-benchmark-check.log`
+- `docs/lms-0722-benchmark-metrics.json`
+- `docs/lms-0722-build.log`
+- `docs/lms-0722-cross-league-baseline.json`
+- `docs/lms-0722-cross-league-diagnosis.md`
+- `docs/lms-0722-current-replay.json`
+- `docs/lms-0722-current-rules-fixture.json`
+- `docs/lms-0722-diagnostic-replay.json`
+- `docs/lms-0722-diff-check.log`
+- `docs/lms-0722-file-manifest.md`
+- `docs/lms-0722-final-source-verification.md`
+- `docs/lms-0722-focused.log`
+- `docs/lms-0722-generated-benchmark.json`
+- `docs/lms-0722-generated-benchmark.md`
+- `docs/lms-0722-implementation-report.md`
+- `docs/lms-0722-isolated-build.log`
+- `docs/lms-0722-lint.log`
+- `docs/lms-0722-new-tests.log`
+- `docs/lms-0722-offline-selection.jsonl`
+- `docs/lms-0722-owner-correction-page-13.png`
+- `docs/lms-0722-owner-source-correction-verification.md`
+- `docs/lms-0722-pdf-bundle.log`
+- `docs/lms-0722-primetime-conflict-source-verification.md`
+- `docs/lms-0722-primetime-source-page-12.png`
+- `docs/lms-0722-primetime-source-page-13.png`
+- `docs/lms-0722-quality-hardening-diagnosis.md`
+- `docs/lms-0722-recall-inspection.json`
+- `docs/lms-0722-required-league-controls.json`
+- `docs/lms-0722-selector-inspect.log`
+- `docs/lms-0722-source-inspection.json`
+- `docs/lms-0722-test-run.log`
+- `docs/lms-0722-trace-appendix.md`
+- `docs/lms-0722-types.log`
+- `docs/project-roadmap.md`
+- `lwrpc-admin/app/ai-assistant/page.js`
+- `lwrpc-admin/app/api/ai-assistant/documents/route.js`
+- `lwrpc-admin/app/lib/aiAnswerGeneration.js`
+- `lwrpc-admin/app/lib/aiConversation.js`
+- `lwrpc-admin/app/lib/aiDocumentActivation.js`
+- `lwrpc-admin/app/lib/aiDocumentNavigation.js`
+- `lwrpc-admin/app/lib/aiEquipmentIntents.js`
+- `lwrpc-admin/app/lib/aiOfficialApplicability.js`
+- `lwrpc-admin/app/lib/aiPassageContinuations.js`
+- `lwrpc-admin/app/lib/aiQuestionConcepts.js`
+- `lwrpc-admin/app/lib/aiRetrieval.js`
+- `lwrpc-admin/app/lib/askLwrPlayerAnswer.js`
+- `lwrpc-admin/app/lib/version.js`
+- `lwrpc-admin/package-lock.json`
+- `lwrpc-admin/package.json`
+- `lwrpc-admin/scripts/lms0722-benchmark-report.mjs`
+- `lwrpc-admin/scripts/lms0722-current-replay.mjs`
+- `lwrpc-admin/scripts/lms0722-generate-benchmark.mjs`
+- `lwrpc-admin/scripts/lms0722-isolated-build.mjs`
+- `lwrpc-admin/scripts/lms0722-replay-fixture.mjs`
+- `lwrpc-admin/scripts/lms0722-selector-inspect.mjs`
+- `lwrpc-admin/scripts/verify-lms0722-ui.cjs`
+- `lwrpc-admin/supabase/migrations/20260907001910_lms0722_document_activation_history.sql`
+- `lwrpc-admin/test/aiApprovedAnswersIntegration.test.mjs`
+- `lwrpc-admin/test/aiDocumentActivation.test.mjs`
+- `lwrpc-admin/test/lms0722.test.mjs`
+
+Pre-existing LMS-0721 acceptance edits preserved separately:
+
+- `docs/lms-0721-final-lifecycle-acceptance.md`
+- `docs/lms-0721-implementation-report.md`
+- `docs/lms-0721-ordinary-sibling-citation-correction.md`

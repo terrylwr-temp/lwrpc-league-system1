@@ -1,0 +1,17 @@
+import fs from 'node:fs';
+import {createClient} from '@supabase/supabase-js';
+process.loadEnvFile('.env.local'); process.env.LWR_AI_ENABLED='true';
+const {retrieveOfficialEvidence}=await import('../app/lib/aiRetrieval.js');
+const {generateOfficialAnswer}=await import('../app/lib/aiAnswerGeneration.js');
+const {officialQuestionConcept}=await import('../app/lib/aiQuestionConcepts.js');
+const db=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});
+const question=process.env.QUAL_QUESTION||'How does rally scoring work in a Picklebreaker?';
+const searches=[];
+const client=new Proxy(db,{get(target,key){if(key==='rpc')return async(name,args)=>{const out=await target.rpc(name,args);if(name==='search_ai_official_chunks')searches.push({query:args.p_query_text,rows:out.data});return out;};return Reflect.get(target,key);}});
+const retrieval=await retrieveOfficialEvidence({supabase:client,body:{question}});
+let prompt,structured;
+const answer=await generateOfficialAnswer({retrieval,supabase:db,fetchImpl:async(url,args)=>{const body=JSON.parse(args.body);prompt={instructions:body.instructions,input:body.input};const response=await fetch(url,args);structured=await response.clone().json();return response;}});
+const selected=answer.selectedEvidence;
+const output={question,concept:officialQuestionConcept(question),searches,candidates:retrieval.candidates,review:retrieval.authorityReviewCandidates,selected,prompt,structured,answer};
+fs.writeFileSync(process.env.QUAL_OUTPUT||'../docs/lms-0722-qualification-before.json',JSON.stringify(output,null,2));
+console.log(JSON.stringify({question,concept:output.concept,selected:selected.map(c=>({id:c.chunkId,page:c.pageNumber,score:c.combinedScore,content:c.content})),answer:answer.answer}));
