@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
@@ -7,6 +7,7 @@ import { formatPhoneNumberForStorage } from "../lib/phone";
 import { isValidEmailAddress, normalizeEmailAddress } from "../lib/email";
 import { useRouter } from "next/navigation";
 import { appConfirm, appNotice } from "../lib/appDialog";
+import { memberImportLocation } from "../lib/memberImportLocation";
 
 const INACTIVE_PROTECTED_ROLES = new Set(["league_manager", "club_pro", "commissioner"]);
 
@@ -106,6 +107,8 @@ export default function MemberImportPage() {
         membership_levels,
         renewal_date,
         is_active_member,
+        club_location,
+        location_id,
         user_roles (
           role
         )
@@ -433,6 +436,8 @@ return {
         newMembers: result?.newMembers || 0,
         updatedMembers: result?.updatedMembers || 0,
         skippedRows: result?.skippedRows || 0,
+        locationReviews: result?.locationReviews || 0,
+        staleRows: result?.staleRows || 0,
         missingMembers: missingMembers.length,
         totalRows: preview.length
       };
@@ -444,7 +449,7 @@ return {
       );
 
       await appNotice(
-        `MembershipWorks import completed successfully.\n\nRows processed: ${summary.totalRows}\nNew members: ${summary.newMembers}\nUpdated members: ${summary.updatedMembers}\nSkipped rows: ${summary.skippedRows}\nMembers missing from import: ${summary.missingMembers}`,
+        `MembershipWorks import completed successfully.\n\nRows processed: ${summary.totalRows}\nNew members: ${summary.newMembers}\nUpdated members: ${summary.updatedMembers}\nSkipped rows: ${summary.skippedRows}\nMembers missing from import: ${summary.missingMembers}\nLocation names needing review (including aliases): ${summary.locationReviews}\nRows skipped because their location changed after preview: ${summary.staleRows}`,
         { title: "Import completed", confirmLabel: "OK", tone: "success" }
       );
 
@@ -458,27 +463,35 @@ return {
   }
 
   async function processMemberImportRows() {
+    const { data: locations, error: locationError } = await supabase.from("locations").select("id, name, is_active");
+    if (locationError) throw new Error(locationError.message);
+    let locationReviews = 0;
+    let staleRows = 0;
     const rows = preview.filter((row) => row.action !== "skip");
     const now = new Date().toISOString();
     const newRows = rows.filter((row) => row.action === "new");
     const updateRows = rows.filter((row) => row.action === "update");
 
     if (newRows.length > 0) {
-      const inserts = newRows.map((row) => ({
-        email: row.email || null,
-        first_name: row.firstName || null,
-        last_name: row.lastName || null,
-        phone: row.phone || null,
-        membershipworks_account_id: row.membershipWorksId || manualMembershipWorksAccountId(),
-        membership_status: "Active",
-        membership_level: row.membershipLevel || null,
-        membership_levels: row.membershipLevel || null,
-        club_location: row.clubLocation || null,
-        dupr_id: row.duprId || null,
-        renewal_date: row.renewalDate || null,
-        is_active_member: true,
-        updated_at: now,
-      }));
+      const inserts = newRows.map((row) => {
+        const location = memberImportLocation(null, row.clubLocation, locations);
+        if (location.review) locationReviews++;
+        return {
+          email: row.email || null,
+          first_name: row.firstName || null,
+          last_name: row.lastName || null,
+          phone: row.phone || null,
+          membershipworks_account_id: row.membershipWorksId || manualMembershipWorksAccountId(),
+          membership_status: "Active",
+          membership_level: row.membershipLevel || null,
+          membership_levels: row.membershipLevel || null,
+          ...location.patch,
+          dupr_id: row.duprId || null,
+          renewal_date: row.renewalDate || null,
+          is_active_member: true,
+          updated_at: now,
+        };
+      });
 
       const { error } = await supabase.from("members").insert(inserts);
       if (error) throw new Error(error.message);
@@ -512,7 +525,9 @@ return {
 
       if (row.firstName && (matchedByAccountId || !existing.first_name)) payload.first_name = row.firstName;
       if (row.lastName && (matchedByAccountId || !existing.last_name)) payload.last_name = row.lastName;
-      if (row.clubLocation && !existing.club_location) payload.club_location = row.clubLocation;
+      const location = memberImportLocation(existing, row.clubLocation, locations);
+      Object.assign(payload, location.patch);
+      if (location.review) locationReviews++;
       if (row.duprId && !existing.dupr_id) payload.dupr_id = row.duprId;
       if (row.membershipLevel && !existing.membership_level) payload.membership_level = row.membershipLevel;
       if (row.membershipLevel && !existing.membership_levels) payload.membership_levels = row.membershipLevel;
@@ -536,18 +551,25 @@ return {
             query = query.eq("membershipworks_account_id", row.membershipWorksId);
           }
 
-          return query;
+          // A concurrent manager location edit wins over this preview/import.
+          const existing = row.matchedMember || {};
+          query = existing.location_id == null ? query.is("location_id", null) : query.eq("location_id", existing.location_id);
+          query = existing.club_location == null ? query.is("club_location", null) : query.eq("club_location", existing.club_location);
+          return query.select("id");
         })
       );
 
       const failed = results.find((result) => result.error);
       if (failed?.error) throw new Error(failed.error.message);
+      staleRows += results.filter(result => !result.data?.length).length;
     }
 
     return {
       newMembers: newRows.length,
-      updatedMembers: updateRows.length,
-      skippedRows: preview.filter(row => row.action === "skip").length
+      updatedMembers: updateRows.length - staleRows,
+      skippedRows: preview.filter(row => row.action === "skip").length + staleRows,
+      locationReviews,
+      staleRows,
     };
   }
 
@@ -784,6 +806,8 @@ Field names are flexible and common variations are supported automatically.`
               <SummaryBox label="Updated" value={importSummary.updatedMembers} />
               <SummaryBox label="Skipped" value={importSummary.skippedRows} />
               <SummaryBox label="Missing" value={importSummary.missingMembers} />
+              <SummaryBox label="Location Review" value={importSummary.locationReviews} />
+              <SummaryBox label="Changed Since Preview" value={importSummary.staleRows} />
 
             </div>
 

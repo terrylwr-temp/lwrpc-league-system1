@@ -1,0 +1,19 @@
+
+> lwrpc-admin@0.1.545 lint
+> eslint
+
+
+C:\lwrpc-league-system\lwrpc-admin\app\captain-dashboard\page.js
+  803:6  warning  React Hook useCallback has an unnecessary dependency: 'router'. Either exclude it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\lwrpc-league-system\lwrpc-admin\app\lib\askLwrPlayerAnswer.js
+  131:29  warning  'documentId' is defined but never used         @typescript-eslint/no-unused-vars
+  131:41  warning  'documentVersionId' is defined but never used  @typescript-eslint/no-unused-vars
+  131:60  warning  'chunkId' is defined but never used            @typescript-eslint/no-unused-vars
+
+C:\lwrpc-league-system\lwrpc-admin\app\player-dashboard\page.js
+  2189:10  warning  'PlayerHistoryDetailsModal' is defined but never used      @typescript-eslint/no-unused-vars
+  2208:10  warning  'calculatePlayerHistoryDetails' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 6 problems (0 errors, 6 warnings)
+
