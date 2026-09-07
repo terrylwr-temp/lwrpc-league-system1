@@ -7,6 +7,7 @@ import { clarificationFromRetrieval, createClarificationReceipt, createFollowUpR
 import { resolveOfficialConversation, playerFallbackResult } from "../../../lib/askLwrPlayerAnswer";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 import { observeQualityRequest } from "../../../lib/aiQualityCapture";
+import {authenticateLive,needsLive,runLive} from '../../../lib/liveLmsService.js';
 
 export const runtime = "nodejs";
 
@@ -15,6 +16,11 @@ export async function POST(req) {
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return failure(authorization.error, authorization.status);
     const body = await req.json().catch(() => ({}));
+    if(needsLive(body)) {
+      const result=await runLive({body,principal:await authenticateLive(req),origin:'manager_test'});
+      if(result)return NextResponse.json({success:true,result:{answer:{answer:result.answer,sources:[],evidenceSufficient:result.kind==='answer',model:'Not called',metrics:{inputTokens:0,outputTokens:0}},live:result.live,conversationReceipt:result.conversationReceipt,retrieval:{candidates:[],suppliedEvidence:[],authorityReviewCandidates:[],intentEvidenceCandidates:[],documentsConsidered:[],evidence:{sufficient:result.kind==='answer'},metrics:{embeddingMs:0,retrievalMs:0,totalMs:0}}}},{headers:{'Cache-Control':'private, no-store'}});
+      body.conversationReceipt=null;
+    }
     const execution = await observeQualityRequest({ supabase: authorization.supabase, origin: "manager_test", run: (_id, trace) => runManagerAnswer(authorization, body, trace) });
     return NextResponse.json({ success: true, result: execution.response });
   } catch (error) {

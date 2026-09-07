@@ -2,14 +2,17 @@ import { NextResponse } from "next/server";
 import { feedbackTransition, readFeedbackReceipt } from "../../../lib/aiConversation";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 import { captureQualityFeedback } from "../../../lib/aiQualityCapture";
+import {authenticateLive,liveFeedback} from '../../../lib/liveLmsService.js';
+import {isLiveReceipt} from '../../../lib/liveLmsReceipts.js';
 
 export const runtime = "nodejs";
 
 export async function POST(req) {
   try {
+    const body = await req.json().catch(() => ({}));
+    if(isLiveReceipt(body.receipt))return NextResponse.json({success:true,result:await liveFeedback(body,await authenticateLive(req))},{headers:{'Cache-Control':'private, no-store'}});
     const authorization = await authorizeAdminRequest(req, "player");
     if (authorization.error) return failure(authorization.status);
-    const body = await req.json().catch(() => ({}));
     if (typeof body?.helpful !== "boolean") return failure(400);
     const claims = readFeedbackReceipt(body.receipt, authorization.user.id);
     const { data: existing, error: existingError } = await authorization.supabase

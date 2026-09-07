@@ -1,3 +1,4 @@
+import {needsLive} from '../../../lib/liveLmsService.js';
 import { NextResponse } from "next/server";
 import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
@@ -9,6 +10,7 @@ export async function POST(req) {
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return fail(authorization.error, authorization.status);
     const body = await req.json().catch(() => ({}));
+    if(needsLive(body))return fail("Use Test AI Assistant for authorized live lookups. Live questions do not use document retrieval.",400);
     const [retrieval, documentsConsidered] = await Promise.all([
       retrieveOfficialEvidence({ supabase: authorization.supabase, body }), eligibleDocuments(authorization.supabase),
     ]);

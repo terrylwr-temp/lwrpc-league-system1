@@ -1,4 +1,5 @@
 "use client";
+import {liveIntent} from '../lib/liveLmsIntent.js';
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -101,7 +102,7 @@ export function AskLwrAssistantPage({ role }) {
 function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, drawer = false }) {
   const fallbackInputRef = useRef(null);
   const composerRef = inputRef || fallbackInputRef;
-  const [context] = useState(currentConversationContext);
+  const [context] = useState(()=>currentConversationContext(supabase));
   const observedGeneration = useRef(context.generation());
   const [busy, setBusy] = useState(() => context.busy());
   const [announcement, setAnnouncement] = useState("");
@@ -148,7 +149,7 @@ function AssistantContent({ role = "player", inputRef, closeButtonRef, onClose, 
     const contextRequest = context.begin();
     const conversationReceipt = contextRequest.receipt;
     setQuestion(""); setWorking(true);
-    setExchanges((current) => [{ id: exchangeId, question: nextQuestion, pending: true }, ...current].slice(0, MAX_SESSION_EXCHANGES));
+    setExchanges((current) => [{ id: exchangeId, question: nextQuestion, pending: true }, ...current].map(entry=>entry.id===exchangeId?{...entry,liveSensitive:Boolean(liveIntent(nextQuestion))||Boolean(conversationReceipt?.startsWith('live1.'))}:entry).slice(0, MAX_SESSION_EXCHANGES));
     try {
       const response = await fetch("/api/ask-lwr", {
         method: "POST",
@@ -205,6 +206,7 @@ function Exchange({ entry, onFeedback }) {
   const clarification = result.kind === "clarification";
   const feedbackEligible = result.kind === "answer" && Boolean(result.feedbackReceipt);
   return <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    {result.live && <div className="border-b border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-950"><strong>LIVE LMS DATA</strong><span className="block">{result.live.operation}</span><span className="block text-xs">Current as of {new Date(result.live.checkedAt).toLocaleString()}</span></div>}
     <div className="border-b border-blue-200 bg-blue-100/70 px-4 py-3"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">Question</h3><p className="mt-2 text-sm font-bold text-slate-800">{entry.question}</p></div>
     <div className="bg-emerald-50/70 p-4"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">{clarification ? "Clarification" : "Answer"}</h3><p className="mt-2 whitespace-pre-wrap text-sm font-semibold leading-6 text-slate-800">{result.answer}</p>{feedbackEligible && <FeedbackControls entry={entry} onFeedback={onFeedback}/>} {result.sources?.length > 0 && <div className="mt-4 border-t border-emerald-100 pt-4"><h3 className="text-sm font-black uppercase tracking-[.1em] text-[#102e64]">Official Source{result.sources.length > 1 ? "s" : ""}</h3><div className="mt-2 grid gap-2">{result.sources.map((source, index) => <a key={`${source.officialDocumentUrl}-${index}`} href={source.officialDocumentUrl} target="_blank" rel="noreferrer" className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-900 transition hover:border-blue-300 hover:bg-blue-100"><strong className="block">{source.documentTitle}</strong><span className="mt-0.5 block font-semibold">{source.citation}</span><span className="mt-2 inline-block font-black text-blue-700">View Official Document ↗</span></a>)}</div></div>}</div>
   </article>;

@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import { hasRole, ROLE_LEVELS } from "./permissions";
+import { hasRole, ROLE_LEVELS } from "./permissions.js";
 
 export function createAdminSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;

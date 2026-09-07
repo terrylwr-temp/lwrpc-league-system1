@@ -6,6 +6,7 @@ import LoadingScreen from '../../components/LoadingScreen';
 import { getRequestAuthorizationHeaders, requireRole } from '../../lib/auth';
 import { REVIEW_CATEGORIES, REVIEW_STATUSES, RETEST_KEY, feedbackPercent, reviewRoleAllowed } from '../../lib/aiReviewShared.js';
 import styles from './review.module.css';
+import LiveFeedbackPanel from './LiveFeedbackPanel';
 import ApprovedAnswersPanel from './ApprovedAnswersPanel';
 
 async function api(params, body) {
@@ -44,7 +45,7 @@ export default function AiFeedbackReviewPage() {
   const select=(name,title,values)=><label>{title}<select aria-label={title} value={draft[name]} onChange={e=>setDraft({...draft,[name]:e.target.value})}><option value="">All</option>{values.map(v=><option key={v} value={v}>{label(v)}</option>)}</select></label>;
   return <main className={styles.page}><AppHeader title="AI Feedback & Review" subtitle="Official-answer feedback, unanswered questions and manager review."/>
     <div className={styles.workspace}><div className={styles.health}>AI Quality Capture: <b>{health?.status==='degraded'?'Degraded':'Unknown'}</b> · Last recorded: {date(health?.lastRecordedAt)}. Independent operator log verification is required.</div>
-    <section className={styles.cards} aria-label="Player outcome summary">{[
+    <LiveFeedbackPanel/><section className={styles.cards} aria-label="Player outcome summary">{[
       ['Grounded Answers',summary?.grounded],['Feedback Participation',summary?feedbackPercent(summary.voted,summary.eligible):'—'],
       ['Helpful %',summary?(summary.voted && !summary.helpful && !summary.not_helpful?'Ambiguous':feedbackPercent(summary.helpful,summary.helpful+summary.not_helpful)):'—'],['Not Helpful',summary?.not_helpful],['Unanswered',summary?.unanswered],['Open Review Cases',summary?.open_cases],
     ].map(([name,value])=><article key={name}><span>{name}</span><strong>{value??'—'}</strong></article>)}</section>
