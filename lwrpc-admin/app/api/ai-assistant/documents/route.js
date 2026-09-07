@@ -1,3 +1,4 @@
+import { withActivationNames } from '../../../lib/aiDocumentActivation';
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
@@ -34,6 +35,7 @@ export async function POST(req) {
       const { error } = await authorization.supabase.rpc("activate_ai_document_version", {
         p_document_id: documentId,
         p_version_id: versionId,
+        p_actor_member_id: authorization.memberRows?.find(row => row.user_roles?.some(r => ["league_manager", "commissioner"].includes(r.role)))?.id || null,
       });
       if (error) throw error;
       return NextResponse.json({ success: true, ...(await documentDetail(authorization.supabase, documentId, versionId)) });
@@ -102,7 +104,7 @@ async function documentList(supabase) {
   const [documentsResult, seasonsResult, leaguesResult, divisionsResult] = await Promise.all([
     supabase
       .from("ai_documents")
-      .select("id, title, description, document_type, authority_rank, status, scope_kind, league_id, division_id, season_id, active_version_id, created_at, updated_at, active_version:ai_document_versions!ai_documents_active_version_id_fkey(id, version_label, processing_status, page_count, chunk_count, processed_at)")
+      .select("id, title, description, document_type, authority_rank, status, scope_kind, league_id, division_id, season_id, active_version_id, created_at, updated_at, active_version:ai_document_versions!ai_documents_active_version_id_fkey(id, version_label, processing_status, page_count, chunk_count, processed_at, activated_at, activated_by_member_id)")
       .order("updated_at", { ascending: false }),
     supabase.from("seasons").select("id, name, is_active").order("name"),
     supabase.from("leagues").select("id, name, season_id, is_active").order("name"),
@@ -110,7 +112,7 @@ async function documentList(supabase) {
   ]);
   for (const result of [documentsResult, seasonsResult, leaguesResult, divisionsResult]) if (result.error) throw result.error;
   return {
-    documents: documentsResult.data || [],
+    documents: await Promise.all((documentsResult.data || []).map(async d=>({...d,active_version:d.active_version?(await withActivationNames(supabase,[d.active_version]))[0]:null}))),
     options: { seasons: seasonsResult.data || [], leagues: leaguesResult.data || [], divisions: divisionsResult.data || [] },
   };
 }
@@ -124,7 +126,7 @@ async function documentDetail(supabase, documentId, requestedVersionId = "") {
   if (documentError) throw documentError;
   const { data: versions, error: versionsError } = await supabase
     .from("ai_document_versions")
-    .select("id, version_label, source_kind, original_filename, file_size_bytes, page_count, processing_status, processing_error, processing_warnings, processed_at, chunk_count, created_at")
+    .select("id, version_label, source_kind, original_filename, file_size_bytes, page_count, processing_status, processing_error, processing_warnings, processed_at, chunk_count, created_at, activated_at, activated_by_member_id")
     .eq("document_id", documentId)
     .order("created_at", { ascending: false });
   if (versionsError) throw versionsError;
@@ -138,7 +140,7 @@ async function documentDetail(supabase, documentId, requestedVersionId = "") {
       .limit(50)
     : { data: [], error: null };
   if (chunksError) throw chunksError;
-  return { document, versions: versions || [], selectedVersionId, previewChunks: chunks || [] };
+  return { document, versions: await withActivationNames(supabase, versions || []), selectedVersionId, previewChunks: chunks || [] };
 }
 
 async function documentInput(source, supabase) {

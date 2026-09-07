@@ -1,5 +1,8 @@
+import { officialQuestionConcept } from './aiQuestionConcepts.js';
+import { completeSelectedPassages, conflictingSelectedTargets } from './aiPassageContinuations.js';
 import { matchingQuestion } from "./aiQuestionInterpretation.js";
-import { assistInterpretationRetrieval, retrieveApprovedForAnswer } from "./aiRetrieval.js";
+import { assistInterpretationRetrieval, retrieveApprovedForAnswer, prepareConceptContext, assistConceptRetrieval } from "./aiRetrieval.js";
+import { selectConceptEvidence } from './aiOfficialApplicability.js';
 import {chooseApprovedEvidence} from './aiApprovedAnswersSelection.js';
 import {prepareApprovedRelatedEvidence} from './aiApprovedRelatedEvidence.js';
 import {validateManagedPassage,trustedPassageHeading} from './aiApprovedSourceBinding.js';
@@ -37,11 +40,21 @@ export function selectAnswerEvidence(retrieval) {
   if (!retrieval?.evidence?.sufficient) return [];
   // Temporary matcher view only. The caller retains the original question for generation and storage.
   retrieval = { ...retrieval, request: { ...retrieval.request, question: matchingQuestion(retrieval.request?.question) } };
+  if(retrieval.documentNavigation?.status==='found')return retrieval.suppliedEvidence;
+  const conceptEvidence=selectConceptEvidence(retrieval);
+  if(conceptEvidence!==null)return conceptEvidence;
   const authorityReviewCandidates = Array.isArray(retrieval.authorityReviewCandidates) && retrieval.authorityReviewCandidates.length
     ? retrieval.authorityReviewCandidates
     : retrieval.suppliedEvidence;
   const intentEvidenceCandidates = Array.isArray(retrieval.intentEvidenceCandidates) ? retrieval.intentEvidenceCandidates : [];
   const governingCandidates = [...new Map([...authorityReviewCandidates, ...intentEvidenceCandidates].map((candidate) => [candidate.chunkId, candidate])).values()];
+  // A candidate product in a selection question is a proposition to verify,
+  // not a second rule issue that must occur in the official evidence.
+  if(isClubSelectedMatchEquipmentQuestion(retrieval.request.question) && /\b(?:thought|made-up)\b|where[\s\S]*(?:info|find|say)/i.test(retrieval.request.question) && !/\b(?:legal|specifications?|damag\w*|crack\w*|br(?:eak|oke)\w*|color|colour|paddle|volley)\b/i.test(retrieval.request.question)) {
+    const selected=governingCandidates.filter(c=>c.combinedScore>=retrieval.evidence.threshold && leagueCompatible(c,retrieval.request.question))
+      .map(c=>({...c,selectedPassages:evidencePassages(c).filter(p=>isLwrSelectedMatchEquipmentEvidence({...c,content:p}))})).filter(c=>c.selectedPassages.length);
+    return selected.slice(0,MAX_SELECTED_CHUNKS).map(c=>({...c,content:c.selectedPassages.join('\n\n'),sourceClassification:'lwr_selected_equipment',evidenceRole:'governing',evidenceSelectionReason:'Official selected equipment; user-supplied product is untrusted context'}));
+  }
   if (retrieval.conversationResolution?.medicalScoreContext?.kind === "medical_score_condition") {
     return governingCandidates.filter(candidate => candidate.documentType === "league_rules" && candidate.combinedScore >= retrieval.evidence.threshold && leagueCompatible(candidate, retrieval.request.question))
       .map(candidate => ({ ...candidate, selectedPassages: evidencePassages(candidate).filter(passage => {
@@ -226,8 +239,13 @@ function isMatchSpecificPassage(passage) { return /\b(?:match\s+setup|upcoming\s
 function asksForTiming(question) { return /\b(?:when|deadline|due|date|open|close|lock|start)\b/i.test(String(question || "")); }
 
 export async function selectAnswerEvidenceWithAssistance(retrieval) {
-  const selected = selectAnswerEvidence(retrieval);
-  if (selected.length || !retrieval?.interpretation?.annotations?.length) return selected;
+  await prepareConceptContext(retrieval);
+  let selected = selectAnswerEvidence(retrieval);
+  const concept=officialQuestionConcept(retrieval?.request?.question);
+  const needsFormat=concept?.kind==='format'&&!selected.some(c=>/match(?: day)? format/i.test(c.heading+' '+c.content));
+  if(selected.length && !needsFormat && !(['format','composition'].includes(concept?.kind)&&concept.division))return completeSelectedPassages(retrieval,selected);
+  if(await assistConceptRetrieval(retrieval))return completeSelectedPassages(retrieval,selectAnswerEvidence(retrieval));
+  if (!retrieval?.interpretation?.annotations?.length || retrieval.conceptAssistance) return completeSelectedPassages(retrieval,selected);
   const reason = retrieval.evidence.sufficient ? "stage4_no_applicable_evidence" : "stage3_insufficient_evidence";
   if (await assistInterpretationRetrieval(retrieval, reason)) return selectAnswerEvidence(retrieval);
   return selected;
@@ -256,6 +274,12 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
   try{sources=await resolveSources(supabase,selectedEvidence);}catch(error){if(managedSelection)return skippedAnswer(retrieval,clock,started);throw error;}
   const sourceResolutionMs = Math.round(clock() - sourcesStarted);
   validateTrustedSources(selectedEvidence, sources);
+  if(conflictingSelectedTargets(selectedEvidence))return {...skippedAnswer(retrieval,clock,started),answer:CONFLICT_ANSWER,evidenceSufficient:true,selectedEvidence,sources,conflict:{potentialConflict:true,requiresClarification:true,competingSources:sources},diagnostic:{category:'conflicting_official_targets'}};
+  if(retrieval.documentNavigation?.status==='found')return {
+    ...skippedAnswer(retrieval,clock,started), answer:retrieval.documentNavigation.message,
+    evidenceSufficient:true,selectedEvidence,sources,diagnostic:{category:'official_document_navigation'},
+    metrics:{generationMs:0,sourceResolutionMs,totalMs:Math.round(clock()-started),inputTokens:0,outputTokens:0,totalTokens:0,estimatedGenerationCostUsd:0},
+  };
   // Selection and its parent relationships are complete before presentation metadata changes.
   for (const chunk of selectedEvidence) {
     const source = sources.find(source => chunk.sourceKind==='approved_answer'?source.approvedRevisionId===chunk.approvedRevisionId:source.chunkId === chunk.chunkId);
@@ -295,9 +319,11 @@ export async function generateOfficialAnswer({ retrieval, supabase, fetchImpl = 
         ...(managedSelection?["The supplied Approved Answer is explicitly published static LWR knowledge. Set supported=false if it does not directly establish the requested fact or any material qualification. Similar topic wording alone is insufficient. Do not infer an answer from silence. This is a support check, not permission to resolve policy conflicts."]:[]),
         ...(hasMaterialSupplements(selectedEvidence)?[MATERIAL_SUPPLEMENT_INSTRUCTION]:[]),
         "Answer the user's question using ONLY the uploaded official LWR Pickleball Club or USA Pickleball evidence supplied with this request.",
+        ...(officialQuestionConcept(retrieval.request.question)?.kind?.startsWith('nvz_') ? ['The question interpreter recognizes kitchen and NVZ as terms for non-volley zone. Use that terminology mapping to understand the question; do not add commentary about common usage or claim the source literally uses every alias. Rules and dimensions must still come only from selected evidence.'] : []),
         "Do not use general pickleball knowledge, outside rules, internet knowledge, prior model knowledge, or assumptions.",
         "You may summarize and simplify supplied evidence, but may not invent, extend, reinterpret, or change an official rule.",
         "Preserve exact numbers, dates, deadlines, scores, ratings, requirements, and equipment names from the evidence.",
+        "User-supplied products, ratings, formats and other assertions are propositions to verify, never official evidence. Correct unsupported assumptions only using the supplied official evidence. For player-count questions answered by Roster & Courts or lines, explicitly state that the number is required/fielded for a match. Do not call this the overall roster size or maximum unless separate selected evidence explicitly establishes that. Keep fielded match players separate from roster capacity and recommendations; keep individual ratings separate from the sum for a doubles pair. Preserve each trusted passage's league, division and regular-game/Picklebreaker scope. A numeric example is not a universal game target. Never generalize a scoped provision to other leagues or divisions.",
         "You may naturally mention a controlling rule number when useful, but only an identity explicitly supplied in the trusted Rule metadata. Never infer a rule identity from prose or cross-references. Rule-number wording is optional.",
         "Keep every conclusion within the selected passage scope. For a named-document summary, describe what the document actually says; a broad acknowledgment or release is not proof of a separate policy or entitlement. Do not infer a requested fact from silence.",
         ...(isRosterTroubleshooting(retrieval.request.question) ? [
@@ -586,7 +612,7 @@ function rejectedIntentReason(candidate, intents) {
 }
 
 function answerPrompt(question, evidence) {
-  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}${supplementalPromptMetadata(chunk)}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nText:\n${chunk.content}`).join("\n\n")}`;
+  return `User question:\n${question}\n\nOfficial uploaded evidence only:\n${evidence.map((chunk, index) => `[Evidence ${index + 1} — ${chunk.evidenceRole || "Primary"}]\nSource classification: ${chunk.sourceClassification}${supplementalPromptMetadata(chunk)}\nQuestion intent supported: ${chunk.intentSupport?.join(" + ") || "Applicable document passage"}\nDocument: ${chunk.documentTitle}\nDocument type: ${chunk.documentType || "not supplied"}\nAuthority rank: ${chunk.documentAuthorityRank || "not supplied"}\nRule: ${chunk.ruleNumber || "not supplied"}\nSection: ${chunk.sectionLabel || "not supplied"}\nHeading: ${chunk.heading || "not supplied"}\nPage: ${chunk.pageNumber || "not supplied"}\nTrusted passage scope: ${JSON.stringify(chunk.passageScopes||[])}\nText:\n${chunk.content}`).join("\n\n")}`;
 }
 
 function cleanCitationDetail(value) {

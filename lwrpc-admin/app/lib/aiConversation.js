@@ -1,4 +1,5 @@
 import {approvedSourceIdentity} from "./aiApprovedAnswersShared.js";
+import { apparelQuestion, officialQuestionConcept } from './aiQuestionConcepts.js';
 import { interpretQuestion, matchingQuestion, medicalScoreContext } from "./aiQuestionInterpretation.js";
 import { missingPlayerObject, playerObjectReply, plausibleRosterTimingLeagues, questionLeague, isRosterParticipationQuestion, ballDamageKind, isSeasonRatingDateQuestion } from "./aiQuestionApplicability.js";
 import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from "node:crypto";
@@ -111,6 +112,12 @@ export function resolveConversationTurn({ question, userId, receipt, now = Date.
 // the presence of active candidates. It never turns candidates into an answer.
 export function clarificationFromRetrieval(resolution, retrieval) {
   if (resolution?.kind !== "resolved") return null;
+  const concept=officialQuestionConcept(resolution.effectiveQuestion);
+  if(retrieval.documentNavigation?.status==='clarification')return {...resolution,kind:'clarification',clarificationQuestion:resolution.effectiveQuestion,clarification:{category:'full_question',reason:'ambiguous_official_document',message:retrieval.documentNavigation.message}};
+  if(concept?.kind==='composition' && !concept.leagues.length && (concept.division||['fielded','courts'].includes(concept.operation)))return {
+    ...resolution,...clarificationResolution(resolution.rawQuestion,'roster_league','missing_composition_league',resolution.priorContextAvailable),clarificationQuestion:resolution.effectiveQuestion,
+    clarification:{category:'roster_league',reason:'missing_composition_league',message:'Which league do you mean: Weekday, Saturday, or PrimeTime? Player counts and division formats can differ.'},
+  };
   const candidates = [...(retrieval?.authorityReviewCandidates || []), ...(retrieval?.candidates || []), ...(retrieval?.suppliedEvidence || [])];
   const leagues = plausibleRosterTimingLeagues(matchingQuestion(resolution.effectiveQuestion), candidates);
   if (!questionLeague(matchingQuestion(resolution.effectiveQuestion)).length && leagues.length > 1) return {
@@ -165,7 +172,8 @@ function composeFollowUp(priorQuestion, followUp) {
 function requiresColorSubjectClarification(question) {
   const value = String(question || "").toLowerCase();
   return /\bcolou?r\b/.test(value)
-    && /\b(?:considerations?|requirements?|rules?|restrictions?|matter)\b/.test(value)
+    && /\b(?:considerations?|requirements?|rules?|restrictions?|matter|wear)\b/.test(value)
+    && !apparelQuestion(value)
     && !/\b(?:ball|pickleball|paddle|clothing|apparel|shirt|jersey|court|surface|uniform|shoes|hat)\b/.test(value);
 }
 
@@ -184,6 +192,7 @@ function clarifiedQuestion(originalQuestion, category, subject) {
 
 function isContextualFollowUp(question) {
   const value = cleanQuestion(question).toLowerCase();
+  if (officialQuestionConcept(value)?.kind === 'document_navigation' || /\bwhere\b.*\bwhat\s+balls?\b.*\b(?:using|use)\b/.test(value)) return false;
   return /^(?:what\s+about|what\s+if|does\s+that|and\s+what|and\s+does)\b/.test(value)
     || /\b(?:that|it|mine|ours)\b/.test(value) && value.split(/\s+/).length <= 12;
 }

@@ -1,4 +1,5 @@
 import { matchingQuestion } from "./aiQuestionInterpretation.js";
+import { apparelQuestion, generalDocumentedProcedure } from './aiQuestionConcepts.js';
 import { isRosterParticipationQuestion, isCommunityParticipationQuestion } from "./aiQuestionApplicability.js";
 import { isRosterTroubleshooting } from "./aiRosterTroubleshooting.js";
 import { INSUFFICIENT_EVIDENCE_ANSWER } from "./aiAnswerGeneration.js";
@@ -16,6 +17,7 @@ const PERSONAL_OPERATIONAL_PATTERNS = [
 
 export function isUnsupportedOperationalQuestion(question) {
   const value = String(question || "").replace(/[’‘]/g, "'").replace(/\s+/g, " ").trim();
+  if (/\b(?:what|which|tell|show|check|does|is)\b[\s\S]{0,100}\b(?:my|our|this|that|the)\b[\s\S]{0,70}\b(?:account|email|reset token|reset link)\b/i.test(value) && !/\b(?:reset my password|change my password|sign in|log in)\b/i.test(value)) return true;
   const liveAffiliation = /\b(?:what|which)\s+(?:home\s+)?community\s+(?:am\s+i|are\s+we)\s+(?:registered|assigned|affiliated)\b/i.test(value)
     || /\b(?:what|which)\s+team\s+(?:am\s+i|are\s+we)\s+(?:currently\s+)?on\b/i.test(value)
     || /\b(?:am\s+i|are\s+we)\s+(?:(?:currently|personally)\s+){0,2}eligible\s+for\s+(?:this\s+|that\s+|the\s+)?team\b/i.test(value)
@@ -32,6 +34,7 @@ export function isUnsupportedOperationalQuestion(question) {
     || /\bmy\s+next\s+(?:opponent|match)\b/i.test(value)
     || /\bwhere\s+do\s+i\s+play\s+next\b/i.test(value);
   if (ratingValue || completedAction || personalSchedule) return true;
+  if (generalDocumentedProcedure(value) || apparelQuestion(value) && /\b(?:colou?r|wear|restrictions?)\b/i.test(value) || /\bwhat colou?r can (?:our|the) team wear\b/i.test(value)) return false;
   if (isCommunityParticipationQuestion(value)) return false;
   if (/\bhow\s+is\s+(?:my\s+|the\s+)?season\s+dupr(?:\s+rating)?\s+(?:determined|calculated|established|set|truncated)\b/i.test(value)) return false;
   if (isRosterParticipationQuestion(value)) return false;

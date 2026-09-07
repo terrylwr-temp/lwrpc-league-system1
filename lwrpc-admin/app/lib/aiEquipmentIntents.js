@@ -6,9 +6,9 @@ export const USAP_LEGAL_BALL_INTENT = "USAP legal ball specifications";
 function words(value) { return String(value || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").replace(/\s+/g, " ").trim(); }
 
 export function isClubSelectedMatchEquipmentQuestion(question) {
-  const value = words(question);
+  const value = words(String(question || '').replace(/[’‘]/g,"'").replace(/\bpickleballs?(?:'s)?\b/gi,'ball'));
   if (!/\b(?:ball|balls)\b/.test(value)) return false;
-  const asksSelection = /\b(?:what|which|kind|type)\b/.test(value);
+  const asksSelection = /\b(?:what|which|kind|type)\b/.test(value) || /\b(?:are|were)\s+we\s+using\b/.test(value);
   const useSignal = /\b(?:use|using|used|playing|play)\b/.test(value);
   const clubSignal = /\b(?:we|our|lwr|club|league|match|matches|season|playoff|playoffs)\b/.test(value);
   const matchBall = /\bmatch balls?\b|\bleague match balls?\b/.test(value);

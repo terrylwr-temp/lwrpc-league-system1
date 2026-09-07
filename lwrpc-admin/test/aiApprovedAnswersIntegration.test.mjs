@@ -60,4 +60,5 @@ test('0721 scope, competing policies and complementary evidence remain distinct'
  assert.equal(meaningfulDiscrepancy(revision,{content:'An organizer can provide administrative assistance.'}),null);
  const other={revision:{...revision,id:randomUUID(),approved_answer:'Teams may not arrange a makeup on Sunday.'},semantic_score:.98,manifest:'manifest'};
  assert.equal(chooseApprovedEvidence(revision.canonical_question,[],[row,other]).conflict,true);
+ assert.equal(chooseApprovedEvidence(revision.canonical_question,[],[other,row]).conflict,true);
 });

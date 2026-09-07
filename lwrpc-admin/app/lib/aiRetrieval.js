@@ -1,4 +1,8 @@
+import { passageScope } from './aiOfficialApplicability.js';
+import { retainPassageReader } from './aiPassageContinuations.js';
 import { interpretQuestion } from "./aiQuestionInterpretation.js";
+import { officialQuestionConcept } from './aiQuestionConcepts.js';
+import { retrieveDocumentNavigation } from './aiDocumentNavigation.js';
 import { aiAssistantConfig } from "./aiAssistantConfig.js";
 import { governingSourceClass, INSUFFICIENT_EVIDENCE_ANSWER } from "./aiGoverningSources.js";
 import { CLUB_SELECTED_MATCH_EQUIPMENT_INTENT, USAP_LEGAL_BALL_INTENT, isClubSelectedMatchEquipmentQuestion, isLwrSelectedMatchEquipmentEvidence, isUsapLegalBallQuestion, isUsapBallSpecificationEvidence } from "./aiEquipmentIntents.js";
@@ -13,6 +17,9 @@ const LWR_MATCH_EQUIPMENT_PROBE_QUERY = "match balls";
 // Request-local capability: vectors and database clients never serialize into diagnostics.
 const interpretationSearches = new WeakMap();
 const approvedSearches = new WeakMap();
+const conceptSearches = new WeakMap();
+const structuralReads = new WeakMap();
+const structuralContexts = new WeakMap();
 const LWR_MATCH_EQUIPMENT_PROBE_EMBEDDING_QUERY = "What ball does the LWR league provide for regular-season matches?";
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const GENERIC_EXACT_TERMS = new Set(["team", "teams", "player", "players", "game", "games", "league", "leagues", "match", "matches", "score", "scores", "rule", "rules", "guide", "guides", "another"]);
@@ -43,8 +50,10 @@ export function normalizeRetrievalRequest(body = {}) {
 
 export async function retrieveOfficialEvidence({ supabase, body, embedQuery = createQueryEmbedding, clock = performance.now.bind(performance) }) {
   if (!aiAssistantConfig.enabled) throw new Error("Ask LWR Pickleball Club AI retrieval is disabled. Set LWR_AI_ENABLED=true on the server.");
-  assertEmbeddingConfiguration();
   const request = normalizeRetrievalRequest(body);
+  const navigation = await retrieveDocumentNavigation(supabase, request);
+  if (navigation) return navigation;
+  assertEmbeddingConfiguration();
   const started = clock();
   const embedding = await embedQuery(request.question);
   if (!Array.isArray(embedding.embedding) || embedding.embedding.length !== aiAssistantConfig.embeddingDimensions) throw new Error("The embedding provider returned an unexpected vector size.");
@@ -85,6 +94,27 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
     environment: { embeddingModel: embedding.model || aiAssistantConfig.embeddingModel, embeddingDimensions: aiAssistantConfig.embeddingDimensions, evidenceThreshold: aiAssistantConfig.evidenceThreshold, retrievalLimit: aiAssistantConfig.retrievalLimit, authorityReviewLimit: AUTHORITY_REVIEW_LIMIT },
     metrics: { interpretationMs, embeddingInputTokens: finiteOrNull(embedding.inputTokens), embeddingMs: Math.round(embeddingDone - started), retrievalMs: Math.round(clock() - embeddingDone), totalMs: Math.round(clock() - started) },
   };
+  retainPassageReader(result,supabase);
+  const concept = officialQuestionConcept(interpretation.matchingView);
+  if (concept?.query) {
+    conceptSearches.set(result, async () => {
+      const {data: rows,error: queryError} = await supabase.rpc('search_ai_official_chunks',rpcArgs(concept.query));
+      if(queryError)throw queryError;
+      return (rows||[]).map((row,index)=>({...candidateFromRow(row,{...retrievalRequest,retrievalQuery:concept.query}),stage3Rank:index+1}));
+    });
+    structuralReads.set(result, async () => {
+      if(typeof supabase.from!=='function')return [];
+      const local=result.candidates.filter(c=>c.documentType==='league_rules');
+      const versions=[...new Set(local.map(c=>c.documentVersionId))].slice(0,2);
+      const parents=new Set();
+      for(const c of local){const parts=String(c.ruleNumber||'').split('.');while(parts.length){parents.add(parts.join('.'));const last=Number(parts.at(-1));if(last>1)parents.add([...parts.slice(0,-1),last-1].join('.'));parts.pop();}}
+      const rules=[...parents].filter(x=>/^\d+(?:\.\d+)*$/.test(x)).slice(0,32);
+      if(!versions.length||!rules.length)return [];
+      const {data: rows,error: contextError}=await supabase.from('ai_document_chunks').select('document_version_id,chunk_ordinal,rule_number,content').in('document_version_id',versions).in('rule_number',rules).eq('is_searchable',true).order('chunk_ordinal').limit(48);
+      if(contextError)throw contextError;
+      return rows||[];
+    });
+  }
   if (interpretation.annotations.length) interpretationSearches.set(result, async () => {
     const query = interpretation.matchingView;
     const { data: assistedRows, error: assistedError } = await supabase.rpc("search_ai_official_chunks", rpcArgs(query));
@@ -111,6 +141,60 @@ export async function retrieveApprovedForAnswer(retrieval) {
     return rows;
   }catch{retrieval.approvedRetrieval={status:'unavailable',additionalEmbeddingCalls:0,searchCount:1,durationMs:Math.round(performance.now()-started)};return [];}
   finally{clearTimeout(timer);}
+}
+
+export async function prepareConceptContext(retrieval) {
+  const read=structuralReads.get(retrieval);
+  if(!read){applyConceptContext(retrieval);return;}
+  if(retrieval.conceptAssistance)structuralReads.delete(retrieval);
+  const started=performance.now(),prior= retrieval.conceptContext;
+  try {
+    const rows=await read();
+    structuralContexts.set(retrieval,rows);
+    applyConceptContext(retrieval);
+    retrieval.conceptContext={status:'completed',count:rows.length};
+  } catch {retrieval.conceptContext={status:'unavailable'};}
+  finally {const ms=Math.round(performance.now()-started);retrieval.conceptContext.readCount=(prior?.readCount||0)+1;retrieval.conceptContext.durationMs=(prior?.durationMs||0)+ms;if(retrieval.metrics){retrieval.metrics.retrievalMs+=ms;retrieval.metrics.totalMs+=ms;}}
+}
+
+function applyConceptContext(retrieval) {
+  const rows=structuralContexts.get(retrieval);
+  if(!rows)return;
+  for(const c of retrieval.candidates||[])c.structuralContext=rows.filter(x=>x.document_version_id===c.documentVersionId).map(x=>({ruleNumber:x.rule_number,content:x.content}));
+  const plan=officialQuestionConcept(retrieval.request?.question);
+  if(plan?.leagues.length===1 && ['format','composition','scoring','mixed_participation'].includes(plan.kind)) {
+    // Preserve eight ranked candidates. The four existing authority-review slots
+    // prioritize controlling candidates with verified matching structural scope.
+    // No score/rank mutation and no expansion of the 32/12/4 limits.
+    const base=retrieval.candidates.slice(0,aiAssistantConfig.retrievalLimit);
+    const tail=retrieval.candidates.slice(aiAssistantConfig.retrievalLimit);
+    const scoped=tail.filter(c=>{const scope=passageScope(c,c.content);return c.documentType==='league_rules'&&scope.league===plan.leagues[0]&&(!scope.division||scope.division===plan.division);});
+    retrieval.authorityReviewCandidates=[...new Set([...base,...scoped,...tail])].slice(0,AUTHORITY_REVIEW_LIMIT);
+    for(const c of retrieval.candidates){const index=retrieval.authorityReviewCandidates.indexOf(c);c.authorityReview={included:index>=0,rank:index>=0?index+1:null,limit:AUTHORITY_REVIEW_LIMIT,reason:index>=base.length&&scoped.includes(c)?'verified_requested_league_scope':'ranked'};}
+  }
+}
+
+export async function assistConceptRetrieval(retrieval) {
+  const search=conceptSearches.get(retrieval);
+  if(!search||retrieval.interpretationAssistance?.attempted)return false;
+  conceptSearches.delete(retrieval);
+  const contextMsBefore=retrieval.conceptContext?.durationMs||0;
+  retrieval.conceptAssistance={status:"started",searchCount:1,additionalEmbeddingCalls:0};
+  const started=performance.now();
+  try {
+    const rows=await search();
+    const merged=new Map((retrieval.candidates||[]).map(c=>[c.chunkId,c]));
+    for(const c of rows){const old=merged.get(c.chunkId);if(!old||c.combinedScore>old.combinedScore)merged.set(c.chunkId,{...c,structuralContext:old?.structuralContext});}
+    retrieval.candidates=[...merged.values()].sort((a,b)=>b.combinedScore-a.combinedScore||a.chunkId.localeCompare(b.chunkId)).slice(0,Math.max(aiAssistantConfig.retrievalLimit*4,24));
+    retrieval.suppliedEvidence=retrieval.candidates.slice(0,aiAssistantConfig.retrievalLimit);
+    retrieval.authorityReviewCandidates=retrieval.candidates.slice(0,AUTHORITY_REVIEW_LIMIT);
+    retrieval.authorityReviewCandidates.forEach((c,index)=>{c.authorityReview={included:true,rank:index+1,limit:AUTHORITY_REVIEW_LIMIT};});
+    await prepareConceptContext(retrieval);
+    retrieval.evidence=evaluateEvidence(retrieval.suppliedEvidence,aiAssistantConfig.evidenceThreshold);
+    retrieval.conceptAssistance={status:'completed',searchCount:1,additionalEmbeddingCalls:0};
+    return true;
+  }catch {retrieval.conceptAssistance={status:'unavailable',searchCount:1,additionalEmbeddingCalls:0};return false;}
+  finally {const durationMs=Math.round(performance.now()-started);retrieval.conceptAssistance.durationMs=durationMs;const exclusiveMs=Math.max(0,durationMs-((retrieval.conceptContext?.durationMs||0)-contextMsBefore));retrieval.metrics.retrievalMs+=exclusiveMs;retrieval.metrics.totalMs+=exclusiveMs;}
 }
 
 const SCORE_FIELDS = ["semanticScore", "keywordScore", "exactScore", "authorityScore", "contextScore", "combinedScore", "vectorRank", "keywordRank", "exactMatch"];
