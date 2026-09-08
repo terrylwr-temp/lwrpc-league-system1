@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
+import ViewAsStartButton from "../../components/ViewAsStartButton";
 import AppHeader from "../../components/AppHeader";
 import RoleCapabilityModal from "../../components/RoleCapabilityModal";
 import DashboardPlayHistoryModal from "../../components/DashboardPlayHistoryModal";
@@ -734,6 +735,7 @@ function printCurrentHistory() {
                   <h1 className="text-4xl font-bold text-slate-900">
                     {member.first_name || ""} {member.last_name || ""}
                   </h1>
+                  {hasRole(currentUserRole,"league_manager") && <ViewAsStartButton memberId={id} name={[member.first_name,member.last_name].filter(Boolean).join(" ")} />}
 
                   <div className="mt-4 space-y-2 text-slate-600">
                     <div className="flex items-center gap-1">

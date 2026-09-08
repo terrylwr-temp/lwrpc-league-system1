@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../lib/viewAsBoundary.js';
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { hasRole } from "../../lib/permissions";
@@ -96,10 +97,14 @@ async function handleReminderRequest(req, options = {}) {
 }
 
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   return handleReminderRequest(req, { dryRun: false });
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   const body = await req.json().catch(() => ({}));
   return handleReminderRequest(req, { dryRun: body?.dryRun === true });
 }

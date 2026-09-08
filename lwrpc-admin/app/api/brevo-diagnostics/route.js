@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { hasRole } from "../../lib/permissions";
@@ -98,6 +99,8 @@ async function checkBrevoSender(apiKey, fromEmail) {
 }
 
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const auth = await requireManager(req);
     if (auth.error) return NextResponse.json({ success: false, error: auth.error }, { status: auth.status });

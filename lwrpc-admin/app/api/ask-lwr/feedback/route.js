@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { feedbackTransition, readFeedbackReceipt } from "../../../lib/aiConversation";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
@@ -8,6 +9,8 @@ import {isLiveReceipt} from '../../../lib/liveLmsReceipts.js';
 export const runtime = "nodejs";
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const body = await req.json().catch(() => ({}));
     if(isLiveReceipt(body.receipt))return NextResponse.json({success:true,result:await liveFeedback(body,await authenticateLive(req))},{headers:{'Cache-Control':'private, no-store'}});

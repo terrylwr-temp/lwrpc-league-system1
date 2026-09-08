@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { conversationDiagnostics } from "../../../lib/aiConversationDiagnostics";
 import { NextResponse } from "next/server";
 import {approvedViewerHref} from "../../../lib/aiApprovedAnswerViewer.js";
@@ -12,6 +13,8 @@ import {liveAuthFailure,authenticateLive,needsLive,runLive} from '../../../lib/l
 export const runtime = "nodejs";
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const body = await req.json().catch(() => ({}));
     if(needsLive(body)) {

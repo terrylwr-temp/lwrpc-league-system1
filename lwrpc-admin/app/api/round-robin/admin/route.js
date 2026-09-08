@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { hasRole } from "../../../lib/permissions";
@@ -42,6 +43,8 @@ function anonClient() {
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const body = await req.json().catch(() => ({}));
     const groupId = String(body.groupId || "").trim();

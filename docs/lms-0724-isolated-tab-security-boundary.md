@@ -1,5 +1,8 @@
 # LMS-0724 isolated-tab implementation preflight — security boundary stop
 
+**Current decision:** dedicated-origin implementation approved and implemented locally in LMS-0724 / 0.1.546. The historical stop and actor-wide-lock alternatives below are superseded. See [implementation, actual boundaries, validation and production gates](lms-0724-implementation-report.md). No production deployment or migration.
+
+
 2026-09-07. Owner approved implementation with independent normal and View-As tabs and protection of all event-code mutation endpoints. Those decisions supersede the earlier actor-wide recommendation. **No View-As application code, SQL, version change or deployment performed.** Existing member-import changes are unrelated and remain intact.
 
 ## Concrete boundary found

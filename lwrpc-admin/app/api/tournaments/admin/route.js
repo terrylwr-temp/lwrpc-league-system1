@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -24,6 +25,8 @@ function adminClient() {
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const body = await req.json().catch(() => ({}));
     const tournamentId = String(body.tournamentId || "").trim();

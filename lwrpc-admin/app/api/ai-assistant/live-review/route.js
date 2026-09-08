@@ -1,7 +1,10 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import {authenticateLive,liveAuthFailure} from '../../../lib/liveLmsService.js';
 export const runtime='nodejs';
 export const dynamic='force-dynamic';
 export async function GET(request){
+  const viewAsDenied = rejectViewAsMutation(request);
+  if (viewAsDenied) return viewAsDenied;
  const headers={'Cache-Control':'private, no-store'};
  try{
   const p=await authenticateLive(request);

@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { isValidEmailAddress, normalizeEmailAddress } from "../../lib/email";
@@ -57,6 +58,8 @@ function anonClient() {
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   let isManager = false;
 
   try {

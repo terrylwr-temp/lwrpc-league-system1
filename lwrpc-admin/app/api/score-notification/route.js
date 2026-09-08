@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { sendEmailMessages, sendSmsMessages } from "../../lib/notifications";
@@ -75,6 +76,8 @@ async function requireScoreNotificationSender(req) {
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const auth = await requireScoreNotificationSender(req);
     if (auth.error) {

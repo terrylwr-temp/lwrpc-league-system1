@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { DEFAULT_SYSTEM_SETTINGS, mergeSystemSettings } from "../../lib/systemSettings";
@@ -109,6 +110,8 @@ export async function GET() {
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const auth = await requireManager(req);
 

@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { hasRole } from "../../lib/permissions";
@@ -76,6 +77,8 @@ async function requireManager(req) {
 }
 
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const auth = await requireManager(req);
 
@@ -117,6 +120,8 @@ export async function GET(req) {
 }
 
 export async function DELETE(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const auth = await requireManager(req);
 

@@ -1,8 +1,11 @@
+import { rejectViewAsMutation } from '../../lib/viewAsBoundary.js';
 import {authorizeAdminRequest} from '../../lib/serverSupabase';
 import {readApprovedViewer} from '../../lib/aiApprovedAnswerViewer.js';
 import {publicApprovedRevision,approvedBoundSource} from '../../lib/aiApprovedAnswersService.js';
 export const runtime='nodejs';
 export async function GET(request){
+  const viewAsDenied = rejectViewAsMutation(request);
+  if (viewAsDenied) return viewAsDenied;
  const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'};
  try{
   const auth=await authorizeAdminRequest(request,'player');if(auth.error)return Response.json({error:'Sign in to view this citation.'},{status:auth.status,headers});

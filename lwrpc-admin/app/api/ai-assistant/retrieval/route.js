@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import {needsLive} from '../../../lib/liveLmsService.js';
 import { NextResponse } from "next/server";
 import { retrieveOfficialEvidence } from "../../../lib/aiRetrieval";
@@ -6,6 +7,8 @@ import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 export const runtime = "nodejs";
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return fail(authorization.error, authorization.status);

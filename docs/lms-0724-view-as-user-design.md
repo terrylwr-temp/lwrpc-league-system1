@@ -1,5 +1,8 @@
 # LMS-0724 / 0.1.546 — View As User: architecture and security design
 
+**Current decision:** dedicated-origin implementation approved and implemented locally in LMS-0724 / 0.1.546. The historical stop and actor-wide-lock alternatives below are superseded. See [implementation, actual boundaries, validation and production gates](lms-0724-implementation-report.md). No production deployment or migration.
+
+
 **Subsequent owner implementation decision:** isolated tabs and protection of all independent event-code mutations are approved; the actor-wide recommendation below is superseded. Implementation preflight identified the context-omission boundary. See [dedicated-origin resolution and stop report](lms-0724-isolated-tab-security-boundary.md). Original design analysis is retained as history, not authority to implement an actor-wide lock.
 
 2026-09-07. **Design only; not approved for implementation by this report.** LMS-0723 / 0.1.545 remains production accepted and is the current application version. No application code, SQL, production data, Auth account, deployment or version was changed during this diagnosis. The earlier Teams By Division toggle remains a separate undeployed local change; its location-data diagnosis is not bundled into this feature.
@@ -360,3 +363,5 @@ Recommend one eventual LMS-0724 / 0.1.546 release implemented in internal securi
 ## References
 
 Local evidence: app/lib/auth.js, serverSupabase.js, permissions.js, liveLmsService.js, liveLmsReceipts.js, aiQualityCapture.js; app/api and pages inventoried above; accepted LMS-0723 manifest production report and server-session migration. Next.js installed use-client guide and Next.js skill consulted. Supabase's official [RLS guidance](https://supabase.com/docs/guides/database/postgres/row-level-security) and [Storage access controls](https://supabase.com/docs/guides/storage/security/access-control) confirm that service credentials bypass RLS and storage needs its own policy boundary; neither replaces application authorization. Documentation was consulted read-only; no SQL example from external guidance was executed.
+
+LMS-0724 owner entry-point clarification: Members → Member Detail → View As User is the only Phase 1 entry. Real Commissioner/League Manager authorization and selected-target validity are rechecked server-side before confirmation and again at context creation. No global entry or nested target entry. Implemented locally; production review remains pending.

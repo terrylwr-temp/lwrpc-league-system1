@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 
@@ -8,6 +9,8 @@ const PROFILE_PHOTO_BUCKET = "profile-photos";
 const PROFILE_PHOTO_URL_MARKER = `/storage/v1/object/public/${PROFILE_PHOTO_BUCKET}/`;
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const authorization = await authorizeAdminRequest(req, "league_manager");
 

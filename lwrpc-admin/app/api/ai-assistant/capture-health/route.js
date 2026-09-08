@@ -1,8 +1,11 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 
 export const runtime = "nodejs";
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   const authorization = await authorizeAdminRequest(req, "league_manager");
   if (authorization.error) return NextResponse.json({ success: false, error: "Manager access required." }, { status: authorization.status });
   try {

@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { normalizeEmailAddress } from "../../../lib/email";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
@@ -8,6 +9,8 @@ const LAST_LOGIN_CACHE_MS = 5 * 60 * 1000;
 let lastLoginCache = { loadedAt: 0, values: {} };
 
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const authorization = await authorizeAdminRequest(req, "league_manager");
 

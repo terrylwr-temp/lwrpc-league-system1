@@ -1,0 +1,277 @@
+{
+  "verifiedAt": "2026-09-07",
+  "project": "glikrmmgirilnmamxxyl",
+  "purpose": "Read-only production catalog, only approved View-As granted columns. Independent of fixture; refresh only after production schema review.",
+  "columns": [
+    {
+      "table_name": "divisions",
+      "column_name": "id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "divisions",
+      "column_name": "is_active",
+      "udt_name": "bool"
+    },
+    {
+      "table_name": "divisions",
+      "column_name": "league_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "divisions",
+      "column_name": "name",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "leagues",
+      "column_name": "id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "leagues",
+      "column_name": "is_active",
+      "udt_name": "bool"
+    },
+    {
+      "table_name": "leagues",
+      "column_name": "name",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "leagues",
+      "column_name": "season_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "locations",
+      "column_name": "club_pro_2_member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "locations",
+      "column_name": "club_pro_member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "locations",
+      "column_name": "id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "locations",
+      "column_name": "name",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "matches",
+      "column_name": "away_team_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "matches",
+      "column_name": "home_team_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "matches",
+      "column_name": "id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "matches",
+      "column_name": "is_published",
+      "udt_name": "bool"
+    },
+    {
+      "table_name": "matches",
+      "column_name": "location_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "matches",
+      "column_name": "scheduled_date",
+      "udt_name": "date"
+    },
+    {
+      "table_name": "matches",
+      "column_name": "scheduled_time",
+      "udt_name": "time"
+    },
+    {
+      "table_name": "matches",
+      "column_name": "status",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "member_season_ratings",
+      "column_name": "member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "member_season_ratings",
+      "column_name": "season_dupr_rating",
+      "udt_name": "numeric"
+    },
+    {
+      "table_name": "member_season_ratings",
+      "column_name": "season_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "member_season_ratings",
+      "column_name": "season_primetime_rating",
+      "udt_name": "numeric"
+    },
+    {
+      "table_name": "members",
+      "column_name": "email",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "members",
+      "column_name": "first_name",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "members",
+      "column_name": "id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "members",
+      "column_name": "is_active_member",
+      "udt_name": "bool"
+    },
+    {
+      "table_name": "members",
+      "column_name": "last_name",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "seasons",
+      "column_name": "id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "seasons",
+      "column_name": "is_active",
+      "udt_name": "bool"
+    },
+    {
+      "table_name": "seasons",
+      "column_name": "name",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "system_settings",
+      "column_name": "setting_key",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "system_settings",
+      "column_name": "setting_value",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "team_members",
+      "column_name": "is_active",
+      "udt_name": "bool"
+    },
+    {
+      "table_name": "team_members",
+      "column_name": "member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "team_members",
+      "column_name": "team_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "team_standings",
+      "column_name": "match_losses",
+      "udt_name": "int4"
+    },
+    {
+      "table_name": "team_standings",
+      "column_name": "match_wins",
+      "udt_name": "int4"
+    },
+    {
+      "table_name": "team_standings",
+      "column_name": "rank",
+      "udt_name": "int4"
+    },
+    {
+      "table_name": "team_standings",
+      "column_name": "standings_points",
+      "udt_name": "numeric"
+    },
+    {
+      "table_name": "team_standings",
+      "column_name": "team_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "captain_member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "club_pro_member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "co_captain_2_member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "co_captain_member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "division_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "home_location_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "is_active",
+      "udt_name": "bool"
+    },
+    {
+      "table_name": "teams",
+      "column_name": "name",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "user_roles",
+      "column_name": "member_id",
+      "udt_name": "uuid"
+    },
+    {
+      "table_name": "user_roles",
+      "column_name": "role",
+      "udt_name": "text"
+    },
+    {
+      "table_name": "user_roles",
+      "column_name": "user_id",
+      "udt_name": "uuid"
+    }
+  ]
+}

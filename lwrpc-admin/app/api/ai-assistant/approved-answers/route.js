@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import {authorizeAdminRequest} from '../../../lib/serverSupabase';
 import {requireReviewRole} from '../../../lib/aiReviewService.js';
 import {ApprovedAnswerError} from '../../../lib/aiApprovedAnswersShared.js';
@@ -6,6 +7,7 @@ import {existingEvidenceCase,confirmExistingEvidence} from '../../../lib/aiExist
 export const runtime='nodejs';
 const headers={'Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff'};
 async function handle(request){
+ const viewAsDenied=rejectViewAsMutation(request);if(viewAsDenied)return viewAsDenied;
  try{
   const auth=await authorizeAdminRequest(request,'league_manager');requireReviewRole(auth);
   const params=new URL(request.url).searchParams;let result;

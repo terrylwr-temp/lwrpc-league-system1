@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { withActivationNames } from '../../../lib/aiDocumentActivation';
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
@@ -8,6 +9,8 @@ import { assertDocumentMetadataReferences, isDocumentMetadataValidationError, no
 export const runtime = "nodejs";
 
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return failure(authorization.error, authorization.status);
@@ -22,6 +25,8 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return failure(authorization.error, authorization.status);
@@ -67,6 +72,8 @@ export async function POST(req) {
 }
 
 export async function PATCH(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const authorization = await authorizeAdminRequest(req, "league_manager");
     if (authorization.error) return failure(authorization.error, authorization.status);

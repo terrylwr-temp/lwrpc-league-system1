@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { resolveOfficialDocumentViewerSource } from "../../../lib/aiOfficialDocumentViewer.js";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
@@ -5,6 +6,8 @@ import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 export const runtime = "nodejs";
 
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   const authorization = await authorizeAdminRequest(req, "player");
   if (authorization.error) return new NextResponse("Not authorized.", { status: authorization.status });
   try {

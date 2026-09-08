@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { runPbccMatchReminders } from "../../../lib/pbccReminders";
@@ -46,10 +47,14 @@ async function handlePbccReminderRequest(req, options = {}) {
 }
 
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   return handlePbccReminderRequest(req, { dryRun: false });
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   const body = await req.json().catch(() => ({}));
   return handlePbccReminderRequest(req, { dryRun: body?.dryRun === true });
 }

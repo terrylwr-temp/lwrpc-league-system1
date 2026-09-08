@@ -1,5 +1,39 @@
 # LWRPC League Management System Roadmap
 
+**CURRENT LMS-0724 — production migration applied once and verified; application deployment/acceptance pending.** Exact approved hash applied, database security and unchanged operational/Auth/AI fingerprints verified. [Production evidence](lms-0724-production-acceptance.md). Do not reapply migration. Earlier blockers below are historical.
+
+**CURRENT LMS-0724 — production migration blocked by automatic approval review.** DNS/HTTPS and three approved production View-As variables are configured. Exact migration rejected before execution twice; no migration or application deployment. [Completed setup and review block](lms-0724-production-review-block.md). Production application remains LMS-0723 / 0.1.545; do not regenerate the configured encryption key on resume.
+
+**CURRENT LMS-0724 production continuation — DNS GATE:** final hash verified; approved view-as.lwrpickleballclub.com attached to lwrpc-admin in Vercel. Bluehost DNS is missing (A view-as → 76.76.21.21). No migration, new environment/key configuration or application deployment yet; LMS-0723 / 0.1.545 remains accepted production. [Preflight, domain action and resume point](lms-0724-production-dns-gate.md).
+
+**CURRENT LMS-0724 / 0.1.546 — replay correction validated locally; STOP BEFORE PRODUCTION.** Exact-state no-op dispatcher replay preserves executor ownership; non-superuser clean apply/two replays/partial recovery/drift/concurrency pass. 666 tests and isolated build pass. [Final correction, hash and validation](lms-0724-replay-ownership-correction.md). No production changes; LMS-0723 / 0.1.545 remains accepted. Earlier blocker/status entries below are historical.
+
+**LMS-0724 correction status — STOP FOR REVIEW:** home_location_id SQL/grant/fixture correction and schema/Club Pro tests pass locally. Non-superuser initial migration succeeds, but replay fails: must be owner of function lms_view_as. No further security correction or production changes. [Full correction and validation report](lms-0724-home-location-correction.md). Earlier preflight and validation statements below are historical.
+
+**Production preflight STOP (2026-09-07):** reviewed View-As SQL references nonexistent `teams.location_id`; production uses `teams.home_location_id`. Fixture mismatch masked the incompatibility. No migration, domain/configuration, deployment or production data mutation attempted. [Evidence and proposed bounded correction](lms-0724-production-preflight-stop.md). LMS-0723 / 0.1.545 remains accepted production; LMS-0724 awaits review.
+
+## Deferred Live LMS UX refinement — DUPR/rating clarification (2026-09-07)
+
+Owner-requested follow-up; do not interrupt LMS-0724 View As User. No version assigned, implementation or production change in this recording pass. The existing shared Live service owns serial rating/context clarification and receipt choices (app/lib/liveLmsService.js); generic clarification/missing messages are in app/lib/liveLmsIntent.js. This is more than a View-As-only presentation edit: combined authorized options, receipt interpretation and player-facing resolved-question presentation require coordinated shared-flow work. Keep it separate from the completed local View-As boundary implementation.
+
+Observed flow: “What's my DUPR” → rating-type clarification → “Season DUPR” → numbered season clarification (2026 Fall Season / 26/27 Saturday Season) → “1” → generic missing-value message. These names are owner-reported examples, not hardcoded options or a verified current data inventory.
+
+Required future behavior and acceptance controls:
+
+- When authorized types and season contexts are already known, combine clarification into one useful grouped choice: “Which DUPR rating would you like?” with Season DUPR and PrimeTime Season DUPR groups and their applicable authorized contexts. Do not imply a stored value exists simply because its context is selectable.
+- Render bounded choices as accessible buttons/chips, operable by keyboard with visible focus. Retain safely resolved typed numbers, unambiguous aliases such as “Fall,” and season names. Ambiguous text must still clarify.
+- Generate choices only from server-authorized contexts. Treat each selection as untrusted input; reauthorize and refetch. Never reveal another player's seasons/ratings or broaden existing role/relationship access.
+- Preserve raw user input for existing permitted diagnostics, while presenting its resolved meaning to the player: “What's my Season DUPR for the 2026 Fall Season?” or “Season DUPR” plus “Selected context: 2026 Fall Season.” Do not display a final substantive question consisting only of “1.” Do not expand live-data telemetry retention.
+- Use deterministic capability/context-specific missing-value language after successful authorization and context resolution: “You don't currently have a Season DUPR recorded for the 2026 Fall Season.” PrimeTime equivalent: “You don't currently have a PrimeTime Season DUPR recorded for [season].” Use only authorized context information and appropriate subject wording; preserve denials and technical errors as distinct outcomes.
+- Preserve the limitation: “Current official DUPR is not currently available through this Live LMS lookup.” Never substitute Season DUPR for official DUPR.
+- New Question clears pending rating/context choices and their protected follow-up state. A stale choice must not restore a cleared lookup.
+- After success or a missing value, “What about Saturday?” may reuse rating intent only through the existing protected follow-up architecture. Resolve ambiguity safely, reauthorize and refetch; no stale rating reuse or fallback to another subject.
+- Answer-model calls = 0; embedding calls = 0. No live rating, season context, or personal data sent to a model. Authorization, rating definitions, NULL semantics and normal privacy boundaries remain unchanged.
+
+Regression matrix: combined vs unavailable/ambiguous contexts; each authorized rating type; click/keyboard/typed equivalence; resolved display with raw wording preserved under existing privacy rules; NULL vs denied vs technical error; official-DUPR limitation; forged/stale/cross-user choices; relationship/role loss between clarification and selection; New Question reset; successful and missing-result Saturday follow-ups; zero model/embedding invocations. Include ordinary Ask LWR and isolated View-As contexts without allowing receipts or choices to cross their security boundaries.
+
+**CURRENT LOCAL — LMS-0724 / 0.1.546 View As User implementation and isolated validation.** Dedicated origin approved; actor-wide locks are superseded. [Implementation/security report and controlled deployment sequence](lms-0724-implementation-report.md). No production changes; LMS-0723 / 0.1.545 remains production accepted. Earlier View-As stop/design entries below are historical.
+
 **LMS-0724 implementation approval — isolated-tab security boundary STOP.** Owner selected independent tabs and mandatory event-code endpoint protection, superseding the actor-wide recommendation. [Concrete request-omission boundary and proposed dedicated-origin resolution](lms-0724-isolated-tab-security-boundary.md). No View-As code/SQL/version/deployment changes. Need confirmation of isolated renderer/server-mediated real-actor authentication before implementation can satisfy the direct-write invariant. Existing member-import correction is separate.
 
 **Member location follow-up (2026-09-07):** Approved 11 missing Esplanade links repaired in production; 13 eligible captain options now linked. Indigo conflict held; 66 additional exact-match missing links and seven unresolved names identified, unchanged. Import correction implemented locally with location snapshot guards and six regression tests; not deployed. [Repair and validation report](member-location-repair-and-import-correction.md). Separate from View As User; no version/schema change.
@@ -891,3 +925,5 @@ Owner-activated Rules v20260906234736-a8d90205 is ready/current; prior v20260906
 
 ### LMS-0722 source gate passed — 2026-09-07 UTC
 **PrimeTime Picklebreaker source conflict RESOLVED BY OWNER SOURCE CORRECTION.** Active Rules v20260907001227-e4d9bf77 consistently specify 15 by 2 Rally in 6.3.3, 6.3.6 and summary. Both prior versions remain superseded/retained and excluded from current retrieval. Resume approved implementation; keep generic conflict regression, no score hardcoding. [Final verification](lms-0722-final-source-verification.md).
+
+LMS-0724 owner entry-point clarification: Members → Member Detail → View As User is the only Phase 1 entry. Real Commissioner/League Manager authorization and selected-target validity are rechecked server-side before confirmation and again at context creation. No global entry or nested target entry. Implemented locally; production review remains pending.

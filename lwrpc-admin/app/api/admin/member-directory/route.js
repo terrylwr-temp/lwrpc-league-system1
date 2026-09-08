@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { NextResponse } from "next/server";
 import { authorizeAdminRequest } from "../../../lib/serverSupabase";
 import { normalizeEmailAddress } from "../../../lib/email";
@@ -9,6 +10,8 @@ const LAST_LOGIN_CACHE_MS = 5 * 60 * 1000;
 let lastLoginCache = { loadedAt: 0, values: {} };
 
 export async function GET(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const url = new URL(req.url);
     const mode = url.searchParams.get("mode") === "roles" ? "roles" : "members";

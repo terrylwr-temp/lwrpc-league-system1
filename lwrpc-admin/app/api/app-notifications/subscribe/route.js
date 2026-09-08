@@ -1,3 +1,4 @@
+import { rejectViewAsMutation } from '../../../lib/viewAsBoundary.js';
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { normalizeAppNotificationPhone } from "../../../lib/appNotifications";
@@ -60,6 +61,8 @@ async function resolvePbccRecipient(supabase, body) {
 }
 
 export async function POST(req) {
+  const viewAsDenied = rejectViewAsMutation(req);
+  if (viewAsDenied) return viewAsDenied;
   try {
     const body = await req.json().catch(() => ({}));
     const { endpoint, p256dh, auth } = subscriptionKeys(body.subscription);
