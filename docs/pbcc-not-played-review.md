@@ -25,3 +25,8 @@ Browser-reviewed static preview uses the actual rendered ScoreCourt component, s
 This changes score-entry behavior and must not use automatic FAST FIX deployment: docs/lms-fast-fix-workflow.md lists schedule/scoring changes as an immediate review condition. Production deployment requires owner release approval. Do not mark a real production game not played, finish a session, export data or send texts merely for acceptance. Use local evidence and read-only production checks unless a specific business action is explicitly authorized.
 
 Recovery baseline: e35fbc480fb60301438297be36b4ee5646646cc9, READY dpl_8a29p1t37aMyw1f4M2JPdJeXj5Jo, immutable lwrpc-admin-6q7aau4lz-terry-lwrpc.vercel.app. No database migration/recovery required. Application rollback removes this UI; existing schema already understands the status, but the previous UI does not expose it or allow blank-score progression, so avoid rollback after real use without reviewing affected sessions.
+
+## GitHub Desktop deployment check
+Owner deployed main commit d4a47c816ef2975d620a90a41c2f5c5f0a7a2dbb (pbcc3), READY dpl_SimiHDLtsevTYezL9MfzuxbrNy4C. That commit does not contain the Not played implementation. Transferred only the four PBCC application-file changes and focused regression test from isolated c93cf43 into the primary working tree; patch applied cleanly and all9 tests pass there. These are uncommitted changes for the owner's next GitHub Desktop commit/push. No new deployment or business-data write was performed by the agent.
+
+Primary-folder verification complete:9 focused tests pass; lint0 errors/11 existing warnings; build/TypeScript pass after retry with cache access (initial sandbox EPERM on .tsbuildinfo). Changes remain uncommitted for GitHub Desktop.

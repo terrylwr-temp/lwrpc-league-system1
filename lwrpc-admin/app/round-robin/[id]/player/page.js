@@ -2198,7 +2198,7 @@ function HistorySessionModal({ session, player, onClose }) {
                               {match.court_name || `Court ${match.court_number || "-"}`}
                             </div>
                             <div className="rounded-md bg-slate-100 px-2 py-1 text-xs font-black uppercase tracking-wide text-slate-500">
-                              Final
+                              {match.status === "not_played" ? "Not played" : "Final"}
                             </div>
                           </div>
                           <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-stretch">

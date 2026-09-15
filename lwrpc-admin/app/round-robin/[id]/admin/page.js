@@ -501,6 +501,7 @@ export default function RoundRobinAdminPage() {
     const scoring = normalizeRoundRobinScoring(session?.settings?.scoring);
 
     for (const match of matchesToCheck) {
+      if (match.status === "not_played") continue;
       const pending = pendingScores[match.id] || {};
       const team1Score = pending.team1Score ?? match.team1_score ?? "";
       const team2Score = pending.team2Score ?? match.team2_score ?? "";
@@ -524,6 +525,7 @@ export default function RoundRobinAdminPage() {
 
     const savedMatchIds = [];
     for (const match of matchesToCheck) {
+      if (match.status === "not_played") continue;
       const pending = pendingScores[match.id] || {};
       const team1Score = pending.team1Score ?? match.team1_score ?? "";
       const team2Score = pending.team2Score ?? match.team2_score ?? "";
@@ -1949,7 +1951,7 @@ function AdminGameResultCard({ match, onEdit = null }) {
           {match.court_name || `Court ${match.court_number || "-"}`}
         </div>
         <div className="rounded-md bg-slate-100 px-2 py-1 text-xs font-black uppercase tracking-wide text-slate-500">
-          Final
+          {match.status === "not_played" ? "Not played" : "Final"}
         </div>
         {onEdit && (
           <button type="button" onClick={onEdit} className="rounded-md border border-teal-300 bg-teal-50 px-2 py-1 text-xs font-black text-teal-900 hover:bg-teal-100">
@@ -1976,6 +1978,7 @@ function AdminGameResultCard({ match, onEdit = null }) {
 }
 
 function PastMatchEditModal({ state, session, match, runAction, actionLoading, onClose }) {
+  const [notPlayed, setNotPlayed] = useState(match.status === "not_played");
   const playerOptions = matchPlayerOptionsForEdit(state, session, match);
   const [team1Score, setTeam1Score] = useState(match.team1_score ?? "");
   const [team2Score, setTeam2Score] = useState(match.team2_score ?? "");
@@ -1997,7 +2000,7 @@ function PastMatchEditModal({ state, session, match, runAction, actionLoading, o
   }
 
   async function save() {
-    const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, session?.settings?.scoring);
+    const scoreError = notPlayed ? "" : validateRoundRobinMatchScore(team1Score, team2Score, session?.settings?.scoring);
     if (scoreError) {
       await appNotice(scoreError, { title: "Score needs attention", tone: "warning" });
       return;
@@ -2021,13 +2024,14 @@ function PastMatchEditModal({ state, session, match, runAction, actionLoading, o
       if (lineupResult?.success === false) return;
     }
 
-    const scoreChanged = String(team1Score) !== String(match.team1_score ?? "") ||
+    const scoreChanged = notPlayed !== (match.status === "not_played") || String(team1Score) !== String(match.team1_score ?? "") ||
       String(team2Score) !== String(match.team2_score ?? "");
     if (scoreChanged) {
       const scoreResult = await runAction("updateMatchScore", {
         matchId: match.id,
-        team1Score,
-        team2Score,
+        notPlayed,
+        team1Score: notPlayed ? "" : team1Score,
+        team2Score: notPlayed ? "" : team2Score,
       }, { returnResult: true });
       if (scoreResult?.success === false) return;
     }
@@ -2046,8 +2050,9 @@ function PastMatchEditModal({ state, session, match, runAction, actionLoading, o
           <button type="button" onClick={onClose} disabled={saving} className="rounded-lg border border-white/40 bg-white px-3 py-2 text-xs font-black text-slate-950 hover:bg-slate-100 disabled:opacity-60">Close</button>
         </div>
         <div className="space-y-5 p-4">
-          <PastMatchEditTeam title="Team 1" players={team1Players} score={team1Score} options={playerOptions} onPlayerChange={(index, value) => updatePlayer("team1", index, value)} onScoreChange={setTeam1Score} />
-          <PastMatchEditTeam title="Team 2" players={team2Players} score={team2Score} options={playerOptions} onPlayerChange={(index, value) => updatePlayer("team2", index, value)} onScoreChange={setTeam2Score} />
+          <label className="flex items-center gap-2 font-bold"><input type="checkbox" checked={notPlayed} disabled={saving} onChange={(event) => setNotPlayed(event.target.checked)} />Not played — no score</label>
+          <PastMatchEditTeam scoreDisabled={notPlayed || saving} title="Team 1" players={team1Players} score={team1Score} options={playerOptions} onPlayerChange={(index, value) => updatePlayer("team1", index, value)} onScoreChange={setTeam1Score} />
+          <PastMatchEditTeam scoreDisabled={notPlayed || saving} title="Team 2" players={team2Players} score={team2Score} options={playerOptions} onPlayerChange={(index, value) => updatePlayer("team2", index, value)} onScoreChange={setTeam2Score} />
         </div>
         <div className="mt-auto flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 p-4 sm:flex-row sm:justify-end">
           <button type="button" onClick={onClose} disabled={saving} className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-black text-slate-700 hover:bg-slate-100 disabled:opacity-60">Cancel</button>
@@ -2058,13 +2063,13 @@ function PastMatchEditModal({ state, session, match, runAction, actionLoading, o
   );
 }
 
-function PastMatchEditTeam({ title, players, score, options, onPlayerChange, onScoreChange }) {
+function PastMatchEditTeam({ scoreDisabled = false, title, players, score, options, onPlayerChange, onScoreChange }) {
   return (
     <section className="rounded-lg border border-slate-200 bg-slate-50 p-3">
       <div className="flex items-center justify-between gap-3">
         <div className="font-black text-slate-950">{title}</div>
         <label className="flex items-center gap-2 text-sm font-black text-slate-700">Score
-          <input value={score} onChange={(event) => onScoreChange(event.target.value)} inputMode="numeric" className="w-20 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-center text-lg font-black text-slate-950" />
+          <input disabled={scoreDisabled} value={scoreDisabled ? "" : score} onChange={(event) => onScoreChange(event.target.value)} inputMode="numeric" className="w-20 rounded-md border border-slate-300 bg-white px-2 py-1.5 text-center text-lg font-black text-slate-950" />
         </label>
       </div>
       <div className="mt-3 grid gap-2">
@@ -2853,7 +2858,7 @@ function StartSessionModal({ session, courts, updateCourt, scoring: scoringDraft
 function ManagerRound({ state, round, session = null, runAction, actionLoading, swapSelection, setSwapSelection, isLadderMatch = false, onPendingScoreChange }) {
   const [editPlayersOpen, setEditPlayersOpen] = useState(false);
   const scoring = normalizeRoundRobinScoring(session?.settings?.scoring);
-  const roundScored = round.matches.length > 0 && round.matches.every(matchHasSavedScore);
+  const roundScored = round.matches.length > 0 && round.matches.every((match) => match.status === "not_played" || matchHasSavedScore(match));
   const byeSlots = round.matches.flatMap((match) => slotPlayers(match, "bye"));
   const playersInRound = round.matches.flatMap((match) => [
     ...slotPlayers(match, "team1"),
@@ -3119,6 +3124,8 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
   const [team1Score, setTeam1Score] = useState(match.team1_score ?? "");
   const [team2Score, setTeam2Score] = useState(match.team2_score ?? "");
   const [editingScore, setEditingScore] = useState(false);
+  const [savingResult, setSavingResult] = useState(false);
+  const notPlayed = match.status === "not_played";
   const team2ScoreRef = useRef(null);
   const scoreRules = normalizeRoundRobinScoring(scoring);
   const hasSavedScore = matchHasSavedScore(match);
@@ -3127,7 +3134,26 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
     setTeam1Score(match.team1_score ?? "");
     setTeam2Score(match.team2_score ?? "");
     setEditingScore(false);
-  }, [match.team1_score, match.team2_score]);
+  }, [match.team1_score, match.team2_score, match.status]);
+
+  async function setNotPlayed(value) {
+    if (savingResult) return;
+    if (value && !(await appConfirm("Mark this game as not played? Scores will be cleared and this game will not count in results or DUPR export.", {
+      title: "Game not played", confirmLabel: "Mark not played", tone: "warning",
+    }))) return;
+    setSavingResult(true);
+    try {
+      const result = await runAction("updateMatchScore", {
+        matchId: match.id, notPlayed: value, team1Score: "", team2Score: "",
+      }, { returnResult: true });
+      if (!result || result.success === false) return;
+      setTeam1Score("");
+      setTeam2Score("");
+      onPendingScoreChange?.(match.id, "team1Score", undefined);
+      onPendingScoreChange?.(match.id, "team2Score", undefined);
+      setEditingScore(false);
+    } finally { setSavingResult(false); }
+  }
 
   async function saveScore() {
     const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, scoreRules);
@@ -3191,6 +3217,10 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
       <div className="flex flex-col gap-2 bg-[linear-gradient(90deg,#0f3b36,#166b61)] px-3 py-2 text-white sm:flex-row sm:items-center sm:justify-between">
         <div className="font-black">{match.court_name || `Court ${match.court_number}`}</div>
         <div className="grid grid-cols-1 gap-2 sm:flex sm:items-center">
+          {notPlayed && <div className="rounded-md bg-amber-100 px-2 py-1 text-xs font-black text-amber-950">Not played — no score</div>}
+          <button type="button" onClick={() => setNotPlayed(!notPlayed)} disabled={savingResult} className="rounded-md border border-white/40 bg-white/15 px-3 py-1 text-xs font-black text-white hover:bg-white/25 disabled:opacity-50">
+            {savingResult ? "Saving..." : notPlayed ? "Reopen for scoring" : "Not played"}
+          </button>
           {hasSavedScore && <div className="rounded-md bg-emerald-300 px-2 py-1 text-xs font-black text-emerald-950">Score Saved</div>}
           {hasSavedScore && !editingScore && (
             <button type="button" onClick={() => setEditingScore(true)} className="rounded-md border border-white/40 bg-white/15 px-3 py-1 text-xs font-black text-white hover:bg-white/25">
@@ -3214,14 +3244,14 @@ function ScoreCourt({ match, scoring = DEFAULT_ROUND_ROBIN_SCORING, lineupLocked
         </div>
         <div className="relative z-10 grid min-h-44 grid-cols-[minmax(0,1fr)_0.75rem_minmax(0,1fr)] items-stretch gap-2 p-2 sm:gap-3 sm:p-3">
           <div className="flex min-w-0 flex-col items-center justify-start gap-3 pt-2">
-            <input value={team1Score} disabled={hasSavedScore && !editingScore} onChange={(event) => { setTeam1Score(event.target.value); onPendingScoreChange?.(match.id, "team1Score", event.target.value); }} onKeyDown={moveToSecondScore} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4 disabled:cursor-default disabled:bg-slate-100" />
+            <input value={team1Score} disabled={notPlayed || savingResult || (hasSavedScore && !editingScore)} onChange={(event) => { setTeam1Score(event.target.value); onPendingScoreChange?.(match.id, "team1Score", event.target.value); }} onKeyDown={moveToSecondScore} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4 disabled:cursor-default disabled:bg-slate-100" />
             <SlotSide match={match} side="team1" align="center" pickSlot={pickSlot} selected={swapSelection} tone="teal" locked={lineupLocked} />
           </div>
           <div className="flex items-center justify-center">
             <div className="h-full w-1.5 rounded-full bg-white/90 shadow-[0_0_18px_rgba(255,255,255,0.8)]" />
           </div>
           <div className="flex min-w-0 flex-col items-center justify-start gap-3 pt-2">
-            <input ref={team2ScoreRef} value={team2Score} disabled={hasSavedScore && !editingScore} onChange={(event) => { setTeam2Score(event.target.value); onPendingScoreChange?.(match.id, "team2Score", event.target.value); }} onKeyDown={submitScoreFromKeyboard} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4 disabled:cursor-default disabled:bg-slate-100" />
+            <input ref={team2ScoreRef} value={team2Score} disabled={notPlayed || savingResult || (hasSavedScore && !editingScore)} onChange={(event) => { setTeam2Score(event.target.value); onPendingScoreChange?.(match.id, "team2Score", event.target.value); }} onKeyDown={submitScoreFromKeyboard} inputMode="numeric" className="w-20 rounded-md border border-amber-200 bg-white px-2 py-2 text-center text-lg font-black text-slate-950 shadow-[0_12px_24px_-18px_rgba(15,23,42,0.9)] outline-none ring-amber-300/30 focus:ring-4 disabled:cursor-default disabled:bg-slate-100" />
             <SlotSide match={match} side="team2" align="center" pickSlot={pickSlot} selected={swapSelection} tone="blue" locked={lineupLocked} />
           </div>
         </div>

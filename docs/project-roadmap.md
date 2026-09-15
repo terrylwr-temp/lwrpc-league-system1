@@ -1472,3 +1472,6 @@ Isolated branch application e35fbc4 / READY dpl_8a29p1t37aMyw1f4M2JPdJeXj5Jo. Bo
 
 ## PBCC Not played — LOCAL IMPLEMENTATION READY FOR REVIEW (2026-09-14)
 Isolated codex/pbcc-not-played branch. Existing not_played schema reused, no SQL. Court Not played/Reopen controls, blank scores, skip-only completion and history labels.9 tests, schedule-balance verification, lint/build pass; no production changes. Scoring-change release review required by FAST FIX workflow. See docs/pbcc-not-played-review.md and docs/pbcc-not-played-preview.html.
+
+## PBCC GitHub Desktop handoff correction
+Owner's main deployment d4a47c8 / READY dpl_SimiHDLtsevTYezL9MfzuxbrNy4C did not include isolated c93cf43 Not played changes. Transferred the scoped PBCC code/test patch into primary working tree for the owner's next commit/push.9 tests, lint (11 existing warnings), build pass. No agent deployment or business writes. See docs/pbcc-not-played-review.md.

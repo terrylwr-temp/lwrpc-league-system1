@@ -1962,8 +1962,9 @@ async function updateMatchScore(supabase, group, body) {
   if (!matchId) throw new Error("Match is required.");
 
   const existing = await loadMatchForGroup(supabase, group.id, matchId);
-  const team1Score = normalizeScore(body.team1Score);
-  const team2Score = normalizeScore(body.team2Score);
+  const notPlayed = body.notPlayed === true;
+  const team1Score = notPlayed ? null : normalizeScore(body.team1Score);
+  const team2Score = notPlayed ? null : normalizeScore(body.team2Score);
   const session = await loadSessionForGroup(supabase, group.id, existing.session_id);
   if (sessionDuprExported(session)) throw new Error("This match has already been exported to DUPR and can no longer be edited.");
   const scoreError = validateRoundRobinMatchScore(team1Score, team2Score, session.settings?.scoring);
@@ -1974,7 +1975,7 @@ async function updateMatchScore(supabase, group, body) {
     .update({
       team1_score: team1Score,
       team2_score: team2Score,
-      status: team1Score === null || team2Score === null ? "scheduled" : "complete",
+      status: notPlayed ? "not_played" : team1Score === null || team2Score === null ? "scheduled" : "complete",
       updated_at: new Date().toISOString(),
     })
     .eq("id", matchId)

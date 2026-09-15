@@ -180,6 +180,7 @@ function CourtDiagram({ match }) {
     <div className="overflow-hidden rounded-lg border border-slate-900/10 bg-white shadow-[0_18px_45px_-32px_rgba(15,23,42,0.9)]">
       <div className="flex items-center justify-between bg-[linear-gradient(90deg,#0f3b36,#166b61)] px-3 py-2 text-white">
         <div className="font-black">{match.court_name || `Court ${match.court_number}`}</div>
+        {match.status === "not_played" && <div className="rounded-md bg-white/15 px-2 py-1 text-sm font-black">Not played — no score</div>}
         {complete && <div className="rounded-md bg-white/15 px-2 py-1 text-sm font-black">{match.team1_score} - {match.team2_score}</div>}
       </div>
       <div className="relative min-h-44 overflow-hidden bg-[#163f38] p-3" style={{ perspective: "900px" }}>
