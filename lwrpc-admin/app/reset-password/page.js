@@ -153,14 +153,14 @@ export default function ResetPasswordPage() {
             </h2>
 
             <div className="mt-4">
-              <label className="text-sm font-semibold text-slate-700">
+              <label htmlFor="new-password" className="text-sm font-semibold text-slate-700">
                 New Password
               </label>
 
-              <input
-                type="password"
+              <PasswordInput
+                id="new-password"
+                label="new password"
                 disabled={loading || checkingSession || !sessionReady}
-                className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
                 required
@@ -168,14 +168,14 @@ export default function ResetPasswordPage() {
             </div>
 
             <div className="mt-5">
-              <label className="text-sm font-semibold text-slate-700">
+              <label htmlFor="confirm-new-password" className="text-sm font-semibold text-slate-700">
                 Confirm New Password
               </label>
 
-              <input
-                type="password"
+              <PasswordInput
+                id="confirm-new-password"
+                label="confirm new password"
                 disabled={loading || checkingSession || !sessionReady}
-                className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
                 required
@@ -240,6 +240,46 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function PasswordInput({ id, label, disabled, ...inputProps }) {
+  const [visible, setVisible] = useState(false);
+  const revealed = visible && !disabled;
+
+  return (
+    <div className="relative mt-1">
+      <input
+        {...inputProps}
+        id={id}
+        type={revealed ? "text" : "password"}
+        autoComplete="new-password"
+        disabled={disabled}
+        className="w-full rounded-xl border border-slate-300 px-4 py-3 pr-14 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+      />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => setVisible(current => !current)}
+        aria-label={`${revealed ? "Hide" : "Show"} ${label}`}
+        aria-pressed={revealed}
+        aria-controls={id}
+        className="absolute inset-y-0 right-1 my-1 flex w-11 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50"
+      >
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          {revealed ? (
+            <>
+              <path d="m3 3 18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 4.2A10.9 10.9 0 0 1 12 4c6 0 10 8 10 8a18.7 18.7 0 0 1-3.1 4.1M6.5 6.5A20.6 20.6 0 0 0 2 12s4 8 10 8a10.8 10.8 0 0 0 5.5-1.5" />
+            </>
+          ) : (
+            <>
+              <path d="M2 12s4-8 10-8 10 8 10 8-4 8-10 8S2 12 2 12Z" />
+              <circle cx="12" cy="12" r="3" />
+            </>
+          )}
+        </svg>
+      </button>
+    </div>
   );
 }
 
