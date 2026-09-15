@@ -1481,3 +1481,6 @@ Primary working tree now rejects invalid/expired recovery URLs before enabling p
 
 ## Password visibility controls — PRODUCTION ACCEPTED (2026-09-15)
 Account Security now provides independent accessible Show/Hide eye buttons for New Password and Confirm New Password. Application `fc05970` / READY deployment `dpl_3g8znJ2WgtjoHiGTL1PaD1jWLiZW`; 12 focused tests, lint, local/Vercel builds, normal sign-in smoke checks, feature UI checks, and runtime error scan passed. No database, security-policy, credential, or business-data changes. See docs/password-visibility-production-acceptance.md.
+
+## Kitchen-fault claim retrieval FAST FIX — PRODUCTION ACCEPTED (2026-09-15)
+Exact opponent kitchen-fault claims now retrieve the complete active USAP call procedure: Rule 11.A.1, Rule 9.B.3, and Rule 9.B.3.b. Application `b97f4ff` / READY deployment `dpl_Dj43Zji3G9BwXyx9ZfReNnrjAibu`; 42 focused tests, lint/build, exact/variant/neighbor production-model replays, normal sign-in smoke checks, and runtime error scan passed. Three validation generations used 6,078 input/266 output tokens, estimated $0.03837 excluding embedding/cache adjustments. No database, corpus, Approved Answer, security, or business-data changes. See docs/kitchen-fault-claim-fast-fix.md.
