@@ -99,9 +99,17 @@ export async function retrieveOfficialEvidence({ supabase, body, embedQuery = cr
   const concept = officialQuestionConcept(interpretation.matchingView);
   if (concept?.query) {
     conceptSearches.set(result, async () => {
-      const {data: rows,error: queryError} = await supabase.rpc('search_ai_official_chunks',rpcArgs(concept.query));
+      let args=rpcArgs(concept.query),additionalEmbeddingCalls=0;
+      if(concept.kind==='nvz_fault_call'){
+        const conceptEmbedding=await embedQuery(concept.query);
+        if(!Array.isArray(conceptEmbedding.embedding)||conceptEmbedding.embedding.length!==aiAssistantConfig.embeddingDimensions)throw new Error('The embedding provider returned an unexpected vector size.');
+        args={...args,p_query_embedding:toPgVector(conceptEmbedding.embedding)};
+        additionalEmbeddingCalls=1;
+        if(Number.isFinite(conceptEmbedding.inputTokens)&&Number.isFinite(result.metrics.embeddingInputTokens))result.metrics.embeddingInputTokens+=conceptEmbedding.inputTokens;
+      }
+      const {data: rows,error: queryError} = await supabase.rpc('search_ai_official_chunks',args);
       if(queryError)throw queryError;
-      return (rows||[]).map((row,index)=>({...candidateFromRow(row,{...retrievalRequest,retrievalQuery:concept.query}),stage3Rank:index+1}));
+      return {rows:(rows||[]).map((row,index)=>({...candidateFromRow(row,{...retrievalRequest,retrievalQuery:concept.query}),stage3Rank:index+1})),additionalEmbeddingCalls};
     });
     structuralReads.set(result, async () => {
       if(typeof supabase.from!=='function')return [];
@@ -184,7 +192,7 @@ export async function assistConceptRetrieval(retrieval) {
   retrieval.conceptAssistance={status:"started",searchCount:1,additionalEmbeddingCalls:0};
   const started=performance.now();
   try {
-    const rows=await search();
+    const assisted=await search(),rows=Array.isArray(assisted)?assisted:assisted.rows;
     const merged=new Map((retrieval.candidates||[]).map(c=>[c.chunkId,c]));
     for(const c of rows){const old=merged.get(c.chunkId);if(!old||c.combinedScore>old.combinedScore)merged.set(c.chunkId,{...c,structuralContext:old?.structuralContext});}
     retrieval.candidates=[...merged.values()].sort((a,b)=>b.combinedScore-a.combinedScore||a.chunkId.localeCompare(b.chunkId)).slice(0,Math.max(aiAssistantConfig.retrievalLimit*4,24));
@@ -193,7 +201,7 @@ export async function assistConceptRetrieval(retrieval) {
     retrieval.authorityReviewCandidates.forEach((c,index)=>{c.authorityReview={included:true,rank:index+1,limit:AUTHORITY_REVIEW_LIMIT};});
     await prepareConceptContext(retrieval);
     retrieval.evidence=evaluateEvidence(retrieval.suppliedEvidence,aiAssistantConfig.evidenceThreshold);
-    retrieval.conceptAssistance={status:'completed',searchCount:1,additionalEmbeddingCalls:0};
+    retrieval.conceptAssistance={status:'completed',searchCount:1,additionalEmbeddingCalls:assisted.additionalEmbeddingCalls||0};
     return true;
   }catch {retrieval.conceptAssistance={status:'unavailable',searchCount:1,additionalEmbeddingCalls:0};return false;}
   finally {const durationMs=Math.round(performance.now()-started);retrieval.conceptAssistance.durationMs=durationMs;const exclusiveMs=Math.max(0,durationMs-((retrieval.conceptContext?.durationMs||0)-contextMsBefore));retrieval.metrics.retrievalMs+=exclusiveMs;retrieval.metrics.totalMs+=exclusiveMs;}

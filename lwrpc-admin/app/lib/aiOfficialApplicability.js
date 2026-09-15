@@ -43,6 +43,9 @@ function applies(candidate, text, plan, scope) {
   if(plan.kind==='apparel')return candidate.documentType==='league_rules' && /\b(?:apparel|clothing|shirts?|jerseys?|uniforms?)\b/.test(p) && /\bcolou?r\b/.test(p) && /\b(?:must|may|shall|prohibited|allowed)\b/.test(p);
   if(plan.kind.startsWith('nvz_')) {
     if(candidate.documentType!=='usap_rulebook'||/adaptive|wheel|tournament director/i.test([candidate.heading,text].join(' ')))return false;
+    if(plan.kind==='nvz_fault_call')return /fault[^.\n]*non-volley zone contact while volleying[\s\S]*when a volleying player/.test(p)
+      || /calling non-volley zone faults[\s\S]*on opponent[\s\S]*players may only call/.test(p)
+      || /disagreement between teams[\s\S]*fault call[\s\S]*rally must be replayed/.test(p);
     if(plan.kind==='nvz_presence')return /may contact[\s\S]*except during the act of volleying/.test(p);
     return /area of the court/.test(p)&&/non-volley zone/.test(p) && (plan.kind!=='nvz_boundary'||/all lines[\s\S]*part of the zone/.test(p));
   }
@@ -82,7 +85,12 @@ export function selectConceptEvidence(retrieval) {
   if(!plan||plan.kind==='document_navigation')return null;
   if(plan.kind==='scoring' && ![...(retrieval.candidates||[]),...(retrieval.suppliedEvidence||[])].some(c=>/rally scoring rules|picklebreaker/i.test(c.content)))return null;
   if(plan.kind==='composition' && plan.alsoRating)return []; // Preserve complete coverage until partial answering is separately approved.
-  const candidates=[...(retrieval.authorityReviewCandidates||retrieval.suppliedEvidence||[]),...(retrieval.intentEvidenceCandidates||[])];
+  // This exact dispute provision can rank below general NVZ mechanics. Its
+  // dedicated matcher is narrow enough to inspect the already bounded Stage 3
+  // result without widening selection for any other question.
+  const candidates=plan.kind==='nvz_fault_call'
+    ? [...(retrieval.candidates||[])]
+    : [...(retrieval.authorityReviewCandidates||retrieval.suppliedEvidence||[]),...(retrieval.intentEvidenceCandidates||[])];
   const selected=[];
   for(const candidate of candidates) {
     if(candidate.combinedScore<(retrieval.evidence?.threshold||.35))continue;

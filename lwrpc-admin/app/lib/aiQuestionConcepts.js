@@ -22,6 +22,9 @@ export function officialQuestionConcept(question) {
   if (apparelQuestion(q) && /\b(?:color|colour|wear|restriction|restrictions)\b/.test(q)) return make('apparel', { query: 'apparel color' });
   const nvz = /\b(?:kitchen|nvz|non[ -]volley zone)\b/.test(q);
   if (nvz) {
+    const opponentClaim = /\b(?:other|opposing)\s+team\b|\bopponents?\b/.test(q)
+      && /\b(?:claim(?:s|ed|ing)?|call(?:s|ed|ing)?|say(?:s|ing)?|said|insist(?:s|ed|ing)?|disagree(?:s|d|ing|ment)?)\b/.test(q);
+    if (opponentClaim && /\bfault\b/.test(q)) return make('nvz_fault_call', { query: 'non-volley zone fault opponent disagreement between teams' });
     if (/\b(?:same|equivalent|define|definition|what is)\b/.test(q) || /\bis the kitchen (?:the )?non[ -]volley zone\b/.test(q)) return make('nvz_definition', { query: 'What is the non-volley zone?' });
     if (/\bline\b/.test(q) && /\b(?:part|include|inside|belong)\b/.test(q)) return make('nvz_boundary', { query: 'non-volley zone boundary lines' });
     if (/\b(?:stand|standing|be|stay)\b/.test(q) && /\b(?:not|without)\s+volley(?:ing)?\b/.test(q)) return make('nvz_presence', { query: 'non-volley zone allowable contact' });

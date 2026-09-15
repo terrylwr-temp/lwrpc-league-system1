@@ -254,7 +254,8 @@ export async function selectAnswerEvidenceWithAssistance(retrieval) {
   let selected = selectAnswerEvidence(retrieval);
   const concept=officialQuestionConcept(retrieval?.request?.question);
   const needsFormat=concept?.kind==='format'&&!selected.some(c=>/match(?: day)? format/i.test(c.heading+' '+c.content));
-  if(selected.length && !needsFormat && !(['format','composition'].includes(concept?.kind)&&concept.division))return completeSelectedPassages(retrieval,selected);
+  const needsNvzFaultResolution=concept?.kind==='nvz_fault_call'&&!selected.some(c=>/disagreement between teams[\s\S]*rally must be replayed/i.test(c.heading+' '+c.content));
+  if(selected.length && !needsFormat && !needsNvzFaultResolution && !(['format','composition'].includes(concept?.kind)&&concept.division))return completeSelectedPassages(retrieval,selected);
   if(await assistConceptRetrieval(retrieval))return completeSelectedPassages(retrieval,selectAnswerEvidence(retrieval));
   if (!retrieval?.interpretation?.annotations?.length || retrieval.conceptAssistance) return completeSelectedPassages(retrieval,selected);
   const reason = retrieval.evidence.sufficient ? "stage4_no_applicable_evidence" : "stage3_insufficient_evidence";
