@@ -1475,3 +1475,6 @@ Isolated codex/pbcc-not-played branch. Existing not_played schema reused, no SQL
 
 ## PBCC GitHub Desktop handoff correction
 Owner's main deployment d4a47c8 / READY dpl_SimiHDLtsevTYezL9MfzuxbrNy4C did not include isolated c93cf43 Not played changes. Transferred the scoped PBCC code/test patch into primary working tree for the owner's next commit/push.9 tests, lint (11 existing warnings), build pass. No agent deployment or business writes. See docs/pbcc-not-played-review.md.
+
+## Password reset invalid-link UI — locally verified
+Primary working tree now rejects invalid/expired recovery URLs before enabling password or passkey actions and rechecks the session before submission. Nine focused controls, lint (11 existing warnings), build, and local built-page browser checks pass. No production credential changes or deployment. Does not repair expired email links themselves. See docs/password-reset-ui-fix.md.

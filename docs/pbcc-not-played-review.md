@@ -30,3 +30,6 @@ Recovery baseline: e35fbc480fb60301438297be36b4ee5646646cc9, READY dpl_8a29p1t37
 Owner deployed main commit d4a47c816ef2975d620a90a41c2f5c5f0a7a2dbb (pbcc3), READY dpl_SimiHDLtsevTYezL9MfzuxbrNy4C. That commit does not contain the Not played implementation. Transferred only the four PBCC application-file changes and focused regression test from isolated c93cf43 into the primary working tree; patch applied cleanly and all9 tests pass there. These are uncommitted changes for the owner's next GitHub Desktop commit/push. No new deployment or business-data write was performed by the agent.
 
 Primary-folder verification complete:9 focused tests pass; lint0 errors/11 existing warnings; build/TypeScript pass after retry with cache access (initial sandbox EPERM on .tsbuildinfo). Changes remain uncommitted for GitHub Desktop.
+
+## Owner deployment verified
+Main commit b279147bc15b1449d684eaf6936465eeef0ef227 is READY on production deployment dpl_4d7Lbvijw82t4JuNkMr3QpYbAn2Y (lwrpc-admin-28upgnr0t-terry-lwrpc.vercel.app), aliased to league.lwrpickleballclub.com. All four PBCC application files and the focused test exactly match tested isolated c93cf43. Deployment identity verified; no real game was marked, reopened, finished or exported for acceptance. Local behavioral evidence remains applicable.

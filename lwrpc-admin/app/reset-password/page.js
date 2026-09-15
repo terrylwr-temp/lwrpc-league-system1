@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../lib/auth";
 import { passkeyErrorMessage } from "../lib/passkeyErrors";
+import { passwordResetAccess, passwordResetLinkError, RESET_SESSION_ERROR } from "../lib/passwordResetAccess";
 import { APP_VERSION, COPYRIGHT_YEAR } from "../lib/version";
 
 export default function ResetPasswordPage() {
@@ -18,6 +19,8 @@ export default function ResetPasswordPage() {
   const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [returnTo, setReturnTo] = useState("");
   const [checkingSession, setCheckingSession] = useState(true);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [linkError, setLinkError] = useState("");
   const returnLabel = "Return to System";
 
   useEffect(() => {
@@ -27,27 +30,39 @@ export default function ResetPasswordPage() {
 
   useEffect(() => {
     let mounted = true;
-    const resetLinkWasUsed = window.location.hash.includes("access_token")
-      || new URLSearchParams(window.location.search).has("code");
+    const errorFromLink = passwordResetLinkError(window.location.search, window.location.hash);
+    setLinkError(errorFromLink);
+    let signedOut = false;
+    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
+      if (event !== "SIGNED_OUT" || !mounted) return;
+      signedOut = true;
+      setSessionReady(false);
+      setPassword("");
+      setConfirmPassword("");
+      setMessage(errorFromLink || RESET_SESSION_ERROR);
+    });
 
     async function confirmRecoverySession() {
-      const { data, error } = await supabase.auth.getSession();
+      const access = await passwordResetAccess(supabase.auth, errorFromLink);
       if (!mounted) return;
-
       setCheckingSession(false);
-      if (error || (!data.session && resetLinkWasUsed)) {
-        setMessage("This password reset link is no longer valid. Please request a new reset email and use the newest link in that same browser.");
-      }
+      setSessionReady(access.ready && !signedOut);
+      setMessage(signedOut ? errorFromLink || RESET_SESSION_ERROR : access.message);
     }
 
     confirmRecoverySession();
     return () => {
       mounted = false;
+      listener.subscription.unsubscribe();
     };
   }, []);
 
   async function updatePassword(e) {
     e.preventDefault();
+    if (checkingSession || !sessionReady || linkError) {
+      setMessage(linkError || RESET_SESSION_ERROR);
+      return;
+    }
 
     if (password !== confirmPassword) {
       setMessage("Passwords do not match.");
@@ -57,9 +72,12 @@ export default function ResetPasswordPage() {
     setLoading(true);
     setMessage("Updating password...");
 
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
-    if (sessionError || !sessionData.session) {
-      setMessage("Your secure password-reset session is not available. Please request a new reset email and use the newest link in the same browser where you opened it.");
+    const access = await passwordResetAccess(supabase.auth, linkError);
+    if (!access.ready) {
+      setSessionReady(false);
+      setPassword("");
+      setConfirmPassword("");
+      setMessage(access.message);
       setLoading(false);
       return;
     }
@@ -81,6 +99,12 @@ export default function ResetPasswordPage() {
   }
 
   async function registerPasskey() {
+    const access = await passwordResetAccess(supabase.auth, linkError);
+    if (checkingSession || !sessionReady || !access.ready) {
+      setSessionReady(false);
+      setMessage(access.message || RESET_SESSION_ERROR);
+      return;
+    }
     if (!supabase.auth.registerPasskey) {
       setPasskeyMessage("Passkey / fingerprint registration is not available in this browser yet.");
       return;
@@ -135,6 +159,7 @@ export default function ResetPasswordPage() {
 
               <input
                 type="password"
+                disabled={loading || checkingSession || !sessionReady}
                 className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
@@ -149,6 +174,7 @@ export default function ResetPasswordPage() {
 
               <input
                 type="password"
+                disabled={loading || checkingSession || !sessionReady}
                 className="mt-1 w-full rounded-xl border border-slate-300 px-4 py-3 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
                 value={confirmPassword}
                 onChange={e => setConfirmPassword(e.target.value)}
@@ -158,14 +184,14 @@ export default function ResetPasswordPage() {
 
             <button
               type="submit"
-              disabled={loading || checkingSession}
+              disabled={loading || checkingSession || !sessionReady}
               className="mt-7 w-full rounded-xl bg-blue-700 px-5 py-3 font-bold text-white transition hover:bg-blue-800 disabled:opacity-50"
             >
               {checkingSession ? "Checking Secure Link..." : loading ? "Updating..." : "Update Password"}
             </button>
 
             {message && (
-              <div className="mt-4 rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-700">
+              <div role="alert" className="mt-4 rounded-xl bg-slate-100 px-4 py-3 text-sm text-slate-700">
                 {message}
               </div>
             )}
@@ -183,7 +209,7 @@ export default function ResetPasswordPage() {
             <button
               type="button"
               onClick={registerPasskey}
-              disabled={passkeyLoading}
+              disabled={passkeyLoading || checkingSession || !sessionReady}
               className="mt-5 w-full rounded-xl bg-sky-600 px-5 py-3 font-bold text-white transition hover:bg-sky-700 disabled:opacity-50"
             >
               {passkeyLoading ? "Registering..." : "Register Passkey / Fingerprint"}
