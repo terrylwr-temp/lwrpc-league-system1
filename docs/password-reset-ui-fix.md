@@ -1,6 +1,8 @@
 # Password reset invalid-link UI correction
 
-Status: locally verified in the primary GitHub Desktop working tree; not deployed by the agent.
+Status: owner deployed through GitHub Desktop; production UI acceptance passed.
+
+Production acceptance: commit `d214113cd0f64abe3a9c15130a18c79514066070`, READY deployment `dpl_tbbTjQUM77cJAyEs3Cz5kZYf3uAg`, production alias `league.lwrpickleballclub.com`. A synthetic invalid-link URL immediately displayed the invalid/expired message; both password inputs and password/passkey buttons were disabled. Direct reset navigation without a session displayed the missing-session message and disabled actions. Return to System reached the normal sign-in page with Forgot Password available. No credentials were entered, reset email sent, or password changed. Valid-session submission remains covered by local deterministic tests, not a live password mutation.
 
 The reported screenshot contains `error=access_denied&error_code=otp_expired`. The page previously displayed an editable password form even when the recovery link had already failed. It reported the missing session only after submission.
 
