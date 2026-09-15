@@ -1478,3 +1478,6 @@ Owner's main deployment d4a47c8 / READY dpl_SimiHDLtsevTYezL9MfzuxbrNy4C did not
 
 ## Password reset invalid-link UI — locally verified
 Primary working tree now rejects invalid/expired recovery URLs before enabling password or passkey actions and rechecks the session before submission. Nine focused controls, lint (11 existing warnings), build, and local built-page browser checks pass. No production credential changes or deployment. Does not repair expired email links themselves. See docs/password-reset-ui-fix.md.
+
+## Password visibility controls — PRODUCTION ACCEPTED (2026-09-15)
+Account Security now provides independent accessible Show/Hide eye buttons for New Password and Confirm New Password. Application `fc05970` / READY deployment `dpl_3g8znJ2WgtjoHiGTL1PaD1jWLiZW`; 12 focused tests, lint, local/Vercel builds, normal sign-in smoke checks, feature UI checks, and runtime error scan passed. No database, security-policy, credential, or business-data changes. See docs/password-visibility-production-acceptance.md.
